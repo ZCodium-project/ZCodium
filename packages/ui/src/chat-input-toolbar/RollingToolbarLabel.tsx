@@ -61,23 +61,6 @@ export function RollingToolbarLabel({
       label
     );
 
-  if (reducedMotion) {
-    return (
-      // 减弱动态效果分支必须保留与动画分支相同的两层包裹结构：
-      // 调用方用 [&>span>span]:block/truncate 作用于内层包裹；少一层会让
-      // prefix/value 两个 span 各自变成 block，模型名被拆成两行。
-      <span
-        className={cn(
-          "relative inline-flex h-[1.3em] min-w-0 items-center overflow-hidden leading-[1.25]",
-          className,
-        )}
-        title={label}
-      >
-        <span className="inline-flex min-w-0 whitespace-nowrap leading-[1.25]">{content}</span>
-      </span>
-    );
-  }
-
   return (
     <span
       className={cn(
@@ -86,18 +69,23 @@ export function RollingToolbarLabel({
       )}
       title={label}
     >
-      <AnimatePresence initial={false} mode="popLayout">
-        <motion.span
-          key={label}
-          className="inline-flex min-w-0 whitespace-nowrap leading-[1.25]"
-          initial={{ y: "0.75em", opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: "-0.75em", opacity: 0 }}
-          transition={LABEL_ROLL_TRANSITION}
-        >
-          {content}
-        </motion.span>
-      </AnimatePresence>
+      {/* 减少动画也保留同一层文字行：模型触发器的截断样式不能落到供应商／模型片段上。 */}
+      {reducedMotion ? (
+        <span className="inline-flex min-w-0 whitespace-nowrap leading-[1.25]">{content}</span>
+      ) : (
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.span
+            key={label}
+            className="inline-flex min-w-0 whitespace-nowrap leading-[1.25]"
+            initial={{ y: "0.75em", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-0.75em", opacity: 0 }}
+            transition={LABEL_ROLL_TRANSITION}
+          >
+            {content}
+          </motion.span>
+        </AnimatePresence>
+      )}
     </span>
   );
 }

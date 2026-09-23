@@ -47,6 +47,7 @@ import type {
   TaskNotificationPayload,
   PostUpdateReleaseNotesPayload,
   RemoteSessionClosedEvent,
+  BotRemoteWorkspaceReconnectedEvent,
   UpdateCheckResultPayload,
   UpdateStatePayload,
   ZCodeStdioTapDevState,
@@ -290,6 +291,16 @@ contextBridge.exposeInMainWorld("zcode", {
       callback(payload as RemoteSessionClosedEvent);
     ipcRenderer.on(PlatformChannels.RemoteSessionClosed, handler);
     return () => ipcRenderer.removeListener(PlatformChannels.RemoteSessionClosed, handler);
+  },
+  /** 订阅 Bot 触发的远程 workspace 重连成功事件，返回 disposer */
+  onBotRemoteWorkspaceReconnected: (
+    callback: (event: BotRemoteWorkspaceReconnectedEvent) => void,
+  ) => {
+    const handler = (_event: unknown, payload: unknown) =>
+      callback(payload as BotRemoteWorkspaceReconnectedEvent);
+    ipcRenderer.on(PlatformChannels.BotRemoteWorkspaceReconnected, handler);
+    return () =>
+      ipcRenderer.removeListener(PlatformChannels.BotRemoteWorkspaceReconnected, handler);
   },
   /** 检查目录是否已在其他窗口打开 */
   activateOrSetWorkspace: (path: string): Promise<{ activated: boolean }> =>
