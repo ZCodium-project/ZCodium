@@ -190,6 +190,29 @@ jobs:
           - Update metadata: `latest*.yml`, `latest.json`
           NOTES
           sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
+          # 自动生成版本差异 Changelog：对比最近的 tag（排除 ci 类提交），插入到标题之后
+          BASE_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)
+          if [ -n "$BASE_TAG" ]; then
+            {
+              echo "## Changelog (vs $BASE_TAG) / 更新日志（相对 $BASE_TAG）"
+              echo ""
+              CHANGES=$(git log --no-merges --pretty='- %s (%h)' "$BASE_TAG..${TAG}" | grep -v '^- ci' || true)
+              if [ -n "$CHANGES" ]; then
+                printf '%s\n' "$CHANGES"
+              else
+                echo "- 无代码变更 / No code changes"
+              fi
+              echo ""
+              echo "对比完整变更 / Full diff: https://github.com/${GITHUB_REPOSITORY}/compare/${BASE_TAG}...${TAG}"
+              echo ""
+              echo "---"
+              echo ""
+            } > /tmp/changelog-section.md
+            head -n 1 /tmp/release-notes.md > /tmp/release-notes-title.md
+            tail -n +2 /tmp/release-notes.md > /tmp/release-notes-rest.md
+            { cat /tmp/release-notes-title.md; echo; cat /tmp/changelog-section.md; cat /tmp/release-notes-rest.md; } > /tmp/release-notes-merged.md
+            mv /tmp/release-notes-merged.md /tmp/release-notes.md
+          fi
           # 测试版警示（如上游审计自动构建的 draft）插入到说明顶部
           if [ -n "${NOTICE:-}" ]; then
             { printf '%s\n\n' "$NOTICE"; cat /tmp/release-notes.md; } > /tmp/release-notes-with-notice.md
