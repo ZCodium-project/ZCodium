@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       build_artifacts:
-        description: "构建 CLI 发行包和桌面客户端并上传到 Release"
+        description: "构建 CLI 发行包和桌面客户端并上传到 Release；全部上传成功后才发布（失败则保持 draft）"
         required: false
         type: boolean
         default: true
@@ -83,7 +83,10 @@ jobs:
           # 桌面构建用完整版本（不带 v 前缀）注入 ZCODE_APP_VERSION，让安装包文件名带审计序号。
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Create tag and release
+      # tag 在构建前就推送，但 release 先建为 draft：
+      # 官网/下载页只解析已发布且带产物列表的 release，draft 不会露出，
+      # 避免用户在构建过程中下到某个尚未上传完成的平台产物（404）。
+      - name: Create tag and draft release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.validate.outputs.tag }}
@@ -174,7 +177,7 @@ jobs:
           - Update metadata: `latest*.yml`, `latest.json`
           NOTES
           sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
-          args=(--title "$TAG" --notes-file /tmp/release-notes.md)
+          args=(--draft --title "$TAG" --notes-file /tmp/release-notes.md)
           if [ "$PRERELEASE" = "true" ]; then
             args+=(--prerelease)
           fi
@@ -309,3 +312,25 @@ jobs:
           done
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
+
+  # 只有 CLI 与全部桌面平台产物都上传成功才公开 release；任一构建失败则保持 draft，
+  # 由人工排查后重跑或删除，避免不完整的版本出现在 Releases 与官网下载页。
+  publish:
+    needs: [release, build, desktop]
+    if: ${{ always() && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          args=(--draft=false --repo "$GITHUB_REPOSITORY")
+          if [ "$PRERELEASE" = "true" ]; then
+            args+=(--prerelease)
+          else
+            args+=(--latest)
+          fi
+          gh release edit "$TAG" "${args[@]}"
