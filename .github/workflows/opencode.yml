@@ -22,6 +22,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      actions: write # 供 action 内置 actions/cache 缓存 opencode 二进制
     steps:
       # GITHUB_TOKEN 模式下 action 不会自行配置 git 凭据，依赖 checkout 默认保留凭据（persist-credentials: true）
       - name: Checkout repository
