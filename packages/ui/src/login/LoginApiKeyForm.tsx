@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input.js";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
@@ -176,28 +177,30 @@ export function LoginApiKeyForm({ onCancel, onSaved, onSkipped }: LoginApiKeyFor
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="end" className="rounded-lg">
-                <SelectItem
-                  value="zai"
-                  className="rounded-md"
-                  data-testid={testId(TID_LOGIN_API_KEY_PROVIDER_ITEM, "zai")}
-                >
-                  {renderOAuthProviderIcon(ZAI_PROVIDER_ID, "size-4")}
-                  {intl.formatMessage({ id: "login.apiKey.provider.zai" })}
-                </SelectItem>
-                <SelectItem
-                  value="bigmodel"
-                  className="rounded-md"
-                  data-testid={testId(TID_LOGIN_API_KEY_PROVIDER_ITEM, "bigmodel")}
-                >
-                  {renderOAuthProviderIcon(BIGMODEL_PROVIDER_ID, "size-4")}
-                  {intl.formatMessage({
-                    id: "login.apiKey.provider.bigmodel",
-                  })}
-                </SelectItem>
-                {/* 下拉里只列内置两家，提示其余供应商在设置里配置，避免用户以为只有这两个可选。 */}
-                <SelectLabel className="mx-1 mt-1 border-t border-border pt-2 text-ui-xs font-normal leading-4 whitespace-normal text-foreground-subtle">
-                  {intl.formatMessage({ id: "login.apiKey.moreProvidersHint" })}
-                </SelectLabel>
+                <SelectGroup>
+                  <SelectItem
+                    value="zai"
+                    className="rounded-md"
+                    data-testid={testId(TID_LOGIN_API_KEY_PROVIDER_ITEM, "zai")}
+                  >
+                    {renderOAuthProviderIcon(ZAI_PROVIDER_ID, "size-4")}
+                    {intl.formatMessage({ id: "login.apiKey.provider.zai" })}
+                  </SelectItem>
+                  <SelectItem
+                    value="bigmodel"
+                    className="rounded-md"
+                    data-testid={testId(TID_LOGIN_API_KEY_PROVIDER_ITEM, "bigmodel")}
+                  >
+                    {renderOAuthProviderIcon(BIGMODEL_PROVIDER_ID, "size-4")}
+                    {intl.formatMessage({
+                      id: "login.apiKey.provider.bigmodel",
+                    })}
+                  </SelectItem>
+                  {/* 下拉里只列内置两家，提示其余供应商在设置里配置，避免用户以为只有这两个可选。 */}
+                  <SelectLabel className="mx-1 mt-1 border-t border-border pt-2 text-ui-xs font-normal leading-4 whitespace-normal text-foreground-subtle">
+                    {intl.formatMessage({ id: "login.apiKey.moreProvidersHint" })}
+                  </SelectLabel>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
