@@ -99,9 +99,16 @@
 
 ### Linux（.AppImage）
 
+请按 CPU 架构选择对应安装包：`ZCodium-*-linux-x86_64.AppImage`（Intel / AMD）或 `ZCodium-*-linux-arm64.AppImage`（arm64 / aarch64）。
+
 ```bash
+# x86_64（Intel / AMD）
 chmod +x ZCodium-*-linux-x86_64.AppImage
 ./ZCodium-*-linux-x86_64.AppImage
+
+# arm64（aarch64）
+chmod +x ZCodium-*-linux-arm64.AppImage
+./ZCodium-*-linux-arm64.AppImage
 ```
 
 ### CLI 发行包（.tar.gz）

@@ -99,9 +99,16 @@ The [Releases](https://github.com/ZCodium-project/ZCodium/releases) page ships d
 
 ### Linux (.AppImage)
 
+Pick the build that matches your CPU architecture: `ZCodium-*-linux-x86_64.AppImage` (Intel / AMD) or `ZCodium-*-linux-arm64.AppImage` (arm64 / aarch64).
+
 ```bash
+# x86_64 (Intel / AMD)
 chmod +x ZCodium-*-linux-x86_64.AppImage
 ./ZCodium-*-linux-x86_64.AppImage
+
+# arm64 (aarch64)
+chmod +x ZCodium-*-linux-arm64.AppImage
+./ZCodium-*-linux-arm64.AppImage
 ```
 
 ### CLI distribution (.tar.gz)
