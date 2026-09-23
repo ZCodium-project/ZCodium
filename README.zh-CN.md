@@ -141,6 +141,8 @@ zcode --help        # 或直接运行：node bin/zcode.mjs --help
 
 本仓库为开源社区驱动，与任何现有商业公司无关。文中事实均来自公开报道与独立代码审计，并已注明出处。如相关方认为内容有误，欢迎通过 Issue 提交更正。
 
+[另一个社区：ZCodium](https://github.com/axiom-desu/ZCodium)
+
 ---
 
 # 官方 ZCode README（以下为上游原文）
