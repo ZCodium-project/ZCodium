@@ -1,0 +1,47 @@
+# 同步 PR 结束（合并 / 关闭未合并）时，自动关闭它关联的审计 issue。
+# 关联来自 PR 正文中的 `Closes #<issue>`：PR 合并时 GitHub 原生会自动关闭 issue，
+# 这里同时兜底「关闭但未合并」以及原生未生效的情况。
+name: audit-pr-closed
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  close-linked-issue:
+    if: startsWith(github.event.pull_request.head.ref, 'audit/upstream-')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close linked audit issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          set -euo pipefail
+          BODY=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json body --jq '.body // ""')
+          # 优先解析 `Closes #<n>`，回退解析审计 issue 链接
+          ISSUE=$(printf '%s' "$BODY" | grep -oiE 'closes?[[:space:]]+#[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+          if [ -z "$ISSUE" ]; then
+            ISSUE=$(printf '%s' "$BODY" | grep -oE 'issues/[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+          fi
+          if [ -z "$ISSUE" ]; then
+            echo "未在 PR 正文中找到关联的审计 issue，跳过。"
+            exit 0
+          fi
+          STATE=$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json state --jq '.state')
+          if [ "$STATE" = "CLOSED" ]; then
+            echo "issue #$ISSUE 已关闭（可能由 Closes 关键字自动关闭），跳过。"
+            exit 0
+          fi
+          if [ "$PR_MERGED" = "true" ]; then
+            NOTE="同步 PR #$PR_NUMBER 已合并，自动关闭本审计记录。/ Sync PR #$PR_NUMBER has been merged; closing this audit record automatically."
+          else
+            NOTE="同步 PR #$PR_NUMBER 已关闭（未合并），自动关闭本审计记录。/ Sync PR #$PR_NUMBER was closed without merging; closing this audit record automatically."
+          fi
+          gh issue close "$ISSUE" --repo "$GITHUB_REPOSITORY" --comment "$NOTE"
+          echo "已关闭 issue #$ISSUE（PR #$PR_NUMBER merged=$PR_MERGED）"

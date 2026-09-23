@@ -100,7 +100,7 @@ jobs:
             - 所有产物必须中英双语：issue 标题、issue 正文、PR 标题、PR 正文的每个条目同时给出中文与英文（中文在前，英文在后），不要只留一种语言。
             - 没有新 commit：绝不创建 issue、PR 或构建参数文件。
             - 保持本仓库「无遥测、无上传」立场，不同步任何上报代码。
-            - issue、PR 都保留：不要关闭、不要合并、不要删除。
+            - issue、PR 都由人工处理：不要关闭、不要合并、不要删除（对应 issue 会在同步 PR 合并或关闭时自动关闭）。
             - 不要把任何密钥写进 issue / PR / 提交。
 
             ## 步骤 1：确定增量范围
@@ -165,7 +165,7 @@ jobs:
 
               ### 2. ...
 
-              > 本 issue 由 upstream-audit 工作流自动创建。/ Created automatically by the upstream-audit workflow.
+              > 本 issue 由 upstream-audit 工作流自动创建，会在对应同步 PR 合并或关闭后自动关闭。/ Created automatically by the upstream-audit workflow; it is closed automatically when the sync PR is merged or closed.
 
               说明：审计结论发现问题时替换为红色警示块内容（中英双语）。
             - 记住 issue 编号。
@@ -189,6 +189,7 @@ jobs:
                 @SudoUserReal
 
                 - 审计 issue / Audit issue: <issue 链接>
+                - Closes #<issue 编号>
                 - 审计范围 / Audit range: `<起始SHA>..<结束SHA>`
                 - 上游仓库 / Upstream repo: https://github.com/zai-org/ZCode
 
@@ -211,7 +212,9 @@ jobs:
                 - pnpm lint：<结果与证据>
                 - 回归测试 / Regression tests：<结果>
 
-                > 本 PR 由 upstream-audit 工作流自动创建，请人工审阅后合并。/ Created automatically by the upstream-audit workflow; please review before merging.
+                > 本 PR 由 upstream-audit 工作流自动创建，请人工审阅后合并。/ Created automatically by the upstream-audit workflow; please review before merging。
+
+              说明：`Closes #<issue 编号>` 必须原样保留——它建立 PR 与审计 issue 的关联，PR 合并时 GitHub 会自动关闭该 issue。
             - 在审计 issue 下评论：`同步 PR / Sync PR：#<编号>`
             - 收尾：确保 `git status --porcelain` 为空（所有改动已提交并推送）。
 
