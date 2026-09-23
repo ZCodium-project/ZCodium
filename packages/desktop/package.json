@@ -29,6 +29,7 @@
   "dependencies": {
     "@babel/runtime": "^7.24.5",
     "@fiahfy/icns": "^0.0.7",
+    "@larksuiteoapi/node-sdk": "1.61.1",
     "@lydell/node-pty-linux-arm64": "1.2.0-beta.10",
     "@lydell/node-pty-linux-x64": "1.2.0-beta.10",
     "@zcode/client": "workspace:*",
