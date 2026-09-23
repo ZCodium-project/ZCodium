@@ -123,7 +123,8 @@ jobs:
 
             The absolute `/usr/bin/xattr` path avoids shadowing by other tools with the same name. You can also right-click (Control-click) the app in Finder -> Open -> Open.
           - **Windows (.exe)**: run `ZCodium-<VERSION>-win-x64.exe`. The installer is not signed by ZCode, so SmartScreen shows a warning - a warning, not a system block; click **More info** -> **Run anyway**. This is expected, not a corrupted file.
-          - **Linux (.AppImage)**: `chmod +x ZCodium-<VERSION>-linux-x86_64.AppImage && ./ZCodium-<VERSION>-linux-x86_64.AppImage`.
+          - **Linux x64 (.AppImage)**: `chmod +x ZCodium-<VERSION>-linux-x86_64.AppImage && ./ZCodium-<VERSION>-linux-x86_64.AppImage`.
+          - **Linux arm64 (.AppImage)**: `chmod +x ZCodium-<VERSION>-linux-arm64.AppImage && ./ZCodium-<VERSION>-linux-arm64.AppImage`.
           - **CLI (.tar.gz)**: requires Node.js 24. Extract and run:
 
             ```bash
@@ -156,7 +157,8 @@ jobs:
 
             使用 `/usr/bin/xattr` 绝对路径，避免 PATH 中同名工具干扰。也可以在“访达”里右键（Control-点击）应用 -> 打开 -> 弹窗里再点“打开”。
           - **Windows（.exe）**：运行 `ZCodium-<VERSION>-win-x64.exe`。没有 ZCode 官方签名，SmartScreen 会显示警告——只是警告，不是系统拦截；点“**更多信息**” -> “**仍要运行**”。这是预期提示，不是文件损坏。
-          - **Linux（.AppImage）**：`chmod +x ZCodium-<VERSION>-linux-x86_64.AppImage && ./ZCodium-<VERSION>-linux-x86_64.AppImage`。
+          - **Linux x64（.AppImage）**：`chmod +x ZCodium-<VERSION>-linux-x86_64.AppImage && ./ZCodium-<VERSION>-linux-x86_64.AppImage`。
+          - **Linux arm64（.AppImage）**：`chmod +x ZCodium-<VERSION>-linux-arm64.AppImage && ./ZCodium-<VERSION>-linux-arm64.AppImage`。
           - **CLI（.tar.gz）**：需要 Node.js 24。解压后运行：
 
             ```bash
@@ -172,6 +174,7 @@ jobs:
           - macOS Intel: `ZCodium-<VERSION>-mac-x64.dmg` / `.zip`
           - Windows x64: `ZCodium-<VERSION>-win-x64.exe`
           - Linux x64: `ZCodium-<VERSION>-linux-x86_64.AppImage`
+          - Linux arm64: `ZCodium-<VERSION>-linux-arm64.AppImage`
           - CLI: `zcodium-<VERSION>.tar.gz`
           - Checksums: `sha256.txt`（下载后可用它校验 / verify downloads with it）
           - Update metadata: `latest*.yml`, `latest.json`
@@ -255,6 +258,13 @@ jobs:
           - runner: ubuntu-latest
             target: linux
             arch: x64
+            glob: "*.AppImage"
+          # GitHub 公开仓库免费的 ARM64 runner（ubuntu-24.04-arm）；electron-builder 在原生 arm64 上
+          # 打包 linux arm64 的 AppImage/deb，无需 QEMU 交叉仿真。
+          # 更新元数据生成 latest-linux-arm64.yml，与 x64 的 latest-linux.yml 不冲突，可并行上传。
+          - runner: ubuntu-24.04-arm
+            target: linux
+            arch: arm64
             glob: "*.AppImage"
     runs-on: ${{ matrix.runner }}
     steps:
