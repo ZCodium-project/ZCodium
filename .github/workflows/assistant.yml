@@ -1,7 +1,7 @@
-# 在 issue / PR 评论中输入 /oc 或 /opencode 触发 OpenCode。
-# 仅仓库协作者（OWNER/MEMBER/COLLABORATOR）的评论会启动工作流，action 内部还会再做一次 admin/write 权限校验。
-# 使用 GITHUB_TOKEN 模式（无需安装 OpenCode GitHub App），评论与 PR 均以 github-actions[bot] 身份发出。
-name: opencode
+# 在 issue / PR 评论中输入 /oc 触发助手。
+# 仅仓库协作者（OWNER/MEMBER/COLLABORATOR）的评论会启动工作流，内部还会再做一次 admin/write 权限校验。
+# 使用 GITHUB_TOKEN 模式，评论与 PR 均以 github-actions[bot] 身份发出。
+name: assistant
 
 on:
   issue_comment:
@@ -10,19 +10,17 @@ on:
     types: [created]
 
 jobs:
-  opencode:
+  assistant:
     if: |
       (startsWith(github.event.comment.body, '/oc') ||
-       contains(github.event.comment.body, ' /oc') ||
-       startsWith(github.event.comment.body, '/opencode') ||
-       contains(github.event.comment.body, ' /opencode')) &&
+       contains(github.event.comment.body, ' /oc')) &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
-      actions: write # 供 action 内置 actions/cache 缓存 opencode 二进制
+      actions: write # 供 action 内置缓存使用
     steps:
       # GITHUB_TOKEN 模式下 action 不会自行配置 git 凭据，依赖 checkout 默认保留凭据（persist-credentials: true）
       - name: Checkout repository
@@ -30,13 +28,13 @@ jobs:
         with:
           fetch-depth: 1
 
-      # GITHUB_TOKEN 模式下 action 不设置提交身份，这里显式配置以便 OpenCode 提交改动
+      # GITHUB_TOKEN 模式下 action 不设置提交身份，这里显式配置以便提交改动
       - name: Configure git identity
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Run OpenCode
+      - name: Run assistant
         uses: anomalyco/opencode/github@latest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -45,3 +43,4 @@ jobs:
           model: deepseek/deepseek-flash
           use_github_token: true
           share: false
+          mentions: /oc

@@ -1,8 +1,8 @@
-# PR 打开 / 更新（非 draft）时自动让 OpenCode review 当前 PR。
+# PR 打开 / 更新（非 draft）时自动 review 当前 PR。
 # 默认 prompt 为 "Review this pull request"；如需自定义 review 重点，可在 with 下增加 prompt: |
 # 说明：action 会校验 PR 作者对仓库的写权限，因此这里只对协作者（OWNER/MEMBER/COLLABORATOR）的 PR 触发；
 # 上游 fork 贡献者的 PR 即使在 action 内部也会因 GITHUB_TOKEN 只读而无法评论，故直接跳过。
-name: opencode-review
+name: assistant-review
 
 on:
   pull_request:
@@ -18,14 +18,14 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
-      actions: write # 供 action 内置 actions/cache 缓存 opencode 二进制
+      actions: write # 供 action 内置缓存使用
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Run OpenCode review
+      - name: Run assistant review
         uses: anomalyco/opencode/github@latest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}

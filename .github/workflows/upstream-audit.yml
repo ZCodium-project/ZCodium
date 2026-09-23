@@ -17,7 +17,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      actions: write # 供 action 内置 actions/cache 缓存 opencode 二进制
+      actions: write # 供 action 内置缓存使用
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh label create upstream-audit --color 5319e7 --description "上游审计记录（自动生成）" || true
 
-      - name: Run OpenCode upstream audit
+      - name: Run upstream audit
         uses: anomalyco/opencode/github@latest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
