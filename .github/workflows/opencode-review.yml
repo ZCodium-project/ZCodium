@@ -1,0 +1,35 @@
+# PR 打开 / 更新（非 draft）时自动让 OpenCode review 当前 PR。
+# 默认 prompt 为 "Review this pull request"；如需自定义 review 重点，可在 with 下增加 prompt: |
+# 说明：action 会校验 PR 作者对仓库的写权限，因此这里只对协作者（OWNER/MEMBER/COLLABORATOR）的 PR 触发；
+# 上游 fork 贡献者的 PR 即使在 action 内部也会因 GITHUB_TOKEN 只读而无法评论，故直接跳过。
+name: opencode-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  review:
+    if: |
+      github.event.pull_request.draft == false &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run OpenCode review
+        uses: anomalyco/opencode/github@latest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          model: deepseek/deepseek-flash
+          use_github_token: true
+          share: false
