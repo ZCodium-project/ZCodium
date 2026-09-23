@@ -1,6 +1,7 @@
 # 上游审计定时任务：每天北京时间 09:00（UTC 01:00）检查 zai-org/ZCode 的新 commit。
-# - 有新 commit：创建审计 issue（标题以【Audit-Official-Repo-Commit-YYYY-MM-DD】开头）并创建同步 PR，@SudoUserReal；
-# - 没有新 commit：不创建任何 issue / PR（正常退出）。
+# - 有新 commit：创建中英双语审计 issue（标题以【Audit-Official-Repo-Commit-YYYY-MM-DD】开头）与同步 PR，@SudoUserReal；
+#   随后自动触发 release.yml 在同步分支上构建 draft 测试版（不公开、不进入自动更新，说明中带测试版警示）。
+# - 没有新 commit：不创建任何 issue / PR，也不触发构建（正常退出）。
 # 增量基准记录在审计 issue 正文的「审计范围」行中；无历史 issue 时以 fork 分叉点（merge-base）为基准。
 # 同时支持 workflow_dispatch 手动触发。
 name: upstream-audit
@@ -17,7 +18,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      actions: write # 供 action 内置缓存使用
+      actions: write # 供 action 内置缓存使用 + 触发 release.yml 的 draft 构建
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -59,7 +60,7 @@ jobs:
           share: false
           prompt: |
             你是 ZCodium 仓库的「上游审计机器人」。ZCodium 是 zai-org/ZCode（下称「上游」）的独立审计 fork，已移除官方监控与遥测，并逐提交审阅上游改动。
-            你的任务：审计上游的新 commit，创建审计 issue，并创建 PR 把改动同步到本仓库。
+            你的任务：审计上游的新 commit，创建中英双语审计 issue，创建中英双语同步 PR 把改动同步到本仓库，并登记 draft 测试版构建参数。
 
             ## 环境（已就绪，直接用）
             - 本仓库：ZCodium-project/ZCodium，当前工作区是 main 的检出。
@@ -67,18 +68,26 @@ jobs:
             - `gh` CLI 已认证，可创建 issue / label / 评论 / PR，可查询历史。
             - git 提交身份已配置。
 
+            ## 硬性纪律（违反即失败）
+            - 验证必须真实执行命令，并在 PR 正文中贴出真实输出证据（例如 `pnpm install` 的 `Done in ...` 行、`pnpm lint` 的 `Found N warnings and M errors` 行、typecheck 的退出码）。**绝对禁止把未执行的命令写成「通过」**；未执行或失败的必须如实写「未执行（原因）」或「失败（输出摘要）」。虚报验证结果比验证失败更严重。
+            - 所有产物必须中英双语：issue 标题、issue 正文、PR 标题、PR 正文的每个条目同时给出中文与英文（中文在前，英文在后），不要只留一种语言。
+            - 没有新 commit：绝不创建 issue、PR 或构建参数文件。
+            - 保持本仓库「无遥测、无上传」立场，不同步任何上报代码。
+            - issue、PR 都保留：不要关闭、不要合并、不要删除。
+            - 不要把任何密钥写进 issue / PR / 提交。
+
             ## 步骤 1：确定增量范围
             1. 查询历史审计 issue（含已关闭）：
                `gh issue list --repo ZCodium-project/ZCodium --label upstream-audit --state all --limit 20 --json number,title,body,createdAt`
-               - 取 createdAt 最新的一条，从正文中找「审计范围」行，格式：`审计范围：<起始SHA>..<结束SHA>`，取结束 SHA 作为增量基准。
+               - 取 createdAt 最新的一条，从正文中找「审计范围 / Audit range」行，格式：`<起始SHA>..<结束SHA>`，取结束 SHA 作为增量基准。
                - 如果最新 issue 里没有该行，就继续往更早的找；都没有则走第 2 步。
             2. 如果没有可用基准：基准 SHA = `git merge-base origin/main upstream/main`（fork 分叉点）。
             3. 列出待审计 commit：
                `git log --oneline --no-decorate <基准SHA>..upstream/main`
-               - 输出为空 ⇒ 上游没有新改动。立即结束：不创建 issue、不创建 PR、不修改任何文件、不新建分支，只输出「上游无新 commit，跳过」。
+               - 输出为空 ⇒ 上游没有新改动。立即结束：不创建 issue、不创建 PR、不写构建参数文件、不修改任何文件、不新建分支，只输出「上游无新 commit，跳过 / No new upstream commits, skipped」。
                - commit 超过 50 个时：只处理最旧的 50 个（即范围为 `<基准SHA>..<第 50 个 commit 的 SHA>`），并在 issue 中说明剩余数量、下次继续。
 
-            ## 步骤 2：分析改动并做隐私审计
+            ## 步骤 2：分析改动、隐私审计与冲突评估
             对范围内每个 commit：用 `git show --stat <sha>`、`git show <sha>`，必要时读取完整文件，理解改动。
             - 把 commit 归并为「改动」（同一功能 / bug fix 的多个 commit 归为一组，文档、重构也可作为独立改动）。
             - 对每个改动做隐私审计，重点检查是否包含：
@@ -87,44 +96,51 @@ jobs:
               3. 向官方或第三方服务发送用户数据（账号、设备、环境、提示词、模型 API 记录等）
               4. 新增上报依赖，或把上报开关默认打开
               判断依据：diff 中的网络请求（fetch / axios / OTLP exporter / grpc）、新增依赖、上传相关函数与调用链；需要时读完整文件确认调用点是否真会上报。
-            - 每个改动记录以下四项：
+            - 对每个改动做「冲突与影响评估」：读取本仓库现状（`git log origin/main`、相关文件），检查上游改动是否：
+              1. 与本仓库已删除 / 已改造的代码冲突（遥测移除、品牌与包名适配、审计版 UI 等）
+              2. 与本仓库新增的功能重叠或语义冲突
+              3. 会改变现有行为或接口（可能影响现有结果）
+              记录结论；无冲突时写「无冲突 / No conflicts」。
+            - 每个改动记录以下五项：
               - 类型：功能 / bug fix / 重构 / 文档 / 其他
               - commit：短 SHA + 标题（多个 commit 全部列出）
-              - 说明：中文 2-4 句
-              - 审计结论（跟在说明后面）：
-                - 未发现问题：「已检查审计代码，未发现代码上传或遥测行为。」
+              - 说明：中文 2-4 句 + English summary（1-3 句）
+              - 审计结论（中英双语）：
+                - 未发现问题：「已检查审计代码，未发现代码上传或遥测行为。/ Audited: no code upload or telemetry behavior found.」
                 - 发现问题：必须使用红色警示块（GitHub 会渲染为红色），格式如下：
                   > [!CAUTION]
-                  > **发现代码上传 / 遥测行为（已在同步 PR 中剥离）**
-                  > - 原始行为：<文件、函数、具体做了什么>
-                  > - 已剥离内容：<逐条写清楚剥离了什么>
+                  > **发现代码上传 / 遥测行为（已在同步 PR 中剥离）/ Code upload or telemetry found (stripped in the sync PR)**
+                  > - 原始行为 / Original behavior：<文件、函数、具体做了什么>
+                  > - 已剥离内容 / Stripped：<逐条写清楚剥离了什么>
+              - 冲突评估：<中文> / <English>；有冲突时写明具体位置与影响。
 
             ## 步骤 3：创建审计 issue（仅在步骤 1 确有新 commit 时）
-            - 标题：`【Audit-Official-Repo-Commit-<当天UTC日期 YYYY-MM-DD>】<一句话摘要>`。
-              示例：【Audit-Official-Repo-Commit-2026-09-23】3 个改动，1 项含遥测已剥离
+            - 标题：`【Audit-Official-Repo-Commit-<当天UTC日期 YYYY-MM-DD>】<中文摘要> / <English summary>`。
+              示例：【Audit-Official-Repo-Commit-2026-09-23】上游 v3.14.3：9 项改动，2 项含遥测已剥离 / Upstream v3.14.3: 9 changes, 2 with telemetry stripped
             - 正文先写入临时文件，再用 `gh issue create --repo ZCodium-project/ZCodium --label upstream-audit --title "<标题>" --body-file <文件>` 创建。
-            - 正文模板（严格遵守，尤其「审计范围」行）：
+            - 正文模板（严格遵守，尤其「审计范围」行必须原样保留）：
 
               @SudoUserReal
 
-              ## 上游审计报告
+              ## 上游审计报告 / Upstream Audit Report
 
-              - 上游仓库：https://github.com/zai-org/ZCode
-              - 审计范围：`<起始SHA>..<结束SHA>`
-              - 改动数量：N 项（M 个 commit）
-              - 同步 PR：见下方评论
+              - 上游仓库 / Upstream repo: https://github.com/zai-org/ZCode
+              - 审计范围 / Audit range: `<起始SHA>..<结束SHA>`
+              - 改动数量 / Changes: N 项（M 个 commit）/ N changes (M commits)
+              - 同步 PR / Sync PR: 见下方评论 / see comment below
 
-              ### 1. <改动标题>
-              - **类型**：<类型>
+              ### 1. <中文标题> / <English title>
+              - **类型 / Type**：<类型>
               - **commit**：`<短SHA>` <标题>；`<短SHA>` <标题>
-              - **说明**：<中文说明>
-              - **审计结论**：已检查审计代码，未发现代码上传或遥测行为。
+              - **说明 / Description**：<中文说明> / <English summary>
+              - **审计结论 / Audit conclusion**：已检查审计代码，未发现代码上传或遥测行为。/ Audited: no code upload or telemetry behavior found.
+              - **冲突评估 / Conflict assessment**：<中文> / <English>
 
               ### 2. ...
 
-              > 本 issue 由 upstream-audit 工作流自动创建。
+              > 本 issue 由 upstream-audit 工作流自动创建。/ Created automatically by the upstream-audit workflow.
 
-              说明：`- **审计结论**：...` 一行在发现问题时替换为上面的红色警示块内容。
+              说明：审计结论发现问题时替换为红色警示块内容（中英双语）。
             - 记住 issue 编号。
 
             ## 步骤 4：创建同步 PR
@@ -132,43 +148,94 @@ jobs:
             - 移植改动：
               - 优先 `git cherry-pick <sha>...`；冲突时按本仓库现状适配（品牌、包名、已移除的遥测代码保持移除）。
               - 含遥测 / 上传的改动：只移植功能部分，**剥离全部上报代码**。
-              - 完全无法适配的改动：跳过，并在 PR 正文「未同步」里说明原因。
-            - 验证（尽力执行；无法完成时如实写明原因，不要因此中断流程）：
-              - `pnpm install --frozen-lockfile`
-              - `pnpm typecheck`
-              - `pnpm lint`
+              - 完全无法适配的改动：跳过，并在 PR 正文「未同步 / Not synced」里说明原因。
+            - 验证（真实执行并记录证据；失败或未执行必须如实写明，不要中断流程）：
+              - `pnpm install --frozen-lockfile` → 记录结尾 `Done in ...`
+              - `pnpm typecheck` → 记录退出码
+              - `pnpm lint` → 记录 `Found ... warnings and ... errors`
+              - 存在对应回归测试时运行（如 no-telemetry）并记录通过数
             - 提交并推送：`git push -u origin <分支名>`。
             - 创建 PR（正文先写入临时文件，用 `gh pr create --repo ZCodium-project/ZCodium --base main --head <分支名> --title "<标题>" --body-file <文件>`）：
-              - 标题：`[上游同步] <YYYY-MM-DD>：<一句话摘要>`。
-              - 正文模板：
+              - 标题：`[上游同步] <YYYY-MM-DD>：<中文摘要> / [Upstream Sync] <YYYY-MM-DD>: <English summary>`
+              - 正文模板（中英双语）：
 
                 @SudoUserReal
 
-                - 审计 issue：<issue 链接>
-                - 审计范围：`<起始SHA>..<结束SHA>`
-                - 上游仓库：https://github.com/zai-org/ZCode
+                - 审计 issue / Audit issue: <issue 链接>
+                - 审计范围 / Audit range: `<起始SHA>..<结束SHA>`
+                - 上游仓库 / Upstream repo: https://github.com/zai-org/ZCode
 
-                ## 同步内容
-                - <改动 1>（commit：...）
+                ## 同步内容 / Synced changes
+                - <改动 1>（commit：...）/ ...
                 - ...
 
-                ## 剥离的遥测 / 上传行为
-                - <逐条写清楚；没有则写「无」>
+                ## 剥离的遥测 / 上传行为 / Stripped telemetry or uploads
+                - <逐条写清楚；没有则写「无 / None」>
 
-                ## 未同步
-                - <逐条说明原因；没有则写「无」>
+                ## 未同步 / Not synced
+                - <逐条说明原因；没有则写「无 / None」>
 
-                ## 验证
-                - pnpm typecheck：<结果>
-                - pnpm lint：<结果>
+                ## 冲突检查 / Conflict check
+                - <逐条说明：与仓库现状的冲突、影响评估、处理方式；有冲突必须显著标出（可用 [!WARNING] 警示块强调）；没有则写「无冲突 / No conflicts」>
 
-                > 本 PR 由 upstream-audit 工作流自动创建，请人工审阅后合并。
-            - 在审计 issue 下评论：`同步 PR：#<编号>`。
+                ## 验证 / Verification
+                - pnpm install --frozen-lockfile：<结果与证据>
+                - pnpm typecheck：<结果与证据>
+                - pnpm lint：<结果与证据>
+                - 回归测试 / Regression tests：<结果>
+
+                > 本 PR 由 upstream-audit 工作流自动创建，请人工审阅后合并。/ Created automatically by the upstream-audit workflow; please review before merging.
+            - 在审计 issue 下评论：`同步 PR / Sync PR：#<编号>`
             - 收尾：确保 `git status --porcelain` 为空（所有改动已提交并推送）。
 
-            ## 硬性约束
-            - 没有新 commit：绝不创建 issue 或 PR。
-            - 保持本仓库「无遥测、无上传」立场，不同步任何上报代码。
-            - issue、PR 都保留：不要关闭、不要合并、不要删除。
-            - issue 与 PR 正文都必须 @SudoUserReal。
-            - 不要把任何密钥写进 issue / PR / 提交。
+            ## 步骤 5：登记 draft 构建参数（有变更且完成上述步骤后）
+            把构建参数写入 `/tmp/opencode/audit-build.json`（先 `mkdir -p /tmp/opencode`）：
+            {"branch":"<PR 的 head 分支名>","version":"<上游版本，如 3.14.3>","upstream_sha":"<本次审计结束 SHA>"}
+            - version 取上游本次改动对应的发布版本（从上游 commit 标题、上游包版本或 README 推断，去掉非语义后缀）；无法确定时使用当前仓库 package.json 的主版本。
+            - 该文件由工作流读取并触发 release.yml 构建 draft 测试版（不公开、不进入自动更新）。本次无变更时绝不创建该文件。
+
+      # 有变更时 agent 已写 /tmp/opencode/audit-build.json；这里触发 release.yml 在同步分支上构建 draft 测试版。
+      # 注意：draft 不进入 releases.atom / 自动更新链路，仅协作者可在 Releases 页面看到与下载。
+      - name: Trigger draft preview build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          RESULT=/tmp/opencode/audit-build.json
+          if [ ! -f "$RESULT" ]; then
+            echo "上游无变更或未生成构建参数，跳过 draft 测试版构建。"
+            exit 0
+          fi
+          BRANCH=$(jq -r '.branch // empty' "$RESULT")
+          VERSION=$(jq -r '.version // empty' "$RESULT")
+          UPSTREAM_SHA=$(jq -r '.upstream_sha // empty' "$RESULT")
+          if [ -z "$BRANCH" ] || [ -z "$VERSION" ]; then
+            echo "::warning::构建参数不完整，跳过 draft 测试版构建。"
+            cat "$RESULT" || true
+            exit 0
+          fi
+          NOTICE=$(cat <<EOF
+          > [!WARNING]
+          > **这是测试版 / This is a test build**
+          >
+          > 本版本由 \`upstream-audit\` 工作流根据同步分支 \`$BRANCH\`（zai-org/ZCode 上游 commit \`$UPSTREAM_SHA\`）自动构建，未经人工验证，仅供测试。
+          > This build was generated automatically by the \`upstream-audit\` workflow from sync branch \`$BRANCH\` (upstream zai-org/ZCode commit \`$UPSTREAM_SHA\`). It has not been manually verified and is for testing only.
+          >
+          > **建议下载正式版 / Please download the stable release**: https://github.com/ZCodium-project/ZCodium/releases/latest
+          EOF
+          )
+          PAYLOAD=$(jq -n --arg ref "$BRANCH" --arg version "$VERSION" --arg notice "$NOTICE" \
+            '{ref:$ref, inputs:{version:$version, prerelease:"true", keep_draft:"true", notice:$notice}}')
+          HTTP_CODE=$(curl -sS -o /tmp/dispatch-response.json -w '%{http_code}' -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/release.yml/dispatches" \
+            -d "$PAYLOAD")
+          if [ "$HTTP_CODE" != "204" ]; then
+            echo "::error::触发 release.yml 失败（HTTP $HTTP_CODE）"
+            cat /tmp/dispatch-response.json || true
+            exit 1
+          fi
+          echo "已触发 draft 测试版构建：branch=$BRANCH version=$VERSION"
+          echo "请在 Actions → Release 页面查看（保持 draft：不公开、不进入自动更新）。"

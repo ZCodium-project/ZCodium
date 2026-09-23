@@ -17,6 +17,15 @@ on:
         required: false
         type: boolean
         default: true
+      keep_draft:
+        description: "保持 draft 不公开（用于上游审计自动构建的测试版本；勾选后即使全部成功也不发布）"
+        required: false
+        type: boolean
+        default: false
+      notice:
+        description: "插入 Release 说明顶部的警示文本（可选，支持多行；用于测试版提示）"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -91,6 +100,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.validate.outputs.tag }}
           PRERELEASE: ${{ inputs.prerelease }}
+          NOTICE: ${{ inputs.notice }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -180,6 +190,11 @@ jobs:
           - Update metadata: `latest*.yml`, `latest.json`
           NOTES
           sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
+          # 测试版警示（如上游审计自动构建的 draft）插入到说明顶部
+          if [ -n "${NOTICE:-}" ]; then
+            { printf '%s\n\n' "$NOTICE"; cat /tmp/release-notes.md; } > /tmp/release-notes-with-notice.md
+            mv /tmp/release-notes-with-notice.md /tmp/release-notes.md
+          fi
           args=(--draft --title "$TAG" --notes-file /tmp/release-notes.md)
           if [ "$PRERELEASE" = "true" ]; then
             args+=(--prerelease)
@@ -325,9 +340,10 @@ jobs:
 
   # 只有 CLI 与全部桌面平台产物都上传成功才公开 release；任一构建失败则保持 draft，
   # 由人工排查后重跑或删除，避免不完整的版本出现在 Releases 与官网下载页。
+  # keep_draft=true（上游审计自动构建的测试版）：即使全部成功也保持 draft，不公开、不进入自动更新。
   publish:
     needs: [release, build, desktop]
-    if: ${{ always() && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') }}
+    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: Publish release
