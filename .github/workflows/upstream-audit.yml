@@ -1,4 +1,5 @@
-# 上游审计定时任务：每天北京时间 09:00（UTC 01:00）检查 zai-org/ZCode 的新 commit。
+# 上游审计定时任务：每 5 分钟检查一次 zai-org/ZCode 的新 commit（GitHub schedule 实际调度可能延迟数分钟）。
+# 前置检查（Check upstream head）发现上游 HEAD 与最近审计范围一致时直接跳过：不启动 agent、不做完整 checkout。
 # - 有新 commit：创建中英双语审计 issue（标题以【Audit-Official-Repo-Commit-YYYY-MM-DD】开头）与同步 PR，@SudoUserReal；
 #   随后自动触发 release.yml 在同步分支上构建 draft 测试版（不公开、不进入自动更新，说明中带测试版警示）。
 # - 没有新 commit：不创建任何 issue / PR，也不触发构建（正常退出）。
@@ -8,7 +9,7 @@ name: upstream-audit
 
 on:
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -20,36 +21,62 @@ jobs:
       issues: write
       actions: write # 供 action 内置缓存使用 + 触发 release.yml 的 draft 构建
     steps:
+      # 高频定时运行的前置检查：上游 HEAD 与最近审计范围一致时直接跳过，不启动 agent、不做完整 checkout。
+      - name: Check upstream head
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          HEAD_SHA=$(gh api repos/zai-org/ZCode/commits/main --jq '.sha')
+          LAST_BODY=$(gh issue list --repo ZCodium-project/ZCodium --label upstream-audit --state all --limit 1 --json body --jq '.[0].body // ""')
+          BASE_SHA=$(printf '%s' "$LAST_BODY" | grep -oE '[0-9a-f]{40}' | tail -1 || true)
+          echo "upstream_head=$HEAD_SHA"
+          echo "last_audited=${BASE_SHA:-<none>}"
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" = "$HEAD_SHA" ]; then
+            echo "上游无新 commit（$HEAD_SHA），跳过本次审计。"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository
+        if: steps.check.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Fetch upstream
+        if: steps.check.outputs.skip != 'true'
         run: |
           git remote add upstream https://github.com/zai-org/ZCode.git
           git fetch upstream main --no-tags
 
       - name: Setup Node
+        if: steps.check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
       - name: Setup pnpm
+        if: steps.check.outputs.skip != 'true'
         uses: pnpm/action-setup@v4
 
       # GITHUB_TOKEN 模式下 action 不设置提交身份，这里显式配置
       - name: Configure git identity
+        if: steps.check.outputs.skip != 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Ensure audit label
+        if: steps.check.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh label create upstream-audit --color 5319e7 --description "上游审计记录（自动生成）" || true
 
       - name: Run upstream audit
+        if: steps.check.outputs.skip != 'true'
         uses: anomalyco/opencode/github@latest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -197,6 +224,7 @@ jobs:
       # 有变更时 agent 已写 /tmp/opencode/audit-build.json；这里触发 release.yml 在同步分支上构建 draft 测试版。
       # 注意：draft 不进入 releases.atom / 自动更新链路，仅协作者可在 Releases 页面看到与下载。
       - name: Trigger draft preview build
+        if: steps.check.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
