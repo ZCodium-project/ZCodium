@@ -2,22 +2,13 @@
 # - 有新 commit：创建审计 issue（标题以【Audit-Official-Repo-Commit-YYYY-MM-DD】开头）并创建同步 PR，@SudoUserReal；
 # - 没有新 commit：不创建任何 issue / PR（正常退出）。
 # 增量基准记录在审计 issue 正文的「审计范围」行中；无历史 issue 时以 fork 分叉点（merge-base）为基准。
-# 同时支持 workflow_dispatch 手动触发；带 test_* 参数时用于测试/补审。
+# 同时支持 workflow_dispatch 手动触发。
 name: upstream-audit
 
 on:
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
-    inputs:
-      test_upstream_ref:
-        description: "仅测试/补审用：替代 upstream/main 的 ref（例如 origin/test/upstream-audit-fixture）"
-        required: false
-        type: string
-      test_base_sha:
-        description: "仅测试/补审用：替代增量基准的 commit SHA"
-        required: false
-        type: string
 
 jobs:
   audit:
@@ -62,8 +53,6 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_UPSTREAM_REF: ${{ inputs.test_upstream_ref }}
-          TEST_BASE_SHA: ${{ inputs.test_base_sha }}
         with:
           model: deepseek/deepseek-flash
           use_github_token: true
@@ -81,16 +70,11 @@ jobs:
             ## 步骤 1：确定增量范围
             1. 查询历史审计 issue（含已关闭）：
                `gh issue list --repo ZCodium-project/ZCodium --label upstream-audit --state all --limit 20 --json number,title,body,createdAt`
-               - 忽略标题里含 `[TEST]` 的 issue。
                - 取 createdAt 最新的一条，从正文中找「审计范围」行，格式：`审计范围：<起始SHA>..<结束SHA>`，取结束 SHA 作为增量基准。
                - 如果最新 issue 里没有该行，就继续往更早的找；都没有则走第 2 步。
             2. 如果没有可用基准：基准 SHA = `git merge-base origin/main upstream/main`（fork 分叉点）。
-            3. 测试 / 补审参数（仅当环境变量非空时生效，正常定时运行时会为空）：
-               - `TEST_BASE_SHA` 非空 → 用它替代基准 SHA。
-               - `TEST_UPSTREAM_REF` 非空 → 用它替代下文所有 `upstream/main`（如 `origin/test/xxx`；如该 ref 不存在，先 `git fetch origin <分支名>`）。
-               - 一旦使用了任一测试参数，所有产物标题末尾追加 ` [TEST]`。
-            4. 列出待审计 commit：
-               `git log --oneline --no-decorate <基准SHA>..<上游ref>`
+            3. 列出待审计 commit：
+               `git log --oneline --no-decorate <基准SHA>..upstream/main`
                - 输出为空 ⇒ 上游没有新改动。立即结束：不创建 issue、不创建 PR、不修改任何文件、不新建分支，只输出「上游无新 commit，跳过」。
                - commit 超过 50 个时：只处理最旧的 50 个（即范围为 `<基准SHA>..<第 50 个 commit 的 SHA>`），并在 issue 中说明剩余数量、下次继续。
 
@@ -116,7 +100,7 @@ jobs:
                   > - 已剥离内容：<逐条写清楚剥离了什么>
 
             ## 步骤 3：创建审计 issue（仅在步骤 1 确有新 commit 时）
-            - 标题：`【Audit-Official-Repo-Commit-<当天UTC日期 YYYY-MM-DD>】<一句话摘要>`；测试模式追加 ` [TEST]`。
+            - 标题：`【Audit-Official-Repo-Commit-<当天UTC日期 YYYY-MM-DD>】<一句话摘要>`。
               示例：【Audit-Official-Repo-Commit-2026-09-23】3 个改动，1 项含遥测已剥离
             - 正文先写入临时文件，再用 `gh issue create --repo ZCodium-project/ZCodium --label upstream-audit --title "<标题>" --body-file <文件>` 创建。
             - 正文模板（严格遵守，尤其「审计范围」行）：
@@ -144,7 +128,7 @@ jobs:
             - 记住 issue 编号。
 
             ## 步骤 4：创建同步 PR
-            - 新建分支：`git checkout -b audit/upstream-<YYYY-MM-DD>`（测试模式用 `audit/test-<YYYY-MM-DD>`）。
+            - 新建分支：`git checkout -b audit/upstream-<YYYY-MM-DD>`。
             - 移植改动：
               - 优先 `git cherry-pick <sha>...`；冲突时按本仓库现状适配（品牌、包名、已移除的遥测代码保持移除）。
               - 含遥测 / 上传的改动：只移植功能部分，**剥离全部上报代码**。
@@ -155,7 +139,7 @@ jobs:
               - `pnpm lint`
             - 提交并推送：`git push -u origin <分支名>`。
             - 创建 PR（正文先写入临时文件，用 `gh pr create --repo ZCodium-project/ZCodium --base main --head <分支名> --title "<标题>" --body-file <文件>`）：
-              - 标题：`[上游同步] <YYYY-MM-DD>：<一句话摘要>`；测试模式追加 ` [TEST]`。
+              - 标题：`[上游同步] <YYYY-MM-DD>：<一句话摘要>`。
               - 正文模板：
 
                 @SudoUserReal
