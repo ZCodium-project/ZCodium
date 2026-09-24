@@ -16,7 +16,7 @@ import { useServices } from "./useServices.js";
 
 type OAuthStatus = "idle" | "waiting" | "error";
 
-export function useOAuth() {
+export function useOAuth(options: { bootstrapProviders?: boolean } = {}) {
   const { oauthService } = useServices();
   const platform = usePlatform();
   const { intl } = useZCodeIntl();
@@ -59,8 +59,14 @@ export function useOAuth() {
   }, [oauthService]);
 
   useEffect(() => {
+    // 只发起登录的入口（如模型设置页的浏览器登录按钮）不需要 provider 列表，
+    // 跳过预加载避免每个卡片各拉一次 getProviders。
+    if (options.bootstrapProviders === false) {
+      setLoadingProviders(false);
+      return;
+    }
     void refreshProviders();
-  }, [refreshProviders]);
+  }, [options.bootstrapProviders, refreshProviders]);
 
   const startLogin = useCallback(
     async (provider: OAuthProviderId, options: { purpose?: LoginEntryPurpose } = {}) => {
