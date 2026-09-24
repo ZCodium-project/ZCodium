@@ -239,8 +239,9 @@ export interface AppSettings {
   /**
    * 官方平台服务开关；缺省全部关闭（不连接官方平台）。
    * 键定义见 officialPlatformPolicy.ts；对话分享已永久下线，不在此列。
+   * 字段允许缺省：读取/投影方用 normalizeOfficialServiceSwitches 补全为全关。
    */
-  officialServices?: OfficialServiceSwitches;
+  officialServices?: Partial<OfficialServiceSwitches>;
   /** 当前 App/Host 不再显示提交前体验套餐推荐；不改变任何入口的模型选择。 */
   startPlanRecommendationDismissed?: boolean;
   recentProjects: string[]; // 最近项目列表，最多保留 10 个

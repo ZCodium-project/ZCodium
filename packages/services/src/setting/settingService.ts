@@ -280,6 +280,10 @@ export function createSettingServiceWithMigrations(): {
       await updateQueue;
       const result = await readSettingsWithMeta();
       if (!result.needsMigrationPersist) {
+        // 官方服务开关是进程级策略，磁盘设置是唯一事实源：
+        // Host/Server/main 没有各自的初始化路径，任何进程首次读取设置后都在这里恢复用户选择。
+        // 读取失败或字段缺失时 normalize 为全关，保持审计版 fail-closed。
+        setOfficialServiceSwitches(result.settings.officialServices);
         return result.settings;
       }
 
@@ -294,7 +298,9 @@ export function createSettingServiceWithMigrations(): {
         await writeSettings(latest.settings, shouldCommit, runSettingsCommit, enterCommitPhase);
       });
 
-      return readSettings();
+      const settings = await readSettings();
+      setOfficialServiceSwitches(settings.officialServices);
+      return settings;
     },
 
     async update(patch: Partial<AppSettings>, expectedAccountSettings): Promise<void> {

@@ -61,7 +61,6 @@ import {
   DEFAULT_LOCALE,
   ZCODE_VERSION,
   resolveZCodeEndpointOrigin,
-  setOfficialServiceSwitches,
   type UpdateStatePayload,
   HostMessageTypes,
 } from "@zcode/shared";
@@ -590,9 +589,10 @@ const UPDATE_STATUS_WINDOW_READY_HEIGHT = UPDATE_STATUS_WINDOW_PROGRESS_HEIGHT -
 const UPDATE_STATUS_WINDOW_TRAFFIC_LIGHT_POSITION = { x: 10, y: 10 } as const;
 const mainSettingService = createSettingService();
 
-// 官方平台服务开关：启动时从设置加载（默认全部关闭），设置页变更由 settingService 即时刷新。
-void mainSettingService.get().then((settings) => {
-  setOfficialServiceSwitches(settings.officialServices);
+// 官方服务开关：启动时读一次设置。settingService.get 会把开关投影到本进程策略（缺省全关），
+// 设置页变更由同一个 settingService.update 即时投影，这里不再单独维护第二份加载逻辑。
+void mainSettingService.get().catch((error) => {
+  logger.warn("[settings] initial official service switches read failed", error);
 });
 
 async function resolveCurrentZCodeEndpointOrigin() {
@@ -797,12 +797,32 @@ function syncCloseToTrayOnWindows(value: unknown) {
   logger.info(`[settings] closeToTrayOnWindows=${value}`);
 }
 
+/** 通知所有应用窗口重新读取设置快照：其他窗口的 UI 与各自 Host 的进程级策略跟随更新。 */
+function broadcastSettingsChangedToWindows() {
+  for (const win of getApplicationWindowsExcludingCuaIndicator()) {
+    if (!win.isDestroyed()) {
+      win.webContents.send(PlatformChannels.SettingsChanged);
+    }
+  }
+}
+
 function syncImmediateAppSettings(patch: Partial<AppSettings>) {
   syncCloseToTrayOnWindows(patch.closeToTrayOnWindows);
 
   if (typeof patch.keepAwakeWhileRunning === "boolean") {
     keepAwakeWhileRunning = patch.keepAwakeWhileRunning;
     reconcileKeepAwakeBlocker();
+  }
+
+  if (patch.officialServices !== undefined) {
+    // 官方服务开关是进程级策略：renderer 已完成落盘（useSettings.update 先 await
+    // settingService.update 再走本通道）。main 重读设置并投影（get 内部统一投影），
+    // 使 webRequest 拦截在本次会话内按新开关放行/拦截，不必重启；再广播让其他窗口的
+    // Host 重新读取设置。不能直接采用 patch 值，部分 patch 会把其他已打开开关归一为关闭。
+    void mainSettingService.get().then(
+      () => broadcastSettingsChangedToWindows(),
+      (error) => logger.warn("[settings] official service switches sync failed", error),
+    );
   }
 
   if (typeof patch.receivePreviewUpdates === "boolean") {
@@ -820,11 +840,7 @@ function syncImmediateAppSettings(patch: Partial<AppSettings>) {
     // 这里重建应用菜单 accelerator，并通知所有窗口刷新设置快照 —— 其他窗口的
     // useAppKeyboard 生效表与设置页跟随更新。先例：setAutoDownloadAndInstallUpdates 的全窗口广播。
     rebuildMenu();
-    for (const win of getApplicationWindowsExcludingCuaIndicator()) {
-      if (!win.isDestroyed()) {
-        win.webContents.send(PlatformChannels.SettingsChanged);
-      }
-    }
+    broadcastSettingsChangedToWindows();
   }
 }
 
@@ -842,11 +858,7 @@ async function setAutoDownloadAndInstallUpdates(enabled: boolean) {
   syncImmediateAppSettings({
     autoDownloadAndInstallUpdates: enabled,
   });
-  for (const win of getApplicationWindowsExcludingCuaIndicator()) {
-    if (!win.isDestroyed()) {
-      win.webContents.send(PlatformChannels.SettingsChanged);
-    }
-  }
+  broadcastSettingsChangedToWindows();
 }
 
 async function prepareAppQuit(reason: string, kind: AppShutdownKind = "normal"): Promise<void> {

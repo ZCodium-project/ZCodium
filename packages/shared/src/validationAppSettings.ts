@@ -417,6 +417,17 @@ function migrateLegacyWorkspaceSession(value: unknown): unknown {
   return migrated;
 }
 
+/** 官方平台服务开关；缺省全部关闭。对话分享已永久下线，不在此列。 */
+export const officialServiceSwitchesSchema = z.object({
+  account: z.boolean().optional(),
+  feedback: z.boolean().optional(),
+  codingPlan: z.boolean().optional(),
+  officialMcp: z.boolean().optional(),
+  offPeak: z.boolean().optional(),
+  marketplace: z.boolean().optional(),
+  clientConfig: z.boolean().optional(),
+});
+
 const appSettingsObjectSchema = z.object({
   recentProjects: z.array(z.string()).default([]),
   locale: localeSchema.default("zh-CN"),
@@ -472,6 +483,9 @@ const appSettingsObjectSchema = z.object({
   skippedElectronUpdateVersions: skippedElectronUpdateVersionsSchema,
   settingsSyncFirstRunPromptHandled: z.boolean().optional(),
   zcodeEndpointOrigin: zcodeEndpointOriginSchema.optional(),
+  // 官方服务开关必须登记在存储 schema 里：只进 patch schema 会在写盘时被 zod strip，
+  // 开关看起来能切但永远读不回来，UI 表现为点击后立刻回弹。
+  officialServices: officialServiceSwitchesSchema.optional(),
 });
 
 export const appSettingsSchema = z.preprocess(
@@ -489,17 +503,6 @@ export const appSettingsSchema = z.preprocess(
     ),
   appSettingsObjectSchema,
 );
-
-/** 官方平台服务开关；缺省全部关闭。对话分享已永久下线，不在此列。 */
-export const officialServiceSwitchesSchema = z.object({
-  account: z.boolean().optional(),
-  feedback: z.boolean().optional(),
-  codingPlan: z.boolean().optional(),
-  officialMcp: z.boolean().optional(),
-  offPeak: z.boolean().optional(),
-  marketplace: z.boolean().optional(),
-  clientConfig: z.boolean().optional(),
-});
 
 export const appSettingsPatchSchema = z.object({
   officialServices: officialServiceSwitchesSchema.optional(),
