@@ -2211,7 +2211,7 @@ const zhCN: Record<string, string> = {
   "settings.officialServicesTitle": "Z.AI 服务",
   "settings.officialServices.title": "Z.AI 服务连接",
   "settings.officialServices.description":
-    "这些是 Z.AI（ZCode）的服务，打开后会连接 Z.AI 的服务器。如无必要，请保持关闭。",
+    "这些是 Z.AI（ZCode）的服务，打开后会连接 Z.AI 的服务器。如无必要，请保持关闭。部分服务在启动时加载，修改后需重启应用生效。",
   "settings.officialServices.account.title": "Z.AI API 配置",
   "settings.officialServices.account.desc": "配置 Z.AI API Key 并使用相关能力。",
   "settings.officialServices.codingPlan.title": "套餐与额度",
@@ -2700,6 +2700,9 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.codingPlan.description.unsupported":
     "当前供应商暂不支持 Coding Plan 状态检查。",
   "settings.modelProvider.codingPlan.login": "配置 {provider} API Key",
+  "settings.modelProvider.codingPlan.browserLogin": "通过浏览器登录",
+  "settings.modelProvider.codingPlan.browserLoginHint":
+    "浏览器登录未完成。请确认已在“设置 → Z.AI 服务”中打开“Z.AI API 配置”，再重试并完成浏览器授权。",
   "settings.modelProvider.codingPlan.connect": "配置 {provider}",
   "settings.modelProvider.codingPlan.disconnect": "解绑",
   "settings.modelProvider.codingPlan.upgrade": "配置",

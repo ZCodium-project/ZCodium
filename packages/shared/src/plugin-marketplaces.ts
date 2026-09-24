@@ -1,3 +1,5 @@
+import { isOfficialServiceEnabled } from "./officialPlatformPolicy.js";
+
 export interface DefaultPluginMarketplace {
   id: string;
   source: string;
@@ -29,8 +31,32 @@ export const DEFAULT_ENABLED_OFFICIAL_PLUGIN_IDS: ReadonlySet<string> = new Set(
   // bootstrap 的「Settings 默认启用集合与 CLI 的官方插件声明一致」单测机械对照两者。
 ]);
 
-// 审计版不连接官方服务；本地内置插件仍由 bootstrap 播种，个人来源保持可用。
-export const DEFAULT_PLUGIN_MARKETPLACES: DefaultPluginMarketplace[] = [];
+// 官方市场来源定义保留在这里；是否进入默认市场集合由 marketplace 开关决定
+// （见 resolveDefaultPluginMarketplaces）。关闭时不 seed，保持审计版默认断连。
+export const DEFAULT_PLUGIN_MARKETPLACES: DefaultPluginMarketplace[] = [
+  {
+    // ZCode 官方唯一市场：本地 seed 分片与 CDN 分片在 Agent storage 内合并。
+    // CDN manifest 的 name 必须与该 canonical id 一致。
+    id: ZCODE_OFFICIAL_PLUGIN_MARKETPLACE_ID,
+    source: "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json",
+    name: ZCODE_OFFICIAL_PLUGIN_MARKETPLACE_ID,
+    description: "Official ZCode plugins marketplace: built-in and community plugins for ZCode.",
+    pluginCount: 0,
+  },
+];
+
+/**
+ * 默认插件市场集合按官方服务开关过滤：
+ * 官方来源只在 marketplace 开启时进入集合；本地内置插件与个人来源不受影响。
+ * agent 进程的开关来自 Desktop 的 env 投影或 CLI 手动的 ZCODIUM_ENABLE_OFFICIAL_*。
+ */
+export function resolveDefaultPluginMarketplaces(): DefaultPluginMarketplace[] {
+  return DEFAULT_PLUGIN_MARKETPLACES.filter(
+    (marketplace) =>
+      marketplace.id !== ZCODE_OFFICIAL_PLUGIN_MARKETPLACE_ID ||
+      isOfficialServiceEnabled("marketplace"),
+  );
+}
 
 // 商店「公开」分段只有一个 ZCode 官方市场 id，内置与 CDN 不再拆分身份。
 export const PUBLIC_STORE_MARKETPLACE_IDS = [ZCODE_OFFICIAL_PLUGIN_MARKETPLACE_ID] as const;

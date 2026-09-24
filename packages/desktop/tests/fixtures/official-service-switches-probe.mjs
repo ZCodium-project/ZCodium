@@ -5,7 +5,7 @@
  * 用法：node --import tsx official-service-switches-probe.mjs <baseline|write|read|close|effects>
  * 环境：ZCODE_DESKTOP_HOME_DIR 指向临时 home（探针只读写该目录下的 setting.json）。
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const home = process.env.ZCODE_DESKTOP_HOME_DIR?.trim();
@@ -22,6 +22,9 @@ const policy = await import(
 );
 const { appSettingsSchema } = await import(
   new URL("../../../shared/src/validationAppSettings.ts", import.meta.url).href
+);
+const { resolveDefaultPluginMarketplaces } = await import(
+  new URL("../../../shared/src/plugin-marketplaces.ts", import.meta.url).href
 );
 
 const ALL_OFF = {
@@ -249,6 +252,48 @@ if (mode === "baseline") {
   );
 } else if (mode === "effects") {
   result.functional = await runFunctionalEffects();
+} else if (mode === "projection") {
+  // Desktop 设置 → agent env 的单一映射，以及官方市场集合按开关过滤。
+  const closedPatch = policy.buildOfficialServiceEnvPatch(undefined);
+  result.closedEnvKeys = Object.keys(closedPatch).length;
+  result.closedEnvValues = [...new Set(Object.values(closedPatch))].sort();
+  result.closedDefaults = resolveDefaultPluginMarketplaces().length;
+
+  await service.update({
+    officialServices: { ...ALL_OFF, marketplace: true },
+  });
+  const openedPatch = policy.buildOfficialServiceEnvPatch({
+    ...ALL_OFF,
+    marketplace: true,
+  });
+  result.openedMarketplaceEnv = openedPatch.ZCODIUM_ENABLE_OFFICIAL_MARKETPLACE;
+  result.openedAccountEnv = openedPatch.ZCODIUM_ENABLE_OFFICIAL_ACCOUNT;
+  const defaults = resolveDefaultPluginMarketplaces();
+  result.openedDefaults = defaults.length;
+  result.openedDefaultSource = defaults[0]?.source ?? null;
+} else if (mode === "marketplace-seed") {
+  // agent 实际 seed 行为：关闭时不写官方市场；env 打开（Desktop 投影路径）后写入官方 CDN 来源。
+  const { ensureDefaultPluginMarketplaces, loadKnownMarketplacesSync } = await import(
+    new URL(
+      "../../../../apps/zcode-cli/packages/adapters/src/plugins/marketplace.ts",
+      import.meta.url,
+    ).href
+  );
+  const storageRoot = join(home, "plugin-storage");
+  mkdirSync(storageRoot, { recursive: true });
+
+  ensureDefaultPluginMarketplaces(storageRoot);
+  const closedRecords = loadKnownMarketplacesSync(storageRoot);
+  result.closedRecords = closedRecords.length;
+  result.closedHasOfficial = closedRecords.some((record) => record.id === "zcode-plugins-official");
+
+  process.env.ZCODIUM_ENABLE_OFFICIAL_MARKETPLACE = "1";
+  policy.setOfficialServiceSwitches(policy.readOfficialServiceSwitchesFromEnv(process.env));
+  ensureDefaultPluginMarketplaces(storageRoot);
+  const openedRecords = loadKnownMarketplacesSync(storageRoot);
+  const official = openedRecords.find((record) => record.id === "zcode-plugins-official");
+  result.openedHasOfficial = Boolean(official);
+  result.openedOfficialSource = official?.source?.url ?? null;
 } else {
   throw new Error(`unknown probe mode: ${mode}`);
 }

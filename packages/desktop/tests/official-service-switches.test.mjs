@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -95,4 +96,65 @@ test("official service switches gate real feature entry points", () => {
   assert.equal(opened.feedbackRejected, false, "打开后提交不再被开关拒绝");
   assert.equal(opened.feedbackCalls, 1, "打开后必须真的发出反馈请求");
   assert.equal(opened.feedbackNetworkReached, true, "打开后请求应到达网络层");
+});
+
+test("official switches project into agent env and gate the official marketplace source", () => {
+  const home = mkdtempSync(join(tmpdir(), "zcode-official-projection-"));
+  const projection = runProbe(home, "projection");
+
+  // 完整 7 键，关闭时全部写 "0"（覆盖 shell 残留的 =1），不能依赖缺键关闭。
+  assert.equal(projection.closedEnvKeys, 7, "env 投影必须写完整键集");
+  assert.deepEqual(projection.closedEnvValues, ["0"], "关闭时全部输出 0");
+
+  // 默认市场集合按开关过滤：关闭不含官方来源，打开包含官方 CDN 来源。
+  assert.equal(projection.closedDefaults, 0, "关闭时默认集合不含官方市场");
+  assert.equal(projection.openedDefaults, 1, "打开后默认集合包含官方市场");
+  assert.equal(
+    projection.openedDefaultSource,
+    "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json",
+    "官方市场来源必须是受开关控制的 CDN manifest",
+  );
+  assert.equal(projection.openedMarketplaceEnv, "1", "marketplace 开启时 env 写入 1");
+  assert.equal(projection.openedAccountEnv, "0", "未开启项 env 写入 0");
+});
+
+test("agent default marketplaces only seed the official source when the switch is on", () => {
+  const home = mkdtempSync(join(tmpdir(), "zcode-official-seed-"));
+  const seed = runProbe(home, "marketplace-seed");
+
+  assert.equal(seed.closedRecords, 0, "关闭时不得 seed 官方市场记录");
+  assert.equal(seed.closedHasOfficial, false, "关闭时官方市场不得出现");
+  assert.equal(seed.openedHasOfficial, true, "env 投影打开后应 seed 官方市场记录");
+  assert.equal(
+    seed.openedOfficialSource,
+    "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json",
+    "seed 的官方来源必须是受开关控制的 CDN manifest",
+  );
+});
+
+test("agent spawn env and protocol entrypoint carry the official switches", async () => {
+  // 防回归：这两处是 Desktop 下开关到达 agent 的唯一路径，任一被误删都会让
+  // 插件市场（及其它 agent 侧官方功能）在打开开关后仍然按“未开启”拒绝。
+  const servicesNode = await readFile(
+    new URL("../../../packages/services/src/node.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    servicesNode,
+    /\.\.\.buildOfficialServiceEnvPatch\(settings\.officialServices\)/,
+    "agent spawn env 必须按当前设置注入官方开关",
+  );
+
+  const entrypoint = await readFile(
+    new URL(
+      "../../../apps/zcode-cli/packages/bootstrap/src/zcode-protocol-entrypoint.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  assert.match(
+    entrypoint,
+    /setOfficialServiceSwitches\(readOfficialServiceSwitchesFromEnv\(/,
+    "协议入口必须在启动时投影官方开关（插件管理等请求不经过 createZCodeApp）",
+  );
 });

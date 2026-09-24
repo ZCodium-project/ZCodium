@@ -62,26 +62,46 @@ export function normalizeOfficialServiceSwitches(input: unknown): OfficialServic
   return next;
 }
 
-/** CLI/headless 用环境变量开启官方功能；键名见下方映射，值为 "1" 时开启。 */
+/**
+ * 环境变量键 → 功能开关的单一映射。
+ * CLI/headless 读取与 Desktop 的 agent env 投影共用，禁止在两处手写键名。
+ */
+export const OFFICIAL_SERVICE_ENV_KEYS: Readonly<Record<string, OfficialServiceKey>> = {
+  ZCODIUM_ENABLE_OFFICIAL_ACCOUNT: "account",
+  ZCODIUM_ENABLE_OFFICIAL_FEEDBACK: "feedback",
+  ZCODIUM_ENABLE_OFFICIAL_CODING_PLAN: "codingPlan",
+  ZCODIUM_ENABLE_OFFICIAL_MCP: "officialMcp",
+  ZCODIUM_ENABLE_OFFICIAL_OFFPEAK: "offPeak",
+  ZCODIUM_ENABLE_OFFICIAL_MARKETPLACE: "marketplace",
+  ZCODIUM_ENABLE_OFFICIAL_CLIENT_CONFIG: "clientConfig",
+};
+
+/** CLI/headless 用环境变量开启官方功能；键名见上方映射，值为 "1" 时开启。 */
 export function readOfficialServiceSwitchesFromEnv(
   env: Record<string, string | undefined> = {},
 ): Partial<OfficialServiceSwitches> {
-  const envKeys: Record<string, OfficialServiceKey> = {
-    ZCODIUM_ENABLE_OFFICIAL_ACCOUNT: "account",
-    ZCODIUM_ENABLE_OFFICIAL_FEEDBACK: "feedback",
-    ZCODIUM_ENABLE_OFFICIAL_CODING_PLAN: "codingPlan",
-    ZCODIUM_ENABLE_OFFICIAL_MCP: "officialMcp",
-    ZCODIUM_ENABLE_OFFICIAL_OFFPEAK: "offPeak",
-    ZCODIUM_ENABLE_OFFICIAL_MARKETPLACE: "marketplace",
-    ZCODIUM_ENABLE_OFFICIAL_CLIENT_CONFIG: "clientConfig",
-  };
   const result: Partial<OfficialServiceSwitches> = {};
-  for (const [key, feature] of Object.entries(envKeys)) {
+  for (const [key, feature] of Object.entries(OFFICIAL_SERVICE_ENV_KEYS)) {
     if (env[key]?.trim() === "1") {
       result[feature] = true;
     }
   }
   return result;
+}
+
+/**
+ * Desktop 运行时的 agent env 投影：按设置输出完整键集（开启=1、关闭=0）。
+ *
+ * 必须写完整键集：用户 shell 里可能残留 `ZCODIUM_ENABLE_OFFICIAL_*=1`，
+ * Desktop 的设置是唯一事实源，关闭项要显式覆盖为 0，不能依赖“缺键=关闭”。
+ */
+export function buildOfficialServiceEnvPatch(input: unknown): Record<string, string> {
+  const switches = normalizeOfficialServiceSwitches(input);
+  const patch: Record<string, string> = {};
+  for (const [key, feature] of Object.entries(OFFICIAL_SERVICE_ENV_KEYS)) {
+    patch[key] = switches[feature] ? "1" : "0";
+  }
+  return patch;
 }
 
 export function setOfficialServiceSwitches(input: unknown): void {

@@ -6,7 +6,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { PluginDiagnostic, PluginManifest, PluginStoreListing } from "@zcode/contracts";
 import { isOfficialMarketplaceId, ZCODE_OFFICIAL_PLUGIN_MARKETPLACE } from "@zcode/contracts";
-import { DEFAULT_PLUGIN_MARKETPLACES, sanitizeZCodeRuntimeEnv } from "@zcode/shared";
+import { resolveDefaultPluginMarketplaces, sanitizeZCodeRuntimeEnv } from "@zcode/shared";
 import { loadPluginMcpServerDefinitions, resolvePluginMcpServers } from "./mcp.js";
 import {
   appendPluginSourceCleanupError,
@@ -280,10 +280,11 @@ export function ensureDefaultPluginMarketplaces(storageRoot: string): KnownMarke
   const known = loadKnownMarketplacesSync(storageRoot);
   const existingIds = new Set(known.map((record) => record.id));
   const now = new Date().toISOString();
-  const missing = DEFAULT_PLUGIN_MARKETPLACES.filter(
-    (marketplace) => !existingIds.has(marketplace.id),
-  ).map(
-    (marketplace): KnownMarketplaceRecord => ({
+  // 官方来源是否进入默认集合由 marketplace 开关（agent 进程策略）决定；
+  // 本地内置插件与个人来源不经过该过滤。
+  const missing = resolveDefaultPluginMarketplaces()
+    .filter((marketplace) => !existingIds.has(marketplace.id))
+    .map((marketplace): KnownMarketplaceRecord => ({
       id: marketplace.id,
       source: defaultMarketplaceSourceFromString(marketplace.source),
       name: marketplace.name,
@@ -291,8 +292,7 @@ export function ensureDefaultPluginMarketplaces(storageRoot: string): KnownMarke
       addedAt: now,
       ...(marketplace.lastUpdated ? { lastUpdated: marketplace.lastUpdated } : {}),
       pluginCount: marketplace.pluginCount,
-    }),
-  );
+    }));
   if (missing.length === 0) return known;
   const next = [...known, ...missing];
   writeKnownMarketplacesSync(storageRoot, next);

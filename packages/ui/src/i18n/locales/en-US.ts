@@ -2349,7 +2349,7 @@ const enUS: Record<string, string> = {
   "settings.officialServicesTitle": "Z.AI services",
   "settings.officialServices.title": "Z.AI service connections",
   "settings.officialServices.description":
-    "These are Z.AI (ZCode) services. Turning one on connects to Z.AI servers — keep them off unless you need them.",
+    "These are Z.AI (ZCode) services. Turning one on connects to Z.AI servers — keep them off unless you need them. Some features load at startup; restart the app after changing these switches.",
   "settings.officialServices.account.title": "Z.AI API configuration",
   "settings.officialServices.account.desc":
     "Configure a Z.AI API key to use related capabilities.",
@@ -2888,6 +2888,9 @@ const enUS: Record<string, string> = {
   "settings.modelProvider.codingPlan.description.unsupported":
     "This provider does not support Coding Plan status checks yet.",
   "settings.modelProvider.codingPlan.login": "Configure {provider} API key",
+  "settings.modelProvider.codingPlan.browserLogin": "Sign in via browser",
+  "settings.modelProvider.codingPlan.browserLoginHint":
+    "Browser sign-in did not complete. Make sure \"Z.AI API configuration\" is enabled under Settings → Z.AI services, then retry and finish the browser authorization.",
   "settings.modelProvider.codingPlan.connect": "Configure {provider}",
   "settings.modelProvider.codingPlan.disconnect": "Unlink",
   "settings.modelProvider.codingPlan.upgrade": "Configure",

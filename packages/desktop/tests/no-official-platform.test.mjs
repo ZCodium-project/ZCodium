@@ -39,6 +39,9 @@ test("runtime official URL literals are restricted to identity and user-opened l
     "packages/shared/src/zcodeEndpoint.ts",
     "packages/ui/src/lib/productDocs.ts",
     "packages/web/src/share/ConversationShareLandingPage.tsx",
+    // 官方插件市场来源：只在 officialServices.marketplace 开关开启（Desktop env 投影或 CLI env）时
+    // 才进入默认市场集合，网络出口仍受 assertOfficialPlatformAccessible 与开关裁决。
+    "packages/shared/src/plugin-marketplaces.ts",
   ]);
   for (const dir of [
     "packages/services/src",

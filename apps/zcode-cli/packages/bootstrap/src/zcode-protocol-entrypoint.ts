@@ -38,6 +38,8 @@ import {
 import {
   createOfficialMcpTrustedOriginRegistry,
   OFFICIAL_MCP_DEV_TRUSTED_ORIGINS_ENV,
+  readOfficialServiceSwitchesFromEnv,
+  setOfficialServiceSwitches,
   ZCODE_WORKSPACE_IDENTITY_ENV,
   resolveRuntimeZCodeEndpointOrigin,
 } from "@zcode/shared";
@@ -90,6 +92,9 @@ export async function runZCodeProtocolAgent(
     });
     return;
   }
+  // 协议入口先按 env 投影官方服务开关：插件市场管理等请求不经过 createZCodeApp，
+  // 只在 createZCodeApp 设置会让这些请求长期停在默认全关（Desktop env 投影失效）。
+  setOfficialServiceSwitches(readOfficialServiceSwitchesFromEnv(options.env ?? process.env));
   const startupStartedAt = startupNow();
   const presentationSurface = options.presentationSurface ?? "terminal";
   const input = options.input ?? process.stdin;

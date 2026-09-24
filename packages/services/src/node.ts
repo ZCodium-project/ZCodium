@@ -448,6 +448,7 @@ import {
   resolveOfficialMcpCredentials,
 } from "./official-mcp/officialMcpCredentials.js";
 import {
+  buildOfficialServiceEnvPatch,
   createOfficialMcpTrustedOriginRegistry,
   OFFICIAL_MCP_DEV_TRUSTED_ORIGINS_ENV,
 } from "@zcode/shared";
@@ -2210,6 +2211,9 @@ export function createLocalServices(options: {
           noProxy: agentNetwork.noProxy,
           caCertPath: settings.httpProxyCaCertPath,
         }),
+        // 官方服务开关按当前设置注入 agent：每次 spawn agent 都读最新设置，关闭项显式写 0
+        // 覆盖继承残留。设置页切换开关后对新启动的 agent 生效；不依赖 Host 进程 env 是否携带。
+        ...buildOfficialServiceEnvPatch(settings.officialServices),
         // 把 host 解析出的权威 origin（含 settings 覆盖）下发给 agent，否则 agent 侧只按
         // env 推导，test env + 自定义端点时两侧信任判定的输入分叉、官方 MCP 整体 fail closed。
         ...buildAgentEndpointOriginEnv(await resolveCurrentZCodeEndpointOrigin()),

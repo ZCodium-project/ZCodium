@@ -61,6 +61,7 @@ import {
   DEFAULT_LOCALE,
   ZCODE_VERSION,
   resolveZCodeEndpointOrigin,
+  buildOfficialServiceEnvPatch,
   type UpdateStatePayload,
   HostMessageTypes,
 } from "@zcode/shared";
@@ -472,6 +473,23 @@ interface RuntimeProcessEnvPreparation {
   fallbackPatch: Record<string, string>;
 }
 
+/**
+ * 官方服务开关的 agent env 投影：Desktop 设置是唯一事实源，输出完整键集覆盖 shell 残留的
+ * ZCODIUM_ENABLE_OFFICIAL_*。Host/agent 在启动时读取，设置页切换开关后需重启应用（或新建窗口）生效。
+ * 读取失败时按全关投影（fail-closed），仍返回完整键集。
+ */
+async function mergeOfficialServiceEnvProjection(
+  patch: Record<string, string>,
+): Promise<Record<string, string>> {
+  try {
+    const settings = await mainSettingService.get();
+    return { ...patch, ...buildOfficialServiceEnvPatch(settings.officialServices) };
+  } catch (error) {
+    logger.warn("[settings] official service env projection read failed", error);
+    return { ...patch, ...buildOfficialServiceEnvPatch(undefined) };
+  }
+}
+
 let runtimeProcessEnvPrewarmSequence = 0;
 function createRuntimeProcessEnvPreparation(): RuntimeProcessEnvPreparation {
   const prewarmId = ++runtimeProcessEnvPrewarmSequence;
@@ -485,34 +503,39 @@ function createRuntimeProcessEnvPreparation(): RuntimeProcessEnvPreparation {
     },
     process.platform,
   );
-  const fallbackPatch = buildRuntimeProcessEnvPatch(baseEnv, null, {
-    platform: process.platform,
-  });
+  // 降级路径读不到设置，按全关投影官方开关（fail-closed），但仍覆盖 shell 残留键。
+  const fallbackPatch = {
+    ...buildRuntimeProcessEnvPatch(baseEnv, null, {
+      platform: process.platform,
+    }),
+    ...buildOfficialServiceEnvPatch(undefined),
+  };
   const patchPromise = captureLoginShellEnvSnapshot({
     baseEnv,
     platform: process.platform,
   }).then(
-    (snapshot) => {
+    async (snapshot) => {
       const patch = buildRuntimeProcessEnvPatch(baseEnv, snapshot, {
         platform: process.platform,
       });
+      const mergedPatch = await mergeOfficialServiceEnvProjection(patch);
       if (process.platform !== "win32" && !snapshot) {
         logger.warn(
           `[startup] login shell env unavailable id=${prewarmId}; using shell-free fallback after ${Date.now() - startedAt}ms`,
         );
-        return patch;
+        return mergedPatch;
       }
       logger.info(
         `[startup] runtime process env prepared asynchronously id=${prewarmId} in ${Date.now() - startedAt}ms`,
       );
-      return patch;
+      return mergedPatch;
     },
-    (error) => {
+    async (error) => {
       logger.warn(
         `[startup] runtime process env prewarm failed id=${prewarmId}; using shell-free fallback`,
         error,
       );
-      return fallbackPatch;
+      return mergeOfficialServiceEnvProjection(fallbackPatch);
     },
   );
   return { patchPromise, fallbackPatch };
