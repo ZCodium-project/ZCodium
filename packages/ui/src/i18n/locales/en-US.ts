@@ -685,6 +685,20 @@ const enUS: Record<string, string> = {
     "Feishu/Lark only support Card JSON 2.0 streaming cards, with tool calls shown only as collapsed summaries.",
   "bots.add": "Add",
   "bots.channel.telegram": "Telegram",
+  "bots.astrbot.bridgeLabel": "AstrBot bridge",
+  "bots.astrbot.bridgeDescription":
+    "Connect through this repository's bridge plugin; AstrBot owns the per-platform adapters.",
+  "bots.astrbot.copyPath": "Copy config path",
+  "bots.astrbot.openPlugin": "Open bridge plugin",
+  "bots.astrbot.runtimeFilePath": "Bridge runtime file (url / port / token / bind code):",
+  "bots.astrbot.step.install": "Install the astrbot-zcodium-plugin.",
+  "bots.astrbot.step.configure": "Fill the url, port, and token from that file into the plugin.",
+  "bots.astrbot.step.bind": "Send /bind <code> in chat to finish binding.",
+  "bots.astrbot.boundDescription":
+    "AstrBot bridge is bound; messages go through the official Bots pipeline.",
+  "bots.astrbot.unboundDescription":
+    "Install and configure astrbot-zcodium-plugin, then generate a bind code.",
+  "bots.channel.astrbot": "AstrBot",
   "bots.channel.weixin": "Weixin",
   "bots.channel.feishu": "Feishu",
   "bots.channel.lark": "Lark",
@@ -700,6 +714,8 @@ const enUS: Record<string, string> = {
   "bots.newBot.fallbackName": "New bot",
   "bots.newBot.comingSoon": "Coming soon",
   "bots.newBot.providerDescription.telegram": "Create a bot, then bind by message.",
+  "bots.newBot.providerDescription.astrbot":
+    "Connect through the AstrBot bridge plugin; AstrBot owns the platform adapters.",
   "bots.newBot.providerDescription.weixin": "Scan to log in; first message activates.",
   "bots.newBot.providerDescription.feishu": "Scan to create an app, then bind by message.",
   "bots.newBot.providerDescription.lark": "Scan to create an app, then bind by message.",
@@ -1739,6 +1755,9 @@ const enUS: Record<string, string> = {
   "webRemoteControl.description": "Control ZCode workspaces through chat bots.",
   "webRemoteControl.botChannel.title": "Use a bot channel",
   "webRemoteControl.botChannel.description": "Connect a chat bot for longer-running mobile access.",
+  "webRemoteControl.botChannel.astrbot.title": "AstrBot",
+  "webRemoteControl.botChannel.astrbot.description":
+    "Open this workspace through a chat platform connected via AstrBot.",
   "webRemoteControl.botChannel.weixin.title": "Weixin",
   "webRemoteControl.botChannel.weixin.description": "Open this workspace from Weixin chat.",
   "webRemoteControl.botChannel.feishu.title": "Feishu",

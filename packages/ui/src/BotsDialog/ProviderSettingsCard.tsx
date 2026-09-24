@@ -109,6 +109,94 @@ function TelegramBotFatherQrPanel({
   );
 }
 
+/** 绑定码面板：官方 provider 与 AstrBot 桥接共用（发送 /bind <code> 完成绑定）。 */
+export function BindCodePanel({
+  bindCode,
+  bindExpired,
+  bindRemainingMs,
+  bindCountdownProgress,
+  onCreateBindCode,
+  onCopyBindCommand,
+}: {
+  bindCode: BindCodeState;
+  bindExpired: boolean;
+  bindRemainingMs: number;
+  bindCountdownProgress: number;
+  onCreateBindCode: () => void;
+  onCopyBindCommand: () => void;
+}) {
+  const { intl } = useZCodeIntl();
+  const bindCommand = `/bind ${bindCode.code}`;
+  return (
+    <DetailPanel>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-ui-base font-medium text-foreground">
+            {intl.formatMessage({ id: "bots.bindCommand" })}
+          </div>
+          <div className="mt-1 text-ui-base leading-5 text-foreground-subtle">
+            {intl.formatMessage({ id: "bots.bindCommandGuide" })}
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onCreateBindCode}>
+          <QrCode className="size-3" />
+          {intl.formatMessage({ id: "bots.setup.refreshBindCode" })}
+        </Button>
+      </div>
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md bg-surface px-2 py-1.5">
+        <span
+          className={cn(
+            "min-w-0 break-all font-mono text-ui-base leading-5",
+            bindExpired ? "text-foreground-subtle" : "text-foreground",
+          )}
+        >
+          {bindCommand}
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCopyBindCommand}
+          disabled={bindExpired}
+          title={intl.formatMessage({ id: "bots.copyBindCommand" })}
+        >
+          <Copy className="size-4" />
+          {intl.formatMessage({ id: "bots.copyBindCommand" })}
+        </Button>
+      </div>
+      <ol className="mt-2 list-decimal space-y-1 pl-4 text-ui-base leading-5 text-foreground-subtle">
+        <li>{intl.formatMessage({ id: "bots.bindCommandStep.copy" })}</li>
+        <li>{intl.formatMessage({ id: "bots.bindCommandStep.openChat" })}</li>
+        <li>{intl.formatMessage({ id: "bots.bindCommandStep.send" })}</li>
+      </ol>
+      <div className="mt-2 flex items-center gap-2 text-ui-base text-foreground-subtle">
+        <Clock3 className="size-3" />
+        {bindExpired
+          ? intl.formatMessage({ id: "bots.bindCodeExpired" })
+          : intl.formatMessage(
+              { id: "bots.bindCodeExpires" },
+              { time: formatBindCountdown(bindRemainingMs) },
+            )}
+      </div>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface">
+        <div
+          key={bindCode.code}
+          className={cn(
+            "h-full origin-left rounded-full transition-transform duration-300 ease-linear",
+            bindExpired
+              ? "bg-border"
+              : bindCountdownProgress <= 10
+                ? "bg-destructive"
+                : bindRemainingMs <= 10_000
+                  ? "bg-warning"
+                  : "bg-primary",
+          )}
+          style={{ transform: `scaleX(${bindCountdownProgress / 100})` }}
+        />
+      </div>
+    </DetailPanel>
+  );
+}
+
 export function ProviderSettingsCard({
   bot,
   runtime,
@@ -299,74 +387,15 @@ export function ProviderSettingsCard({
       </DetailPanel>
     );
   } else if (showBindCode) {
-    const bindCommand = `/bind ${bindCode.code}`;
     detail = (
-      <DetailPanel>
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <div className="text-ui-base font-medium text-foreground">
-              {intl.formatMessage({ id: "bots.bindCommand" })}
-            </div>
-            <div className="mt-1 text-ui-base leading-5 text-foreground-subtle">
-              {intl.formatMessage({ id: "bots.bindCommandGuide" })}
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" onClick={onCreateBindCode}>
-            <QrCode className="size-3" />
-            {intl.formatMessage({ id: "bots.setup.refreshBindCode" })}
-          </Button>
-        </div>
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md bg-surface px-2 py-1.5">
-          <span
-            className={cn(
-              "min-w-0 break-all font-mono text-ui-base leading-5",
-              bindExpired ? "text-foreground-subtle" : "text-foreground",
-            )}
-          >
-            {bindCommand}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCopyBindCommand}
-            disabled={bindExpired}
-            title={intl.formatMessage({ id: "bots.copyBindCommand" })}
-          >
-            <Copy className="size-4" />
-            {intl.formatMessage({ id: "bots.copyBindCommand" })}
-          </Button>
-        </div>
-        <ol className="mt-2 list-decimal space-y-1 pl-4 text-ui-base leading-5 text-foreground-subtle">
-          <li>{intl.formatMessage({ id: "bots.bindCommandStep.copy" })}</li>
-          <li>{intl.formatMessage({ id: "bots.bindCommandStep.openChat" })}</li>
-          <li>{intl.formatMessage({ id: "bots.bindCommandStep.send" })}</li>
-        </ol>
-        <div className="mt-2 flex items-center gap-2 text-ui-base text-foreground-subtle">
-          <Clock3 className="size-3" />
-          {bindExpired
-            ? intl.formatMessage({ id: "bots.bindCodeExpired" })
-            : intl.formatMessage(
-                { id: "bots.bindCodeExpires" },
-                { time: formatBindCountdown(bindRemainingMs) },
-              )}
-        </div>
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface">
-          <div
-            key={bindCode.code}
-            className={cn(
-              "h-full origin-left rounded-full transition-transform duration-300 ease-linear",
-              bindExpired
-                ? "bg-border"
-                : bindCountdownProgress <= 10
-                  ? "bg-destructive"
-                  : bindRemainingMs <= 10_000
-                    ? "bg-warning"
-                    : "bg-primary",
-            )}
-            style={{ transform: `scaleX(${bindCountdownProgress / 100})` }}
-          />
-        </div>
-      </DetailPanel>
+      <BindCodePanel
+        bindCode={bindCode}
+        bindExpired={bindExpired}
+        bindRemainingMs={bindRemainingMs}
+        bindCountdownProgress={bindCountdownProgress}
+        onCreateBindCode={onCreateBindCode}
+        onCopyBindCommand={onCopyBindCommand}
+      />
     );
   } else if (hasActiveFeishuRegistration) {
     detail = (

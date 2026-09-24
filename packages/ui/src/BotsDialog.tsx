@@ -52,6 +52,7 @@ import {
   BotReplyGranularityCard,
   BotSummaryCard,
 } from "@/BotsDialog/BotSummaryCard.js";
+import { AstrBotSettingsCard, ASTRBOT_PLUGIN_URL } from "@/BotsDialog/AstrBotSettingsCard.js";
 import { ProviderSettingsCard } from "@/BotsDialog/ProviderSettingsCard.js";
 import { WorkspaceAccessCard } from "@/BotsDialog/WorkspaceAccessCard.js";
 import { SettingsGroupCard } from "@/settings/SettingsPageParts.js";
@@ -1303,6 +1304,20 @@ export function BotsDialog({
                   onPatchBot={patchSelectedBot}
                 />
 
+                {selectedBot.provider === "astrbot" ? (
+                  <AstrBotSettingsCard
+                    bot={selectedBot}
+                    runtime={selectedRuntime}
+                    bindCode={bindCode}
+                    bindExpired={bindExpired}
+                    bindRemainingMs={bindRemainingMs}
+                    bindCountdownProgress={bindCountdownProgress}
+                    onCreateBindCode={() => void handleCreateBindCode()}
+                    onUnbind={() => void handleUnbind()}
+                    onCopyBindCommand={() => void copyBindCommand()}
+                    onOpenPlugin={() => platform.openExternal(ASTRBOT_PLUGIN_URL)}
+                  />
+                ) : (
                 <ProviderSettingsCard
                   bot={selectedBot}
                   runtime={selectedRuntime}
@@ -1331,6 +1346,7 @@ export function BotsDialog({
                   onUnbind={() => void handleUnbind()}
                   onCopyBindCommand={() => void copyBindCommand()}
                 />
+                )}
 
                 <SettingsGroupCard>
                   <BotReplyGranularityCard

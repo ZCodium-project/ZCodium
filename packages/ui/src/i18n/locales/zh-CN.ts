@@ -621,6 +621,19 @@ const zhCN: Record<string, string> = {
     "飞书/Lark 仅支持基于 Card JSON 2.0 的流式卡片，工具调用只显示折叠摘要。",
   "bots.add": "添加",
   "bots.channel.telegram": "Telegram",
+  "bots.astrbot.bridgeLabel": "AstrBot 桥接",
+  "bots.astrbot.bridgeDescription":
+    "通过本仓库的桥接插件接入 AstrBot，由 AstrBot 负责各聊天平台适配。",
+  "bots.astrbot.copyPath": "复制配置路径",
+  "bots.astrbot.openPlugin": "打开桥接插件",
+  "bots.astrbot.runtimeFilePath": "桥接运行时文件（含 url / port / token / 绑定码）：",
+  "bots.astrbot.step.install": "安装 astrbot-zcodium-plugin 插件。",
+  "bots.astrbot.step.configure": "把该文件里的 url、port、token 填入插件配置。",
+  "bots.astrbot.step.bind": "在聊天里发送 /bind <绑定码> 完成绑定。",
+  "bots.astrbot.boundDescription": "已绑定 AstrBot 桥接；消息经官方 Bots 流程处理。",
+  "bots.astrbot.unboundDescription":
+    "安装并配置 astrbot-zcodium-plugin，然后生成绑定码完成绑定。",
+  "bots.channel.astrbot": "AstrBot",
   "bots.channel.weixin": "微信",
   "bots.channel.feishu": "飞书",
   "bots.channel.lark": "Lark",
@@ -636,6 +649,8 @@ const zhCN: Record<string, string> = {
   "bots.newBot.fallbackName": "新机器人",
   "bots.newBot.comingSoon": "即将支持",
   "bots.newBot.providerDescription.telegram": "创建机器人，再消息绑定。",
+  "bots.newBot.providerDescription.astrbot":
+    "通过 AstrBot 桥接插件接入，由 AstrBot 负责各聊天平台适配。",
   "bots.newBot.providerDescription.weixin": "扫码登录，首条消息激活。",
   "bots.newBot.providerDescription.feishu": "扫码创建应用，再消息绑定。",
   "bots.newBot.providerDescription.lark": "扫码创建应用，再消息绑定。",
@@ -1620,6 +1635,9 @@ const zhCN: Record<string, string> = {
   "webRemoteControl.description": "通过聊天机器人控制 ZCode 工作区。",
   "webRemoteControl.botChannel.title": "使用 Bot Channel",
   "webRemoteControl.botChannel.description": "连接聊天 Bot，适合更长时间的移动端访问。",
+  "webRemoteControl.botChannel.astrbot.title": "AstrBot",
+  "webRemoteControl.botChannel.astrbot.description":
+    "通过 AstrBot 打开的聊天平台访问这个工作区。",
   "webRemoteControl.botChannel.weixin.title": "微信",
   "webRemoteControl.botChannel.weixin.description": "从微信会话打开这个工作区。",
   "webRemoteControl.botChannel.feishu.title": "飞书",

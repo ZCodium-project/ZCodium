@@ -48,6 +48,12 @@ export interface BotProviderAcknowledgeResult {
   handled?: boolean;
 }
 
+/**
+ * 官方任务流生命周期，供传输型 provider（如 astrbot）对齐 bridge 的 accepted→delivery→status 轮次收口。
+ * `started` 表示已进入任务流（此时不应提前收口）；其余为终态/等待交互。
+ */
+export type BotTaskLifecyclePhase = "started" | "awaiting_input" | "completed" | "failed";
+
 export interface BotProviderAdapter {
   test(bot: BotConfig): Promise<{ ok: boolean; message: string }>;
   resolveName?(bot: BotConfig): Promise<string | null>;
@@ -98,5 +104,10 @@ export interface BotProviderAdapter {
     attachment: BotInboundAttachment,
     actor?: BotActor,
   ): Promise<BotProviderDownloadedAttachment | null>;
+  /**
+   * 任务流生命周期通知（可选）。仅在 provider 需要把官方轮次映射成自有传输信号时实现，
+   * 不改变任何业务状态。
+   */
+  notifyTaskLifecycle?(bot: BotConfig, actor: BotActor, phase: BotTaskLifecyclePhase): void;
   parseCallback(payload: unknown): BotInboundMessage[];
 }

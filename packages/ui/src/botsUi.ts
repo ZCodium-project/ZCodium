@@ -12,6 +12,8 @@ type BotProviderEntry =
   | { id: BotProviderEntryId; label: string; implemented: false };
 
 export const BOT_PROVIDERS: BotProviderEntry[] = [
+  // AstrBot 走官方 provider 化后的桥接；官方已实现适配器的平台同步开放。
+  { id: "astrbot", label: "AstrBot", implemented: true },
   { id: "weixin", label: "Weixin", implemented: true },
   { id: "feishu", label: "Feishu", implemented: true },
   { id: "lark", label: "Lark", implemented: true },
