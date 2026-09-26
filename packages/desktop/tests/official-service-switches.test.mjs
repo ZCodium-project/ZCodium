@@ -158,3 +158,27 @@ test("agent spawn env and protocol entrypoint carry the official switches", asyn
     "协议入口必须在启动时投影官方开关（插件管理等请求不经过 createZCodeApp）",
   );
 });
+
+test("host filters the official marketplace from the public projection when the switch is off", () => {
+  const home = mkdtempSync(join(tmpdir(), "zcode-official-overview-"));
+  const filter = runProbe(home, "overview-filter");
+
+  // 关闭：官方市场与官方候选插件不可见，已安装列表保留；标记为 false（UI 展示引导）。
+  assert.deepEqual(filter.closedMarketplaces, ["probe-market"], "关闭时公开市场不得包含官方市场");
+  assert.deepEqual(
+    filter.closedAvailable,
+    ["probe@probe-market"],
+    "关闭时公开候选插件不得包含官方插件",
+  );
+  assert.deepEqual(
+    filter.closedInstalled,
+    ["github@zcode-plugins-official"],
+    "已安装列表必须保留，用户仍可管理本地插件",
+  );
+  assert.equal(filter.closedFlag, false, "关闭时必须注入 officialMarketplaceEnabled=false");
+
+  // 打开：官方市场与候选插件恢复可见；标记为 true。
+  assert.deepEqual(filter.openedMarketplaces, ["zcode-plugins-official", "probe-market"]);
+  assert.deepEqual(filter.openedAvailable, ["github@zcode-plugins-official", "probe@probe-market"]);
+  assert.equal(filter.openedFlag, true, "打开时 officialMarketplaceEnabled=true");
+});

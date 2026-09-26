@@ -44,6 +44,7 @@ export function PluginStoreListView({
   segment,
   onSegmentChange,
   onOpenManage,
+  officialMarketplaceEnabled = true,
 }: {
   items: StorePluginItem[];
   order?: PluginStoreOrder | null;
@@ -55,6 +56,8 @@ export function PluginStoreListView({
   segment: PluginStoreSegment;
   onSegmentChange: (segment: PluginStoreSegment) => void;
   onOpenManage: () => void;
+  /** Host 注入的官方市场开关；关闭时“公开”分段为空并引导用户去设置打开。 */
+  officialMarketplaceEnabled?: boolean;
 }) {
   const { intl, locale } = useZCodeIntl();
   const isOfficeMode = useIsOfficeMode();
@@ -76,9 +79,15 @@ export function PluginStoreListView({
       ),
     [items, locale],
   );
+  const officialMarketplaceDisabled = officialMarketplaceEnabled === false;
   const publicItems = useMemo(
-    () => items.filter((item) => isPublicStoreMarketplaceId(item.marketplace)),
-    [items],
+    // 关闭官方市场开关时“公开”分段整体为空：缓存的市场/插件不再展示，
+    // 已安装列表（installedItems）不受影响，仍是用户可管理的本地资产。
+    () =>
+      officialMarketplaceDisabled
+        ? []
+        : items.filter((item) => isPublicStoreMarketplaceId(item.marketplace)),
+    [items, officialMarketplaceDisabled],
   );
   const personalItems = useMemo(
     () => items.filter((item) => !isPublicStoreMarketplaceId(item.marketplace)),
@@ -273,6 +282,7 @@ export function PluginStoreListView({
           featuredItems={featuredItems}
           loading={loading}
           locale={locale}
+          officialMarketplaceDisabled={officialMarketplaceDisabled}
           resolveCategoryLabel={resolveCategoryLabel}
           onToggleGroup={toggleGroup}
         />
@@ -436,6 +446,7 @@ function PublicSegment({
   featuredItems,
   loading,
   locale,
+  officialMarketplaceDisabled,
   resolveCategoryLabel,
   onToggleGroup,
 }: {
@@ -445,6 +456,7 @@ function PublicSegment({
   featuredItems: StorePluginItem[];
   loading: boolean;
   locale: string;
+  officialMarketplaceDisabled: boolean;
   resolveCategoryLabel: (category: string) => string;
   onToggleGroup: (key: string) => void;
 }) {
@@ -457,9 +469,13 @@ function PublicSegment({
           ? intl.formatMessage({
               id: "settings.plugins.marketplace.catalogLoading",
             })
-          : intl.formatMessage({
-              id: "settings.plugins.marketplacePlugins.empty",
-            })}
+          : officialMarketplaceDisabled
+            ? intl.formatMessage({
+                id: "settings.plugins.store.officialMarketplaceDisabled",
+              })
+            : intl.formatMessage({
+                id: "settings.plugins.marketplacePlugins.empty",
+              })}
       </p>
     );
   }

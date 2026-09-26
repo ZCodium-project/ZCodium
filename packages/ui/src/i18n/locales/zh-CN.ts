@@ -3490,6 +3490,8 @@ const zhCN: Record<string, string> = {
   "settings.plugins.marketplaces.refreshCatalogHint": "刷新以加载 Z.AI 目录。",
   "settings.plugins.marketplacePlugins.title": "市场插件",
   "settings.plugins.marketplacePlugins.empty": "暂无市场插件",
+  "settings.plugins.store.officialMarketplaceDisabled":
+    "Z.AI 官方插件市场已关闭。可在“设置 → Z.AI 服务”中打开“Z.AI 插件市场与 CDN”。",
   "settings.plugins.marketplacePlugins.install": "安装",
   "settings.plugins.marketplacePlugins.installed": "已安装",
   "settings.plugins.marketplace.searchPlaceholder": "搜索插件、技能、MCP…",

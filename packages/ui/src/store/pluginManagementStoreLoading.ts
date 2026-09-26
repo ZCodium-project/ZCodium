@@ -144,6 +144,8 @@ async function runLoadInto(
       plugins: listResult.plugins,
       marketplaces: overviewResult.marketplaces,
       marketplaceAvailabilityKnown: true,
+      // Host 注入的展示态；旧 agent/旧 Host 缺省视为可用。
+      officialMarketplaceEnabled: overviewResult.officialMarketplaceEnabled !== false,
       availablePlugins: overviewResult.availablePlugins,
       installedPlugins: overviewResult.installedPlugins,
       restorableBuiltins: overviewResult.restorableBuiltins,

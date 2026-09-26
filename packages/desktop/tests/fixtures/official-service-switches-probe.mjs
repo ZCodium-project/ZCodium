@@ -271,6 +271,71 @@ if (mode === "baseline") {
   const defaults = resolveDefaultPluginMarketplaces();
   result.openedDefaults = defaults.length;
   result.openedDefaultSource = defaults[0]?.source ?? null;
+} else if (mode === "overview-filter") {
+  // Host 的公开市场投影：关闭时官方市场/候选插件从 overview 过滤且注入标记，已安装列表保留。
+  const { createPluginManagementService } = await import(
+    new URL("../../../services/src/plugins/pluginManagementService.ts", import.meta.url).href
+  );
+  const officialMarketplace = {
+    id: "zcode-plugins-official",
+    name: "zcode-plugins-official",
+    source: { source: "url", url: "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json" },
+    pluginCount: 28,
+  };
+  const personalMarketplace = {
+    id: "probe-market",
+    name: "Probe Market",
+    source: { source: "url", url: "https://example.com/market.json" },
+    pluginCount: 1,
+  };
+  const installed = [
+    {
+      id: "github@zcode-plugins-official",
+      name: "Github",
+      marketplace: "zcode-plugins-official",
+      version: "1.0.0",
+      installPath: "/tmp/probe",
+      installedAt: "2026-01-01T00:00:00.000Z",
+      scope: "user",
+    },
+  ];
+  const agent = {
+    getPluginsOverview: async () => ({
+      marketplaces: [officialMarketplace, personalMarketplace],
+      availablePlugins: [
+        {
+          id: "github@zcode-plugins-official",
+          name: "Github",
+          marketplace: "zcode-plugins-official",
+          installed: false,
+        },
+        {
+          id: "probe@probe-market",
+          name: "Probe",
+          marketplace: "probe-market",
+          installed: false,
+        },
+      ],
+      installedPlugins: installed,
+      restorableBuiltins: [],
+      diagnostics: [],
+      capability: { supported: true },
+    }),
+    listPlugins: async () => ({ plugins: [], diagnostics: [] }),
+  };
+  const pluginManagementService = createPluginManagementService({ zcodeAgentService: agent });
+
+  const closed = await pluginManagementService.getPluginsOverview({ workspacePath: home });
+  result.closedMarketplaces = closed.marketplaces.map((item) => item.id);
+  result.closedAvailable = closed.availablePlugins.map((item) => item.id);
+  result.closedInstalled = closed.installedPlugins.map((item) => item.id);
+  result.closedFlag = closed.officialMarketplaceEnabled;
+
+  await service.update({ officialServices: { ...ALL_OFF, marketplace: true } });
+  const opened = await pluginManagementService.getPluginsOverview({ workspacePath: home });
+  result.openedMarketplaces = opened.marketplaces.map((item) => item.id);
+  result.openedAvailable = opened.availablePlugins.map((item) => item.id);
+  result.openedFlag = opened.officialMarketplaceEnabled;
 } else if (mode === "marketplace-seed") {
   // agent 实际 seed 行为：关闭时不写官方市场；env 打开（Desktop 投影路径）后写入官方 CDN 来源。
   const { ensureDefaultPluginMarketplaces, loadKnownMarketplacesSync } = await import(

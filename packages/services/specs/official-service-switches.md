@@ -54,7 +54,9 @@ Host spawn agent（每次 spawn 都读当前设置）
 
 - **marketplace**：开关关闭时默认插件市场集合不包含官方 CDN 来源（`https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json`），插件市场只保留本地内置插件与个人来源；开关开启（且 agent env 投影为 1）时默认集合包含官方来源，插件市场可刷新并安装官方插件。
 - 官方市场的网络出口由 agent HTTP 适配器的 `assertOfficialPlatformAccessible` 按 agent 进程开关裁决：关闭时刷新/下载在请求前拒绝。
-- 关闭开关不主动删除已存在的市场记录或已安装插件；它们保留在本地，官方网络请求被拒绝。重新打开并重启应用后恢复可刷新。
+- **关闭时的展示投影**：Host 的插件 overview 在开关关闭时将官方市场与官方候选插件从公开投影中过滤，并注入 `officialMarketplaceEnabled: false`；插件市场“公开”分段因此为空，展示引导文案（去 设置 → Z.AI 服务 打开“Z.AI 插件市场与 CDN”）。已安装插件列表不过滤，用户仍可管理本地已安装的插件。
+- 本地市场记录与缓存不主动删除：重新打开开关后（Host 过滤即时解除）公开分段恢复可见；无需重启应用。
+- 该展示投影以 Host 的实时开关为准（`settingService.get` 投影）；agent 侧刷新/下载仍以 agent env 投影为准（重启应用后生效）。
 - **account**：浏览器授权登录入口只在用户主动打开的模型设置页（provider 详情）提供；OAuth 流程与 CLI 一致（浏览器授权 + Host 轮询 + deep link 回调），登录成功后由 Root 常驻 effect 收敛账号态。**首次启动的 WelcomeScreen 保持 API Key 表单与“跳过”，不出现 OAuth 入口、不自动触发登录、不强迫新用户登录**。account 开关关闭时点击浏览器登录会在服务层被拒绝，UI 给出开关引导提示。
 
 ## 不变量
@@ -79,4 +81,5 @@ Host spawn agent（每次 spawn 都读当前设置）
 5. 真实业务入口：关闭时 `clientConfigService` / `offPeakServerClient` / `FeedbackHttpClient` 在凭证与网络前拒绝且不发起请求，`resolveRemoteCdnBaseUrls` 返回空；打开后分别真的拉取客户端配置、发出取号请求、发出反馈请求并出现 CDN 下载源。
 6. Desktop → Agent 投影：`buildOfficialServiceEnvPatch` 输出完整 7 键（开=1/关=0）；开关关闭时覆盖 shell 残留的 `=1`；开关打开时 agent 的默认市场集合包含官方来源，关闭时不含。
 7. account 浏览器登录：模型设置页提供“通过浏览器登录”；全新用户首次启动只看到 API Key 表单且可跳过，不出现 OAuth 入口、不自动登录。
-8. 回归测试：`appSettingsSchema` 保留字段、`update` 落盘、`get` 读回、跨进程投影、开关放行与真实业务入口、官方市场 seed 与 env 投影；`pnpm typecheck`、`pnpm lint`、架构检查通过。
+8. marketplace 关闭态：Host overview 过滤官方市场与官方候选插件并注入 `officialMarketplaceEnabled=false`；“公开”分段为空并展示开关引导文案；已安装列表保留；打开/关闭切换即时生效（Host 实时开关），无需重启。
+9. 回归测试：`appSettingsSchema` 保留字段、`update` 落盘、`get` 读回、跨进程投影、开关放行与真实业务入口、官方市场 seed 与 env 投影、关闭态公开投影过滤；`pnpm typecheck`、`pnpm lint`、架构检查通过。

@@ -31,6 +31,11 @@ export interface PluginManagementState {
   marketplaces: ZCodePluginMarketplaceSummary[];
   /** 最近一次 overview 是否成功；false 表示来源存在性未知，不能推导孤立状态。 */
   marketplaceAvailabilityKnown: boolean;
+  /**
+   * 官方插件市场开关是否开启（Host 在 overview 上注入的展示态）。
+   * false 时 Host 已过滤官方市场与候选插件；“公开”分段展示引导用户去设置打开。
+   */
+  officialMarketplaceEnabled: boolean;
   availablePlugins: ZCodeAvailablePluginSummary[];
   installedPlugins: ZCodeInstalledPluginSummary[];
   restorableBuiltins: ZCodeAvailablePluginSummary[];
@@ -124,6 +129,7 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
   plugins: [],
   marketplaces: [],
   marketplaceAvailabilityKnown: false,
+  officialMarketplaceEnabled: true,
   availablePlugins: [],
   installedPlugins: [],
   restorableBuiltins: [],

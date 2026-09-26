@@ -74,6 +74,9 @@ export function PluginStorePage({
   const marketplaceAvailabilityKnown = usePluginManagementStore(
     (state) => state.marketplaceAvailabilityKnown,
   );
+  const officialMarketplaceEnabled = usePluginManagementStore(
+    (state) => state.officialMarketplaceEnabled,
+  );
   const availablePlugins = usePluginManagementStore((state) => state.availablePlugins);
   const installedPlugins = usePluginManagementStore((state) => state.installedPlugins);
   const restorableBuiltins = usePluginManagementStore((state) => state.restorableBuiltins);
@@ -549,6 +552,7 @@ export function PluginStorePage({
           segment={segment}
           onSegmentChange={setSegment}
           onOpenManage={onManageInstalled}
+          officialMarketplaceEnabled={officialMarketplaceEnabled}
         />
       )}
 

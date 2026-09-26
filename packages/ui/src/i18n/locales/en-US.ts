@@ -3725,6 +3725,8 @@ const enUS: Record<string, string> = {
   "settings.plugins.marketplaces.refreshCatalogHint": "Refresh to load the Z.AI catalog.",
   "settings.plugins.marketplacePlugins.title": "Marketplace plugins",
   "settings.plugins.marketplacePlugins.empty": "No marketplace plugins found",
+  "settings.plugins.store.officialMarketplaceDisabled":
+    "The Z.AI official plugin marketplace is off. Enable \"Z.AI marketplace and CDN\" under Settings → Z.AI services.",
   "settings.plugins.marketplacePlugins.install": "Install",
   "settings.plugins.marketplacePlugins.installed": "Installed",
   "settings.plugins.marketplace.searchPlaceholder": "Search Plugins, Skills, MCPs...",
