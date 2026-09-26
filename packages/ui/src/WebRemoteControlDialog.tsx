@@ -17,12 +17,14 @@ import { getBotProviderRegionTagLabelId } from "@/botsUi.js";
 
 type RemoteControlBotProvider = Extract<
   BotProvider,
-  "weixin" | "feishu" | "lark" | "telegram"
+  "weixin" | "feishu" | "lark" | "telegram" | "astrbot"
 >;
 
 const REMOTE_CONTROL_BOT_ENTRIES: Array<{
   provider: RemoteControlBotProvider;
 }> = [
+  // 当前仅 AstrBot 可用；其余渠道入口保留，待与桥接统一后再开放。
+  { provider: "astrbot" },
   { provider: "weixin" },
   { provider: "feishu" },
   { provider: "lark" },

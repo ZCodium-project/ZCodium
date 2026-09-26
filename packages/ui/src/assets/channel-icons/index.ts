@@ -1,3 +1,4 @@
+export { default as AstrBotChannelIcon } from "./icon-astrbot.svg";
 export { default as DiscordChannelIcon } from "./icon-discord@2x.png";
 export { default as DingDingChannelIcon } from "./icon-dingding@2x.png";
 export { default as FeishuChannelIcon } from "./icon-feishu@2x.png";

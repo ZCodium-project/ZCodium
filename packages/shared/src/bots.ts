@@ -29,6 +29,7 @@ export const botProviders = [
   "weixin",
   "discord",
   "wecom",
+  "astrbot",
 ] as const;
 
 export type BotProvider = (typeof botProviders)[number];

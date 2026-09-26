@@ -122,6 +122,15 @@ export type {
   CuaHelperInstallerOptions,
 } from "./cua-permission-broker/index.js";
 export { createBotsService } from "./bots/botsService.js";
+export { createAstrBotBotProvider } from "./bots/providers/astrbotProvider.js";
+export type {
+  AstrBotProvider,
+  AstrBotProviderOptions,
+} from "./bots/providers/astrbotProvider.js";
+export { IAstrBotBridgeService } from "./bots/astrbotBridgePort.js";
+export type { AstrBotBridgeTransport } from "./bots/astrbotBridgePort.js";
+export { BotsDeliveryLog, BOTS_DELIVERY_WINDOW } from "./bots/botsDeliveryLog.js";
+export type { BotsDeliveryRecord, BotsDeliveryReplay } from "./bots/botsDeliveryLog.js";
 export { createFileWatcherService } from "./fileWatcher/fileWatcherService.js";
 export { createOAuthService } from "./oauth/oauthService.js";
 export { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js";
@@ -267,7 +276,7 @@ export {
   OffPeakModelUnavailableError,
   OffPeakPermanentDispatchError,
 } from "./session/offPeakRuntimeModel.js";
-export { createServiceLogger } from "./logger/serviceLogger.js";
+export { createServiceLogger, type ServiceLogger } from "./logger/serviceLogger.js";
 export {
   buildOfficialMcpAuthHeaders,
   createOfficialMcpAuthHeadersResolver,
@@ -308,6 +317,7 @@ import {
 import { createLocalConversationShareArtifactSource } from "./conversation-share/conversationShareArtifactSource.js";
 import { ConversationShareHttpClient } from "./conversation-share/conversationShareHttpClient.js";
 import { IBotsService } from "./bots/bots.js";
+import { IAstrBotBridgeService } from "./bots/astrbotBridgePort.js";
 import { IFileWatcherService } from "./fileWatcher/fileWatcher.js";
 import { IOAuthService } from "./oauth/oauth.js";
 import { IUsageStatsService } from "./usage-stats/usageStats.js";
@@ -348,6 +358,7 @@ import { createZCodeSessionService } from "./zcode-session/zcodeSessionService.j
 import { createZCodeTaskIndexSyncer } from "./zcode-agent/zcodeTaskIndexSyncer.js";
 import { TaskIndexRepo } from "./session/taskIndexRepo.js";
 import { createBotsService } from "./bots/botsService.js";
+import { createAstrBotBotProvider } from "./bots/providers/astrbotProvider.js";
 import { createBotRemoteWorkspaceService } from "./bots/botRemoteWorkspaceBridge.js";
 import type { SessionMessageSendRequested } from "#src/session/sessionMailbox.js";
 import { createFileWatcherService } from "./fileWatcher/fileWatcherService.js";
@@ -2415,6 +2426,8 @@ export function createLocalServices(options: {
   // 注册链上的懒工厂（如 OffPeak）会各自创建 tasks-index sqlite repo；先收集到本数组，
   // services 集合建好后在 return 前统一登记进 sharedSqliteRepos 侧表
   const sqliteReposToClose: Array<{ close(): void }> = [];
+  // AstrBot 桥接 provider：官方 BotsService 的一个传输 provider，host 负责 attach loopback WS。
+  const astrBotProvider = createAstrBotBotProvider();
   const services = new ServiceCollection()
     .register(IFileService, fileService)
     .register(IMediaPreviewService, mediaPreviewService)
@@ -2432,6 +2445,7 @@ export function createLocalServices(options: {
     .register(ICuaPermissionService, cuaPermissionService)
     .register(ICuaPipSessionService, cuaPipSessionService)
     .register(IConversationShareService, conversationShareService)
+    .register(IAstrBotBridgeService, astrBotProvider)
     .register(
       IBotsService,
       createBotsService({
@@ -2441,6 +2455,7 @@ export function createLocalServices(options: {
         settingService,
         modelSelectionService: providerRuntime.modelSelection,
         remoteWorkspaceService: botRemoteWorkspaceService,
+        astrBotProvider,
         // 远端与本地 Bot 都读取所属 Environment 的 Model Selection View。
         // 远端启动期不再轮询旧 Preset，避免重新制造一套模型候选事实。
         runStartupBackgroundTasks: !isDesktopAttachedRemote,

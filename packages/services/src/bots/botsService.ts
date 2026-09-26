@@ -280,6 +280,8 @@ interface BotsServiceDeps {
   settingService?: ISettingService;
   modelSelectionService: Pick<IModelSelectionService, "getView">;
   remoteWorkspaceService?: BotRemoteWorkspaceService;
+  /** 由组合根注入的 AstrBot 桥接 provider；未注入时 astrbot 出站为空。 */
+  astrBotProvider?: BotProviderAdapter;
   // 修复原因：desktop-attached 远端启动阶段不应抢跑 bot 轮询、runtime lock 和模型候选缓存；
   // 这些后台任务属于本地桌面 host，不属于 SSH/Docker 远端首屏连接路径。
   runStartupBackgroundTasks?: boolean;
@@ -745,6 +747,8 @@ export function createBotsService(
     }),
     discord: null,
     wecom: null,
+    // AstrBot 桥接 provider 由组合根注入；入站经 handleProviderCallback("astrbot", frame)。
+    astrbot: deps.astrBotProvider ?? null,
   };
   let service: IBotsService & {
     disposeAll(): void;
@@ -4036,11 +4040,13 @@ export function createBotsService(
             await sendOutbound(bot, permissionReply);
           }
         }
+        providers[bot.provider]?.notifyTaskLifecycle?.(bot, actor, "awaiting_input");
         return;
       }
       if (event.type === "elicitation_request") {
         await sealStreamingCardReply();
         await handleElicitationRequest(bot, user, actor, context, event);
+        providers[bot.provider]?.notifyTaskLifecycle?.(bot, actor, "awaiting_input");
         return;
       }
       if (event.type === "elicitation_response") {
@@ -4054,6 +4060,11 @@ export function createBotsService(
         runningTasks.delete(event.taskId);
         liveStatusProgressByTaskId.delete(event.taskId);
         stopTyping(event.taskId);
+        providers[bot.provider]?.notifyTaskLifecycle?.(
+          bot,
+          actor,
+          event.type === "task_error" ? "failed" : "completed",
+        );
         if (context.pendingElicitation?.taskId === event.taskId) {
           clearPendingElicitationSelection(context.pendingElicitation);
           await writeContext({ ...context, pendingElicitation: undefined });
@@ -4225,6 +4236,8 @@ export function createBotsService(
       },
     });
     startTyping(bot, actor, context.activeTaskId);
+    // 告诉传输型 provider 已进入任务流：此时不得提前收口 bridge 轮次。
+    providers[bot.provider]?.notifyTaskLifecycle?.(bot, actor, "started");
   }
 
   async function createSelectionReply(
