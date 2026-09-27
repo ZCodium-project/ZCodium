@@ -8,6 +8,41 @@
 
 @plugin "@tailwindcss/typography";
 
+/* === Persian (fa-IR) / RTL === */
+
+/* Vazirmatn（SIL OFL 1.1，许可证见 src/fonts/OFL.txt）仅作为 RTL 界面的阿拉伯文字形
+ * 前置回退：西文字形仍来自原有栈，非 RTL 语言完全不受影响。 */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./fonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./fonts/Vazirmatn-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./fonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* RTL 语言（当前 fa-IR）：html[dir="rtl"] 由 IntlProvider / ErrorBoundary 按界面语言写入。
+ * 覆盖 --font-sans 后，Tailwind 的 font-sans 与 preflight 的 html 字体都在 html 元素上解析，
+ * 因此只需这一条规则；LTR 语言读取默认栈，零影响。 */
+[dir="rtl"] {
+  --font-sans:
+    "Vazirmatn", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Noto Color Emoji";
+}
+
 /*  KaTeX 会同时输出 MathML 辅助层和 HTML 视觉层；缺少 katex CSS 时两层都会显示，
  * 行内公式和块级公式就会看起来“渲染一遍又普通文本一遍”。 */
 

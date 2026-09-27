@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { Component, useEffect } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import type { Locale } from "@zcode/shared";
 import { DEFAULT_LOCALE } from "@zcode/shared";
@@ -125,6 +125,14 @@ function ErrorFallback({
   isWindowsDesktop?: boolean;
 }) {
   const errorSummary = error.message.trim() || formatBoundaryMessage("appError.unknown");
+
+  // 错误边界可能脱离 IntlProvider 渲染，这里按 fallback 语言同步 html lang/dir（fa-IR 为 RTL）。
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const locale = resolveBoundaryLocale();
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === "fa-IR" ? "rtl" : "ltr";
+  }, []);
 
   return (
     <DesktopWindowFrame

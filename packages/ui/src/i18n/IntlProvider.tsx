@@ -272,6 +272,13 @@ export function ZCodeIntlProvider({
     return localePreference === "system" ? systemLocale : localePreference;
   }, [localePreference, systemLocale]);
 
+  // html 的 lang/dir 必须跟随界面语言；fa-IR 是 RTL，其余语言保持 LTR。
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === "fa-IR" ? "rtl" : "ltr";
+  }, [locale]);
+
   const setLocalePreference = useCallback(
     (newPreference: LocalePreference) => {
       const operationSeq = localePreferenceOperationSeqRef.current + 1;
