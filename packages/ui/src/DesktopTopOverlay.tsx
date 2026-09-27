@@ -121,6 +121,8 @@ export function DesktopTopOverlay({
           usesCustomCaptionArea && "ps-3 ms-px",
           isMacDesktop &&
             (isMacFullscreen ? (!isSidebarVisible ? "ps-5 pt-1" : "ps-3 pt-1") : "pt-1"),
+          // Web 端没有任何平台内边距兜底，RTL 时工具组会贴死窗口右缘；留 8px。
+          !isDesktop && "rtl:ps-2",
         )}
       >
         <div
