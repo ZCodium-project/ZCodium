@@ -1027,9 +1027,12 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
                 ref={primaryTaskTabsListRef}
                 className="relative h-7 w-fit overflow-hidden rounded-full bg-surface p-0.5 group-data-horizontal/tabs:h-7"
               >
+                {/* 指示条用 translateX(offsetLeft) 物理坐标定位（见 updateIndicator），
+                    必须锚定物理 left-0；换 logical start-0 在 RTL 下会指到错误的 tab。
+                    不要把这个 left-0 迁移成逻辑属性。 */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0.5 start-0 rounded-full bg-background transition-[opacity,transform,width] duration-200 ease-out"
+                  className="pointer-events-none absolute inset-y-0.5 left-0 rounded-full bg-background transition-[opacity,transform,width] duration-200 ease-out"
                   style={primaryTaskIndicatorStyle}
                 />
                 <TabsTrigger
