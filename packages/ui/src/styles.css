@@ -57,6 +57,14 @@
   text-align: left;
 }
 
+/*  方向性 lucide 图标（arrow/chevron left|right）承载「后退/前进」语义，RTL 下镜像。
+ *  用 scale 独立属性而不是 transform，与 Tailwind v4 的 -scale-x-100 同属一个属性，
+ *  级联只会取一个值，不会和已有的 rtl:-scale-x-100 叠加成双重翻转。 */
+[dir="rtl"]
+  :is(.lucide-arrow-left, .lucide-arrow-right, .lucide-chevron-left, .lucide-chevron-right) {
+  scale: -1 1;
+}
+
 /*  KaTeX 会同时输出 MathML 辅助层和 HTML 视觉层；缺少 katex CSS 时两层都会显示，
  * 行内公式和块级公式就会看起来“渲染一遍又普通文本一遍”。 */
 
