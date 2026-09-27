@@ -43,6 +43,20 @@
     "Noto Color Emoji";
 }
 
+/*  代码永远是 LTR：代码块、行内代码、diff 视图与终端不随界面语言镜像，
+ *  字体也固定为 --font-mono，不落进 RTL 的 Vazirmatn 回退。
+ *  inline 的 code/kbd 需要 unicode-bidi: isolate，否则 direction 不生效。 */
+[dir="rtl"] :is(pre, code, kbd, samp, .font-mono) {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  font-family: var(--font-mono);
+}
+[dir="rtl"] :is(diffs-container, .xterm) {
+  direction: ltr;
+  text-align: left;
+}
+
 /*  KaTeX 会同时输出 MathML 辅助层和 HTML 视觉层；缺少 katex CSS 时两层都会显示，
  * 行内公式和块级公式就会看起来“渲染一遍又普通文本一遍”。 */
 
