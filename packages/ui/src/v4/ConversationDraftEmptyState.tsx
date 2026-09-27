@@ -177,7 +177,7 @@ export function ConversationDraftEmptyState({ className }: { className?: string 
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute start-1/2 top-1/2 aspect-[5/4] w-[min(72vw,25rem)] -mt-10",
-          "-translate-x-1/2 -translate-y-1/2 text-foreground-subtlest",
+          "-translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 text-foreground-subtlest",
         )}
       >
         <ZCodeEmptyStateLogo className="h-full w-full" />

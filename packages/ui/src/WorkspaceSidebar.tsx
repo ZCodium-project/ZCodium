@@ -1253,7 +1253,7 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
         <div
           className={cn(
             "absolute inset-0 flex min-h-0 flex-col transition-transform duration-200 ease-out",
-            isFileTreeOpen && "-translate-x-full pointer-events-none",
+            isFileTreeOpen && "-translate-x-full rtl:translate-x-full pointer-events-none",
           )}
           aria-hidden={isFileTreeOpen}
         >
@@ -1658,7 +1658,9 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
         <div
           className={cn(
             "absolute inset-0 transition-transform duration-200 ease-out",
-            isFileTreeOpen ? "translate-x-0" : "translate-x-full pointer-events-none",
+            isFileTreeOpen
+              ? "translate-x-0"
+              : "translate-x-full rtl:-translate-x-full pointer-events-none",
           )}
           aria-hidden={!isFileTreeOpen}
         >

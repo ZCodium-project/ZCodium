@@ -321,7 +321,7 @@ export function ToastMessageView({
         isTopRight
           ? visible
             ? "translate-x-0 opacity-100"
-            : "translate-x-[calc(100%+1rem)] opacity-0"
+            : "translate-x-[calc(100%+1rem)] opacity-0 rtl:translate-x-[calc(-100%-1rem)]"
           : isBottom
             ? visible
               ? "translate-y-0 scale-100 opacity-100"
