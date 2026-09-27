@@ -84,13 +84,13 @@ export function ThemeHeroVisual(props: {
     <div className={cn("relative overflow-hidden", palette.panel, props.className)}>
       <div
         className={cn(
-          "pointer-events-none absolute left-[-12%] top-[18%] h-[42rem] w-[42rem] rounded-full blur-3xl",
+          "pointer-events-none absolute start-[-12%] top-[18%] h-[42rem] w-[42rem] rounded-full blur-3xl",
           palette.glowPrimary,
         )}
       />
       <div
         className={cn(
-          "pointer-events-none absolute right-[-18%] bottom-[-14%] h-[36rem] w-[36rem] rounded-full blur-3xl",
+          "pointer-events-none absolute end-[-18%] bottom-[-14%] h-[36rem] w-[36rem] rounded-full blur-3xl",
           palette.glowSecondary,
         )}
       />

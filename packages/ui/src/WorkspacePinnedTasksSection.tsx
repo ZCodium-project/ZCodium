@@ -743,7 +743,7 @@ export function WorkspacePinnedTasksSection({
       </ContextMenu>
       {syncingRemoteWorkspaces ? <TaskListRemoteSyncHint /> : null}
       {canToggleExpanded ? (
-        <div className="cursor-pointer pl-8.5">
+        <div className="cursor-pointer ps-8.5">
           <span
             className="text-ui-base text-foreground-subtlest hover:text-foreground-subtle"
             onClick={() => {

@@ -263,7 +263,7 @@ export function ChangesGroupToolCallBlock(context: ToolCallBlockRenderContext) {
   );
   const renderContent = useCallback(
     () => (
-      <div className="ml-2 space-y-2 border-border border-l pl-3.5">
+      <div className="ms-2 space-y-2 border-border border-s ps-3.5">
         {childToolCalls.map((child) => (
           <ToolCallBlock
             key={child.toolCall.toolId}

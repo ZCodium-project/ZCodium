@@ -56,7 +56,7 @@ export function ArtifactSheetGlyph({ badge }: { badge?: string }) {
       </div>
       {badge === undefined ? null : (
         <span
-          className="absolute bottom-2 right-2 rounded-[4px] bg-surface-hover px-1.5 py-0.5 font-mono text-ui-xs text-foreground-subtle"
+          className="absolute bottom-2 end-2 rounded-[4px] bg-surface-hover px-1.5 py-0.5 font-mono text-ui-xs text-foreground-subtle"
           data-testid="workflow-artifact-sheet-badge"
         >
           {badge}
@@ -116,7 +116,7 @@ export function WorkflowArtifactTile({
             : undefined
         }
         className={cn(
-          "wf-tile-hit wf-arrive flex min-w-0 items-center gap-1.5 rounded-lg bg-transparent p-0 px-0.5 text-left text-ui-sm outline-none",
+          "wf-tile-hit wf-arrive flex min-w-0 items-center gap-1.5 rounded-lg bg-transparent p-0 px-0.5 text-start text-ui-sm outline-none",
           openable ? "wf-tile-open cursor-pointer" : "cursor-default",
         )}
         data-artifact-id={artifact.id}

@@ -276,7 +276,7 @@ export function TaskFindDialog({
     </ControlHintTooltip>
   );
   const findContent = (
-    <div className="flex h-9 items-center gap-1.5 py-0 pr-2 pl-2">
+    <div className="flex h-9 items-center gap-1.5 py-0 pe-2 ps-2">
       <SearchIcon className="size-3.5 shrink-0 text-foreground" />
       <input
         ref={inputRef}
@@ -291,7 +291,7 @@ export function TaskFindDialog({
           ? `${activeFindState.currentIndex + 1}/${activeFindState.total}`
           : "0/0"}
       </div>
-      <div className="flex shrink-0 items-center gap-0.5 border-l border-border pl-1.5">
+      <div className="flex shrink-0 items-center gap-0.5 border-s border-border ps-1.5">
         {renderFindIconButton({
           label: previousLabel,
           disabled: activeFindState.total === 0,
@@ -312,7 +312,7 @@ export function TaskFindDialog({
             children: <ScopeIcon className="size-3.5" />,
           })}
       </div>
-      <div className="ml-0.5 flex shrink-0 border-l border-border pl-1.5">
+      <div className="ms-0.5 flex shrink-0 border-s border-border ps-1.5">
         {renderFindIconButton({
           label: closeLabel,
           onClick: () => onOpenChange(false),
@@ -324,17 +324,17 @@ export function TaskFindDialog({
   const contentPositionClassName = cn(
     // 原查找框宽高偏大，在小窗口和密集操作里会遮挡更多正文区域。
     // 这里收紧到更小的宽度与内边距，减少侵入性并保持操作可读性。
-    "left-auto !w-[min(360px,calc(100vw-0.75rem))] !max-w-[calc(100vw-0.75rem)] translate-x-0 translate-y-0",
+    "start-auto !w-[min(360px,calc(100vw-0.75rem))] !max-w-[calc(100vw-0.75rem)] translate-x-0 translate-y-0",
     // Linux 的窗口控制和标题栏都是 renderer 自绘；查找浮层如果继续贴在 top-3，
     // 会覆盖标题栏点击区，导致打开浮层后无法通过标题栏切换/拖动窗口。Linux desktop
     // 预留 48px 标题栏和 120px 右侧窗口按钮安全区，其余平台用各自分支的偏移。
     isWindowsDesktop
-      ? "top-12 right-36"
+      ? "top-12 end-36"
       : isMacDesktop
-        ? "top-14 right-3"
+        ? "top-14 end-3"
         : isLinuxDesktop
-          ? "top-12 right-[120px]"
-          : "top-3 right-3",
+          ? "top-12 end-[120px]"
+          : "top-3 end-3",
   );
 
   if (placement === "chat") {
@@ -348,7 +348,7 @@ export function TaskFindDialog({
         aria-modal="false"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="absolute top-3 left-1/2 z-30 w-[min(360px,calc(100%-1rem))] -translate-x-1/2 overflow-hidden rounded-2xl border border-popover-border bg-popover p-0 text-ui-base/relaxed text-foreground shadow-md outline-none [app-region:no-drag] max-md:top-2"
+        className="absolute top-3 start-1/2 z-30 w-[min(360px,calc(100%-1rem))] -translate-x-1/2 rtl:translate-x-1/2 overflow-hidden rounded-2xl border border-popover-border bg-popover p-0 text-ui-base/relaxed text-foreground shadow-md outline-none [app-region:no-drag] max-md:top-2"
       >
         <div className="sr-only">
           <h2 id={titleId}>{intl.formatMessage({ id: "quickPick.find.title" })}</h2>

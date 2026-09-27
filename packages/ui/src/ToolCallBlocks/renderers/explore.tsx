@@ -421,7 +421,7 @@ export function ExploreToolCallBlock(context: ToolCallBlockRenderContext) {
   const renderContent = useCallback(
     () =>
       childToolCalls.length > 0 ? (
-        <div className="ml-2 space-y-2 border-border border-l pl-3.5 border-border">
+        <div className="ms-2 space-y-2 border-border border-s ps-3.5 border-border">
           {childToolCalls.map((childToolCallNode) => (
             <ToolCallBlock
               key={childToolCallNode.toolCall.toolId}

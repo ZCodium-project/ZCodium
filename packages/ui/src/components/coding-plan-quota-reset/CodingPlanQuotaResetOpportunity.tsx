@@ -81,7 +81,7 @@ export function CodingPlanQuotaResetOpportunity({
         <span className="truncate">{label}</span>
       </span>
       {placement === "inline" && !hasMultipleOpportunities ? (
-        <span className="ml-2 shrink-0 font-normal text-interaction-confirmation-foreground/80 tabular-nums">
+        <span className="ms-2 shrink-0 font-normal text-interaction-confirmation-foreground/80 tabular-nums">
           {countdownLabel}
         </span>
       ) : null}

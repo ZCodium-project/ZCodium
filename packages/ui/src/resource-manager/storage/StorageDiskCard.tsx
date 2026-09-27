@@ -111,7 +111,7 @@ export function StorageDiskCard({
     </>
   );
   const className = cn(
-    "w-full rounded-xl border border-card-border bg-card p-4 text-left",
+    "w-full rounded-xl border border-card-border bg-card p-4 text-start",
     selectable && "cursor-pointer transition-colors hover:bg-surface-hover",
     selected && selectable && "bg-card-selected border-brand",
   );

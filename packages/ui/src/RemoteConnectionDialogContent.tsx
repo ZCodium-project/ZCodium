@@ -83,7 +83,7 @@ export function RemoteConnectionKindStep({
                     : TID_REMOTE_KIND_DOCKER
               }
               className={cn(
-                "flex min-h-32 flex-col items-start gap-4 rounded-2xl border p-4 text-left transition-colors",
+                "flex min-h-32 flex-col items-start gap-4 rounded-2xl border p-4 text-start transition-colors",
                 selected
                   ? "border-border-hover bg-selected"
                   : "border-border bg-card hover:border-border-hover hover:bg-surface",
@@ -228,7 +228,7 @@ export function RemoteConnectionSettingsStep({
         data-testid="remote-connection-settings-scroll"
         // SSH 配置项增多时，表单内容以前没有自己的滚动边界，会继续绘制到下方按钮区域。
         // 这里把中间内容区限定为可滚动区域，让 footer 始终占据独立空间，不遮挡最后几项配置。
-        className="flex-1 min-h-0 space-y-4 overflow-y-auto pr-1"
+        className="flex-1 min-h-0 space-y-4 overflow-y-auto pe-1"
       >
         {currentRuntimeOptionsError ? (
           <div className="flex items-start gap-3 rounded-2xl border border-warning bg-warning px-4 py-3 text-ui-base text-warning-foreground">
@@ -384,7 +384,7 @@ export function RemoteConnectionDirectoryStep({
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-6 h-full">
         <div className="flex min-h-[22rem] flex-1 items-center justify-center rounded-2xl border border-border bg-card text-ui-base text-foreground-subtle">
-          <LoaderIcon className="mr-2 size-4 animate-spin" />
+          <LoaderIcon className="me-2 size-4 animate-spin" />
           {intl.formatMessage({ id: "common.loading" })}
         </div>
         <div className="flex justify-end gap-3">

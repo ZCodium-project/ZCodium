@@ -168,7 +168,7 @@ function ScreenshotThumb({
       <button
         type="button"
         onClick={onPreview}
-        className="block aspect-square w-full text-left outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="block aspect-square w-full text-start outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/50"
         title={item.filename}
       >
         <img
@@ -180,7 +180,7 @@ function ScreenshotThumb({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full border border-border bg-popover text-foreground-subtle opacity-90 shadow-sm transition-colors hover:bg-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/50 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+        className="absolute end-1 top-1 flex size-5 items-center justify-center rounded-full border border-border bg-popover text-foreground-subtle opacity-90 shadow-sm transition-colors hover:bg-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/50 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
         aria-label={removeLabel}
         title={removeLabel}
       >

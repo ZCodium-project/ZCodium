@@ -211,7 +211,7 @@ export function MigrationCandidatesCard({
                   type="button"
                   disabled={isImporting}
                   className={cn(
-                    "w-full rounded-lg border px-3 py-3 text-left transition-colors",
+                    "w-full rounded-lg border px-3 py-3 text-start transition-colors",
                     isSelected
                       ? "border-primary bg-accent"
                       : "border-border bg-background hover:bg-surface",
@@ -255,7 +255,7 @@ export function MigrationCandidatesCard({
                             {candidate.sourcePath}
                           </div>
                         </div>
-                        <div className="text-right text-ui-xs text-foreground-subtle">
+                        <div className="text-end text-ui-xs text-foreground-subtle">
                           {intl.formatMessage(
                             { id: "settings.migration.updatedAt" },
                             { time: dateTimeFormatter.format(candidate.updatedAt) },

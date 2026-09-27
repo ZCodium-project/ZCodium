@@ -63,7 +63,7 @@ export function WorkflowTimelineArcs({
   return (
     <svg
       aria-hidden
-      className="absolute left-0 top-0 overflow-visible"
+      className="absolute start-0 top-0 overflow-visible"
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       width={width}

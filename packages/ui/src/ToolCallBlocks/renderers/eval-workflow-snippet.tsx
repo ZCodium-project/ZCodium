@@ -251,7 +251,7 @@ function SnippetTextPanel({
           wrapLongLines
           renderMermaid={false}
         >
-          <CodeBlockHeader className="pl-3 pr-2 pt-2" language={language} />
+          <CodeBlockHeader className="ps-3 pe-2 pt-2" language={language} />
         </CodeBlock>
       </div>
       {truncated ? (

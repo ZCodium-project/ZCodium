@@ -22,7 +22,7 @@ import type { MessageFileLinkTarget } from "@/components/ai-elements/message.js"
 import type { ConversationCuaGroupEvent } from "@/v4/conversationCuaGroups.js";
 
 const NESTED_TOOLCALL_CONTAINER_CLASS =
-  "ml-2 space-y-2 border-border border-l pl-3.5 border-border";
+  "ms-2 space-y-2 border-border border-s ps-3.5 border-border";
 const MAX_TOOL_ENTRANCE_ANIMATION_KEYS = 800;
 const TOOL_ENTRANCE_ANIMATION_CLEANUP_MS = 1000;
 const toolEntranceAnimationKeys = new Map<string, number>();

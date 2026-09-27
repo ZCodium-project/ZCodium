@@ -60,7 +60,7 @@ export function OffPeakHistoryTab({
   return (
     <div className="overflow-x-auto rounded-[8px]">
       {/* History 表格字号可缩放，使用相对行高避免大字号内容被固定 18px 行盒裁切。*/}
-      <table className="w-full text-left text-ui-base font-normal leading-snug tracking-[-0.08px]">
+      <table className="w-full text-start text-ui-base font-normal leading-snug tracking-[-0.08px]">
         <thead className="bg-surface text-foreground-subtle">
           <tr className="h-[30px] border-b border-border">
             <th className="px-4 font-normal">

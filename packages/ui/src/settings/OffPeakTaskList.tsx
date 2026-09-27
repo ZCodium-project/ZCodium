@@ -203,13 +203,13 @@ export function OffPeakTaskList({
             }}
             className={cn(
               // inset surface shadow 不是 Card 描边语义，明暗主题下会与首页卡片产生色差。
-              "group relative flex h-full min-h-0 cursor-pointer gap-3 overflow-hidden rounded-[10px] border border-card-border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
+              "group relative flex h-full min-h-0 cursor-pointer gap-3 overflow-hidden rounded-[10px] border border-card-border p-3 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
               // 完成态保持整体置灰，但仍需用 hover 背景反馈卡片可点击、更多菜单可操作。
               task.status === "completed" ? "opacity-60 hover:bg-hover" : "hover:bg-hover",
             )}
           >
             <div className="flex h-full min-w-0 flex-1 flex-col gap-3">
-              <span className="block truncate pr-14 text-ui-base font-medium leading-5 text-foreground">
+              <span className="block truncate pe-14 text-ui-base font-medium leading-5 text-foreground">
                 {task.title || task.prompt}
               </span>
               {/* 任务卡正文与状态字号可缩放，固定 18px 行高会在大字号下挤压或裁切文字。*/}
@@ -225,7 +225,7 @@ export function OffPeakTaskList({
                     footer.className,
                     (task.status === "queued" || task.status === "paused") &&
                       // Zai Dark 的 brand 是白色，闲时排队 Tag 必须使用设计稿专用紫色语义。
-                      "rounded-[8px] bg-idle-task-surface py-0.5 pl-1 pr-2 text-idle-task",
+                      "rounded-[8px] bg-idle-task-surface py-0.5 ps-1 pe-2 text-idle-task",
                   )}
                 >
                   <span className="flex size-5 shrink-0 items-center justify-center">
@@ -240,7 +240,7 @@ export function OffPeakTaskList({
                   </span>
                 </div>
                 {failedQueueFooter && FailedQueueIcon ? (
-                  <div className="flex w-fit shrink-0 items-center gap-0.5 rounded-[6px] bg-idle-task-surface py-0.5 pl-1 pr-2 text-idle-task opacity-40">
+                  <div className="flex w-fit shrink-0 items-center gap-0.5 rounded-[6px] bg-idle-task-surface py-0.5 ps-1 pe-2 text-idle-task opacity-40">
                     <span className="flex size-5 shrink-0 items-center justify-center">
                       <FailedQueueIcon
                         className="size-4 shrink-0"
@@ -260,7 +260,7 @@ export function OffPeakTaskList({
                   // 会话内创建的任务绑定并运行在创建它的会话里，脚注露出会话标题。
                   <span
                     data-testid={TID_OFFPEAK_CARD_SESSION}
-                    className="ml-auto min-w-0 truncate text-foreground-subtle"
+                    className="ms-auto min-w-0 truncate text-foreground-subtle"
                     title={task.sessionTitle}
                   >
                     {intl.formatMessage(
@@ -272,7 +272,7 @@ export function OffPeakTaskList({
               </div>
             </div>
 
-            <div className="absolute right-3 top-3 flex items-center gap-1">
+            <div className="absolute end-3 top-3 flex items-center gap-1">
               {task.sessionId ? (
                 <button
                   type="button"

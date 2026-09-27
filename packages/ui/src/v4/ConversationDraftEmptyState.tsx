@@ -109,8 +109,8 @@ export function ConversationDraftEmptyState({ className }: { className?: string 
       frameId = null;
       const containerStyle = window.getComputedStyle(container);
       const horizontalPaddingPx =
-        Number.parseFloat(containerStyle.paddingLeft) +
-        Number.parseFloat(containerStyle.paddingRight);
+        Number.parseFloat(containerStyle.paddingInlineStart) +
+        Number.parseFloat(containerStyle.paddingInlineEnd);
       const availableWidthPx = Math.max(
         0,
         container.getBoundingClientRect().width - horizontalPaddingPx,
@@ -176,7 +176,7 @@ export function ConversationDraftEmptyState({ className }: { className?: string 
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute left-1/2 top-1/2 aspect-[5/4] w-[min(72vw,25rem)] -mt-10",
+          "pointer-events-none absolute start-1/2 top-1/2 aspect-[5/4] w-[min(72vw,25rem)] -mt-10",
           "-translate-x-1/2 -translate-y-1/2 text-foreground-subtlest",
         )}
       >
@@ -243,7 +243,10 @@ function ZCodeEmptyStateLogo({ className }: { className?: string }) {
         </defs>
         <path d="M184 224H512L453 308Q439 328 415 328H184Z" fill="url(#zcode-brand-z-gradient)" />
         <path d="M584 224H832L424 800H176Z" fill="url(#zcode-brand-z-gradient)" />
-        <path d="M536 720L600 656L648 704L824 528L888 592L648 832Z" fill="url(#zcode-brand-z-gradient)" />
+        <path
+          d="M536 720L600 656L648 704L824 528L888 592L648 832Z"
+          fill="url(#zcode-brand-z-gradient)"
+        />
       </svg>
     </>
   );

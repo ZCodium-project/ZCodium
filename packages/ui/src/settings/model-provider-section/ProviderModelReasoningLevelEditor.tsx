@@ -142,7 +142,7 @@ export function ProviderModelReasoningLevelEditor({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="mr-0.5 size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0"
+            className="me-0.5 size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0"
             aria-label={`${deleteLabel}: ${value}`}
             disabled={values.length <= 1}
             onClick={() => onChange(values.filter((_, valueIndex) => valueIndex !== index))}

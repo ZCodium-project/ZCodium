@@ -230,7 +230,7 @@ export function WhiteboardPane({
           aria-label={intl.formatMessage({ id: "whiteboard.nameLabel" })}
           className="max-w-48"
         />
-        <div className="ml-auto flex min-w-0 items-center gap-1">
+        <div className="ms-auto flex min-w-0 items-center gap-1">
           <ControlHintTooltip title={addToChatLabel}>
             <Button
               type="button"
@@ -353,7 +353,7 @@ export function WhiteboardPane({
             onPointerCancel={finishPointerStroke}
             onLostPointerCapture={finishPointerStroke}
           />
-          <div className="pointer-events-none absolute left-2 top-2 flex size-6 items-center justify-center rounded-full border border-border bg-surface/90 text-foreground-subtle shadow-sm sm:hidden">
+          <div className="pointer-events-none absolute start-2 top-2 flex size-6 items-center justify-center rounded-full border border-border bg-surface/90 text-foreground-subtle shadow-sm sm:hidden">
             <PaletteIcon className="size-3.5" />
           </div>
         </div>

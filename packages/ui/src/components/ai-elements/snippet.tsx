@@ -57,7 +57,7 @@ export const SnippetAddon = (props: SnippetAddonProps) => <InputGroupAddon {...p
 export type SnippetTextProps = ComponentProps<typeof InputGroupText>;
 
 export const SnippetText = ({ className, ...props }: SnippetTextProps) => (
-  <InputGroupText className={cn("pl-2 font-normal text-muted-foreground", className)} {...props} />
+  <InputGroupText className={cn("ps-2 font-normal text-muted-foreground", className)} {...props} />
 );
 
 export type SnippetInputProps = Omit<ComponentProps<typeof InputGroupInput>, "readOnly" | "value">;

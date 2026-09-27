@@ -412,7 +412,7 @@ export function WorkspaceHeaderTitleSection({
           title={
             <span
               data-workspace-header-context-info=""
-              className="flex w-full min-w-0 flex-col gap-3 text-left"
+              className="flex w-full min-w-0 flex-col gap-3 text-start"
             >
               <span className="flex min-w-0 items-start gap-2">
                 {isRemoteWorkspace ? (

@@ -432,7 +432,7 @@ export const featureSuggestedPrompts: FeatureRecommendedPrompt[] = [
     },
   },
   {
-    id: "feature-coding-mr-summary",
+    id: "feature-coding-me-summary",
     mode: "coding",
     iconUrl: terminalIcon,
     iconStyle: "plugin",

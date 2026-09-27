@@ -98,13 +98,13 @@ const INACTIVE_PANE_OVERLAY_STYLE: CSSProperties = {
 function dropPreviewClassName(side: PaneSplitSide): string {
   switch (side) {
     case "left":
-      return "left-1 top-1 bottom-1 w-1/2";
+      return "start-1 top-1 bottom-1 w-1/2";
     case "right":
-      return "right-1 top-1 bottom-1 w-1/2";
+      return "end-1 top-1 bottom-1 w-1/2";
     case "up":
-      return "left-1 right-1 top-1 h-1/2";
+      return "start-1 end-1 top-1 h-1/2";
     case "down":
-      return "left-1 right-1 bottom-1 h-1/2";
+      return "start-1 end-1 bottom-1 h-1/2";
   }
 }
 

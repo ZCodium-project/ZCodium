@@ -96,7 +96,7 @@ export function WorkflowRunSettingsModelField({
             focusSelectorOnClose={null}
             labelVisibilityClassName="inline-flex min-w-0"
             triggerClassName="h-7 w-full min-w-0 justify-between rounded-md border border-input-border bg-input px-2 text-foreground hover:border-input-border-hover hover:bg-input focus-visible:border-input-border-focused focus-visible:bg-input-focused"
-            triggerLabelClassName="inline-flex min-w-0 flex-1 truncate text-left"
+            triggerLabelClassName="inline-flex min-w-0 flex-1 truncate text-start"
             triggerTestId="workflow-run-settings-model-trigger"
             {...(badge === undefined
               ? {}

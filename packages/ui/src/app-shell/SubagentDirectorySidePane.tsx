@@ -73,7 +73,7 @@ const DirectoryRow = memo(function DirectoryRow({
   return (
     <button
       type="button"
-      className="flex w-full min-w-0 items-start gap-3 rounded-lg px-3 py-2.5 text-left text-ui-base transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+      className="flex w-full min-w-0 items-start gap-3 rounded-lg px-3 py-2.5 text-start text-ui-base transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
       onClick={() => onOpen(item)}
     >
       <span className="mt-0.5 text-foreground-subtle">

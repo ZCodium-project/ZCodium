@@ -591,7 +591,7 @@ function AssistantHistoryStatus({
           type="button"
           data-testid={testId(TID_CHAT_ASSISTANT_HISTORY_TRIGGER, segment.key)}
           data-history-open={String(open)}
-          className="group/history-message inline-flex max-w-full items-center gap-2 text-left text-ui-base text-foreground-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
+          className="group/history-message inline-flex max-w-full items-center gap-2 text-start text-ui-base text-foreground-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
         >
           <span className="truncate">{label}</span>
           {!segment.assistantHistoryDefaultOpen ? (
@@ -1056,7 +1056,7 @@ function ConversationBackgroundResultWork({
         <div className="flex w-full border-b border-[var(--color-border)]/50 pb-2">
           <div
             data-testid={testId(TID_CHAT_BACKGROUND_RESULT_TITLE, unit.key)}
-            className="min-w-0 whitespace-pre-wrap break-words text-left text-ui-base text-[var(--color-foreground-subtle)]"
+            className="min-w-0 whitespace-pre-wrap break-words text-start text-ui-base text-[var(--color-foreground-subtle)]"
           >
             {title}
           </div>
@@ -1268,7 +1268,7 @@ function ConversationTurnGroupImpl({
               ? "partial"
               : "unselected"
         }
-        className="absolute left-0 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center"
+        className="absolute start-0 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center"
       >
         <label className="flex size-8 cursor-pointer items-center justify-center">
           <Checkbox

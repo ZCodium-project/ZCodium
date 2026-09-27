@@ -183,7 +183,7 @@ function GroupedTaskRowComponent({
           {/* grouped task 标题超出时不要显示省略号，右侧渐隐能保留标题连续性，避免和右侧状态元信息挤在一起。*/}
           {taskTitle}
         </TaskTitleOverflowText>
-        <span className="ml-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
+        <span className="ms-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
           {task.pendingInteraction ? (
             <TaskInteractionBadge
               interaction={task.pendingInteraction}
@@ -227,7 +227,7 @@ function GroupedTaskRowComponent({
                 className="size-3.5 shrink-0"
               />
             ) : null}
-            {!hasPendingInteraction ? <span className="mr-1">{taskTimeLabel}</span> : null}
+            {!hasPendingInteraction ? <span className="me-1">{taskTimeLabel}</span> : null}
           </span>
         </span>
       </span>
@@ -383,7 +383,7 @@ function GroupedTaskRowComponent({
           {/* grouped task 标题超出时不要显示省略号，右侧渐隐能保留标题连续性，避免和右侧状态元信息挤在一起。*/}
           {taskTitle}
         </TaskTitleOverflowText>
-        <span className="ml-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
+        <span className="ms-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
           {task.pendingInteraction ? (
             <TaskInteractionBadge
               interaction={task.pendingInteraction}
@@ -422,7 +422,7 @@ function GroupedTaskRowComponent({
                   className="size-3.5 shrink-0"
                 />
               ) : null}
-              {!hasPendingInteraction ? <span className="mr-1">{taskTimeLabel}</span> : null}
+              {!hasPendingInteraction ? <span className="me-1">{taskTimeLabel}</span> : null}
             </span>
           ) : null}
           {shouldMountHoverActions ? (

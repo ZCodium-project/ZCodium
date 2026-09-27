@@ -14,7 +14,7 @@ export function WorkspaceSidebarCollapsedRail({
   const { intl } = useZCodeIntl();
 
   return (
-    <aside className="flex h-full flex-col overflow-hidden border-r border-border bg-background-alt">
+    <aside className="flex h-full flex-col overflow-hidden border-e border-border bg-background-alt">
       <div className="flex h-9 shrink-0 items-center justify-center border-b border-border bg-background-alt px-1.5 [app-region:drag]">
         <div className="[app-region:no-drag]">
           <ControlHintTooltip

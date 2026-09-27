@@ -230,13 +230,13 @@ export const WorkspaceCardBody = memo(function WorkspaceCardBody({
                 key={index}
                 title={isGrepMatch(item) ? item.text : undefined}
               >
-                <span className="w-[22px] shrink-0 text-right text-foreground-subtlest">
+                <span className="w-[22px] shrink-0 text-end text-foreground-subtlest">
                   {isGrepMatch(item) ? item.line : index + 1}
                 </span>
                 {isGrepMatch(item) ? (
                   <span className="min-w-0 truncate">
                     <span>{item.path}</span>
-                    <span className="ml-2 text-foreground-subtle">{item.text.trim()}</span>
+                    <span className="ms-2 text-foreground-subtle">{item.text.trim()}</span>
                   </span>
                 ) : (
                   <span className="min-w-0 truncate">{String(item)}</span>
@@ -244,7 +244,7 @@ export const WorkspaceCardBody = memo(function WorkspaceCardBody({
               </li>
             ))}
             {value.length > items.length ? (
-              <li className="px-3 pl-[46px] pt-1 text-ui-xs text-foreground-subtlest">
+              <li className="px-3 ps-[46px] pt-1 text-ui-xs text-foreground-subtlest">
                 {format(
                   { id: "chat.toolCall.workflow.script.result.more" },
                   { count: String(value.length - items.length) },

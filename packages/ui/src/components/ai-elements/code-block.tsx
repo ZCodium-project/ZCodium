@@ -237,7 +237,7 @@ export const CodeBlockActions = ({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("-my-1 -mr-1 flex items-center gap-1", className)} {...props}>
+  <div className={cn("-my-1 -me-1 flex items-center gap-1", className)} {...props}>
     {children}
   </div>
 );

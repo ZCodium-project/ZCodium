@@ -155,7 +155,7 @@ function VirtualizedGroupedTopLevelList({
           <div
             key={virtualRow.key}
             ref={rowVirtualizer.measureElement}
-            className="absolute left-0 top-0 w-full"
+            className="absolute start-0 top-0 w-full"
             data-index={virtualRow.index}
             style={{
               transform: `translateY(${virtualRow.start - scrollMargin}px)`,

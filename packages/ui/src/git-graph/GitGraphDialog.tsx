@@ -174,7 +174,7 @@ export function GitGraphDialog({ open, workspacePath, onOpenChange }: GitGraphDi
             variant="ghost"
             size="icon-sm"
             aria-label={intl.formatMessage({ id: "common.close" })}
-            className="absolute right-2 top-2 z-30 bg-background/80 text-foreground-subtle hover:bg-hover hover:text-foreground [app-region:no-drag]"
+            className="absolute end-2 top-2 z-30 bg-background/80 text-foreground-subtle hover:bg-hover hover:text-foreground [app-region:no-drag]"
           >
             <XIcon className="size-3.5" />
           </Button>

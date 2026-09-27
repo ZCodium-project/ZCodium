@@ -471,7 +471,7 @@ const ArtifactPresentation = memo(function ArtifactPresentation({
   return (
     // ReadonlyTurn 已提供与正文一致的水平 inset，这里再加 px-4 会让资源卡片两侧各多缩进 16px。
     <div data-conversation-share-row-kind="artifact" className="py-1">
-      <div className="flex w-full items-center gap-3 rounded-xl border border-card-border bg-card p-3 pr-4 text-foreground">
+      <div className="flex w-full items-center gap-3 rounded-xl border border-card-border bg-card p-3 pe-4 text-foreground">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-background text-foreground-subtle">
           {descriptor ? (
             <FileDisplayIcon src={descriptor.fileIconSrc} size={24} />
@@ -805,7 +805,7 @@ function ReadonlyHistoryStatus({
           type="button"
           data-conversation-share-history-trigger="true"
           data-history-open={String(open)}
-          className="group/history-message inline-flex max-w-full items-center gap-2 text-left text-ui-base text-foreground-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+          className="group/history-message inline-flex max-w-full items-center gap-2 text-start text-ui-base text-foreground-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
         >
           <span className="truncate">{label}</span>
           {!segment.assistantHistoryDefaultOpen ? (

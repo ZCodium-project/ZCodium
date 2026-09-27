@@ -208,7 +208,7 @@ export function VirtualizedGroupedTaskList({
             // 真实高度由 measureElement 量回，否则相邻行会叠在一起。
             ref={measureElement}
             data-index={virtualRow.index}
-            className="absolute left-0 top-0 w-full"
+            className="absolute start-0 top-0 w-full"
             style={{
               transform: `translateY(${virtualRow.start - scrollMargin}px)`,
             }}

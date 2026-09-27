@@ -97,7 +97,7 @@ function RemoteMcpSyncTitle() {
   });
 
   return (
-    <DialogTitle className="flex min-w-0 items-center gap-2 pr-8">
+    <DialogTitle className="flex min-w-0 items-center gap-2 pe-8">
       <span className="min-w-0 truncate">
         {intl.formatMessage({ id: "settings.mcp.remoteSync.title" })}
       </span>

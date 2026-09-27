@@ -36,7 +36,7 @@ export function AskQuestionToolCallBlock(context: ToolCallBlockRenderContext) {
   const renderContent = useCallback(
     () =>
       !isRunning || isFailed ? (
-        <div className="ml-2 space-y-2 border-l border-border pl-3.5">
+        <div className="ms-2 space-y-2 border-s border-border ps-3.5">
           {data.questions.map((question) => (
             <div key={question.id} className="space-y-1">
               <p className="text-ui-base font-medium leading-5 text-foreground">

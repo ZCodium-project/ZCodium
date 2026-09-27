@@ -41,7 +41,7 @@ export function GroupedDraftTaskRow({
         onClick={onSelect}
         onKeyDown={handleKeyDown}
         className={cn(
-          "group/task-row flex h-7 w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg pl-2.5 pr-1 text-left text-ui-base transition-colors",
+          "group/task-row flex h-7 w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg ps-2.5 pe-1 text-start text-ui-base transition-colors",
           "border border-dashed",
           active
             ? "bg-selected border-primary/35"
@@ -51,7 +51,7 @@ export function GroupedDraftTaskRow({
         <span className="min-w-0 flex-1 truncate text-foreground-subtlest" title={title}>
           {title}
         </span>
-        <span className="ml-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
+        <span className="ms-auto flex shrink-0 items-center gap-1.5 text-ui-sm text-foreground-subtle">
           <span
             className="max-w-24 truncate rounded-full bg-tag/50 px-1.5 py-0.5 text-ui-sm text-foreground-subtle"
             title={workspaceLabel}

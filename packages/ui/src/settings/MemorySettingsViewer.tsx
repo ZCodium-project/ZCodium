@@ -157,7 +157,7 @@ export function MemorySettingsViewer({
                 <div className="flex min-w-0 items-center hover:bg-hover">
                   <div
                     data-testid={testId(TID_SETTINGS_MEMORY_FILE, file.name)}
-                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-start"
                   >
                     <span
                       data-testid={testId(TID_SETTINGS_MEMORY_FILE_ICON, file.name)}
@@ -191,7 +191,7 @@ export function MemorySettingsViewer({
                   </div>
                   <span
                     data-testid={testId(TID_SETTINGS_MEMORY_FILE_EDITOR_ACTIONS, file.name)}
-                    className="mr-3 shrink-0"
+                    className="me-3 shrink-0"
                   >
                     <WorkspaceEditorButtonGroup workspaceAbsPath={file.path} />
                   </span>

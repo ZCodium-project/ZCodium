@@ -276,7 +276,7 @@ export function WorkflowPermissionBlock({
 
       {scriptText ? (
         <Collapsible open={scriptOpen} onOpenChange={setScriptOpen}>
-          <CollapsibleTrigger className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-left text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle">
+          <CollapsibleTrigger className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-start text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle">
             <ChevronRightIcon
               className={cn("size-3.5 shrink-0 transition-transform", scriptOpen && "rotate-90")}
             />

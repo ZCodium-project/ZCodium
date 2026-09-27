@@ -624,12 +624,12 @@ export function WorkspaceFileTree({
       </div>
       <div className="flex shrink-0 items-center px-2 pb-2">
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-foreground-subtlest" />
+          <Search className="pointer-events-none absolute start-2 top-1/2 size-3.5 -translate-y-1/2 text-foreground-subtlest" />
           <Input
             type="text"
             size="default"
             value={fileSearchQuery}
-            className="h-7 bg-transparent pl-7 pr-7 focus-visible:bg-input-focused"
+            className="h-7 bg-transparent ps-7 pe-7 focus-visible:bg-input-focused"
             placeholder={intl.formatMessage({
               id: "workspaceFileTree.searchPlaceholder",
             })}
@@ -643,7 +643,7 @@ export function WorkspaceFileTree({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-foreground-subtlest hover:bg-surface-hover hover:text-foreground"
+              className="absolute end-1 top-1/2 -translate-y-1/2 text-foreground-subtlest hover:bg-surface-hover hover:text-foreground"
               aria-label={intl.formatMessage({
                 id: "workspaceFileTree.clearSearch",
               })}
@@ -659,7 +659,7 @@ export function WorkspaceFileTree({
       </div>
       <div className="flex shrink-0 items-center px-2 pb-2">
         <div className="flex min-w-0 flex-1 items-center gap-1">
-          <h3 className="min-w-0 truncate py-1 pr-0.5 pl-2.5 text-ui-base font-medium text-foreground-subtlest">
+          <h3 className="min-w-0 truncate py-1 pe-0.5 ps-2.5 text-ui-base font-medium text-foreground-subtlest">
             {workspaceTitle}
           </h3>
         </div>

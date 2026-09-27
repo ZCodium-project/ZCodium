@@ -158,7 +158,7 @@ export function LightweightDiffPreview({
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "sticky left-0 z-[1] w-12 shrink-0 select-none border-r border-border px-2 text-right tabular-nums",
+                    "sticky start-0 z-[1] w-12 shrink-0 select-none border-e border-border px-2 text-end tabular-nums",
                     lineStyles.lineNumberClassName,
                   )}
                   style={lineStyles.gutterStyle}

@@ -501,7 +501,7 @@ export function GitPane({
                   <div
                     key={virtualRow.key}
                     ref={changeRowVirtualizer.measureElement}
-                    className="absolute left-0 w-full min-w-0"
+                    className="absolute start-0 w-full min-w-0"
                     data-git-pane-change-virtual-row
                     data-index={virtualRow.index}
                     // transform 定位会让行内 sticky 文件名失效，展开大 diff 后标题不再置顶。

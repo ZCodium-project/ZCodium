@@ -87,7 +87,7 @@ export function WorkspaceHelpMenuButton({
       </ControlHintTooltip>
       <DropdownMenuContent
         align="end"
-        className="min-w-0 w-max [&_[data-slot=dropdown-menu-item]]:pr-6"
+        className="min-w-0 w-max [&_[data-slot=dropdown-menu-item]]:pe-6"
       >
         <DropdownMenuItem onSelect={handleOpenCommunity}>
           <UsersIcon className="size-4" />

@@ -186,7 +186,7 @@ export function GitBranchSwitcher({
               })}
               className={cn(
                 "min-w-0 rounded-full text-ui-base/relaxed",
-                "max-w-full pl-3 pr-2",
+                "max-w-full ps-3 pe-2",
                 triggerClassName,
               )}
             >
@@ -195,7 +195,7 @@ export function GitBranchSwitcher({
                 className="size-4 text-foreground-subtle"
               />
               <>
-                <span className="min-w-0 max-w-25 truncate text-left">{triggerLabel}</span>
+                <span className="min-w-0 max-w-25 truncate text-start">{triggerLabel}</span>
                 {loadingBranches || mutationPending ? (
                   <LoaderIcon
                     data-branch-switcher-trailing-icon="true"
@@ -281,7 +281,7 @@ export function GitBranchSwitcher({
                         }}
                       >
                         <GitBranchIcon className="mt-0.5 size-4 text-foreground-subtle" />
-                        <div className="min-w-0 flex-1 flex flex-col gap-1 text-left">
+                        <div className="min-w-0 flex-1 flex flex-col gap-1 text-start">
                           <div className="truncate text-ui-base font-medium text-foreground">
                             {branch.name}
                           </div>

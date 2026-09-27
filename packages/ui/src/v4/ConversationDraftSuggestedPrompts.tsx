@@ -255,7 +255,7 @@ export function ConversationDraftSuggestedPrompts({
                     data-draft-suggested-prompt={item.id}
                     disabled={!onSelect || disabled}
                     onClick={() => onSelect?.(item)}
-                    className="flex w-full items-center gap-3 rounded-xl p-3 text-left text-ui-base text-foreground hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused disabled:opacity-50"
+                    className="flex w-full items-center gap-3 rounded-xl p-3 text-start text-ui-base text-foreground hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused disabled:opacity-50"
                   >
                     <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface p-px">
                       <img
@@ -318,7 +318,7 @@ export function ConversationDraftSuggestedPrompts({
                   title={label}
                   disabled={!onSelect || disabled}
                   onClick={onSelect ? () => onSelect(item) : undefined}
-                  className="zcode-draft-prompt-waterfall h-8 min-w-0 justify-start gap-1.5 overflow-hidden rounded-lg px-3 text-left text-ui-caption font-normal leading-4.5 text-foreground"
+                  className="zcode-draft-prompt-waterfall h-8 min-w-0 justify-start gap-1.5 overflow-hidden rounded-lg px-3 text-start text-ui-caption font-normal leading-4.5 text-foreground"
                   style={
                     {
                       "--zcode-draft-prompt-waterfall-delay": `${index * 65}ms`,

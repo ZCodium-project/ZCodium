@@ -274,7 +274,7 @@ export function ChatEmptyWorkspacePreviewMenu({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="pointer-events-none absolute left-1.5 z-10 rounded-full text-foreground-subtle opacity-0 transition-opacity group-hover/workspace-chip:pointer-events-auto group-hover/workspace-chip:opacity-100 group-focus-within/workspace-chip:pointer-events-auto group-focus-within/workspace-chip:opacity-100"
+            className="pointer-events-none absolute start-1.5 z-10 rounded-full text-foreground-subtle opacity-0 transition-opacity group-hover/workspace-chip:pointer-events-auto group-hover/workspace-chip:opacity-100 group-focus-within/workspace-chip:pointer-events-auto group-focus-within/workspace-chip:opacity-100"
             aria-label={intl.formatMessage({ id: "chat.empty.detachProject" })}
             data-testid={TID_COMPOSER_PROJECT_DETACH}
             onClick={(event) => {
@@ -292,7 +292,7 @@ export function ChatEmptyWorkspacePreviewMenu({
             size="default"
             className={cn(
               "min-w-0 rounded-full bg-transparent text-ui-base/relaxed hover:bg-transparent",
-              "max-w-[15rem] pl-3 pr-2",
+              "max-w-[15rem] ps-3 pe-2",
               triggerClassName,
             )}
             aria-label={intl.formatMessage({ id: "chat.empty.workspaceMenu" })}

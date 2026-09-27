@@ -48,11 +48,11 @@ export function UsageMeter({
         aria-label={`${appLabel} ${appValue}, ${systemLabel} ${systemValue}`}
       >
         <div
-          className="absolute inset-y-0 left-0 rounded-sm bg-foreground-subtlest/40"
+          className="absolute inset-y-0 start-0 rounded-sm bg-foreground-subtlest/40"
           style={{ width: `${systemPercent}%` }}
         />
         <div
-          className="absolute inset-y-0 left-0 rounded-sm bg-brand"
+          className="absolute inset-y-0 start-0 rounded-sm bg-brand"
           style={{ width: `${appPercent}%` }}
         />
       </div>
@@ -103,7 +103,7 @@ export function UsageGroup({
     >
       <button
         type="button"
-        className="flex h-9 w-full items-center gap-2 px-3 text-left hover:bg-hover"
+        className="flex h-9 w-full items-center gap-2 px-3 text-start hover:bg-hover"
         aria-expanded={expanded}
         onClick={onToggle}
       >
@@ -118,7 +118,7 @@ export function UsageGroup({
         <span className="rounded-sm bg-tag px-1.5 text-ui-xs text-foreground-subtle">
           {group.processCount}
         </span>
-        <span className="w-24 text-right font-mono text-ui-sm text-foreground-subtle">
+        <span className="w-24 text-end font-mono text-ui-sm text-foreground-subtle">
           {metric === "cpu" ? formatPercent(group.cpuPercent) : formatBytes(group.memoryBytes)}
         </span>
       </button>
@@ -136,8 +136,8 @@ export function UsageGroup({
               )}
             >
               <div>{columns.process}</div>
-              <div className="text-right">{columns.pid}</div>
-              <div className="text-right">{metric === "cpu" ? columns.cpu : columns.memory}</div>
+              <div className="text-end">{columns.pid}</div>
+              <div className="text-end">{metric === "cpu" ? columns.cpu : columns.memory}</div>
             </div>
             {group.processes.map((process) => (
               <ProcessRow
@@ -182,9 +182,9 @@ function ProcessRow({
           </div>
         ) : null}
       </div>
-      <div className="text-right font-mono text-foreground-subtle">{process.pid}</div>
+      <div className="text-end font-mono text-foreground-subtle">{process.pid}</div>
       <div
-        className="text-right font-mono text-foreground-subtle"
+        className="text-end font-mono text-foreground-subtle"
         title={process.sampled ? undefined : samplingText}
       >
         {!process.sampled

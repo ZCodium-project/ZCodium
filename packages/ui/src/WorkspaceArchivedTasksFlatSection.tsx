@@ -163,7 +163,7 @@ export function WorkspaceArchivedTasksFlatSection({
                     title={intl.formatMessage({ id: "taskList.mobileActive" })}
                     side="right"
                     align="center"
-                    triggerClassName="absolute -left-5 top-1/2 z-10 -translate-y-1/2"
+                    triggerClassName="absolute -start-5 top-1/2 z-10 -translate-y-1/2"
                   >
                     <span
                       data-mobile-active-task="true"
@@ -335,7 +335,7 @@ export function WorkspaceArchivedTasksFlatSection({
       </ul>
       {syncingRemoteWorkspaces ? <TaskListRemoteSyncHint /> : null}
       {canToggleExpanded ? (
-        <div className="cursor-pointer pl-8.5 pb-4">
+        <div className="cursor-pointer ps-8.5 pb-4">
           <span
             className="text-ui-base text-foreground-subtlest hover:text-foreground-subtle"
             onClick={() => {

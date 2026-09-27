@@ -27,11 +27,11 @@ const selectTriggerVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 aria-expanded:bg-destructive aria-expanded:text-destructive-foreground",
       },
       size: {
-        xs: "h-5 rounded-sm pl-2 pr-1 text-ui-base [&_svg:not([class*='size-'])]:size-2.5",
-        sm: "h-6 rounded-md pl-2 pr-1 text-ui-base/relaxed [&_svg:not([class*='size-'])]:size-3",
+        xs: "h-5 rounded-sm ps-2 pe-1 text-ui-base [&_svg:not([class*='size-'])]:size-2.5",
+        sm: "h-6 rounded-md ps-2 pe-1 text-ui-base/relaxed [&_svg:not([class*='size-'])]:size-3",
         default:
-          "h-7 rounded-md pl-2 pr-1 text-ui-base/relaxed [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-8 rounded-lg pl-3 pr-2 text-ui-base [&_svg:not([class*='size-'])]:size-4",
+          "h-7 rounded-md ps-2 pe-1 text-ui-base/relaxed [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-8 rounded-lg ps-3 pe-2 text-ui-base [&_svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: {
@@ -103,7 +103,7 @@ function SelectContent({
         data-align-trigger={position === "item-aligned"}
         className={cn(
           // 可操作的 Select 必须高于 z-50 tooltip，避免提示遮住选项。
-          "relative z-[60] max-h-(--radix-select-content-available-height) min-w-32 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg border border-popover-border bg-menu p-1 text-foreground shadow-md duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 [app-region:no-drag]",
+          "relative z-[60] max-h-(--radix-select-content-available-height) min-w-32 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg border border-popover-border bg-menu p-1 text-foreground shadow-md duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-end-2 data-[side=right]:slide-in-from-start-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 [app-region:no-drag]",
           className,
         )}
         position={position}
@@ -157,11 +157,11 @@ const SelectItem = React.forwardRef<React.ElementRef<typeof SelectPrimitive.Item
         {...props}
       >
         {trailing ? (
-          <span className="pointer-events-auto absolute right-2 flex items-center justify-center">
+          <span className="pointer-events-auto absolute end-2 flex items-center justify-center">
             {trailing}
           </span>
         ) : null}
-        <span className="pointer-events-none absolute right-2 flex items-center justify-center">
+        <span className="pointer-events-none absolute end-2 flex items-center justify-center">
           <SelectPrimitive.ItemIndicator>
             <CheckIcon className="pointer-events-none size-4 text-foreground-subtle" />
           </SelectPrimitive.ItemIndicator>

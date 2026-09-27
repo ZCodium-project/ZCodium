@@ -45,7 +45,7 @@ function ConversationHeaderImpl({ title, onClosePane, workspaceBadge }: Conversa
       {hasFloatingActions ? (
         <div
           data-v4-pane-actions="floating"
-          className="pointer-events-none absolute left-2 top-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1"
+          className="pointer-events-none absolute start-2 top-2 z-20 flex max-w-[calc(100%-1rem)] items-center gap-1"
         >
           {workspaceBadge ? (
             <span

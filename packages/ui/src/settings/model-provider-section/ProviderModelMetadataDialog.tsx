@@ -146,7 +146,7 @@ export function ProviderModelMetadataDialog({
         className="max-h-[min(48rem,calc(100vh-4rem))] max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto_auto] overflow-clip"
         data-no-model-drag="true"
       >
-        <DialogHeader className="pr-8">
+        <DialogHeader className="pe-8">
           <DialogTitle className="truncate">
             {intl.formatMessage({
               id:
@@ -169,7 +169,7 @@ export function ProviderModelMetadataDialog({
         {/* 保存期间锁定正文交互，不改变原有滚动容器；页脚单独显示提交状态。 */}
         <div
           inert={saving}
-          className="min-h-0 min-w-0 -mr-3 space-y-4 overflow-y-auto pr-4"
+          className="min-h-0 min-w-0 -me-3 space-y-4 overflow-y-auto pe-4"
           data-model-settings-scroll="true"
         >
           <ModelSettingsGroup group="basic">

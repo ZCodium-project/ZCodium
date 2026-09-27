@@ -29,7 +29,7 @@ export function StickyGroupHeaderSlot({ header }: { header: ReactNode | null }) 
   return (
     <div
       className={cn(
-        "pointer-events-auto absolute left-0 right-0 top-0 z-20 pt-1",
+        "pointer-events-auto absolute start-0 end-0 top-0 z-20 pt-1",
         "transition-[opacity,transform] duration-150 ease-out motion-reduce:translate-y-0 motion-reduce:transition-none",
         visible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
       )}

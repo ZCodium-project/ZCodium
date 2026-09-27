@@ -144,34 +144,34 @@ export function DeveloperToolsPane({
             <table className="w-full min-w-[38rem] border-collapse text-ui-xs">
               <thead className="sticky top-0 bg-background text-foreground-subtle">
                 <tr className="border-b border-border">
-                  <th className="px-2 py-1.5 text-left font-medium">
+                  <th className="px-2 py-1.5 text-start font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.round" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.input" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.output" })}
                   </th>
                   <th
-                    className="px-2 py-1.5 text-right font-medium"
+                    className="px-2 py-1.5 text-end font-medium"
                     title={intl.formatMessage({ id: "tokenDebug.tpsDescription" })}
                   >
                     {intl.formatMessage({ id: "tokenDebug.column.tps" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.total" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.reasoning" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.cacheRead" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.cacheWrite" })}
                   </th>
-                  <th className="px-2 py-1.5 text-right font-medium">
+                  <th className="px-2 py-1.5 text-end font-medium">
                     {intl.formatMessage({ id: "tokenDebug.column.hitRate" })}
                   </th>
                 </tr>
@@ -189,14 +189,14 @@ export function DeveloperToolsPane({
                       <td className="px-2 py-1.5 font-mono text-foreground">
                         {formatNumber(locale, round.requestIndex)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.inputTokens)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.outputTokens)}
                       </td>
                       <td
-                        className="px-2 py-1.5 text-right font-mono text-foreground"
+                        className="px-2 py-1.5 text-end font-mono text-foreground"
                         data-testid="token-debug-tps"
                       >
                         {round.tokensPerSecond === null
@@ -205,19 +205,19 @@ export function DeveloperToolsPane({
                               round.tokensPerSecond,
                             )}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.totalTokens)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.reasoningTokens)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.cachedInputTokens)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatNumber(locale, round.usage.cachedWriteInputTokens)}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-foreground">
+                      <td className="px-2 py-1.5 text-end font-mono text-foreground">
                         {formatPercent(locale, round.hitRate)}
                       </td>
                     </tr>

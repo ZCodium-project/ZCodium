@@ -63,10 +63,10 @@ export function WorkflowMoreRow({
       aria-label={title}
       aria-expanded={door?.open}
       className={cn(
-        "wf-pill wf-agent-pill wf-more-row wf-arrive flex h-8 min-w-0 items-center gap-2 rounded-full pl-2 pr-2.5 text-ui-sm",
+        "wf-pill wf-agent-pill wf-more-row wf-arrive flex h-8 min-w-0 items-center gap-2 rounded-full ps-2 pe-2.5 text-ui-sm",
         door?.open === true ? "bg-surface-hover" : "bg-surface",
         onOpen !== undefined &&
-          "wf-pill-open cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+          "wf-pill-open cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
       )}
       data-door={door === undefined ? undefined : door.open ? "open" : "closed"}
       data-more-count={more.count}
@@ -97,7 +97,7 @@ export function WorkflowMoreRow({
         {label}
       </span>
       {door === undefined ? null : door.open ? null : (
-        <RosterTally className="mr-0.5 shrink-0" counts={door.tally} />
+        <RosterTally className="me-0.5 shrink-0" counts={door.tally} />
       )}
       {door !== undefined || more.failed === 0 ? null : (
         <span

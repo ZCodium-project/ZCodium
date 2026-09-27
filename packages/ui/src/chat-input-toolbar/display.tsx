@@ -421,7 +421,7 @@ export function ConfigSelect({
                 <SelectItem
                   key={entry.value}
                   value={entry.value}
-                  className="min-h-13 items-start gap-3 py-2 pl-2 pr-8"
+                  className="min-h-13 items-start gap-3 py-2 ps-2 pe-8"
                   data-testid={getConfigSelectItemTestId(option, entry)}
                 >
                   <span className="flex min-w-0 items-start gap-3">

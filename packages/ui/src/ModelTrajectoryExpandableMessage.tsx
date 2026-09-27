@@ -124,12 +124,12 @@ export function ExpandableTrajectoryMessage({
       >
         <CollapsibleTrigger
           data-trajectory-message-trigger=""
-          className="col-span-2 grid min-h-8 min-w-0 grid-cols-subgrid items-center py-0 pl-3 text-left text-ui-sm text-foreground-subtle"
+          className="col-span-2 grid min-h-8 min-w-0 grid-cols-subgrid items-center py-0 ps-3 text-start text-ui-sm text-foreground-subtle"
         >
           <span
             data-trajectory-role-label={resolvedVisualRole}
             className={cn(
-              "pr-1 font-mono text-ui-sm uppercase",
+              "pe-1 font-mono text-ui-sm uppercase",
               trajectoryRoleTextClass(resolvedVisualRole),
             )}
           >
@@ -141,7 +141,7 @@ export function ExpandableTrajectoryMessage({
                 <CircleAlertIcon
                   data-trajectory-payload-error-icon=""
                   aria-hidden="true"
-                  className="mr-1 size-3.5 shrink-0 text-destructive"
+                  className="me-1 size-3.5 shrink-0 text-destructive"
                 />
               ) : null
             ) : null}
@@ -149,7 +149,7 @@ export function ExpandableTrajectoryMessage({
               <span
                 data-trajectory-payload-direction=""
                 className={cn(
-                  "mr-2 shrink-0 font-mono text-ui-sm uppercase",
+                  "me-2 shrink-0 font-mono text-ui-sm uppercase",
                   toolPayloadHasError ? "text-destructive" : "text-foreground",
                 )}
               >
@@ -159,7 +159,7 @@ export function ExpandableTrajectoryMessage({
             {payloadDirection ? (
               <ArrowRightIcon
                 data-trajectory-payload-arrow=""
-                className="mr-2 size-3 shrink-0 text-foreground-subtlest group-data-[state=open]:hidden"
+                className="me-2 size-3 shrink-0 text-foreground-subtlest group-data-[state=open]:hidden"
               />
             ) : null}
             <span
@@ -174,7 +174,7 @@ export function ExpandableTrajectoryMessage({
                 data-trajectory-tool-result-name=""
                 data-trajectory-search-field="tool-name"
                 variant="outline"
-                className="ml-1.5 h-5 rounded-full border-border bg-tag px-2 font-mono text-ui-xs text-foreground-subtle group-data-[state=open]:hidden"
+                className="ms-1.5 h-5 rounded-full border-border bg-tag px-2 font-mono text-ui-xs text-foreground-subtle group-data-[state=open]:hidden"
                 title={toolResultMeta.names}
               >
                 {toolResultMeta.names}
@@ -185,7 +185,7 @@ export function ExpandableTrajectoryMessage({
                 data-trajectory-tool-result-id=""
                 data-trajectory-search-field="tool-id"
                 variant="outline"
-                className="ml-1 h-5 max-w-[40%] truncate rounded-full border-border bg-tag px-2 font-mono text-ui-xs text-foreground-subtle group-data-[state=open]:hidden"
+                className="ms-1 h-5 max-w-[40%] truncate rounded-full border-border bg-tag px-2 font-mono text-ui-xs text-foreground-subtle group-data-[state=open]:hidden"
                 title={toolResultMeta.ids}
               >
                 {toolResultMeta.ids}
@@ -194,7 +194,7 @@ export function ExpandableTrajectoryMessage({
             <span
               data-trajectory-call-metadata=""
               data-trajectory-user-call-metadata={role === "user" ? "" : undefined}
-              className="ml-auto mr-7 hidden min-w-0 items-center gap-1 font-mono text-ui-xs text-foreground-subtlest group-data-[state=open]:flex"
+              className="ms-auto me-7 hidden min-w-0 items-center gap-1 font-mono text-ui-xs text-foreground-subtlest group-data-[state=open]:flex"
             >
               <span>{callDurationLabel}</span>
               <span aria-hidden="true">·</span>
@@ -217,7 +217,7 @@ export function ExpandableTrajectoryMessage({
         </CollapsibleTrigger>
         <span
           data-trajectory-message-actions=""
-          className="relative -ml-1 mr-1 flex items-center justify-end"
+          className="relative -ms-1 me-1 flex items-center justify-end"
         >
           <Button
             data-trajectory-message-copy=""
@@ -225,7 +225,7 @@ export function ExpandableTrajectoryMessage({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute right-full mr-1 hidden text-foreground-subtlest group-data-[state=open]:inline-flex"
+            className="absolute end-full me-1 hidden text-foreground-subtlest group-data-[state=open]:inline-flex"
             aria-label={copyLabel}
             title={copyLabel}
             disabled={!copyText}

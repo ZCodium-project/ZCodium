@@ -43,7 +43,7 @@ export function CallCard({
     <article data-trajectory-call="" className="col-span-full grid grid-cols-subgrid">
       <div
         data-trajectory-call-summary=""
-        className="sticky top-0 z-10 col-span-full flex w-full min-w-0 items-center gap-1.5 border-b border-border/50 bg-surface/90 px-3 py-2 text-left supports-[backdrop-filter]:backdrop-blur-sm"
+        className="sticky top-0 z-10 col-span-full flex w-full min-w-0 items-center gap-1.5 border-b border-border/50 bg-surface/90 px-3 py-2 text-start supports-[backdrop-filter]:backdrop-blur-sm"
       >
         <span className="flex size-5 shrink-0 items-center justify-center font-mono text-ui-xs text-foreground-subtlest">
           {String(index + 1).padStart(2, "0")}
@@ -220,7 +220,7 @@ function MessageBlock({
       <span
         data-trajectory-role-label={knownRole ? message.role : "unknown"}
         className={cn(
-          "pr-1 pt-0.5 font-mono text-ui-sm uppercase",
+          "pe-1 pt-0.5 font-mono text-ui-sm uppercase",
           knownRole
             ? trajectoryRoleTextClass(
                 message.role === "tool"
@@ -393,7 +393,7 @@ function CallMetadata({
   return (
     <span
       data-trajectory-call-metadata=""
-      className="ml-auto flex shrink-0 items-center gap-1 font-mono text-ui-xs text-foreground-subtlest"
+      className="ms-auto flex shrink-0 items-center gap-1 font-mono text-ui-xs text-foreground-subtlest"
     >
       {items.map((item, index) => (
         <span key={`${item.text}:${index}`} title={item.title}>

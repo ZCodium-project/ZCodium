@@ -49,7 +49,7 @@ function BoardCard({ card }: { card: BoardCardModel }) {
             <div className="flex min-w-0 items-baseline gap-1.5" key={detail.label}>
               <dt className="shrink-0 text-ui-xs text-foreground-subtlest">{detail.label}</dt>
               <dd
-                className="min-w-0 flex-1 truncate text-right font-mono text-ui-xs text-foreground-subtle"
+                className="min-w-0 flex-1 truncate text-end font-mono text-ui-xs text-foreground-subtle"
                 title={detail.value}
               >
                 {detail.value}

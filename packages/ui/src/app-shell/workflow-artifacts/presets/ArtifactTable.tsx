@@ -89,7 +89,7 @@ export const ArtifactTable = memo(function ArtifactTable({
           compact ? "" : "max-h-128",
         )}
       >
-        <table className="w-full border-collapse text-left">
+        <table className="w-full border-collapse text-start">
           <thead className="sticky top-0 z-10 bg-surface">
             <tr>
               {model.columns.map((column) => (

@@ -296,7 +296,7 @@ export function CreateWorkflowToolCallBlock(context: ToolCallBlockRenderContext)
   const resume =
     workflowRun?.resumable === true && onResumeWorkflowRun !== undefined ? (
       <Button
-        className="ml-auto"
+        className="ms-auto"
         data-testid="workflow-card-resume"
         onClick={handleResume}
         size="sm"
@@ -418,7 +418,7 @@ export function CreateWorkflowToolCallBlock(context: ToolCallBlockRenderContext)
               // 没有 run 就没有详情页的 Script 区，脚本原文只能在这里读；默认收起，与确认窗同形。
               <Collapsible open={scriptOpen} onOpenChange={setScriptOpen}>
                 <CollapsibleTrigger
-                  className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-left text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle"
+                  className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-start text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle"
                   data-testid="workflow-card-script-toggle"
                 >
                   <ChevronRightIcon

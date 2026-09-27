@@ -110,7 +110,7 @@ function CuaGroupChildren({
       onScroll={updateScrollState}
       style={getVerticalScrollMaskStyle(scrollMaskState)}
     >
-      <div ref={contentRef} className="ml-2 space-y-2 border-border border-l pl-3.5">
+      <div ref={contentRef} className="ms-2 space-y-2 border-border border-s ps-3.5">
         {events.map((event) =>
           event.kind === "tool" ? (
             <ToolCallBlock

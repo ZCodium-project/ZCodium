@@ -71,7 +71,7 @@ function UsageLimitRow({
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-1.5">
       <div className="min-w-0 truncate text-ui-sm text-foreground">{label}</div>
-      <div className="flex min-w-0 max-w-36 items-center gap-2 text-right text-ui-sm">
+      <div className="flex min-w-0 max-w-36 items-center gap-2 text-end text-ui-sm">
         <span className="min-w-0 truncate font-medium text-foreground">{value}</span>
         {resetTime ? (
           <span className="min-w-0 truncate text-foreground-subtle">{resetTime}</span>

@@ -761,7 +761,7 @@ function ElicitationDialogContent({
         onFocus={() => setActiveOptionIndex(index)}
         onKeyDown={handleOptionKeyDown}
         className={cn(
-          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left outline-none transition-colors focus-visible:bg-hover",
+          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-start outline-none transition-colors focus-visible:bg-hover",
           isSelected ? "bg-selected" : isActive ? "bg-hover" : "hover:bg-hover",
         )}
       >
@@ -792,7 +792,7 @@ function ElicitationDialogContent({
             {optionLabel}
           </span>
           {optionDescription ? (
-            <span className="ml-2 text-ui-base leading-normal text-foreground-subtle">
+            <span className="ms-2 text-ui-base leading-normal text-foreground-subtle">
               {optionDescription}
             </span>
           ) : null}
@@ -971,17 +971,17 @@ function ElicitationDialogContent({
           <div
             data-elicitation-dialog-body="true"
             className={cn(
-              "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pr-1",
+              "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pe-1",
               !isDialogExpanded ? "max-md:hidden" : undefined,
             )}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1 text-ui-base font-medium leading-5">
-                <InteractionRequestOriginBadge origin={request.origin} className="mr-2" />
+                <InteractionRequestOriginBadge origin={request.origin} className="me-2" />
                 {titleHeader ? (
                   <Badge
                     variant="outline"
-                    className="mr-2 max-w-40 align-baseline text-ui-base truncate"
+                    className="me-2 max-w-40 align-baseline text-ui-base truncate"
                   >
                     {titleHeader}
                   </Badge>
@@ -1097,7 +1097,7 @@ function ElicitationDialogContent({
               <button
                 type="button"
                 onClick={() => setIsDialogExpanded(true)}
-                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 text-left text-ui-base font-medium text-foreground hover:bg-hover"
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 text-start text-ui-base font-medium text-foreground hover:bg-hover"
               >
                 {titleHeader ? (
                   <Badge

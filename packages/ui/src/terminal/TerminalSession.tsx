@@ -1111,11 +1111,11 @@ export function TerminalSession({
       </ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onSelect={handleCopy}>
-          <Copy className="mr-2 h-4 w-4" />
+          <Copy className="me-2 h-4 w-4" />
           {intl.formatMessage({ id: "terminal.contextMenu.copy" })}
         </ContextMenuItem>
         <ContextMenuItem onSelect={handlePaste}>
-          <ClipboardPaste className="mr-2 h-4 w-4" />
+          <ClipboardPaste className="me-2 h-4 w-4" />
           {intl.formatMessage({ id: "terminal.contextMenu.paste" })}
         </ContextMenuItem>
       </ContextMenuContent>

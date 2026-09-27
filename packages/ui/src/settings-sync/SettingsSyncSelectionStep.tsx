@@ -108,7 +108,7 @@ export function SettingsSyncSelectionStep(props: {
 
         return (
           <div key={category} className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-surface-hover/50">
+            <div className="flex w-full items-center gap-3 rounded-lg p-3 text-start transition-colors hover:bg-surface-hover/50">
               <button
                 type="button"
                 className="flex size-5 shrink-0 items-center justify-start"
@@ -150,7 +150,7 @@ export function SettingsSyncSelectionStep(props: {
                 </div>
               </div>
             </div>
-            <div className="ml-5 flex flex-col gap-1 border-l border-border py-1 pl-4">
+            <div className="ms-5 flex flex-col gap-1 border-s border-border py-1 ps-4">
               {agentsForCategory.map((agent) => {
                 const key = getSelectionKey(agent.agent, category);
                 const checked = selected.has(key);
@@ -160,7 +160,7 @@ export function SettingsSyncSelectionStep(props: {
                     type="button"
                     onClick={() => props.onToggleSelection(key)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
+                      "flex w-full items-center gap-3 rounded-lg p-3 text-start transition-colors",
                       "hover:bg-surface-hover/50",
                     )}
                   >

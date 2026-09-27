@@ -227,7 +227,7 @@ export function OpenSplitButton({
           type="button"
           variant="ghost"
           size="default"
-          className="h-7 rounded-none border-0 gap-1 pr-1.5"
+          className="h-7 rounded-none border-0 gap-1 pe-1.5"
           disabled={!canPreview}
           onClick={(event) => {
             stopEventPropagation(event);

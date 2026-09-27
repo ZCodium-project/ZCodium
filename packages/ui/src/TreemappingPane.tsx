@@ -639,7 +639,7 @@ function FileBox({
       data-selected={selected ? "true" : undefined}
       style={style}
       className={cn(
-        "relative min-w-20 flex-1 self-stretch rounded-md border-2 p-2 text-left text-ui-base transition-colors duration-150 hover:border-primary/60 focus-visible:border-primary focus-visible:outline-none",
+        "relative min-w-20 flex-1 self-stretch rounded-md border-2 p-2 text-start text-ui-base transition-colors duration-150 hover:border-primary/60 focus-visible:border-primary focus-visible:outline-none",
         "animate-in fade-in zoom-in-95",
         getFileTone(node.kind),
         // 最近触达高亮之前使用 ring（box-shadow），点击后的 focus reset 会把它清掉；
@@ -655,10 +655,10 @@ function FileBox({
       }}
     >
       {node.pendingToolCallIds.length > 0 ? (
-        <span className="absolute right-2 top-2 size-2 animate-pulse rounded-full bg-current opacity-80" />
+        <span className="absolute end-2 top-2 size-2 animate-pulse rounded-full bg-current opacity-80" />
       ) : null}
       <span className="flex h-full min-h-0 flex-col justify-between gap-2">
-        <span className="flex min-w-0 flex-col gap-0.5 pr-3 leading-5">
+        <span className="flex min-w-0 flex-col gap-0.5 pe-3 leading-5">
           <span className="flex min-w-0 items-center gap-1.5">
             <FileDisplayIcon
               src={descriptor.fileIconSrc}

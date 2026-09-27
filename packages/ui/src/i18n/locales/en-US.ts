@@ -1116,7 +1116,7 @@ const enUS: Record<string, string> = {
   "treemapping.detail.directoryFiles": "{count} files",
   "diff.placeholder.badge": "UI placeholder",
   "diff.placeholder.description":
-    "This phase focuses on the right-side Diff panel shell first. Real Git services and command execution will be connected later.",
+    "This phase focuses on the end-side Diff panel shell first. Real Git services and command execution will be connected later.",
   "diff.placeholder.toast":
     "The Diff panel is still using UI placeholder mode for now because the Git service is not fully wired up yet.",
   "git.readonly": "Read-only",

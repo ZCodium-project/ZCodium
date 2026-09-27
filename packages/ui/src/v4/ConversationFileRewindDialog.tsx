@@ -116,7 +116,7 @@ export function ConversationFileRewindDialog({
             })}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid max-h-[50vh] gap-3 overflow-y-auto pr-1">
+        <div className="grid max-h-[50vh] gap-3 overflow-y-auto pe-1">
           {previewLoading ? (
             <div className="flex items-center gap-2 text-ui-base text-foreground-subtle">
               <Loader2Icon className="size-3.5 animate-spin" />

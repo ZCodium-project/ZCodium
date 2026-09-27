@@ -141,7 +141,7 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
           )}
         </AvatarFallback>
       </Avatar>
-      <div className="min-w-0 flex-1 overflow-hidden text-left">
+      <div className="min-w-0 flex-1 overflow-hidden text-start">
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="min-w-0 truncate text-ui-base font-semibold text-foreground">
             {profileBadge}
@@ -205,7 +205,7 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
               type="button"
               variant="ghost"
               size={"lg"}
-              className="min-w-0 flex-1 justify-start gap-2 overflow-hidden rounded-tl-2xl rounded-bl-2xl border-0 pl-0"
+              className="min-w-0 flex-1 justify-start gap-2 overflow-hidden rounded-tl-2xl rounded-bl-2xl border-0 ps-0"
               data-testid={TID_LOGIN_TRIGGER}
               aria-label={profileBadge}
             >

@@ -902,7 +902,7 @@ export function WorkspaceTimelineTasksSection({
       </ContextMenu>
       {syncingRemoteWorkspaces ? <TaskListRemoteSyncHint /> : null}
       {canLoadMore ? (
-        <div className="cursor-pointer pl-8.5 pb-4">
+        <div className="cursor-pointer ps-8.5 pb-4">
           <span
             className="text-ui-base text-foreground-subtlest hover:text-foreground-subtle"
             onClick={() => {

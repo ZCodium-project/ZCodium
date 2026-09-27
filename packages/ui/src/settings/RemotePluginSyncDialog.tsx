@@ -1064,7 +1064,7 @@ function RemotePluginSyncTitle() {
   });
 
   return (
-    <DialogTitle className="flex min-w-0 items-center gap-2 pr-8">
+    <DialogTitle className="flex min-w-0 items-center gap-2 pe-8">
       <span className="min-w-0 truncate">
         {intl.formatMessage({ id: "settings.plugins.remoteSync.title" })}
       </span>
@@ -1349,7 +1349,7 @@ function RemotePluginSyncLogHoverCard({ logs }: { logs: readonly string[] }) {
         align="end"
         side="left"
         sideOffset={6}
-        className="flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 bg-popover p-3 text-left"
+        className="flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 bg-popover p-3 text-start"
       >
         <div className="text-ui-base font-medium text-popover-foreground">
           {intl.formatMessage({ id: "settings.plugins.remoteSync.logTooltip" })}

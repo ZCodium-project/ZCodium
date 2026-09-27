@@ -148,7 +148,7 @@ function ChatCodingPlanUsageMeter({
             <span
               ref={fullValueRef}
               aria-hidden="true"
-              className="invisible absolute left-0 whitespace-nowrap"
+              className="invisible absolute start-0 whitespace-nowrap"
             >
               <span className="font-mono">{value}</span>
               <span className="text-ui-xs"> · {resetTime}</span>

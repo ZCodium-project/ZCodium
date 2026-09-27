@@ -89,7 +89,7 @@ export function GitPaneChangeCard({
             type="button"
             aria-expanded={isExpanded}
             className={cn(
-              "sticky top-0 z-10 flex h-8 w-full items-center gap-3 bg-background px-3 text-left transition-colors hover:bg-surface-hover supports-[backdrop-filter]:backdrop-blur-sm",
+              "sticky top-0 z-10 flex h-8 w-full items-center gap-3 bg-background px-3 text-start transition-colors hover:bg-surface-hover supports-[backdrop-filter]:backdrop-blur-sm",
               isExpanded && "bg-surface-hover",
             )}
             onClick={() => onOpenChange(change, !isExpanded)}
@@ -110,10 +110,10 @@ export function GitPaneChangeCard({
                 />
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-end gap-3 pl-3">
+            <div className="flex shrink-0 items-center justify-end gap-3 ps-3">
               <div className="shrink-0 whitespace-nowrap text-ui-base">
                 <span className="text-diff-added">+{change.added}</span>
-                <span className="ml-2 text-diff-removed">-{change.removed}</span>
+                <span className="ms-2 text-diff-removed">-{change.removed}</span>
               </div>
               <ChevronDownIcon
                 className={cn(

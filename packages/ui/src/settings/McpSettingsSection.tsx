@@ -491,7 +491,7 @@ function PluginMcpServerList({
                 }}
                 className="size-9 bg-background"
               />
-              <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-background">
+              <span className="absolute -end-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-background">
                 <McpStatusDot
                   status={item.status}
                   attention={Boolean(item.authorization?.authorizationUrl)}

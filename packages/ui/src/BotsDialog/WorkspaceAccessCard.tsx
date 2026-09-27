@@ -26,10 +26,7 @@ export function WorkspaceAccessCard({
   currentWorkspace: BotWorkspaceRef;
   loading: boolean;
   onPatchAllowedWorkspaces: (allowedWorkspaces: string[]) => Promise<void>;
-  onToggleWorkspaceAccess: (
-    workspaceId: string,
-    checked: boolean,
-  ) => Promise<void>;
+  onToggleWorkspaceAccess: (workspaceId: string, checked: boolean) => Promise<void>;
 }) {
   const { intl } = useZCodeIntl();
   const allAllowed = isAllWorkspacesAllowed(bot.allowedWorkspaces);
@@ -52,9 +49,7 @@ export function WorkspaceAccessCard({
       )}
       control={
         <div className="flex items-center justify-end gap-2">
-          {loading ? (
-            <LoaderCircle className="size-4 animate-spin text-foreground-subtle" />
-          ) : null}
+          {loading ? <LoaderCircle className="size-4 animate-spin text-foreground-subtle" /> : null}
           <Select
             value={allAllowed ? "all" : "selected"}
             onValueChange={(value) => {
@@ -92,10 +87,8 @@ export function WorkspaceAccessCard({
                   <button
                     key={workspace.id}
                     type="button"
-                    className="flex min-w-0 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={() =>
-                      void onToggleWorkspaceAccess(workspace.id, !checked)
-                    }
+                    className="flex min-w-0 items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => void onToggleWorkspaceAccess(workspace.id, !checked)}
                     disabled={loading}
                     title={workspace.label}
                   >

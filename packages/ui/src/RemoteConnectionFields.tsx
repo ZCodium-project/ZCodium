@@ -238,7 +238,7 @@ export function RemoteConnectionFields({
                   data-testid={TID_SSH_CONFIG_ALIAS_SELECT}
                   className="h-9 w-full max-w-80 justify-between rounded-lg border-input-border bg-input px-3 text-ui-base font-normal hover:border-input-border-hover hover:bg-input aria-expanded:border-input-border-focused aria-expanded:bg-input-focused"
                 >
-                  <span className="min-w-0 truncate text-left">{sshAliasTriggerLabel}</span>
+                  <span className="min-w-0 truncate text-start">{sshAliasTriggerLabel}</span>
                   <ChevronDownIcon className="size-3.5 text-foreground-subtle" />
                 </Button>
               </PopoverTrigger>
@@ -291,7 +291,7 @@ export function RemoteConnectionFields({
                             setSshAliasPopoverOpen(false);
                           }}
                         >
-                          <span className="flex min-w-0 flex-1 flex-col text-left">
+                          <span className="flex min-w-0 flex-1 flex-col text-start">
                             <span className="truncate">{aliasOption.alias}</span>
                             <span className="truncate text-ui-base text-foreground-subtle">
                               {formatSshConfigAliasSummary(aliasOption)}
@@ -429,7 +429,7 @@ export function RemoteConnectionFields({
               </label>
               <div className="relative mb-3">
                 <RemoteConnectionHistoryInput
-                  className="h-9 pr-10 text-ui-base"
+                  className="h-9 pe-10 text-ui-base"
                   value={privateKeyPath}
                   onChange={setPrivateKeyPath}
                   placeholder={intl.formatMessage({
@@ -447,7 +447,7 @@ export function RemoteConnectionFields({
                   type="button"
                   variant="ghost"
                   size="icon-lg"
-                  className="absolute top-1/2 right-0.5 -translate-y-1/2"
+                  className="absolute top-1/2 end-0.5 -translate-y-1/2"
                   title={intl.formatMessage({ id: "ssh.privateKeySelect" })}
                   onClick={() => {
                     void (async () => {
@@ -625,7 +625,7 @@ export function RemoteConnectionFields({
                 >
                   <span
                     className={cn(
-                      "min-w-0 truncate text-left",
+                      "min-w-0 truncate text-start",
                       dockerContainerTriggerIsPlaceholder
                         ? "text-foreground-subtlest"
                         : "text-foreground",

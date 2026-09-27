@@ -493,7 +493,7 @@ function PluginList({
           >
             <button
               type="button"
-              className="flex min-w-0 flex-1 items-center gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+              className="flex min-w-0 flex-1 items-center gap-3 text-start outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
               onClick={() => actions.onOpenDetail(plugin.id)}
             >
               <PluginStoreAvatar
@@ -1244,7 +1244,7 @@ export function PluginsSection({
             </div>
             <SettingsSearchInput
               data-testid="plugin-settings-search"
-              containerClassName="w-full sm:ml-auto sm:w-64"
+              containerClassName="w-full sm:ms-auto sm:w-64"
               clearLabel={intl.formatMessage({ id: "settings.search.clear" })}
               value={activeSearchQuery}
               onClear={() => {

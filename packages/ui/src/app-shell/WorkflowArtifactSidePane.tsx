@@ -235,7 +235,7 @@ function WorkflowArtifactView({
             version={version}
             versionIndex={versionIndex}
           />
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ms-auto flex items-center gap-1">
             {localSourcePath !== undefined && onRevealFileInTree !== undefined ? (
               <Button
                 data-testid="workflow-artifact-reveal"

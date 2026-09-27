@@ -404,7 +404,7 @@ function OptionRow({
         data-selected={isSelected ? "true" : "false"}
         data-disabled={isDisabled ? "true" : "false"}
         className={cn(
-          "flex h-8 w-full items-center gap-3 rounded-xl px-3 text-left transition-colors",
+          "flex h-8 w-full items-center gap-3 rounded-xl px-3 text-start transition-colors",
           isDisabled
             ? "cursor-not-allowed opacity-50"
             : isSelected

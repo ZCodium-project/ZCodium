@@ -226,7 +226,7 @@ export function ShortcutSettingsSection({ isDesktop = false }: { isDesktop?: boo
             disabled={!overrides || Object.keys(overrides).length === 0}
             data-testid="settings-shortcut-reset-all"
           >
-            <RotateCcw className="mr-2 size-4" />
+            <RotateCcw className="me-2 size-4" />
             {intl.formatMessage({ id: "settings.shortcuts.resetAll" })}
           </Button>
         }

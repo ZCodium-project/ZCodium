@@ -313,7 +313,7 @@ const WorkflowWorkspaceContent = memo(function WorkflowWorkspaceContent({
         </div>
         {summaryParts.length === 0 ? null : (
           <div
-            className="flex items-center gap-1.5 pl-[46px] text-ui-sm text-foreground-subtle"
+            className="flex items-center gap-1.5 ps-[46px] text-ui-sm text-foreground-subtle"
             data-testid="workflow-workspace-summary"
           >
             {summaryParts.map((part, position) => (

@@ -498,7 +498,7 @@ export function HooksSection({ workspacePath, workspaceIdentity }: HooksSectionP
           </div>
         </div>
         <SettingsSearchInput
-          containerClassName="w-full sm:ml-auto sm:w-64"
+          containerClassName="w-full sm:ms-auto sm:w-64"
           clearLabel={intl.formatMessage({ id: "settings.search.clear" })}
           value={query}
           onClear={() => setQuery("")}

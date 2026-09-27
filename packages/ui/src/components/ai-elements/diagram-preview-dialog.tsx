@@ -672,7 +672,7 @@ export function DiagramPreviewDialog({
           <div
             ref={contentRef}
             aria-label={title}
-            className="absolute top-0 left-0 origin-top-left select-none [&_svg]:block [&_svg]:h-auto [&_svg]:max-w-none"
+            className="absolute top-0 start-0 origin-top-left select-none [&_svg]:block [&_svg]:h-auto [&_svg]:max-w-none"
             dangerouslySetInnerHTML={{ __html: svg }}
             role="img"
             style={transformStyle}

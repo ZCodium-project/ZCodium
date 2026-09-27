@@ -182,7 +182,7 @@ export const Attachments = ({
         className={cn(
           "flex items-start",
           variant === "list" ? "flex-col gap-2" : "flex-wrap gap-2",
-          variant === "grid" && "ml-auto w-fit",
+          variant === "grid" && "ms-auto w-fit",
           className,
         )}
         {...props}
@@ -266,7 +266,7 @@ export const Attachment = ({
           variant === "grid" && "size-24 overflow-hidden rounded-lg",
           variant === "inline" && [
             "flex h-8 select-none items-center gap-0.5",
-            "overflow-hidden rounded-md border border-border p-1 pr-2.5",
+            "overflow-hidden rounded-md border border-border p-1 pe-2.5",
             "font-medium text-ui-base transition-all",
             "bg-background",
             "[--attachment-bg:var(--color-background)]",
@@ -464,7 +464,7 @@ export const AttachmentRemove = ({
     return (
       <span
         className={cn(
-          "pointer-events-none absolute inset-y-0 right-0 z-10 flex items-center transition-opacity duration-150 ease-out",
+          "pointer-events-none absolute inset-y-0 end-0 z-10 flex items-center transition-opacity duration-150 ease-out",
           alwaysVisible
             ? "opacity-100"
             : "opacity-0 group-hover:opacity-100 focus-within:opacity-100",
@@ -495,7 +495,7 @@ export const AttachmentRemove = ({
       aria-label={label}
       className={cn(
         variant === "grid" && [
-          "absolute top-2 right-2 size-6 rounded-full p-0",
+          "absolute top-2 end-2 size-6 rounded-full p-0",
           "bg-background/80 backdrop-blur-sm",
           "opacity-0 transition-opacity group-hover:opacity-100",
           "hover:bg-background",

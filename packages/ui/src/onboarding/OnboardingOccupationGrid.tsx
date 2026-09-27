@@ -39,7 +39,7 @@ export function OnboardingOccupationGrid({
             disabled={saving}
             onClick={() => onSelect(value)}
             className={cn(
-              "group flex min-h-12 items-center gap-3 rounded-xl border px-3 py-3 [@media(max-height:740px)]:min-h-11 [@media(max-height:740px)]:py-2 text-left text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
+              "group flex min-h-12 items-center gap-3 rounded-xl border px-3 py-3 [@media(max-height:740px)]:min-h-11 [@media(max-height:740px)]:py-2 text-start text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
               occupation === value
                 ? "border-foreground/60 bg-card-selected dark:border-foreground/50"
                 : "border-card-border bg-card hover:border-border-hover hover:bg-surface-hover dark:border-border/60 dark:bg-transparent dark:hover:bg-surface/60",

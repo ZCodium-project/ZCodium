@@ -43,7 +43,7 @@ export function ContextAttachmentPill({
             "group flex h-8 max-w-full cursor-pointer select-none items-center gap-1.5 rounded-full border-0 bg-surface py-1.5 text-ui-base font-medium text-foreground transition-all hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
             // 输入框与对话流共用该外壳，但只有输入框存在关闭按钮。
             // 无条件压缩右 padding 会让对话流 pill 视觉上偏右，因此按删除入口分流间距。
-            onRemoveAll ? "pl-3 pr-1.5" : "px-3",
+            onRemoveAll ? "ps-3 pe-1.5" : "px-3",
           )}
           role="button"
           tabIndex={0}

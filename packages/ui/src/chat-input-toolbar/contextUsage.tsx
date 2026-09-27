@@ -853,7 +853,7 @@ export function ChatContextUsage({
     >
       <ControlHintTooltip
         className={
-          triggerTooltipKind === "reset-status" ? undefined : "bg-background py-0.5 pr-0.5"
+          triggerTooltipKind === "reset-status" ? undefined : "bg-background py-0.5 pe-0.5"
         }
         open={resetStatusTooltipOpen}
         side="top"
@@ -921,7 +921,7 @@ export function ChatContextUsage({
                 <span className="shrink-0 text-ui-base font-medium text-foreground">
                   {intl.formatMessage({ id: "chat.contextUsage.title" })}
                 </span>
-                <span className="ml-auto shrink-0 text-right font-mono text-ui-sm text-foreground-subtle">
+                <span className="ms-auto shrink-0 text-end font-mono text-ui-sm text-foreground-subtle">
                   {compactTokenUsageLabel}
                 </span>
               </div>
@@ -959,7 +959,7 @@ export function ChatContextUsage({
                           })}
                         </span>
                         {/* breakdown 行只展示占比，分项 token 数会和顶部总量口径混在一起造成误读。*/}
-                        <span className="ml-auto min-w-10 shrink-0 text-right font-mono text-ui-sm tabular-nums text-foreground">
+                        <span className="ms-auto min-w-10 shrink-0 text-end font-mono text-ui-sm tabular-nums text-foreground">
                           {percentageFormatter.format(segment.percent)}
                         </span>
                       </div>

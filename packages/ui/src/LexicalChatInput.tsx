@@ -1427,7 +1427,7 @@ export function LexicalChatInput({
         "aria-placeholder": placeholder,
         placeholder: (
           <div
-            className={`pointer-events-none absolute left-0 top-0 ${compactPlaceholder ? "line-clamp-2" : ""} text-ui-base leading-5 text-foreground-subtlest`}
+            className={`pointer-events-none absolute start-0 top-0 ${compactPlaceholder ? "line-clamp-2" : ""} text-ui-base leading-5 text-foreground-subtlest`}
           >
             {placeholder}
           </div>

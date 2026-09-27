@@ -260,7 +260,7 @@ export function SavedWorkflowsSection({
         <h2 className="text-ui-base font-medium leading-5 text-foreground-subtle">
           {intl.formatMessage({ id: "workflows.hub.sectionTitle" })}
           {totalCount > 0 ? (
-            <span className="ml-1 font-normal text-foreground-subtlest">{totalCount}</span>
+            <span className="ms-1 font-normal text-foreground-subtlest">{totalCount}</span>
           ) : null}
         </h2>
         <ControlHintTooltip title={intl.formatMessage({ id: "workflows.hub.refresh" })}>

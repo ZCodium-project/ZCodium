@@ -203,7 +203,7 @@ export function SidePaneTabOverview({
                       <span className="min-w-0 flex-1 truncate text-ui-base font-medium text-foreground">
                         {title}
                       </span>
-                      <span className="mr-0.5 shrink-0 text-ui-base text-foreground-subtle">
+                      <span className="me-0.5 shrink-0 text-ui-base text-foreground-subtle">
                         {openedAtLabel}
                       </span>
                       <Button
@@ -251,7 +251,7 @@ export function SidePaneTabOverview({
                     <span className="min-w-0 flex-1 truncate text-ui-base font-medium text-foreground">
                       {title}
                     </span>
-                    <span className="mr-0.5 shrink-0 text-ui-base text-foreground-subtle">
+                    <span className="me-0.5 shrink-0 text-ui-base text-foreground-subtle">
                       {closedAtLabel}
                     </span>
                   </CommandItem>

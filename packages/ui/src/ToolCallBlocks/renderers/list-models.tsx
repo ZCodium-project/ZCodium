@@ -340,7 +340,7 @@ export function ListModelsToolCallBlock(context: ToolCallBlockRenderContext) {
                   </span>
                 )}
                 {model.contextWindow === undefined ? null : (
-                  <span className="ml-auto shrink-0 font-mono text-ui-xs tabular-nums text-foreground-subtlest">
+                  <span className="ms-auto shrink-0 font-mono text-ui-xs tabular-nums text-foreground-subtlest">
                     {formatContextWindow(model.contextWindow)}
                   </span>
                 )}

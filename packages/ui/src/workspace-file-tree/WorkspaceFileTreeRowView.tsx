@@ -215,9 +215,9 @@ export function WorkspaceFileTreeRowView({
       tabIndex={0}
       draggable={!isDeletedFile}
       className={cn(
-        "group/file-tree-row relative flex h-7 w-full min-w-0 items-center gap-1.5 rounded-lg border pr-2 py-1 text-left text-ui-base text-foreground outline-none transition-[background-color,border-color,box-shadow]",
+        "group/file-tree-row relative flex h-7 w-full min-w-0 items-center gap-1.5 rounded-lg border pe-2 py-1 text-start text-ui-base text-foreground outline-none transition-[background-color,border-color,box-shadow]",
         isDeletedFile ? "cursor-default" : "cursor-pointer",
-        "pl-[calc(var(--workspace-file-tree-depth)*0.75rem+0.5rem)]",
+        "ps-[calc(var(--workspace-file-tree-depth)*0.75rem+0.5rem)]",
         selected
           ? "border-input-border-focused bg-transparent hover:bg-surface-hover"
           : "border-transparent hover:bg-surface-hover",
@@ -261,7 +261,7 @@ export function WorkspaceFileTreeRowView({
       {hierarchyGuideStyle && !isDragging ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-y-px left-2.5"
+          className="pointer-events-none absolute -inset-y-px start-2.5"
           data-workspace-file-tree-hierarchy-guides={row.depth}
           style={hierarchyGuideStyle}
         />
@@ -291,7 +291,7 @@ export function WorkspaceFileTreeRowView({
           side="right"
           align="center"
           sideOffset={4}
-          triggerClassName="ml-auto"
+          triggerClassName="ms-auto"
         >
           <span
             className={cn(
@@ -310,7 +310,7 @@ export function WorkspaceFileTreeRowView({
           side="right"
           align="center"
           sideOffset={4}
-          triggerClassName="ml-1"
+          triggerClassName="ms-1"
         >
           <span className="flex shrink-0 items-center" aria-label="●">
             <span
@@ -323,9 +323,9 @@ export function WorkspaceFileTreeRowView({
         </ControlHintTooltip>
       ) : null}
       {row.loading ? (
-        <LoaderCircle className="ml-2 size-3 shrink-0 animate-spin text-foreground-subtlest" />
+        <LoaderCircle className="ms-2 size-3 shrink-0 animate-spin text-foreground-subtlest" />
       ) : row.error ? (
-        <AlertCircle className="ml-2 size-3 shrink-0 text-warning" />
+        <AlertCircle className="ms-2 size-3 shrink-0 text-warning" />
       ) : null}
     </div>
   );
@@ -346,7 +346,7 @@ export function WorkspaceFileTreeRowView({
 
   return (
     <div
-      className={cn(layout === "absolute" ? "absolute left-0 top-0 w-full px-1" : "w-full")}
+      className={cn(layout === "absolute" ? "absolute start-0 top-0 w-full px-1" : "w-full")}
       style={rowStyle}
     >
       <ContextMenu>

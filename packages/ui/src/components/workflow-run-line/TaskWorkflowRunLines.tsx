@@ -100,7 +100,7 @@ function RunRail({ rail, intl }: { rail: WorkflowRunRail; intl: TaskWorkflowRunL
         </span>
       ))}
       {rail.hidden > 0 ? (
-        <span className="ml-1 text-ui-xs leading-none text-foreground-subtlest">
+        <span className="ms-1 text-ui-xs leading-none text-foreground-subtlest">
           {intl.formatMessage(
             { id: "taskList.workflowRun.moreStations" },
             { count: String(rail.hidden) },
@@ -212,7 +212,7 @@ export function TaskWorkflowRunLines({
         const lineClassName = cn(
           "flex min-w-0 max-w-full items-center gap-1.5 rounded-md text-foreground-subtle",
           compact ? "h-6 text-ui-sm" : "h-5 text-ui-sm",
-          interactive && "-ml-1 px-1 hover:bg-surface-hover hover:text-foreground",
+          interactive && "-ms-1 px-1 hover:bg-surface-hover hover:text-foreground",
         );
         const lineProps = {
           "data-workflow-run-line": "true",

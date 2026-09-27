@@ -144,7 +144,7 @@ function CuaAppList({ items }: { items: CuaAppItem[] }) {
   }, [items, platform]);
 
   return (
-    <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
+    <div className="max-h-64 space-y-1 overflow-y-auto pe-1">
       {items.map((item, index) => (
         <div
           key={`${item.bundleId ?? item.name}:${index}`}
@@ -175,7 +175,7 @@ function CuaAppList({ items }: { items: CuaAppItem[] }) {
 function CuaWindowList({ items }: { items: CuaWindowItem[] }) {
   const { intl } = useZCodeIntl();
   return (
-    <div className="max-h-64 space-y-1 overflow-y-auto pr-1">
+    <div className="max-h-64 space-y-1 overflow-y-auto pe-1">
       {items.map((item, index) => (
         <div
           key={`${item.title ?? "untitled"}:${index}`}

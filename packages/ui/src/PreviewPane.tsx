@@ -1565,7 +1565,7 @@ export function PreviewPane({
           </div>
         </div>
 
-        <div className="flex shrink-0 pr-1.5 items-center gap-2">
+        <div className="flex shrink-0 pe-1.5 items-center gap-2">
           {canOpenDiffFilePreview ? (
             <Button
               type="button"

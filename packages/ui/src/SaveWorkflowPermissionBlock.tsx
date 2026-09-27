@@ -56,14 +56,14 @@ function WorkflowArgsTable({ args }: { args: readonly WorkflowArgDeclaration[] }
   });
 
   return (
-    <table className="w-full border-collapse text-left" data-workflow-save-args="true">
+    <table className="w-full border-collapse text-start" data-workflow-save-args="true">
       <thead>
         <tr>
           {headers.map((header) => (
             <th
               key={header}
               scope="col"
-              className="border-b border-border pb-1 pr-3 text-ui-xs font-medium text-foreground-subtlest"
+              className="border-b border-border pb-1 pe-3 text-ui-xs font-medium text-foreground-subtlest"
             >
               {header}
             </th>
@@ -74,13 +74,13 @@ function WorkflowArgsTable({ args }: { args: readonly WorkflowArgDeclaration[] }
         {args.map((arg) => (
           <Fragment key={arg.name}>
             <tr data-workflow-save-arg={arg.name}>
-              <td className="pr-3 pt-1.5 align-top font-mono text-ui-sm text-foreground-subtle">
+              <td className="pe-3 pt-1.5 align-top font-mono text-ui-sm text-foreground-subtle">
                 {arg.name}
               </td>
-              <td className="pr-3 pt-1.5 align-top font-mono text-ui-sm text-foreground-subtlest">
+              <td className="pe-3 pt-1.5 align-top font-mono text-ui-sm text-foreground-subtlest">
                 {arg.type ?? NO_VALUE_PLACEHOLDER}
               </td>
-              <td className="pr-3 pt-1.5 align-top text-ui-sm text-foreground-subtlest">
+              <td className="pe-3 pt-1.5 align-top text-ui-sm text-foreground-subtlest">
                 {arg.required ? requiredLabel : optionalLabel}
               </td>
               <td className="pt-1.5 align-top font-mono text-ui-sm text-foreground-subtlest">
@@ -194,7 +194,7 @@ export function SaveWorkflowPermissionBlock({ request }: { request: ZCodePermiss
 
       {input.script === undefined ? null : (
         <Collapsible open={scriptOpen} onOpenChange={setScriptOpen}>
-          <CollapsibleTrigger className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-left text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle">
+          <CollapsibleTrigger className="flex min-w-0 items-center gap-1 rounded-md py-0.5 text-start text-ui-xs font-medium text-foreground-subtlest transition-colors hover:text-foreground-subtle">
             <ChevronRightIcon
               className={cn("size-3.5 shrink-0 transition-transform", scriptOpen && "rotate-90")}
             />

@@ -215,7 +215,7 @@ function pad2(value: number): string {
 const CUSTOM_REPEAT_SELECT_CONTENT_CLASS =
   "w-[var(--radix-select-trigger-width)] px-0 py-1.5 [&_[data-position=popper]]:px-1 [&_[data-slot=select-scroll-up-button]]:hidden [&_[data-slot=select-scroll-down-button]]:hidden";
 const CUSTOM_REPEAT_SELECT_ITEM_CLASS =
-  "min-h-8 rounded-[8px] px-2 py-1.5 pr-8 text-ui-base leading-5 text-foreground-subtle data-[highlighted]:bg-menu-hover data-[highlighted]:text-foreground data-[state=checked]:bg-menu-hover data-[state=checked]:text-foreground";
+  "min-h-8 rounded-[8px] px-2 py-1.5 pe-8 text-ui-base leading-5 text-foreground-subtle data-[highlighted]:bg-menu-hover data-[highlighted]:text-foreground data-[state=checked]:bg-menu-hover data-[state=checked]:text-foreground";
 
 function CustomRepeatSelectIndicator() {
   return (
@@ -293,7 +293,7 @@ function TimeOfDayPicker({
         <button
           type="button"
           aria-label={ariaLabel}
-          className="inline-flex h-auto items-center gap-1 rounded-full bg-hover py-px pl-2 pr-1.5 text-ui-base leading-5 tabular-nums text-foreground transition-colors hover:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
+          className="inline-flex h-auto items-center gap-1 rounded-full bg-hover py-px ps-2 pe-1.5 text-ui-base leading-5 tabular-nums text-foreground transition-colors hover:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
         >
           {pad2(hour)}:{pad2(minute)}
           <span className="shrink-0 text-foreground-subtle">
@@ -389,7 +389,7 @@ function MonthDayPicker({
           aria-label={intl.formatMessage({
             id: "automations.form.schedule.yearDateLabel",
           })}
-          className="inline-flex h-auto items-center gap-1 rounded-full bg-hover py-px pl-2 pr-1.5 text-ui-base leading-5 tabular-nums text-foreground transition-colors hover:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
+          className="inline-flex h-auto items-center gap-1 rounded-full bg-hover py-px ps-2 pe-1.5 text-ui-base leading-5 tabular-nums text-foreground transition-colors hover:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
         >
           {intl.formatMessage(
             { id: "automations.form.schedule.monthDayValue" },
@@ -448,7 +448,7 @@ function WeekdayPicker({
             id: "automations.form.schedule.weekdaysLabel",
           })}
           // 星期多选 trigger 与同层频率、时间 tag 使用相同高亮，避免亮度不一致。
-          className="inline-flex h-auto max-w-full items-center gap-0.5 rounded-full bg-hover py-px pl-2 pr-0.5 text-ui-base leading-5 text-foreground transition-colors hover:bg-selected data-[state=open]:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
+          className="inline-flex h-auto max-w-full items-center gap-0.5 rounded-full bg-hover py-px ps-2 pe-0.5 text-ui-base leading-5 text-foreground transition-colors hover:bg-selected data-[state=open]:bg-selected focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused"
         >
           <span className="truncate">{label}</span>
           <AutomationChevronDownIcon />
@@ -467,7 +467,7 @@ function WeekdayPicker({
                   active ? weekdays.filter((candidate) => candidate !== day) : [...weekdays, day],
                 );
               }}
-              className="flex h-7 w-full items-center gap-2 rounded-md px-2 text-left text-ui-base text-foreground transition-colors hover:bg-menu-hover"
+              className="flex h-7 w-full items-center gap-2 rounded-md px-2 text-start text-ui-base text-foreground transition-colors hover:bg-menu-hover"
             >
               {/* 勾选位放在行首会让星期菜单偏离标准的尾部状态布局。 */}
               <span className="min-w-0 flex-1 truncate">
@@ -541,7 +541,7 @@ function EndDatePicker({
         <button
           type="button"
           disabled={disabled}
-          className="inline-flex h-9 w-[135px] items-center justify-center gap-1.5 rounded-lg border border-input-border bg-input pl-3 pr-3.5 text-ui-base font-normal leading-5 tracking-[-0.18px] text-foreground transition-colors hover:border-input-border-hover hover:bg-input/80 data-[state=open]:border-input-border-hover data-[state=open]:bg-input/80 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-input-border disabled:hover:bg-input"
+          className="inline-flex h-9 w-[135px] items-center justify-center gap-1.5 rounded-lg border border-input-border bg-input ps-3 pe-3.5 text-ui-base font-normal leading-5 tracking-[-0.18px] text-foreground transition-colors hover:border-input-border-hover hover:bg-input/80 data-[state=open]:border-input-border-hover data-[state=open]:bg-input/80 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-input-border disabled:hover:bg-input"
         >
           <CustomRepeatCalendarIcon className="size-5 shrink-0 text-foreground-subtle" />
           <span className="tabular-nums">
@@ -702,7 +702,7 @@ function CustomRepeatDialog({
             <button
               type="button"
               aria-label={intl.formatMessage({ id: "common.close" })}
-              className="absolute right-5 top-5 flex size-6 items-center justify-center rounded-[6px] opacity-80 transition-colors hover:bg-surface-hover hover:opacity-100"
+              className="absolute end-5 top-5 flex size-6 items-center justify-center rounded-[6px] opacity-80 transition-colors hover:bg-surface-hover hover:opacity-100"
             >
               <X className="size-4" strokeWidth={2} aria-hidden="true" />
             </button>
@@ -728,7 +728,7 @@ function CustomRepeatDialog({
                   inputMode="numeric"
                   value={intervalInput}
                   aria-invalid={!isIntervalValid}
-                  className="h-9 rounded-lg px-3 pr-10 text-mobile-input-safe leading-6 tracking-[-0.18px] [appearance:textfield] md:text-ui-base md:leading-5 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  className="h-9 rounded-lg px-3 pe-10 text-mobile-input-safe leading-6 tracking-[-0.18px] [appearance:textfield] md:text-ui-base md:leading-5 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   data-testid={TID_AUTOMATION_CUSTOM_INTERVAL_SELECT}
                   onChange={(event) => {
                     const value = event.target.value;
@@ -739,7 +739,7 @@ function CustomRepeatDialog({
                 />
                 {/* 原生 number spinner 在系统浏览器与 WebView 的尺寸、主题反馈不一致；
                     使用受控步进按钮，统一桌面与手机 Web 的点击样式。 */}
-                <div className="absolute inset-y-px right-px flex w-8 flex-col overflow-hidden rounded-r-[7px] border-l border-input-border bg-input">
+                <div className="absolute inset-y-px end-px flex w-8 flex-col overflow-hidden rounded-r-[7px] border-s border-input-border bg-input">
                   <button
                     type="button"
                     aria-label="+1"
@@ -2074,7 +2074,7 @@ export function AutomationEditView({
                 </div>
                 <div className="flex min-h-8 flex-wrap items-center gap-2">
                   {/* 状态圆点与胶囊沿用了偏大的 8px / 36px 尺寸，未遵循 6px glyph + 20px frame 的规格。 */}
-                  <span className="inline-flex h-8 max-w-full items-center gap-1 rounded-lg bg-card pl-2 pr-4 text-ui-base leading-5 text-foreground">
+                  <span className="inline-flex h-8 max-w-full items-center gap-1 rounded-lg bg-card ps-2 pe-4 text-ui-base leading-5 text-foreground">
                     <span className="flex size-5 shrink-0 items-center justify-center">
                       <span
                         className={cn(
@@ -2136,7 +2136,7 @@ export function AutomationEditView({
                 </label>
                 <div
                   data-testid={TID_AUTOMATION_SCHEDULE_PREVIEW}
-                  className="relative flex h-9 items-center overflow-hidden rounded-xl border border-input-border bg-input px-2 pr-9 text-ui-base leading-5 text-foreground-subtle transition-colors hover:border-input-border-hover focus-within:border-input-border-focused focus-within:bg-input-focused"
+                  className="relative flex h-9 items-center overflow-hidden rounded-xl border border-input-border bg-input px-2 pe-9 text-ui-base leading-5 text-foreground-subtle transition-colors hover:border-input-border-hover focus-within:border-input-border-focused focus-within:bg-input-focused"
                 >
                   <span className="min-w-0 truncate">
                     {intl.formatMessage({ id: "automations.frequency.custom" })}
@@ -2145,7 +2145,7 @@ export function AutomationEditView({
                     type="button"
                     data-testid={TID_AUTOMATION_SCHEDULE_DELETE}
                     onClick={handleRemoveSchedule}
-                    className="absolute right-2 top-2 flex size-5 items-center justify-center text-foreground-subtle transition-colors hover:text-foreground"
+                    className="absolute end-2 top-2 flex size-5 items-center justify-center text-foreground-subtle transition-colors hover:text-foreground"
                     aria-label={intl.formatMessage({ id: "common.delete" })}
                   >
                     <AutomationTrashIcon />
@@ -2215,7 +2215,7 @@ export function AutomationEditView({
                     {/* 调度栏不用 min-height、换行布局和全行摘要——那些会在新增 tag 后被第二行撑高。
                         恢复全局 Input 的 1px 描边后，用 7px 左内边距抵消边框占位，保持首个 tag
                         距外边缘仍为 8px；tag 增加上下各 1px padding 后仍在 36px input 内垂直居中。 */}
-                    <div className="relative flex h-9 flex-nowrap items-center gap-1 overflow-hidden rounded-xl border border-input-border bg-input py-1 pl-[7px] pr-9 text-ui-base leading-5 text-foreground transition-colors hover:border-input-border-hover focus-within:border-input-border-focused focus-within:bg-input-focused">
+                    <div className="relative flex h-9 flex-nowrap items-center gap-1 overflow-hidden rounded-xl border border-input-border bg-input py-1 ps-[7px] pe-9 text-ui-base leading-5 text-foreground transition-colors hover:border-input-border-hover focus-within:border-input-border-focused focus-within:bg-input-focused">
                       <Select
                         value={builder.frequency}
                         onValueChange={(value) => {
@@ -2245,7 +2245,7 @@ export function AutomationEditView({
                         <SelectTrigger
                           variant="ghost"
                           data-testid={TID_AUTOMATION_FREQUENCY_SELECT}
-                          className="h-auto min-w-24 rounded-full border-0 bg-hover py-px pl-2 text-ui-base leading-5 text-foreground hover:bg-selected aria-expanded:bg-selected"
+                          className="h-auto min-w-24 rounded-full border-0 bg-hover py-px ps-2 text-ui-base leading-5 text-foreground hover:bg-selected aria-expanded:bg-selected"
                           indicator={<AutomationChevronDownIcon />}
                         >
                           <SelectValue>
@@ -2282,7 +2282,7 @@ export function AutomationEditView({
                         >
                           <SelectTrigger
                             variant="ghost"
-                            className="h-auto w-auto rounded-full border-0 bg-hover py-px pl-2 pr-0.5 text-ui-base leading-5 text-foreground hover:bg-selected aria-expanded:bg-selected"
+                            className="h-auto w-auto rounded-full border-0 bg-hover py-px ps-2 pe-0.5 text-ui-base leading-5 text-foreground hover:bg-selected aria-expanded:bg-selected"
                             indicator={<AutomationChevronDownIcon />}
                           >
                             <SelectValue />
@@ -2318,7 +2318,7 @@ export function AutomationEditView({
                           // 视觉重构误删了 E2E 稳定选择器，导致保存后无法重新打开 Custom Repeat 验证复原值。
                           data-testid={TID_AUTOMATION_CUSTOM_REPEAT_EDIT}
                           onClick={() => setCustomRepeatOpen(true)}
-                          className="inline-flex h-auto items-center gap-0.5 rounded-full bg-hover py-px pl-2 pr-0.5 text-ui-base leading-5 text-foreground hover:bg-selected"
+                          className="inline-flex h-auto items-center gap-0.5 rounded-full bg-hover py-px ps-2 pe-0.5 text-ui-base leading-5 text-foreground hover:bg-selected"
                         >
                           <span>
                             {intl.formatMessage(
@@ -2393,7 +2393,7 @@ export function AutomationEditView({
                           >
                             <SelectTrigger
                               variant="ghost"
-                              className="h-auto w-14 rounded-full border-0 bg-hover py-px pl-2 text-ui-base leading-5 tabular-nums hover:bg-selected"
+                              className="h-auto w-14 rounded-full border-0 bg-hover py-px ps-2 text-ui-base leading-5 tabular-nums hover:bg-selected"
                             >
                               <SelectValue>{pad2(builder.minute)}</SelectValue>
                             </SelectTrigger>
@@ -2432,7 +2432,7 @@ export function AutomationEditView({
                           >
                             <SelectTrigger
                               variant="ghost"
-                              className="h-auto w-16 rounded-full border-0 bg-hover py-px pl-2 text-ui-base leading-5 tabular-nums hover:bg-selected"
+                              className="h-auto w-16 rounded-full border-0 bg-hover py-px ps-2 text-ui-base leading-5 tabular-nums hover:bg-selected"
                             >
                               <SelectValue>{pad2(builder.minute)}</SelectValue>
                             </SelectTrigger>
@@ -2492,7 +2492,7 @@ export function AutomationEditView({
                       {schedulePreview ? (
                         <span
                           data-testid={TID_AUTOMATION_SCHEDULE_PREVIEW}
-                          className="min-w-0 flex-1 truncate text-ui-base text-foreground-subtle sm:ml-1"
+                          className="min-w-0 flex-1 truncate text-ui-base text-foreground-subtle sm:ms-1"
                         >
                           {schedulePreview}
                         </span>
@@ -2501,7 +2501,7 @@ export function AutomationEditView({
                         type="button"
                         data-testid={TID_AUTOMATION_SCHEDULE_DELETE}
                         onClick={handleRemoveSchedule}
-                        className="absolute right-2 top-2 flex size-5 items-center justify-center text-foreground-subtle transition-colors hover:text-foreground"
+                        className="absolute end-2 top-2 flex size-5 items-center justify-center text-foreground-subtle transition-colors hover:text-foreground"
                         aria-label={intl.formatMessage({ id: "common.delete" })}
                       >
                         <AutomationTrashIcon />
@@ -2641,7 +2641,7 @@ export function AutomationEditView({
                         AUTOMATION_INSTRUCTIONS_TOOLBAR_TRIGGER_CLASSNAME,
                         "w-fit max-w-56 min-w-0 shrink justify-start gap-1 px-2",
                       )}
-                      labelVisibilityClassName="inline-flex min-w-0 truncate text-left"
+                      labelVisibilityClassName="inline-flex min-w-0 truncate text-start"
                       provider={ZCODE_AGENT_PROVIDER}
                       restoreFocusSelector={null}
                     />
@@ -2735,7 +2735,7 @@ export function AutomationEditView({
             ) : (
               <div className="overflow-x-auto rounded-[8px]">
                 {/* 运行历史使用可缩放字号，不能继续绑定固定 18px 行高。*/}
-                <table className="w-full text-left text-ui-base font-normal leading-normal tracking-[-0.08px]">
+                <table className="w-full text-start text-ui-base font-normal leading-normal tracking-[-0.08px]">
                   <thead className="bg-surface text-foreground-subtle">
                     <tr className="h-[30px] border-b border-border">
                       <th className="px-4 font-normal">

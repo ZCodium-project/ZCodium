@@ -69,6 +69,6 @@ export const TaskContent = ({ children, className, ...props }: TaskContentProps)
     )}
     {...props}
   >
-    <div className="ml-2 space-y-2 border-border border-l pl-3.5 border-border">{children}</div>
+    <div className="ms-2 space-y-2 border-border border-s ps-3.5 border-border">{children}</div>
   </CollapsibleContent>
 );

@@ -566,7 +566,7 @@ export function GroupItem({
                     type="button"
                     tabIndex={-1}
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-0 top-0 invisible overflow-hidden rounded-sm px-1 text-left text-ui-base text-foreground"
+                    className="pointer-events-none absolute start-0 top-0 invisible overflow-hidden rounded-sm px-1 text-start text-ui-base text-foreground"
                     // 测量节点不能跟随 label 的 max-w-full，否则输入变长时会被当前宽度反向卡住。
                     // 外层 label 继续用 max-w-full 负责视觉裁剪，这里只测真实内容宽度。
                     style={{ whiteSpace: "pre" }}
@@ -576,7 +576,7 @@ export function GroupItem({
                   <input
                     ref={titleInputRef}
                     autoFocus
-                    className="w-full min-w-0 truncate rounded-sm border-0 bg-transparent px-1 py-0 text-left text-ui-base leading-normal text-foreground outline-none hover:bg-hover focus-visible:ring-1 focus-visible:ring-input-border-focused"
+                    className="w-full min-w-0 truncate rounded-sm border-0 bg-transparent px-1 py-0 text-start text-ui-base leading-normal text-foreground outline-none hover:bg-hover focus-visible:ring-1 focus-visible:ring-input-border-focused"
                     value={renameDraft}
                     onBlur={handleRenameBlur}
                     onChange={(event) => setRenameDraft(event.target.value)}

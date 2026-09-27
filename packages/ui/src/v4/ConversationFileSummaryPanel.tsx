@@ -197,7 +197,7 @@ export function ConversationFileSummaryPanel({
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="flex h-full min-w-0 flex-1 items-center gap-2 px-1 text-left text-ui-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+              className="flex h-full min-w-0 flex-1 items-center gap-2 px-1 text-start text-ui-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
               aria-label={intl.formatMessage({
                 id: open ? "chat.changeSummary.collapse" : "chat.changeSummary.expand",
               })}
@@ -264,7 +264,7 @@ export function ConversationFileSummaryPanel({
                     <div
                       aria-disabled={!canReview}
                       className={cn(
-                        "flex w-full items-center gap-1 px-2 py-2 text-left transition-colors",
+                        "flex w-full items-center gap-1 px-2 py-2 text-start transition-colors",
                         canReview ? "cursor-pointer hover:bg-hover/30" : "cursor-default",
                       )}
                       onClick={() => openDiff(item, context)}

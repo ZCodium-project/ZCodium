@@ -96,7 +96,7 @@ export function WorkflowRunSubagentRoster({
             {subagent.instructionsHead === undefined ||
             subagent.instructionsHead.length === 0 ? null : (
               // 任务行从属于上一行，不是新的一行事实：缩进而不是另起一格。
-              <p className="min-w-0 break-words pl-3 text-ui-sm text-foreground-subtle">
+              <p className="min-w-0 break-words ps-3 text-ui-sm text-foreground-subtle">
                 {intl.formatMessage(
                   { id: `${I18N_PREFIX}subagent.task` },
                   { task: subagent.instructionsHead },

@@ -60,7 +60,7 @@ export function WorkspacePurposeSection({
                 这里统一为 section title 的 text-ui-base，避免可折叠能力改变标题层级。 */}
             <button
               type="button"
-              className="flex h-7 min-w-0 flex-1 items-center gap-1 px-2.5 text-left text-ui-base font-medium text-foreground-subtlest outline-none transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+              className="flex h-7 min-w-0 flex-1 items-center gap-1 px-2.5 text-start text-ui-base font-medium text-foreground-subtlest outline-none transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               <span className="min-w-0 truncate">{title}</span>
               {open ? (
@@ -78,7 +78,7 @@ export function WorkspacePurposeSection({
               )}
             </button>
           </CollapsibleTrigger>
-          <div className="flex shrink-0 items-center pr-1.5 opacity-0 transition-opacity group-hover/purpose-section:opacity-100 group-focus-within/purpose-section:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:none)]:opacity-100">
+          <div className="flex shrink-0 items-center pe-1.5 opacity-0 transition-opacity group-hover/purpose-section:opacity-100 group-focus-within/purpose-section:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:none)]:opacity-100">
             <button
               ref={setActivatorNodeRef}
               type="button"

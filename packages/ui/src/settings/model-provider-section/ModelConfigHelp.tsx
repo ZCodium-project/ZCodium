@@ -46,7 +46,7 @@ export function ModelConfigHelp({ field }: { field: ModelConfigHelpField }) {
           type="button"
           size="icon-sm"
           variant="ghost"
-          className="ml-1 size-6 align-middle text-foreground-subtle"
+          className="ms-1 size-6 align-middle text-foreground-subtle"
           data-model-help={field}
           aria-label={intl.formatMessage(
             { id: "settings.modelProvider.fieldHelp" },
@@ -81,7 +81,7 @@ export function ModelConfigHelp({ field }: { field: ModelConfigHelpField }) {
         <div className="space-y-2">
           {copy.split("\n\n").map((paragraph, index) =>
             paragraph.startsWith("- ") ? (
-              <ul key={index} className="list-disc space-y-1 pl-4">
+              <ul key={index} className="list-disc space-y-1 ps-4">
                 {paragraph.split("\n").map((line, lineIndex) => (
                   <li key={lineIndex}>{emphasis(line.slice(2))}</li>
                 ))}

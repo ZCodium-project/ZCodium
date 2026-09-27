@@ -254,7 +254,7 @@ export function OccupationOnboarding({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-12 [app-region:drag]" />
       {/* 与 Settings 相同，计入 Workspace 的 4px 外层留白、1px 边框和 8px 内边距。 */}
       {showWindowControls ? (
-        <div className="absolute right-1 top-1 z-30 mt-px mr-px flex h-12 items-center px-2">
+        <div className="absolute end-1 top-1 z-30 mt-px me-px flex h-12 items-center px-2">
           <DesktopWindowControls />
         </div>
       ) : null}

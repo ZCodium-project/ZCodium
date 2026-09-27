@@ -111,8 +111,8 @@ export function ControlHintTooltip({
         sideOffset={sideOffset}
         className={cn(
           description
-            ? "max-w-72 flex-col items-start gap-1.5 px-3 py-2 text-left"
-            : "max-w-[min(28rem,calc(100vw-1rem))] items-center gap-2 px-2.5 py-1 text-left has-data-[slot=kbd]:pr-1",
+            ? "max-w-72 flex-col items-start gap-1.5 px-3 py-2 text-start"
+            : "max-w-[min(28rem,calc(100vw-1rem))] items-center gap-2 px-2.5 py-1 text-start has-data-[slot=kbd]:pe-1",
           className,
         )}
       >

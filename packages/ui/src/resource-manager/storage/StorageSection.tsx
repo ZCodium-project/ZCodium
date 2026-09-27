@@ -167,7 +167,7 @@ export function StorageSection({
                 ? intl.formatMessage({ id: "resourceManager.storage.failed" })
                 : intl.formatMessage({ id: "resourceManager.storage.idle" })}
         </div>
-        <div className="ml-auto">
+        <div className="ms-auto">
           <Button
             type="button"
             variant="outline"

@@ -218,7 +218,7 @@ export function WorkflowArtifactTilePreview({
                   {row.map((cell, cellIndex) => (
                     <td
                       className={cn(
-                        "whitespace-nowrap border-b py-1.5 pr-3 text-foreground",
+                        "whitespace-nowrap border-b py-1.5 pe-3 text-foreground",
                         rowIndex === 0
                           ? "border-border font-sans text-ui-sm font-medium uppercase tracking-wide text-foreground-subtlest"
                           : "border-[var(--color-workflow-rule)]",

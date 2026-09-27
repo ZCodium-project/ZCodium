@@ -32,9 +32,9 @@ export function ShortcutSearchBar({
   return (
     <div className="flex gap-2">
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle" />
+        <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-foreground-subtle" />
         <Input
-          className={`pl-9 font-mono ${keyLabel !== null ? "pr-16 text-brand" : "pr-9"}`}
+          className={`ps-9 font-mono ${keyLabel !== null ? "pe-16 text-brand" : "pe-9"}`}
           placeholder={
             keySearch.armed
               ? intl.formatMessage({ id: "settings.shortcuts.keySearchPlaceholder" })
@@ -52,7 +52,7 @@ export function ShortcutSearchBar({
             type="button"
             aria-label={intl.formatMessage({ id: "settings.shortcuts.keySearchClearAria" })}
             data-testid="settings-shortcut-key-search-clear"
-            className="absolute right-9 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-foreground-subtle hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="absolute end-9 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-foreground-subtle hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={keySearch.clear}
           >
             <X className="size-3.5" />
@@ -63,7 +63,7 @@ export function ShortcutSearchBar({
           aria-label={intl.formatMessage({ id: "settings.shortcuts.keySearchAria" })}
           aria-pressed={keySearch.armed}
           data-testid="settings-shortcut-key-search"
-          className={`absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm p-1 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+          className={`absolute end-2.5 top-1/2 -translate-y-1/2 rounded-sm p-1 focus-visible:outline-2 focus-visible:outline-offset-2 ${
             keySearch.armed ? "text-brand" : "text-foreground-subtle hover:text-foreground"
           }`}
           onClick={() => {

@@ -194,7 +194,7 @@ export function ProviderFamilyPlanModeSwitch({
             })}
           >
             {selectedOption ? (
-              <span className="min-w-0 truncate text-left">{selectedOption.label}</span>
+              <span className="min-w-0 truncate text-start">{selectedOption.label}</span>
             ) : null}
           </SelectValue>
         </SelectTrigger>
@@ -203,7 +203,7 @@ export function ProviderFamilyPlanModeSwitch({
             <SelectItem
               key={option.key}
               value={option.key}
-              className="min-w-0 whitespace-normal pr-8 [overflow-wrap:anywhere]"
+              className="min-w-0 whitespace-normal pe-8 [overflow-wrap:anywhere]"
               data-testid={testId(TID_MODEL_PROVIDER_CONNECTION_MODE_ITEM, option.key)}
             >
               {option.label}

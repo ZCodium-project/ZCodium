@@ -197,10 +197,10 @@ export function WorkflowAgentPill({
       className={cn(
         "wf-pill wf-agent-pill wf-arrive flex rounded-full min-w-0 items-center",
         size === "row"
-          ? "h-6 gap-1.5 pl-1 pr-1.5 text-ui-sm"
-          : "h-8 gap-2 bg-surface pl-2 pr-2.5 text-ui-sm",
+          ? "h-6 gap-1.5 ps-1 pe-1.5 text-ui-sm"
+          : "h-8 gap-2 bg-surface ps-2 pe-2.5 text-ui-sm",
         open !== undefined &&
-          "wf-pill-open cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+          "wf-pill-open cursor-pointer text-start outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         className,
       )}
       data-agent-open={open === undefined ? undefined : "true"}

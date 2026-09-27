@@ -215,7 +215,7 @@ export function DirectoryBrowser({
             onClick={handleGoUp}
             // 滚动容器是纵向 flex 布局，子项默认允许 shrink；
             // 当目录很多触发滚动时，首行“返回上级”会被压缩导致高度变化。
-            className="flex h-10 w-full shrink-0 cursor-pointer items-center gap-2 border-b border-border px-3 text-left text-ui-base transition hover:bg-hover/50"
+            className="flex h-10 w-full shrink-0 cursor-pointer items-center gap-2 border-b border-border px-3 text-start text-ui-base transition hover:bg-hover/50"
           >
             <FolderIcon className="size-4 shrink-0 text-foreground-subtle" />
             <span className="text-foreground">..</span>
@@ -241,7 +241,7 @@ export function DirectoryBrowser({
               <button
                 key={entry.path}
                 onClick={() => navigateTo(entry.path)}
-                className="flex w-full shrink-0 cursor-pointer items-center gap-2 px-3 py-2 text-left text-ui-base transition hover:bg-hover/50"
+                className="flex w-full shrink-0 cursor-pointer items-center gap-2 px-3 py-2 text-start text-ui-base transition hover:bg-hover/50"
               >
                 <EntryIcon className="size-4 shrink-0 text-foreground-subtle" />
                 <span className="truncate">{entry.name}</span>

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const LEFT_NAVIGATION_SELECTOR = '[data-conversation-share-left-navigation="true"]';
+const LEFT_NAVIGATION_SELECTOR = '[data-conversation-share-start-navigation="true"]';
 
 function eventComesFromConversationShareLeftNavigation(event: PointerEvent): boolean {
   return event

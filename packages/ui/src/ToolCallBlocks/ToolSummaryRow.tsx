@@ -179,7 +179,7 @@ export function ToolSummaryRow(props: ToolSummaryRowProps) {
         aria-label={action.ariaLabel}
         onClick={action.onActivate}
         onKeyDown={(event) => handleToolSummaryActionKeyDown(event, action.onActivate)}
-        className="group/tool-summary inline-flex max-w-full cursor-pointer items-center gap-2 self-start text-left text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+        className="group/tool-summary inline-flex max-w-full cursor-pointer items-center gap-2 self-start text-start text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
         title={title}
       >
         {sharedContent}
@@ -206,7 +206,7 @@ export function ToolSummaryRow(props: ToolSummaryRowProps) {
             event.preventDefault();
             event.currentTarget.click();
           }}
-          className="group/tool-summary inline-flex max-w-full cursor-pointer items-center gap-2 self-start text-left text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+          className="group/tool-summary inline-flex max-w-full cursor-pointer items-center gap-2 self-start text-start text-ui-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
           title={title}
         >
           {sharedContent}
@@ -226,7 +226,7 @@ export function ToolSummaryRow(props: ToolSummaryRowProps) {
   return (
     <div
       data-testid={testId(TID_TOOL_SUMMARY_TRIGGER, toolId)}
-      className="group/tool-summary cursor-default flex w-full items-center gap-2 text-left text-ui-base transition-colors focus-visible:outline-none"
+      className="group/tool-summary cursor-default flex w-full items-center gap-2 text-start text-ui-base transition-colors focus-visible:outline-none"
       title={title}
     >
       {sharedContent}

@@ -188,7 +188,7 @@ export function OnboardingSessionsStep(props: {
                   key={workspace.workspacePath}
                   type="button"
                   onClick={() => props.onToggleWorkspace(workspace.workspacePath)}
-                  className="flex min-w-0 w-full items-start gap-3 rounded-lg bg-background p-3 pl-3 text-left transition-colors hover:bg-surface-hover/50"
+                  className="flex min-w-0 w-full items-start gap-3 rounded-lg bg-background p-3 ps-3 text-start transition-colors hover:bg-surface-hover/50"
                 >
                   <div className="flex size-5 shrink-0 items-center justify-center">
                     <div

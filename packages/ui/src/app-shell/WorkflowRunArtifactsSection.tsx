@@ -101,7 +101,7 @@ export const WorkflowRunArtifactsSection = memo(function WorkflowRunArtifactsSec
             ? "chat.toolCall.workflow.run.artifacts.collapse"
             : "chat.toolCall.workflow.run.artifacts.expand",
         })}
-        className="flex h-9 w-full items-center gap-2 px-3 text-left outline-none transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring/40"
+        className="flex h-9 w-full items-center gap-2 px-3 text-start outline-none transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring/40"
         data-testid={TID_WORKFLOW_ARTIFACTS_TOGGLE}
         onClick={() => setExpanded((previous) => !previous)}
         type="button"
@@ -128,7 +128,7 @@ export const WorkflowRunArtifactsSection = memo(function WorkflowRunArtifactsSec
         <ChevronRightIcon
           aria-hidden
           className={cn(
-            "ml-auto size-3.5 shrink-0 text-foreground-subtlest transition-transform",
+            "ms-auto size-3.5 shrink-0 text-foreground-subtlest transition-transform",
             expanded && "rotate-90",
           )}
         />

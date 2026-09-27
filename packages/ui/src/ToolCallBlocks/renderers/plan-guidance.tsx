@@ -82,7 +82,7 @@ export function PlanGuidanceToolCallBlock(context: ToolCallBlockRenderContext) {
   const renderContent = useCallback(
     () =>
       guidanceMarkdown ? (
-        <div className="ml-2 space-y-2 border-border border-l pl-3.5 border-border">
+        <div className="ms-2 space-y-2 border-border border-s ps-3.5 border-border">
           <MessageResponse
             className="min-w-0 break-words [&_h1]:text-foreground-subtlest [&_h2]:text-foreground-subtlest [&_h3]:text-foreground-subtlest [&_li]:text-foreground-subtlest [&_p]:text-foreground-subtlest"
             workspacePath={context.workspacePath}

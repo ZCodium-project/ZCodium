@@ -216,7 +216,7 @@ export function PluginStoreListView({
                         data-testid="plugin-store-installed-item-update"
                         data-plugin-id={item.id}
                         aria-label={intl.formatMessage({ id: "settings.plugins.detail.update" })}
-                        className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-success text-success-foreground shadow-sm transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused disabled:opacity-60"
+                        className="absolute -top-1 -end-1 flex size-4 items-center justify-center rounded-full bg-success text-success-foreground shadow-sm transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused disabled:opacity-60"
                         disabled={actions.operationId !== null}
                         onClick={(event) => {
                           event.stopPropagation();
@@ -394,7 +394,7 @@ function CollapsibleCardGroup({
           type="button"
           data-testid="plugin-store-group-toggle"
           data-group-key={groupKey}
-          className="mt-2 flex w-full min-w-0 items-center gap-2 rounded-xl px-2 py-2 text-left text-ui-base text-foreground-subtle transition-colors hover:bg-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+          className="mt-2 flex w-full min-w-0 items-center gap-2 rounded-xl px-2 py-2 text-start text-ui-base text-foreground-subtle transition-colors hover:bg-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
           onClick={() => onToggle(groupKey)}
         >
           <span className="flex shrink-0 items-center gap-1.5" aria-hidden="true">

@@ -121,7 +121,7 @@ export function WorkflowFeedbackContent({
             showLineNumbers
             {...(flaggedLines === undefined ? {} : { markedLines: flaggedLines })}
           >
-            <CodeBlockHeader className="pl-3 pr-2 pt-2" language="typescript" />
+            <CodeBlockHeader className="ps-3 pe-2 pt-2" language="typescript" />
           </CodeBlock>
         </div>
       ) : null}

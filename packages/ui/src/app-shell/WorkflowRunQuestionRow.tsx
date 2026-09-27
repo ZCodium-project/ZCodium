@@ -42,7 +42,7 @@ export function WorkflowRunQuestionRow({
       <MessageCircleQuestionIcon aria-hidden className="mt-0.5 size-3.5 shrink-0" />
       <div className="min-w-0 flex-1">
         {showAsker ? (
-          <span className="mr-2 font-mono text-ui-xs font-medium">
+          <span className="me-2 font-mono text-ui-xs font-medium">
             {question.actorName ??
               (question.actorSiteId === undefined
                 ? intl.formatMessage({ id: "chat.toolCall.workflow.graph.lane.anonymous" })

@@ -435,7 +435,7 @@ function GitCommitDialog({
                   placeholder={intl.formatMessage({
                     id: "git.actionMenu.commitDialog.messagePlaceholder",
                   })}
-                  className="field-sizing-fixed min-h-28 rounded-none border-0 bg-transparent px-0 py-2 pr-8 text-ui-base font-medium text-foreground shadow-none placeholder:text-foreground-subtle focus-visible:border-transparent focus-visible:bg-transparent focus-visible:ring-0 md:text-ui-base"
+                  className="field-sizing-fixed min-h-28 rounded-none border-0 bg-transparent px-0 py-2 pe-8 text-ui-base font-medium text-foreground shadow-none placeholder:text-foreground-subtle focus-visible:border-transparent focus-visible:bg-transparent focus-visible:ring-0 md:text-ui-base"
                   onChange={(event) => {
                     onMessageChange(event.target.value);
                   }}
@@ -458,7 +458,7 @@ function GitCommitDialog({
                           ? "git.actionMenu.commitDialog.regenerate"
                           : "git.actionMenu.commitDialog.generate",
                       })}
-                      className="absolute right-0 top-1.5 text-foreground-subtle hover:text-foreground"
+                      className="absolute end-0 top-1.5 text-foreground-subtle hover:text-foreground"
                     >
                       {generationPending ? (
                         <LoaderIcon className="size-4 animate-spin" />
@@ -487,7 +487,7 @@ function GitCommitDialog({
                 disabled={actionPending || !hasUnstagedChanges}
                 onClick={() => onIncludeUnstagedChange(!includeUnstaged)}
                 className={cn(
-                  "flex h-8 w-full items-center gap-2 rounded-lg px-2 text-left text-ui-base font-medium transition-colors",
+                  "flex h-8 w-full items-center gap-2 rounded-lg px-2 text-start text-ui-base font-medium transition-colors",
                   actionPending || !hasUnstagedChanges
                     ? "cursor-default text-foreground-subtle"
                     : "cursor-pointer text-foreground hover:bg-menu-hover",
@@ -1325,7 +1325,7 @@ export function GitActionMenu({
             "h-7 rounded-lg border-0 gap-1 px-1.5 @max-[560px]/workspace-header:w-7 @max-[560px]/workspace-header:px-0 @max-[560px]/workspace-header:[&>span]:hidden",
             triggerIconOnly && "w-7 px-0 [&>span]:hidden",
             isStatusRowTrigger &&
-              "h-8 min-w-0 w-full justify-start gap-2 px-2 text-left text-ui-base hover:bg-transparent hover:text-foreground @max-[560px]/workspace-header:w-auto @max-[560px]/workspace-header:[&>span]:inline",
+              "h-8 min-w-0 w-full justify-start gap-2 px-2 text-start text-ui-base hover:bg-transparent hover:text-foreground @max-[560px]/workspace-header:w-auto @max-[560px]/workspace-header:[&>span]:inline",
           )}
           onClick={isStatusRowTrigger && !triggerIconOnly ? undefined : handlePrimaryAction}
         >

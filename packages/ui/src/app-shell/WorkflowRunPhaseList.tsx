@@ -294,7 +294,7 @@ export const WorkflowRunPhaseList = memo(function WorkflowRunPhaseList({
         {/* 问题挂在提问者下面，再退一步（26px）：它属于这一行，不属于这一站。 */}
         {questions.map((question) => (
           <WorkflowRunQuestionRow
-            className="ml-[26px]"
+            className="ms-[26px]"
             key={question.qid}
             now={now}
             question={question}
@@ -317,7 +317,8 @@ export const WorkflowRunPhaseList = memo(function WorkflowRunPhaseList({
         const pending = status === "pending";
         const spine = sections[index] ?? { curves: [], rails: [] };
         // 分支站整节右移一格：节头、药丸与灯一起，轨道之间 12px。
-        const indent = station.track === 0 ? undefined : { paddingLeft: 39 + 12 * station.track };
+        const indent =
+          station.track === 0 ? undefined : { paddingInlineStart: 39 + 12 * station.track };
         const roster = stationRosterOf(station, ROSTER_PINS_PANE);
         return (
           <section
@@ -342,7 +343,7 @@ export const WorkflowRunPhaseList = memo(function WorkflowRunPhaseList({
                 { name },
               )}
               className={cn(
-                "wf-station-open relative flex h-9 w-full items-center gap-2 pl-[39px] pr-3 text-left outline-none transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring/40",
+                "wf-station-open relative flex h-9 w-full items-center gap-2 ps-[39px] pe-3 text-start outline-none transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring/40",
                 landed?.phaseId === station.id && "wf-landed",
               )}
               data-testid="workflow-run-phase-toggle"
@@ -381,7 +382,7 @@ export const WorkflowRunPhaseList = memo(function WorkflowRunPhaseList({
             </button>
             {expanded ? (
               <div
-                className="wf-unfold flex flex-col gap-1.5 pb-3 pl-[39px] pr-3 pt-0.5"
+                className="wf-unfold flex flex-col gap-1.5 pb-3 ps-[39px] pe-3 pt-0.5"
                 style={indent}
               >
                 {roster === undefined ? (
@@ -431,7 +432,7 @@ export const WorkflowRunPhaseList = memo(function WorkflowRunPhaseList({
       })}
       {orphanQuestions.length === 0 ? null : (
         <div
-          className="flex flex-col gap-1 pl-[39px] pr-3 pt-2"
+          className="flex flex-col gap-1 ps-[39px] pe-3 pt-2"
           data-testid="workflow-run-orphan-questions"
         >
           <span className="text-ui-xs font-medium text-foreground-subtle">

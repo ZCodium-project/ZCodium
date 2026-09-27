@@ -137,7 +137,7 @@ export function WorkspacePluginPreview({
           type="button"
           variant="ghost"
           size="default"
-          className="shrink-0 gap-1.5 rounded-full bg-transparent pl-3 pr-2 text-ui-base/relaxed text-foreground hover:bg-surface-hover focus-visible:bg-surface-hover"
+          className="shrink-0 gap-1.5 rounded-full bg-transparent ps-3 pe-2 text-ui-base/relaxed text-foreground hover:bg-surface-hover focus-visible:bg-surface-hover"
           data-workspace-plugin-preview=""
         >
           <span className="isolate flex shrink-0 items-center -space-x-1" aria-hidden="true">

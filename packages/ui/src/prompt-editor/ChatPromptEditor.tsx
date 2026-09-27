@@ -411,7 +411,7 @@ export function ChatPromptEditor({
             </div>
           </div>
           <div
-            className="ml-auto flex shrink-0 items-center justify-end gap-1.5"
+            className="ms-auto flex shrink-0 items-center justify-end gap-1.5"
             data-composer-trailing-actions
           >
             {onCancel && cancelLabel ? (

@@ -287,7 +287,7 @@ export function AgentToolCallBlock(context: ToolCallBlockRenderContext) {
   );
   const renderContent = useCallback(
     () => (
-      <div className="ml-2 space-y-3 border-border border-l pl-3.5">
+      <div className="ms-2 space-y-3 border-border border-s ps-3.5">
         {backgroundAgentInfo ? (
           <BackgroundAgentProcessSection
             outputFile={backgroundAgentInfo.outputFile}

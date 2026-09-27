@@ -88,7 +88,7 @@ export function useAppChromeState({
     }
 
     // macOS 全屏后红绿灯会重新贴近左上角布局。
-    // 顶部浮层继续沿用窗口态的 pl-24 会把左侧安全区撑得过大，视觉上像是三键"消失"。
+    // 顶部浮层继续沿用窗口态的 ps-24 会把左侧安全区撑得过大，视觉上像是三键"消失"。
     // 这里订阅桌面窗口全屏状态，只在 macOS 全屏时收窄留白，不影响普通窗口态。
     return platform.onWindowFullscreenChanged((fullscreen) => {
       setIsMacFullscreen(fullscreen);

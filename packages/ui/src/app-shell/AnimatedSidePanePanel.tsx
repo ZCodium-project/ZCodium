@@ -846,7 +846,7 @@ export function AnimatedSidePanePanel({
                   onClick={item.onOpen}
                 >
                   <Icon className="size-4 text-foreground-subtle" />
-                  <span className="side-pane-open-tab-button-label min-w-0 flex-1 truncate text-left">
+                  <span className="side-pane-open-tab-button-label min-w-0 flex-1 truncate text-start">
                     {item.label}
                   </span>
                 </button>
@@ -1041,13 +1041,13 @@ export function AnimatedSidePanePanel({
                       </DragOverlay>
                     </DndContext>
 
-                    <div className="ml-auto flex h-full shrink-0 items-center gap-1 px-2">
+                    <div className="ms-auto flex h-full shrink-0 items-center gap-1 px-2">
                       {isTabsOverflowing ? addTabMenu : null}
                       {closeSidePaneButton}
                     </div>
                   </div>
                   {/* Expand Panel 按钮按要求先注释保留，相关逻辑已删除。
-                <div className="flex h-full shrink-0 items-center pl-1.5 pr-2">
+                <div className="flex h-full shrink-0 items-center ps-1.5 pe-2">
                   <ControlHintTooltip title="" side="bottom" align="end">
                     <Button type="button" variant="ghost" size="icon-sm" aria-label="">
                       Expand Panel
@@ -1324,7 +1324,7 @@ export function AnimatedSidePanePanel({
           ref={panelElementRef}
           aria-hidden={!isVisible}
           className={cn(
-            "h-full w-full min-w-0 border-l border-border bg-background transition-opacity duration-200 ease-out",
+            "h-full w-full min-w-0 border-s border-border bg-background transition-opacity duration-200 ease-out",
             isVisible || isScreenshotSurfaceActive
               ? "opacity-100"
               : "pointer-events-none opacity-0",

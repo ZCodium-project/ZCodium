@@ -135,7 +135,7 @@ export function AutomationCreateDropdown({
         </DropdownMenuTrigger>
       </div>
       <DropdownMenuContent align="end" sideOffset={4} className="w-auto min-w-0">
-        <DropdownMenuItem className="pr-6" onSelect={onViaChat}>
+        <DropdownMenuItem className="pe-6" onSelect={onViaChat}>
           {intl.formatMessage({ id: "automations.createViaChat" })}
         </DropdownMenuItem>
       </DropdownMenuContent>

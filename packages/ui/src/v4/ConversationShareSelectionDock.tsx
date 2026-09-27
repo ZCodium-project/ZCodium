@@ -238,7 +238,7 @@ function ConversationShareSelectionDockImpl({
             ) : null}
           </span>
         </div>
-        <div className="ml-auto flex shrink-0 items-center justify-end gap-3">
+        <div className="ms-auto flex shrink-0 items-center justify-end gap-3">
           <Button
             type="button"
             variant="outline"

@@ -92,7 +92,7 @@ export function SwitchModeToolCallBlock(context: ToolCallBlockRenderContext) {
                 {getPlanFileLabel(planFilePath)}
               </code>
             ) : null}
-            <div className="ml-auto flex shrink-0 items-center gap-1">
+            <div className="ms-auto flex shrink-0 items-center gap-1">
               <Button
                 type="button"
                 variant="ghost"
@@ -129,7 +129,7 @@ export function SwitchModeToolCallBlock(context: ToolCallBlockRenderContext) {
               type="button"
               variant="default"
               size="lg"
-              className="absolute bottom-6 left-1/2 h-10 -translate-x-1/2 rounded-full !pr-4.5 pl-6 shadow-xs"
+              className="absolute bottom-6 start-1/2 h-10 -translate-x-1/2 rtl:translate-x-1/2 rounded-full !pe-4.5 ps-6 shadow-xs"
               onClick={(event) => {
                 event.stopPropagation();
                 openDetail();

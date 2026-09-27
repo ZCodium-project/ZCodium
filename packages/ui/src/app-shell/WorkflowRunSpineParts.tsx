@@ -61,7 +61,7 @@ function SpineRail({
       aria-hidden
       className={cn(
         "wf-ink absolute rounded-full",
-        ink === "march" ? "left-[20.25px] w-[1.5px]" : "left-[20.5px] w-px",
+        ink === "march" ? "start-[20.25px] w-[1.5px]" : "start-[20.5px] w-px",
         position === "above" ? "top-0 h-3" : position === "below" ? "bottom-0 top-6" : "inset-y-0",
         ink !== "march" && "bg-foreground-subtlest",
         ink === "march" && "wf-spine-march",
@@ -105,7 +105,7 @@ function SpineCurve({
   return (
     <svg
       aria-hidden
-      className={cn("absolute left-0", at === "top" ? "top-0" : "bottom-0")}
+      className={cn("absolute start-0", at === "top" ? "top-0" : "bottom-0")}
       data-curve-ink={ink}
       data-curve-track={track}
       data-testid={`workflow-run-spine-${kind}`}
@@ -148,7 +148,7 @@ export function SpineLamp({ status, track = 0 }: { status: StepRunStatus; track?
     <span
       aria-hidden
       className={cn(
-        "wf-lamp absolute left-4 top-[13px] size-2.5 rounded-full",
+        "wf-lamp absolute start-4 top-[13px] size-2.5 rounded-full",
         STATUS_DOT[status],
         status === "pending" && "bg-background",
         status === "running" && "wf-lamp-running motion-reduce:animate-none",
@@ -197,7 +197,7 @@ export function AvatarCluster({
         );
       })}
       {more > 0 ? (
-        <span className="ml-1 font-mono text-ui-xs tabular-nums text-foreground-subtlest">
+        <span className="ms-1 font-mono text-ui-xs tabular-nums text-foreground-subtlest">
           +{more}
         </span>
       ) : null}

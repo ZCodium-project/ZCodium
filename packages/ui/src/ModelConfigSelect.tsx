@@ -129,7 +129,7 @@ function getModelTriggerLabelClassName({
     return triggerLabelClassName;
   }
 
-  return cn("min-w-0 text-left", labelVisibilityClassName);
+  return cn("min-w-0 text-start", labelVisibilityClassName);
 }
 
 interface ModelConfigSelectProps {
@@ -297,7 +297,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
       } as const;
       const content = (
         <>
-          <span className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+          <span className="flex min-w-0 flex-1 items-center gap-1.5 text-start">
             <span className="min-w-0 truncate" title={item.name}>
               {item.name}
             </span>
@@ -354,7 +354,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
           key={itemKey}
           {...commonProps}
           value={item.value}
-          className="min-h-8 gap-2 pl-2 pr-8 text-ui-base"
+          className="min-h-8 gap-2 ps-2 pe-8 text-ui-base"
           onSelect={() => {
             handleModelValueChange(item.value);
             handlePopoverOpenChange(false);
@@ -384,7 +384,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
 
   const renderGroupLabel = useCallback(
     (group: ModelSelectGroup, options: { mutedLabel?: boolean } = {}) => (
-      <span className="min-w-0 flex-1 items-center gap-1.5 text-left inline-flex">
+      <span className="min-w-0 flex-1 items-center gap-1.5 text-start inline-flex">
         <span
           className={cn(
             "min-w-0 whitespace-normal break-words text-ui-base",
@@ -412,7 +412,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
         return (
           <div className="flex min-h-8 items-center gap-2 px-2 py-1">
             <span
-              className="min-w-0 flex-1 truncate text-left text-ui-sm font-medium text-foreground-subtlest"
+              className="min-w-0 flex-1 truncate text-start text-ui-sm font-medium text-foreground-subtlest"
               title={group.label}
             >
               {group.label}
@@ -431,7 +431,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
               <SelectTrigger
                 size="xs"
                 variant="outline"
-                className="min-w-0 shrink-0 gap-0.5 rounded-full pr-1.5 text-ui-sm text-foreground-subtle [&_svg]:size-3"
+                className="min-w-0 shrink-0 gap-0.5 rounded-full pe-1.5 text-ui-sm text-foreground-subtle [&_svg]:size-3"
                 data-testid={testId(TID_CHAT_MODEL_SELECT_GROUP, group.key)}
                 data-model-provider-key={group.key}
                 onPointerDown={(event) => event.stopPropagation()}
@@ -492,7 +492,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
         aria-label={triggerAriaLabel}
         onClick={guideTooltipOpen ? onGuideTooltipDismiss : undefined}
         className={cn(
-          "w-fit justify-between gap-1 rounded-lg pl-2 pr-1.5 text-ui-base whitespace-nowrap",
+          "w-fit justify-between gap-1 rounded-lg ps-2 pe-1.5 text-ui-base whitespace-nowrap",
           triggerClassName,
         )}
       >
@@ -532,7 +532,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
           shortcut={guideTooltipOpen ? undefined : shortcutLabel}
           triggerRef={triggerRef}
           open={guideTooltipOpen ? true : undefined}
-          className={guideTooltipOpen ? "bg-background py-0.5 pr-0.5 pl-2" : undefined}
+          className={guideTooltipOpen ? "bg-background py-0.5 pe-0.5 ps-2" : undefined}
         >
           {modelTrigger}
         </ControlHintTooltip>
@@ -637,7 +637,7 @@ export const ModelConfigSelect = memo(function ModelConfigSelectComponent({
               ? renderModelItems(modelGroups[0]?.items ?? [])
               : null}
           {renderedFooterActions.length > 0 ? (
-            <div className="sticky bottom-0 z-10 bg-menu after:absolute after:left-0 after:top-full after:h-1 after:w-full after:bg-menu after:content-['']">
+            <div className="sticky bottom-0 z-10 bg-menu after:absolute after:start-0 after:top-full after:h-1 after:w-full after:bg-menu after:content-['']">
               {hasSelectableModel ? <DropdownMenuSeparator /> : null}
               {renderedFooterActions.map((action) => (
                 <DropdownMenuItem

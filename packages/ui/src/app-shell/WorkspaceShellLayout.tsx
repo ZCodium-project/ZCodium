@@ -1637,7 +1637,7 @@ export const WorkspaceShellLayout = memo(function WorkspaceShellLayoutComponent(
           id="content"
           className={cn(
             "flex min-w-[320px] flex-1 flex-col",
-            hasDesktopPanelInset ? "p-1 pl-0 pt-0" : "p-0",
+            hasDesktopPanelInset ? "p-1 ps-0 pt-0" : "p-0",
           )}
         >
           {

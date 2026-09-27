@@ -56,7 +56,7 @@ function SubagentModelSegment({
     <button
       aria-expanded={configureOpen}
       aria-haspopup="dialog"
-      className={`${className ?? ""} cursor-pointer rounded-sm text-left underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40`}
+      className={`${className ?? ""} cursor-pointer rounded-sm text-start underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40`}
       data-testid="workflow-run-subagent-model"
       onClick={(event) => onConfigureFrom(event.currentTarget)}
       title={title}
@@ -270,7 +270,7 @@ export const WorkflowRunStatusHeader = memo(function WorkflowRunStatusHeader({
         </div>
       ) : (
         <button
-          className="mt-1.5 flex min-w-0 cursor-pointer items-baseline gap-2 rounded-md text-left text-ui-xs text-foreground-subtle outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
+          className="mt-1.5 flex min-w-0 cursor-pointer items-baseline gap-2 rounded-md text-start text-ui-xs text-foreground-subtle outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
           data-testid="workflow-run-superseded-by"
           onClick={onOpenSuccessor}
           type="button"

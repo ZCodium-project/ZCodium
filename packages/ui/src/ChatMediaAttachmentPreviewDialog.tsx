@@ -80,7 +80,7 @@ export function ChatMediaAttachmentPreviewDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-xl max-w-5xl gap-0 overflow-hidden p-0" showCloseButton>
-        <DialogHeader className="gap-1 border-b border-popover-border px-4 py-3 pr-12">
+        <DialogHeader className="gap-1 border-b border-popover-border px-4 py-3 pe-12">
           <DialogTitle className="truncate">{attachment?.filename ?? title}</DialogTitle>
           <DialogDescription className="truncate text-ui-base">
             {attachment?.mediaType ?? title}

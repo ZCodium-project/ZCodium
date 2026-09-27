@@ -825,7 +825,7 @@ export const WorkspaceSidebarItem = memo(function WorkspaceSidebarItem({
                    * 断连的 remote workspace 不能展开任务列表，因此这里也要禁掉 hover 展开态提示，
                    * 避免用户看到“可展开”的反馈却点不开，只保留 warning 背景提示当前需要先重连。
                    */
-                  "flex h-8 min-w-0 flex-1 justify-start gap-2 rounded-lg pl-2.5 pr-1 text-left text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground",
+                  "flex h-8 min-w-0 flex-1 justify-start gap-2 rounded-lg ps-2.5 pe-1 text-start text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground",
                   "hover:bg-surface-hover hover:text-foreground",
                   isDisconnectedRemoteWorkspace &&
                     "hover:bg-transparent aria-expanded:bg-transparent",
@@ -850,7 +850,7 @@ export const WorkspaceSidebarItem = memo(function WorkspaceSidebarItem({
                         side="right"
                         align="start"
                         sideOffset={6}
-                        className="max-w-80 flex-col items-start gap-2 p-2.5 text-left"
+                        className="max-w-80 flex-col items-start gap-2 p-2.5 text-start"
                       >
                         <span className="text-ui-sm font-medium text-tooltip-foreground">
                           {intl.formatMessage({

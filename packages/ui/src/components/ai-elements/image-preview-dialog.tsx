@@ -402,7 +402,7 @@ export function ImagePreviewDialog({
         <DialogTitle className="sr-only">
           {activeItem?.alt || intl.formatMessage({ id: "chat.attachments.preview.title" })}
         </DialogTitle>
-        <div className="pointer-events-auto absolute right-4 top-4 z-20 flex items-center gap-2 [app-region:no-drag] platform-mac-desktop:top-12 platform-linux-desktop:right-6 platform-linux-desktop:top-4 platform-windows-desktop:right-6 platform-windows-desktop:top-[calc(env(titlebar-area-height,48px)_+_0.5rem)]">
+        <div className="pointer-events-auto absolute end-4 top-4 z-20 flex items-center gap-2 [app-region:no-drag] platform-mac-desktop:top-12 platform-linux-desktop:end-6 platform-linux-desktop:top-4 platform-windows-desktop:end-6 platform-windows-desktop:top-[calc(env(titlebar-area-height,48px)_+_0.5rem)]">
           {!activeItemIsVideo ? (
             <Button
               type="button"
@@ -433,7 +433,7 @@ export function ImagePreviewDialog({
             <Button
               type="button"
               aria-label={intl.formatMessage({ id: "markdownImage.previous" })}
-              className="pointer-events-auto absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background text-foreground shadow-md [app-region:no-drag] hover:bg-background/80"
+              className="pointer-events-auto absolute start-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background text-foreground shadow-md [app-region:no-drag] hover:bg-background/80"
               onClick={() => navigate(-1)}
               size="icon-md"
               variant="ghost"
@@ -443,7 +443,7 @@ export function ImagePreviewDialog({
             <Button
               type="button"
               aria-label={intl.formatMessage({ id: "markdownImage.next" })}
-              className="pointer-events-auto absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background text-foreground shadow-md [app-region:no-drag] hover:bg-background/80"
+              className="pointer-events-auto absolute end-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border bg-background text-foreground shadow-md [app-region:no-drag] hover:bg-background/80"
               onClick={() => navigate(1)}
               size="icon-md"
               variant="ghost"
@@ -530,7 +530,7 @@ export function ImagePreviewDialog({
           ) : null
         ) : null}
         {!activeItemIsVideo ? (
-          <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-popover-border bg-popover/95 p-1 shadow-md [app-region:no-drag]">
+          <div className="pointer-events-auto absolute bottom-4 start-1/2 flex -translate-x-1/2 rtl:translate-x-1/2 items-center gap-2 rounded-full border border-popover-border bg-popover/95 p-1 shadow-md [app-region:no-drag]">
             <Button
               type="button"
               aria-label={intl.formatMessage({ id: "markdownImage.zoomOut" })}

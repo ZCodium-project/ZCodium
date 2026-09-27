@@ -468,7 +468,7 @@ export const TaskList = memo(function TaskList({
           )}
         </div>
         {hasMore && onShowMore ? (
-          <div className="cursor-pointer pl-8.5">
+          <div className="cursor-pointer ps-8.5">
             <span
               className="text-ui-base text-foreground-subtlest hover:text-foreground-subtle"
               onClick={onShowMore}

@@ -630,7 +630,7 @@ export function OffPeakEditView({
                       AUTOMATION_INSTRUCTIONS_TOOLBAR_TRIGGER_CLASSNAME,
                       "w-fit max-w-56 min-w-0 shrink justify-start gap-1 px-2",
                     )}
-                    labelVisibilityClassName="inline-flex min-w-0 truncate text-left"
+                    labelVisibilityClassName="inline-flex min-w-0 truncate text-start"
                     restoreFocusSelector={null}
                   />
                 </div>
@@ -659,7 +659,7 @@ export function OffPeakEditView({
                       AUTOMATION_INSTRUCTIONS_TOOLBAR_TRIGGER_CLASSNAME,
                       "w-fit max-w-72 min-w-0 shrink justify-between px-2",
                     )}
-                    triggerLabelClassName="inline-flex min-w-0 truncate text-left"
+                    triggerLabelClassName="inline-flex min-w-0 truncate text-start"
                   />
                   {/* 推理档位：仅推理模型显示；缺省=workspace 默认 */}
                   {thoughtLevelOption ? (

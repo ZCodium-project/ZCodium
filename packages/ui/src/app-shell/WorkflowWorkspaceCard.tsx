@@ -349,7 +349,7 @@ export const WorkflowWorkspaceCard = memo(function WorkflowWorkspaceCard({
           {expandable ? (
             <ChevronRightIcon
               className={cn(
-                "ml-0.5 size-3.5 shrink-0 self-center text-foreground-subtlest opacity-0 transition-[opacity,transform] duration-[160ms] group-hover/ws:opacity-100 group-focus-visible/ws:opacity-100",
+                "ms-0.5 size-3.5 shrink-0 self-center text-foreground-subtlest opacity-0 transition-[opacity,transform] duration-[160ms] group-hover/ws:opacity-100 group-focus-visible/ws:opacity-100",
                 open && "rotate-90 opacity-100",
               )}
             />

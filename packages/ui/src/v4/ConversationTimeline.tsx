@@ -1738,14 +1738,14 @@ function ConversationTimelineImpl({
           // 横向跳动；稳定预留 gutter，让桌面与手机 Web 共用的滚动区宽度保持不变。
           // 只声明 overflow-y-auto 会让浏览器把横轴计算为 auto，宽内容会把
           // 整条 Conversation 撑出横向滚动；表格和代码块应由各自内部容器滚动。
-          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] [--markdown-table-layout-left-inset:16px] [--markdown-table-layout-right-inset:16px] max-md:[--markdown-table-layout-left-inset:8px] max-md:[--markdown-table-layout-right-inset:8px]",
+          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] [--markdown-table-layout-start-inset:16px] [--markdown-table-layout-end-inset:16px] max-md:[--markdown-table-layout-start-inset:8px] max-md:[--markdown-table-layout-end-inset:8px]",
           // 分享选择面板展开时改为 overflow-hidden：scrollTop 与 scrollbar-gutter 都保持不变，
           // 但原生滚动条、滚轮和键盘翻页都不再能移动背景，勾选目标不会漂走。
           backgroundScrollLocked && "!overflow-y-hidden",
           // Conversation turn map 覆盖 timeline 左侧 48px；表格增强滚动如果仍按
           // 普通 16px 边距借位，会有 32px 落到 turn map 下方，必须把完整占用计入左边界。
           turnNavigatorQueryRowIds.size >= 2 &&
-            "@min-[864px]/conversation:[--markdown-table-layout-left-inset:48px]",
+            "@min-[864px]/conversation:[--markdown-table-layout-start-inset:48px]",
         )}
       >
         <div
@@ -1827,7 +1827,7 @@ function ConversationTimelineImpl({
                       data-turn-id={unit.turnId}
                       // virtual history 的子项通过 absolute 定位，父级 padding 不会缩小
                       // 它们的 containing block；正文响应式内边距必须落在 turn wrapper 自身。
-                      className="absolute left-0 top-0 w-full"
+                      className="absolute start-0 top-0 w-full"
                       style={{ transform: `translateY(${virtualRow.start - headerSlotHeight}px)` }}
                     >
                       <ConversationTurnGroup
@@ -1929,7 +1929,7 @@ function ConversationTimelineImpl({
                       //
                       // 圆钮采用自己的居中定位；`pointer-events-auto` 保留：
                       // 它是"按钮点得动"唯一可断言的契约。
-                      className="pointer-events-auto absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 shadow-sm"
+                      className="pointer-events-auto absolute bottom-full start-1/2 z-30 mb-2 -translate-x-1/2 rtl:translate-x-1/2 shadow-sm"
                       label={intl.formatMessage({ id: "chat.scrollToBottom" })}
                       onClick={handleBackToBottom}
                     />
@@ -1943,7 +1943,7 @@ function ConversationTimelineImpl({
       </div>
       {backToBottomVisible && !bottomDock ? (
         <ConversationBackToBottomButton
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 shadow-sm"
+          className="absolute bottom-3 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 shadow-sm"
           label={intl.formatMessage({ id: "chat.scrollToBottom" })}
           onClick={handleBackToBottom}
         />

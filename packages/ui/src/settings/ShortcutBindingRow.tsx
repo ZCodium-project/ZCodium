@@ -115,7 +115,7 @@ export function ShortcutBindingRow({
         <button
           type="button"
           disabled={menuChannelUnavailable}
-          className="w-fit rounded-lg px-0 py-1 text-left focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-fit rounded-lg px-0 py-1 text-start focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={intl.formatMessage(
             { id: "settings.shortcuts.rebindAria" },
             { command: commandLabel },
@@ -170,7 +170,7 @@ export function ShortcutBindingRow({
           <button
             type="button"
             disabled={menuChannelUnavailable}
-            className="w-fit rounded-lg px-0 py-1 text-left focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-fit rounded-lg px-0 py-1 text-start focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={intl.formatMessage(
               { id: "settings.shortcuts.rebindAria" },
               { command: commandLabel },

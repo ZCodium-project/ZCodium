@@ -1581,7 +1581,7 @@ function ConversationComposerImpl({
                   className={
                     isMediaAttachment
                       ? "relative size-12 overflow-hidden rounded-lg bg-surface after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:border after:border-border after:content-['']"
-                      : "h-12 w-fit max-w-full min-w-0 gap-2 rounded-lg border border-border bg-surface p-1.5 pr-6 [--attachment-bg:var(--color-surface)] hover:bg-surface-hover"
+                      : "h-12 w-fit max-w-full min-w-0 gap-2 rounded-lg border border-border bg-surface p-1.5 pe-6 [--attachment-bg:var(--color-surface)] hover:bg-surface-hover"
                   }
                   data={{
                     id: attachment.id,
@@ -1767,7 +1767,7 @@ function ConversationComposerImpl({
                     aria-label={intl.formatMessage({
                       id: "chat.attachments.remove",
                     })}
-                    className="absolute right-0.5 top-0.5 z-20 size-3.5 rounded-full bg-primary p-0 text-primary-foreground opacity-0 transition-opacity hover:bg-primary/80 hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+                    className="absolute end-0.5 top-0.5 z-20 size-3.5 rounded-full bg-primary p-0 text-primary-foreground opacity-0 transition-opacity hover:bg-primary/80 hover:text-primary-foreground group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
                     onPointerDown={(event) => event.stopPropagation()}
                     onClick={(event) => {
                       event.preventDefault();
@@ -2146,12 +2146,12 @@ function ConversationComposerImpl({
               size="icon-md"
               disabled={pending}
               aria-label={intl.formatMessage({ id: "common.close" })}
-              className="absolute top-4 right-4"
+              className="absolute top-4 end-4"
             >
               <XIcon className="size-5" />
             </Button>
           </DialogClose>
-          <DialogHeader className="gap-3 pr-8">
+          <DialogHeader className="gap-3 pe-8">
             <DialogTitle className="text-xl font-semibold sm:text-2xl">
               {intl.formatMessage({ id: "chat.queue.sendConfirm.title" })}
             </DialogTitle>

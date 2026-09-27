@@ -112,10 +112,10 @@ export function WorkflowArtifactPill({
           : undefined
       }
       className={cn(
-        "wf-pill wf-arrive flex min-w-0 max-w-full items-center bg-surface text-left",
+        "wf-pill wf-arrive flex min-w-0 max-w-full items-center bg-surface text-start",
         md
-          ? "h-8 gap-2 rounded-[9px] pl-2 pr-2.5 text-ui-sm"
-          : "h-6 gap-1.5 rounded-md pl-1.5 pr-2 text-ui-xs",
+          ? "h-8 gap-2 rounded-[9px] ps-2 pe-2.5 text-ui-sm"
+          : "h-6 gap-1.5 rounded-md ps-1.5 pe-2 text-ui-xs",
         openable
           ? "wf-pill-open cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           : "cursor-default",

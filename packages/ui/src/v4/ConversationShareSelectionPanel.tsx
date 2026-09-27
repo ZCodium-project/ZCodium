@@ -117,9 +117,9 @@ function ConversationShareSelectionPanelImpl({
           key="conversation-share-selection-panel"
           aria-label={intl.formatMessage({ id: "conversationShare.partial.panelLabel" })}
           data-testid="conversation-share-selection-panel"
-          data-conversation-share-left-navigation="true"
+          data-conversation-share-start-navigation="true"
           data-conversation-share-mode-motion="selection-panel"
-          className="group/share-selection-panel absolute left-4 z-30 flex h-auto w-[14.375rem] flex-col overflow-hidden rounded-xl bg-popover py-2 text-popover-foreground shadow-md ring-1 ring-inset ring-popover-border max-md:left-2 max-md:w-[min(14.375rem,calc(100vw-1rem))]"
+          className="group/share-selection-panel absolute start-4 z-30 flex h-auto w-[14.375rem] flex-col overflow-hidden rounded-xl bg-popover py-2 text-popover-foreground shadow-md ring-1 ring-inset ring-popover-border max-md:start-2 max-md:w-[min(14.375rem,calc(100vw-1rem))]"
           style={PANEL_LAYOUT_STYLE}
           initial={motionConfig.initial}
           animate={motionConfig.animate}
@@ -136,7 +136,7 @@ function ConversationShareSelectionPanelImpl({
               // scale-y-50 只缩短 Radix thumb 的绘制结果，位移仍按原长度计算，
               // 因而滚动到底后可见 thumb 仍停在轨道中段。原始 thumb 仅保留拖动命中，
               // 视觉 thumb 由完整 scroll progress 独立映射到整条轨道。
-              scrollbarClassName="opacity-0 transition-opacity group-hover/share-selection-panel:opacity-100 group-focus-within/share-selection-panel:opacity-100 data-vertical:!w-2.5 data-vertical:!pr-1 data-vertical:!pl-0 [&_[data-slot=scroll-area-thumb]]:!min-w-1.5 [&_[data-slot=scroll-area-thumb]]:!bg-transparent [@media(hover:none)]:opacity-100"
+              scrollbarClassName="opacity-0 transition-opacity group-hover/share-selection-panel:opacity-100 group-focus-within/share-selection-panel:opacity-100 data-vertical:!w-2.5 data-vertical:!pe-1 data-vertical:!ps-0 [&_[data-slot=scroll-area-thumb]]:!min-w-1.5 [&_[data-slot=scroll-area-thumb]]:!bg-transparent [@media(hover:none)]:opacity-100"
             >
               <div ref={scrollContentRef} className="flex min-w-0 flex-col gap-2 px-2">
                 {items.length > 0 ? (
@@ -182,7 +182,7 @@ function ConversationShareSelectionPanelImpl({
                             onInspect({ unitIndex: item.unitIndex, rowId: item.rowId })
                           }
                           className={cn(
-                            "flex min-w-0 flex-1 flex-col rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
+                            "flex min-w-0 flex-1 flex-col rounded-md text-start outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
                             index === 0 ? "gap-1" : "gap-1.5",
                           )}
                         >
@@ -217,7 +217,7 @@ function ConversationShareSelectionPanelImpl({
               ref={visualThumbRef}
               aria-hidden="true"
               data-testid="conversation-share-selection-scroll-thumb"
-              className="pointer-events-none absolute right-1 top-0 z-10 hidden w-1.5 rounded-full bg-border opacity-0 transition-opacity group-hover/share-selection-panel:opacity-100 group-focus-within/share-selection-panel:opacity-100 [@media(hover:none)]:opacity-100"
+              className="pointer-events-none absolute end-1 top-0 z-10 hidden w-1.5 rounded-full bg-border opacity-0 transition-opacity group-hover/share-selection-panel:opacity-100 group-focus-within/share-selection-panel:opacity-100 [@media(hover:none)]:opacity-100"
             />
           </div>
         </motion.aside>

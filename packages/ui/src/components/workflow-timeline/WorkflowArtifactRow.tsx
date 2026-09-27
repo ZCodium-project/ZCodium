@@ -82,7 +82,7 @@ export function WorkflowArtifactRow({
             : undefined
         }
         className={cn(
-          "wf-tile-hit wf-arrive flex min-w-0 flex-col gap-0.5 rounded-lg bg-transparent p-0 pt-px text-left outline-none",
+          "wf-tile-hit wf-arrive flex min-w-0 flex-col gap-0.5 rounded-lg bg-transparent p-0 pt-px text-start outline-none",
           openable ? "wf-tile-open cursor-pointer" : "cursor-default",
         )}
         data-artifact-id={artifact.id}

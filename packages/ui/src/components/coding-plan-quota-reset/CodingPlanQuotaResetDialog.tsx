@@ -274,7 +274,7 @@ export function CodingPlanQuotaResetDialog({
         aria-describedby={undefined}
         className="w-[min(480px,calc(100vw-2rem))] max-w-none gap-5"
       >
-        <DialogTitle className="min-w-0 truncate pr-8 text-ui-lg font-medium text-foreground">
+        <DialogTitle className="min-w-0 truncate pe-8 text-ui-lg font-medium text-foreground">
           {intl.formatMessage({ id: "codingPlan.quotaReset.dialog.title" })}
         </DialogTitle>
 
@@ -316,7 +316,7 @@ export function CodingPlanQuotaResetDialog({
             <div className="relative">
               <div
                 ref={resetListRef}
-                className="max-h-[262px] overflow-y-auto overscroll-contain pr-1"
+                className="max-h-[262px] overflow-y-auto overscroll-contain pe-1"
                 onScroll={updateScrollMasks}
               >
                 {visibleResetItems.map((item) => {

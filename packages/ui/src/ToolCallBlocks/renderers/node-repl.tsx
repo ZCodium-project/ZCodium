@@ -150,7 +150,7 @@ function FriendlyCodeBlock({
       style={eagerLayout ? COLLAPSIBLE_CODE_LAYOUT_STYLE : undefined}
       wrapLongLines
     >
-      <CodeBlockHeader className="pl-3 pr-2 pt-2">
+      <CodeBlockHeader className="ps-3 pe-2 pt-2">
         <CodeBlockTitle>
           <span className="text-ui-base font-medium text-foreground-subtle">{label}</span>
         </CodeBlockTitle>
@@ -304,7 +304,7 @@ export function NodeReplToolCallBlock(context: ToolCallBlockRenderContext) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="-ml-2 text-foreground-subtlest hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
+                className="-ms-2 text-foreground-subtlest hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
               >
                 <ChevronRightIcon className="size-3.5 transition-transform group-data-[state=open]/details:rotate-90" />
                 {detailsLabel}

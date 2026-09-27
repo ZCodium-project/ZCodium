@@ -92,7 +92,7 @@ function StartPlanBalanceLimit({
           {remainingPercent}
         </span>
         {renewTimeLabel ? (
-          <span className="min-w-0 truncate text-right text-ui-xs text-foreground-subtle">
+          <span className="min-w-0 truncate text-end text-ui-xs text-foreground-subtle">
             {renewTimeLabel}
           </span>
         ) : null}

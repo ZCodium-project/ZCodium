@@ -49,7 +49,7 @@ export function PptxElementReferenceChip({
           {onOpen ? (
             <button
               type="button"
-              className="flex min-w-0 flex-1 items-start gap-2 rounded-md px-1 py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+              className="flex min-w-0 flex-1 items-start gap-2 rounded-md px-1 py-0.5 text-start outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
               onClick={() => onOpen(reference)}
             >
               <PresentationIcon className="mt-1 size-4 shrink-0 text-foreground-subtle" />

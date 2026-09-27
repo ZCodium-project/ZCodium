@@ -31,7 +31,7 @@ export function OnboardingModeSelector({
             disabled={saving}
             onClick={() => onSelect(value)}
             className={cn(
-              "flex w-full items-start gap-4 rounded-xl border p-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
+              "flex w-full items-start gap-4 rounded-xl border p-5 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
               mode === value
                 ? "border-foreground/60 bg-card-selected dark:border-foreground/50"
                 : "border-card-border bg-card hover:border-border-hover hover:bg-surface-hover dark:border-border/60 dark:bg-transparent dark:hover:bg-surface/60",

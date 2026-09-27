@@ -355,7 +355,7 @@ function ConversationShareConfirmationDockImpl({
               ref={disclosureRef}
               data-testid="conversation-share-disclosure"
               role="note"
-              className="mx-3 mb-3 mt-3 rounded-xl border border-border border-l-2 border-l-warning bg-surface p-3 text-ui-sm text-foreground"
+              className="mx-3 mb-3 mt-3 rounded-xl border border-border border-s-2 border-s-warning bg-surface p-3 text-ui-sm text-foreground"
             >
               <div className="flex items-start gap-2">
                 <span
@@ -388,7 +388,7 @@ function ConversationShareConfirmationDockImpl({
                     </label>
                     <div
                       data-testid="conversation-share-disclosure-supporting-row"
-                      className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-ui-xs leading-5 @min-[480px]/share:ml-auto @min-[480px]/share:justify-end"
+                      className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-ui-xs leading-5 @min-[480px]/share:ms-auto @min-[480px]/share:justify-end"
                     >
                       <span
                         data-testid="conversation-share-disclosure-description"
@@ -417,7 +417,7 @@ function ConversationShareConfirmationDockImpl({
                         >
                           <span
                             aria-hidden="true"
-                            className="pointer-events-none absolute bottom-[-0.375rem] right-7 z-0 size-3 rotate-45 border-b border-r border-popover-border bg-popover"
+                            className="pointer-events-none absolute bottom-[-0.375rem] end-7 z-0 size-3 rotate-45 border-b border-e border-popover-border bg-popover"
                           />
                           <div className="relative z-10 overflow-hidden rounded-xl border border-popover-border bg-popover text-ui-sm text-popover-foreground shadow-lg">
                             <div className="border-b border-border px-4 py-3">

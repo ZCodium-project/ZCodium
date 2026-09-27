@@ -69,9 +69,9 @@ function FontSizeInput({
             setDraft(String(value));
           }
         }}
-        className="pr-8 text-right tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="pe-8 text-end tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
-      <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-ui-lg text-foreground-subtle">
+      <span className="pointer-events-none absolute inset-y-0 end-2 flex items-center text-ui-lg text-foreground-subtle">
         px
       </span>
     </div>

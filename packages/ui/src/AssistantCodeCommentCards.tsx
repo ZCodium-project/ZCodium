@@ -62,7 +62,7 @@ export function AssistantCodeCommentCards({
       >
         <button
           type="button"
-          className="flex h-full min-w-0 flex-1 items-center gap-2 px-1 text-left"
+          className="flex h-full min-w-0 flex-1 items-center gap-2 px-1 text-start"
           aria-expanded={isOpen}
           aria-label={intl.formatMessage(
             {
@@ -76,7 +76,7 @@ export function AssistantCodeCommentCards({
             data-testid="assistant-code-comment-toggle-icon"
             aria-hidden="true"
             className={cn(
-              "inline-block size-1.5 shrink-0 -rotate-45 border-r border-b border-foreground-subtlest transition-transform",
+              "inline-block size-1.5 shrink-0 -rotate-45 border-e border-b border-foreground-subtlest transition-transform",
               isOpen && "rotate-45",
             )}
           />
@@ -140,7 +140,7 @@ export function AssistantCodeCommentCards({
                     // Git 文件行把半透明基础面放在父层，hover 放在内层；若把
                     // 两个背景放到同一元素，hover 会替换基础背景而不是在其上叠加，
                     // 浅色主题下对比度几乎不可见。因此这里保持与 Git 文件行相同的分层。
-                    className="flex min-h-10 w-full min-w-0 cursor-pointer select-text items-center gap-3 px-6 py-2 text-left whitespace-nowrap transition-colors hover:bg-hover/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                    className="flex min-h-10 w-full min-w-0 cursor-pointer select-text items-center gap-3 px-6 py-2 text-start whitespace-nowrap transition-colors hover:bg-hover/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
                     aria-label={intl.formatMessage(
                       { id: "chat.codeCommentCards.openReview" },
                       { title },

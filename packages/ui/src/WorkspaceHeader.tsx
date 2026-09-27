@@ -123,12 +123,12 @@ export function WorkspaceHeader({
   if (shouldOffsetHeaderForWindowControls) {
     if (isMacDesktop) {
       if (hasUpdateReady) {
-        headerWindowControlsPaddingClass = isMacFullscreen ? "pl-48" : "pl-66";
+        headerWindowControlsPaddingClass = isMacFullscreen ? "ps-48" : "ps-66";
       } else {
-        headerWindowControlsPaddingClass = isMacFullscreen ? "pl-38" : "pl-58";
+        headerWindowControlsPaddingClass = isMacFullscreen ? "ps-38" : "ps-58";
       }
     } else {
-      headerWindowControlsPaddingClass = hasUpdateReady ? "pl-44" : "pl-38";
+      headerWindowControlsPaddingClass = hasUpdateReady ? "ps-44" : "ps-38";
     }
   }
 

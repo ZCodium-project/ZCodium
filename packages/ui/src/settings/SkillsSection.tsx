@@ -131,7 +131,7 @@ function SkillPathDetailField({
           size="sm"
           aria-label={openLabel}
           title={openLabel}
-          className="inline-flex h-auto max-w-full items-baseline gap-1.5 whitespace-normal break-all px-0 py-0 text-left align-baseline font-mono text-ui-base font-normal text-foreground-subtle underline-offset-2 hover:text-foreground hover:underline"
+          className="inline-flex h-auto max-w-full items-baseline gap-1.5 whitespace-normal break-all px-0 py-0 text-start align-baseline font-mono text-ui-base font-normal text-foreground-subtle underline-offset-2 hover:text-foreground hover:underline"
           onClick={onOpen}
         >
           <span>{path}</span>
@@ -716,7 +716,7 @@ export function SkillsSection({
         <div className="overflow-hidden rounded-lg border border-amber-500/40 bg-amber-500/10 text-ui-base text-foreground">
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+            className="flex w-full items-center gap-2 px-3 py-2 text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
             onClick={() => setDiagnosticsOpen((prev) => !prev)}
             aria-expanded={diagnosticsOpen}
             aria-label={
@@ -878,7 +878,7 @@ export function SkillsSection({
           {detailSkill ? (
             <div className="flex min-h-0 flex-col">
               <DialogHeader className="border-b border-popover-border px-4 pt-4 pb-3">
-                <DialogTitle className="truncate pr-8 text-ui-lg">{detailSkill.name}</DialogTitle>
+                <DialogTitle className="truncate pe-8 text-ui-lg">{detailSkill.name}</DialogTitle>
               </DialogHeader>
               <div className="min-h-0 space-y-4 overflow-auto px-4 py-5">
                 <div className="grid gap-1.5">

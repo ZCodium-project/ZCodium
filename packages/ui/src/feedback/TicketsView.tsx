@@ -107,7 +107,7 @@ export function TicketsView({
           />
           {loadingList && items.length > 0 ? (
             <div className="flex items-center justify-center py-2 text-ui-xs text-foreground-subtle">
-              <Loader2 className="mr-1.5 size-3 animate-spin" />
+              <Loader2 className="me-1.5 size-3 animate-spin" />
               {formatMessage({ id: "common.loading" })}
             </div>
           ) : null}

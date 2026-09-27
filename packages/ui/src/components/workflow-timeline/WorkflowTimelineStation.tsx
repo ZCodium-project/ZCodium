@@ -58,7 +58,7 @@ export function StationHead({
   return onSelect === undefined ? (
     <span
       className={cn(
-        "wf-station flex h-6 min-w-0 shrink items-center gap-2 rounded-md text-left",
+        "wf-station flex h-6 min-w-0 shrink items-center gap-2 rounded-md text-start",
         foldClass,
       )}
       data-testid="workflow-timeline-station-head"
@@ -69,7 +69,7 @@ export function StationHead({
   ) : (
     <button
       className={cn(
-        "wf-station wf-station-open flex h-6 min-w-0 shrink cursor-pointer items-center gap-2 rounded-md text-left outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40",
+        "wf-station wf-station-open flex h-6 min-w-0 shrink cursor-pointer items-center gap-2 rounded-md text-start outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40",
         foldClass,
       )}
       onClick={onSelect}
@@ -115,7 +115,7 @@ export function WorkflowStationRow({
 }) {
   const n = stations.length;
   return (
-    <div className="absolute left-0 flex" style={{ height: RAIL_ROW, top, width }}>
+    <div className="absolute start-0 flex" style={{ height: RAIL_ROW, top, width }}>
       {stations.map((station, i) => {
         const rail = rails.get(railKey(i, i + 1));
         const full = fullNames[i]!;
@@ -148,7 +148,7 @@ export function WorkflowStationRow({
                   <span
                     aria-hidden
                     className={cn(
-                      "ml-px inline-block h-3 w-px bg-foreground align-[-1px]",
+                      "ms-px inline-block h-3 w-px bg-foreground align-[-1px]",
                       pen.idle && "wf-caret",
                     )}
                     data-pen={pen.idle ? "idle" : "writing"}
@@ -178,7 +178,7 @@ export function WorkflowStationRow({
                 data-rail-ink={rail?.ink ?? "none"}
                 data-rail-to={i + 1}
                 data-testid="workflow-timeline-rail"
-                style={{ marginLeft: 10, marginRight: -6 }}
+                style={{ marginInlineStart: 10, marginInlineEnd: -6 }}
               />
             ) : null}
           </div>

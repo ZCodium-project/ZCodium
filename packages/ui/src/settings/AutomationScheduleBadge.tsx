@@ -48,7 +48,7 @@ export function AutomationScheduleBadge({
         <TooltipTrigger asChild>
           <span
             className={cn(
-              "inline-flex w-fit min-w-0 max-w-full items-center gap-0.5 overflow-hidden rounded-lg bg-success/10 py-0.5 pl-1 pr-2 font-normal text-success",
+              "inline-flex w-fit min-w-0 max-w-full items-center gap-0.5 overflow-hidden rounded-lg bg-success/10 py-0.5 ps-1 pe-2 font-normal text-success",
               dimmed && "opacity-40",
             )}
           >

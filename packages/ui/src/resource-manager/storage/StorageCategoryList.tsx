@@ -44,7 +44,7 @@ export function StorageCategoryList({
             <button
               type="button"
               data-testid={testId(TID_RESOURCE_MANAGER_STORAGE_CATEGORY_ROW, category.id)}
-              className="flex min-w-0 flex-1 items-center gap-3 text-left"
+              className="flex min-w-0 flex-1 items-center gap-3 text-start"
               onClick={() => onOpen(category.id)}
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface text-foreground-subtle">

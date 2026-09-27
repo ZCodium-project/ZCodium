@@ -798,7 +798,7 @@ export function PermissionDialog({
                     onFocus={() => setSelectedIndex(index)}
                     onKeyDown={handleOptionKeyDown}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left outline-none transition-colors focus-visible:bg-selected",
+                      "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-start outline-none transition-colors focus-visible:bg-selected",
                       isSelected ? "bg-selected" : "hover:bg-hover",
                     )}
                   >

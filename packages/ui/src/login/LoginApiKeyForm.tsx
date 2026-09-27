@@ -209,7 +209,7 @@ export function LoginApiKeyForm({ onCancel, onSaved, onSkipped }: LoginApiKeyFor
               id="login-api-key"
               type="password"
               size="lg"
-              className={`h-10 w-full text-ui-base ${showApiKeyLink ? "pr-28" : ""}`}
+              className={`h-10 w-full text-ui-base ${showApiKeyLink ? "pe-28" : ""}`}
               data-testid={TID_LOGIN_API_KEY_INPUT}
               aria-label={intl.formatMessage({
                 id: "login.apiKey.placeholder",
@@ -232,7 +232,7 @@ export function LoginApiKeyForm({ onCancel, onSaved, onSkipped }: LoginApiKeyFor
             {showApiKeyLink ? (
               <button
                 type="button"
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ui-base font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ui-base font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   if (apiKeyUrl) {

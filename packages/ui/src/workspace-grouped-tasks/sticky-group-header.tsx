@@ -99,7 +99,7 @@ export function StickyGroupHeader({
             tabIndex={0}
             aria-expanded={!collapsed}
             className={cn(
-              "flex h-8 items-center gap-1 rounded-lg border border-border bg-background pl-1.5 pr-1 text-ui-base text-foreground shadow-sm",
+              "flex h-8 items-center gap-1 rounded-lg border border-border bg-background ps-1.5 pe-1 text-ui-base text-foreground shadow-sm",
               "cursor-pointer transition-[border-color,box-shadow] hover:border-border-hover",
             )}
             onClick={handleToggle}
@@ -149,7 +149,7 @@ export function StickyGroupHeader({
             </DropdownMenu>
             <div className="flex min-w-0 flex-1 items-center gap-1">
               <span
-                className="min-w-0 max-w-full truncate rounded-sm px-1 text-left text-foreground"
+                className="min-w-0 max-w-full truncate rounded-sm px-1 text-start text-foreground"
                 title={displayTitle}
               >
                 {displayTitle}

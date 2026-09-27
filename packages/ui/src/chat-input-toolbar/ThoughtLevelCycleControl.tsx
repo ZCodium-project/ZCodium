@@ -213,7 +213,7 @@ export function ThoughtLevelCycleControl({
       >
         <span
           className={cn(
-            "absolute bottom-0 left-0 w-full rounded-full bg-success transition-[height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+            "absolute bottom-0 start-0 w-full rounded-full bg-success transition-[height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
             progressPercent > 0 ? "min-h-1" : undefined,
           )}
           style={{ height: `${progressPercent}%` }}

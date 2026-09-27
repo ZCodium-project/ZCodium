@@ -41,7 +41,7 @@ export function WorkflowRunSectionToggle({
     <button
       aria-expanded={expanded}
       aria-label={label}
-      className="flex w-full items-center gap-1.5 px-4 py-2 text-left outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-ring/40"
+      className="flex w-full items-center gap-1.5 px-4 py-2 text-start outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-ring/40"
       data-testid={testId}
       onClick={onToggle}
       type="button"

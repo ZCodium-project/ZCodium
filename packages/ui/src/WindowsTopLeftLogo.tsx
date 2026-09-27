@@ -15,7 +15,7 @@ export function WindowsTopLeftLogo({
         // Workspace 的 logo 位于 28px 按钮内，图像相对按钮左沿还有 4px 居中留白；
         // Settings 直接渲染 20px 图像，不能拿按钮容器的 left 13px 当作图像坐标。
         // 计入 4px 外层留白、1px 边框和按钮内 4px 后，两处图像均为 left 17px / top 19px。
-        "absolute left-1 top-1 mt-px ml-px z-20 flex h-12 items-center px-3 [app-region:drag]",
+        "absolute start-1 top-1 mt-px ms-px z-20 flex h-12 items-center px-3 [app-region:drag]",
         className,
       )}
     >

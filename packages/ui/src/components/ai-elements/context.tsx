@@ -256,7 +256,7 @@ export const ContextContentFooter = ({
 const TokensWithCost = ({ tokens, costText }: { tokens?: number; costText?: string }) => (
   <span>
     {tokens === undefined ? "—" : formatCompactTokenNumber("", tokens)}
-    {costText ? <span className="ml-2 text-muted-foreground">• {costText}</span> : null}
+    {costText ? <span className="ms-2 text-muted-foreground">• {costText}</span> : null}
   </span>
 );
 

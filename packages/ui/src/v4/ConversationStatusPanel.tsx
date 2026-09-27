@@ -258,13 +258,13 @@ function StatusSectionHeader({
   title: string;
 }) {
   return (
-    <div className="mb-0.5 flex h-8 min-w-0 shrink-0 items-center gap-1.5 px-2 pr-8">
+    <div className="mb-0.5 flex h-8 min-w-0 shrink-0 items-center gap-1.5 px-2 pe-8">
       <CollapsibleTrigger asChild>
         <button
           type="button"
           aria-expanded={isOpen}
           data-status-section-trigger={section}
-          className="group flex min-w-0 shrink-0 items-center gap-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
+          className="group flex min-w-0 shrink-0 items-center gap-1 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
         >
           <span className="shrink-0 text-ui-base text-[var(--color-foreground-subtle)]">
             {title}
@@ -340,7 +340,7 @@ function StatusSection({
               data-status-section-scroll={section}
               className={cn(
                 scrollViewportMaxHeightClass,
-                "min-h-0 overflow-x-hidden overflow-y-auto pr-1",
+                "min-h-0 overflow-x-hidden overflow-y-auto pe-1",
               )}
             >
               {children}
@@ -410,7 +410,7 @@ function GitStatusSection({
           type="button"
           disabled={!canOpenReview}
           className={cn(
-            "flex h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 text-left text-ui-base text-[var(--color-foreground)] transition-colors",
+            "flex h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 text-start text-ui-base text-[var(--color-foreground)] transition-colors",
             canOpenReview
               ? "hover:bg-[var(--color-hover)] hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
               : "cursor-default opacity-50",
@@ -434,7 +434,7 @@ function GitStatusSection({
           dirtyFileCount={git.dirtyFileCount}
           onRefreshGit={onRefreshGit}
           className="w-full px-0 pt-0"
-          triggerClassName="flex h-8 w-full min-w-0 justify-start gap-2 rounded-lg px-2 text-left text-ui-base text-[var(--color-foreground)] hover:bg-[var(--color-hover)] hover:text-[var(--color-foreground)] [&>span]:max-w-[calc(100%-3.5rem)] [&_svg:first-child]:text-[var(--color-foreground)]"
+          triggerClassName="flex h-8 w-full min-w-0 justify-start gap-2 rounded-lg px-2 text-start text-ui-base text-[var(--color-foreground)] hover:bg-[var(--color-hover)] hover:text-[var(--color-foreground)] [&>span]:max-w-[calc(100%-3.5rem)] [&_svg:first-child]:text-[var(--color-foreground)]"
           popoverClassName="w-72 max-w-[calc(100vw-2rem)]"
           branchListClassName="max-h-56"
           popoverSide={useVerticalFloatingPanels ? "bottom" : "left"}
@@ -686,7 +686,7 @@ const TodoPreviewTrigger = forwardRef<
       type="button"
       aria-expanded={open}
       data-status-todo-preview-trigger={group}
-      className="flex h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 text-left text-ui-base text-[var(--color-foreground-subtle)] hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]"
+      className="flex h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 text-start text-ui-base text-[var(--color-foreground-subtle)] hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]"
       onClick={(event) => {
         onClick?.(event);
         // HoverCard 在桌面由 hover/focus 驱动；仅无 hover 输入补充点击打开，
@@ -753,7 +753,7 @@ function TodoHiddenGroupPreview({
           <p className="flex h-8 shrink-0 items-center px-2 text-ui-base text-[var(--color-foreground-subtle)]">
             {label}
           </p>
-          <ul className="min-h-0 space-y-0 overflow-y-auto pr-1">
+          <ul className="min-h-0 space-y-0 overflow-y-auto pe-1">
             <PlanStatusItemRows items={items} />
           </ul>
         </div>
@@ -841,7 +841,7 @@ function SessionPlansStatusSection({
                   onOpenPlanDetail?.(buildSessionPlanOpenRequest(parentSessionId, item));
                 }}
                 className={cn(
-                  "flex min-h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-ui-base text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]",
+                  "flex min-h-8 w-full min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-start text-ui-base text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]",
                   canOpen && "hover:bg-[var(--color-hover)]",
                 )}
               >
@@ -937,7 +937,7 @@ function RunningWorkCancelButton({
         id: "chat.summaryPanel.stopRunningBackgroundTask",
       })}
       onClick={handleClick}
-      className="pointer-events-auto relative z-[2] ml-auto h-6 shrink-0 px-1.5 text-ui-base text-[var(--color-foreground)]"
+      className="pointer-events-auto relative z-[2] ms-auto h-6 shrink-0 px-1.5 text-ui-base text-[var(--color-foreground)]"
     >
       <SquareIcon aria-hidden className="size-3 fill-current" />
       {intl.formatMessage({ id: "chat.statusPanel.runningStop" })}
@@ -1486,12 +1486,12 @@ function EndedDirectoryRow({
       <button
         type="button"
         data-testid={testId}
-        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-ui-base text-[var(--color-foreground)] hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]"
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-ui-base text-[var(--color-foreground)] hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-input-border-focused)]"
         onClick={onOpen}
       >
         {icon}
         <span>{label}</span>
-        <span className="ml-auto text-[var(--color-foreground-subtle)]">{count}</span>
+        <span className="ms-auto text-[var(--color-foreground-subtle)]">{count}</span>
         <ChevronRightIcon className="size-4 text-[var(--color-foreground-subtle)]" />
       </button>
     </div>
@@ -1533,7 +1533,7 @@ function EndedSubagentDirectoryRow({
 
 function StatusSummaryMetric({ children, icon }: { children: ReactNode; icon: ReactNode }) {
   return (
-    <div className="flex h-8 w-max max-w-80 min-w-0 items-center gap-1.5 pl-2 pr-3 text-ui-base text-[var(--color-foreground)]">
+    <div className="flex h-8 w-max max-w-80 min-w-0 items-center gap-1.5 ps-2 pe-3 text-ui-base text-[var(--color-foreground)]">
       <span className="relative size-4 shrink-0">
         <span className="absolute inset-0 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0">
           {icon}
@@ -1694,7 +1694,7 @@ function StatusSummaryRow({
       <button
         type="button"
         aria-label={expandLabel}
-        className="group inline-flex w-max max-w-80 cursor-pointer flex-col items-stretch text-left text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-menu-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
+        className="group inline-flex w-max max-w-80 cursor-pointer flex-col items-stretch text-start text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-menu-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-input-border-focused)]"
         onClick={() => onVariantChange?.("panel")}
       >
         {summaryMetric}
@@ -1866,9 +1866,9 @@ function ConversationStatusPanelImpl({
         // 旧 ChatView 的 inline 面板直接钉在右侧，正文列通过独立 translate 让位。
         // v4 若继续用 inset-x-0 + justify-end，会让面板容器宽铺满并改变宽屏下的横向对齐。
         layoutMode === "inline"
-          ? "right-4"
+          ? "end-4"
           : layoutMode === "auto"
-            ? "inset-x-0 flex justify-end px-4 @min-[1280px]/conversation:left-auto @min-[1280px]/conversation:right-4 @min-[1280px]/conversation:px-0"
+            ? "inset-x-0 flex justify-end px-4 @min-[1280px]/conversation:start-auto @min-[1280px]/conversation:end-4 @min-[1280px]/conversation:px-0"
             : "inset-x-0 flex justify-end px-4",
         className,
       )}
@@ -1904,7 +1904,7 @@ function ConversationStatusPanelImpl({
         {variant !== "mini" ? (
           <div
             className={cn(
-              "absolute right-3 top-3 z-10 items-center gap-1",
+              "absolute end-3 top-3 z-10 items-center gap-1",
               variant === "auto" ? "hidden @min-[1280px]/conversation:flex" : "flex",
             )}
           >
@@ -2064,7 +2064,7 @@ function ConversationStatusPanelImpl({
             variant === "mini"
               ? "pointer-events-auto relative visible opacity-100"
               : variant === "panel"
-                ? "pointer-events-none invisible absolute left-0 top-0 opacity-0"
+                ? "pointer-events-none invisible absolute start-0 top-0 opacity-0"
                 : "pointer-events-auto relative visible opacity-100 @min-[1280px]/conversation:hidden",
           )}
         >

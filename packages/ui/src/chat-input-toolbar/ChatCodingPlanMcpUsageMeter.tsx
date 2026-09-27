@@ -92,7 +92,7 @@ export function ChatCodingPlanMcpUsageMeter({
       <span className="shrink-0">{labelContent}</span>
       {/* truncate 放在内层 inline span 不会生效，长日期会溢出并遮挡固定宽度进度条；
           截断约束必须由这个实际参与 flex 收缩的容器承担。 */}
-      <span className="ml-auto min-w-0 shrink overflow-hidden text-ellipsis whitespace-nowrap">
+      <span className="ms-auto min-w-0 shrink overflow-hidden text-ellipsis whitespace-nowrap">
         {valueContent}
       </span>
       {progressContent}

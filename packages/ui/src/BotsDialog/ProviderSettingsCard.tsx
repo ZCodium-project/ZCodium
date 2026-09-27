@@ -336,7 +336,7 @@ export function ProviderSettingsCard({
             {intl.formatMessage({ id: "bots.copyBindCommand" })}
           </Button>
         </div>
-        <ol className="mt-2 list-decimal space-y-1 pl-4 text-ui-base leading-5 text-foreground-subtle">
+        <ol className="mt-2 list-decimal space-y-1 ps-4 text-ui-base leading-5 text-foreground-subtle">
           <li>{intl.formatMessage({ id: "bots.bindCommandStep.copy" })}</li>
           <li>{intl.formatMessage({ id: "bots.bindCommandStep.openChat" })}</li>
           <li>{intl.formatMessage({ id: "bots.bindCommandStep.send" })}</li>

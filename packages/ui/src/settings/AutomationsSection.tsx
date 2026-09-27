@@ -1635,13 +1635,13 @@ export function AutomationsSection({
                             }}
                             className={cn(
                               // 任务卡与模板卡曾分别使用 surface/border，跨主题下描边深浅不一致。
-                              "group relative flex h-full min-h-0 cursor-pointer gap-3 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
+                              "group relative flex h-full min-h-0 cursor-pointer gap-3 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused",
                               // 已完成任务保持静态弱化，不在 hover 时恢复透明度或改变背景。
                               status === "completed" ? "opacity-60" : "hover:bg-hover",
                             )}
                           >
                             <div className="flex h-full min-w-0 flex-1 flex-col gap-3">
-                              <span className="block truncate pr-12 text-ui-base font-medium leading-5 text-foreground">
+                              <span className="block truncate pe-12 text-ui-base font-medium leading-5 text-foreground">
                                 {automation.title}
                               </span>
                               <p className="text-wrap-phrase line-clamp-2 h-10 text-ui-base font-normal leading-5 text-foreground-subtle">
@@ -1651,7 +1651,7 @@ export function AutomationsSection({
                                 <div className="flex min-w-0 flex-1 items-center gap-2">
                                   {hasFailure ? (
                                     <>
-                                      <span className="inline-flex shrink-0 items-center py-0.5 pl-1 pr-2 font-normal text-destructive">
+                                      <span className="inline-flex shrink-0 items-center py-0.5 ps-1 pe-2 font-normal text-destructive">
                                         <span className="flex size-5 shrink-0 items-center justify-center">
                                           <TriangleAlert
                                             className="size-4"
@@ -1659,21 +1659,21 @@ export function AutomationsSection({
                                             aria-hidden="true"
                                           />
                                         </span>
-                                        <span className="pl-1">
+                                        <span className="ps-1">
                                           {intl.formatMessage({
                                             id: "automations.lifecycle.failed",
                                           })}
                                         </span>
                                       </span>
                                       {/* 失败态也只展示 cron 摘要，禁止把已过期 nextRunAt 误写成“下次运行”。 */}
-                                      <span className="inline-flex min-w-0 items-center rounded-md bg-success/10 py-0.5 pl-1 pr-2 font-normal text-success opacity-40">
+                                      <span className="inline-flex min-w-0 items-center rounded-md bg-success/10 py-0.5 ps-1 pe-2 font-normal text-success opacity-40">
                                         <span className="flex size-5 shrink-0 items-center justify-center">
                                           <AutomationClockIcon
                                             className="size-4"
                                             aria-hidden="true"
                                           />
                                         </span>
-                                        <span className="truncate pl-1">{scheduleCardText}</span>
+                                        <span className="truncate ps-1">{scheduleCardText}</span>
                                       </span>
                                     </>
                                   ) : status === "active" ? (
@@ -1733,7 +1733,7 @@ export function AutomationsSection({
                               </div>
                             </div>
 
-                            <div className="absolute right-3 top-3 flex items-center gap-1">
+                            <div className="absolute end-3 top-3 flex items-center gap-1">
                               {busy ? <Spinner className="size-3.5" /> : null}
                               <AutomationActionsMenu
                                 automation={automation}
@@ -1856,7 +1856,7 @@ export function AutomationsSection({
                           });
                         }}
                         // Grid wrapper 虽已拉伸到行高，卡片本体仍需 h-full 才能继承同一行的最大高度；只设 min-height 时短文案卡会矮一截。
-                        className="flex h-full min-h-[114px] w-full flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-left transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+                        className="flex h-full min-h-[114px] w-full flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-start transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
                       >
                         <div className="flex items-center gap-0.5 text-foreground">
                           <OffPeakTemplateIcon
@@ -1928,7 +1928,7 @@ export function AutomationsSection({
                         key={template.id}
                         type="button"
                         onClick={() => handleUseTemplate(template)}
-                        className="group flex min-h-[114px] flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-left transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
+                        className="group flex min-h-[114px] flex-col gap-2 overflow-hidden rounded-xl border border-card-border bg-background p-3 text-start transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused"
                       >
                         <div className="flex min-w-0 items-center gap-1 text-foreground">
                           <span className="flex size-5 shrink-0 items-center justify-center">

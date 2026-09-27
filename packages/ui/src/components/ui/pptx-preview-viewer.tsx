@@ -221,7 +221,7 @@ function RenderedPage({
           renderer 只能操作下面不包含 React 子节点的独立 leaf mount。 */}
       <div
         data-zcode-pptx-render-surface=""
-        className="absolute left-0 top-0 origin-top-left"
+        className="absolute start-0 top-0 origin-top-left"
         style={{
           width: document.pageSize.width,
           height: document.pageSize.height,
@@ -786,7 +786,7 @@ export function PptxPreviewViewer({
       <aside
         ref={setThumbnailRoot}
         aria-label={labels.thumbnails}
-        className="w-24 shrink-0 overflow-y-auto border-r border-border bg-surface/30 p-2 sm:w-32"
+        className="w-24 shrink-0 overflow-y-auto border-e border-border bg-surface/30 p-2 sm:w-32"
       >
         <div className="flex flex-col gap-2">
           {Array.from({ length: document.pageCount }, (_, index) => (

@@ -114,7 +114,7 @@ function McpServerItem({
         data-mcp-status-dot-placement="icon-corner"
       >
         <Cable className="size-4" aria-hidden="true" />
-        <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-background">
+        <span className="absolute -end-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-background">
           <McpStatusDot status={server.status} reason={statusReason} />
         </span>
       </div>

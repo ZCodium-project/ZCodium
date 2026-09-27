@@ -213,7 +213,7 @@ export function EditToolCallBlock(context: ToolCallBlockRenderContext) {
       ) : (
         <>
           {hasMultipleFiles ? (
-            <div className="ml-2 space-y-2 border-border border-l pl-3.5 border-border">
+            <div className="ms-2 space-y-2 border-border border-s ps-3.5 border-border">
               {/* 多文件 edit 的主体只展示一份总览，下面把每个文件拆成独立块，
               这样既能保留总 diff 预览，也能满足“每个文件一个 edit block”的展示。 */}
               {rawFileSummaries.map((summary, index) => (

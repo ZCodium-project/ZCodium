@@ -307,7 +307,7 @@ function FeatureRequestTextarea({
     <section className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-ui-base font-semibold text-foreground">
-          {required ? <span className="mr-1 text-destructive">*</span> : null}
+          {required ? <span className="me-1 text-destructive">*</span> : null}
           {title}
         </h3>
         <span className="text-ui-xs tabular-nums text-foreground-subtle">

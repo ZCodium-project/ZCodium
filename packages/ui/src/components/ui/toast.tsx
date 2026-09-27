@@ -48,13 +48,13 @@ export function resolveToastStackClassName(position: ToastPosition): string {
   const bottomInset = "bottom-[calc(1rem+env(safe-area-inset-bottom))]";
   switch (position) {
     case "top-center":
-      return "fixed top-16 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2";
+      return "fixed top-16 start-1/2 z-[9999] flex -translate-x-1/2 rtl:translate-x-1/2 flex-col items-center gap-2";
     case "top-right":
-      return "fixed right-4 top-16 z-[9999] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2";
+      return "fixed end-4 top-16 z-[9999] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2";
     case "bottom-center":
-      return `fixed ${bottomInset} left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2`;
+      return `fixed ${bottomInset} start-1/2 z-[9999] flex -translate-x-1/2 rtl:translate-x-1/2 flex-col items-center gap-2`;
     case "bottom-left":
-      return `fixed ${bottomInset} left-4 z-[9999] flex flex-col items-start gap-2`;
+      return `fixed ${bottomInset} start-4 z-[9999] flex flex-col items-start gap-2`;
   }
 }
 
@@ -378,7 +378,7 @@ export function ToastMessageView({
                 type="button"
                 onClick={onAction ?? item.onAction}
                 // 长团队名等具体目标不能把窄屏 Toast 撑出视口；保留完整名称并允许换行。
-                className="max-w-1/2 self-center shrink-0 whitespace-normal break-words text-left font-medium leading-snug text-foreground underline underline-offset-2 hover:text-foreground-subtle"
+                className="max-w-1/2 self-center shrink-0 whitespace-normal break-words text-start font-medium leading-snug text-foreground underline underline-offset-2 hover:text-foreground-subtle"
               >
                 {item.actionLabel}
               </button>

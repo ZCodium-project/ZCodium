@@ -59,7 +59,7 @@ export const PromptInputButton = ({
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent side={side}>
         {tooltipContent}
-        {shortcut && <span className="ml-2 text-muted-foreground">{shortcut}</span>}
+        {shortcut && <span className="ms-2 text-muted-foreground">{shortcut}</span>}
       </TooltipContent>
     </Tooltip>
   );

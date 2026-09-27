@@ -80,7 +80,7 @@ export function ConversationSharePermissionPicker({
                 disabled={disabled}
                 onClick={() => onChange(value)}
                 className={cn(
-                  "flex w-full min-w-0 items-center text-left text-foreground outline-none transition-colors hover:bg-menu-hover focus-visible:bg-menu-hover disabled:pointer-events-none disabled:opacity-60",
+                  "flex w-full min-w-0 items-center text-start text-foreground outline-none transition-colors hover:bg-menu-hover focus-visible:bg-menu-hover disabled:pointer-events-none disabled:opacity-60",
                   compact
                     ? "min-h-11 gap-2 rounded-lg border border-input-border bg-input px-2.5 py-2 text-ui-sm"
                     : "h-11 gap-1.5 p-3 text-ui-base",

@@ -59,7 +59,7 @@ export function OnboardingWelcomeView(props: { onStart: () => void; onOpenMigrat
         </div>
       </div>
 
-      <div className="flex w-1/2 flex-col p-2 pl-0">
+      <div className="flex w-1/2 flex-col p-2 ps-0">
         <OnboardingWelcomeAsciiVisual />
       </div>
     </div>

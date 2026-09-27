@@ -42,7 +42,7 @@ export function AutomationSwitchToggle({
               ? "bg-foreground-inverse"
               : "bg-success-foreground"
             : "bg-primary",
-          checked ? (isSmall ? "left-[17px]" : "left-[18px]") : "left-px",
+          checked ? (isSmall ? "start-[17px]" : "start-[18px]") : "start-px",
         )}
       />
     </button>

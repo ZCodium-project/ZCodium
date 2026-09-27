@@ -22,7 +22,7 @@ export function ProviderStatusIndicator({
     <CircleIcon
       data-provider-status={status}
       aria-label={intl.formatMessage({ id: label })}
-      className={`size-2 shrink-0 fill-current max-md:absolute max-md:right-1 max-md:bottom-1 max-md:rounded-full max-md:ring-2 max-md:ring-card ${color}`}
+      className={`size-2 shrink-0 fill-current max-md:absolute max-md:end-1 max-md:bottom-1 max-md:rounded-full max-md:ring-2 max-md:ring-card ${color}`}
     />
   );
 }

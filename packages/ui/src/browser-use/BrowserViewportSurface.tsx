@@ -91,7 +91,7 @@ export function BrowserViewportSurface({
           role="status"
           aria-live="polite"
           data-browser-resize-warning="visible"
-          className="pointer-events-none absolute top-2 right-2 left-2 z-20 mx-auto flex w-fit max-w-full items-center gap-2 rounded-xl border border-popover-border bg-popover px-3 py-2 text-ui-base font-medium text-foreground shadow-md"
+          className="pointer-events-none absolute top-2 end-2 start-2 z-20 mx-auto flex w-fit max-w-full items-center gap-2 rounded-xl border border-popover-border bg-popover px-3 py-2 text-ui-base font-medium text-foreground shadow-md"
         >
           <span
             aria-hidden="true"

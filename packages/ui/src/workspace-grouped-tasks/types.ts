@@ -35,15 +35,15 @@ const TASK_GROUP_BORDER_COLOR_CLASS: Record<ZCodeTaskGroupColor, string> = {
 const TASK_GROUP_CONTAINER_CLASS =
   "relative pt-2.5 pb-0 transition-[width,max-width] duration-200 ease-out";
 const TASK_GROUP_HEADER_CLASS =
-  "mb-0.5 flex h-8 items-center gap-1 rounded-lg border border-transparent pl-1.5 pr-1 text-ui-base text-foreground transition-[background-color,border-color,box-shadow] hover:bg-surface-hover";
+  "mb-0.5 flex h-8 items-center gap-1 rounded-lg border border-transparent ps-1.5 pe-1 text-ui-base text-foreground transition-[background-color,border-color,box-shadow] hover:bg-surface-hover";
 const TASK_GROUP_TITLE_CLASS =
-  "min-w-0 max-w-full cursor-pointer truncate rounded-sm px-1 text-left text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused";
+  "min-w-0 max-w-full cursor-pointer truncate rounded-sm px-1 text-start text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-input-border-focused";
 const TASK_GROUP_COUNT_BADGE_CLASS =
   "inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-tag/50 px-1.5 py-0.5 text-ui-sm font-medium leading-none text-foreground-subtle";
-const TASK_GROUP_CONTENT_CLASS = "ml-4 border-l py-px pl-2";
+const TASK_GROUP_CONTENT_CLASS = "ms-4 border-s py-px ps-2";
 // 行是纵向列：首行（标题 + 右侧元信息）固定 28px，其下可挂工作流运行行，所以外层只定 min-h。
 const TASK_GROUP_ROW_CLASS =
-  "flex min-h-7 w-full min-w-0 flex-col justify-center rounded-lg border border-transparent pl-2.5 pr-1 text-left text-ui-base transition-[background-color,border-color,color,opacity]";
+  "flex min-h-7 w-full min-w-0 flex-col justify-center rounded-lg border border-transparent ps-2.5 pe-1 text-start text-ui-base transition-[background-color,border-color,color,opacity]";
 const TASK_GROUP_ROW_LINE_CLASS = "flex h-7 w-full min-w-0 items-center gap-2";
 export {
   TASK_GROUP_ROW_LINE_CLASS,
