@@ -124,13 +124,22 @@ export function TaskTitleOverflowText({
       if (reducedMotionQuery?.matches) return;
 
       stopMarquee();
+      // RTL 下内容向左溢出，走马灯需要向右位移、渐隐遮罩也要镜像。
+      const isRtl = getComputedStyle(textElement).direction === "rtl";
+      const scrollSign = isRtl ? 1 : -1;
+      const edgeFadeMask = isRtl
+        ? "linear-gradient(to left, black 0, black calc(100% - 1.5rem), transparent 100%)"
+        : rightFadeMask;
+      const bothEdgesMask = isRtl
+        ? "linear-gradient(to left, transparent 0, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)"
+        : bothEdgesFadeMask;
       const totalDuration = duration + marqueePauseSeconds;
       // 纯 CSS infinite 动画只能按百分比停顿，标题宽度变化时无法保证
       // 副本头部对齐后固定等待 2 秒。Web Animation 用动态 offset 分离移动与停留时长。
       const movementEndOffset = duration / totalDuration;
       const maskFadeInEndOffset = marqueeMaskFadeInSeconds / totalDuration;
       // 左侧 mask 在 24px 间距内继续淡出，会让已经离场的主体标题
-      // 仍留下一段无内容的渐变。主体尾部到达左边缘时直接切换为仅右侧 mask。
+      // 仍留下一段无内容的渐变。主体尾部到达边缘时直接切换为仅单侧 mask。
       const originalTailArrivalTime = duration * ((distance - marqueeGapPx) / distance);
       const originalTailArrivalOffset = originalTailArrivalTime / totalDuration;
       const animationOptions: KeyframeAnimationOptions = {
@@ -143,24 +152,24 @@ export function TaskTitleOverflowText({
           { offset: 0, transform: "translate3d(0, 0, 0)" },
           {
             offset: movementEndOffset,
-            transform: `translate3d(-${distance}px, 0, 0)`,
+            transform: `translate3d(${scrollSign * distance}px, 0, 0)`,
           },
           {
             offset: 1,
-            transform: `translate3d(-${distance}px, 0, 0)`,
+            transform: `translate3d(${scrollSign * distance}px, 0, 0)`,
           },
         ],
         animationOptions,
       );
       // 滚动期间始终使用双侧 mask，会让副本对齐后的 2 秒停留画面
-      // 仍然看不清标题开头。mask 与位移动画共用时长，在到达前淡出左侧并保持到下一轮。
+      // 仍然看不清标题开头。mask 与位移动画共用时长，在到达前淡出边缘并保持到下一轮。
       const maskAnimation = textElement.animate(
         [
-          createMaskKeyframe(rightFadeMask, 0),
-          createMaskKeyframe(bothEdgesFadeMask, maskFadeInEndOffset),
-          createMaskKeyframe(bothEdgesFadeMask, originalTailArrivalOffset),
-          createMaskKeyframe(rightFadeMask, originalTailArrivalOffset),
-          createMaskKeyframe(rightFadeMask, 1),
+          createMaskKeyframe(edgeFadeMask, 0),
+          createMaskKeyframe(bothEdgesMask, maskFadeInEndOffset),
+          createMaskKeyframe(bothEdgesMask, originalTailArrivalOffset),
+          createMaskKeyframe(edgeFadeMask, originalTailArrivalOffset),
+          createMaskKeyframe(edgeFadeMask, 1),
         ],
         animationOptions,
       );

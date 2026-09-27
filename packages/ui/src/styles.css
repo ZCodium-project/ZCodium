@@ -1361,6 +1361,12 @@ body {
   }
 }
 
+/* RTL 下走马灯从左缘溢出：静态渐隐翻到左侧（WAAPI 的 mask/位移在组件内按 direction 翻转）。 */
+[dir="rtl"] .task-title-marquee {
+  mask-image: linear-gradient(to left, black calc(100% - 1.5rem), transparent);
+  -webkit-mask-image: linear-gradient(to left, black calc(100% - 1.5rem), transparent);
+}
+
 /* 工作流图·行进边：控制流进入正在运行的站所走的
  * 那条边**亮着、不动**——它说的是过去（控制流走了这条边），动作属于正在运行的灯（下面的 wf-beat）。
  * 光是灯的颜色，在灯那一头最亮、朝控制流来的方向淡去，像灯照亮了自己来的路。之前是一条沿边滚动的
