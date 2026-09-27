@@ -8,6 +8,7 @@ import {
   useRef,
 } from "react";
 import type { ReactNode } from "react";
+import { Direction as DirectionPrimitive } from "radix-ui";
 import type { Locale, LocalePreference } from "@zcode/shared";
 import { DEFAULT_LOCALE } from "@zcode/shared";
 import type { BroadcastMessage, IBroadcastService, ISettingService } from "@zcode/services";
@@ -373,7 +374,15 @@ export function ZCodeIntlProvider({
     [intl, locale, localePreference, setLocale, setLocalePreference],
   );
 
-  return <IntlContext value={value}>{children}</IntlContext>;
+  return (
+    <IntlContext value={value}>
+      {/* Radix 组件（dropdown/select/dialog 等 portal）不读 html[dir]，必须由
+          DirectionProvider 显式给方向，否则 fa-IR 下所有浮层仍是 LTR。 */}
+      <DirectionPrimitive.DirectionProvider dir={locale === "fa-IR" ? "rtl" : "ltr"}>
+        {children}
+      </DirectionPrimitive.DirectionProvider>
+    </IntlContext>
+  );
 }
 
 /** 获取 intl 上下文 */
