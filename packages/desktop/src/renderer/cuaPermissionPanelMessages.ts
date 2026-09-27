@@ -31,6 +31,15 @@ const MESSAGES: Record<
     accessibility: "Accessibility",
     screen_recording: "Screen Recording",
   },
+  "fa-IR": {
+    documentTitle: "مجوزهای Computer Use در ZCodium",
+    dragTitle: "مرا به فهرست مجوزهای بالا بکشید",
+    hintPrefix: "نماد سمت چپ را به ",
+    hintSuffix: " فهرست بالا بکشید",
+    completion: "برای اعطای دسترسی رها کنید — نیازی به زدن کلید نیست",
+    accessibility: "دسترس‌پذیری",
+    screen_recording: "ضبط صفحه",
+  },
 };
 
 export function resolveCuaPermissionPanelMessages(

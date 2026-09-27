@@ -1031,7 +1031,7 @@ export function SettingsPage({
         setLocalePreference("system");
         return;
       }
-      if (value === "zh-CN" || value === "en-US") {
+      if (value === "zh-CN" || value === "en-US" || value === "fa-IR") {
         setLocalePreference(value as Locale);
       }
     },

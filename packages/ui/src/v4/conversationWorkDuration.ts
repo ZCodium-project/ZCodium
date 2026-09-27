@@ -8,8 +8,8 @@ function formatDurationUnit(
   locale: Locale,
 ): string {
   const unit = intl.formatMessage({ id: messageId });
-  // 中文时长单位需要空格；英文单位本身已带缩写，不额外插入空格。
-  return `${value}${locale === "zh-CN" ? " " : ""}${unit}`;
+  // 中文/波斯语时长单位需要空格；英文单位本身已带缩写，不额外插入空格。
+  return `${value}${locale === "zh-CN" || locale === "fa-IR" ? " " : ""}${unit}`;
 }
 
 /** Desktop 与 Share 共用的工作时长文案，避免同一轮在两个 surface 显示不同单位。 */

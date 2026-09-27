@@ -49,8 +49,7 @@ const zhCN: Record<string, string> = {
   "occupationOnboarding.heroTitle": "简单、迅捷、氛围十足！",
   "occupationOnboarding.heroDescription": "多智能体协作完成复杂目标，随时随地尽在掌控。",
   "occupationOnboarding.title": "你的主要工作方向是？",
-  "occupationOnboarding.description":
-    "选择最接近你日常工作的一项，让 ZCodium 更懂你的工作。",
+  "occupationOnboarding.description": "选择最接近你日常工作的一项，让 ZCodium 更懂你的工作。",
   "occupationOnboarding.office": "白领 / 办公人群",
   "occupationOnboarding.developer": "软件开发/数据/AI",
   "occupationOnboarding.student": "学生/教师/科研",
@@ -380,8 +379,7 @@ const zhCN: Record<string, string> = {
   "conversationShare.import.installing": "正在安装分享文件",
   "conversationShare.import.committing": "正在创建分享会话",
   "conversationShare.import.complete": "分享导入完成",
-  "conversationShare.import.loginRequired":
-    "该分享暂不支持匿名导入，请登录 ZCodium 后重试",
+  "conversationShare.import.loginRequired": "该分享暂不支持匿名导入，请登录 ZCodium 后重试",
   "conversationShare.import.notFound": "分享不存在或无权访问",
   "conversationShare.import.expired": "分享已过期，请让分享者重新生成",
   "conversationShare.import.integrityFailed": "分享文件校验失败，已停止导入",
@@ -2147,9 +2145,11 @@ const zhCN: Record<string, string> = {
   "settings.locale.system": "系统默认",
   "settings.locale.zh-CN": "中文简体",
   "settings.locale.en-US": "English",
+  "settings.locale.fa-IR": "فارسی",
   "sidebar.settings.systemDefault": "系统默认",
   "sidebar.settings.locale.en-US": "English",
   "sidebar.settings.locale.zh-CN": "中文简体",
+  "sidebar.settings.locale.fa-IR": "فارسی",
   "sidebar.settings.interfaceZoom": "界面缩放",
   "sidebar.settings.theme.light": "浅色主题",
   "sidebar.settings.theme.zai-light": "浅色主题",
@@ -2479,8 +2479,7 @@ const zhCN: Record<string, string> = {
   "settings.mcp.failure.oauth_authorization_failed": "MCP 授权未完成或已超时，请重新授权。",
   "settings.mcp.failure.official_origin_untrusted": "MCP 服务器地址未通过安全校验，连接已阻止。",
   "settings.mcp.failure.not_authenticated": "当前未配置 API Key，请先完成配置。",
-  "settings.mcp.failure.coding_plan_required":
-    "当前没有配置 Coding Plan，请先在模型设置中配置。",
+  "settings.mcp.failure.coding_plan_required": "当前没有配置 Coding Plan，请先在模型设置中配置。",
   "settings.mcp.failure.server_not_found": "找不到该 MCP 服务器，请检查插件或服务器配置。",
   "settings.mcp.failure.server_unavailable": "MCP 服务暂时不可用，请稍后重试。",
   "settings.mcp.failure.rate_limited": "MCP 请求过于频繁，请稍后重试。",
@@ -2636,8 +2635,7 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.connectionMode.teamPlanBadge": "团队",
   "settings.modelProvider.connectionMode.loadFailed": "连接方式获取失败",
   "settings.modelProvider.connectionMode.noAvailablePlan": "无可用套餐",
-  "settings.modelProvider.accountProviderConfigMissing":
-    "Provider 配置暂不可用，请刷新后重试。",
+  "settings.modelProvider.accountProviderConfigMissing": "Provider 配置暂不可用，请刷新后重试。",
   "settings.modelProvider.startPlan.login": "配置 API",
   "settings.modelProvider.startPlan.status.loginRequired": "配置 API Key 后查看",
   "settings.modelProvider.startPlan.status.expired": "体验套餐已过期",
@@ -2659,8 +2657,7 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.startPlan.balance.used": "已用 {value}",
   "settings.modelProvider.startPlan.highlight.trial.label": "体验周期",
   "settings.modelProvider.startPlan.highlight.trial.value": "5 个自然日",
-  "settings.modelProvider.startPlan.highlight.trial.description":
-    "配置 API Key 后开始计时。",
+  "settings.modelProvider.startPlan.highlight.trial.description": "配置 API Key 后开始计时。",
   "settings.modelProvider.startPlan.highlight.quota.label": "每日额度",
   "settings.modelProvider.startPlan.highlight.quota.value": "3M tokens/日",
   "settings.modelProvider.startPlan.highlight.quota.description":
@@ -2906,8 +2903,7 @@ const zhCN: Record<string, string> = {
     "来自当前供应商工具用量接口，统计联网搜索 / Web Reader / Zread 等工具调用次数。",
   "settings.usage.sourceProvider": "来源：{provider}",
   "settings.usage.billingBanner.title": "{provider} 编程套餐",
-  "settings.usage.billingBanner.description":
-    "配置 {provider} API Key 后可查询用量。",
+  "settings.usage.billingBanner.description": "配置 {provider} API Key 后可查询用量。",
   "settings.usage.billingBanner.compactDescription": "配置 {provider} API Key 后即可同步用量。",
   "settings.usage.billingBanner.buy": "配置 Coding Plan",
   "settings.usage.billingBanner.apiKeys": "API 密钥",
@@ -3039,8 +3035,7 @@ const zhCN: Record<string, string> = {
   "chat.planUsage.toolRemaining": "剩余 {remaining} / {total} · 重置 {time}",
   "chat.planUsage.toolUsed": "已用 {used} / {total} · 重置 {time}",
   "chat.planUsage.noQuotaLimits": "接口暂未返回可展示的额度项。",
-  "usage.error.chatPlan.credential":
-    "无法读取额度。请重新配置 API Key，或确认已开通 Coding Plan。",
+  "usage.error.chatPlan.credential": "无法读取额度。请重新配置 API Key，或确认已开通 Coding Plan。",
   "usage.error.chatPlan.generic": "无法读取套餐额度。请稍后重试，或检查供应商配置。",
   "settings.usage.range.all": "全部时间",
   "settings.usage.range.7d": "近 7 日",
@@ -3283,8 +3278,7 @@ const zhCN: Record<string, string> = {
   "settings.skills.diagnostics.code.skill_too_large": "SKILL.md 体积过大已截断",
   "settings.skills.diagnostics.code.skill_not_found": "技能未找到",
   "settings.subagents.title": "子智能体",
-  "settings.subagents.description":
-    "管理 ZCodium Agent 运行时消费的用户级子智能体 Markdown 文件。",
+  "settings.subagents.description": "管理 ZCodium Agent 运行时消费的用户级子智能体 Markdown 文件。",
   "settings.subagents.workspaceScopeUnsupported": "暂不支持工作区级创建或编辑",
   "settings.subagents.searchPlaceholder": "搜索子智能体...",
   "settings.subagents.empty": "没有找到子智能体",
@@ -4211,8 +4205,7 @@ const zhCN: Record<string, string> = {
   "chat.toolbar.computerUse.label": "电脑操作",
   "chat.toolbar.computerUse.tooltip.idle": "电脑操作空闲——首次使用时自动启动",
   "chat.toolbar.computerUse.tooltip.starting": "正在启用电脑操作插件…",
-  "chat.toolbar.computerUse.tooltip.ready":
-    "电脑操作已就绪 · 直接描述你想让 ZCodium 做的事",
+  "chat.toolbar.computerUse.tooltip.ready": "电脑操作已就绪 · 直接描述你想让 ZCodium 做的事",
   "chat.toolbar.computerUse.tooltip.permissionRequired": "缺少 macOS 权限，点击完成授权",
   "chat.toolbar.computerUse.tooltip.error":
     "电脑操作启用失败 · 重启 ZCodium 应用后重试，或让 ZCodium 排查日志",
@@ -4624,8 +4617,7 @@ const zhCN: Record<string, string> = {
   "workflows.hub.detail.meta.saveFailed": "保存失败：{reason}",
   "workflows.hub.detail.meta.descriptionRequired": "说明不能为空",
   "workflows.hub.detail.script": "脚本",
-  "workflows.hub.detail.script.note":
-    "脚本只读。要改脚本，在对话里让 ZCodium 修订后另存一版。",
+  "workflows.hub.detail.script.note": "脚本只读。要改脚本，在对话里让 ZCodium 修订后另存一版。",
   "workflows.hub.detail.script.copy": "复制脚本",
   "workflows.hub.detail.loadError": "无法读取这个工作流：{reason}",
   "workflows.hub.detail.notFound": "这个工作流已不在项目里。",
@@ -5366,8 +5358,7 @@ const zhCN: Record<string, string> = {
   "zcode.error.ZCODE_BIGMODEL_TEAM_PLAN_MEMBER_REQUIRED":
     "当前模型不可用，请检查是否已将该 API Key 添加到项目成员列表",
   "zcode.error.providerBusiness.1006": "API Key 已失效，请重新配置后再试。",
-  "zcode.error.providerBusiness.1005":
-    "今日免费计划额度已用完。请切换模型或等待额度恢复。",
+  "zcode.error.providerBusiness.1005": "今日免费计划额度已用完。请切换模型或等待额度恢复。",
   "zcode.error.providerBusiness.3006": "当前模型不在可用范围内，请切换到允许的模型后重试。",
   "zcode.error.providerBusiness.3002": "请求过于频繁，请稍后重试。",
   "zcode.error.providerBusiness.3001": "请求参数错误，请检查输入后重试。",

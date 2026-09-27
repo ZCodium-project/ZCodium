@@ -139,7 +139,14 @@ export function createDesktopPlatform(options: {
     setApplicationLocale: (locale) => window.zcode.setApplicationLocale(locale),
     getSystemLocale: () =>
       window.zcode.getSystemLocale?.() ??
-      Promise.resolve(navigator.language.toLowerCase().startsWith("zh") ? "zh-CN" : "en-US"),
+      Promise.resolve(
+        (() => {
+          const normalized = navigator.language.toLowerCase();
+          if (normalized.startsWith("zh")) return "zh-CN" as const;
+          if (normalized.startsWith("fa")) return "fa-IR" as const;
+          return "en-US" as const;
+        })(),
+      ),
     setTitleBarTheme: (theme) => window.zcode.setTitleBarTheme(theme),
     getDeviceId: () =>
       (window as Window & { __ZCODE_DEVICE_ID__?: string }).__ZCODE_DEVICE_ID__ ?? "",

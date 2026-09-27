@@ -251,6 +251,8 @@ const messages = {
 export type BotMessageId = keyof (typeof messages)[BotMessageLocale];
 
 export function normalizeBotMessageLocale(locale: Locale | undefined): BotMessageLocale {
+  // bot 文案只有 zh/en 两份；fa-IR 等其他界面语言跟随英文，undefined 保持 zh 默认。
+  if (locale === "fa-IR") return "en-US";
   return locale === "en-US" ? "en-US" : DEFAULT_BOT_MESSAGE_LOCALE;
 }
 

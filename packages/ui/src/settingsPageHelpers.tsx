@@ -313,6 +313,12 @@ export function GeneralSectionContent({
                 >
                   {intl.formatMessage({ id: "settings.locale.en-US" })}
                 </SelectItem>
+                <SelectItem
+                  value="fa-IR"
+                  data-testid={testId(TID_SETTINGS_LOCALE_SELECT_ITEM, "fa-IR")}
+                >
+                  {intl.formatMessage({ id: "settings.locale.fa-IR" })}
+                </SelectItem>
               </SelectContent>
             </Select>
           }

@@ -84,6 +84,14 @@ const ABOUT_MESSAGES: Record<
     auditNotice: "Community audit build, not affiliated with Z.AI.",
     copyright: (year) => `Copyright © ${year} ZCodium.`,
   },
+  "fa-IR": {
+    aboutTitle: "درباره ZCodium",
+    versionLabel: "نسخه",
+    okButtonLabel: "تأیید",
+    optimizedForAppleSilicon: "بهینه‌شده برای Apple Silicon.",
+    auditNotice: "نسخه ممیزی مستقل جامعه؛ وابسته به Z.AI نیست.",
+    copyright: (year) => `حق نشر © ${year} ZCodium.`,
+  },
 };
 
 function normalizeValue(value: string | undefined | null): string {

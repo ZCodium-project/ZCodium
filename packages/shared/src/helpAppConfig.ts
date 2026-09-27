@@ -8,6 +8,7 @@ const helpConfigSchema = z.object({
     .object({
       "zh-CN": z.string().optional().catch(undefined),
       "en-US": z.string().optional().catch(undefined),
+      "fa-IR": z.string().optional().catch(undefined),
     })
     .optional()
     .catch(undefined),
@@ -38,6 +39,8 @@ export function resolveHelpAppConfig(remote: unknown, local: unknown): HelpAppCo
     community_urls: {
       "zh-CN": getCommunityUrlFromConfigs(remoteConfig, localConfig, "zh-CN"),
       "en-US": getCommunityUrlFromConfigs(remoteConfig, localConfig, "en-US"),
+      // fa-IR 暂无独立社区站点，跟随英文入口。
+      "fa-IR": getCommunityUrlFromConfigs(remoteConfig, localConfig, "en-US"),
     },
     feedback_url: getFeedbackUrlFromConfig(remoteConfig) ?? getFeedbackUrlFromConfig(localConfig),
     // false 是远端明确配置，不能按 truthy 判断后回退到本地 true。
@@ -63,6 +66,7 @@ export function createHelpAppConfigReader(options: {
         community_urls: {
           "zh-CN": ZCODIUM_ISSUES_URL,
           "en-US": ZCODIUM_ISSUES_URL,
+          "fa-IR": ZCODIUM_ISSUES_URL,
         },
         feedback_url: ZCODIUM_ISSUES_URL,
         feedback_use_external_form: true,

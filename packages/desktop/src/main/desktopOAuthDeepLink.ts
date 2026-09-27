@@ -150,6 +150,16 @@ export function resolveExternalWorkspaceOpenDialogCopy(
     };
   }
 
+  if (locale === "fa-IR") {
+    return {
+      buttons: ["باز کردن پوشه", "لغو"],
+      title: "باز کردن پیوند خارجی ZCodium؟",
+      message: "این پوشه در ZCodium باز شود؟",
+      detail: (path) =>
+        `${path}\n\nفقط پوشه‌های منبع‌هایی را باز کنید که به آن‌ها اعتماد دارید. تنظیمات پروژه ممکن است روی runtime ایجنت اثر بگذارد.`,
+    };
+  }
+
   return {
     buttons: ["Open folder", "Cancel"],
     title: "Open external ZCodium link?",

@@ -102,6 +102,7 @@ export const providerTemplateNameMapDataSchema = z
   .object({
     "zh-CN": z.string().min(1).optional(),
     "en-US": z.string().min(1).optional(),
+    "fa-IR": z.string().min(1).optional(),
   })
   .strict();
 export const providerTemplateDataSchema = z

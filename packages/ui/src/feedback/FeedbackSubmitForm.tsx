@@ -265,7 +265,8 @@ export function FeedbackSubmitForm({
         ticketSeverity,
         ticketModule,
         modelContext,
-        locale,
+        // 反馈服务端只接受 zh/en 语言头，fa-IR 等按 en-US 透传。
+        locale: locale === "fa-IR" ? "en-US" : locale,
         copy: submissionCopy,
         formatMessage: intl.formatMessage,
         onTicketCreated: shouldCloseOnTicketCreated

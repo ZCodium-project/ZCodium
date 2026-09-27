@@ -41,7 +41,7 @@ export function workDurationParts(
   return parts.slice(0, 2);
 }
 
-/** 中文时长单位与数字之间留空格以保持可读；英文缩写单位紧贴数字。 */
+/** 中文和波斯语时长单位与数字之间留空格以保持可读；英文缩写单位紧贴数字。 */
 export function workDurationUnitSeparator(locale: string): string {
-  return locale === "zh-CN" ? " " : "";
+  return locale === "zh-CN" || locale === "fa-IR" ? " " : "";
 }
