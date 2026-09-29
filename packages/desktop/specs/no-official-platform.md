@@ -22,6 +22,6 @@ sequenceDiagram
   Note over P: 开关随设置文件持久化，各进程读取设置后投影；分享无开关
 ```
 
-用户自配模型 URL、密钥、代理和本地功能保持可用；CLI 不再把模型 URL 改写至官方 Coding Plan 网关。官方 CDN 默认市场和图片改为无远端来源，网络边界拒绝历史缓存中的官方平台地址。用户主动打开系统浏览器的文档链接不受此策略限制。
+用户自配模型 URL、密钥、代理和本地功能保持可用；CLI 不再把模型 URL 改写至官方 Coding Plan 网关。官方 CDN 默认市场和图片改为无远端来源，网络边界拒绝历史缓存中的官方平台地址。显式配置的远程资源自建源（`ZCODE_REMOTE_ASSET_CDN_BASE_URL`）视为用户自有配置，不受官方服务开关与官方出口策略限制；默认官方 CDN 来源仍由 marketplace 开关把关。用户主动打开系统浏览器的文档链接不受此策略限制。
 
 验收：源码 grep 风格回归扫描主动域名和网络出口；使用会在被调用时失败的网络替身验证 no-op；验证用户模型 URL 和请求参数不被修改；官方服务开关回归（`packages/desktop/tests/official-service-switches.test.mjs`）验证设置持久化、跨进程投影及开关放行；运行桌面 no-telemetry 回归、pnpm typecheck、pnpm lint、架构检查。实际 Electron 启动抓包若未执行必须明确说明。

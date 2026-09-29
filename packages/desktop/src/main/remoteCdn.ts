@@ -20,10 +20,14 @@ function normalizeBaseUrl(value: string): string {
 }
 
 export function resolveRemoteCdnBaseUrls(options: ResolveRemoteCdnOptions = {}): string[] {
-  // 审计版不连接官方服务，不从 CDN 自动下载资源。
-  if (!isOfficialServiceEnabled("marketplace")) return [];
+  // 显式覆盖地址是用户自有的 remote 资源源（镜像 / GitHub Release 等），与官方平台无关。
+  // 它必须先于官方服务开关判断：否则默认关闭的 marketplace 会把自建源一起拦掉，
+  // 表现为“连 WSL/SSH 需要先打开插件市场开关”。
   const override = options.overrideBaseUrl?.trim();
   if (override) return [normalizeBaseUrl(override)];
+
+  // 默认（或构建注入）的官方 CDN 仍由 marketplace 开关把关：审计版不自动连接官方 CDN。
+  if (!isOfficialServiceEnabled("marketplace")) return [];
   const baseUrl =
     process.env.ZCODE_CDN_BASE_URL?.trim() ||
     (typeof __ZCODE_CDN_BASE_URL__ === "undefined" ? "" : __ZCODE_CDN_BASE_URL__) ||

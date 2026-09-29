@@ -82,6 +82,11 @@ test("official service switches gate real feature entry points", () => {
   assert.equal(closed.remoteCdnCount, 0, "关闭时不得暴露远程 CDN 下载源");
   assert.equal(opened.remoteCdnCount, 1, "打开后应出现 CDN 下载源");
 
+  // 自建源：显式覆盖地址与官方开关解耦，关闭态可用、打开态保持原值。
+  const probeOverrideUrl = "https://github.com/probe/repo/releases/download/v0.0.0";
+  assert.equal(closed.remoteCdnOverrideUrl, probeOverrideUrl, "关闭时显式自建源不得被官方开关阻断");
+  assert.equal(opened.remoteCdnOverrideUrl, probeOverrideUrl, "打开后显式自建源不得被开关改写");
+
   // offPeak：关闭=取号在凭证/网络前拒绝；打开=真的发出取号请求并解析结果。
   assert.equal(closed.offPeakRejected, true, "关闭时取号必须按未开启拒绝");
   assert.equal(closed.offPeakFetchCalls, 0, "关闭时不得发起取号请求");

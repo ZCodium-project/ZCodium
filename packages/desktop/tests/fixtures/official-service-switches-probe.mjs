@@ -121,6 +121,13 @@ async function runFunctionalEffects() {
     // marketplace：关闭时远程 CDN 来源为空；打开后出现可下载的 CDN 源。
     snapshot.remoteCdnCount = resolveRemoteCdnBaseUrls({ version: "0.0.0" }).length;
 
+    // 自建源：显式覆盖地址是用户自有源，先于官方开关判断，开关状态不得阻断或改写它。
+    snapshot.remoteCdnOverrideUrl =
+      resolveRemoteCdnBaseUrls({
+        version: "0.0.0",
+        overrideBaseUrl: "https://github.com/probe/repo/releases/download/v0.0.0",
+      })[0] ?? null;
+
     // offPeak：关闭时取号在凭证/网络前拒绝；打开后真的发出取号请求并解析结果。
     let offPeakFetchCalls = 0;
     const offPeakClient = createOffPeakServerClient({

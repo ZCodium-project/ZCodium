@@ -361,12 +361,61 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
+  # remote runtime 资产（WSL/SSH/Docker 远端连接用）：本仓库构建后以 GitHub Release
+  # 扁平布局上传，客户端用显式自建源（ZCODE_REMOTE_ASSET_CDN_BASE_URL）加载。
+  # 与其他产物一致：上传失败则 release 保持 draft，避免出现半套资产。
+  remote-assets:
+    needs: release
+    if: ${{ inputs.build_artifacts }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare remote assets
+        run: pnpm prepare:remote-assets
+
+      - name: Build GitHub release layout
+        run: node scripts/publish-remote-assets.mjs --out dist/remote-assets-github
+
+      - name: Upload remote assets to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(dist/remote-assets-github/*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::no remote asset files produced"
+            exit 1
+          fi
+          # GitHub API 偶发连接失败（runner 网络抖动），上传重试 3 次；--clobber 让重试可安全覆盖。
+          for attempt in 1 2 3; do
+            if gh release upload "$TAG" "${files[@]}" --clobber; then
+              exit 0
+            fi
+            echo "::warning::gh release upload failed (attempt $attempt/3), retrying in 10s"
+            sleep 10
+          done
+          echo "::error::gh release upload failed after 3 attempts"
+          exit 1
+
   # 只有 CLI 与全部桌面平台产物都上传成功才公开 release；任一构建失败则保持 draft，
   # 由人工排查后重跑或删除，避免不完整的版本出现在 Releases 与官网下载页。
   # keep_draft=true（上游审计自动构建的测试版）：即使全部成功也保持 draft，不公开、不进入自动更新。
   publish:
-    needs: [release, build, desktop]
-    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') }}
+    needs: [release, build, desktop, remote-assets]
+    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') && (needs['remote-assets'].result == 'success' || needs['remote-assets'].result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: Publish release

@@ -53,6 +53,7 @@ Host spawn agent（每次 spawn 都读当前设置）
 ## 功能来源与开关
 
 - **marketplace**：开关关闭时默认插件市场集合不包含官方 CDN 来源（`https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json`），插件市场只保留本地内置插件与个人来源；开关开启（且 agent env 投影为 1）时默认集合包含官方来源，插件市场可刷新并安装官方插件。
+- **marketplace 与远程资源源**：remote runtime 的默认下载源（官方 CDN）同样由 marketplace 开关把关：开关关闭时 `resolveRemoteCdnBaseUrls` 对默认源返回空。显式配置的 `ZCODE_REMOTE_ASSET_CDN_BASE_URL`（镜像 / GitHub Release / 其他自建源）是用户自有配置，先于开关判断并按原值返回，不经过官方服务开关与官方出口策略，开关状态不得改写它；远端连接因此不再要求先打开插件市场开关。
 - 官方市场的网络出口由 agent HTTP 适配器的 `assertOfficialPlatformAccessible` 按 agent 进程开关裁决：关闭时刷新/下载在请求前拒绝。
 - **关闭时的展示投影**：Host 的插件 overview 在开关关闭时将官方市场与官方候选插件从公开投影中过滤，并注入 `officialMarketplaceEnabled: false`；插件市场“公开”分段因此为空，展示引导文案（去 设置 → Z.AI 服务 打开“Z.AI 插件市场与 CDN”）。已安装插件列表不过滤，用户仍可管理本地已安装的插件。
 - 本地市场记录与缓存不主动删除：重新打开开关后（Host 过滤即时解除）公开分段恢复可见；无需重启应用。
@@ -78,7 +79,7 @@ Host spawn agent（每次 spawn 都读当前设置）
 2. 新进程（模拟 Host/Server 重启）只调用 `settingService.get()`，进程策略即恢复磁盘值：已开启服务 `assertOfficialServiceAvailable` 放行、`shouldBlockOfficialPlatformUrl` 不再拦截对应域名；未开启服务仍拒绝。
 3. `update()` 到落盘出现在同一条写队列内，重复 `get()` 幂等。
 4. main 的 webRequest 策略随设置变更即时刷新：当前会话内 renderer 对官方域名的请求立即放行/拦截，不依赖重启；其它窗口的 Host 通过 `SettingsChanged` 广播重新读取设置。
-5. 真实业务入口：关闭时 `clientConfigService` / `offPeakServerClient` / `FeedbackHttpClient` 在凭证与网络前拒绝且不发起请求，`resolveRemoteCdnBaseUrls` 返回空；打开后分别真的拉取客户端配置、发出取号请求、发出反馈请求并出现 CDN 下载源。
+5. 真实业务入口：关闭时 `clientConfigService` / `offPeakServerClient` / `FeedbackHttpClient` 在凭证与网络前拒绝且不发起请求，`resolveRemoteCdnBaseUrls` 对默认官方源返回空；打开后分别真的拉取客户端配置、发出取号请求、发出反馈请求并出现 CDN 下载源。显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 在开关关闭时仍返回该自建源、开关打开时保持原值，不被开关改写。
 6. Desktop → Agent 投影：`buildOfficialServiceEnvPatch` 输出完整 7 键（开=1/关=0）；开关关闭时覆盖 shell 残留的 `=1`；开关打开时 agent 的默认市场集合包含官方来源，关闭时不含。
 7. account 浏览器登录：模型设置页提供“通过浏览器登录”；全新用户首次启动只看到 API Key 表单且可跳过，不出现 OAuth 入口、不自动登录。
 8. marketplace 关闭态：Host overview 过滤官方市场与官方候选插件并注入 `officialMarketplaceEnabled=false`；“公开”分段为空并展示开关引导文案；已安装列表保留；打开/关闭切换即时生效（Host 实时开关），无需重启。
