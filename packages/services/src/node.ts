@@ -188,6 +188,7 @@ export { createAccountProviderRequestAuthService } from "./model-provider/accoun
 export { resolveAccountTeamPlanRuntimeApiKey } from "./model-provider/accountProviderTeamPlanRequestKey.js";
 export { createAccountProviderCredentialService } from "./model-provider/accountProviderCredentialService.js";
 export { createUsageStatsService } from "./usage-stats/usageStatsService.js";
+export { createProviderBalanceTargetResolver } from "./usage-stats/providers/providerBalanceTargetResolver.js";
 // Storage：service 与 adapters 工厂；desktop host 负责组装（Worker runner 在 desktop 包内）
 export { createStorageService } from "./storage/app/storageService.js";
 export type {
@@ -395,6 +396,7 @@ import {
   type IAccountRequestAuthService,
 } from "./model-provider/accountRequestAuthService.js";
 import { createUsageStatsService } from "./usage-stats/usageStatsService.js";
+import { createProviderBalanceTargetResolver } from "./usage-stats/providers/providerBalanceTargetResolver.js";
 import { createCodingPlanSubscriptionService } from "./coding-plan-subscription/codingPlanSubscriptionService.js";
 import { createClientConfigService } from "./client-config/clientConfigService.js";
 import { IClientConfigService } from "./client-config/clientConfig.js";
@@ -2456,6 +2458,10 @@ export function createLocalServices(options: {
         credentialService,
         zcodeAgentService,
         officialMcpCredentialSource,
+        // 余额查询跟随当前 Environment 的 Provider Settings；远端 workspace 使用各自的解析器装配。
+        resolveProviderBalanceTarget: createProviderBalanceTargetResolver(
+          providerRuntime.providerSettings,
+        ),
       }),
     )
     .register(ICodingPlanSubscriptionService, codingPlanSubscriptionService)

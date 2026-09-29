@@ -2808,6 +2808,11 @@ const faIR: Record<string, string> = {
   "settings.modelProvider.startPlan.balance.title": "موجودی امروز",
   "settings.modelProvider.startPlan.balance.remaining": "{value} توکن باقی مانده",
   "settings.modelProvider.startPlan.balance.used": "{value} مصرف شده",
+  "settings.modelProvider.balance.title": "موجودی حساب",
+  "settings.modelProvider.balance.refresh": "به‌روزرسانی موجودی",
+  "settings.modelProvider.balance.notConfigured": "برای بررسی موجودی، کلید API را وارد کنید.",
+  "settings.modelProvider.balance.unauthorized": "کلید API نامعتبر یا منقضی شده است.",
+  "settings.modelProvider.balance.error": "بارگذاری موجودی ممکن نشد. بعداً دوباره تلاش کنید.",
   "settings.modelProvider.startPlan.highlight.trial.label": "دوره آزمایشی",
   "settings.modelProvider.startPlan.highlight.trial.value": "5 روز تقویمی",
   "settings.modelProvider.startPlan.highlight.trial.description":

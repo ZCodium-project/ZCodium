@@ -2840,6 +2840,11 @@ const enUS: Record<string, string> = {
   "settings.modelProvider.startPlan.balance.title": "Today's balance",
   "settings.modelProvider.startPlan.balance.remaining": "{value} tokens remaining",
   "settings.modelProvider.startPlan.balance.used": "{value} used",
+  "settings.modelProvider.balance.title": "Account balance",
+  "settings.modelProvider.balance.refresh": "Refresh balance",
+  "settings.modelProvider.balance.notConfigured": "Enter an API key to check the balance.",
+  "settings.modelProvider.balance.unauthorized": "The API key is invalid or expired.",
+  "settings.modelProvider.balance.error": "Could not load the balance. Try again later.",
   "settings.modelProvider.startPlan.highlight.trial.label": "Trial period",
   "settings.modelProvider.startPlan.highlight.trial.value": "5 calendar days",
   "settings.modelProvider.startPlan.highlight.trial.description":

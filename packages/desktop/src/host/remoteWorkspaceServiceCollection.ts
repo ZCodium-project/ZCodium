@@ -57,6 +57,7 @@ import {
   createSettingsSyncService,
   createBotsService,
   createUsageStatsService,
+  createProviderBalanceTargetResolver,
   createMediaPreviewService,
   createCodingPlanSubscriptionService,
   createClientScenesService,
@@ -356,6 +357,10 @@ export function createRemoteWorkspaceServiceCollection(params: {
         accountRequestAuthService: localAccountRequestAuthService,
         credentialService: localCredentialService,
         zcodeAgentService: params.connectionServices.zcodeAgentService,
+        // 余额查询读取远端 Environment 自己的 Provider Settings，而不是 Desktop 本地配置。
+        resolveProviderBalanceTarget: createProviderBalanceTargetResolver(
+          params.connectionServices.providerSettingsService,
+        ),
       }),
     )
     .register(ICodingPlanSubscriptionService, localCodingPlanSubscriptionService)

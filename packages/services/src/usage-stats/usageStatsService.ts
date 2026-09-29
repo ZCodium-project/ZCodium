@@ -10,6 +10,8 @@ import type {
   CodingPlanResetStatusSnapshot,
   CodingPlanResetUseRequest,
   CodingPlanResetUseResult,
+  ProviderBalanceRequest,
+  ProviderBalanceSnapshot,
   UsageEntitlementRequest,
   UsageEntitlementSnapshot,
   UsageStatsRequest,
@@ -26,6 +28,10 @@ import {
   type UsageApiAuthorization,
 } from "./providers/bigmodelUsageQuotaProvider.js";
 import type { OfficialMcpCredentialSource } from "./providers/zcodeMcpQuotaProvider.js";
+import {
+  ProviderBalanceProvider,
+  type ProviderBalanceTarget,
+} from "./providers/providerBalanceProvider.js";
 
 interface UsageStatsServiceDependencies {
   apiClient: ApiClient;
@@ -36,6 +42,11 @@ interface UsageStatsServiceDependencies {
   resolveApiAuthorization?: (
     request: UsageApiAuthorizationRequest,
   ) => Promise<UsageApiAuthorization | null>;
+  /**
+   * 外部 API Key Provider 的余额查询目标解析器。
+   * 缺省时 `getProviderBalanceSnapshot` 一律返回 `unsupported`。
+   */
+  resolveProviderBalanceTarget?: (providerId: string) => Promise<ProviderBalanceTarget | null>;
   credentialService?: Pick<ICredentialService, "load">;
   env?: NodeJS.ProcessEnv;
   /** App Usage 经 ZCode Protocol 读取 agent 数据库真实统计。 */
@@ -54,6 +65,12 @@ function isCodingPlanProviderId(providerId: string | undefined): boolean {
 export function createUsageStatsService(
   dependencies: UsageStatsServiceDependencies,
 ): IUsageStatsService {
+  const providerBalanceProvider = new ProviderBalanceProvider({
+    apiClient: dependencies.apiClient,
+    ...(dependencies.resolveProviderBalanceTarget
+      ? { resolveTarget: dependencies.resolveProviderBalanceTarget }
+      : {}),
+  });
   const quotaProvider = new BigModelUsageQuotaProvider({
     apiClient: dependencies.apiClient,
     accountRequestAuthService: dependencies.accountRequestAuthService,
@@ -123,6 +140,11 @@ export function createUsageStatsService(
       request: UsageEntitlementRequest = {},
     ): Promise<UsageEntitlementSnapshot> {
       return quotaProvider.getSnapshotForRequest(request);
+    },
+    async getProviderBalanceSnapshot(
+      request: ProviderBalanceRequest,
+    ): Promise<ProviderBalanceSnapshot> {
+      return providerBalanceProvider.getSnapshot(request);
     },
   };
 }

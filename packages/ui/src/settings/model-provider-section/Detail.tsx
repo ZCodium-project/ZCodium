@@ -57,7 +57,8 @@ import { useUsageEntitlement } from "@/hooks/useUsageEntitlement.js";
 import { useCodingPlanUpgradeDialog } from "@/settings/CodingPlanUpgradeDialogProvider.js";
 import { useProviderSettingsView } from "@/hooks/useProviderSettingsView.js";
 import type { ProviderSettingsView } from "@zcode/services";
-import type { SavePersonalModelDraftInput } from "@zcode/provider";
+import { isApiKeyAccess, type SavePersonalModelDraftInput } from "@zcode/provider";
+import { ProviderBalanceCard } from "./ProviderBalanceCard.js";
 import { resolveAccountProviderInspectionAccess } from "@/lib/accountProviderAccess.js";
 import { projectProviderSettingsViewToFormProviders } from "@/lib/providerSettingsFormProjection.js";
 
@@ -428,6 +429,11 @@ export function ModelProviderSectionDetail({
           nameEditable={false}
           headerVisible={!familySpec}
           headerActionsVisible={familySpec ? false : undefined}
+          statusSection={
+            isApiKeyAccess(presetProvider.config.access) ? (
+              <ProviderBalanceCard providerId={presetProvider.providerId} />
+            ) : undefined
+          }
         />
       </ProviderFamilyDetailShell>
     );
@@ -835,6 +841,11 @@ export function ModelProviderSectionDetail({
               onOpenApiKeyUrl(customApiKeyUrl);
             }
           : undefined
+      }
+      statusSection={
+        isApiKeyAccess(customProvider.config.access) ? (
+          <ProviderBalanceCard providerId={customProvider.providerId} />
+        ) : undefined
       }
     />
   );
