@@ -186,7 +186,7 @@ jobs:
           - Linux x64: `ZCodium-<VERSION>-linux-x86_64.AppImage`
           - Linux arm64: `ZCodium-<VERSION>-linux-arm64.AppImage`
           - CLI: `zcodium-<VERSION>.tar.gz`
-          - Checksums: `sha256.txt`（下载后可用它校验 / verify downloads with it）
+          - Checksums: `sha256.txt`（覆盖上方安装包与 CLI 包 / covers the installers and CLI package above）
           - Update metadata: `latest*.yml`, `latest.json`
           NOTES
           sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
@@ -278,6 +278,33 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
+      # 校验片段：各构建 job 只上传自己产出的文件哈希，由 checksums job 合并成
+      # release 的 sha256.txt。CLI 侧沿用 build-zcode 生成的 tarball sha256.txt，
+      # 并补上由用户直接下载执行的 install.sh。
+      # 用 node 计算（各 runner 都有），避免 sha256sum / shasum / certutil 的平台差异；
+      # 输出格式 `<hash>  <file>`（两个空格）与 sha256sum -c 兼容。
+      - name: Generate CLI checksums
+        run: |
+          set -euo pipefail
+          mkdir -p dist/release-checksums
+          {
+            cat dist/zcode/releases/*/sha256.txt
+            (cd dist/zcode && node -e '
+          const { createHash } = require("node:crypto");
+          const { readFileSync } = require("node:fs");
+          for (const file of process.argv.slice(1)) {
+            console.log(createHash("sha256").update(readFileSync(file)).digest("hex") + "  " + file);
+          }
+          ' install.sh)
+          } > dist/release-checksums/cli.txt
+          cat dist/release-checksums/cli.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-checksums-cli
+          path: dist/release-checksums/cli.txt
+          retention-days: 1
+
   desktop:
     needs: release
     if: ${{ inputs.build_artifacts }}
@@ -368,6 +395,38 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
+      # 校验片段：只覆盖用户会直接下载运行的安装包（dmg / zip / exe / AppImage）。
+      # latest*.yml 与 *.blockmap 是 electron-updater 的更新元数据（应用内用其中
+      # 的 sha512 校验），且两个 mac 架构会先后覆盖同名 latest-mac.yml，不能在此落哈希。
+      # 用 node 计算（各 runner 都有），避免 sha256sum / shasum / certutil 的平台差异。
+      - name: Generate desktop checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          cd packages/desktop/dist
+          checksummed=( ${{ matrix.glob }} *.zip )
+          if [ ${#checksummed[@]} -eq 0 ]; then
+            echo "::error::no desktop assets to checksum in packages/desktop/dist"
+            exit 1
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/dist/release-checksums"
+          node -e '
+          const { createHash } = require("node:crypto");
+          const { readFileSync } = require("node:fs");
+          for (const file of process.argv.slice(1)) {
+            console.log(createHash("sha256").update(readFileSync(file)).digest("hex") + "  " + file);
+          }
+          ' "${checksummed[@]}" \
+            > "$GITHUB_WORKSPACE/dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt"
+          cat "$GITHUB_WORKSPACE/dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-checksums-desktop-${{ matrix.target }}-${{ matrix.arch }}
+          path: dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt
+          retention-days: 1
+
   # remote runtime 资产（WSL/SSH/Docker 远端连接用）：本仓库构建后以 GitHub Release
   # 扁平布局上传，客户端用显式自建源（ZCODE_REMOTE_ASSET_CDN_BASE_URL）加载。
   # 与其他产物一致：上传失败则 release 保持 draft，避免出现半套资产。
@@ -423,12 +482,77 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
-  # 只有 CLI 与全部桌面平台产物都上传成功才公开 release；任一构建失败则保持 draft，
+  # 校验和收口：各构建 job 先上传自己的校验片段（artifact），这里合并成完整的
+  # sha256.txt，并覆盖 release 上 CLI 构建产出的初版（只有一行 tarball 哈希）。
+  # 放在 publish 之前：release 公开时校验清单已与全部产物一致；合并失败则保持 draft。
+  # 覆盖范围：全部安装包（dmg / zip / exe / AppImage）、CLI 包与 install.sh。
+  # latest*.yml、latest.json、*.blockmap、zz-* 远端资产不在其中（各自有校验机制）。
+  checksums:
+    needs: [release, build, desktop]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-checksums-*
+          merge-multiple: true
+          path: release-checksums
+
+      - name: Merge checksum fragments
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          fragments=(release-checksums/*.txt)
+          if [ ${#fragments[@]} -eq 0 ]; then
+            echo "::error::no checksum fragments were produced"
+            exit 1
+          fi
+          # 同一文件名出现多个哈希说明片段来源重叠，宁可失败也不发布有歧义的清单；
+          # sort -k 2 使同一文件名相邻，uniq -d 即可检出。
+          cat "${fragments[@]}" | LC_ALL=C sort -k 2 > sha256-merged.txt
+          duplicated="$(awk '{ print $2 }' sha256-merged.txt | uniq -d)"
+          if [ -n "$duplicated" ]; then
+            echo "::error::duplicate checksum entries for: $duplicated"
+            exit 1
+          fi
+          mv sha256-merged.txt sha256.txt
+          cat sha256.txt
+          # 回归保护：清单必须覆盖每个平台的安装包与 CLI 侧文件；缺任一类都说明
+          # 上传或片段生成出了问题，阻止发布而不是发布不完整的清单。
+          for pattern in \
+            '^[0-9a-f]{64}  zcodium-[^ ]+\.tar\.gz$' \
+            '^[0-9a-f]{64}  install\.sh$' \
+            '^[0-9a-f]{64}  ZCodium-[^ ]+\.dmg$' \
+            '^[0-9a-f]{64}  ZCodium-[^ ]+\.zip$' \
+            '^[0-9a-f]{64}  ZCodium-[^ ]+\.exe$' \
+            '^[0-9a-f]{64}  ZCodium-[^ ]+\.AppImage$'; do
+            if ! grep -Eq "$pattern" sha256.txt; then
+              echo "::error::sha256.txt is missing an entry matching $pattern"
+              exit 1
+            fi
+          done
+
+      - name: Upload merged checksum file
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if gh release upload "$TAG" sha256.txt --clobber; then
+              exit 0
+            fi
+            echo "::warning::gh release upload failed (attempt $attempt/3), retrying in 10s"
+            sleep 10
+          done
+          echo "::error::gh release upload failed after 3 attempts"
+          exit 1
+
+  # 只有 CLI、全部桌面平台产物与完整校验清单都成功才公开 release；任一构建失败则保持 draft，
   # 由人工排查后重跑或删除，避免不完整的版本出现在 Releases 与官网下载页。
   # keep_draft=true（上游审计自动构建的测试版）：即使全部成功也保持 draft，不公开、不进入自动更新。
   publish:
-    needs: [release, build, desktop, remote-assets]
-    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') && (needs['remote-assets'].result == 'success' || needs['remote-assets'].result == 'skipped') }}
+    needs: [release, build, desktop, remote-assets, checksums]
+    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') && (needs['remote-assets'].result == 'success' || needs['remote-assets'].result == 'skipped') && (needs.checksums.result == 'success' || needs.checksums.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: Publish release

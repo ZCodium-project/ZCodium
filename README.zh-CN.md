@@ -76,7 +76,7 @@
 
 [Releases](https://github.com/ZCodium-project/ZCodium/releases) 提供桌面客户端（macOS / Windows / Linux）和 CLI 发行包。
 
-**关于签名**：所有安装包都**没有 ZCode 官方签名**，首次打开会被系统安全机制拦截。这是预期行为，按下面各平台的方式放行一次即可。放行前可以先用 Release 页提供的 `sha256.txt` 校验下载文件。
+**关于签名**：所有安装包都**没有 ZCode 官方签名**，首次打开会被系统安全机制拦截。这是预期行为，按下面各平台的方式放行一次即可。放行前可以先按 Release 页的 `sha256.txt` 校验下载文件：该文件覆盖全部安装包、CLI 包与 `install.sh`（更新元数据与 `zz-*` 远端资产由各自的校验机制覆盖）。用 `shasum -a 256 <文件>`（macOS）、`sha256sum <文件>`（Linux）或 `certutil -hashfile <文件> SHA256`（Windows）计算后与文件中同名行比对即可。
 
 ### macOS（.dmg）
 
@@ -95,7 +95,7 @@
 1. 下载 `ZCodium-*-win-x64.exe`，双击运行。
 2. 安装包没有 ZCode 官方签名，Windows SmartScreen 会弹出“Windows 已保护你的电脑”的警告。点击“**更多信息**” → “**仍要运行**”，按提示完成安装即可。
 
-   这是预期提示，不是文件损坏；介意的话可以先按 Release 页的 `sha256.txt` 校验安装包。
+   这是预期提示，不是文件损坏；介意的话可以先按 Release 页的 `sha256.txt` 校验安装包，例如 `certutil -hashfile ZCodium-<version>-win-x64.exe SHA256`，与文件中同名行比对一致即可。
 
 ### Linux（.AppImage）
 

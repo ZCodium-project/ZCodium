@@ -76,7 +76,7 @@ Compared with the upstream open-source release, this repository contains **no mo
 
 The [Releases](https://github.com/ZCodium-project/ZCodium/releases) page ships desktop clients (macOS / Windows / Linux) and the CLI distribution.
 
-**About signing**: the builds are **not signed by ZCode**, so the operating system blocks the first launch. That is expected — allow it once per platform as below. You can verify the download against the `sha256.txt` on the release page before allowing it.
+**About signing**: the builds are **not signed by ZCode**, so the operating system blocks the first launch. That is expected — allow it once per platform as below. Before allowing it you can verify the download against the `sha256.txt` on the release page — it covers every installer, the CLI package and `install.sh` (update metadata and remote runtime assets carry their own checksums). Compute the file hash with `shasum -a 256 <file>` (macOS), `sha256sum <file>` (Linux) or `certutil -hashfile <file> SHA256` (Windows) and compare it with the matching line.
 
 ### macOS (.dmg)
 
@@ -95,7 +95,7 @@ The [Releases](https://github.com/ZCodium-project/ZCodium/releases) page ships d
 1. Download `ZCodium-*-win-x64.exe` and double-click it.
 2. The installer is not signed by ZCode, so SmartScreen shows the "Windows protected your PC" warning. Click **More info** → **Run anyway** and finish the installer.
 
-   This is the expected prompt, not a sign of corruption; you can also verify the installer against the `sha256.txt` from the release page first.
+   This is the expected prompt, not a sign of corruption; you can also verify the installer against the `sha256.txt` from the release page first, e.g. `certutil -hashfile ZCodium-<version>-win-x64.exe SHA256` compared with the matching line.
 
 ### Linux (.AppImage)
 
