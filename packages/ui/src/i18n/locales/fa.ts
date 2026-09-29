@@ -6366,6 +6366,44 @@ const faIR: Record<string, string> = {
   "scheduledPreview.addSchedule": "افزودن زمان‌بندی",
   "settings.locale.fa-IR": "فارسی",
   "sidebar.settings.locale.fa-IR": "فارسی",
+  "bots.setup.guide.webhook.bind.2":
+    'بار (payload) باید حداقل شامل این موارد باشد: botId، یک userId پایدار، `chatType: "private"` و متن روی {command} تنظیم شود.',
+  "bots.deleteConfirmTitle": "بات «{name}» حذف شود؟",
+  "browser.loadError.certHint":
+    "اگر به این نشانی اعتماد دارید، در تنظیمات ← مرورگر ← امنیت گزینه «نادیده‌گرفتن خطاهای گواهی» را فعال کنید و سپس برای دسترسی، برنامه را دوباره راه‌اندازی کنید.",
+  "settings.shortcuts.conflictOccupied": "از قبل توسط «{command}» استفاده شده است",
+  "settings.shortcuts.clearConflict":
+    "کلید پیش‌فرض از قبل توسط «{command}» استفاده می‌شود؛ بازگرداندن آن تعارض ایجاد می‌کند. ابتدا آن دستور را تغییر دهید",
+  "settings.shortcuts.rebindAria": "بازتعریف میان‌بر «{command}»",
+  "settings.shortcuts.addAria": "افزودن میان‌بر برای «{command}»",
+  "settings.shortcuts.removeBindingAria": "حذف این میان‌بر برای «{command}»",
+  "settings.shortcuts.clearAria": "پاک کردن میان‌بر «{command}»",
+  "resourceManager.storage.confirmTitle": "«{category}» پاک شود؟",
+  "settings.mcp.deleteConfirmTitle": "سرور MCP «{name}» حذف شود؟",
+  "settings.modelProvider.deleteConfirm": "«{name}» حذف شود؟",
+  "settings.modelProvider.deleteConfirmTitle": "فراهم‌کننده «{name}» حذف شود؟",
+  "settings.skills.delete.description":
+    "«{name}» حذف شود؟ این کار پوشه مهارت را از دیسک حذف می‌کند و قابل بازگشت نیست.",
+  "settings.skills.remoteSync.filteredEmpty":
+    "فقط مهارت‌هایی که از پیش در راه دور وجود دارند در دسترس‌اند. برای دیدن آن‌ها «نمایش مهارت‌های موجود در راه دور» را فعال کنید.",
+  "settings.subagents.delete.description":
+    "از حذف ایجنت فرعی «{name}» مطمئن هستید؟ این کار قابل بازگشت نیست.",
+  "settings.commands.delete.description":
+    "از حذف دستور «{name}» مطمئن هستید؟ این کار قابل بازگشت نیست.",
+  "workflows.hub.delete.title": "گردش کار «{name}» حذف شود؟",
+  "workflows.hub.deleted": "گردش کار «{name}» حذف شد",
+  "workflows.hub.history.note":
+    "سوابق اجرا از دفتر رویداد گردش کارهای این پروژه می‌آید و با ری‌استارت باقی می‌ماند. «باز کردن اجرا» به گفت‌وگویی که آن را آغاز کرده برمی‌گردد و جزئیات اجرا را باز می‌کند.",
+  "chat.quota.mcp.quotaExhausted":
+    "سهمیه امروز MCP «{server}» در ZCodium تمام شد. فردا بازنشانی می‌شود.",
+  "chat.quota.mcp.codingPlanRequired":
+    "سهمیه‌ای برای MCP «{server}» در ZCodium وجود ندارد. برای استفاده، یک کلید API یا Coding Plan پیکربندی کنید.",
+  "offPeak.notify.completed.body": "«{title}» با موفقیت کامل شد.",
+  "offPeak.notify.failed.body": "«{title}» با خطا متوقف شد.",
+  "offPeak.newTask.bannerText":
+    "قابلیت تازه برای مشترکین: با ساخت «وظیفه در زمان بی‌کاری»، در دوره‌های مازاد توان پردازشی، وظیفه تخصیص‌یافته شما را رایگان کامل می‌کنیم.",
+  "offPeak.cancel.description":
+    "«{title}» از اجرا بازمی‌ایستد. فایل‌هایی که تا حالا تغییر داده حفظ می‌شوند.",
 };
 
 export default faIR;

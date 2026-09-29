@@ -61,30 +61,32 @@ const EDGE_RESIZE_HANDLES = [
   },
 ] as const;
 
+// 角手柄的定位用逻辑 start/end，RTL 下会自动镜像到另一侧；但对角线光标是按物理方向定义的
+// （nwse = ↖↘），不会随 dir 翻转，所以 RTL 下需要对调两个对角线光标，否则四角的光标指向反了。
 const CORNER_RESIZE_HANDLES = [
   {
-    className: "-top-2 -start-2 cursor-nwse-resize",
+    className: "-top-2 -start-2 cursor-nwse-resize rtl:cursor-nesw-resize",
     heightDirection: -1,
     key: "top-left",
     testId: TID_BROWSER_RESPONSIVE_RESIZE_CORNER_TOP_LEFT,
     widthDirection: -1,
   },
   {
-    className: "-top-2 -end-2 cursor-nesw-resize",
+    className: "-top-2 -end-2 cursor-nesw-resize rtl:cursor-nwse-resize",
     heightDirection: -1,
     key: "top-right",
     testId: TID_BROWSER_RESPONSIVE_RESIZE_CORNER_TOP_RIGHT,
     widthDirection: 1,
   },
   {
-    className: "-bottom-2 -start-2 cursor-nesw-resize",
+    className: "-bottom-2 -start-2 cursor-nesw-resize rtl:cursor-nwse-resize",
     heightDirection: 1,
     key: "bottom-left",
     testId: TID_BROWSER_RESPONSIVE_RESIZE_CORNER_BOTTOM_LEFT,
     widthDirection: -1,
   },
   {
-    className: "-end-2 -bottom-2 cursor-nwse-resize",
+    className: "-end-2 -bottom-2 cursor-nwse-resize rtl:cursor-nesw-resize",
     heightDirection: 1,
     key: "bottom-right",
     testId: TID_BROWSER_RESPONSIVE_RESIZE_CORNER,

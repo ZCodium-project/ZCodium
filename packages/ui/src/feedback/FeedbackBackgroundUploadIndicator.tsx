@@ -255,11 +255,11 @@ function FeedbackBackgroundUploadIndicatorView({
       </div>
       <div className={cn("bg-border", expanded ? "h-1" : "h-0.5")}>
         {progress.indeterminate ? (
-          <div className="h-full w-1/3 animate-pulse rounded-r-full bg-primary" />
+          <div className="h-full w-1/3 animate-pulse rounded-e-full bg-primary" />
         ) : (
           <div
             className={cn(
-              "h-full rounded-r-full transition-[width] duration-200",
+              "h-full rounded-e-full transition-[width] duration-200",
               isError
                 ? "bg-destructive"
                 : isSuccess

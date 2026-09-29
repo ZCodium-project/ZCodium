@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { XIcon } from "lucide-react";
 import type { IFeedbackService } from "@zcode/services";
+import { toFeedbackLocale } from "@zcode/shared";
 import { Button } from "@/components/ui/button.js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
 import { Input } from "@/components/ui/input.js";
@@ -136,7 +137,7 @@ export const FeatureRequestDialog = memo(function FeatureRequestDialogComponent(
         ticketModule: "其它",
         modelContext: {},
         // 反馈服务端只接受 zh/en 语言头，fa-IR 等按 en-US 透传。
-        locale: locale === "fa-IR" ? "en-US" : locale,
+        locale: toFeedbackLocale(locale),
         copy,
         formatMessage: intl.formatMessage,
         onCompleted: (ticketId) => {

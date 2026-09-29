@@ -1338,8 +1338,8 @@ function MarkdownTableEdgeShadow({
       className={cn(
         "pointer-events-none absolute inset-y-0 z-10 w-6",
         side === "left"
-          ? "start-0 rounded-l-xl shadow-[inset_12px_0_12px_-12px_color-mix(in_srgb,black_15%,transparent)]"
-          : "end-0 rounded-r-xl shadow-[inset_-12px_0_12px_-12px_color-mix(in_srgb,black_15%,transparent)]",
+          ? "start-0 rounded-s-xl shadow-[inset_12px_0_12px_-12px_color-mix(in_srgb,black_15%,transparent)]"
+          : "end-0 rounded-e-xl shadow-[inset_-12px_0_12px_-12px_color-mix(in_srgb,black_15%,transparent)]",
       )}
       data-markdown-table-edge-shadow={side}
     />

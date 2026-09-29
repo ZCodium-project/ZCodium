@@ -9,65 +9,65 @@ export const faIR: ZCodeCopy = {
     },
     help: (version) => `zcode ${version}
 
-用法:
+طرز استفاده:
   zcode [command] [options]
 
-Without a command, zcode opens the full-screen TUI.
+بدون هیچ دستوری، zcode رابط ترمینالی تمام‌صفحه (TUI) را باز می‌کند.
 
-Commands:
-  app-server Run the ZCode Protocol stdio app server
-  commands   List custom slash commands (\`commands list\`)
-  doctor     Inspect runtime and packaging assumptions
-  login [zai|bigmodel]  Sign in through browser authorization
-  logout     Remove the shared Z.AI login credentials
-  plugins    Manage plugins and marketplaces (\`plugins list|install|uninstall|enable|disable|update|validate|marketplace ...\`; alias: plugin)
-  skills     List local skills (\`skills list\`)
-  tui        Open the terminal UI
-  version    Print the CLI version
+دستورها:
+  app-server اجرای سرور app استاندارد io مبتنی بر ZCode Protocol
+  commands   فهرست دستورهای اسلش سفارشی (\`commands list\`)
+  doctor     بررسی فرضیات runtime و بسته‌بندی
+  login [zai|bigmodel]  ورود از طریق مجوزدهی مرورگر
+  logout     حذف اطلاعات ورود مشترک Z.AI
+  plugins    مدیریت افزونه‌ها و بازار افزونه‌ها (\`plugins list|install|uninstall|enable|disable|update|validate|marketplace ...\`؛ نام مستعار: plugin)
+  skills     فهرست مهارت‌های محلی (\`skills list\`)
+  tui        باز کردن رابط ترمینالی
+  version    نمایش نسخه CLI
 
-Options:
-  -h, --help       Show help
-  -v, --version    Show version
-  -p, --prompt <text>  Run a single prompt without opening the TUI
-  --enable-workflow  Enable dynamic workflows for --prompt or --target (default: off)
-  --memory-bench   With --prompt, enable automatic Memory extraction and wait before exiting (requires Memory enabled)
-  --browser-use <mode> Enable Browser Use backend (supported: headless)
-  --surface <surface>  Presentation surface for headless prompts/app-server: terminal or desktop
-  --browser-executable <path> Chrome/Chromium executable for headless Browser Use
-  --attach <path>  Attach a local file to --prompt; repeat for multiple files
-  --cwd <path>     Run this command from the given directory
+گزینه‌ها:
+  -h, --help       نمایش راهنما
+  -v, --version    نمایش نسخه
+  -p, --prompt <text>  اجرای یک پرامپت بدون باز کردن TUI
+  --enable-workflow  فعال‌سازی گردش‌کارهای پویا برای --prompt یا --target (پیش‌فرض: غیرفعال)
+  --memory-bench   همراه --prompt، استخراج خودکار حافظه را فعال می‌کند و پیش از خروج منتظر می‌ماند (نیازمند فعال بودن حافظه)
+  --browser-use <mode> فعال‌سازی بک‌اند Browser Use (پشتیبانی‌شده: headless)
+  --surface <surface>  سطح نمایش برای پرامپت‌های headless و app-server: terminal یا desktop
+  --browser-executable <path> مسیر اجرایی Chrome/Chromium برای Browser Use در حالت headless
+  --attach <path>  پیوست یک فایل محلی به --prompt؛ برای چند فایل تکرار شود
+  --cwd <path>     اجرای این دستور از پوشه داده‌شده
   --disallowed-tools, --disallowedTools <tools...>
-    Remove whole tools for this prompt/TUI run only; saved settings are unchanged.
-    Comma or space-separated tool names, e.g. "Bash Edit".
-    "Bash(git *)" removes all of Bash; command patterns are not matched.
-  --force-mcs      Force mid-conversation system projection for Anthropic providers
-  --locale <locale>  UI locale: en-US, zh-CN, fa-IR, or auto
-  --mode <mode>    Permission mode for prompts: build, edit, plan, or yolo (default: yolo for --prompt)
-  --resume <sessionId>  Resume a persisted session by sessionId (sess_...)
-  --target <text>  Run or set the session goal in headless mode
-  --target-replace Replace any existing session goal set by --target
-  -c, --continue        Resume the latest session for the current directory
-  --json           Print machine-readable JSON where supported
-  --no-browser     Print the OAuth URL without opening a browser
-  --no-color       Disable ANSI colors
-  --verbose        Print extra diagnostic detail
+    حذف کامل ابزارها فقط برای اجرای فعلی پرامپت/TUI؛ تنظیمات ذخیره‌شده تغییر نمی‌کند.
+    نام ابزارها با کاما یا فاصله جدا شود، مثلاً "Bash Edit".
+    الگوی "Bash(git *)" کل Bash را حذف می‌کند؛ تطبیق بر اساس محتوای دستور انجام نمی‌شود.
+  --force-mcs      اجبار پیش‌نمایش سیستمی میانه‌گفتگو برای فراهم‌کننده‌های Anthropic
+  --locale <locale>  زبان رابط کاربری: en-US، zh-CN، fa-IR یا auto
+  --mode <mode>    حالت مجوز برای پرامپت‌ها: build، edit، plan یا yolo (پیش‌فرض yolo برای --prompt)
+  --resume <sessionId>  ازسرگیری نشست ذخیره‌شده با شناسه sessionId (sess_...)
+  --target <text>  اجرای هدف یا تنظیم هدف نشست در حالت headless
+  --target-replace جایگزینی هدف نشستی که پیش‌تر با --target تنظیم شده است
+  -c, --continue        ازسرگیری آخرین نشست پوشه جاری
+  --json           چاپ JSON قابل‌پردازش ماشین در دستورهای پشتیبانی‌شده
+  --no-browser     چاپ نشانی OAuth بدون باز کردن مرورگر
+  --no-color       غیرفعال کردن رنگ‌های ANSI
+  --verbose        چاپ جزئیات تشخیصی بیشتر
 
-Slash Commands:
-  /help [command]       Show slash command help
-  /login                Choose Z.AI or BigModel browser login
-  /logout               Remove the shared Z.AI login credentials
-  /compact [instructions]  Compact the current conversation
-  /expert [status|resume|stop|<task>]  Run or manage the expert workflow
-  /dwf [list|cancel|resume]  List, cancel, or resume dynamic workflow runs
-  /fork [latest|checkpointId]  Fork a new session from a workspace checkpoint
-  /mcp [list|status|connect|disconnect]  Show or manage MCP servers
-  /mode [mode]          Show or switch permission mode: build, edit, plan, or yolo
-  /model [id]           Show or switch the current session model
-  /new                  Start a fresh session in the TUI
-  /resume [sessionId]   Resume a session by sessionId; omit it for latest in cwd
-  /rewind [latest|checkpointId]  Show latest checkpoint or restore workspace files
-  /skill [name] [task]  List skills, or force the next prompt to load one
-  /goal [action]        Show or set the current session goal
+دستورهای اسلش:
+  /help [command]       نمایش راهنمای دستورهای اسلش
+  /login                انتخاب ورود Z.AI یا BigModel از طریق مرورگر
+  /logout               حذف اطلاعات ورود مشترک Z.AI
+  /compact [instructions]  فشرده‌سازی گفت‌وگوی فعلی
+  /expert [status|resume|stop|<task>]  اجرا یا مدیریت گردش‌کار متخصص
+  /dwf [list|cancel|resume]  فهرست، لغو یا ازسرگیری اجراهای گردش‌کار پویا
+  /fork [latest|checkpointId]  ایجاد نشست جدید از یک نقطه بازیابی فضای کاری
+  /mcp [list|status|connect|disconnect]  نمایش یا مدیریت سرورهای MCP
+  /mode [mode]          نمایش یا تغییر حالت مجوز: build، edit، plan یا yolo
+  /model [id]           نمایش یا تغییر مدل نشست جاری
+  /new                  شروع نشست تازه در TUI
+  /resume [sessionId]   ازسرگیری نشست با شناسه sessionId؛ بدون شناسه، آخرین نشست پوشه جاری
+  /rewind [latest|checkpointId]  نمایش آخرین نقطه بازیابی یا بازگردانی فایل‌های فضای کاری
+  /skill [name] [task]  فهرست مهارت‌ها، یا اجبار پرامپت بعدی به بارگذاری یکی از آن‌ها
+  /goal [action]        نمایش یا تنظیم هدف نشست جاری
 `,
   },
   tui: {

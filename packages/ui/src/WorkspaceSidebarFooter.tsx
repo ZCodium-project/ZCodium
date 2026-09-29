@@ -205,7 +205,7 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
               type="button"
               variant="ghost"
               size={"lg"}
-              className="min-w-0 flex-1 justify-start gap-2 overflow-hidden rounded-tl-2xl rounded-bl-2xl border-0 ps-0"
+              className="min-w-0 flex-1 justify-start gap-2 overflow-hidden rounded-ss-2xl rounded-es-2xl border-0 ps-0"
               data-testid={TID_LOGIN_TRIGGER}
               aria-label={profileBadge}
             >

@@ -53,7 +53,7 @@ export function resolveWorkspaceShellWindowChromeClass({
   if (!supportsNativeRoundedCorners) {
     // 仅按 Windows 平台统一绘制右侧圆角，会在不支持原生圆角的 Windows 10
     // 上伪造一层窗口外形。只收直右侧外角，不能顺带删除面板原有的三条弱边框。
-    return "rounded-l-[5px] border border-border";
+    return "rounded-s-[5px] border border-border";
   }
 
   // 旧最大化规则把面板当成系统窗口外沿，清除了圆角和三条边框。

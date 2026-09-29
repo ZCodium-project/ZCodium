@@ -85,14 +85,18 @@ export function DesktopTopOverlay({
   const taskBackTitle = intl.formatMessage({ id: "taskNav.back" });
   const taskForwardTitle = intl.formatMessage({ id: "taskNav.forward" });
   const isNewTaskButtonVisible = showNewTaskButton ?? !isSidebarVisible;
+  // 平台原生标题栏按钮（macOS 红绿灯在物理左侧、Windows caption 按钮在物理右侧）
+  // 属于窗口装饰，不会随界面语言镜像，因此避让用的内边距必须保持物理方向。
+  // 用 paddingInlineStart/End 会在 RTL 下避让到错误的一侧（Windows 上工具组会压到 caption 按钮下面）。
+  // 这两个 padding 不要迁移成逻辑方向。
   const macTopOverlayPaddingStyle =
     isMacDesktop && !isMacFullscreen && Number.isFinite(macWindowControlsLeftPaddingPx)
-      ? { paddingInlineStart: `${Math.round(macWindowControlsLeftPaddingPx ?? 96)}px` }
+      ? { paddingLeft: `${Math.round(macWindowControlsLeftPaddingPx ?? 96)}px` }
       : undefined;
   const windowsTopOverlayPaddingStyle = isWindowsDesktop
     ? {
         ...createWindowsCaptionControlsStyle(windowsWindowControlsRightPaddingPx),
-        paddingInlineEnd: WINDOWS_CAPTION_CONTROLS_RIGHT_INSET_VAR,
+        paddingRight: WINDOWS_CAPTION_CONTROLS_RIGHT_INSET_VAR,
       }
     : undefined;
   const topOverlayWidthStyle = isSidebarVisible

@@ -913,7 +913,7 @@ function ImportTargetDropdownButton({
         size="lg"
         disabled={disabled || !canImportToTarget}
         aria-label={intl.formatMessage({ id: activeTargetLabelId })}
-        className="rounded-r-none border-e-0"
+        className="rounded-e-none border-e-0"
         onClick={() => onImport(targetScope)}
       >
         {intl.formatMessage({ id: activeTargetLabelId })}
@@ -923,7 +923,7 @@ function ImportTargetDropdownButton({
           <Button
             type="button"
             size="lg"
-            className="rounded-l-none border-s-0 px-2"
+            className="rounded-s-none border-s-0 px-2"
             disabled={disabled}
             aria-label={intl.formatMessage({ id: `settings.${category}.import.targetLabel` })}
           >
