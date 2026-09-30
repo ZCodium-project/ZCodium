@@ -43,20 +43,24 @@
 ## 装配
 
 ```text
-设置页 Provider 详情（读取当前 workspace services）
+设置页 模型供应商详情（本机 root Environment 的 base services）
   └─ useProviderBalance → usageStatsService.getProviderBalanceSnapshot({ providerId })
        └─ ProviderBalanceProvider
             └─ resolveProviderBalanceTarget(providerId)
-                 └─ Provider Settings View（目标 Environment 的 effectiveConfig）
+                 └─ Provider Settings View（本 Environment 的 effectiveConfig）
 
 node.ts：resolveProviderBalanceTarget = createProviderBalanceTargetResolver(providerRuntime.providerSettings)
-remoteWorkspaceServiceCollection.ts：解析远端 connectionServices.providerSettingsService
+remoteWorkspaceServiceCollection.ts：远端 Environment 的 usageStatsService 装配同一 resolver 的远端版本（connectionServices.providerSettingsService）
 ```
+
+- 设置页模型配置区域固定使用本机 Host（`SettingsPage` 注释：模型配置属于本机全局事实源），余额卡片因此展示本机（root Environment）Provider 的余额。
+- 远端装配保证：远端 Environment 的 `usageStatsService` 被调用时，余额查询读取该 Environment 自己的 Provider Settings，而不是 Desktop 本地配置。
+- 余额卡与卡片头部共存：`statusSection` 默认替代头部（plan/账号分支依赖），余额卡调用点显式传 `statusSectionSuppressesHeader={false}`。
 
 ## 验收
 
-1. 配置 DeepSeek / Kimi / OpenRouter 等 API Key 的 Provider 详情卡片展示对应余额；未识别供应商不渲染卡片。
-2. 未填写 API Key 显示 `not_configured` 文案；无效 Key 显示 `unauthorized`；网络失败显示 `error` 且可点刷新重试。
-3. 远端 workspace 的余额来自远端 Provider 配置，不读取 Desktop 本地 Provider。
-4. `resolveProviderBalanceProvider` 的识别与解析有 `node:test` 覆盖（`packages/services/test/providerBalanceParsing.test.ts`）。
+1. 配置 DeepSeek / Kimi / OpenRouter 等 API Key 的 Provider 详情卡片展示对应余额；未识别供应商不渲染卡片，且卡片头部（名称/开关/重命名/删除）保留。
+2. 未填写 API Key 显示 `not_configured` 文案；无效 Key 显示 `unauthorized`；网络失败显示 `error` 且可点刷新重试；保存 API Key / baseUrl 后自动重查。
+3. 余额卡片与设置页模型配置的事实源一致（本机 root Environment）；远端 Environment 的 `usageStatsService` 被调用时按该 Environment 的 Provider Settings 解析。
+4. `resolveProviderBalanceProvider` 的识别与解析、`ProviderBalanceProvider` 的状态机有 `node:test` 覆盖（`packages/services/test/providerBalanceParsing.test.ts`、`packages/services/test/providerBalanceProvider.test.ts`）。
 5. `pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed` 通过；余额查询不破坏既有 Coding Plan entitlement 行为。

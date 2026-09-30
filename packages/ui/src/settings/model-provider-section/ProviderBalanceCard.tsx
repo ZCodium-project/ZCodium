@@ -12,12 +12,18 @@ import { useProviderBalance } from "@/hooks/useProviderBalance.js";
 export function ProviderBalanceCard({
   providerId,
   enabled = true,
+  recheckKey,
 }: {
   providerId: string;
   enabled?: boolean;
+  /**
+   * 重查指纹：API Key / baseUrl 等影响余额查询的配置变化后由调用方更新，
+   * 卡片随之自动重新查询（同一 Provider 刷新时保留旧快照，不闪空）。
+   */
+  recheckKey?: string;
 }) {
   const { intl, locale } = useZCodeIntl();
-  const { snapshot, loading, refresh } = useProviderBalance(providerId, { enabled });
+  const { snapshot, loading, refresh } = useProviderBalance(providerId, { enabled, recheckKey });
 
   if (!snapshot || snapshot.status === "unsupported") {
     return null;

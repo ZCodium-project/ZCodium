@@ -94,6 +94,14 @@ test("novita: availableBalance 单位为 0.0001 USD", () => {
   ]);
 });
 
+test("novita: cashBalance 同样按 0.0001 USD 换算", () => {
+  const provider = resolveProviderBalanceProvider("https://api.novita.ai/v3");
+  assert.ok(provider);
+  const balances = provider.parse({ availableBalance: 100000, cashBalance: 250000 });
+  assert.equal(balances[0]?.remaining, 10);
+  assert.equal(balances[0]?.total, 25);
+});
+
 test("未知/缺失 baseUrl 不参与余额查询", () => {
   assert.equal(resolveProviderBalanceProvider("https://example.com/v1"), null);
   assert.equal(resolveProviderBalanceProvider("not a url"), null);

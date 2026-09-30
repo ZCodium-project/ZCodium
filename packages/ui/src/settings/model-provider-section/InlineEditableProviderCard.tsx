@@ -149,6 +149,7 @@ export function InlineEditableProviderCard({
   presetApiKeyUrl,
   onOpenPresetApiKey,
   statusSection,
+  statusSectionSuppressesHeader = true,
   nameEditable,
   headerVisible = true,
   headerActionsVisible,
@@ -176,6 +177,13 @@ export function InlineEditableProviderCard({
   presetApiKeyUrl?: string;
   onOpenPresetApiKey?: () => void;
   statusSection?: ReactNode;
+  /**
+   * `statusSection` 是否替代卡片头部（默认 true，保持既有 plan/账号分支语义：
+   * 外层 ProviderFamilyDetailShell 已提供头部，内层卡片不再重复渲染）。
+   * 余额卡这类需要与头部共存的内联内容必须显式传 false——否则会出现
+   * "传了 statusSection 就丢头部"：即使内容组件自身返回 null，元素本身也非 undefined。
+   */
+  statusSectionSuppressesHeader?: boolean;
   nameEditable?: boolean;
   headerVisible?: boolean;
   headerActionsVisible?: boolean;
@@ -748,7 +756,10 @@ export function InlineEditableProviderCard({
   const headerProviderName = providerDisplayName;
   const isAccountProvider = provider.config.access?.type === "zhipu-account";
   const isApiKeyProvider = isApiKeyAccess(provider.config.access);
-  const effectiveHeaderVisible = headerVisible && statusSection === undefined;
+  // 修复说明：之前只看 statusSection 是否存在，导致自定义 Provider 传余额卡后头部
+  // （名称/开关/重命名/删除）被整体隐藏。这里把"是否替代头部"变成显式开关，调用方决定。
+  const effectiveHeaderVisible =
+    headerVisible && !(statusSection !== undefined && statusSectionSuppressesHeader);
 
   return (
     <div className="space-y-3">

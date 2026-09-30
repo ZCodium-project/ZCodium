@@ -31,7 +31,7 @@ function getErrorMessage(error: unknown): string {
  */
 export function useProviderBalance(
   providerId: string | undefined,
-  options: { enabled?: boolean } = {},
+  options: { enabled?: boolean; recheckKey?: string } = {},
 ) {
   const services = useOptionalBaseWorkspaceServices();
   const usageStatsService = services?.usageStatsService;
@@ -39,7 +39,10 @@ export function useProviderBalance(
   const requestVersionRef = useRef(0);
   const scopeRef = useRef(providerId);
   const enabled = (options.enabled ?? true) && Boolean(providerId);
+  const recheckKey = options.recheckKey;
 
+  // 依赖里的 recheckKey 让保存 API Key / baseUrl 后可自动重查；
+  // 同一 Provider 刷新保留旧快照，切换 Provider 清空（见下方 sameScope）。
   const refresh = useCallback(async () => {
     if (!enabled || !providerId || !usageStatsService) {
       setState(INITIAL_STATE);
@@ -74,7 +77,7 @@ export function useProviderBalance(
         error: message,
       }));
     }
-  }, [enabled, providerId, usageStatsService]);
+  }, [enabled, providerId, usageStatsService, recheckKey]);
 
   useEffect(() => {
     void refresh();

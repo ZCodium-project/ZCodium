@@ -183,12 +183,14 @@ function parseNovita(payload: unknown): ProviderBalanceEntry[] {
   }
   const raw = readNumber(root, "availableBalance");
   const remaining = raw === null ? null : raw / 10_000;
+  // 修复：响应内所有金额字段同单位（0.0001 USD），cashBalance 也必须换算，否则 total 放大 10000 倍。
+  const rawTotal = readNumber(root, "cashBalance");
   return [
     entry({
       label: "USD",
       unit: "USD",
       remaining,
-      total: readNumber(root, "cashBalance"),
+      total: rawTotal === null ? null : rawTotal / 10_000,
       isAvailable: remaining === null ? true : remaining > 0,
     }),
   ];
