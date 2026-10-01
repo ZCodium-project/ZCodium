@@ -192,6 +192,24 @@ export const resolveBuildAliases = ({
     rootDirectory,
     "../../packages/shared/src/workspace-hook-trust-store-file.ts",
   ),
+  // workspace 文件搜索/条目编解码被 services/fileService 引用；漏声明会被通用
+  // "@zcode/shared" 前缀改写成 `src/index.ts/<subpath>`，Desktop agent/SEA 打包失败。
+  "@zcode/shared/workspaceFileEntriesCodec": resolve(
+    rootDirectory,
+    "../../packages/shared/src/workspaceFileEntriesCodec.ts",
+  ),
+  "@zcode/shared/workspaceFileSearch": resolve(
+    rootDirectory,
+    "../../packages/shared/src/workspaceFileSearch.ts",
+  ),
+  "@zcode/shared/account-provider-state": resolve(
+    rootDirectory,
+    "../../packages/shared/src/account-provider-state.ts",
+  ),
+  "@zcode/shared/node-repl-browser-broker": resolve(
+    rootDirectory,
+    "../../packages/shared/src/browser-use/nodeReplBroker.ts",
+  ),
   "@zcode/shared/zcodeEndpoint": resolve(
     rootDirectory,
     "../../packages/shared/src/zcodeEndpoint.ts",
