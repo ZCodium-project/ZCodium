@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { setDataBaseDir } from "@zcode/services/node";
+import { isDataBaseDirEnvOverrideActive, setDataBaseDir } from "@zcode/services/node";
 
 function resolveBootstrapSettingsFile(homePath: string = homedir()): string {
   return join(homePath, ".zcode", "v2", "setting.json");
@@ -37,6 +37,11 @@ function readBootstrapDataBaseDirFromDisk(
 }
 
 export function applyEarlyDataBaseDirBootstrap(): string | null {
+  // ZCODE_DATA_BASE_DIR 显式注入时是隔离硬边界：真实 HOME 的 setting.json 里若带
+  // dataBaseDir 会把隔离实例拉回真实数据目录（曾把 dev 实例写进开发者真实凭据），直接跳过。
+  if (isDataBaseDirEnvOverrideActive()) {
+    return null;
+  }
   const dataBaseDir = readBootstrapDataBaseDirFromDisk();
   if (dataBaseDir) {
     // 启动早期就把 dataBaseDir 注入进来，避免 logger / crashReporter 先按默认 HOME 建目录，

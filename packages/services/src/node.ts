@@ -59,6 +59,7 @@ export type {
 export {
   setDataBaseDir,
   getDataBaseDir,
+  isDataBaseDirEnvOverrideActive,
   getZCodeDataRootDir,
   getConversationWorkspaceDir,
   getAppConfigDir,

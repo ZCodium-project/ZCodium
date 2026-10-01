@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, join } from "node:path";
+import { homedir } from "node:os";
 
 import { withPinnedNodePath } from "./mise-toolchain-env.mjs";
 import { quoteArgsForWindowsShell } from "./spawn-command.mjs";
@@ -11,6 +12,20 @@ if (requestedEnv !== "test" && requestedEnv !== "production") {
   console.error("Usage: node scripts/dev-desktop-env.mjs <test|production> [--agent-bytecode]");
   process.exit(1);
 }
+
+// dev 实例的数据目录隔离不能只依赖 mise 任务层注入：绕过 mise 直接运行
+// pnpm dev:desktop:test 时若没有 ZCODE_DATA_BASE_DIR，实例会读写开发者真实的
+// ~/.zcode（曾因此重写真实 credentials.json）。test 模式在此兜底注入与 mise
+// 任务一致的默认隔离目录；production 保持 dogfood 语义不注入。
+const DEFAULT_ISOLATED_DATA_BASE_DIR = join(homedir(), ".zcode-dev-home");
+if (requestedEnv === "test" && !process.env.ZCODE_DATA_BASE_DIR?.trim()) {
+  process.env.ZCODE_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
+}
+console.log(
+  `[dev] ZCODE_ENV=${requestedEnv} 数据目录: ${
+    process.env.ZCODE_DATA_BASE_DIR?.trim() || "(未注入 — 将使用真实 HOME，dogfood 模式)"
+  }`,
+);
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";

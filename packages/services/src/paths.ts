@@ -11,6 +11,15 @@ export const ZCODE_WINDOWS_APP_INSTALL_DIR_ENV = "ZCODE_WINDOWS_APP_INSTALL_DIR"
 const envDataBaseDir = process.env.ZCODE_DATA_BASE_DIR?.trim() || null;
 const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
 
+/**
+ * 显式注入的 ZCODE_DATA_BASE_DIR 是 dev test / e2e 的数据目录隔离硬边界：
+ * 一旦生效，设置文件里发现的自定义 dataBaseDir（来自真实 HOME）不得再把
+ * 运行时拉回真实数据目录，否则隔离实例会读写开发者的真实凭据与配置。
+ */
+export function isDataBaseDirEnvOverrideActive(): boolean {
+  return envDataBaseDir !== null;
+}
+
 interface DataBaseDirTargetValidationOptions {
   platform?: NodeJS.Platform | string;
   env?: Record<string, string | undefined>;
@@ -27,10 +36,12 @@ type DataBaseDirTargetValidationResult =
 
 /** Set the base directory for app data (replaces homedir() prefix). */
 export function setDataBaseDir(dir: string | null): void {
+  // 环境变量生效时本函数是 no-op：隔离运行不得被设置文件 bootstrap 或设置页改写目录。
+  if (isDataBaseDirEnvOverrideActive()) return;
   _dataBaseDir = dir?.trim() || null;
 }
 
-/** Get the current base directory. Priority: setDataBaseDir() > env ZCODE_DATA_BASE_DIR > homedir(). */
+/** Get the current base directory. Priority: env ZCODE_DATA_BASE_DIR > setDataBaseDir() > homedir(). */
 export function getDataBaseDir(): string {
   if (_dataBaseDir) return _dataBaseDir;
   if (envDataBaseDir) return envDataBaseDir;
