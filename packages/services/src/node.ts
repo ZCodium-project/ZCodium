@@ -386,6 +386,7 @@ import {
   createProviderRuntimeFromConfigRuntime,
   type ProviderRuntime,
 } from "./model-provider/providerRuntime.js";
+import { createRemoteModelCatalogExecutor } from "./model-provider/remoteModelCatalog.js";
 import {
   IModelSelectionService,
   IProviderSettingsService,
@@ -1648,6 +1649,8 @@ export function createLocalServices(options: {
     modelSelectionConfiguredDefaultSource,
     disposeModelSelectionConfiguredDefaultSource: () =>
       modelSelectionConfiguredDefaultSource.dispose(),
+    // 模型可用性探测是 Host 侧纯读请求，不经过 Agent 执行链；fetch 可被测试替换。
+    listRemoteModels: createRemoteModelCatalogExecutor({}),
     testConnectivity: createProviderSettingsConnectivityTester({
       testModelConnectivity: async (input) => {
         if (!providerConnectivityAgentService) {

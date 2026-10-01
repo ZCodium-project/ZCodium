@@ -2844,6 +2844,8 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.modelsEmpty": "当前没有配置模型，添加模型后可在聊天中使用。",
   "settings.modelProvider.addModel": "添加模型",
   "settings.modelProvider.modelId": "模型 ID",
+  "settings.modelProvider.detectModels": "检测可用模型",
+  "settings.modelProvider.detectModelsEmpty": "未检测到可用模型",
   "settings.modelProvider.modelDisplayName": "显示名称",
   "settings.modelProvider.modelApiFormat.anthropic": "Anthropic Messages",
   "settings.modelProvider.modelApiFormat.openaiCompatible": "OpenAI Compatible",

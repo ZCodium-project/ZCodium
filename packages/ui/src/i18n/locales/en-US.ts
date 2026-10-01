@@ -3039,6 +3039,8 @@ const enUS: Record<string, string> = {
   "settings.modelProvider.modelsEmpty": "No models are configured. Add a model to use it in chat.",
   "settings.modelProvider.addModel": "Add model",
   "settings.modelProvider.modelId": "Model ID",
+  "settings.modelProvider.detectModels": "Detect available models",
+  "settings.modelProvider.detectModelsEmpty": "No available models detected",
   "settings.modelProvider.modelDisplayName": "Display name",
   "settings.modelProvider.modelApiFormat.anthropic": "Anthropic messages",
   "settings.modelProvider.modelApiFormat.openaiCompatible": "OpenAI Compatible",

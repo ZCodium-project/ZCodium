@@ -12,7 +12,7 @@ import type {
   ProviderSettingsFormModel,
 } from "@/lib/providerSettingsFormTypes.js";
 import type { ModelConnectivityResult } from "@zcode/shared";
-import type { ProviderApiType } from "@zcode/provider";
+import type { ProviderApiType, RemoteModelCatalogResult } from "@zcode/provider";
 import {
   TID_MODEL_PROVIDER_ADD_MODEL_BUTTON,
   TID_MODEL_PROVIDER_BASE_URL_INPUT,
@@ -356,6 +356,7 @@ export function ProviderModelsSection({
   onAddModel,
   onReorderModelIds,
   settingsRevision = 0,
+  onDetectRemoteModels,
 }: {
   providerId: string;
   providerName?: string;
@@ -373,6 +374,8 @@ export function ProviderModelsSection({
   onAddModel: (model: ProviderSettingsFormModel) => void | Promise<void>;
   onReorderModelIds?: (modelIds: string[]) => void;
   settingsRevision?: number;
+  /** 装配后对话框内出现"检测可用模型"入口；未装配（账号/套餐 Provider）则保持手输。 */
+  onDetectRemoteModels?: () => Promise<RemoteModelCatalogResult>;
 }) {
   const { intl } = useZCodeIntl();
   const { providerSettingsService } = useServices();
@@ -381,6 +384,10 @@ export function ProviderModelsSection({
   const addSavingRef = useRef(false);
   const [addCommitError, setAddCommitError] = useState<string | null>(null);
   const [addModel] = useState(createEmptyModel);
+  const [detectPending, setDetectPending] = useState(false);
+  const [detectError, setDetectError] = useState<string | null>(null);
+  const [detectModels, setDetectModels] = useState<readonly string[] | null>(null);
+  const latestDetectTokenRef = useRef(0);
   const [addDraftErrorField, setAddDraftErrorField] = useState<
     | "id"
     | "contextWindow"
@@ -406,8 +413,42 @@ export function ProviderModelsSection({
     editor.reset(createEmptyModel());
     setAddDraftErrorField(null);
     setAddCommitError(null);
+    setDetectModels(null);
+    setDetectError(null);
     setAddDialogOpen(true);
   }, [editor.reset]);
+
+  const handleDetectRemoteModels = useCallback(() => {
+    if (!onDetectRemoteModels || detectPending) return;
+    // 连续点击时旧响应可能晚到；token 守卫保证只提交最新一次检测结果。
+    const token = latestDetectTokenRef.current + 1;
+    latestDetectTokenRef.current = token;
+    setDetectPending(true);
+    setDetectError(null);
+    void onDetectRemoteModels()
+      .then((result) => {
+        if (token !== latestDetectTokenRef.current) return;
+        if (result.success) {
+          setDetectModels(result.models);
+          setDetectError(
+            result.models.length === 0
+              ? intl.formatMessage({ id: "settings.modelProvider.detectModelsEmpty" })
+              : null,
+          );
+        } else {
+          setDetectModels(null);
+          setDetectError(result.message);
+        }
+      })
+      .catch((error) => {
+        if (token !== latestDetectTokenRef.current) return;
+        setDetectModels(null);
+        setDetectError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (token === latestDetectTokenRef.current) setDetectPending(false);
+      });
+  }, [onDetectRemoteModels, detectPending, intl]);
 
   const updateAddDraft = (patch: Partial<ProviderModelDraftValues>) => {
     editor.change(patch);
@@ -418,6 +459,9 @@ export function ProviderModelsSection({
     setAddDialogOpen(false);
     editor.reset(createEmptyModel());
     setAddDraftErrorField(null);
+    setAddCommitError(null);
+    setDetectModels(null);
+    setDetectError(null);
     editor.cancel();
   };
 
@@ -572,6 +616,16 @@ export function ProviderModelsSection({
           saving={addSaving}
           modelConfigResolutionPending={editor.pending}
           modelDefaultsLoaded={editor.defaultsLoaded}
+          remoteModelDetection={
+            onDetectRemoteModels
+              ? {
+                  pending: detectPending,
+                  error: detectError,
+                  models: detectModels,
+                  onDetect: handleDetectRemoteModels,
+                }
+              : undefined
+          }
           onModelIdBlur={() => {
             void editor.flush().catch(() => undefined);
           }}
