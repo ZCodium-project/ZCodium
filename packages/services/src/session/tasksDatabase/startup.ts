@@ -1,9 +1,9 @@
 import type { DatabaseMigrationFacts } from "@zcode/shared";
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import { createRequire } from "node:module";
+import { createNodeRequire } from "../../nodeRequire.js";
 // 与既有 Repo 一致：避免构建器把 node:sqlite 改写成不存在的 npm sqlite 包。
-const { DatabaseSync } = createRequire(import.meta.url)(
+const { DatabaseSync } = createNodeRequire()(
   "node:sqlite",
 ) as typeof import("node:sqlite");
 import { TaskIndexRepo } from "#src/session/taskIndexRepo.js";

@@ -1,5 +1,4 @@
 import { accessSync, chmodSync, constants, existsSync, statSync } from "node:fs";
-import { createRequire } from "node:module";
 import { homedir, release } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { Emitter, type Event } from "@zcode/rpc";
@@ -12,8 +11,9 @@ import {
   type TerminalThemeProfile,
 } from "./terminalProfile.js";
 import { registerMemoryDiagnosticsProvider } from "#src/memoryDiagnostics.js";
+import { createNodeRequire } from "../nodeRequire.js";
 
-const require = createRequire(import.meta.url);
+const require = createNodeRequire();
 type NodePtyModule = typeof import("node-pty");
 type PtySpawnOptions = Parameters<NodePtyModule["spawn"]>[2];
 
