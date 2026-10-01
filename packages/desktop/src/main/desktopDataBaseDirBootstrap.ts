@@ -1,10 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { isDataBaseDirEnvOverrideActive, setDataBaseDir } from "@zcode/services/node";
+import {
+  isDataBaseDirEnvOverrideActive,
+  migrateLegacyZCodeDataRoot,
+  setDataBaseDir,
+} from "@zcode/services/node";
 
 function resolveBootstrapSettingsFile(homePath: string = homedir()): string {
-  return join(homePath, ".zcode", "v2", "setting.json");
+  return join(homePath, ".zcodium", "v2", "setting.json");
 }
 
 function extractBootstrapDataBaseDir(rawValue: unknown): string | null {
@@ -37,6 +41,9 @@ function readBootstrapDataBaseDirFromDisk(
 }
 
 export function applyEarlyDataBaseDirBootstrap(): string | null {
+  // 迁移是 base 相对的：env 锁定的隔离 base 内也可能有旧 dev 数据（.zcode），
+  // 与真实 HOME 一样需要在读取设置前完成一次性迁移。
+  migrateLegacyZCodeDataRoot();
   // ZCODE_DATA_BASE_DIR 显式注入时是隔离硬边界：真实 HOME 的 setting.json 里若带
   // dataBaseDir 会把隔离实例拉回真实数据目录（曾把 dev 实例写进开发者真实凭据），直接跳过。
   if (isDataBaseDirEnvOverrideActive()) {
@@ -47,6 +54,8 @@ export function applyEarlyDataBaseDirBootstrap(): string | null {
     // 启动早期就把 dataBaseDir 注入进来，避免 logger / crashReporter 先按默认 HOME 建目录，
     // 导致后续再切换到自定义目录时，日志和 crash dump 落在两套路径里。
     setDataBaseDir(dataBaseDir);
+    // 自定义数据目录是另一个 base：其内部的 .zcode 旧根同样需要迁移到 .zcodium。
+    migrateLegacyZCodeDataRoot();
   }
   return dataBaseDir;
 }

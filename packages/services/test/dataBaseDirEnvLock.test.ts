@@ -20,5 +20,5 @@ test("ZCODE_DATA_BASE_DIR 生效时 setDataBaseDir 是 no-op（隔离硬边界�
 
 test("env 锁定后派生路径全部落在隔离目录内", async () => {
   const paths = await import("../src/paths.js");
-  assert.equal(paths.getZCodeDataRootDir().replaceAll("\\", "/"), "/isolated-data-root/.zcode");
+  assert.equal(paths.getZCodeDataRootDir().replaceAll("\\", "/"), "/isolated-data-root/.zcodium");
 });

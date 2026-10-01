@@ -4,7 +4,7 @@ import { z } from "zod";
  * Onboarding 完成记录（三步向导：职业 / 模式 / 偏好）。
  *
  * 设计约束：
- * - 独立本地 JSON（~/.zcode/v2/onboarding-record.json），不混入 AppSettings；
+ * - 独立本地 JSON（~/.zcodium/v2/onboarding-record.json），不混入 AppSettings；
  * - 以 deviceMid 为设备锚点，entries 支持多个 userId（多人登录）与 null（apikey/未登录）；
  * - uploadState 预留后续上传服务器：pending → uploaded；
  * - 跳过是显式答案：某页被跳过时该字段记 null，与"明确选择了值"区分。

@@ -267,7 +267,7 @@ class ClaudeNativeSessionImportRepo {
     workspaceIdentity?: string;
     sourcePath: string;
   }): Promise<{ outputPath: string; createdOutputPaths: string[] }> {
-    // 导入副本沿用历史目录布局 ~/.zcode/v2/agent-config/claude/{workspaceHash}/projects；
+    // 导入副本沿用历史目录布局 ~/.zcodium/v2/agent-config/claude/{workspaceHash}/projects；
     // 这是 Claude 历史导入的存储位置，与 agent runtime provider（glm）无关。
     const relativeProjectsPath = this.getRelativeProjectsPath(params.sourcePath);
     const outputPath = join(

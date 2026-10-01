@@ -1,10 +1,16 @@
 /* path 规则集中维护：旧 task 快照与 provider 配置路径仍在这里收口。 */
 import { lstatSync } from "node:fs";
+import { cpSync, existsSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { basename, join, win32 } from "node:path";
 import { homedir } from "node:os";
-import { DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE } from "@zcode/shared";
+import {
+  DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE,
+  LEGACY_MIGRATION_MARKER_FILE,
+  LEGACY_ZCODE_DATA_ROOT_DIR_NAME,
+  ZCODE_DATA_ROOT_DIR_NAME,
+} from "@zcode/shared";
 
 let _dataBaseDir: string | null = null;
 export const ZCODE_WINDOWS_APP_INSTALL_DIR_ENV = "ZCODE_WINDOWS_APP_INSTALL_DIR";
@@ -50,19 +56,56 @@ export function getDataBaseDir(): string {
   return defaultDataBaseDir;
 }
 
-/** {dataBaseDir}/.zcode */
+/** {dataBaseDir}/.zcodium —— 与官方 ZCode 客户端的 ~/.zcode 命名空间隔离。 */
 export function getZCodeDataRootDir(): string {
-  return join(getDataBaseDir(), ".zcode");
+  return join(getDataBaseDir(), ZCODE_DATA_ROOT_DIR_NAME);
 }
 
-/** 非项目对话共享的真实工作目录；默认 ~/.zcode/workspace/default。 */
+/** 非项目对话共享的真实工作目录；默认 ~/.zcodium/workspace/default。 */
 export function getConversationWorkspaceDir(): string {
   return join(getZCodeDataRootDir(), "workspace", "default");
 }
 
-/** {dataBaseDir}/.zcode/v2 */
+/** {dataBaseDir}/.zcodium/v2 */
 export function getAppConfigDir(): string {
   return join(getZCodeDataRootDir(), "v2");
+}
+
+/**
+ * 把旧数据根 {base}/.zcode 一次性复制到 {base}/.zcodium。
+ *
+ * - 复制而非移动：官方 ZCode 客户端可能仍在使用旧根，不能使其中断；
+ * - 旧根写入 .migrated-to-zcodium 标记，用户删除新根视为重置，不重复灌入；
+ * - 经同卷临时目录 + rename 原子落位，并发启动时后到方发现目标已存在即退出；
+ * - 任何失败不阻断启动，无标记时下次启动自动重试。
+ */
+export function migrateLegacyZCodeDataRoot(): void {
+  const baseDir = getDataBaseDir();
+  const legacyRoot = join(baseDir, LEGACY_ZCODE_DATA_ROOT_DIR_NAME);
+  const nextRoot = getZCodeDataRootDir();
+  try {
+    if (nextRoot === legacyRoot) return;
+    if (existsSync(nextRoot)) return;
+    if (!existsSync(legacyRoot)) return;
+    if (existsSync(join(legacyRoot, LEGACY_MIGRATION_MARKER_FILE))) return;
+    const stagingRoot = join(baseDir, `${ZCODE_DATA_ROOT_DIR_NAME}.migrating-${process.pid}`);
+    try {
+      rmSync(stagingRoot, { recursive: true, force: true });
+      cpSync(legacyRoot, stagingRoot, { recursive: true });
+      try {
+        renameSync(stagingRoot, nextRoot);
+      } catch {
+        // 并发进程可能已完成迁移；目标存在即视为成功，否则向调用方暴露真实错误。
+        if (!existsSync(nextRoot)) throw new Error("迁移数据根时目标目录创建失败");
+      }
+      writeFileSync(join(legacyRoot, LEGACY_MIGRATION_MARKER_FILE), new Date().toISOString());
+    } finally {
+      rmSync(stagingRoot, { recursive: true, force: true });
+    }
+  } catch (error) {
+    // 早期 bootstrap 阶段尚无 service logger；失败不阻断启动，且未写标记、下次启动重试。
+    console.error("[paths] 迁移旧数据根 ~/.zcode → ~/.zcodium 失败，将继续使用新根:", error);
+  }
 }
 
 function readEnvValue(env: Record<string, string | undefined>, key: string): string | undefined {
@@ -193,7 +236,7 @@ export function getGitCheckpointIndexRootDir(): string {
   return join(getZCodeDataRootDir(), "git-checkpoint-index");
 }
 
-/** ~/.zcode/v2/tasks-index.sqlite */
+/** ~/.zcodium/v2/tasks-index.sqlite */
 export function getTasksIndexDatabasePath(): string {
   return join(getAppConfigDir(), "tasks-index.sqlite");
 }
@@ -211,12 +254,12 @@ export function getWorkspaceHash(workspacePath: string, workspaceIdentity?: stri
     .slice(0, 12);
 }
 
-/** ~/.zcode/v2/sessions/{workspaceHash} */
+/** ~/.zcodium/v2/sessions/{workspaceHash} */
 function getTaskSessionDir(workspacePath: string, workspaceIdentity?: string): string {
   return join(getAppConfigDir(), "sessions", getWorkspaceHash(workspacePath, workspaceIdentity));
 }
 
-/** ~/.zcode/v2/sessions/{workspaceHash}/{taskId}.json */
+/** ~/.zcodium/v2/sessions/{workspaceHash}/{taskId}.json */
 export function getLegacyTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -225,7 +268,7 @@ export function getLegacyTaskSessionSnapshotPath(
   return join(getTaskSessionDir(workspacePath, workspaceIdentity), `${taskId}.json`);
 }
 
-/** ~/.zcode/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
+/** ~/.zcodium/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
 export function getLegacyDeletedTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -240,8 +283,8 @@ export function getLegacyDeletedTaskSessionSnapshotPath(
  * state must only live at the default homedir location.
  */
 export async function copyDataDirectory(oldBaseDir: string, newBaseDir: string): Promise<void> {
-  const oldDir = join(oldBaseDir, ".zcode", "v2");
-  const newDir = join(newBaseDir, ".zcode", "v2");
+  const oldDir = join(oldBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
+  const newDir = join(newBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
   await cp(oldDir, newDir, {
     recursive: true,
     force: false,

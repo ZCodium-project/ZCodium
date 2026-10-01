@@ -22,14 +22,14 @@ const deviceMidCacheByStateFile = new Map<string, Promise<string>>();
 // 路径与字段，改名等于重置用户的设备身份，因此文件名保持不变。
 function resolveDeviceStateFile(homeDir?: string): string {
   if (homeDir) {
-    return join(homeDir, ".zcode", "v2", "telemetry-state.json");
+    return join(homeDir, ".zcodium", "v2", "telemetry-state.json");
   }
   return join(getAppConfigDir(), "telemetry-state.json");
 }
 
 function resolveDeviceStateLockFile(homeDir?: string): string {
   if (homeDir) {
-    return join(homeDir, ".zcode", "v2", "telemetry-state.lock");
+    return join(homeDir, ".zcodium", "v2", "telemetry-state.lock");
   }
   return join(getAppConfigDir(), "telemetry-state.lock");
 }
