@@ -22,7 +22,7 @@
     设置文件改为从隔离目录内读取，真实 HOME 的 `setting.json` 不再被读取。
 - 未注入环境变量时保持现状：设置文件 `dataBaseDir` 继续生效（重定位数据目录的正式用户）。
 - `dev-desktop-env.mjs test` 模式在 `ZCODE_DATA_BASE_DIR` 未设置时注入默认隔离目录
-  `~/.zcodium-dev-home`（与 mise 任务一致），并在启动日志打印本次实际数据目录；
+  `~/.zcode-dev-home`（与 mise 任务一致），并在启动日志打印本次实际数据目录；
   `production` 模式不注入（dogfood 语义），但同样打印数据目录来源。
 
 ## 状态所有者
@@ -36,4 +36,4 @@
    `getDataBaseDir()` 仍返回 `/isolated`。
 2. 未设置环境变量时 `setDataBaseDir(/real)` 生效（回归不受影响）。
 3. 环境变量生效时，桌面早期 bootstrap 不读取真实 HOME 的 `setting.json`。
-4. `pnpm dev:desktop:test` 不经过 mise 时，启动日志显示数据目录为 `~/.zcodium-dev-home`。
+4. `pnpm dev:desktop:test` 不经过 mise 时，启动日志显示数据目录为 `~/.zcode-dev-home`。

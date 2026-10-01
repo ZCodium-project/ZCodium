@@ -17,7 +17,7 @@ if (requestedEnv !== "test" && requestedEnv !== "production") {
 // pnpm dev:desktop:test 时若没有 ZCODE_DATA_BASE_DIR，实例会读写开发者真实的
 // ~/.zcode（曾因此重写真实 credentials.json）。test 模式在此兜底注入与 mise
 // 任务一致的默认隔离目录；production 保持 dogfood 语义不注入。
-const DEFAULT_ISOLATED_DATA_BASE_DIR = join(homedir(), ".zcodium-dev-home");
+const DEFAULT_ISOLATED_DATA_BASE_DIR = join(homedir(), ".zcode-dev-home");
 if (requestedEnv === "test" && !process.env.ZCODE_DATA_BASE_DIR?.trim()) {
   process.env.ZCODE_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
 }
