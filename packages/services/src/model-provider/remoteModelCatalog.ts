@@ -37,9 +37,16 @@ export function createRemoteModelCatalogExecutor(dependencies: {
           signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });
         if (!response.ok) {
+          const statusText = `Provider 返回 ${response.status}${response.statusText ? ` ${response.statusText}` : ""}`;
+          // 404 高频根因是网关把列表挂在 /v1/models 而 Base URL 没带 /v1（正式执行链
+          // 同样要求 Base URL 自含前缀）；带上实际请求 URL 并给出提示，避免用户盲猜。
+          const hint =
+            response.status === 404
+              ? `（请求：GET ${request.url}；若为 OpenAI 兼容网关，请检查 Base URL 是否遗漏 /v1 前缀）`
+              : `（请求：GET ${request.url}）`;
           return {
             success: false,
-            message: `Provider 返回 ${response.status}${response.statusText ? ` ${response.statusText}` : ""}`,
+            message: `${statusText}${hint}`,
           };
         }
         const parsed = parseRemoteModelListPage(await response.json());

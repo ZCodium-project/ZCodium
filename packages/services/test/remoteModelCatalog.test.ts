@@ -121,10 +121,8 @@ test("executor：非 2xx 返回失败结果并携带状态码", async () => {
     fetch: async () => new Response("denied", { status: 401, statusText: "Unauthorized" }),
   });
   const result = await executor(openAiRequest());
-  assert.deepEqual(result, {
-    success: false,
-    message: "Provider 返回 401 Unauthorized",
-  });
+  assert.equal(result.success, false);
+  assert.match(result.success ? "" : result.message, /^Provider 返回 401 Unauthorized（请求：GET https:\/\/gateway\.example\/v1\/models）$/);
 });
 
 test("executor：网络异常与无法解析的响应都转为失败结果", async () => {
