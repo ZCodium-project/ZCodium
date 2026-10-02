@@ -14,6 +14,7 @@ import type {
 import type { ModelConnectivityResult } from "@zcode/shared";
 import type { ProviderApiType } from "@zcode/provider";
 import {
+  ORCAROUTER_PROVIDER_TEMPLATE_ID,
   TID_MODEL_PROVIDER_ADD_MODEL_BUTTON,
   TID_MODEL_PROVIDER_BASE_URL_INPUT,
   TID_MODEL_PROVIDER_MODEL_DELETE_BUTTON,
@@ -37,6 +38,7 @@ import { useServices } from "@/hooks/useServices.js";
 import { TECHNICAL_INPUT_ATTRIBUTES } from "@/lib/technicalInputAttributes.js";
 import { ApiKeyInput } from "./ApiKeyInput.js";
 import { ModelRowInput } from "./ProviderFormControls.js";
+import { OrcaRouterModelSelector } from "./OrcaRouterModelSelector.js";
 import { PresetProviderApiKeyBanner } from "./PresetProviderApiKeyBanner.js";
 import { type ProviderModelDraftValues } from "@/settings/model-provider-section/ProviderModelMetadata.js";
 import { ProviderModelMetadataDialog } from "@/settings/model-provider-section/ProviderModelMetadataDialog.js";
@@ -356,6 +358,7 @@ export function ProviderModelsSection({
   onAddModel,
   onReorderModelIds,
   settingsRevision = 0,
+  discoveryTemplateId = null,
 }: {
   providerId: string;
   providerName?: string;
@@ -373,6 +376,8 @@ export function ProviderModelsSection({
   onAddModel: (model: ProviderSettingsFormModel) => void | Promise<void>;
   onReorderModelIds?: (modelIds: string[]) => void;
   settingsRevision?: number;
+  /** OrcaRouter 模板：模型只能从真实目录生成的下拉中选择，不支持自由输入。 */
+  discoveryTemplateId?: string | null;
 }) {
   const { intl } = useZCodeIntl();
   const { providerSettingsService } = useServices();
@@ -464,6 +469,21 @@ export function ProviderModelsSection({
       })
     : null;
 
+  // OrcaRouter：模型不能自由输入，只能从真实目录生成、按当前入口能力过滤的下拉中选择。
+  const orcaRouterTemplate = discoveryTemplateId === ORCAROUTER_PROVIDER_TEMPLATE_ID;
+  const handleSelectOrcaModel = useCallback(
+    async (modelId: string | null) => {
+      if (!modelId) return;
+      const existing = models.find((model) => model.modelId === modelId);
+      await onAddModel(
+        existing
+          ? { ...existing, hasPersonalConfig: true }
+          : { ...createEmptyModel(), modelId, hasPersonalConfig: true },
+      );
+    },
+    [models, onAddModel],
+  );
+
   return (
     <div>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
@@ -482,6 +502,17 @@ export function ProviderModelsSection({
           {intl.formatMessage({ id: "settings.modelProvider.addModel" })}
         </Button>
       </div>
+      {orcaRouterTemplate ? (
+        <div className="mb-2">
+          <OrcaRouterModelSelector
+            capability="chat"
+            selectedModelId={models[0]?.modelId ?? null}
+            onSelectModel={(modelId) => {
+              void handleSelectOrcaModel(modelId);
+            }}
+          />
+        </div>
+      ) : null}
       {models.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-input-border bg-input">
           <SortableProviderModelList
