@@ -119,6 +119,14 @@
       "sourceUrl": "https://avatars.githubusercontent.com/u/130314967?v=4",
       "sourceOwner": "xAI",
       "normalization": "Official GitHub organization avatar downsampled from 460x460 to 80x80 RGB."
+    },
+    {
+      "brand": "OrcaRouter",
+      "file": "model-provider-orcarouter.png",
+      "providerIds": ["orcarouter"],
+      "sourceUrl": "https://www.orcarouter.ai/orca-logo-classic.png",
+      "sourceOwner": "OrcaRouter",
+      "normalization": "Official classic logo downloaded unchanged from https://www.orcarouter.ai/orca-logo-classic.png. One asset serves both the API-key and the PKCE entries. Retrieved 2026-10-02."
     }
   ]
 }

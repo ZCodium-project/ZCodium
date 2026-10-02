@@ -2822,6 +2822,37 @@ const enUS: Record<string, string> = {
   "settings.modelProvider.apiFormat.title.anthropicMessages": "Anthropic messages",
   "settings.modelProvider.apiKey": "API key",
   "settings.modelProvider.apiKeyPlaceholder": "Enter API key",
+  "orcaRouter.title": "OrcaRouter",
+  "orcaRouter.description":
+    "OrcaRouter is an OpenAI-compatible AI gateway. Use an existing API key or connect your OrcaRouter account; both end up as the same API key against {baseUrl}.",
+  "orcaRouter.apiKey.title": "Use API key",
+  "orcaRouter.apiKey.save": "Save key",
+  "orcaRouter.apiKey.invalid":
+    "OrcaRouter API keys start with sk-orca-. Check the value and try again.",
+  "orcaRouter.pkce.title": "Connect with OrcaRouter",
+  "orcaRouter.pkce.description":
+    "OAuth 2.0 + PKCE. No client secret and no redirect URI to register; the authorization page shows a code you paste back here.",
+  "orcaRouter.pkce.connect": "Connect with OrcaRouter",
+  "orcaRouter.pkce.openHint": "Open this URL, approve, then paste the code below",
+  "orcaRouter.pkce.open": "Open authorization page",
+  "orcaRouter.pkce.copy": "Copy authorization URL",
+  "orcaRouter.pkce.copied": "Authorization URL copied",
+  "orcaRouter.pkce.codePlaceholder": "Paste the authorization code",
+  "orcaRouter.pkce.submitCode": "Finish connecting",
+  "orcaRouter.connect.failed": "Could not start the OrcaRouter authorization",
+  "orcaRouter.connected": "Connected · {masked}",
+  "orcaRouter.notConnected": "Not connected",
+  "orcaRouter.clear": "Clear",
+  "orcaRouter.needsReauth":
+    "OrcaRouter rejected this credential. Connect again to replace it; the stored key is kept until a new login succeeds.",
+  "orcaRouter.model.selectPlaceholder": "Select a model",
+  "orcaRouter.model.search": "Search models",
+  "orcaRouter.model.empty": "No model in the current catalog matches this entry.",
+  "orcaRouter.catalog.failed": "The OrcaRouter model catalog is unavailable.",
+  "orcaRouter.catalog.degradedSeed":
+    "Live model catalog unavailable. Showing the verified offline seed ({count} models).",
+  "orcaRouter.catalog.degradedLastKnownGood":
+    "Live model catalog refresh failed. Showing the last known good catalog ({count} models).",
   "settings.modelProvider.apiKeyDisabledHint": "Set an API key to enable this provider.",
   "settings.modelProvider.getApiKey": "Get API key",
   "settings.modelProvider.viewUsage": "View usage",

@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "rootDir": ".",
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": [
+    "packages/shared/test/orcarouter.test.ts",
+    "packages/services/test/orcarouter.test.ts",
+    "packages/services/test/orcarouter.live.test.ts",
+    "packages/ui/test/orcarouterModelOptions.test.ts"
+  ],
+  "references": [
+    { "path": "./packages/rpc" },
+    { "path": "./packages/provider" },
+    { "path": "./packages/provider-node" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/services" },
+    { "path": "./packages/client" },
+    { "path": "./packages/ui" }
+  ]
+}
