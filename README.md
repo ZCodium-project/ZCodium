@@ -19,7 +19,7 @@
 
 ZCodium keeps the product itself — an AI coding workspace for desktop, browser and terminal — and rebuilds it from the public source with monitoring and telemetry removed and vendor services off by default.
 
-- **One Agent, three interfaces**: the Electron desktop app, the browser workspace and the `zcode` terminal TUI share the same Agent runtime and sessions; you can also connect to a remote host over SSH, or drive the same desktop agent from your phone's browser.
+- **One Agent, three interfaces**: the Electron desktop app, the browser workspace and the `zcodium` terminal TUI share the same Agent runtime and sessions; you can also connect to a remote host over SSH, or drive the same desktop agent from your phone's browser.
 - **Plans, edits, runs, verifies**: file changes arrive as diffs, terminal commands carry their context, the agent checks its own work by running commands and tests, and a built-in browser plugin drives a real browser for web tasks.
 - **Asks before it touches your project**: every edit, command and tool call can require approval — allow once, always in this project, or full access.
 - **Multi-agent collaboration and orchestration**: sub-agents, dynamic workflows, skills and scheduled automations.
@@ -138,8 +138,8 @@ The CLI distribution is a self-contained bundle (TUI + Web + Agent) and needs No
 ```bash
 tar -xzf zcodium-*.tar.gz
 cd zcodium
-./install.sh        # installs the zcode command (defaults to ~/.zcode/runtime, entry in ~/.local/bin)
-zcode --help        # or run directly: node bin/zcode.mjs --help
+./install.sh        # installs the zcodium command (defaults to ~/.zcodium/runtime, entry in ~/.local/bin)
+zcodium --help      # or run directly: node bin/zcode.mjs --help
 ```
 
 ## Build and Release
@@ -177,7 +177,7 @@ ZCode is an AI coding workspace with desktop, browser, and terminal interfaces. 
 | ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------ |
 | Desktop                      | Electron desktop application                                                              | `pnpm dev:desktop`             |
 | Web / ZCode CLI distribution | Terminal and browser workspace; packages the TUI, Web client, backend, and Agent together | `pnpm dev:web`                 |
-| Agent CLI                    | The `zcode` terminal interface, which also provides the Agent runtime for Desktop and Web | `pnpm --filter @zcode/cli dev` |
+| Agent CLI                    | The `zcodium` terminal interface, which also provides the Agent runtime for Desktop and Web | `pnpm --filter @zcode/cli dev` |
 
 ## Setup
 
@@ -239,21 +239,21 @@ After changing Agent source code, run `pnpm --filter @zcode/cli... build` and re
 
 ### ZCode CLI distribution
 
-The command-line distribution includes the TUI, Web client, and Agent behind one `zcode` command. With no arguments it starts the TUI; a leading `--web` starts Web mode; all other arguments go to the existing Agent CLI. Both modes run locally without Electron.
+The command-line distribution includes the TUI, Web client, and Agent behind one `zcodium` command. With no arguments it starts the TUI; a leading `--web` starts Web mode; all other arguments go to the existing Agent CLI. Both modes run locally without Electron.
 
 ```bash
 # Start the terminal UI by default
-zcode
+zcodium
 
 # Start the Web interface
-zcode --web
+zcodium --web
 
 # Set the project and port without opening a browser automatically
-zcode --web --workspace /path/to/project --port 3030 --no-open
+zcodium --web --workspace /path/to/project --port 3030 --no-open
 
 # Show CLI or Web options
-zcode --help
-zcode --web --help
+zcodium --help
+zcodium --web --help
 ```
 
 In Web mode, it uses the current directory as the workspace, listens on `127.0.0.1` without token authentication by default, selects an available port, and opens a browser. Use the URL printed in the terminal and press `Ctrl+C` to stop the service. For LAN access, use `--host 0.0.0.0`; listening on a non-local address generates an access token by default. Use the token-bearing URL printed in the terminal. Set a token with `--token`, or disable token authentication with `--no-token`.
@@ -323,7 +323,7 @@ pnpm build:zcode
 pnpm build:zcode --skip-build
 
 # Show options for the version, output directory, and more
-pnpm build:zcode --help
+pnpm build:zcodium --help
 ```
 
 The version defaults to the root `package.json` version. Output is written to `dist/zcode/`:
