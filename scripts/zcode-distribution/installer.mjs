@@ -5,8 +5,8 @@ export function installScriptSource(baseUrl) {
 set -eu
 
 BASE_URL="\${ZCODE_DIST_BASE_URL:-${baseUrl}}"
-INSTALL_DIR="\${ZCODE_DIST_HOME:-$HOME/.zcodium/runtime}"
-BIN_DIR="\${ZCODE_DIST_BIN_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="\${ZCODIUM_DIST_HOME:-\${ZCODE_DIST_HOME:-$HOME/.zcodium/runtime}}"
+BIN_DIR="\${ZCODIUM_DIST_BIN_DIR:-\${ZCODE_DIST_BIN_DIR:-$HOME/.local/bin}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then

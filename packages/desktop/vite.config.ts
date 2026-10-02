@@ -157,7 +157,11 @@ export default defineConfig(({ mode }) => {
     env.VITE_ZCODE_E2E_STORE_BRIDGE === "1" || process.env.VITE_ZCODE_E2E_STORE_BRIDGE === "1";
   const zcodeEndpointOrigin = resolveZCodeEndpointOrigin({
     env: zcodeEnv,
-    envBaseOrigin: env.ZCODE_BASE_URL ?? env.ZCODE_ENDPOINT_ORIGIN,
+    envBaseOrigin:
+      env.ZCODIUM_BASE_URL ??
+      env.ZCODE_BASE_URL ??
+      env.ZCODIUM_ENDPOINT_ORIGIN ??
+      env.ZCODE_ENDPOINT_ORIGIN,
   });
   const codingPlanWebviewOrigin =
     env.VITE_CODING_PLAN_WEBVIEW_ORIGIN ?? process.env.VITE_CODING_PLAN_WEBVIEW_ORIGIN ?? "";

@@ -203,6 +203,7 @@ async function runServe(
           stdio: "ignore",
           env: {
             ...process.env,
+            ZCODIUM_DATA_BASE_DIR: layout.dataBaseDir,
             ZCODE_DATA_BASE_DIR: layout.dataBaseDir,
             ZCODE_SERVER_ROOT: layout.serverRoot,
           },

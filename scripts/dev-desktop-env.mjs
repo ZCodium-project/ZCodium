@@ -18,7 +18,11 @@ if (requestedEnv !== "test" && requestedEnv !== "production") {
 // ~/.zcode（曾因此重写真实 credentials.json）。test 模式在此兜底注入与 mise
 // 任务一致的默认隔离目录；production 保持 dogfood 语义不注入。
 const DEFAULT_ISOLATED_DATA_BASE_DIR = join(homedir(), ".zcode-dev-home");
-if (requestedEnv === "test" && !process.env.ZCODE_DATA_BASE_DIR?.trim()) {
+const legacyDataBaseDirSet =
+  process.env.ZCODIUM_DATA_BASE_DIR?.trim() || process.env.ZCODE_DATA_BASE_DIR?.trim();
+if (requestedEnv === "test" && !legacyDataBaseDirSet) {
+  // 新旧名双写：新旧二进制混布（SSH 远端旧 agent）也能读到隔离目录。
+  process.env.ZCODIUM_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
   process.env.ZCODE_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
 }
 console.log(

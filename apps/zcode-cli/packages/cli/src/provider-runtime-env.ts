@@ -1,4 +1,5 @@
 import { existsSync, realpathSync } from "node:fs";
+import { readExternalEnvVar } from "@zcode/shared";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
@@ -57,7 +58,8 @@ export async function prepareCliProviderRuntimeEnv(
 
   const explicitZCodeBuiltin = options.env[ZCODE_BUILTIN_PROVIDER_CONFIG_FILE_ENV]?.trim();
   const explicitPersonal = options.env[ZCODE_PERSONAL_PROVIDER_CONFIG_FILE_ENV]?.trim();
-  const dataBaseDir = options.dataBaseDir ?? options.env.ZCODE_DATA_BASE_DIR?.trim() ?? homedir();
+  const dataBaseDir =
+    options.dataBaseDir ?? readExternalEnvVar(options.env, "ZCODE_DATA_BASE_DIR") ?? homedir();
   if (explicitZCodeBuiltin && explicitPersonal) {
     return {
       [ZCODE_BUILTIN_PROVIDER_CONFIG_FILE_ENV]: explicitZCodeBuiltin,

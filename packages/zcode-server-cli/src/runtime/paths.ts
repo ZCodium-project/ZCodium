@@ -1,4 +1,5 @@
 import { realpath } from "node:fs/promises";
+import { readExternalEnvVar } from "@zcode/shared";
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
 
@@ -21,7 +22,7 @@ export interface ServerLayout {
 }
 
 function getDefaultServerDataRoot(): string {
-  const configured = process.env.ZCODE_DATA_BASE_DIR?.trim();
+  const configured = readExternalEnvVar(process.env, "ZCODE_DATA_BASE_DIR");
   return join(configured || homedir(), ".zcodium", "server");
 }
 
