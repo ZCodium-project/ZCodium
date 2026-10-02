@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "revision": 30,
+  "revision": 31,
   "config": {
     "providerConfigRules": {
       "templateRules": [
@@ -684,6 +684,34 @@
             "logo": {
               "type": "builtin",
               "key": "opencode"
+            }
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "templateNameMap": {
+            "zh-CN": "OrcaRouter",
+            "en-US": "OrcaRouter"
+          },
+          "config": {
+            "access": {
+              "type": "api-key",
+              "apiKeyManagementUrl": "https://www.orcarouter.ai/console/keys"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.orcarouter.ai/v1"
+            },
+            "builtinModelIds": [
+              "openai/gpt-5.5",
+              "anthropic/claude-opus-4.8",
+              "google/gemini-3.5-flash",
+              "deepseek/deepseek-v4-pro",
+              "orcarouter/auto"
+            ],
+            "logo": {
+              "type": "builtin",
+              "key": "orcarouter"
             }
           }
         }
@@ -4311,6 +4339,110 @@
               "supportsJsonSchemaOutput": true
             }
           }
+        },
+        {
+          "modelMatch": ".*gpt-5\\.5(?:[.\\-:/\\[].*)?",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.orcarouter\\.ai/v1/?",
+          "config": {
+            "properties": {
+              "contextWindow": 400000,
+              "inputFormat": {
+                "supportsText": true,
+                "supportsImage": true,
+                "supportsVideo": false,
+                "supportsAudio": false,
+                "supportsPdf": true
+              },
+              "supportsJsonSchemaOutput": true
+            },
+            "optionSpecs": {
+              "reasoningLevel": {
+                "values": ["low", "medium", "high", "xhigh"],
+                "map": "reasoningLevel == \"disabled\" || reasoningLevel == \"none\"\n  ? { \"reasoning_effort\": \"none\" }\n  : { \"reasoning_effort\": reasoningLevel }"
+              },
+              "maxOutputTokens": {
+                "max": 128000,
+                "map": "{ \"max_tokens\": maxOutputTokens }"
+              }
+            }
+          }
+        },
+        {
+          "modelMatch": ".*claude-opus-4\\.8(?:[.\\-:/\\[].*)?",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.orcarouter\\.ai/v1/?",
+          "config": {
+            "properties": {
+              "contextWindow": 200000,
+              "inputFormat": {
+                "supportsText": true,
+                "supportsImage": true,
+                "supportsVideo": false,
+                "supportsAudio": false,
+                "supportsPdf": true
+              },
+              "supportsJsonSchemaOutput": true
+            },
+            "optionSpecs": {
+              "maxOutputTokens": {
+                "max": 64000,
+                "map": "{ \"max_tokens\": maxOutputTokens }"
+              }
+            }
+          }
+        },
+        {
+          "modelMatch": ".*gemini-3\\.5-flash(?:[.\\-:/\\[].*)?",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.orcarouter\\.ai/v1/?",
+          "config": {
+            "properties": {
+              "contextWindow": 1000000,
+              "inputFormat": {
+                "supportsText": true,
+                "supportsImage": true,
+                "supportsVideo": false,
+                "supportsAudio": false,
+                "supportsPdf": true
+              },
+              "supportsJsonSchemaOutput": true
+            },
+            "optionSpecs": {
+              "maxOutputTokens": {
+                "max": 65536,
+                "map": "{ \"max_tokens\": maxOutputTokens }"
+              }
+            }
+          }
+        },
+        {
+          "modelMatch": ".*deepseek-v4-pro(?:[.\\-:/\\[].*)?",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.orcarouter\\.ai/v1/?",
+          "config": {
+            "properties": {
+              "contextWindow": 1000000,
+              "inputFormat": {
+                "supportsText": true,
+                "supportsImage": false,
+                "supportsVideo": false,
+                "supportsAudio": false,
+                "supportsPdf": false
+              },
+              "supportsJsonSchemaOutput": false
+            },
+            "optionSpecs": {
+              "reasoningLevel": {
+                "values": ["disabled", "low", "high", "max"],
+                "map": "reasoningLevel == \"disabled\" || reasoningLevel == \"none\"\n  ? { \"reasoning_effort\": \"none\" }\n  : { \"reasoning_effort\": reasoningLevel }"
+              },
+              "maxOutputTokens": {
+                "max": 384000,
+                "map": "{ \"max_tokens\": maxOutputTokens }"
+              }
+            }
+          }
         }
       ],
       "templateModelRules": [
@@ -6020,6 +6152,41 @@
           "modelId": "qwen/qwen3.8-max-0902",
           "config": {
             "enabled": false
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "modelId": "openai/gpt-5.5",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "modelId": "anthropic/claude-opus-4.8",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "modelId": "google/gemini-3.5-flash",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "modelId": "deepseek/deepseek-v4-pro",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "orcarouter",
+          "modelId": "orcarouter/auto",
+          "config": {
+            "enabled": true
           }
         }
       ],

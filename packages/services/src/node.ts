@@ -362,6 +362,14 @@ import { createBotRemoteWorkspaceService } from "./bots/botRemoteWorkspaceBridge
 import type { SessionMessageSendRequested } from "#src/session/sessionMailbox.js";
 import { createFileWatcherService } from "./fileWatcher/fileWatcherService.js";
 import { createOAuthService } from "./oauth/oauthService.js";
+import {
+  IOrcaRouterService,
+  OrcaConnectController,
+  createOrcaCredentialAdapters,
+  createOrcaCredentialStore,
+  createOrcaRouterService,
+} from "./orcarouter/index.js";
+import { resolveOrcaOrigins } from "@zcode/shared";
 import { isCurrentOAuthCredentialRequest } from "#src/oauth/oauthUnauthorizedRequest.js";
 import { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js";
 import { OAuthCredentialRepo } from "./oauth/repo/oauthCredentialRepo.js";
@@ -2352,6 +2360,21 @@ export function createLocalServices(options: {
     apiClient,
     onProviderLogout: handleOAuthProviderLogout,
   });
+  // OrcaRouter：API Key 与 OAuth 2.0 + PKCE 两个入口共用同一凭据 seam，
+  // 密钥只落在既有的加密 Credential Store，模型目录由 host 持 key 拉取。
+  const orcaOrigins = resolveOrcaOrigins(process.env);
+  const orcaCredentialStore = createOrcaCredentialStore({ credentialService });
+  const orcaConnect = new OrcaConnectController({
+    credentialStore: orcaCredentialStore,
+    origins: orcaOrigins,
+    appName: "ZCodium",
+  });
+  const orcaRouterService = createOrcaRouterService({
+    store: orcaCredentialStore,
+    adapters: createOrcaCredentialAdapters({ store: orcaCredentialStore }),
+    connect: orcaConnect,
+    origins: orcaOrigins,
+  });
   const zcodeJwtLogoutLogger = createServiceLogger("zcode-jwt-logout");
   zcodeJwtLogoutHandlerRef.current = (input, headers) => {
     // 条件退出本身已串行去重；不能丢弃等待旧候选期间到来的新凭据 401。
@@ -2475,6 +2498,7 @@ export function createLocalServices(options: {
     )
     .register(IFileWatcherService, createFileWatcherService())
     .register(IOAuthService, oauthService)
+    .register(IOrcaRouterService, orcaRouterService)
     .register(
       IUsageStatsService,
       createUsageStatsService({

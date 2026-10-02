@@ -15,6 +15,7 @@ import type { ICuaPermissionService } from "./cua-permission-broker/cuaPermissio
 import type { IBotsService } from "./bots/bots.js";
 import type { IFileWatcherService } from "./fileWatcher/fileWatcher.js";
 import type { IOAuthService } from "./oauth/oauth.js";
+import type { IOrcaRouterService } from "./orcarouter/service.js";
 import type {
   IModelSelectionService,
   IProviderSettingsService,
@@ -64,6 +65,8 @@ export interface IServiceAccessor {
   readonly botsService: IBotsService;
   readonly fileWatcherService: IFileWatcherService;
   readonly oauthService: IOAuthService;
+  /** OrcaRouter 的凭据与模型目录服务；旧 host / 测试 double 可不提供。 */
+  readonly orcaRouterService?: IOrcaRouterService;
   /** 当前 Environment 的 Provider 配置与设置视图。 */
   readonly providerSettingsService: IProviderSettingsService;
   /** 当前 Environment Registry 发布的唯一模型选择 View。 */

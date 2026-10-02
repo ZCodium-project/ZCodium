@@ -92,6 +92,8 @@ export const ServiceChannels = {
   FileWatcher: "file-watcher",
   /** OAuth 认证服务 */
   OAuth: "oauth",
+  /** OrcaRouter provider 的凭据与模型目录服务 */
+  OrcaRouter: "orcarouter",
   /** 新 Provider Config 的设置读写 Facade */
   ProviderSettings: "provider-settings",
   /** 新 Provider Registry 的模型选择 Facade */
