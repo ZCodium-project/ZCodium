@@ -1,0 +1,21 @@
+[
+  {
+    "template_name": "thesis-template-2026",
+    "template_mode": "institutional_multi_section",
+    "sections": [
+      { "name": "cover", "required": true, "titlePg": true },
+      { "name": "toc", "required": true, "titlePg": true },
+      { "name": "body", "required": true, "titlePg": false }
+    ],
+    "style_requirements": {
+      "heading1_style_id": "1",
+      "heading2_style_id": "2",
+      "normal_style_id": "a"
+    },
+    "anchor_rules": {
+      "must_be_atomic": true,
+      "allowed_placeholders": ["@@FIELD:title@@", "@@FIELD:author@@"]
+    },
+    "validation_profile": "thesis_strict"
+  }
+]

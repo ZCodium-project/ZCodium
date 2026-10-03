@@ -1,0 +1,49 @@
+{
+  "source": "{{INPUT_FILE}}",
+  "sheet": "Orders",
+  "source_rows_including_header": 9995,
+  "data_rows": 9994,
+  "columns": 21,
+  "outputs": {
+    "csv_utf8": "{{DATA_DIR}}/agents/agent4/workspace/superstore_conversion_outputs/superstore_orders_utf8.csv",
+    "json_array": "{{DATA_DIR}}/agents/agent4/workspace/superstore_conversion_outputs/superstore_orders.json",
+    "pdf_html_source": "{{DATA_DIR}}/agents/agent4/workspace/superstore_conversion_outputs/superstore_orders_print.html",
+    "csv_to_xlsx_xml_template": "{{DATA_DIR}}/agents/agent4/workspace/superstore_conversion_outputs/superstore_orders_from_csv_verified.xlsx"
+  },
+  "type_rules": {
+    "date": [
+      "Order Date",
+      "Ship Date"
+    ],
+    "integer": [
+      "Postal Code",
+      "Quantity",
+      "Row ID"
+    ],
+    "number": [
+      "Discount",
+      "Profit",
+      "Sales"
+    ],
+    "text": [
+      "Category",
+      "City",
+      "Country",
+      "Customer ID",
+      "Customer Name",
+      "Order ID",
+      "Product ID",
+      "Product Name",
+      "Region",
+      "Segment",
+      "Ship Mode",
+      "State",
+      "Sub-Category"
+    ]
+  },
+  "notes": [
+    "CSV dates formatted YYYY-MM-DD",
+    "JSON numbers serialized as numeric values",
+    "CSV to XLSX generated via direct OOXML package/template construction"
+  ]
+}

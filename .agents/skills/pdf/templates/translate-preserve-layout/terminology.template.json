@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "version": "v1-DRAFT",
+    "domain": "<!-- finance / legal / technical / medical / political -->",
+    "freeze_after_iteration": 3,
+    "freeze_status": "DRAFT",
+    "note": [
+      "Once freeze_status='FROZEN', NO new terms accepted.",
+      "All translation rounds MUST consult this glossary before producing any text.",
+      "Conflicts: report to user, do NOT silently re-translate."
+    ]
+  },
+
+  "policy": [
+    {
+      "term_en": "<!-- ENGLISH_TERM -->",
+      "term_cn": "<!-- TRANSLATED_TERM -->",
+      "category": "policy",
+      "note": "Star (*) marks required terms; describe context / first-use vs subsequent-use rule."
+    }
+  ],
+
+  "finance": [
+    {
+      "term_en": "<!-- ENGLISH_TERM -->",
+      "term_cn": "<!-- TRANSLATED_TERM -->",
+      "category": "finance",
+      "note": "Star (*) marks required terms; preserve abbreviations / currency conversions / etc."
+    }
+  ],
+
+  "technical": [
+    {
+      "term_en": "<!-- ENGLISH_TERM -->",
+      "term_cn": "<!-- TRANSLATED_TERM -->",
+      "category": "technical",
+      "note": "Preserve casing for code identifiers / API names."
+    }
+  ],
+
+  "proper_noun": [
+    {
+      "term_en": "<!-- AUTHOR_NAME -->",
+      "term_cn": "<!-- AUTHOR_NAME (same — preserve English) -->",
+      "category": "proper_noun",
+      "note": "Star (*) NEVER invent target-language names for English authors. Preserve English. Same rule for company names, product names, and place names without a standard target-language translation."
+    },
+    {
+      "term_en": "Shanghai",
+      "term_cn": "上海",
+      "category": "proper_noun",
+      "note": "Standard CN translation exists; use it."
+    }
+  ],
+
+  "punctuation": [
+    {
+      "rule": "preserve_chinese_quotes",
+      "description": "Chinese quotation marks 「」『』 must be preserved; do NOT replace with \"...\" "
+    },
+    {
+      "rule": "preserve_percent_ranges",
+      "description": "'around 5%' / '4.5-5.0%' keep number format + % sign + dash style"
+    }
+  ]
+}

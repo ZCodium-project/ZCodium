@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>技术服务合同</title>
+<style>
+@page { size: A4 portrait; margin: 18mm 20mm 18mm 20mm; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", serif;
+  color: #111;
+  background: #fff;
+  font-size: 10.5pt;
+  line-height: 1.72;
+  letter-spacing: 0.01em;
+}
+.document { width: 100%; }
+.page { page-break-after: always; min-height: 261mm; position: relative; padding-top: 10mm; padding-bottom: 12mm; }
+.page:last-child { page-break-after: auto; }
+.cover { display: flex; flex-direction: column; min-height: 261mm; padding-top: 0; padding-bottom: 0; }
+.cover .template-note { text-align: center; font-size: 12pt; font-weight: 700; text-decoration: underline; margin: 0 0 28mm; }
+.cover h1 { text-align: center; font-size: 26pt; letter-spacing: 0.34em; margin: 0 0 6mm; font-weight: 700; line-height: 1.25; }
+.cover .expense { text-align: center; font-size: 15pt; margin-bottom: 20mm; }
+.cover-meta { width: 140mm; margin: 0 auto; font-size: 13pt; line-height: 2.05; }
+.cover-meta p { margin: 0 0 2.6mm; text-align: left; white-space: nowrap; }
+.cover-meta .m-label { display: inline-block; width: 38mm; text-align: right; }
+.cover-meta .m-line { display: inline-block; border-bottom: 0.75pt solid #111; height: 1.25em; vertical-align: baseline; }
+.cover-meta .wide { width: 92mm; }
+.cover-meta .place { width: 34mm; }
+.cover-meta .date { width: 15mm; }
+.cover-meta .m-unit { display: inline-block; padding: 0 1.5mm; }
+.cover-meta .center { text-align: center; }
+.cover .supervise { margin-top: auto; text-align: center; font-size: 13pt; font-weight: 700; line-height: 2; }
+.cover .print-note { text-align: center; font-size: 11pt; font-weight: 700; margin-top: 8mm; }
+.doc-title { font-size: 18pt; font-weight: 700; text-align: center; margin: 0 0 9mm; letter-spacing: 0.18em; }
+h2 { font-size: 13.5pt; line-height: 1.5; margin: 8mm 0 4mm; font-weight: 700; page-break-after: avoid; }
+h3 { font-size: 11.5pt; line-height: 1.5; margin: 4mm 0 2mm; font-weight: 700; page-break-after: avoid; }
+p { margin: 0 0 3.2mm; text-align: justify; text-justify: inter-ideograph; }
+.indent { text-indent: 2em; }
+.center { text-align: center; }
+.right { text-align: right; }
+.underline { text-decoration: underline; text-underline-offset: 2px; }
+.article-list, .explain-list { margin: 0; padding-left: 0; list-style: none; counter-reset: item; }
+.explain-list { padding: 6mm 7mm 4mm 9mm; }
+.explain-list li { counter-increment: item; margin: 0 0 3.4mm; text-align: justify; }
+.explain-list li::before { content: counter(item) "．"; font-weight: 700; }
+.num { display: inline-block; min-width: 2em; }
+.blank-block { min-height: 11mm; border-bottom: 0.75pt solid #888; margin: 1mm 0 3mm; }
+.box-table, .signature-table { border-collapse: collapse; width: 100%; table-layout: fixed; border: 1.2pt solid #111; }
+.box-table td, .box-table th, .signature-table td, .signature-table th { border: 0.75pt solid #111; padding: 2.4mm 2.3mm; vertical-align: middle; word-break: break-word; overflow-wrap: anywhere; }
+.box-table { margin: 2mm 0 7mm; }
+.box-table td { vertical-align: top; }
+.signature-page { page-break-before: always; }
+.signature-table { font-size: 9.2pt; line-height: 1.42; margin-top: 4mm; }
+.signature-table td { height: 9.6mm; }
+.signature-table .side { width: 10mm; text-align: center; font-weight: 700; line-height: 1.28; letter-spacing: 0; }
+.signature-table .label { width: 28mm; text-align: center; background: #f7f7f7; font-weight: 700; }
+.signature-table .seal { height: 19mm; }
+.signature-table .tall { height: 15mm; }
+.signature-table .center-cell { text-align: center; }
+.keep { page-break-inside: avoid; }
+.small { font-size: 9.5pt; line-height: 1.55; }
+.running-header { position: absolute; top: 0; left: 0; right: 0; height: 7mm; border-bottom: 0.5pt solid #bdbdbd; color: #555; font-size: 8.5pt; line-height: 7mm; }
+.running-header .left { float: left; }
+.running-header .right { float: right; }
+.running-footer { position: absolute; bottom: 0; left: 0; right: 0; height: 8mm; border-top: 0.5pt solid #bdbdbd; color: #555; font-size: 8.5pt; line-height: 8mm; text-align: center; }
+.page-number { position: static; display: inline; }
+.contract-body { counter-reset: section; }
+@media screen {
+  html { background: #d0d0d0; }
+  body { padding: 18px 0; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto 18px; padding: 18mm 20mm 18mm; padding-top: 28mm; padding-bottom: 30mm; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,.18); }
+  .cover { padding-top: 18mm; padding-bottom: 18mm; }
+}
+@media print {
+  .page { min-height: 261mm; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .cover { min-height: 261mm; height: 261mm; }
+}
+</style>
+</head>
+<body>
+<div class="document">
+  <section class="page cover">
+    <div class="template-note">北京大学纵向科研任务技术服务合同模板</div>
+    <h1>技术服务合同</h1>
+    <div class="expense">（支 出）</div>
+    <div class="cover-meta">
+      <p><span class="m-label">项目名称：</span><span class="m-line wide"></span></p>
+      <p><span class="m-label">委托方（甲方）：</span><span class="m-line wide center">北京大学（ 学院/系/所）</span></p>
+      <p><span class="m-label">受托方（乙方）：</span><span class="m-line wide"></span></p>
+      <p><span class="m-label">签订地点：</span><span class="m-line place"></span><span class="m-unit">省（市）</span><span class="m-line place"></span><span class="m-unit">市（县、区）</span></p>
+      <p><span class="m-label">签订日期：</span><span class="m-line date"></span><span class="m-unit">年</span><span class="m-line date"></span><span class="m-unit">月</span><span class="m-line date"></span><span class="m-unit">日</span></p>
+      <p><span class="m-label">有效期限：</span><span class="m-line date"></span><span class="m-unit">年</span><span class="m-line date"></span><span class="m-unit">月</span><span class="m-line date"></span><span class="m-unit">日至</span><span class="m-line date"></span><span class="m-unit">年</span><span class="m-line date"></span><span class="m-unit">月</span><span class="m-line date"></span><span class="m-unit">日</span></p>
+    </div>
+    <div class="supervise">北京大学科学研究部监制<br>20　年　月</div>
+    <div class="print-note">（建议双面打印）</div>
+  </section>
+
+  <section class="page">
+    <h2 class="doc-title">填写说明</h2>
+    <table class="box-table keep"><tr><td>
+      <ol class="explain-list">
+        <li>本合同参考中华人民共和国科学技术部印制的技术服务合同示范文本制订，供北京大学校本部承担国家纵向科研任务的当事人参照使用。</li>
+        <li>本合同适用于北京大学承担的国家纵向科研任务（各类国家科技计划项目、国家自然科学基金以及其它部委、省市地方项目）在执行过程需委托外单位进行部分测试、加工等技术工作时所订立的合同。</li>
+        <li>本合同所涉及的经费支出应符合上级课题预算书的预算内容。</li>
+        <li>本合同涉及单位名称，请按单位公章的名称填写。填写内容涉及到外文名称，首次出现时要写全称。当事人约定无需填写的条款应注明“无”等字样。</li>
+        <li>本合同书未尽事项，可由当事人附页另行约定，并作为本合同的组成部分。</li>
+      </ol>
+    </td></tr></table>
+    <p class="indent">依据《中华人民共和国民法典》的规定，合同双方就</p>
+    <div class="blank-block"></div>
+    <p class="indent">项目的技术服务（该项目属　　　　计划，母合同名称　　　　　　　　（项目编号　　　　）），经过平等协商，在真实、充分地表达各自意愿的基础上，达成如下协议，并由双方共同遵守。</p>
+    <p class="indent">本合同及相关附件中所涉及的有关名词及技术术语，其定义和解释双方确认如下：</p>
+    <p>1、</p><div class="blank-block"></div>
+    <p>2、</p><div class="blank-block"></div>
+    <p>3、</p><div class="blank-block"></div>
+    <div class="running-header"><span class="left">技术服务合同</span><span class="right">北京大学纵向科研任务技术服务合同模板</span></div>
+    <div class="running-footer">第 <span class="page-number">1</span> 页</div>
+  </section>
+
+  <section class="page contract-body">
+    <h2>一、技术服务内容、方式和要求：</h2>
+    <p>1．技术服务的内容：</p><div class="blank-block"></div>
+    <p>2．技术服务的方式：</p><div class="blank-block"></div>
+    <p>3．技术服务的质量和期限要求：</p><div class="blank-block"></div>
+
+    <h2>二、工作条件和协作事项：</h2>
+    <p>1．甲方应向乙方提供下列工作条件：</p><div class="blank-block"></div>
+    <p>2．其它协作事项：</p><div class="blank-block"></div>
+
+    <h2>三、技术服务工作成果验收标准和方式：</h2>
+    <p>1．乙方完成技术服务工作的形式：</p><div class="blank-block"></div>
+    <p>2．技术服务工作成果的验收标准：</p><div class="blank-block"></div>
+    <p>3．技术服务工作成果的验收方法：</p><div class="blank-block"></div>
+    <p>4．验收的时间和地点：</p><div class="blank-block"></div>
+
+    <h2>四、知识产权：</h2>
+    <p class="indent">1、各方保证己方为履行本协议义务而提供的信息及资源等，如果合作之前拥有自主产权和知识产权的，则权利归属保持不变；未拥有自主产权和知识产权的，则各方保证对提供的信息及资源等已获得权利方的许可，拥有合法的使用权。</p>
+    <p class="indent">2、乙方将保护甲方免于承担因使用本合同项下技术/产品而侵犯或者被指控侵犯任何第三方知识产权（包括但不限于任何专利权、专有技术、著作权、商标专用权以及商业秘密等）所产生的任何侵权与赔偿责任。甲方对因使用本合同项下乙方提供/完成的技术/产品而产生的任何实际侵权或者被任何第三方指控侵权概不负责。一旦上述情况和事件发生，乙方必须承担一切相关法律责任和经济赔偿责任并保护甲方免于承担该等责任。</p>
+    <div class="running-header"><span class="left">技术服务合同</span><span class="right">北京大学纵向科研任务技术服务合同模板</span></div>
+    <div class="running-footer">第 <span class="page-number">2</span> 页</div>
+  </section>
+
+  <section class="page">
+    <h2>五、保密</h2>
+    <p class="indent">甲方将根据本合同约定向乙方披露其特定的信息、数据、文件、系统、方法、结果和技术秘密等，涉及科学、技术、商业、财务、法律和/或 IT（以下合称“保密信息”）。在服从于本合同第四条款的前提下，乙方应当：</p>
+    <p>1、对该等保密信息予以保密；</p>
+    <p>2、不得在本合同目的以外使用该等保密信息；</p>
+    <p>3、以符合甲方保护其自有的同类保密信息的方法和程序保持、使用、披露或以其他方式处理保密信息；</p>
+    <p>4、不得向任何第三方披露本协议已签署、任何已向甲方披露保密信息的事实以及与此有关的任何条款、条件或其他事实；</p>
+    <p>5、在本合同终止或到期后，乙方应根据甲方的要求，返还或销毁任何甲方提供的保密信息、所有备份和含有这些信息摘录的文件。</p>
+    <p>6、本保密义务应在本合同期满、解除或终止后仍然有效。</p>
+
+    <h2>六、报酬及其支付方式：</h2>
+    <p>1、本项目报酬（服务费）　　　　万元，由甲方提供。</p>
+    <p>2、支付方式（按以下第　　　　种方式）：</p>
+    <p>① 一次总付：　　　　万元，时间：　　　　年　　月　　日前。乙方在甲方付款后，提供技术服务。</p>
+    <p>② 分期支付：　　　　万元，</p>
+    <p class="indent">第一次支付　　　　万元（不低于合同总额的　　　　%），</p>
+    <p class="indent">时间：　　　　年　　月　　日。乙方在甲方付款后，提供技术服务。</p>
+    <p class="indent">第二次支付　　　　万元，时间：验收后　　　　天内，　　　　年　　月　　日之前。</p>
+    <p>③ 其它方式：</p><div class="blank-block"></div>
+
+    <h2>七、争议的解决办法：</h2>
+    <p class="indent">双方因履行本合同而发生的争议，应协商、调解解决。协商、调解不成的，确定按以下第　　　　种方式处理：</p>
+    <p>1、提交<span class="underline">北京仲裁委员会</span>仲裁；</p>
+    <p>2、依法向人民法院起诉。</p>
+    <div class="running-header"><span class="left">技术服务合同</span><span class="right">北京大学纵向科研任务技术服务合同模板</span></div>
+    <div class="running-footer">第 <span class="page-number">3</span> 页</div>
+  </section>
+
+  <section class="page">
+    <h2>八、期限与终止：</h2>
+    <p class="indent">本合同自　　　　年　　月　　日起生效，至　　　　年　　月　　日或本合同项下的义务履行完毕时止。如遇以下情况，则合同提前终止，由乙方配合甲方根据合同履行情况退回已经拨付的资金：</p>
+    <p>1、双方经共同协商解除本合同；</p>
+    <p>2、发生不可抗力；</p>
+    <p>3、一方当事人有严重违约行为，致使本合同的履行成为不必要或不可能。</p>
+
+    <h2>九、违约金或者损失赔偿额的计算方法：</h2>
+    <p class="indent">当事人违反本合同约定，违约方应按以下约定承担违约责任：</p>
+    <div class="blank-block" style="min-height: 18mm;"></div>
+
+    <h2>十、其它：</h2>
+    <p>1、本合同一式 4 份，自双方授权代表签字盖章之日起生效。双方各执 2 份，具有同等法律效力。</p>
+    <p>2、</p><div class="blank-block"></div>
+    <p>3、对本合同任何条款的修改、补充或变更，双方必须签订书面协议并签字盖章后方可生效。</p>
+    <div class="running-header"><span class="left">技术服务合同</span><span class="right">北京大学纵向科研任务技术服务合同模板</span></div>
+    <div class="running-footer">第 <span class="page-number">4</span> 页</div>
+  </section>
+
+  <section class="page signature-page">
+    <h2>十一、签字盖章：</h2>
+    <table class="signature-table keep">
+      <colgroup>
+        <col style="width: 10mm"><col style="width: 28mm"><col style="width: 39mm"><col style="width: 31mm"><col style="width: 31mm"><col style="width: 31mm">
+      </colgroup>
+      <tbody>
+        <tr>
+          <td class="side" rowspan="6">委<br>托<br>方<br>︵<br>甲<br>方<br>︶</td>
+          <td class="label">单位名称</td>
+          <td class="seal" colspan="4">北京大学（授权科学研究部）　　　　　　　　　（签章）<br>（北京大学科技合同专用章）</td>
+        </tr>
+        <tr><td class="label">委托代理人</td><td colspan="4">　　　　　　　　　　　　　　　　（签字）</td></tr>
+        <tr><td class="label">通讯地址</td><td colspan="4"></td></tr>
+        <tr><td class="label">电　话</td><td></td><td class="label">手机</td><td></td><td class="label">传真</td></tr>
+        <tr><td class="label">开户银行</td><td colspan="4">工商银行北京海淀西区支行营业厅</td></tr>
+        <tr><td class="label">帐　号</td><td colspan="2">0200004509089131151</td><td class="label">邮政编码</td><td>100871</td></tr>
+
+        <tr>
+          <td class="side" rowspan="7">服<br>务<br>方<br>︵<br>乙<br>方<br>︶</td>
+          <td class="label">单位名称</td>
+          <td class="seal" colspan="4">　　　　　　　　　　　　　　　　（签章）</td>
+        </tr>
+        <tr><td class="label">法定代表人</td><td>　　　　　　（签章）</td><td class="label">委托代理人</td><td colspan="2">　　　　　　（签章）</td></tr>
+        <tr><td class="label">联系人</td><td colspan="4">　　　　　　　　　　　　　　　　（签章）</td></tr>
+        <tr><td class="label">通讯地址</td><td colspan="4"></td></tr>
+        <tr><td class="label">电　话</td><td colspan="2"></td><td class="label">传真</td><td></td></tr>
+        <tr><td class="label">开户银行</td><td colspan="4"></td></tr>
+        <tr><td class="label">帐　号</td><td colspan="2"></td><td class="label">邮政编码</td><td></td></tr>
+      </tbody>
+    </table>
+    <p class="small" style="margin-top: 8mm;">注：本页签字盖章信息应与双方有效主体资格文件、银行账户信息及授权文件保持一致。</p>
+    <div class="running-header"><span class="left">技术服务合同</span><span class="right">北京大学纵向科研任务技术服务合同模板</span></div>
+    <div class="running-footer">第 <span class="page-number">5</span> 页</div>
+  </section>
+</div>
+</body>
+</html>
