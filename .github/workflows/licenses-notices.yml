@@ -1,0 +1,174 @@
+# 许可声明重生成：必须在 Linux 上跑 `node scripts/licenses.mjs notices`。
+#
+# 为什么不能在本机跑：
+# scripts/licenses.mjs 的 notices 走 collectNpmNotices -> scanInstalledPackages，
+# 按「磁盘上真实安装的 node_modules」收集许可文件，而不是只读锁文件；缺任何一个生产
+# 依赖就抛 `Missing installed dependency`。而安装树里含大量平台相关 optional 依赖
+# （@napi-rs/canvas-*、@tailwindcss/oxide-* 等），pnpm 只落当前平台能匹配的那一份。
+# 于是在 Windows 或 macOS 上跑，Linux 专属的预编译产物全部落到 missing，声明根本
+# 生成不出来。这是平台差异，不是台账缺陷，所以必须在 Linux 上做。
+#
+# 为什么用 ubuntu-latest：
+# release.yml 的 build / remote-assets job 也跑在 ubuntu-latest 上，同镜像、同
+# pnpm 10.33.2、同 node 24。用同一个 runner 重生成，才能让 inventory 与实际发版
+# 构建机的依赖树一致（见 third-party/README.md 的约定）。
+#
+# 产物不自动提交：THIRD-PARTY-NOTICES.md 与 third-party/inventory.json 通过
+# actions/upload-artifact 交回，人工 review diff 后再入库，避免 CI 直接改 main。
+#
+# 作为长期闸门：依赖树或台账输入一变就自动重生成并与已入库台账比对，不一致直接
+# 失败——「依赖改了但台账没重生成」必须在合并前暴露，不能留到发版。
+name: licenses-notices
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      # 依赖图与安装口径
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "**/package.json"
+      - "patches/**"
+      # 台账本身（含手工编辑，必须能被验出来）
+      - "THIRD-PARTY-NOTICES.md"
+      - "third-party/**"
+      # 被登记为 copied 组件的源码
+      - ".agents/skills/**"
+      # 生成器与门禁逻辑
+      - "scripts/**"
+      - ".github/workflows/licenses-notices.yml"
+  push:
+    branches: [main]
+    paths:
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "**/package.json"
+      - "patches/**"
+      - "THIRD-PARTY-NOTICES.md"
+      - "third-party/**"
+      - ".agents/skills/**"
+      - "scripts/**"
+      - ".github/workflows/licenses-notices.yml"
+
+# 同一分支连续推送只保留最新一次，避免旧 run 抢报失败。
+concurrency:
+  group: licenses-notices-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  notices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # pnpm-workspace.yaml 的 supportedArchitectures.libc 只列了 current + glibc，
+      # 于是 musl 平台的预编译产物（@napi-rs/canvas-linux-*-musl 等）在任何
+      # glibc runner 上都装不出来，missingProductionPackages 会直接抛
+      # `Missing installed dependency`。那是「不是本机」而不是「装不上」——
+      # 仓库发布物覆盖 5 个平台，声明台账也应该覆盖这些变体的许可文本。
+      # supportedArchitectures 不写进锁文件 settings（只记 autoInstallPeers /
+      # excludeLinksFromLockfile），所以这里临时补一项不会让 --frozen-lockfile 失效。
+      #
+      # 这个补丁只对「把文件装到磁盘上」这一件事有意义，所以下面 install 结束立刻
+      # 还原。generate-third-party-notices.mjs 会把 pnpm-workspace.yaml 本身作为
+      # 输入记进 inventory.inputs 哈希；若带着补丁生成，台账记录的就是仓库里并不
+      # 存在的那个文件，任何非 CI 环境重生成都会被判成「不可复现」。
+      - name: Add musl to supported libc for this job only
+        run: |
+          set -euo pipefail
+          node -e '
+          const fs = require("node:fs");
+          const file = "pnpm-workspace.yaml";
+          const anchor = "  libc:\n    - current\n    - glibc\n";
+          const source = fs.readFileSync(file, "utf8");
+          if (!source.includes(anchor)) {
+            console.error("::error::pnpm-workspace.yaml 的 supportedArchitectures.libc 结构已变，先对齐再跑本工作流");
+            process.exit(1);
+          }
+          if (source.includes("- musl")) process.exit(0);
+          fs.writeFileSync(file, source.replace(anchor, anchor + "    - musl\n"));
+          '
+          sed -n "/^supportedArchitectures:/,/^[a-z]/p" pnpm-workspace.yaml
+
+      # 与 release.yml 的 build job 保持同一安装口径（prod + dev 全量）。
+      # notices 声明只取生产图，但许可标识门禁作用于全量实装包，两者需同一棵树。
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          # musl 产物已经落盘，工作区文件的作用期结束。还原后才能保证 inventory
+          # 记录的输入哈希与仓库实际内容一致。
+          git checkout -- pnpm-workspace.yaml
+          git --no-pager diff --exit-code -- pnpm-workspace.yaml \
+            || { echo "::error::pnpm-workspace.yaml 未能还原，台账输入哈希会失真"; exit 1; }
+
+      - name: Regenerate third-party notices
+        run: node scripts/licenses.mjs notices
+
+      # 生成通过后再跑一次许可标识门禁：check 校验全量实装包（prod + dev）的许可
+      # 分类，以及声明新鲜度。只跑 notices 会漏掉构建依赖侧的越界许可。
+      - name: Run license identifier gate
+        run: node scripts/licenses.mjs check
+
+      # licenses.mjs 两类硬失败都只报第一个命中项（Missing installed dependency /
+      # Stale npm notice override），这里在失败时把两个集合一次性打全，省得每次只为
+      # 多知道一个条目再重跑一次全量安装。
+      - name: Diagnose ledger blockers
+        if: failure()
+        run: |
+          node --input-type=module -e '
+          import { readFile } from "node:fs/promises";
+          import {
+            readWorkspaceProductionGraph,
+            scanInstalledPackages,
+          } from "./scripts/third-party-npm.mjs";
+          const root = process.cwd();
+          const { required, projects } = await readWorkspaceProductionGraph(root);
+          const installed = await scanInstalledPackages(root, projects);
+          const missing = [...required]
+            .filter(([key]) => !installed.has(key))
+            .map(([, item]) => `${item.name}@${item.version}`);
+          console.log(`::warning::生产图 ${required.size} 个包，未安装 ${missing.length} 个`);
+          console.log(missing.join("\n") || "(none)");
+
+          const overrides = JSON.parse(await readFile("third-party/npm-overrides.json", "utf8"));
+          const current = new Set([...required.keys()]);
+          const stale = overrides.filter((entry) => !current.has(entry.package));
+          console.log(`::warning::notice override 共 ${overrides.length} 条，陈旧 ${stale.length} 条`);
+          console.log(stale.map((entry) => entry.package).join("\n") || "(none)");
+          '
+
+      # 台账已进入仓库后重跑，diff 应为空——非空说明生成结果不可复现（依赖树随机器
+      # 漂移、文件行尾，或某个输入没被纳入哈希），必须先查清再入库。
+      - name: Report diff against committed ledger
+        run: |
+          set -euo pipefail
+          changed=$(git --no-pager diff --numstat -- THIRD-PARTY-NOTICES.md third-party/inventory.json | wc -l)
+          git --no-pager diff --stat -- THIRD-PARTY-NOTICES.md third-party/inventory.json
+          if [ "$changed" -ne 0 ]; then
+            echo "::error::重生成结果与已入库台账不一致（$changed 个文件有差异），生成不可复现"
+            exit 1
+          fi
+          echo "重生成结果与已入库台账一致：生成可复现 ✓"
+
+      # 门禁失败时也必须把产物交出去：作者需要的正是这份「应该长什么样」的文件，
+      # 直接提交即可修复。always() 保证差异校验拦下 run 时不会把出路一起拦掉。
+      - name: Upload regenerated ledgers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: licenses-notices
+          path: |
+            THIRD-PARTY-NOTICES.md
+            third-party/inventory.json
+          retention-days: 30
