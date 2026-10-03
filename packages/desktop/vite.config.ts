@@ -5,10 +5,7 @@ import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 // 见 tsup.config.ts 同名注释：构建配置需要相对路径导入 shared 源码，避免 Node 原生加载 .ts。
-import {
-  resolveZCodeEndpointOrigin,
-  pickProductEndpointEnv,
-} from "../shared/src/zcodeEndpoint.js";
+import { resolveZCodeEndpointOrigin, pickProductEndpointEnv } from "../shared/src/zcodeEndpoint.js";
 import { pdfJsCMapsPlugin } from "../ui/vite/pdfJsCMapsPlugin.js";
 import { getBuildMetadata } from "./scripts/build-metadata.mjs";
 import { resolveDesktopProductFlavor } from "./scripts/desktop-product-identity.mjs";

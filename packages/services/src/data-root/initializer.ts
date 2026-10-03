@@ -7,7 +7,7 @@
  * - CLI / server：非交互，按 ZCODIUM_DATA_ROOT_ACTION（fresh|migrate|fail）处置；
  * - 冲突目录整体备份让路，不删除、不合并。
  */
-import { mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
+import { chmodSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -23,7 +23,12 @@ import {
   executeDataRootCopyMigration,
   cleanupStaleMigrationStaging,
 } from "./migration.js";
-import { forfeitConflictingDataRoot, forfeitDataRootByLabel, readDataRootStatus, writeDataRootManifest } from "./ownership.js";
+import {
+  forfeitConflictingDataRoot,
+  forfeitDataRootByLabel,
+  readDataRootStatus,
+  writeDataRootManifest,
+} from "./ownership.js";
 import type {
   DataRootInitResult,
   DataRootMigrationProgress,
@@ -43,9 +48,25 @@ export function getActiveDiagnosticRoot(): string | null {
   return activeDiagnosticRoot;
 }
 
-function cleanupStaleDiagnosticRoots(): void {
+/**
+ * 诊断根承载真实用户数据的运行态（session、日志、解密后的凭据使用），
+ * 必须仅限当前用户访问：创建时 0700；已存在时尝试收紧（失败说明目录不是
+ * 当前用户创建，保持现状而不报错）。共享 tmp 上默认 0755 会让同机其它用户可读。
+ */
+function ensureDiagnosticRootParent(): string {
   const parent = join(tmpdir(), "zcodium-startup");
+  mkdirSync(parent, { recursive: true, mode: 0o700 });
   try {
+    chmodSync(parent, 0o700);
+  } catch {
+    // 目录属于其它用户或文件系统不支持时无法收紧。
+  }
+  return parent;
+}
+
+function cleanupStaleDiagnosticRoots(): void {
+  try {
+    const parent = ensureDiagnosticRootParent();
     const now = Date.now();
     for (const name of readdirSync(parent)) {
       const entryPath = join(parent, name);
@@ -70,8 +91,13 @@ function cleanupStaleDiagnosticRoots(): void {
 function enterPendingDiagnosticMode(): string {
   if (!activeDiagnosticRoot) {
     cleanupStaleDiagnosticRoots();
-    const root = join(tmpdir(), "zcodium-startup", String(process.pid));
-    mkdirSync(root, { recursive: true });
+    const root = join(ensureDiagnosticRootParent(), String(process.pid));
+    mkdirSync(root, { recursive: true, mode: 0o700 });
+    try {
+      chmodSync(root, 0o700);
+    } catch {
+      // 无法收紧时仍继续：pending 语义的关键是禁止写正式根。
+    }
     activeDiagnosticRoot = root;
   }
   setDataRootPathOverride(activeDiagnosticRoot);
@@ -270,7 +296,7 @@ export async function executeDataRootImport(
   input: ExecuteDesktopMigrationInput,
 ): Promise<
   | { ok: true; backupRoot: string | null; migratedBases: string[] }
-  | { ok: false; error: string; cancelled: boolean }
+  | { ok: false; error: string; cancelled: boolean; backupRoot: string | null }
 > {
   const baseDir = input.baseDir;
   let backupRoot: string | null = null;
@@ -281,6 +307,7 @@ export async function executeDataRootImport(
       ok: false,
       error: error instanceof Error ? error.message : String(error),
       cancelled: false,
+      backupRoot: null,
     };
   }
   const result = await executeDataRootCopyMigration({
@@ -292,7 +319,7 @@ export async function executeDataRootImport(
     ...(input.isCancelled ? { isCancelled: input.isCancelled } : {}),
   });
   if (!result.ok) {
-    return { ok: false, error: result.error, cancelled: result.cancelled };
+    return { ok: false, error: result.error, cancelled: result.cancelled, backupRoot };
   }
   return { ok: true, backupRoot, migratedBases: result.migratedBases };
 }

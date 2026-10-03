@@ -17,13 +17,6 @@ export const DataRootDecisionChannels = {
   StateChanged: "zcodium:data-root-decision:state-changed",
 } as const;
 
-export const DataRootImportChannels = {
-  /** Renderer → Main：设置页拉取可再次导入的旧数据候选。 */
-  GetCandidates: "zcodium:data-root-import:get-candidates",
-  /** Renderer → Main：执行再次导入（备份现有新根后全量复制）。 */
-  Execute: "zcodium:data-root-import:execute",
-} as const;
-
 export type DataRootDecisionStatusKind = "absent-with-legacy" | "unowned" | "corrupt";
 
 export interface DataRootDecisionStatus {
@@ -67,7 +60,9 @@ export interface DataRootDecisionState {
 
 export type DataRootDecisionAction = "migrate" | "fresh" | "quit";
 
-export type DataRootDecisionResult = { ok: true; action: DataRootDecisionAction } | { ok: false; error: string };
+export type DataRootDecisionResult =
+  | { ok: true; action: DataRootDecisionAction }
+  | { ok: false; error: string };
 
 export type DataRootDecisionProgressPhase = "preparing" | "copying" | "finalizing";
 
@@ -79,25 +74,10 @@ export interface DataRootDecisionProgress {
   currentBaseDir?: string;
 }
 
-export interface DataRootImportCandidate {
-  baseDir: string;
-  legacyRoot: string;
-  sizeBytes: number | null;
-  modifiedAt: string | null;
-}
-
-export type DataRootImportExecuteResult = { ok: true } | { ok: false; error: string };
-
 /** 决策窗口 preload 暴露的 API（window.zcodiumDataRootDecision）。 */
 export interface DataRootDecisionBridge {
   getState(): Promise<DataRootDecisionState>;
   decide(action: DataRootDecisionAction): Promise<DataRootDecisionResult>;
   onProgress(listener: (progress: DataRootDecisionProgress) => void): () => void;
   onStateChanged(listener: (state: DataRootDecisionState) => void): () => void;
-}
-
-/** 主窗口设置页再次导入 API（window.zcode.dataRootImport）。 */
-export interface DataRootImportBridge {
-  getCandidates(): Promise<DataRootImportCandidate[]>;
-  execute(baseDirs: string[]): Promise<DataRootImportExecuteResult>;
 }

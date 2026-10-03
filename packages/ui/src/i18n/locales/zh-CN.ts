@@ -2154,8 +2154,7 @@ const zhCN: Record<string, string> = {
   "settings.dataBaseDirBrowse": "选择文件夹",
   "settings.dataBaseDirSave": "保存",
   "settings.dataBaseDirImport": "导入旧数据",
-  "settings.dataBaseDirImportHint":
-    "从旧版数据目录复制数据并重启应用（当前数据目录会先整体备份）",
+  "settings.dataBaseDirImportHint": "从旧版数据目录复制数据并重启应用（当前数据目录会先整体备份）",
   "settings.dataBaseDirCopying": "正在复制数据，请勿关闭应用…",
   "settings.dataBaseDirCopyFailed": "数据复制失败，路径未更改。",
   "settings.dataBaseDirForbiddenInstallDir":

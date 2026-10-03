@@ -6,7 +6,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { existsSync, renameSync } from "node:fs";
-import { copyFile, mkdir, opendir, rm, stat } from "node:fs/promises";
+import { chmod, copyFile, mkdir, opendir, rm, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -145,6 +145,7 @@ async function copyTree(srcDir: string, destDir: string, options: CopyTreeOption
     }
     if (entry.isDirectory()) {
       await copyTree(srcPath, destPath, options);
+      await inheritSourceMode(srcPath, destPath);
       continue;
     }
     if (!entry.isFile()) {
@@ -154,13 +155,36 @@ async function copyTree(srcDir: string, destDir: string, options: CopyTreeOption
       continue;
     }
     let size = 0;
+    let sourceMode: number | null = null;
     try {
-      size = (await stat(srcPath)).size;
+      const sourceStat = await stat(srcPath);
+      size = sourceStat.size;
+      sourceMode = sourceStat.mode;
     } catch {
       // stat 失败时按 0 计，copyFile 会给出真实错误。
     }
     await copyFile(srcPath, destPath);
+    if (sourceMode !== null) {
+      await inheritSourceMode(srcPath, destPath, sourceMode);
+    }
     options.onBytes(size);
+  }
+}
+
+/**
+ * 复制后对齐源权限：凭据等敏感文件（0600）不得在迁移中放宽为 umask 默认值。
+ * 权限保留失败不阻断迁移（Windows 与非 POSIX 文件系统的 mode 语义有限）。
+ */
+async function inheritSourceMode(
+  srcPath: string,
+  destPath: string,
+  knownSourceMode?: number,
+): Promise<void> {
+  try {
+    const sourceMode = knownSourceMode ?? (await stat(srcPath)).mode;
+    await chmod(destPath, sourceMode & 0o777);
+  } catch {
+    // 权限不是迁移的阻塞条件。
   }
 }
 
@@ -171,7 +195,8 @@ function shouldSkipTransientFile(name: string): boolean {
   return name.startsWith("setting.json.");
 }
 
-/** 清理本 base 下残留的迁移 staging（超过 STAGING_STALE_MS）。 */export function cleanupStaleMigrationStaging(baseDir: string): void {
+/** 清理本 base 下残留的迁移 staging（超过 STAGING_STALE_MS）。 */
+export function cleanupStaleMigrationStaging(baseDir: string): void {
   void (async () => {
     try {
       const entries = await opendir(baseDir);

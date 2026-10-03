@@ -21,11 +21,20 @@ void main();
 async function main(): Promise<void> {
   // 任何 CLI 子命令（含 Host Worker）都可能读取数据目录；先完成数据根初始化与合法化。
   // CLI 没有决策窗口，按 ZCODIUM_DATA_ROOT_ACTION 非交互处置（默认备份冲突目录 + 全新初始化）。
-  await initializeDataRootNonInteractive({
-    createdBy: "cli",
-    appVersion: ZCODE_VERSION,
-    action: resolveDataRootActionFromEnv(),
-  });
+  try {
+    await initializeDataRootNonInteractive({
+      createdBy: "cli",
+      appVersion: ZCODE_VERSION,
+      action: resolveDataRootActionFromEnv(),
+    });
+  } catch (error) {
+    // fail 策略或迁移失败必须拒绝启动：没有合法数据根时任何子命令都无法安全工作。
+    process.stderr.write(
+      `[zcode] data root initialization failed: ${error instanceof Error ? error.message : String(error)}\n`,
+    );
+    process.exitCode = 1;
+    return;
+  }
   const argv = process.argv.slice(2);
   // 存储模式也可运行在 Host Worker 中，不能修改整个 Host 的进程名称。
   if (!argv.includes("--prepare-storage")) setCliProcessTitle();

@@ -185,8 +185,12 @@ async function handleAction(
         });
         if (!result.ok) {
           session.deciding = false;
-          logger.error(`${LOG_SCOPE} import failed`, result.error);
-          return { ok: false, error: result.error };
+          logger.error(`${LOG_SCOPE} import failed`, result.error, result.backupRoot ?? "");
+          // 现有根在导入前已整体备份；失败时把备份落点告诉用户，便于手动恢复。
+          const backupHint = result.backupRoot
+            ? `（原数据已备份到 ${toDisplayPath(result.backupRoot)}）`
+            : "";
+          return { ok: false, error: `${result.error}${backupHint}` };
         }
         logger.info(`${LOG_SCOPE} import completed`, result.migratedBases.join(", "));
         scheduleRelaunch();
@@ -314,8 +318,7 @@ export function openDataRootImportWindow(): void {
     mode: "import",
     baseDir,
     // import 模式只看旧数据候选；unowned/corrupt 仍展示冲突提示。
-    status:
-      status.kind === "unowned" || status.kind === "corrupt" ? status : { kind: "absent" },
+    status: status.kind === "unowned" || status.kind === "corrupt" ? status : { kind: "absent" },
     locale: resolveSystemApplicationLocale(),
   });
 }

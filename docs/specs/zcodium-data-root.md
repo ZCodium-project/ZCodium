@@ -41,12 +41,12 @@
 
 ## 合法性状态
 
-| 状态 | 条件 | 处理 |
-| --- | --- | --- |
-| `normal` | 归属文件存在、可解析、product 匹配、schemaVersion 支持 | 复用，正常启动 |
-| `absent` | `.zcodium` 不存在 | 有旧根 → 桌面决策；无旧根 → 直接初始化 |
-| `unowned` | 无归属文件，或 product 不匹配 | 桌面决策（先备份让路）；无 UI 入口备份后全新 |
-| `corrupt` | 归属文件不可解析，或 schemaVersion 高于当前支持 | 同 unowned，但文案区分“损坏/版本不兼容”；不静默复用 |
+| 状态      | 条件                                                   | 处理                                                |
+| --------- | ------------------------------------------------------ | --------------------------------------------------- |
+| `normal`  | 归属文件存在、可解析、product 匹配、schemaVersion 支持 | 复用，正常启动                                      |
+| `absent`  | `.zcodium` 不存在                                      | 有旧根 → 桌面决策；无旧根 → 直接初始化              |
+| `unowned` | 无归属文件，或 product 不匹配                          | 桌面决策（先备份让路）；无 UI 入口备份后全新        |
+| `corrupt` | 归属文件不可解析，或 schemaVersion 高于当前支持        | 同 unowned，但文案区分“损坏/版本不兼容”；不静默复用 |
 
 ## 初始化器（唯一所有者）
 
@@ -57,8 +57,11 @@
 type DataRootInitResult =
   | { state: "ready"; status: DataRootStatus; manifest: DataRootManifest }
   | { state: "initialized"; status: Extract<DataRootStatus, { kind: "absent" }> }
-  | { state: "pending"; status: Exclude<DataRootStatus, { kind: "normal" | "absent" }>;
-      legacyCandidates: LegacyDataRootCandidate[] };
+  | {
+      state: "pending";
+      status: Exclude<DataRootStatus, { kind: "normal" | "absent" }>;
+      legacyCandidates: LegacyDataRootCandidate[];
+    };
 ```
 
 - 桌面（有 UI）：`pending` 时进入决策；`ready`/`initialized` 正常启动。
@@ -70,7 +73,8 @@ type DataRootInitResult =
 - 并发保护：初始化/迁移使用根目录锁（`O_EXCL` 锁文件），后到方读结果而非重复写入。
 - **pending 期间路径重定向**：初始化器把 `getZCodeDataRootDir()` 解析重定向到进程级
   诊断根（`os.tmpdir()/zcodium-startup-<pid>`），保证任何模块在决策前都无法写正式根；
-  决策完成执行操作后进程重启（relaunch），重定向消失。
+  决策完成执行操作后进程重启（relaunch），重定向消失。诊断根目录创建/收紧为 `0700`，
+  避免共享 tmp 上同机其它用户读取运行态数据。
 
 ## 启动时序（桌面）
 
@@ -108,7 +112,8 @@ main 模块加载
 2. 迁移源：默认 base 与旧 `setting.json` 中 `dataBaseDir` 指向的 base 下存在的 `.zcode`；
    V1 支持多候选逐一复制，候选为空则不显示“迁移”。
 3. 复制：同卷 staging `{base}/.zcodium.migrating-<uuid>` → `renameSync` 落位；
-   目标已存在时保留已知安全结果并发方完成。
+   目标已存在时保留已知安全结果并发方完成；复制保留源文件权限（凭据文件 `0600`
+   等不在迁移中被 umask 放宽）。
 4. 成功：写归属文件（含 `migration` 元数据）；deviceMid（`v2/telemetry-state.json`）
    随复制带入，保持设备身份连续。
 5. 失败：清理 staging、保留现场、不写归属；下次启动仍为 pending，可重试。
@@ -119,16 +124,17 @@ main 模块加载
 - 入口：设置 → 数据存储路径区域。
 - 行为：从旧数据根的候选列出可导入项；确认后先备份现有 `.zcodium`，
   再执行复制并写归属（`migration.mode = "import"`）；完成后重启。
-- 冲突策略：不合并，整体替换（备份保留）。
+- 冲突策略：不合并，整体替换（备份保留）。导入失败时错误信息必须携带备份落点，
+  便于用户手动恢复。
 
 ## 无 UI 入口行为
 
-| 入口 | unowned / corrupt | absent（有旧根） | normal |
-| --- | --- | --- | --- |
-| CLI | 备份 + 全新初始化 | 全新初始化（不迁移） | 复用 |
-| server / zcode-server-cli | 备份 + 全新初始化 | 全新初始化（不迁移） | 复用 |
-| E2E / dev 隔离 base | 自动全新初始化，不弹窗 | 自动全新初始化 | 复用 |
-| 手机远控 | 跟随宿主桌面；宿主 pending 时提示“请在桌面完成设置” | 同左 | 复用 |
+| 入口                      | unowned / corrupt                                   | absent（有旧根）     | normal |
+| ------------------------- | --------------------------------------------------- | -------------------- | ------ |
+| CLI                       | 备份 + 全新初始化                                   | 全新初始化（不迁移） | 复用   |
+| server / zcode-server-cli | 备份 + 全新初始化                                   | 全新初始化（不迁移） | 复用   |
+| E2E / dev 隔离 base       | 自动全新初始化，不弹窗                              | 自动全新初始化       | 复用   |
+| 手机远控                  | 跟随宿主桌面；宿主 pending 时提示“请在桌面完成设置” | 同左                 | 复用   |
 
 - 显式迁移入口：`ZCODIUM_DATA_ROOT_ACTION=migrate|fresh|fail`（无 UI 环境可选；
   默认行为按上表）。

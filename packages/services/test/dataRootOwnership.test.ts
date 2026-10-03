@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -110,7 +118,10 @@ test("corrupt：schemaVersion 过新（降级场景）", async () => {
   const { readDataRootStatus } = await loadOwnership();
   const base = makeBase();
   try {
-    writeManifestFile(base, validManifest({ schemaVersion: DATA_ROOT_MANIFEST_SCHEMA_VERSION + 1 }));
+    writeManifestFile(
+      base,
+      validManifest({ schemaVersion: DATA_ROOT_MANIFEST_SCHEMA_VERSION + 1 }),
+    );
     const status = readDataRootStatus(base);
     assert.equal(status.kind, "corrupt");
     if (status.kind === "corrupt") {
@@ -135,7 +146,10 @@ test("writeDataRootManifest 原子写：内容完整且不残留临时文件", a
     writeDataRootManifest(base, manifest);
     assert.equal(readDataRootStatus(base).kind, "normal");
     const rootFiles = readdirSync(join(base, ".zcodium"));
-    assert.equal(rootFiles.some((name) => name.endsWith(".tmp")), false);
+    assert.equal(
+      rootFiles.some((name) => name.endsWith(".tmp")),
+      false,
+    );
     const parsed = JSON.parse(
       readFileSync(join(base, ".zcodium", DATA_ROOT_MANIFEST_FILE_NAME), "utf8"),
     );

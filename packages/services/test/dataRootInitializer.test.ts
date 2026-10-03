@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DATA_ROOT_MANIFEST_FILE_NAME, DATA_ROOT_PRODUCT_ID } from "@zcode/shared";
@@ -87,6 +96,30 @@ test("interactive：absent + 旧根 → pending，正式根零写入且路径重
     rmSync(base, { recursive: true, force: true });
   }
 });
+
+test(
+  "pending：诊断根目录权限为 0700（仅当前用户可访问）",
+  { skip: process.platform === "win32" && "Windows 无 POSIX 权限位" },
+  async () => {
+    const init = await loadInitializer();
+    const base = makeBase();
+    try {
+      seedLegacyRoot(base);
+      const result = init.initializeDataRootInteractive({
+        baseDir: base,
+        createdBy: "desktop",
+        appVersion: "3.15.0",
+      });
+      assert.equal(result.state, "pending");
+      const diagnosticRoot = init.getActiveDiagnosticRoot();
+      assert.ok(diagnosticRoot);
+      assert.equal(statSync(diagnosticRoot).mode & 0o777, 0o700);
+    } finally {
+      init.resetDataRootInitializerForTest();
+      rmSync(base, { recursive: true, force: true });
+    }
+  },
+);
 
 test("interactive：unowned 不静默复用", async () => {
   const init = await loadInitializer();
@@ -220,3 +253,46 @@ test("executeDataRootImport：备份现有根后以 import 模式导入", async 
     rmSync(base, { recursive: true, force: true });
   }
 });
+
+test(
+  "import：迁移失败时返回备份落点（现有根可恢复）",
+  {
+    skip:
+      process.platform === "win32"
+        ? "依赖 POSIX 权限位模拟复制失败"
+        : typeof process.getuid === "function" && process.getuid() === 0
+          ? "root 可读任意文件，无法用权限位模拟复制失败"
+          : false,
+  },
+  async () => {
+    const init = await loadInitializer();
+    const base = makeBase();
+    try {
+      // 现有合法根：导入前会被整体备份。
+      init.initializeFreshDataRoot({
+        baseDir: base,
+        createdBy: "desktop",
+        appVersion: "3.15.0",
+      });
+      const legacy = seedLegacyRoot(base);
+      const blocked = join(legacy, "v2", "blocked.bin");
+      writeFileSync(blocked, "blocked");
+      chmodSync(blocked, 0o000);
+      const result = await init.executeDataRootImport({
+        baseDir: base,
+        candidates: [{ baseDir: base, legacyRoot: legacy, isPrimaryBase: true }],
+        createdBy: "desktop",
+        appVersion: "3.15.0",
+      });
+      assert.equal(result.ok, false);
+      if (result.ok) return;
+      assert.ok(result.backupRoot, "失败时必须返回备份落点");
+      assert.equal(existsSync(result.backupRoot), true);
+      // 现有根已让位到备份；正式根等待用户手动恢复或重新初始化。
+      assert.equal(existsSync(join(base, ".zcodium")), false);
+    } finally {
+      init.resetDataRootInitializerForTest();
+      rmSync(base, { recursive: true, force: true });
+    }
+  },
+);

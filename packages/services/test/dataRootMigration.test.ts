@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -42,10 +44,7 @@ test("discoverLegacyDataRootCandidates：主 base + 旧 setting.json 的自定�
     const legacy = seedLegacy(base);
     const customLegacy = seedLegacy(customBase);
     // 旧 setting.json 指向自定义数据目录。
-    writeFileSync(
-      join(legacy, "v2", "setting.json"),
-      JSON.stringify({ dataBaseDir: customBase }),
-    );
+    writeFileSync(join(legacy, "v2", "setting.json"), JSON.stringify({ dataBaseDir: customBase }));
     const candidates = migration.discoverLegacyDataRootCandidates(base);
     assert.equal(candidates.length, 2);
     assert.equal(candidates[0]?.isPrimaryBase, true);
@@ -104,9 +103,7 @@ test("executeDataRootCopyMigration：完整复制、跳过快照文件、旧根�
     assert.equal(existsSync(join(nextRoot, "v2", "setting.json.123.tmp")), false);
     // 复制而非移动：旧根原样保留。
     assert.equal(existsSync(join(legacy, "v2", "setting.json")), true);
-    const manifest = JSON.parse(
-      readFileSync(join(nextRoot, DATA_ROOT_MANIFEST_FILE_NAME), "utf8"),
-    );
+    const manifest = JSON.parse(readFileSync(join(nextRoot, DATA_ROOT_MANIFEST_FILE_NAME), "utf8"));
     assert.equal(manifest.migration.mode, "copy");
     assert.equal(manifest.migration.from, legacy);
     assert.equal(phases.includes("copying"), true);
@@ -143,3 +140,29 @@ test("executeDataRootCopyMigration：取消时清理 staging 且目标不落位"
     rmSync(base, { recursive: true, force: true });
   }
 });
+
+test(
+  "executeDataRootCopyMigration：保留源文件权限（凭据 0600 不放宽）",
+  { skip: process.platform === "win32" && "Windows 无 POSIX 权限位" },
+  async () => {
+    const migration = await loadMigration();
+    const base = makeBase();
+    try {
+      const legacy = seedLegacy(base);
+      const credentialsPath = join(legacy, "v2", "credentials.json");
+      writeFileSync(credentialsPath, '{"secret":"encrypted"}');
+      chmodSync(credentialsPath, 0o600);
+      const result = await migration.executeDataRootCopyMigration({
+        candidates: [{ baseDir: base, legacyRoot: legacy, isPrimaryBase: true }],
+        createdBy: "desktop",
+        appVersion: "3.15.0",
+      });
+      assert.equal(result.ok, true);
+      if (!result.ok) return;
+      const copiedPath = join(base, ".zcodium", "v2", "credentials.json");
+      assert.equal(statSync(copiedPath).mode & 0o777, 0o600);
+    } finally {
+      rmSync(base, { recursive: true, force: true });
+    }
+  },
+);

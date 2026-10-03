@@ -20,9 +20,7 @@ function applySystemTheme(): void {
 }
 
 applySystemTheme();
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", applySystemTheme);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySystemTheme);
 
 const container = document.getElementById("root");
 const bridge = (window as Window & { zcodiumDataRootDecision?: DataRootDecisionBridge })
