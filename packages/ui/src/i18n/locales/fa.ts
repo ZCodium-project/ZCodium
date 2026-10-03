@@ -2251,6 +2251,9 @@ const faIR: Record<string, string> = {
   "settings.dataBaseDirPlaceholder": "پیش‌فرض: پوشه خانه کاربر",
   "settings.dataBaseDirBrowse": "انتخاب پوشه",
   "settings.dataBaseDirSave": "ذخیره",
+  "settings.dataBaseDirImport": "ورود داده قدیمی",
+  "settings.dataBaseDirImportHint":
+    "کپی داده از پوشه قدیمی و راه‌اندازی مجدد (ابتدا از پوشه فعلی نسخه پشتیبان گرفته می‌شود)",
   "settings.dataBaseDirCopying": "در حال کپی داده‌ها؛ لطفاً برنامه را نبندید...",
   "settings.dataBaseDirCopyFailed": "کپی داده‌ها ناموفق بود. مسیر تغییر نکرد.",
   "settings.dataBaseDirForbiddenInstallDir":
@@ -6409,6 +6412,42 @@ const faIR: Record<string, string> = {
     "قابلیت تازه برای مشترکین: با ساخت «وظیفه در زمان بی‌کاری»، در دوره‌های مازاد توان پردازشی، وظیفه تخصیص‌یافته شما را رایگان کامل می‌کنیم.",
   "offPeak.cancel.description":
     "«{title}» از اجرا بازمی‌ایستد. فایل‌هایی که تا حالا تغییر داده حفظ می‌شوند.",
+
+  // ---- پنجره تصمیم محل داده ----
+  "dataRoot.loading": "در حال آماده‌سازی…",
+  "dataRoot.title": "محل ذخیره داده‌ها",
+  "dataRoot.status.absentWithLegacy":
+    "داده‌های نسخه قدیمی ZCodium / ZCode پیدا شد. می‌توانید آن را به پوشه داده جدید کپی کنید یا از نو شروع کنید.",
+  "dataRoot.status.unowned":
+    "پوشه داده فعلی متعلق به این محصول نیست (ممکن است از شاخه دیگری یا به‌صورت دستی ساخته شده باشد). ابتدا یک نسخه پشتیبان گرفته می‌شود؛ چیزی حذف یا ادغام نمی‌شود.",
+  "dataRoot.status.corrupt":
+    "اطلاعات مالکیت پوشه داده آسیب دیده یا از نسخه جدیدتر است و قابل خواندن امن نیست. ابتدا نسخه پشتیبان گرفته می‌شود.",
+  "dataRoot.conflict.notice": "پوشه متضاد ابتدا به نسخه پشتیبان تغییر نام می‌یابد: {path}",
+  "dataRoot.candidates.title": "داده‌های قدیمی قابل انتقال",
+  "dataRoot.candidate.size": "حجم",
+  "dataRoot.candidate.modified": "آخرین تغییر",
+  "dataRoot.candidate.empty": "داده قدیمی ~/.zcode پیدا نشد. فقط شروع از نو امکان‌پذیر است.",
+  "dataRoot.disk.insufficient":
+    "فضای دیسک کافی نیست: حدود {required} لازم است، {free} در دسترس است. فضا آزاد کنید و دوباره تلاش کنید.",
+  "dataRoot.progress.preparing": "در حال آماده‌سازی برای کپی…",
+  "dataRoot.progress.copying": "در حال کپی داده‌های قدیمی…",
+  "dataRoot.progress.finalizing": "در حال نهایی‌سازی انتقال…",
+  "dataRoot.error.title": "عملیات ناموفق بود",
+  "dataRoot.error.retry": "دوباره تلاش کنید یا از نو شروع کنید.",
+  "dataRoot.done.restarting": "در حال راه‌اندازی مجدد برنامه…",
+  "dataRoot.action.migrate": "انتقال داده‌های قدیمی",
+  "dataRoot.action.migrateHint":
+    "داده‌های قدیمی به پوشه جدید کپی می‌شود و پوشه قدیمی باقی می‌ماند؛ پس از آن دو طرف همگام نمی‌شوند.",
+  "dataRoot.action.fresh": "شروع از نو",
+  "dataRoot.action.freshHint":
+    "داده‌های قدیمی وارد نمی‌شود؛ پوشه قدیمی باقی می‌ماند و بعداً از تنظیمات قابل ورود است.",
+  "dataRoot.action.quit": "خروج",
+  "dataRoot.action.quitHint": "هیچ تغییری اعمال نمی‌شود؛ دفعه بعد دوباره پرسیده می‌شود.",
+  "dataRoot.import.title": "ورود از پوشه داده قدیمی",
+  "dataRoot.import.description":
+    "داده‌های قدیمی به پوشه داده فعلی کپی می‌شود. ابتدا از پوشه فعلی نسخه پشتیبان گرفته می‌شود و پس از پایان، برنامه راه‌اندازی مجدد می‌شود.",
+  "dataRoot.action.import": "ورود و راه‌اندازی مجدد",
+  "dataRoot.action.cancel": "لغو",
 };
 
 export default faIR;

@@ -60,7 +60,7 @@ export {
   setDataBaseDir,
   getDataBaseDir,
   isDataBaseDirEnvOverrideActive,
-  migrateLegacyZCodeDataRoot,
+  setDataRootPathOverride,
   getZCodeDataRootDir,
   getConversationWorkspaceDir,
   getAppConfigDir,
@@ -74,6 +74,41 @@ export {
   validateDataBaseDirTarget,
   ZCODE_WINDOWS_APP_INSTALL_DIR_ENV,
 } from "./paths.js";
+export {
+  readDataRootStatus,
+  resolveDataRootDir,
+  writeDataRootManifest,
+  writeDataRootManifestIntoRoot,
+  readLegacyDataBaseDirFromSettings,
+  forfeitConflictingDataRoot,
+  forfeitDataRootByLabel,
+} from "./data-root/ownership.js";
+export {
+  discoverLegacyDataRootCandidates,
+  collectLegacyCandidateStats,
+  executeDataRootCopyMigration,
+  cleanupStaleMigrationStaging,
+} from "./data-root/migration.js";
+export {
+  initializeDataRootInteractive,
+  initializeDataRootNonInteractive,
+  initializeFreshDataRoot,
+  resolveDataRootActionFromEnv,
+  executeDesktopDataRootMigration,
+  executeDesktopFreshStart,
+  executeDataRootImport,
+  getActiveDiagnosticRoot,
+  releasePendingDiagnosticMode,
+} from "./data-root/initializer.js";
+export type {
+  DataRootStatus,
+  DataRootInitResult,
+  DataRootNonInteractiveAction,
+  LegacyDataRootCandidate,
+  LegacyDataRootCandidateStats,
+  DataRootMigrationProgress,
+  DataRootMigrationResult,
+} from "./data-root/types.js";
 export { createGitService } from "./git/gitService.js";
 export { GitCommitMessageGenerator } from "./git/gitCommitMessageGenerator.js";
 export { createGitCheckpointService } from "./git/gitCheckpointService.js";

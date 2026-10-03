@@ -533,6 +533,12 @@ export interface IPlatformService {
   /** 打开系统多文件选择框，返回选中的文件路径；取消时返回空数组 */
   selectFiles?(): Promise<string[]>;
 
+  /**
+   * 打开“从旧数据目录再次导入”独立窗口（设置页入口）。
+   * 窗口内完成备份/复制并重启应用；仅 Desktop 实现。
+   */
+  openDataRootImport?(): void;
+
   /** 使用宿主原生另存为对话框写入文件；普通 Web 端不实现 */
   saveFile?(payload: SaveFileRequest): Promise<SaveFileResult>;
 

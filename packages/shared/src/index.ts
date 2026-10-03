@@ -275,4 +275,5 @@ export { redactFeedbackText } from "./feedbackPrivacy.js";
 
 export * from "./remoteWorkspaceConnection.js";
 export * from "./data-root.js";
+export * from "./data-root-decision.js";
 export * from "./env-names.js";

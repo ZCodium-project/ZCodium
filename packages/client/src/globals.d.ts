@@ -91,6 +91,8 @@ declare global {
       selectFile(): Promise<string | null>;
       /** 打开系统多文件选择框，返回选中文件路径；取消时返回空数组 */
       selectFiles?(): Promise<string[]>;
+      /** 打开“从旧数据目录再次导入”独立窗口（设置页入口） */
+      openDataRootImport?(): void;
       /** 通过系统原生另存为对话框保存文件 */
       saveFile?(
         payload: import("@zcode/shared").SaveFileRequest,

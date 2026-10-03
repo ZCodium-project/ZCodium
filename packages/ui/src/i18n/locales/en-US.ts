@@ -2296,6 +2296,9 @@ const enUS: Record<string, string> = {
   "settings.dataBaseDirPlaceholder": "Default: user home directory",
   "settings.dataBaseDirBrowse": "Choose folder",
   "settings.dataBaseDirSave": "Save",
+  "settings.dataBaseDirImport": "Import legacy data",
+  "settings.dataBaseDirImportHint":
+    "Copy data from the legacy data directory and restart (the current directory is backed up first)",
   "settings.dataBaseDirCopying": "Copying data, please do not close the app...",
   "settings.dataBaseDirCopyFailed": "Data copy failed. Path was not changed.",
   "settings.dataBaseDirForbiddenInstallDir":
@@ -6484,6 +6487,42 @@ const enUS: Record<string, string> = {
   "scheduledPreview.toast.running": "Running “{title}”…",
   "scheduledPreview.toast.view": "View",
   "scheduledPreview.addSchedule": "Add schedule",
+
+  // ---- Data root decision window ----
+  "dataRoot.loading": "Preparing…",
+  "dataRoot.title": "Data storage",
+  "dataRoot.status.absentWithLegacy":
+    "Legacy ZCodium / ZCode data was found. You can copy it into the new data directory, or start fresh.",
+  "dataRoot.status.unowned":
+    "The current data directory is not owned by this product (it may come from another branch or was created manually). It will be backed up first; nothing is deleted or merged.",
+  "dataRoot.status.corrupt":
+    "The data directory ownership record is damaged or from a newer version and cannot be read safely. It will be backed up first.",
+  "dataRoot.conflict.notice": "Conflicting directory will be renamed to a backup first: {path}",
+  "dataRoot.candidates.title": "Legacy data available",
+  "dataRoot.candidate.size": "Size",
+  "dataRoot.candidate.modified": "Modified",
+  "dataRoot.candidate.empty": "No legacy ~/.zcode data found. Only a fresh start is available.",
+  "dataRoot.disk.insufficient":
+    "Not enough disk space: about {required} required, {free} available. Free some space and retry.",
+  "dataRoot.progress.preparing": "Preparing to copy…",
+  "dataRoot.progress.copying": "Copying legacy data…",
+  "dataRoot.progress.finalizing": "Finalizing migration…",
+  "dataRoot.error.title": "Operation failed",
+  "dataRoot.error.retry": "Please retry, or start fresh.",
+  "dataRoot.done.restarting": "Restarting the app…",
+  "dataRoot.action.migrate": "Migrate legacy data",
+  "dataRoot.action.migrateHint":
+    "Copy legacy data into the new directory; the old directory stays. Neither side syncs afterwards.",
+  "dataRoot.action.fresh": "Start fresh",
+  "dataRoot.action.freshHint":
+    "Do not import legacy data; the old directory stays and can be imported later from Settings.",
+  "dataRoot.action.quit": "Quit",
+  "dataRoot.action.quitHint": "Make no changes; you will be asked again next launch.",
+  "dataRoot.import.title": "Import from legacy data directory",
+  "dataRoot.import.description":
+    "Legacy data will be copied into the current data directory. The current directory is backed up first; the app restarts when done.",
+  "dataRoot.action.import": "Import and restart",
+  "dataRoot.action.cancel": "Cancel",
 };
 
 export default enUS;

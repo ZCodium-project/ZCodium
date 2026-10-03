@@ -10,13 +10,22 @@ import { installCliProcessErrorBoundary } from "./process-errors.js";
 import { installProtocolStderrBoundary } from "./protocol-stderr.js";
 import { createProtocolProcessLifecycle } from "./protocol-lifecycle.js";
 import { isProtocolServerInvocation } from "./arguments.js";
-import { migrateLegacyZCodeDataRoot } from "@zcode/services/node";
+import {
+  initializeDataRootNonInteractive,
+  resolveDataRootActionFromEnv,
+} from "@zcode/services/node";
+import { ZCODE_VERSION } from "@zcode/shared";
 
 void main();
 
 async function main(): Promise<void> {
-  // 任何 CLI 子命令（含 Host Worker）都可能读取数据目录；先完成旧根一次性迁移。
-  migrateLegacyZCodeDataRoot();
+  // 任何 CLI 子命令（含 Host Worker）都可能读取数据目录；先完成数据根初始化与合法化。
+  // CLI 没有决策窗口，按 ZCODIUM_DATA_ROOT_ACTION 非交互处置（默认备份冲突目录 + 全新初始化）。
+  await initializeDataRootNonInteractive({
+    createdBy: "cli",
+    appVersion: ZCODE_VERSION,
+    action: resolveDataRootActionFromEnv(),
+  });
   const argv = process.argv.slice(2);
   // 存储模式也可运行在 Host Worker 中，不能修改整个 Host 的进程名称。
   if (!argv.includes("--prepare-storage")) setCliProcessTitle();

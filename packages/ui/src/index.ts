@@ -51,6 +51,7 @@ export {
   PlatformProvider,
   usePlatform,
   useSelectDirectory,
+  useOpenDataRootImport,
   useConnectRemote,
   useReaddir,
   useSystemInfo,
@@ -88,3 +89,4 @@ export {
 } from "./lib/uiFontSize.js";
 export { generateMobileDeviceFingerprint, setStreamClientId } from "./lib/streamClientId.js";
 export { GlobalDatabaseStartupLoading } from "./root/GlobalDatabaseStartupLoading.js";
+export { DataRootDecisionApp } from "./data-root-decision/DataRootDecisionApp.js";

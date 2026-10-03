@@ -94,7 +94,7 @@ import { WorkspaceHelpMenuButton } from "@/WorkspaceHelpMenuButton.js";
 import { WorkspaceSidebarFooter } from "@/WorkspaceSidebarFooter.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "@/components/lib/utils.js";
-import { useSelectDirectory } from "@/hooks/usePlatform.js";
+import { useSelectDirectory, useOpenDataRootImport } from "@/hooks/usePlatform.js";
 import { ServiceProvider, useServices } from "@/hooks/useServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import type { CreateTaskRequest } from "@/app-shell/types.js";
@@ -632,6 +632,7 @@ export function SettingsPage({
     activeWorkspaceTab?.remoteTarget,
   );
   const selectDirectory = useSelectDirectory();
+  const openDataRootImport = useOpenDataRootImport();
   const services = useServices();
   const onboardingRecordService = services.onboardingRecordService;
   const localHostServices = useBaseWorkspaceServices();
@@ -1395,6 +1396,7 @@ export function SettingsPage({
                             modelIoFullRetentionEnabled={modelIoFullRetentionEnabled}
                             onDataBaseDirChange={handleDataBaseDirChange}
                             onSelectDataBaseDir={selectDirectory}
+                            onOpenDataRootImport={() => openDataRootImport()}
                             onTerminalInheritSystemProfileChange={
                               handleTerminalInheritSystemProfileChange
                             }

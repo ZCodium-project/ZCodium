@@ -38,6 +38,12 @@ export function useSelectDirectory() {
   return useCallback(() => platform.selectDirectory(), [platform]);
 }
 
+/** 打开“从旧数据目录再次导入”窗口的便捷 hook（仅 Desktop 实现）。 */
+export function useOpenDataRootImport() {
+  const platform = usePlatform();
+  return useCallback(() => platform.openDataRootImport?.(), [platform]);
+}
+
 /** 连接远程的便捷 hook */
 export function useConnectRemote() {
   const platform = usePlatform();
