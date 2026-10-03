@@ -1,3 +1,5 @@
 # 主分支保护配套：所有 PR 必须由仓库维护者 review。
 # 与 Ruleset「main-protection」的 require_code_owner_review 配合生效。
-* @SudoUserReal
+# @yachen4ever 具备仓库写权限（可直接推分支提 PR），不列进 CODEOWNERS 会导致
+# 其 PR 永远卡在 require_code_owner_review，且该成员无法 review 他人的 PR。
+* @SudoUserReal @yachen4ever
