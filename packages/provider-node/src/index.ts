@@ -7,6 +7,7 @@ export * from "./endpoint-scoped-zcode-builtin-source.js";
 export * from "./zcode-builtin-provider-config-materializer.js";
 export * from "./model-selection-config-repository.js";
 export * from "./personal-provider-config-repository.js";
+export * from "./retired-zhipu-provider-migration.js";
 export * from "./provider-config-file-codec.js";
 export * from "./provider-config-runtime.js";
 export * from "./provider-registry-runtime.js";

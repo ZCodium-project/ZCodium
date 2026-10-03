@@ -2329,24 +2329,12 @@ const faIR: Record<string, string> = {
   "settings.officialServices.title": "اتصال‌های خدمات Z.AI",
   "settings.officialServices.description":
     "این‌ها خدمات Z.AI (ZCode) هستند. روشن کردن هر یک به سرورهای Z.AI متصل می‌شود — مگر نیاز داشته باشید، خاموش نگه‌شان دارید. برخی قابلیت‌ها هنگام راه‌اندازی بارگذاری می‌شوند؛ پس از تغییر این کلیدها، برنامه را دوباره راه‌اندازی کنید.",
-  "settings.officialServices.account.title": "پیکربندی API Z.AI",
-  "settings.officialServices.account.desc":
-    "برای استفاده از قابلیت‌های مرتبط، کلید API Z.AI را پیکربندی کنید.",
-  "settings.officialServices.codingPlan.title": "طرح و سهمیه",
-  "settings.officialServices.codingPlan.desc": "مشاهده طرح، سهمیه و مصرف Z.AI.",
-  "settings.officialServices.feedback.title": "کانال بازخورد Z.AI",
-  "settings.officialServices.feedback.desc":
-    "بازخورد را از طریق API Z.AI ارسال کنید؛ وقتی خاموش است، از GitHub Issues استفاده کنید.",
-  "settings.officialServices.officialMcp.title": "Z.AI MCP",
-  "settings.officialServices.officialMcp.desc": "استفاده از سرویس اعتبارنامه MCP Z.AI.",
-  "settings.officialServices.offPeak.title": "وظایف خارج از ساعت اوج",
-  "settings.officialServices.offPeak.desc": "استفاده از دروازه وظایف خارج از ساعت اوج Z.AI.",
   "settings.officialServices.marketplace.title": "بازار افزونه‌ها و CDN Z.AI",
   "settings.officialServices.marketplace.desc":
     "دانلود افزونه‌ها و منابع از بازار افزونه‌ها و CDN Z.AI.",
   "settings.officialServices.clientConfig.title": "پیکربندی کلاینت Z.AI",
   "settings.officialServices.clientConfig.desc":
-    "دریافت پیکربندی کلاینت Z.AI و داده‌های پیش‌گرمایش راه‌اندازی.",
+    "دریافت پیکربندی کلاینت Z.AI و داده‌های پیش‌گرمایش راه‌اندازی؛ شامل قالب‌های Provider نیست (پیش‌تنظیم‌های مدل از پیکربندی داخلی می‌آیند).",
   "settings.usageTitle": "آمار مصرف",
   "settings.usageDescription": "مرور فعالیت تقریبی و مصرف مدل تجمیع‌شده از نشست‌های محلی.",
   "resourceManager.storage.summaryTotal": "مجموع مصرف‌شده توسط ZCodium",
@@ -3302,6 +3290,8 @@ const faIR: Record<string, string> = {
   "settings.modelProvider.reorderProvider": "برای تغییر ترتیب فراهم‌کننده بکشید",
   "settings.modelProvider.reorderModel": "برای تغییر ترتیب مدل بکشید",
   "settings.modelProvider.empty": "هنوز فراهم‌کننده مدل سفارشی وجود ندارد",
+  "settings.modelProvider.emptyHint":
+    'برای ایجاد از قالب‌های آماده روی "افزودن ارائه‌دهنده" بزنید، یا یک ارائه‌دهنده سفارشی بسازید و کلید API را وارد کنید.',
   "settings.modelProvider.deleteConfirmDescription":
     "این کار پیکربندی فراهم‌کننده سفارشی را حذف می‌کند. ویرایش‌های مرتبط در صفحه تنظیمات فعلی به‌طور خودکار بازگردانده نمی‌شوند.",
   "settings.modelProvider.deleteConfirmAction": "حذف فراهم‌کننده",

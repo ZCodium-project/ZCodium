@@ -1,6 +1,11 @@
 # 官方服务开关：持久化与进程投影
 
-用户在设置页“Z.AI 服务连接”（`settings.officialServices`）逐个打开或关闭官方服务：`account`、`codingPlan`、`feedback`、`officialMcp`、`offPeak`、`marketplace`、`clientConfig`；对话分享已永久下线，不在开关列表内。
+用户在设置页“Z.AI 服务连接”（`settings.officialServices`）逐个打开或关闭官方服务：`marketplace`、`clientConfig`。
+
+不再有开关的能力（**BREAKING**，见 `docs/specs/flatten-provider-zones.md`）：
+
+- 对话分享：早已整体下线；
+- `account`、`feedback`、`codingPlan`、`officialMcp`、`offPeak`：能力随「去智谱化」移除，只保留 key 让调用点与报错文案能说清“已下线”。这三个子系统的物理删除另开 issue 跟踪，本轮不删 dormant 代码。
 
 ## 事实源与所有权
 
@@ -58,12 +63,14 @@ Host spawn agent（每次 spawn 都读当前设置）
 - **关闭时的展示投影**：Host 的插件 overview 在开关关闭时将官方市场与官方候选插件从公开投影中过滤，并注入 `officialMarketplaceEnabled: false`；插件市场“公开”分段因此为空，展示引导文案（去 设置 → Z.AI 服务 打开“Z.AI 插件市场与 CDN”）。已安装插件列表不过滤，用户仍可管理本地已安装的插件。
 - 本地市场记录与缓存不主动删除：重新打开开关后（Host 过滤即时解除）公开分段恢复可见；无需重启应用。
 - 该展示投影以 Host 的实时开关为准（`settingService.get` 投影）；agent 侧刷新/下载仍以 agent env 投影为准（重启应用后生效）。
-- **account**：浏览器授权登录入口只在用户主动打开的模型设置页（provider 详情）提供；OAuth 流程与 CLI 一致（浏览器授权 + Host 轮询 + deep link 回调），登录成功后由 Root 常驻 effect 收敛账号态。**首次启动的 WelcomeScreen 保持 API Key 表单与“跳过”，不出现 OAuth 入口、不自动触发登录、不强迫新用户登录**。account 开关关闭时点击浏览器登录会在服务层被拒绝，UI 给出开关引导提示。
+- **clientConfig**：只负责客户端配置与启动预热数据（`clientConfigService`）。**不覆盖 Provider 模板**——模型预设以内置配置为唯一事实源，CDN 模板下载链路不恢复（与“builtin json 是 builtin Provider 唯一事实源、CDN 只作套餐模板投递通道”的架构决策冲突）。
+- **官方平台 URL 的三层裁决**：`marketplace` / `clientConfig` 命中登记路径且开关开启才放行；命中已下线功能的路径恒拦截；未登记路径（含已下线的分享）恒拦截。已下线路径的正则保留在 `officialPlatformPolicy` 的独立表里，只为让报错精确指向具体功能，而不是含糊的“已下线或未登记”。匹配顺序上已下线表优先：`account` 的 `client/claim` 会被 `clientConfig` 的 `client` 前缀吞掉，反过来会让套餐认领路径在 clientConfig 开启时被误放行。
+- **account（原说明，能力已下线）**：浏览器授权登录入口原本只在用户主动打开的模型设置页（provider 详情）提供；OAuth 流程与 CLI 一致（浏览器授权 + Host 轮询 + deep link 回调）。能力已随去智谱化移除，`oauthService` 的相关入口恒返回未接入态或抛“已下线”，UI 不再提供入口。
 
 ## 不变量
 
 1. `appSettingsSchema.parse({ ...settings, officialServices })` 必须保留 `officialServices`；写入 `setting.json` 后 `get()` 读回相同的布尔值。否则 UI 受控开关会在 `refresh()` 后回弹，表现为“开关无法点击”。
-2. 打开某开关只放行该开关对应的官方服务；未打开的开关保持拒绝，不得因其他开关打开而放行。
+2. 打开某开关只放行该开关对应的官方服务；未打开的开关保持拒绝，不得因其他开关打开而放行；已下线功能没有开关可开，恒拒绝。
 3. 投影结果与设置文件一致；进程内开关不得成为独立事实源（不允许出现“UI 显示开启、服务层仍全关”）。
 4. 关闭开关立即恢复拒绝；已发出的请求不回溯。
 
@@ -77,10 +84,11 @@ Host spawn agent（每次 spawn 都读当前设置）
 
 1. 设置页点击开关后开关保持打开/关闭，`setting.json` 出现 `officialServices` 且与 UI 一致。
 2. 新进程（模拟 Host/Server 重启）只调用 `settingService.get()`，进程策略即恢复磁盘值：已开启服务 `assertOfficialServiceAvailable` 放行、`shouldBlockOfficialPlatformUrl` 不再拦截对应域名；未开启服务仍拒绝。
+2.1 已下线功能恒拒绝：`assertOfficialServiceRemoved` 必抛且文案含“下线”，`shouldBlockOfficialPlatformUrl` 对已下线路径恒为 `true`，`resolveOfficialServiceForUrl` 返回具体已下线 key（含被 `clientConfig` 前缀覆盖的 `client/claim`）。存量用户磁盘上的已下线字段在写盘时被 zod strip。
 3. `update()` 到落盘出现在同一条写队列内，重复 `get()` 幂等。
 4. main 的 webRequest 策略随设置变更即时刷新：当前会话内 renderer 对官方域名的请求立即放行/拦截，不依赖重启；其它窗口的 Host 通过 `SettingsChanged` 广播重新读取设置。
-5. 真实业务入口：关闭时 `clientConfigService` / `offPeakServerClient` / `FeedbackHttpClient` 在凭证与网络前拒绝且不发起请求，`resolveRemoteCdnBaseUrls` 对默认官方源返回空；打开后分别真的拉取客户端配置、发出取号请求、发出反馈请求并出现 CDN 下载源。显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 与构建内置的 `ZCODIUM_REMOTE_ASSET_CDN_BASE_URL` 在开关关闭时仍返回对应自建源、开关打开时保持原值，不被开关改写；显式覆盖优先于内置源。
-6. Desktop → Agent 投影：`buildOfficialServiceEnvPatch` 输出完整 7 键（开=1/关=0）；开关关闭时覆盖 shell 残留的 `=1`；开关打开时 agent 的默认市场集合包含官方来源，关闭时不含。
-7. account 浏览器登录：模型设置页提供“通过浏览器登录”；全新用户首次启动只看到 API Key 表单且可跳过，不出现 OAuth 入口、不自动登录。
+5. 真实业务入口：关闭时 `clientConfigService` 在凭证与网络前兜底且 `resolveRemoteCdnBaseUrls` 对默认官方源返回空；打开后分别真的拉取客户端配置并出现 CDN 下载源。`offPeakServerClient` / `FeedbackHttpClient` 能力已下线，关闭与“存量开关仍写着开启”两种状态下都必须在凭证与网络前拒绝，且文案为“已下线”。显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 与构建内置的 `ZCODIUM_REMOTE_ASSET_CDN_BASE_URL` 在开关关闭时仍返回对应自建源、开关打开时保持原值，不被开关改写；显式覆盖优先于内置源。
+6. Desktop → Agent 投影：`buildOfficialServiceEnvPatch` 输出完整 2 键（开=1/关=0）；开关关闭时覆盖 shell 残留的 `=1`；已下线功能不再有环境变量映射，避免残留的 `=1` 看起来仍能放行；开关打开时 agent 的默认市场集合包含官方来源，关闭时不含。
+7. account 浏览器登录：能力已下线，模型设置页不再提供该入口。
 8. marketplace 关闭态：Host overview 过滤官方市场与官方候选插件并注入 `officialMarketplaceEnabled=false`；“公开”分段为空并展示开关引导文案；已安装列表保留；打开/关闭切换即时生效（Host 实时开关），无需重启。
 9. 回归测试：`appSettingsSchema` 保留字段、`update` 落盘、`get` 读回、跨进程投影、开关放行与真实业务入口、官方市场 seed 与 env 投影、关闭态公开投影过滤；`pnpm typecheck`、`pnpm lint`、架构检查通过。

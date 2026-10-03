@@ -178,38 +178,45 @@ export function useModelProviderNavigation({
   );
 
   const navigationGroups = useMemo<ModelProviderNavGroup[]>(() => {
+    // 智谱套餐体系移除后 presetProviders / codingPlanItems 恒为空；
+    // preset 组仅在确有内容时渲染，避免出现空的"智谱"分组标题。
+    const presetItems: ModelProviderNavGroup["items"] = [
+      ...presetProviders.map(({ id, displayName, provider }) => {
+        const statusProvider = resolvePresetFamilyStatusProvider({
+          presetId: id,
+          provider,
+          connectionModeItems: connectionModeCodingPlanItems,
+          connectionSelections,
+          modelProviders,
+        });
+        return {
+          key: createPresetProviderNodeKey(id),
+          type: "preset" as const,
+          presetId: id,
+          label: displayName,
+          logo: modelProviders.find(
+            (candidate) =>
+              candidate.providerId ===
+              resolveModelProviderFamilySpecByProviderId(id)?.individualCodingPlanProviderId,
+          )?.config.logo,
+          provider,
+          displayName,
+          statusProvider,
+          statusActive: statusProvider?.executable === true,
+        };
+      }),
+      ...codingPlanItems.filter((item) => isStartPlanModelProviderId(item.presetId)),
+    ];
     const groups: ModelProviderNavGroup[] = [
-      {
-        id: "preset",
-        title: intl.formatMessage({ id: "settings.modelProvider.presetTitle" }),
-        items: [
-          ...presetProviders.map(({ id, displayName, provider }) => {
-            const statusProvider = resolvePresetFamilyStatusProvider({
-              presetId: id,
-              provider,
-              connectionModeItems: connectionModeCodingPlanItems,
-              connectionSelections,
-              modelProviders,
-            });
-            return {
-              key: createPresetProviderNodeKey(id),
-              type: "preset" as const,
-              presetId: id,
-              label: displayName,
-              logo: modelProviders.find(
-                (candidate) =>
-                  candidate.providerId ===
-                  resolveModelProviderFamilySpecByProviderId(id)?.individualCodingPlanProviderId,
-              )?.config.logo,
-              provider,
-              displayName,
-              statusProvider,
-              statusActive: statusProvider?.executable === true,
-            };
-          }),
-          ...codingPlanItems.filter((item) => isStartPlanModelProviderId(item.presetId)),
-        ],
-      },
+      ...(presetItems.length > 0
+        ? [
+            {
+              id: "preset" as const,
+              title: intl.formatMessage({ id: "settings.modelProvider.presetTitle" }),
+              items: presetItems,
+            },
+          ]
+        : []),
       {
         id: "custom",
         title: intl.formatMessage({ id: "settings.modelProvider.customTitle" }),

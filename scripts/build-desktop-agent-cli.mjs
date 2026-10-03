@@ -18,6 +18,10 @@ const useBootstrapWithRemoteBuild = process.env.ZCODE_BOOTSTRAP_WITH_REMOTE === 
 const pnpmRunEnv = {
   ...process.env,
   ZCODE_ENV: await resolveBuiltinProviderBuildEnvironment({ root: repoRoot }),
+  // 宿主 CLI（如在 ZCode 内开发）会向子进程泄漏其运行时 builtin 配置路径，
+  // 使 staging 静默改用官方运行时副本而非仓库事实源；dev/E2E 构建必须剔除。
+  ZCODE_BUILTIN_PROVIDER_CONFIG_FILE: undefined,
+  ZCODE_BUILTIN_PROVIDER_BUNDLED_CONFIG_FILE: undefined,
   // pnpm 11 的 verify-deps-before-run 会在 apps/zcode-cli 子 workspace
   // 执行每个 run 前触发 pnpm install；子 workspace 运行时依赖根仓库 @zcode/shared，
   // 自动 install 无法解析根 workspace 包，导致 dev:desktop:test 和 E2E onPrepare 失败。
