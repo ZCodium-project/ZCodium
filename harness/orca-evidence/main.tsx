@@ -11,6 +11,7 @@ import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
 import { ServiceProvider } from "@/hooks/useServices.js";
 import { OrcaRouterProviderFields } from "@/settings/model-provider-section/OrcaRouterProviderFields.js";
 import { OrcaRouterModelSelector } from "@/settings/model-provider-section/OrcaRouterModelSelector.js";
+import { ProviderModelsSection } from "@/settings/model-provider-section/ProviderCardSections.js";
 import "@zcode/ui/styles.css";
 import { CATALOG_SOURCE_URL, listOrcaModels, ORCA_MODEL_CATALOG } from "./catalog.js";
 
@@ -115,6 +116,20 @@ function createFakeOrcaRouterService() {
 /** 仅提供 UI 需要的 orcaRouterService；IServiceAccessor 其余字段均为可选。 */
 const fakeAccessor = { orcaRouterService: createFakeOrcaRouterService() };
 
+/** 与 catalog.js 同源的模型列表，供 ProviderModelsSection 的选中值展示。 */
+const EVIDENCE_MODELS = ORCA_MODEL_CATALOG.map((model) => ({
+  kind: "candidate",
+  modelId: model.modelId,
+  builtin: false,
+  personalConfig: { access: undefined },
+  config: { properties: { contextWindow: 128000 } },
+  hasPersonalConfig: true,
+  executable: true,
+  selectable: true,
+}));
+
+function noop() {}
+
 function Harness() {
   const [selectedModelId, setSelectedModelId] = useState(null);
   const [multimodalModelId, setMultimodalModelId] = useState(null);
@@ -157,6 +172,27 @@ function Harness() {
             hasImageAttachment={true}
             selectedModelId={multimodalModelId}
             onSelectModel={setMultimodalModelId}
+          />
+        </div>
+        {/* 真实 Provider 设置区块：证明 OrcaRouter 下没有 Add Model / 自由填写入口。 */}
+        <div
+          style={{
+            marginTop: "16px",
+            border: "1px solid #3f3f46",
+            borderRadius: "12px",
+            background: "#1c1c1c",
+            padding: "16px",
+          }}
+          data-evidence-provider-models-section
+        >
+          <ProviderModelsSection
+            providerId="orcarouter"
+            providerName="OrcaRouter"
+            models={EVIDENCE_MODELS}
+            discoveryTemplateId="orcarouter"
+            onModelCommit={noop}
+            onDeleteModel={noop}
+            onAddModel={noop}
           />
         </div>
       </div>

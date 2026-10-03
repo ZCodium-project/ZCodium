@@ -2843,6 +2843,7 @@ const enUS: Record<string, string> = {
   "orcaRouter.connected": "Connected · {masked}",
   "orcaRouter.notConnected": "Not connected",
   "orcaRouter.clear": "Clear",
+  "orcaRouter.clear.failed": "Could not clear the OrcaRouter credential. Try again.",
   "orcaRouter.needsReauth":
     "OrcaRouter rejected this credential. Connect again to replace it; the stored key is kept until a new login succeeds.",
   "orcaRouter.model.selectPlaceholder": "Select a model",

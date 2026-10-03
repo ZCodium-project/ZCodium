@@ -2790,6 +2790,7 @@ const faIR: Record<string, string> = {
   "orcaRouter.connected": "متصل · {masked}",
   "orcaRouter.notConnected": "متصل نیست",
   "orcaRouter.clear": "پاک کردن",
+  "orcaRouter.clear.failed": "پاک کردن اعتبارنامه OrcaRouter ممکن نشد. دوباره تلاش کنید.",
   "orcaRouter.needsReauth":
     "OrcaRouter این اعتبارنامه را رد کرد. برای جایگزینی دوباره متصل شوید؛ کلید ذخیره‌شده تا موفقیت ورود جدید حذف نمی‌شود.",
   "orcaRouter.model.selectPlaceholder": "انتخاب مدل",

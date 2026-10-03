@@ -2654,6 +2654,7 @@ const zhCN: Record<string, string> = {
   "orcaRouter.connected": "已连接 · {masked}",
   "orcaRouter.notConnected": "未连接",
   "orcaRouter.clear": "清除",
+  "orcaRouter.clear.failed": "无法清除 OrcaRouter 凭据，请重试。",
   "orcaRouter.needsReauth":
     "OrcaRouter 已拒绝该凭据。请重新连接以替换；在新登录成功前不会删除已保存的密钥。",
   "orcaRouter.model.selectPlaceholder": "选择模型",

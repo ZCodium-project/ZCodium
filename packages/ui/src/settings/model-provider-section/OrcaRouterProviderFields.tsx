@@ -5,11 +5,13 @@ import {
   TID_ORCAROUTER_SPEC,
   type OrcaCredentialSource,
 } from "@zcode/shared";
+import type { IOrcaRouterService } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useServices } from "@/hooks/useServices.js";
 import { ApiKeyInput } from "./ApiKeyInput.js";
+import { OrcaRouterCodeForm } from "./OrcaRouterCodeForm.js";
 import { ProviderLogo } from "./ProviderLogo.js";
 
 type ConnectPhase = "idle" | "waiting" | "exchanging" | "connected" | "error";
@@ -52,7 +54,6 @@ export function OrcaRouterProviderFields({
   const [phase, setPhase] = useState<ConnectPhase>("idle");
   const [hint, setHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   /** 单调递增序号：旧响应不得覆盖新登录 */
   const generationRef = useRef(0);
@@ -63,15 +64,32 @@ export function OrcaRouterProviderFields({
     setCredential(await orcaRouterService.getCredentialStatus());
   }, [orcaRouterService]);
 
-  useEffect(() => {
-    void refreshCredential();
-  }, [refreshCredential]);
+  /** 状态刷新失败不能变成 unhandled rejection：提示错误并允许用户重试。 */
+  const handleRefreshCredential = useCallback(async () => {
+    try {
+      await refreshCredential();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : intl.formatMessage({ id: "orcaRouter.catalog.failed" }),
+      );
+    }
+  }, [intl, refreshCredential]);
 
-  /** 同步清 busy/hint，并让在途响应失效 */
+  useEffect(() => {
+    void handleRefreshCredential();
+  }, [handleRefreshCredential]);
+
+  /**
+   * 同步清 hint/phase，并让在途响应失效。
+   *
+   * busy 不再单独维护：登录中的 UI 状态由 `phase`（waiting/exchanging）派生，
+   * 两者同源可避免「phase 已复位但 busy 仍卡住」这类双写漂移。
+   */
   const clearLoginState = useCallback(() => {
     generationRef.current += 1;
     sessionRef.current = null;
-    setBusy(false);
     setHint(null);
     setPhase("idle");
   }, []);
@@ -128,14 +146,21 @@ export function OrcaRouterProviderFields({
     if (!orcaRouterService) return;
     setError(null);
     clearLoginState();
-    setCredential(await orcaRouterService.clearCredential());
-  }, [clearLoginState, orcaRouterService]);
+    try {
+      setCredential(await orcaRouterService.clearCredential());
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : intl.formatMessage({ id: "orcaRouter.clear.failed" }),
+      );
+    }
+  }, [clearLoginState, intl, orcaRouterService]);
 
   const handleStartConnect = useCallback(async () => {
     if (!orcaRouterService) return;
     const attempt = ++generationRef.current;
     setError(null);
-    setBusy(true);
     setPhase("waiting");
     try {
       const state = await orcaRouterService.beginConnect();
@@ -148,7 +173,6 @@ export function OrcaRouterProviderFields({
     } catch (caught) {
       if (attempt !== generationRef.current) return;
       setPhase("error");
-      setBusy(false);
       setHint(null);
       setError(
         caught instanceof Error
@@ -159,33 +183,54 @@ export function OrcaRouterProviderFields({
   }, [intl, orcaRouterService]);
 
   const handleCancelConnect = useCallback(async () => {
+    // 先同步清本地 busy/hint，再释放服务端登录锁；释放失败也不能把 UI 留在 busy。
     clearLoginState();
     invalidateOnServer("auth-method-switch");
-    if (orcaRouterService) await orcaRouterService.cancelConnect({ reason: "用户取消" });
-  }, [clearLoginState, invalidateOnServer, orcaRouterService]);
+    if (!orcaRouterService) return;
+    try {
+      await orcaRouterService.cancelConnect({ reason: "用户取消" });
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : intl.formatMessage({ id: "orcaRouter.connect.failed" }),
+      );
+    }
+  }, [clearLoginState, intl, invalidateOnServer, orcaRouterService]);
 
   const handleSubmitCode = useCallback(
     async (code: string) => {
       if (!orcaRouterService) return;
       const attempt = generationRef.current;
-      setBusy(true);
       setPhase("exchanging");
       setError(null);
-      const result = await orcaRouterService.submitConnectCode({ code });
+      let result: Awaited<ReturnType<IOrcaRouterService["submitConnectCode"]>>;
+      try {
+        result = await orcaRouterService.submitConnectCode({ code });
+      } catch (caught) {
+        // RPC 拒绝时不能把 UI 留在 exchanging；必须复位 phase 并给出可操作提示。
+        if (attempt !== generationRef.current) return;
+        setPhase("error");
+        setHint(null);
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : intl.formatMessage({ id: "orcaRouter.connect.failed" }),
+        );
+        return;
+      }
       if (attempt !== generationRef.current) return;
       if (!result.ok) {
         setPhase("error");
-        setBusy(false);
         setHint(null);
         setError(result.message);
         return;
       }
       setPhase("connected");
-      setBusy(false);
       setHint(null);
-      await refreshCredential();
+      await handleRefreshCredential();
     },
-    [orcaRouterService, refreshCredential],
+    [handleRefreshCredential, intl, orcaRouterService],
   );
 
   const handleCopy = useCallback(async () => {
@@ -387,44 +432,5 @@ export function OrcaRouterProviderFields({
         </p>
       ) : null}
     </section>
-  );
-}
-
-function OrcaRouterCodeForm({
-  disabled,
-  onSubmit,
-}: {
-  disabled?: boolean;
-  onSubmit: (code: string) => Promise<void>;
-}) {
-  const { intl } = useZCodeIntl();
-  const [code, setCode] = useState("");
-  return (
-    <form
-      className="flex items-center gap-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void onSubmit(code);
-      }}
-    >
-      <Input
-        size="lg"
-        className="h-9"
-        value={code}
-        disabled={disabled}
-        data-testid={TID_ORCAROUTER_SPEC.codeInput}
-        placeholder={intl.formatMessage({ id: "orcaRouter.pkce.codePlaceholder" })}
-        onChange={(event) => setCode(event.target.value)}
-      />
-      <Button
-        type="submit"
-        variant="outline"
-        size="sm"
-        disabled={disabled || !code.trim()}
-        data-testid={TID_ORCAROUTER_SPEC.submitCode}
-      >
-        {intl.formatMessage({ id: "orcaRouter.pkce.submitCode" })}
-      </Button>
-    </form>
   );
 }
