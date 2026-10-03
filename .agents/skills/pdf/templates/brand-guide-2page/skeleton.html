@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><!-- BRAND_NAME --> Brand Style Guide</title>
+  <style>
+    @page { size: A4 portrait; margin: 15mm; }
+
+    :root {
+      --charcoal: #181E25;
+      --surface: #F7F8FA;
+      --primary: <!-- BRAND_PRIMARY -->;
+      --secondary: <!-- BRAND_SECONDARY -->;
+      --muted: #5A6470;
+      --rule: #E2E5EA;
+      --magenta: #E01878;   /* tagline gradient top */
+      --coral:   #F06030;   /* tagline gradient bottom */
+    }
+
+    /* Local font embeds (point to your assets/fonts/) — fall back to system stack
+       cleanly if files missing. Replace these src URLs to ship with the project. */
+    @font-face { font-family: "Outfit"; font-weight: 700;
+                 src: local("Outfit Bold"), local("Outfit-Bold"); }
+    @font-face { font-family: "Outfit"; font-weight: 600;
+                 src: local("Outfit SemiBold"), local("Outfit-SemiBold"); }
+    @font-face { font-family: "Poppins"; font-weight: 400;
+                 src: local("Poppins Regular"), local("Poppins-Regular"); }
+    @font-face { font-family: "Poppins"; font-weight: 500;
+                 src: local("Poppins Medium"), local("Poppins-Medium"); }
+
+    html, body {
+      background: var(--surface);
+      color: var(--charcoal);
+      font-family: "Poppins", system-ui, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      margin: 0; padding: 0;
+    }
+
+    .page {
+      width: 100%;
+      height: calc(297mm - 30mm);
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      break-after: page;
+    }
+    .page:last-of-type { page-break-after: auto; break-after: auto; }
+    .page[data-page="2"] .footer { margin-top: auto; }
+
+    .doc-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 0.6px solid var(--rule);
+      padding-bottom: 3mm; margin-bottom: 4mm;
+    }
+    .doc-header .lockup svg { height: 14mm; width: auto; }
+    .doc-header .meta { text-align: right; }
+    .doc-header .meta .doc-title { font-family: "Outfit"; font-weight: 600; font-size: 14px; }
+    .doc-header .meta .doc-sub { font-size: 10px; color: var(--muted); }
+
+    .section { margin-top: 4mm; }
+    .section-label {
+      font-family: "Poppins"; font-size: 8.5px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--muted); margin-bottom: 3mm;
+    }
+
+    /* Color swatches (page 1) */
+    .swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+    .swatch { border-radius: 2.5mm; border: 0.5px solid var(--rule);
+              overflow: hidden; display: flex; flex-direction: column; }
+    .swatch .chip { flex: 1; min-height: 16mm; }
+    .swatch .meta-row { background: #FFF; padding: 2mm 3mm; }
+    .swatch .name { font-family: "Outfit"; font-weight: 600; font-size: 10px; }
+    .swatch .hex { font-family: "Poppins"; font-weight: 500; font-size: 9.5px; color: var(--muted); }
+
+    /* Type scale (page 1) */
+    .type-row { padding: 1.5mm 0; border-top: 0.4px solid var(--rule); display: flex;
+                justify-content: space-between; align-items: baseline; gap: 4mm; }
+    .type-row .label { font-size: 9px; color: var(--muted); width: 18mm; flex: 0 0 auto; }
+    .type-row .specimen { font-family: "Outfit"; flex: 1; }
+
+    /* Voice cards (page 2) */
+    .voice-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 1mm; }
+    .voice-card { background: #FFF; border: 0.5px solid var(--rule);
+                  border-radius: 2.5mm; padding: 4mm; }
+    .voice-card .num { font-family: "Outfit"; font-weight: 700; font-size: 11px; color: var(--primary); }
+    .voice-card .label { font-family: "Outfit"; font-weight: 600; font-size: 14px; margin: 1mm 0 1mm; }
+    .voice-card .desc { font-size: 9px; line-height: 1.4; color: var(--muted); }
+
+    /* Tagline (page 2) */
+    .tagline-display {
+      font-family: "Outfit"; font-weight: 700;
+      font-size: 38px; line-height: 1.05;
+      background: linear-gradient(180deg, var(--magenta) 0%, var(--coral) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 1mm 0;
+    }
+
+    /* Do's & Don'ts (page 2) */
+    .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+    .rules-col h4 { font-family: "Outfit"; font-weight: 600; font-size: 13px; margin: 0 0 2mm; }
+    .rule-row { display: grid; grid-template-columns: 5mm 1fr; gap: 2mm;
+                padding: 1.4mm 0; font-size: 9.5px; border-top: 0.4px solid var(--rule); }
+    .rule-row .glyph { font-family: "Outfit"; font-weight: 700; font-size: 11px; }
+    .rule-row.do .glyph { color: #1F8A4C; }
+    .rule-row.dont .glyph { color: #D01316; }
+
+    .footer { border-top: 0.5px solid var(--rule); padding-top: 2mm;
+              display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: 8.5px; }
+    .footer .col-left { font-weight: 500; }
+    .footer .col-center { text-align: center; font-style: italic; color: var(--muted); }
+    .footer .col-right { text-align: right; font-weight: 500; }
+  
+  /* === Screen-emulation: open in browser → looks like the A4 PDF =========== */
+  @media screen {
+    html { background: #d0d0d0; }
+    body { margin: 0; padding: 20px 0; }
+    body > section {
+      width: 210mm; min-height: 297mm; margin: 0 auto 20px;
+      background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      box-sizing: border-box; overflow: hidden;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── PAGE 1 — Identity ─────────────────────────────────────────── -->
+<section class="page" data-page="1">
+  <header class="doc-header">
+    <div class="lockup">
+      <!-- BRAND_LOGO_SVG (paste inline <svg>...</svg> here, ~200-400 chars) -->
+      <svg viewBox="0 0 100 28" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="20" font-family="Outfit, sans-serif" font-weight="700" font-size="22"
+              fill="var(--charcoal)"><!-- BRAND_NAME --></text>
+      </svg>
+    </div>
+    <div class="meta">
+      <div class="doc-title">Brand Style Guide</div>
+      <div class="doc-sub">Identity &middot; <!-- DATE_YEAR --></div>
+    </div>
+  </header>
+
+  <div class="section">
+    <div class="section-label">01 / Logo</div>
+    <!-- Logo lockup + clearspace spec content here -->
+    <p style="font-size:10px;color:var(--muted);">Clearspace = X (= height of brand mark). Min size 12mm. Never recolour.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">02 / Color Palette</div>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="chip" style="background: var(--primary)"></div>
+        <div class="meta-row">
+          <div class="name"><!-- COLOR_1_NAME --></div>
+          <div class="hex"><!-- BRAND_PRIMARY --></div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: var(--secondary)"></div>
+        <div class="meta-row">
+          <div class="name"><!-- COLOR_2_NAME --></div>
+          <div class="hex"><!-- BRAND_SECONDARY --></div>
+        </div>
+      </div>
+      <!-- REPEAT: add 4 more swatch blocks for 60-30-10 palette balance -->
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">03 / Typography</div>
+    <div class="type-row">
+      <span class="label">H1 / 48/56</span>
+      <span class="specimen" style="font-size: 28px; font-weight: 700;">Display heading</span>
+    </div>
+    <div class="type-row">
+      <span class="label">H2 / 32/40</span>
+      <span class="specimen" style="font-size: 20px; font-weight: 700;">Section heading</span>
+    </div>
+    <div class="type-row">
+      <span class="label">Body / 12/18</span>
+      <span class="specimen" style="font-family: 'Poppins'; font-size: 12px;">The quick brown fox.</span>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="col-left">Page 1 / 2</div>
+    <div class="col-center"><!-- BRAND_NAME --></div>
+    <div class="col-right"><!-- BRAND_DOMAIN --></div>
+  </footer>
+</section>
+
+<!-- ─── PAGE 2 — Voice & Application ──────────────────────────────── -->
+<section class="page" data-page="2">
+  <header class="doc-header">
+    <div class="meta" style="text-align:left;">
+      <div class="doc-sub" style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;">Part Two</div>
+      <div class="doc-title" style="font-size:18px;">Voice &amp; Application</div>
+    </div>
+  </header>
+
+  <div class="section">
+    <div class="section-label">04 / Voice Pillars</div>
+    <div class="voice-cards">
+      <div class="voice-card">
+        <div class="num">01</div>
+        <div class="label"><!-- PILLAR_1_NAME --></div>
+        <div class="desc"><!-- PILLAR_1_DESCRIPTION --></div>
+      </div>
+      <div class="voice-card">
+        <div class="num">02</div>
+        <div class="label"><!-- PILLAR_2_NAME --></div>
+        <div class="desc"><!-- PILLAR_2_DESCRIPTION --></div>
+      </div>
+      <div class="voice-card">
+        <div class="num">03</div>
+        <div class="label"><!-- PILLAR_3_NAME --></div>
+        <div class="desc"><!-- PILLAR_3_DESCRIPTION --></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">05 / Tagline Lockup</div>
+    <div class="tagline-display"><!-- BRAND_TAGLINE --></div>
+    <p style="font-size:9px;color:var(--muted);margin-top:1mm;">
+      Use only on light backgrounds. Never alter the gradient direction.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">06 / Do's &amp; Don'ts</div>
+    <div class="rules-grid">
+      <div class="rules-col">
+        <h4>Do</h4>
+        <div class="rule-row do">
+          <span class="glyph">✓</span>
+          <span><strong><!-- DO_1_LABEL --></strong> — <!-- DO_1_REASON --></span>
+        </div>
+        <!-- REPEAT: 3-4 do entries -->
+      </div>
+      <div class="rules-col">
+        <h4>Don't</h4>
+        <div class="rule-row dont">
+          <span class="glyph">✕</span>
+          <span><strong><!-- DONT_1_LABEL --></strong> — <!-- DONT_1_REASON --></span>
+        </div>
+        <!-- REPEAT: 4-7 don't entries -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="col-left">Compiled <!-- COMPILE_DATE --></div>
+    <div class="col-center"><!-- BRAND_TAGLINE --></div>
+    <div class="col-right">Page 2 of 2</div>
+  </footer>
+</section>
+
+</body>
+</html>

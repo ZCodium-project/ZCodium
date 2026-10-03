@@ -1,0 +1,233 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "case": "synthetic-italy-schengen-visa-example",
+    "source_pdf": "user-provided-form.pdf",
+    "key_format": "page-prefixed identifiers; inspect each actual form",
+    "synthetic": true,
+    "comments": [
+      "所有人物、证件、雇主和联系信息均为合成示例，不可用于提交真实申请。",
+      "实际字段名及 checkbox 值必须通过 fill inspect 获取。"
+    ]
+  },
+  "writes": [
+    {
+      "key": "p1-surname",
+      "qname": "Surname",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "EXAMPLE",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "Chinese family name -> uppercase pinyin",
+      "validation": "required_if_name_present"
+    },
+    {
+      "key": "p1-first-name",
+      "qname": "First name",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "PERSON",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "Chinese given name -> uppercase pinyin",
+      "validation": "required_if_name_present"
+    },
+    {
+      "key": "p1-date-of-birth",
+      "qname": "date of birth",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "01-01-1990",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "YYYY/MM/DD -> DD-MM-YYYY",
+      "validation": "DD-MM-YYYY"
+    },
+    {
+      "key": "p1-place-of-birth",
+      "qname": "Place of birth",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "EXAMPLE CITY",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "place name -> uppercase pinyin/English",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p1-passport-number",
+      "qname": "Travel document number",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "TEST00000",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "preserve verbatim",
+      "validation": "passport_number"
+    },
+    {
+      "key": "p1-occupation",
+      "qname": "Occupation",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "SOFTWARE ENGINEER",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "standard English occupation, uppercase",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p1-employer",
+      "qname": "Employer",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "EXAMPLE COMPANY\n+00 0000 0000\nExample Street",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "conservative company-name translation + phone",
+      "validation": "latin_only_multiline"
+    },
+    {
+      "key": "p1-purpose-tourism",
+      "qname": "Tourism",
+      "page_no": 1,
+      "type": "checkbox",
+      "set_to": "/1",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "checkbox on_value from inspect",
+      "validation": "must_equal_inspect_on_value"
+    },
+    {
+      "key": "p2-destination",
+      "qname": "Destination",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "ITALY",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "country name uppercase English",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p2-first-entry",
+      "qname": "First entry",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "ITALY - ROME",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "country + first-entry city uppercase English",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p2-duration",
+      "qname": "Duration of stay",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "11",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "remove 天, digits only",
+      "validation": "integer_days"
+    },
+    {
+      "key": "p2-arrival",
+      "qname": "Intended date of arrival",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "15-04-2025",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "YYYY-MM-DD -> DD-MM-YYYY",
+      "validation": "DD-MM-YYYY"
+    },
+    {
+      "key": "p2-departure",
+      "qname": "Intended date of departure",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "25-04-2025",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "YYYY-MM-DD -> DD-MM-YYYY",
+      "validation": "DD-MM-YYYY"
+    },
+    {
+      "key": "p2-accommodation-name",
+      "qname": "Inviting person surname",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "EXAMPLE HOTEL",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "hotel name uppercase",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p2-accommodation-address",
+      "qname": "Address of inviting person",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "Example Street, Rome",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "hotel address uppercase, omit booking confirmation",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p2-cost-free-text",
+      "qname": "Cost",
+      "page_no": 2,
+      "type": "text",
+      "set_to": "APPLICANT HIMSELF/HERSELF",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "official-form wording",
+      "validation": "latin_only"
+    },
+    {
+      "key": "p2-cost-applicant-checkbox",
+      "qname": "Applicant",
+      "page_no": 2,
+      "type": "checkbox",
+      "set_to": "/1",
+      "source": "合成示例；实际填写必须使用用户提供的材料。",
+      "transform": "checkbox on_value from inspect",
+      "validation": "must_equal_inspect_on_value"
+    }
+  ],
+  "missing_required": [
+    {
+      "field_name": "Passport date of issue / valid until / issuing authority",
+      "page_no": 1,
+      "type": "text",
+      "reason": "Not present in employment certificate or itinerary."
+    },
+    {
+      "field_name": "Applicant home address, reliable phone, email",
+      "page_no": 1,
+      "type": "text",
+      "reason": "Home address absent; itinerary phone/email looked placeholder-like and should not be written without confirmation."
+    },
+    {
+      "field_name": "Current nationality / country of birth / nationality at birth",
+      "page_no": 1,
+      "type": "text",
+      "reason": "Not explicit in source materials; do not infer."
+    },
+    {
+      "field_name": "Sex / marital status / national ID number",
+      "page_no": 1,
+      "type": "checkbox/text",
+      "reason": "Not provided."
+    },
+    {
+      "field_name": "Schengen visa history and fingerprints",
+      "page_no": 2,
+      "type": "checkbox/text",
+      "reason": "Not provided."
+    },
+    {
+      "field_name": "Photo",
+      "page_no": 1,
+      "type": "visual_only",
+      "reason": "Visual photo frame, not an AcroForm text value; user must attach/upload a photo."
+    },
+    {
+      "field_name": "Place/date/signature",
+      "page_no": 3,
+      "type": "visual_or_text",
+      "reason": "Requires applicant confirmation and handwritten/e-signature."
+    }
+  ],
+  "validation_summary": {
+    "synthetic": true,
+    "note": "仅展示字段映射结构，不声明已生成或验收真实签证申请。"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "_meta": {
+    "schema_version": "2",
+    "source_pdf": "<!-- artifacts/your_form.pdf -->",
+    "data_source_doc": "<!-- reports/field-mapping-final.md (sync date YYYY-MM-DD) -->",
+    "key_format": "qname is the fully qualified field name from `fill inspect`; page_no is its 1-based page",
+    "widget_total": "<!-- N from `fill inspect` -->",
+    "filled_at": "<!-- YYYY-MM-DDTHH:MM:SS -->",
+    "data_sources": [
+      {
+        "file": "<!-- 在职证明.pdf -->",
+        "fields_supplied": ["<!-- NAME_PINYIN -->", "<!-- PASSPORT_NUM -->", "<!-- DOB -->"]
+      },
+      {
+        "file": "<!-- 行程单.docx -->",
+        "fields_supplied": ["<!-- ENTRY_DATE -->", "<!-- EXIT_DATE -->", "<!-- FIRST_CITY -->"]
+      }
+    ],
+    "comments": [
+      "type='text': set_to is any string; apply writes /V (TextStringObject).",
+      "type='checkbox': set_to MUST equal the on_value (e.g. '/On' / '/Yes' / '/1') or off_value from `fill inspect`. Do NOT pass 'true' or 'checked'.",
+      "type='radio_group': set_to MUST equal one of radio_choices[].set_to from `fill inspect` (typically starts with '/').",
+      "type='choice': set_to MUST equal one of choice_options[].set_to from `fill inspect`.",
+      "Untouched fields are NOT listed — apply leaves them as-is.",
+      "qname comes from `fill inspect`; do not invent or shorten — apply rejects unknown qnames.",
+      "page_no is checked against inspect output; mismatches are rejected at apply time.",
+      "Before running `fill apply`, extract the apply-only payload:",
+      "  jq '.writes | map({qname, page_no, set_to})' field_values.json > values.json"
+    ]
+  },
+
+  "writes": [
+    {
+      "key": "p1-Surname",
+      "qname": "Surname",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "<!-- EXAMPLE -->",
+      "source": "<!-- employment_cert.pdf ('示例申请人') -> pinyin uppercase -->",
+      "transform": "uppercase_pinyin",
+      "maxlen": 20,
+      "validation": "required"
+    },
+    {
+      "key": "p1-Name",
+      "qname": "Name",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "<!-- WEI -->",
+      "source": "<!-- employment_cert.pdf ('示例申请人') -> pinyin uppercase -->",
+      "transform": "uppercase_pinyin",
+      "maxlen": 20,
+      "validation": "required"
+    },
+    {
+      "key": "p1-DOB",
+      "qname": "DOB",
+      "page_no": 1,
+      "type": "text",
+      "set_to": "<!-- 15-03-1990 -->",
+      "source": "<!-- passport.pdf ('1990-03-15') -> DD-MM-YYYY -->",
+      "transform": "date_DD-MM-YYYY",
+      "maxlen": 10,
+      "validation": "required"
+    },
+    {
+      "key": "p1-purpose-Tourism",
+      "qname": "purpose.Tourism",
+      "page_no": 1,
+      "type": "checkbox",
+      "set_to": "<!-- /1 (look up in inspect.on_value) -->",
+      "source": "<!-- itinerary.docx ('travel purpose: tourism') -->",
+      "validation": "required"
+    },
+    {
+      "key": "p2-purpose-Other",
+      "qname": "purpose.Other",
+      "page_no": 2,
+      "type": "checkbox",
+      "set_to": "/Off",
+      "source": "<!-- DISAMBIG: this is travel-purpose's 'Other'; marital-status's 'Other' has qname 'marital.Other' on page 1 -->",
+      "validation": "required"
+    }
+  ],
+
+  "missing_required": [
+    {
+      "field_name": "<!-- PHOTO -->",
+      "page_no": 1,
+      "type": "visual_only",
+      "coordinates": {"x": "<!-- 450.0 -->", "y": "<!-- 700.0 -->", "width": "<!-- 100 -->", "height": "<!-- 130 -->"},
+      "reason": "Visual frame for photo paste. acroform_apply cannot fill — user must paste photo manually after printing."
+    },
+    {
+      "field_name": "<!-- SIGNATURE -->",
+      "page_no": 3,
+      "type": "visual_only",
+      "coordinates": {"x": "<!-- 80.0 -->", "y": "<!-- 120.0 -->", "width": "<!-- 200 -->", "height": "<!-- 40 -->"},
+      "reason": "Signature line. User must sign manually after printing (not a digital signature field)."
+    },
+    {
+      "field_name": "<!-- ADDRESS_HOME -->",
+      "page_no": 1,
+      "type": "text",
+      "reason": "Source documents don't contain home address. User must provide."
+    }
+  ],
+
+  "validation_summary": {
+    "total_widgets": "<!-- N from `fill inspect` -->",
+    "filled": "<!-- count of writes[] -->",
+    "skipped_unchanged": "<!-- N - filled - missing -->",
+    "missing_required": "<!-- count of missing_required[] -->",
+    "warnings": [
+      "<!-- e.g. 'NAME field truncated from 22 to 19 chars due to maxlen=20' -->"
+    ]
+  }
+}
