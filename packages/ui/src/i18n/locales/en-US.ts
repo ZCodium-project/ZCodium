@@ -6492,7 +6492,7 @@ const enUS: Record<string, string> = {
   "dataRoot.loading": "Preparing…",
   "dataRoot.title": "Data storage",
   "dataRoot.status.absentWithLegacy":
-    "Legacy ZCodium / ZCode data was found. You can copy it into the new data directory, or start fresh.",
+    "Legacy ZCodium / ZCode data was found. You can copy it into the new data directory, or start fresh; either way the old directory is kept as is.",
   "dataRoot.status.unowned":
     "The current data directory is not owned by this product (it may come from another branch or was created manually). It will be backed up first; nothing is deleted or merged.",
   "dataRoot.status.corrupt":

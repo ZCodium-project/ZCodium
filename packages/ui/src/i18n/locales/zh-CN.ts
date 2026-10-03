@@ -6194,7 +6194,7 @@ const zhCN: Record<string, string> = {
   "dataRoot.loading": "正在准备…",
   "dataRoot.title": "数据存储设置",
   "dataRoot.status.absentWithLegacy":
-    "检测到旧版 ZCodium / ZCode 的数据。你可以把它复制到新的数据目录，也可以全新开始。",
+    "检测到旧版 ZCodium / ZCode 的数据。你可以把它复制到新的数据目录，也可以全新开始；无论选择哪种，旧目录都会原样保留。",
   "dataRoot.status.unowned":
     "当前数据目录包含无法识别归属的数据（可能来自其它分支或手动创建）。继续操作前会先整体备份该目录，不会删除或合并。",
   "dataRoot.status.corrupt":

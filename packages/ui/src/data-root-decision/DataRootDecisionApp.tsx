@@ -275,12 +275,6 @@ export function DataRootDecisionApp({ bridge }: { bridge: DataRootDecisionBridge
             {isImportMode ? t("dataRoot.action.import") : t("dataRoot.action.migrate")}
           </Button>
         </div>
-        {!isImportMode ? (
-          <div className="flex flex-wrap justify-end gap-x-4 gap-y-1 text-ui-sm text-muted-foreground">
-            <span>{t("dataRoot.action.migrateHint")}</span>
-            <span>{t("dataRoot.action.freshHint")}</span>
-          </div>
-        ) : null}
       </footer>
     </div>
   );
