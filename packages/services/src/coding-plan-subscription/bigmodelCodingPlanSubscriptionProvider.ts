@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 /* eslint-disable max-lines -- Coding Plan provider 需要集中维护 BigModel 支付宝与 Z.ai Stripe/PayPal 接口映射，拆分会让共享鉴权和响应解包更难追踪。 */
 import type {
   ApiClient,
@@ -1272,7 +1272,7 @@ async function readCodingPlanApiJson<T>(
   init?: ApiRequestInit,
 ): Promise<T> {
   // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-  assertOfficialServiceAvailable("codingPlan");
+  assertOfficialServiceRemoved("codingPlan");
 
   try {
     return await readApiJson<T>(apiClient, input, init);

@@ -417,13 +417,11 @@ function migrateLegacyWorkspaceSession(value: unknown): unknown {
   return migrated;
 }
 
-/** 官方平台服务开关；缺省全部关闭。对话分享已永久下线，不在此列。 */
+/** 官方平台服务开关；缺省全部关闭。
+ * 对话分享已永久下线；account / feedback / codingPlan / officialMcp / offPeak 随去智谱化移除，
+ * 不再登记字段——存量用户已存的这些键会在写盘时被 zod strip，属于预期的 BREAKING 行为。
+ */
 export const officialServiceSwitchesSchema = z.object({
-  account: z.boolean().optional(),
-  feedback: z.boolean().optional(),
-  codingPlan: z.boolean().optional(),
-  officialMcp: z.boolean().optional(),
-  offPeak: z.boolean().optional(),
   marketplace: z.boolean().optional(),
   clientConfig: z.boolean().optional(),
 });
@@ -469,6 +467,9 @@ const appSettingsObjectSchema = z.object({
   providerFamilyDomain: providerFamilyDomainSchema.optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().default(false),
+  // 去智谱化后 providerFamilyDomain 只剩 zai/bigmodel 两个已下线取值，存量值没有合法语义。
+  // 独立于 providerFamilyDomainMigrated：老用户恰恰已经迁移过，靠那个守卫会跳过清理。
+  retiredProviderFamilySettingsPurged: z.boolean().default(false),
   nativeSearchEnhancementsEnabled: z.boolean().default(true),
   onboardingOccupation: appSettingsOccupationSchema.nullish(),
   proactiveSuggestionsEnabled: z.boolean().optional(),
@@ -541,6 +542,7 @@ export const appSettingsPatchSchema = z.object({
   providerFamilyDomain: z.union([providerFamilyDomainSchema, z.literal("")]).optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().optional(),
+  retiredProviderFamilySettingsPurged: z.boolean().optional(),
   nativeSearchEnhancementsEnabled: z.boolean().optional(),
   onboardingOccupation: z
     .enum([

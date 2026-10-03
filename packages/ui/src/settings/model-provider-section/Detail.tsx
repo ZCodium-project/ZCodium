@@ -27,6 +27,7 @@ import {
 } from "./constants.js";
 import { InlineEditableProviderCard } from "./InlineEditableProviderCard.js";
 import {
+  ModelProviderEmptyCard,
   ModelProviderLoadingCard,
   PresetProviderPlaceholderCard,
   CodingPlanStatusPanel,
@@ -235,6 +236,7 @@ function resolveProviderBalanceRecheckKey(provider: ProviderSettingsFormProvider
 export function ModelProviderSectionDetail({
   selectedNavItem,
   navigationItems = selectedNavItem ? [selectedNavItem] : [],
+  providerListEmpty = false,
   connectionSettingsFailed = false,
   connectionSelections,
   startPlanSubscriptionCount = 0,
@@ -309,6 +311,8 @@ export function ModelProviderSectionDetail({
   onCodingPlanPurchaseComplete: () => void | Promise<void>;
   onSelectNavItem?: (item: ModelProviderNavItem) => void;
   providerSettingsView?: ProviderSettingsView | null;
+  /** 导航供应商列表为空（拉平后全新安装常见）；用于区分"加载中"与"没有供应商"。 */
+  providerListEmpty?: boolean;
 }) {
   const { intl } = useZCodeIntl();
   const { openCodingPlanUpgrade } = useCodingPlanUpgradeDialog();
@@ -399,6 +403,15 @@ export function ModelProviderSectionDetail({
   }, [selectedItemKey]);
 
   if (!selectedNavItem) {
+    // 拉平后全新安装没有任何供应商：显示空态引导而不是永久 loading。
+    if (providerListEmpty) {
+      return (
+        <ModelProviderEmptyCard
+          emptyLabel={intl.formatMessage({ id: "settings.modelProvider.empty" })}
+          hintLabel={intl.formatMessage({ id: "settings.modelProvider.emptyHint" })}
+        />
+      );
+    }
     return <ModelProviderLoadingCard loadingLabel={loadingLabel} />;
   }
 

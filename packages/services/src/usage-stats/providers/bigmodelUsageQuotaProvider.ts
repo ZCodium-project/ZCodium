@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 /* eslint-disable max-lines -- quota、entitlement 与 monitor 请求共用同一套 provider 鉴权逻辑，拆文件会让 Coding Plan strict key 边界更难追踪。 */
 import { z } from "zod";
 import type {
@@ -803,7 +803,7 @@ export class BigModelUsageQuotaProvider {
     resolved: ResolvedQuotaAuthorization,
   ): Promise<BigModelUsageQuotaEnvelope> {
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelUsageQuotaEnvelope>(this.apiClient, buildQuotaLimitUrl(resolved), {
       method: "GET",
       timeoutMs: REQUEST_TIMEOUT_MS,
@@ -817,7 +817,7 @@ export class BigModelUsageQuotaProvider {
     endTime: string,
   ): Promise<BigModelUsageModelUsageEnvelope> {
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelUsageModelUsageEnvelope>(
       this.apiClient,
       buildUsageMonitorUrl(resolved, "model-usage", startTime, endTime),
@@ -835,7 +835,7 @@ export class BigModelUsageQuotaProvider {
     endTime: string,
   ): Promise<BigModelUsageToolUsageEnvelope> {
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelUsageToolUsageEnvelope>(
       this.apiClient,
       buildUsageMonitorUrl(resolved, "tool-usage", startTime, endTime),
@@ -853,7 +853,7 @@ export class BigModelUsageQuotaProvider {
   ): Promise<BigModelCreditUsageActivityEnvelope> {
     const range = resolveCreditUsageActivityTimeRange(timeZone);
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelCreditUsageActivityEnvelope>(
       this.apiClient,
       buildCreditUsageMonitorUrl(resolved, "activity", range.startTime, range.endTime),
@@ -872,7 +872,7 @@ export class BigModelUsageQuotaProvider {
     usageType: "MODEL" | "MCP",
   ): Promise<BigModelCreditUsageDetailEnvelope> {
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelCreditUsageDetailEnvelope>(
       this.apiClient,
       buildCreditUsageMonitorUrl(resolved, "usage-detail", startTime, endTime, usageType),
@@ -891,7 +891,7 @@ export class BigModelUsageQuotaProvider {
   ): Promise<BigModelUsageModelPerformanceEnvelope> {
     const timeRange = resolveModelPerformanceTimeRange(timeZone, range);
     // 审计版不连接官方套餐服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     return readApiJson<BigModelUsageModelPerformanceEnvelope>(
       this.apiClient,
       buildModelPerformanceMonitorUrl(resolved, timeRange.startTime, timeRange.endTime),
@@ -964,7 +964,7 @@ async function readCodingPlanResetApiJson(
   init: ApiRequestInit,
   options: { acceptedBusinessCodes?: readonly number[] } = {},
 ): Promise<unknown> {
-  assertOfficialServiceAvailable("codingPlan");
+  assertOfficialServiceRemoved("codingPlan");
   const response = await apiClient.request(input, init);
   let payload: unknown;
   let parseError: unknown;

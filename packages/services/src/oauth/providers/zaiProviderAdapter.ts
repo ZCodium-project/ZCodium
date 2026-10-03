@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import { Buffer } from "node:buffer";
 import {
   ApiError,
@@ -298,7 +298,7 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
 
   async normalizePolledTokenSet(tokenSet: OAuthTokenSet): Promise<OAuthTokenSet> {
     // 审计版不连接官方服务，轮询 token 也不能触发二次兑换。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
     // CLI flow 的 ready.access_token 仍是 Z.AI OAuth token，而 Desktop
     // oauth:zai:access_token 的既有契约是 /api/auth/z/login 返回的业务 token。
     // polling 与 deep link 必须在同一 adapter 边界完成转换，避免两种登录方式落盘语义分裂。
@@ -313,7 +313,7 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
     context: OAuthProviderContext,
   ): Promise<OAuthTokenSet> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
 
     // 后端 OAuth token 路由排查时，原日志只记录了 404 结果，看不到客户端实际请求形态。
     // 这里记录 method/url/headers/body 结构，同时脱敏一次性 code，避免敏感授权码落盘。
@@ -400,7 +400,7 @@ export class ZaiProviderAdapter implements OAuthProviderAdapter {
     _context: OAuthProviderContext,
   ): Promise<OAuthUserProfile> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
 
     if (this.lastBackendUserProfile?.state === _context.state) {
       const profile = this.lastBackendUserProfile.profile;

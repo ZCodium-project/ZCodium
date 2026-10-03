@@ -8,16 +8,8 @@ interface OfficialServicesSettingsSectionProps {
   onToggle: (key: OfficialServiceKey, enabled: boolean) => void;
 }
 
-/** 展开顺序即页面顺序；分享已永久下线，不在此列。 */
-const OFFICIAL_SERVICE_FEATURES: readonly OfficialServiceKey[] = [
-  "account",
-  "codingPlan",
-  "feedback",
-  "officialMcp",
-  "offPeak",
-  "marketplace",
-  "clientConfig",
-];
+/** 展开顺序即页面顺序；对话分享与随去智谱化下线的 5 个能力都不在此列。 */
+const OFFICIAL_SERVICE_FEATURES: readonly OfficialServiceKey[] = ["marketplace", "clientConfig"];
 
 export function OfficialServicesSettingsSection({
   switches,

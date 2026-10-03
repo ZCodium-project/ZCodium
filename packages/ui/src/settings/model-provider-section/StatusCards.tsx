@@ -98,6 +98,24 @@ function PlanStatusCardSurface({
   );
 }
 
+export function ModelProviderEmptyCard({
+  emptyLabel,
+  hintLabel,
+}: {
+  emptyLabel: string;
+  hintLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
+      <div className="flex items-center gap-2 text-ui-base text-foreground-subtle">
+        <InfoIcon className="size-4 shrink-0" aria-hidden="true" />
+        <span>{emptyLabel}</span>
+      </div>
+      <div className="text-ui-sm text-foreground-subtlest">{hintLabel}</div>
+    </div>
+  );
+}
+
 export function ModelProviderLoadingCard({ loadingLabel }: { loadingLabel: string }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">

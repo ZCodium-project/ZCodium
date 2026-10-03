@@ -28,41 +28,63 @@ function runProbe(home, mode) {
 test("official service switches persist, project across processes and gate official URLs", () => {
   const home = mkdtempSync(join(tmpdir(), "zcode-official-switches-"));
 
-  // 1. 默认全关：没有设置文件时不读取也不放行。
+  // 1. 默认全关：没有设置文件时不读取也不放行；已下线能力恒拒绝。
   const baseline = runProbe(home, "baseline");
   assert.equal(baseline.enabled, false, "默认应为全关");
   assert.equal(baseline.assertRejects, true, "默认应拒绝官方服务");
+  assert.equal(baseline.removedRejects, true, "已下线能力必须恒拒绝");
 
   // 2. 设置页打开开关：存储 schema 保留字段、写盘、读回、当前进程立即生效。
+  //    探针写入的 officialServices 里带着 5 个已下线字段（模拟存量用户磁盘数据）。
   const written = runProbe(home, "write");
-  assert.equal(written.storageSchemaAccount, true, "appSettingsSchema 必须保留 officialServices");
-  assert.equal(written.diskAccount, true, "setting.json 必须落盘 account=true");
+  assert.equal(
+    written.storageSchemaMarketplace,
+    true,
+    "appSettingsSchema 必须保留 officialServices",
+  );
+  assert.equal(written.diskMarketplace, true, "setting.json 必须落盘 marketplace=true");
   assert.equal(written.diskClientConfig, false, "setting.json 必须落盘关闭项");
-  assert.equal(written.readBackAccount, true, "get() 必须读回已开启的开关");
-  assert.equal(written.enabledAccount, true, "update 后当前进程 account 生效");
-  assert.equal(written.enabledOffPeak, true, "update 后当前进程 offPeak 生效");
+  assert.equal(
+    written.storageSchemaStrippedAccount,
+    undefined,
+    "已下线字段不得进入 schema（BREAKING：存量值写盘时被 strip）",
+  );
+  assert.equal(written.diskAccount, undefined, "setting.json 不得残留 account 字段");
+  assert.equal(written.readBackMarketplace, true, "get() 必须读回已开启的开关");
+  assert.equal(written.readBackAccount, undefined, "读回不得带出已下线字段");
+  assert.equal(written.enabledMarketplace, true, "update 后当前进程 marketplace 生效");
   assert.equal(written.enabledClientConfig, false, "未开启的 clientConfig 保持关闭");
-  assert.equal(written.assertAccountPasses, true, "已开启服务应放行");
+  assert.equal(written.assertMarketplacePasses, true, "已开启服务应放行");
   assert.equal(written.assertClientConfigRejects, true, "未开启服务应拒绝");
   assert.equal(written.blockedMarketplaceUrl, false, "marketplace 开启后 CDN 请求不再被拦截");
   assert.equal(written.blockedClientConfigUrl, true, "clientConfig 未开启时对应平台路径仍被拦截");
 
+  // 已下线能力：错误理由必须是“已下线”，不是“未开启”，否则用户会去设置页找不存在的开关。
+  assert.match(written.removedAccountMessage, /下线/, "账号能力应报“已下线”");
+  assert.match(written.removedAccountMessage, /issues/, "报错应指向 issues 地址");
+  assert.equal(written.blockedRemovedAccountUrl, true, "账号路径恒被拦截");
+  assert.equal(written.blockedRemovedPlanUrl, true, "套餐路径恒被拦截");
+  // client/claim 同时命中 account 与 clientConfig 的前缀，必须归给 account（恒拦截）。
+  assert.equal(written.resolvedRemovedClaim, "account", "client/claim 必须归给已下线的 account");
+  assert.equal(written.blockedRemovedClaimUrl, true, "client/claim 不能被 clientConfig 放行");
+  assert.match(written.removedClaimMessage, /下线/, "client/claim 应报“已下线”");
+  assert.equal(written.resolvedRemovedAccount, "account", "账号路径归属 account");
+
   // 3. 新进程（模拟 Host/Server 重启）：只 get 一次即恢复磁盘开关并生效。
   const reopened = runProbe(home, "read");
-  assert.equal(reopened.readAccount, true, "新进程必须读回 account=true");
+  assert.equal(reopened.readMarketplace, true, "新进程必须读回 marketplace=true");
   assert.equal(reopened.readClientConfig, false, "新进程必须读回 clientConfig=false");
-  assert.equal(reopened.enabledAccount, true, "新进程 get() 后 account 策略恢复");
-  assert.equal(reopened.enabledOffPeak, true, "新进程 get() 后 offPeak 策略恢复");
+  assert.equal(reopened.enabledMarketplace, true, "新进程 get() 后 marketplace 策略恢复");
   assert.equal(reopened.enabledClientConfig, false, "新进程未开启项保持关闭");
-  assert.equal(reopened.assertOffPeakPasses, true, "恢复后的 offPeak 应放行");
+  assert.equal(reopened.assertMarketplacePasses, true, "恢复后的 marketplace 应放行");
   assert.equal(reopened.assertClientConfigRejects, true, "未开启项恢复后仍拒绝");
   assert.equal(reopened.blockedMarketplaceUrl, false, "恢复后 marketplace CDN 请求放行");
   assert.equal(reopened.blockedClientConfigUrl, true, "clientConfig 路径仍按开关拦截");
 
   // 4. 关闭开关：立即恢复拒绝并读回 false。
   const closed = runProbe(home, "close");
-  assert.equal(closed.readBackAccount, false, "关闭后必须读回 account=false");
-  assert.equal(closed.enabledAccount, false, "关闭后进程策略立即恢复拒绝");
+  assert.equal(closed.readBackMarketplace, false, "关闭后必须读回 marketplace=false");
+  assert.equal(closed.enabledMarketplace, false, "关闭后进程策略立即恢复拒绝");
   assert.equal(closed.assertRejects, true, "关闭后官方服务应拒绝");
   assert.equal(closed.blockedMarketplaceUrl, true, "关闭 marketplace 后 CDN 请求恢复拦截");
 });
@@ -96,29 +118,36 @@ test("official service switches gate real feature entry points", () => {
     "显式覆盖优先于内置源",
   );
 
-  // offPeak：关闭=取号在凭证/网络前拒绝；打开=真的发出取号请求并解析结果。
-  assert.equal(closed.offPeakRejected, true, "关闭时取号必须按未开启拒绝");
-  assert.equal(closed.offPeakFetchCalls, 0, "关闭时不得发起取号请求");
-  assert.equal(opened.offPeakRejected, false, "打开后取号不再被开关拒绝");
-  assert.equal(opened.offPeakFetchCalls, 1, "打开后必须真的发出取号请求");
-  assert.equal(opened.offPeakCanTake, true, "打开后应解析服务端取号结果");
+  // offPeak：能力已下线 → 关闭态与“打开”（探针写入的已下线字段）都必须拒绝，且不碰网络。
+  for (const [label, snapshot] of [
+    ["关闭", closed],
+    ["开启", opened],
+  ]) {
+    assert.equal(snapshot.offPeakRejected, true, `${label}时取号必须拒绝`);
+    assert.equal(snapshot.offPeakFetchCalls, 0, `${label}时不得发起取号请求`);
+    assert.match(snapshot.offPeakMessage, /下线/, `${label}时应报“已下线”`);
+  }
 
-  // feedback：关闭=提交在凭证/请求前拒绝；打开=真的发出反馈请求。
-  assert.equal(closed.feedbackRejected, true, "关闭时提交必须按未开启拒绝");
-  assert.equal(closed.feedbackCalls, 0, "关闭时不得发起反馈请求");
-  assert.equal(closed.feedbackAuthCalls, 0, "关闭时不得解析反馈凭证");
-  assert.equal(opened.feedbackRejected, false, "打开后提交不再被开关拒绝");
-  assert.equal(opened.feedbackCalls, 1, "打开后必须真的发出反馈请求");
-  assert.equal(opened.feedbackNetworkReached, true, "打开后请求应到达网络层");
+  // feedback：同上，恒拒绝且不解析凭证、不触达网络。
+  for (const [label, snapshot] of [
+    ["关闭", closed],
+    ["开启", opened],
+  ]) {
+    assert.equal(snapshot.feedbackRejected, true, `${label}时提交必须拒绝`);
+    assert.equal(snapshot.feedbackCalls, 0, `${label}时不得发起反馈请求`);
+    assert.equal(snapshot.feedbackAuthCalls, 0, `${label}时不得解析反馈凭证`);
+    assert.match(snapshot.feedbackMessage, /下线/, `${label}时应报“已下线”`);
+  }
 });
 
 test("official switches project into agent env and gate the official marketplace source", () => {
   const home = mkdtempSync(join(tmpdir(), "zcode-official-projection-"));
   const projection = runProbe(home, "projection");
 
-  // 完整 7 键，关闭时全部写 "0"（覆盖 shell 残留的 =1），不能依赖缺键关闭。
-  assert.equal(projection.closedEnvKeys, 7, "env 投影必须写完整键集");
+  // 完整 2 键，关闭时全部写 "0"（覆盖 shell 残留的 =1），不能依赖缺键关闭。
+  assert.equal(projection.closedEnvKeys, 2, "env 投影必须写完整键集");
   assert.deepEqual(projection.closedEnvValues, ["0"], "关闭时全部输出 0");
+  assert.deepEqual(projection.removedEnvKeys, [], "已下线能力不得再有环境变量映射");
 
   // 默认市场集合按开关过滤：关闭不含官方来源，打开包含官方 CDN 来源。
   assert.equal(projection.closedDefaults, 0, "关闭时默认集合不含官方市场");
@@ -129,7 +158,7 @@ test("official switches project into agent env and gate the official marketplace
     "官方市场来源必须是受开关控制的 CDN manifest",
   );
   assert.equal(projection.openedMarketplaceEnv, "1", "marketplace 开启时 env 写入 1");
-  assert.equal(projection.openedAccountEnv, "0", "未开启项 env 写入 0");
+  assert.equal(projection.openedClientConfigEnv, "0", "未开启项 env 写入 0");
 });
 
 test("agent default marketplaces only seed the official source when the switch is on", () => {
@@ -148,7 +177,7 @@ test("agent default marketplaces only seed the official source when the switch i
 
 test("agent spawn env and protocol entrypoint carry the official switches", async () => {
   // 防回归：这两处是 Desktop 下开关到达 agent 的唯一路径，任一被误删都会让
-  // 插件市场（及其它 agent 侧官方功能）在打开开关后仍然按“未开启”拒绝。
+  // 插件市场在打开开关后仍然按“未开启”拒绝。
   const servicesNode = await readFile(
     new URL("../../../packages/services/src/node.ts", import.meta.url),
     "utf8",

@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import type { HttpClientPort, HttpClientRunOptions, TraceContext } from "@zcode/contracts";
 import { resolveBigModelApiOrigin } from "@zcode/shared";
 
@@ -75,7 +75,7 @@ export function createCodingPlanApiKeyResolver(
       runOptions?: HttpClientRunOptions,
     ): Promise<string> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
 
       const accessToken = input.accessToken.trim();
       if (!accessToken) {

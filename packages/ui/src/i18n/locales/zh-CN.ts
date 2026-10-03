@@ -2230,20 +2230,11 @@ const zhCN: Record<string, string> = {
   "settings.officialServices.title": "Z.AI 服务连接",
   "settings.officialServices.description":
     "这些是 Z.AI（ZCode）的服务，打开后会连接 Z.AI 的服务器。如无必要，请保持关闭。部分服务在启动时加载，修改后需重启应用生效。",
-  "settings.officialServices.account.title": "Z.AI API 配置",
-  "settings.officialServices.account.desc": "配置 Z.AI API Key 并使用相关能力。",
-  "settings.officialServices.codingPlan.title": "套餐与额度",
-  "settings.officialServices.codingPlan.desc": "查询 Z.AI 套餐、额度与用量。",
-  "settings.officialServices.feedback.title": "Z.AI 反馈通道",
-  "settings.officialServices.feedback.desc": "通过 Z.AI 接口提交反馈；关闭时请到 GitHub Issues。",
-  "settings.officialServices.officialMcp.title": "Z.AI MCP",
-  "settings.officialServices.officialMcp.desc": "使用 Z.AI 的 MCP 凭证服务。",
-  "settings.officialServices.offPeak.title": "闲时任务",
-  "settings.officialServices.offPeak.desc": "使用 Z.AI 的闲时任务网关。",
   "settings.officialServices.marketplace.title": "Z.AI 插件市场与 CDN",
   "settings.officialServices.marketplace.desc": "从 Z.AI 市场与 CDN 下载插件与资源。",
   "settings.officialServices.clientConfig.title": "Z.AI 客户端配置",
-  "settings.officialServices.clientConfig.desc": "拉取 Z.AI 客户端配置与启动预热数据。",
+  "settings.officialServices.clientConfig.desc":
+    "拉取 Z.AI 客户端配置与启动预热数据；不包含 Provider 模板（模型预设以内置配置为准）。",
   "settings.usageTitle": "使用统计",
   "settings.usageDescription": "查看会话活跃度与模型用量的粗略统计。",
   "resourceManager.storage.summaryTotal": "ZCodium 总占用",
@@ -2898,6 +2889,8 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.reorderProvider": "拖拽调整供应商顺序",
   "settings.modelProvider.reorderModel": "拖拽调整模型顺序",
   "settings.modelProvider.empty": "暂无自定义模型供应商",
+  "settings.modelProvider.emptyHint":
+    "点击右上角「添加供应商」从预设模板创建，或直接创建自定义供应商并填写 API Key。",
   "settings.modelProvider.deleteConfirm": '确定要删除"{name}"吗？',
   "settings.modelProvider.deleteConfirmTitle": "删除供应商“{name}”？",
   "settings.modelProvider.deleteConfirmDescription":

@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import { randomBytes } from "node:crypto";
 import type { HttpClientPort, HttpClientRunOptions, TraceContext } from "@zcode/contracts";
 import { buildBigModelApiUrl } from "@zcode/shared";
@@ -67,7 +67,7 @@ export function createBigmodelOAuthClient(
       runOptions?: HttpClientRunOptions,
     ): Promise<BigmodelOAuthTokenSet> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
 
       if (!appSecret) {
         throw new BigmodelOAuthError("BigModel OAuth appSecret is required.");

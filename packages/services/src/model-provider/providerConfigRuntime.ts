@@ -6,8 +6,11 @@ import {
   type NodeProviderConfigRuntimeOptions,
 } from "@zcode/provider-node";
 import type { ModelProviderConfig } from "./legacyModelProviderSerialized.js";
+import { createServiceLogger } from "../logger/serviceLogger.js";
 import { getAppConfigDir } from "../paths.js";
 import { importLegacyPersonalProviderConfig } from "./legacyPersonalProviderConfigImporter.js";
+
+const log = createServiceLogger("provider-config-runtime");
 
 export interface ProviderConfigRuntimeOptions {
   readonly zcodeBuiltinFilePath: string;
@@ -40,6 +43,10 @@ export class ProviderConfigRuntime {
       onZCodeBuiltinRefreshError: options.onZCodeBuiltinRefreshError,
       onPersonalConfigRecovery: options.onPersonalConfigRecovery,
       onPersonalConfigPollingError: options.onPersonalConfigPollingError,
+      // 去智谱化迁移失败是可恢复异常：Personal 数据仍能加载，只是残留条目暂不可用。
+      onRetiredProviderMigrationError: (error) => {
+        log.warn("去智谱化 Provider 残留迁移失败，下次启动重试", { error });
+      },
       personalFilePath:
         options.personalFilePath ?? join(getAppConfigDir(), PERSONAL_PROVIDER_CONFIG_FILE_NAME),
       personalPollingIntervalMs: options.personalPollingIntervalMs,

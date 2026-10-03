@@ -1,4 +1,4 @@
-import { isOfficialServiceEnabled } from "@zcode/shared";
+import { isOfficialServiceRemoved } from "@zcode/shared";
 /*
  * ZCode 官方 Server MCP 的凭证解析与身份头构造。
  *
@@ -285,8 +285,9 @@ function identityOnlyOutcome(identity: OfficialMcpIdentitySnapshot): OfficialMcp
 export async function resolveOfficialMcpCredentials(
   deps: OfficialMcpCredentialResolverDeps,
 ): Promise<OfficialMcpCredentialOutcome> {
-  // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-  if (!isOfficialServiceEnabled("officialMcp")) return fail("official_auth_unavailable");
+  // 官方 MCP 凭证能力已随去智谱化下线：恒按“凭证不可用”短路。保留条件形状是刻意的，
+  // 见 officialPlatformPolicy.isOfficialServiceRemoved 的注释（不可达区会丢失类型收窄）。
+  if (isOfficialServiceRemoved("officialMcp")) return fail("official_auth_unavailable");
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const identity = await readIdentitySnapshot(deps);

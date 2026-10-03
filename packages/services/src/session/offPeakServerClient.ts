@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 /* off-peak 服务端五接口客户端。
    只负责 额度快照/取号/批量查状态/结算 四个 JSON 接口——messages 调模型不走这里
    （由 idle plan per-turn provider 在 agent 进程内直连）。
@@ -149,7 +149,7 @@ export function createOffPeakServerClient(deps: OffPeakServerClientDeps): OffPea
 
   async function request(method: "GET" | "POST", path: string, body?: unknown): Promise<unknown> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("offPeak");
+    assertOfficialServiceRemoved("offPeak");
 
     const credentials = await deps.resolveCredentials();
     const controller = new AbortController();

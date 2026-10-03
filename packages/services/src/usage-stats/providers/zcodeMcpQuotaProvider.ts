@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 /* ZCode 官方 Server MCP 的调用额度读取（`GET /api/v1/mcp/usage`）。
  *
  * 单文件承载该接口的全部细节：路径、信封解析、总额度映射。**鉴权不在这里实现**——
@@ -172,7 +172,7 @@ export async function fetchMcpQuotaSnapshot(params: {
   requestScope: McpQuotaRequestScope;
 }): Promise<UsageMcpQuotaSnapshot | null> {
   // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-  assertOfficialServiceAvailable("codingPlan");
+  assertOfficialServiceRemoved("codingPlan");
 
   let outcome: OfficialMcpCredentialOutcome;
   try {

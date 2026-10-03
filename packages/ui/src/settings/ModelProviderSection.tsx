@@ -1092,6 +1092,7 @@ export function ModelProviderSection({
         />
       ) : (
         <ModelProviderSectionDetail
+          providerListEmpty={!loading && navigationItems.length === 0}
           connectionSelections={effectiveConnectionSelections}
           providerSettingsView={providerSettingsView}
           selectedNavItem={selectedNavItem}

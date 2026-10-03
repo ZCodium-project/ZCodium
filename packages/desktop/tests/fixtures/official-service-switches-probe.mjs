@@ -27,21 +27,20 @@ const { resolveDefaultPluginMarketplaces } = await import(
   new URL("../../../shared/src/plugin-marketplaces.ts", import.meta.url).href
 );
 
-const ALL_OFF = {
-  account: false,
-  codingPlan: false,
-  feedback: false,
-  officialMcp: false,
-  offPeak: false,
-  marketplace: false,
-  clientConfig: false,
-};
-const OPENED = {
-  ...ALL_OFF,
+// 只剩仍在册的两个开关：account / feedback / codingPlan / officialMcp / offPeak 随去智谱化下线。
+const ALL_OFF = { marketplace: false, clientConfig: false };
+const ALL_ON = { marketplace: true, clientConfig: true };
+// 存量用户磁盘上仍可能存在的已下线字段，用于验证写盘时被 zod strip。
+const LEGACY_KEYS = {
   account: true,
+  feedback: true,
+  codingPlan: true,
+  officialMcp: true,
   offPeak: true,
-  marketplace: true,
 };
+const LEGACY_STORED = { ...ALL_ON, ...LEGACY_KEYS };
+// 持久化场景只需要 marketplace 开启，另带 5 个已下线字段。
+const WRITE_PATCH = { marketplace: true, clientConfig: false, ...LEGACY_KEYS };
 
 const service = createSettingService();
 const result = { mode };
@@ -64,11 +63,32 @@ function throwsError(run) {
   }
 }
 
+function errorMessage(run) {
+  try {
+    run();
+    return "";
+  } catch (error) {
+    return String(error?.message ?? error);
+  }
+}
+
+// 业务入口多为 async：拒绝会变成 rejected promise，必须 await 才能拿到文案，
+// 否则会漏成 unhandled rejection 直接把探针进程带崩。
+async function rejectionMessage(run) {
+  try {
+    await run();
+    return "";
+  } catch (error) {
+    return String(error?.message ?? error);
+  }
+}
+
 const PROBE_LOGGER = { info() {}, warn() {}, error() {}, debug() {} };
 
 /**
- * 逐项验证开关的真实业务功能：同一份服务在关闭态应明确拒绝（不碰凭证/网络），
- * 打开后应真的进入各自功能（拉客户端配置 / 出现 CDN 下载源 / 发出取号请求 / 发出反馈请求）。
+ * 逐项验证仍在册开关的真实业务功能：同一份服务在关闭态应明确拒绝（不碰凭证/网络），
+ * 打开后应真的进入各自功能（拉客户端配置 / 出现 CDN 下载源）。
+ * 同时验证已下线功能无论开关如何都拒绝，并给出“已下线”而不是“未开启”的文案。
  */
 async function runFunctionalEffects() {
   const { createClientConfigService } = await import(
@@ -143,7 +163,7 @@ async function runFunctionalEffects() {
         bundledBaseUrl: "https://github.com/probe/repo/releases/download/v0.0.0",
       })[0] ?? null;
 
-    // offPeak：关闭时取号在凭证/网络前拒绝；打开后真的发出取号请求并解析结果。
+    // offPeak：能力已下线 → 恒拒绝，且不得触达凭证/网络。
     let offPeakFetchCalls = 0;
     const offPeakClient = createOffPeakServerClient({
       resolveOrigin: () => "https://mock-offpeak.example",
@@ -160,17 +180,13 @@ async function runFunctionalEffects() {
       },
       logger: PROBE_LOGGER,
     });
-    try {
-      const availability = await offPeakClient.getTakeNumberAvailability();
-      snapshot.offPeakRejected = false;
-      snapshot.offPeakCanTake = availability.canTakeNumber === true;
-    } catch (error) {
-      snapshot.offPeakRejected = String(error?.message ?? error).includes("未开启");
-      snapshot.offPeakCanTake = false;
-    }
+    snapshot.offPeakMessage = await rejectionMessage(() =>
+    offPeakClient.getTakeNumberAvailability(),
+  );
+    snapshot.offPeakRejected = Boolean(snapshot.offPeakMessage);
     snapshot.offPeakFetchCalls = offPeakFetchCalls;
 
-    // feedback：关闭时提交在请求前拒绝；打开后真的发出反馈请求（mock 网络触达即失败）。
+    // feedback：能力已下线 → 恒拒绝，且不得触达凭证/网络。
     let feedbackCalls = 0;
     let feedbackAuthCalls = 0;
     const feedbackClient = new FeedbackHttpClient({
@@ -187,15 +203,8 @@ async function runFunctionalEffects() {
       },
       logger: PROBE_LOGGER,
     });
-    try {
-      await feedbackClient.list();
-      snapshot.feedbackRejected = false;
-      snapshot.feedbackNetworkReached = false;
-    } catch (error) {
-      const message = String(error?.message ?? error);
-      snapshot.feedbackRejected = message.includes("未开启");
-      snapshot.feedbackNetworkReached = message.includes("probe feedback network reached");
-    }
+    snapshot.feedbackMessage = await rejectionMessage(() => feedbackClient.list());
+    snapshot.feedbackRejected = Boolean(snapshot.feedbackMessage);
     snapshot.feedbackCalls = feedbackCalls;
     snapshot.feedbackAuthCalls = feedbackAuthCalls;
 
@@ -203,17 +212,7 @@ async function runFunctionalEffects() {
   }
 
   const closed = await inspect();
-  await service.update({
-    officialServices: {
-      account: true,
-      codingPlan: true,
-      feedback: true,
-      officialMcp: true,
-      offPeak: true,
-      marketplace: true,
-      clientConfig: true,
-    },
-  });
+  await service.update({ officialServices: LEGACY_STORED });
   const opened = await inspect();
   return { closed, opened };
 }
@@ -221,39 +220,68 @@ async function runFunctionalEffects() {
 if (mode === "baseline") {
   // 不读取设置：进程策略应保持默认全关。
   result.enabled = policy.isOfficialPlatformEnabled();
-  result.assertRejects = throwsError(() => policy.assertOfficialServiceAvailable("account"));
+  result.assertRejects = throwsError(() => policy.assertOfficialServiceAvailable("marketplace"));
+  result.removedRejects = throwsError(() => policy.assertOfficialServiceRemoved("account"));
 } else if (mode === "write") {
-  result.storageSchemaAccount = appSettingsSchema.parse({
-    officialServices: OPENED,
+  result.storageSchemaMarketplace = appSettingsSchema.parse({
+    officialServices: WRITE_PATCH,
+  }).officialServices?.marketplace;
+  // 存量用户磁盘上的已下线字段必须在写盘时被 zod strip。
+  result.storageSchemaStrippedAccount = appSettingsSchema.parse({
+    officialServices: WRITE_PATCH,
   }).officialServices?.account;
-  await service.update({ officialServices: OPENED });
-  const disk = JSON.parse(readFileSync(join(home, ".zcode", "v2", "setting.json"), "utf8"));
-  result.diskAccount = disk.officialServices?.account;
+  await service.update({ officialServices: WRITE_PATCH });
+  const disk = JSON.parse(readFileSync(join(home, ".zcodium", "v2", "setting.json"), "utf8"));
+  result.diskMarketplace = disk.officialServices?.marketplace;
   result.diskClientConfig = disk.officialServices?.clientConfig;
+  result.diskAccount = disk.officialServices?.account;
   const readBack = await service.get();
+  result.readBackMarketplace = readBack.officialServices?.marketplace;
   result.readBackAccount = readBack.officialServices?.account;
-  result.enabledAccount = policy.isOfficialServiceEnabled("account");
-  result.enabledOffPeak = policy.isOfficialServiceEnabled("offPeak");
+  result.enabledMarketplace = policy.isOfficialServiceEnabled("marketplace");
   result.enabledClientConfig = policy.isOfficialServiceEnabled("clientConfig");
-  result.assertAccountPasses = doesNotThrow(() => policy.assertOfficialServiceAvailable("account"));
+  result.assertMarketplacePasses = doesNotThrow(() =>
+    policy.assertOfficialServiceAvailable("marketplace"),
+  );
   result.assertClientConfigRejects = throwsError(() =>
     policy.assertOfficialServiceAvailable("clientConfig"),
   );
+  // 已下线功能：开关打开与否都恒拒绝，且理由是“已下线”而不是“未开启”。
+  result.removedAccountMessage = errorMessage(() => policy.assertOfficialServiceRemoved("account"));
   result.blockedMarketplaceUrl = policy.shouldBlockOfficialPlatformUrl(
     "https://cdn-zcode.z.ai/icon.png",
   );
   result.blockedClientConfigUrl = policy.shouldBlockOfficialPlatformUrl(
     "https://zcode.z.ai/api/v1/client/configs",
   );
+  result.blockedRemovedAccountUrl = policy.shouldBlockOfficialPlatformUrl(
+    "https://zcode.z.ai/api/v1/oauth/cli/init",
+  );
+  result.blockedRemovedClaimUrl = policy.shouldBlockOfficialPlatformUrl(
+    "https://zcode.z.ai/api/v1/client/claim",
+  );
+  result.blockedRemovedPlanUrl = policy.shouldBlockOfficialPlatformUrl(
+    "https://zcode.z.ai/api/v1/coding-plan/usage",
+  );
+  result.resolvedRemovedAccount = policy.resolveOfficialServiceForUrl(
+    "https://zcode.z.ai/api/v1/oauth/cli/init",
+  );
+  result.resolvedRemovedClaim = policy.resolveOfficialServiceForUrl(
+    "https://zcode.z.ai/api/v1/client/claim",
+  );
+  result.removedClaimMessage = errorMessage(() =>
+    policy.assertOfficialPlatformAccessible("https://zcode.z.ai/api/v1/client/claim"),
+  );
 } else if (mode === "read") {
   // 新进程：不执行 update，只读取已落盘的设置。
   const readBack = await service.get();
-  result.readAccount = readBack.officialServices?.account;
+  result.readMarketplace = readBack.officialServices?.marketplace;
   result.readClientConfig = readBack.officialServices?.clientConfig;
-  result.enabledAccount = policy.isOfficialServiceEnabled("account");
-  result.enabledOffPeak = policy.isOfficialServiceEnabled("offPeak");
+  result.enabledMarketplace = policy.isOfficialServiceEnabled("marketplace");
   result.enabledClientConfig = policy.isOfficialServiceEnabled("clientConfig");
-  result.assertOffPeakPasses = doesNotThrow(() => policy.assertOfficialServiceAvailable("offPeak"));
+  result.assertMarketplacePasses = doesNotThrow(() =>
+    policy.assertOfficialServiceAvailable("marketplace"),
+  );
   result.assertClientConfigRejects = throwsError(() =>
     policy.assertOfficialServiceAvailable("clientConfig"),
   );
@@ -266,9 +294,9 @@ if (mode === "baseline") {
 } else if (mode === "close") {
   await service.update({ officialServices: ALL_OFF });
   const readBack = await service.get();
-  result.readBackAccount = readBack.officialServices?.account;
-  result.enabledAccount = policy.isOfficialServiceEnabled("account");
-  result.assertRejects = throwsError(() => policy.assertOfficialServiceAvailable("account"));
+  result.readBackMarketplace = readBack.officialServices?.marketplace;
+  result.enabledMarketplace = policy.isOfficialServiceEnabled("marketplace");
+  result.assertRejects = throwsError(() => policy.assertOfficialServiceAvailable("marketplace"));
   result.blockedMarketplaceUrl = policy.shouldBlockOfficialPlatformUrl(
     "https://cdn-zcode.z.ai/icon.png",
   );
@@ -281,15 +309,14 @@ if (mode === "baseline") {
   result.closedEnvValues = [...new Set(Object.values(closedPatch))].sort();
   result.closedDefaults = resolveDefaultPluginMarketplaces().length;
 
-  await service.update({
-    officialServices: { ...ALL_OFF, marketplace: true },
-  });
-  const openedPatch = policy.buildOfficialServiceEnvPatch({
-    ...ALL_OFF,
-    marketplace: true,
-  });
+  await service.update({ officialServices: { ...ALL_OFF, marketplace: true } });
+  const openedPatch = policy.buildOfficialServiceEnvPatch({ ...ALL_OFF, marketplace: true });
   result.openedMarketplaceEnv = openedPatch.ZCODIUM_ENABLE_OFFICIAL_MARKETPLACE;
-  result.openedAccountEnv = openedPatch.ZCODIUM_ENABLE_OFFICIAL_ACCOUNT;
+  result.openedClientConfigEnv = openedPatch.ZCODIUM_ENABLE_OFFICIAL_CLIENT_CONFIG;
+  // 已下线功能不再有环境变量：留着会让 shell 残留的 =1 看起来还能放行。
+  result.removedEnvKeys = Object.keys(openedPatch).filter((key) =>
+    /ACCOUNT|FEEDBACK|CODING_PLAN|_MCP|OFFPEAK/.test(key),
+  );
   const defaults = resolveDefaultPluginMarketplaces();
   result.openedDefaults = defaults.length;
   result.openedDefaultSource = defaults[0]?.source ?? null;
