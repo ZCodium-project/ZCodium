@@ -4,7 +4,8 @@ import { dirname, extname, isAbsolute, resolve } from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { resolveZCodeEndpointOrigin, pickProductEndpointEnv } from "@zcode/shared/zcodeEndpoint";
+// 见 tsup.config.ts 同名注释：构建配置需要相对路径导入 shared 源码，避免 Node 原生加载 .ts。
+import { resolveZCodeEndpointOrigin, pickProductEndpointEnv } from "../shared/src/zcodeEndpoint.js";
 import { pdfJsCMapsPlugin } from "../ui/vite/pdfJsCMapsPlugin.js";
 import { getBuildMetadata } from "./scripts/build-metadata.mjs";
 import { resolveDesktopProductFlavor } from "./scripts/desktop-product-identity.mjs";
@@ -233,6 +234,7 @@ export default defineConfig(({ mode }) => {
           index: resolve(__dirname, "src/renderer/index.html"),
           "resource-manager": resolve(__dirname, "src/renderer/resource-manager.html"),
           "cua-permission-panel": resolve(__dirname, "src/renderer/cua-permission-panel.html"),
+          "data-root-decision": resolve(__dirname, "src/renderer/data-root-decision.html"),
         },
       },
     },

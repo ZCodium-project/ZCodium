@@ -2153,6 +2153,8 @@ const zhCN: Record<string, string> = {
   "settings.dataBaseDirPlaceholder": "默认：用户主目录",
   "settings.dataBaseDirBrowse": "选择文件夹",
   "settings.dataBaseDirSave": "保存",
+  "settings.dataBaseDirImport": "导入旧数据",
+  "settings.dataBaseDirImportHint": "从旧版数据目录复制数据并重启应用（当前数据目录会先整体备份）",
   "settings.dataBaseDirCopying": "正在复制数据，请勿关闭应用…",
   "settings.dataBaseDirCopyFailed": "数据复制失败，路径未更改。",
   "settings.dataBaseDirForbiddenInstallDir":
@@ -6186,6 +6188,40 @@ const zhCN: Record<string, string> = {
   "scheduledPreview.toast.running": "正在运行“{title}”…",
   "scheduledPreview.toast.view": "查看",
   "scheduledPreview.addSchedule": "添加计划",
+
+  // ---- 数据根决策窗口 ----
+  "dataRoot.loading": "正在准备…",
+  "dataRoot.title": "数据存储设置",
+  "dataRoot.status.absentWithLegacy":
+    "检测到旧版 ZCodium / ZCode 的数据。你可以把它复制到新的数据目录，也可以全新开始；无论选择哪种，旧目录都会原样保留。",
+  "dataRoot.status.unowned":
+    "当前数据目录包含无法识别归属的数据（可能来自其它分支或手动创建）。继续操作前会先整体备份该目录，不会删除或合并。",
+  "dataRoot.status.corrupt":
+    "当前数据目录的归属信息损坏或版本过新，无法安全读取。继续操作前会先整体备份该目录。",
+  "dataRoot.conflict.notice": "冲突目录将先整体重命名为备份：{path}",
+  "dataRoot.candidates.title": "可迁移的旧数据",
+  "dataRoot.candidate.size": "大小",
+  "dataRoot.candidate.modified": "最后修改",
+  "dataRoot.candidate.empty": "未找到旧的 ~/.zcode 数据目录，只能全新开始。",
+  "dataRoot.disk.insufficient":
+    "磁盘空间不足：需要约 {required}，当前可用 {free}。请清理空间后重试。",
+  "dataRoot.progress.preparing": "正在准备复制…",
+  "dataRoot.progress.copying": "正在复制旧数据…",
+  "dataRoot.progress.finalizing": "正在完成迁移…",
+  "dataRoot.error.title": "操作失败",
+  "dataRoot.error.retry": "请重试，或选择全新开始。",
+  "dataRoot.done.restarting": "正在重启应用…",
+  "dataRoot.action.migrate": "迁移旧数据",
+  "dataRoot.action.migrateHint": "复制旧数据到新目录，原目录保留；之后两边互不同步。",
+  "dataRoot.action.fresh": "全新开始",
+  "dataRoot.action.freshHint": "不导入旧数据；旧目录保留，之后可在设置中导入。",
+  "dataRoot.action.quit": "退出应用",
+  "dataRoot.action.quitHint": "不做任何修改，下次启动会再次询问。",
+  "dataRoot.import.title": "从旧数据目录导入",
+  "dataRoot.import.description":
+    "将从旧版数据目录复制数据到当前数据目录。当前数据目录会先整体备份，完成后应用会重启。",
+  "dataRoot.action.import": "导入并重启",
+  "dataRoot.action.cancel": "取消",
 };
 
 export default zhCN;
