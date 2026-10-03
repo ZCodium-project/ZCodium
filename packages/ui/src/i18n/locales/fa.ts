@@ -552,7 +552,7 @@ const faIR: Record<string, string> = {
   "confirmDialog.projectRemoveDescription":
     "پروژه «{projectName}» از نوار کناری حذف می‌شود، اما فایل‌های روی دیسک دست‌نخورده باقی می‌مانند.",
   "bots.title": "بات‌ها",
-  "bots.description": "اتصال گفت‌وگوهای خارجی و وب‌هوک‌ها به بات‌های ZCode.",
+  "bots.description": "اتصال گفت‌وگوهای خارجی و وب‌هوک‌ها به بات‌های ZCodium.",
   "bots.listTitle": "بات‌ها",
   "bots.addBot": "بات جدید",
   "bots.addBinding": "افزودن پیوند",
@@ -1729,7 +1729,7 @@ const faIR: Record<string, string> = {
     "در حال برقراری اتصال {method} هستیم. می‌توانید روند راه‌اندازی را به صورت زنده اینجا دنبال کنید.",
   "webRemoteControl.trigger": "کنترل از راه دور با موبایل",
   "webRemoteControl.title": "کنترل از راه دور با موبایل",
-  "webRemoteControl.description": "کنترل فضاهای کاری ZCode از طریق چت‌بات‌ها.",
+  "webRemoteControl.description": "کنترل فضاهای کاری ZCodium از طریق چت‌بات‌ها.",
   "webRemoteControl.botChannel.title": "استفاده از کانال ربات",
   "webRemoteControl.botChannel.description": "برای دسترسی موبایلی طولانی‌مدت، یک چت‌بات متصل کنید.",
   "webRemoteControl.botChannel.weixin.title": "Weixin",
@@ -2247,7 +2247,7 @@ const faIR: Record<string, string> = {
   "settings.taskAutoArchiveDays.option.30": "بایگانی پس از 30 روز",
   "settings.dataBaseDir": "مسیر ذخیره داده‌ها",
   "settings.dataBaseDirDescription":
-    "پوشه ریشه داده‌های برنامه (به‌طور پیش‌فرض پوشه خانه کاربر). داده‌های موجود به مکان جدید کپی می‌شوند. پسوند .zcode/v2 قابل تغییر نیست.",
+    "پوشه ریشه داده‌های برنامه (به‌طور پیش‌فرض پوشه خانه کاربر). داده‌های موجود به مکان جدید کپی می‌شوند. پسوند .zcodium/v2 قابل تغییر نیست.",
   "settings.dataBaseDirPlaceholder": "پیش‌فرض: پوشه خانه کاربر",
   "settings.dataBaseDirBrowse": "انتخاب پوشه",
   "settings.dataBaseDirSave": "ذخیره",

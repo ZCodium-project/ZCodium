@@ -4,7 +4,7 @@ import {
   buildRuntimeZCodeEndpointUrls,
 } from "@zcode/shared";
 
-const DESKTOP_OAUTH_CALLBACK_URI = "zcode://oauth/callback";
+const DESKTOP_OAUTH_CALLBACK_URI = "zcodium://oauth/callback";
 
 export function readEnv(env: NodeJS.ProcessEnv, key: string): string | undefined {
   const value = env[key];

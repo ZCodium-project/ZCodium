@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { readExternalEnvVar } from "@zcode/shared";
 import { join } from "node:path";
 import { findOfficialMcpReservedHeaders } from "@zcode/shared";
 import type {

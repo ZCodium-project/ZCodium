@@ -10,10 +10,13 @@ import { installCliProcessErrorBoundary } from "./process-errors.js";
 import { installProtocolStderrBoundary } from "./protocol-stderr.js";
 import { createProtocolProcessLifecycle } from "./protocol-lifecycle.js";
 import { isProtocolServerInvocation } from "./arguments.js";
+import { migrateLegacyZCodeDataRoot } from "@zcode/services/node";
 
 void main();
 
 async function main(): Promise<void> {
+  // 任何 CLI 子命令（含 Host Worker）都可能读取数据目录；先完成旧根一次性迁移。
+  migrateLegacyZCodeDataRoot();
   const argv = process.argv.slice(2);
   // 存储模式也可运行在 Host Worker 中，不能修改整个 Host 的进程名称。
   if (!argv.includes("--prepare-storage")) setCliProcessTitle();

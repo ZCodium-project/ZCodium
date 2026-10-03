@@ -29,8 +29,9 @@ import {
 } from "@zcode/shared";
 import { getTasksIndexDatabasePath } from "#src/paths.js";
 import { runTasksDatabaseMigrations } from "#src/session/tasksDatabase/migrations.js";
+import { createNodeRequire } from "../nodeRequire.js";
 
-const require = createRequire(import.meta.url);
+const require = createNodeRequire();
 const { DatabaseSync } = require("node:sqlite") as typeof import("node:sqlite");
 type DatabaseSyncInstance = InstanceType<typeof DatabaseSync>;
 
@@ -230,7 +231,7 @@ export class AutomationRepo {
   private initializePromise: Promise<void> | null = null;
   // db 路径不能从进程级全局 _dataBaseDir（getTasksIndexDatabasePath）解析：
   // vitest threads 池会在同一进程并发跑多个测试文件，各文件的 setDataBaseDir(tempDir)
-  // 互相覆盖全局值，导致 repo 与裸 SQL 操作在并发窗口内写进真实库 ~/.zcode/v2（历史脏数据
+  // 互相覆盖全局值，导致 repo 与裸 SQL 操作在并发窗口内写进真实库 ~/.zcodium/v2（历史脏数据
   // /tmp/ws 系列即因此污染）。改为构造期固定一份 dbPath，测试通过依赖注入传入临时库路径，
   // 生产路径不传则回退 getTasksIndexDatabasePath，向后兼容。
   private readonly resolvedDbPath: string | null;

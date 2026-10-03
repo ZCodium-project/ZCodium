@@ -43,7 +43,7 @@ export const SKILL_SCAN_EXCLUDED_DIRECTORY_NAMES: ReadonlySet<string> = new Set(
 export const MAX_SKILL_SCAN_DEPTH = 8;
 
 /**
- * 技能目录（含 ~/.zcode/skills 等）下默认不进入以 . 开头的子目录，
+ * 技能目录（含 ~/.zcodium/skills 等）下默认不进入以 . 开头的子目录，
  * 避免 .agents/.cursor 等 vendored 副本与软链镜像重复列出；
  * 同时跳过 node_modules 等内容目录。
  */

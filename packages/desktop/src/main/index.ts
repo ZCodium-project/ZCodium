@@ -47,6 +47,7 @@ import {
   buildRuntimeProcessEnvPatch,
   captureLoginShellEnvSnapshot,
   getConversationWorkspaceDir,
+  migrateLegacyZCodeDataRoot,
   normalizeRuntimeProcessEnv,
   setDataBaseDir,
 } from "@zcode/services/node";
@@ -459,7 +460,7 @@ async function runBrowserCommandOnView(params: {
 let currentDesktopZoomLevel = 0;
 let currentDesktopWindowSize: DesktopWindowSize | undefined;
 const preloadPath = join(import.meta.dirname, "../preload/index.cjs");
-const settingsFile = join(homedir(), ".zcode", "v2", "setting.json");
+const settingsFile = join(homedir(), ".zcodium", "v2", "setting.json");
 let activeAppShutdownPolicy = resolveAppShutdownPolicy("normal", process.platform);
 let activeAppShutdownKind: AppShutdownKind | null = null;
 const WINDOWS_AGENT_FORCE_KILL_TIMEOUT_MS = 2_000;
@@ -1796,6 +1797,8 @@ app.whenReady().then(async () => {
     bootstrapSettings = await mainSettingService.get();
     if (bootstrapSettings.dataBaseDir) {
       setDataBaseDir(bootstrapSettings.dataBaseDir);
+      // 自定义数据目录是另一个 base：其内部的 .zcode 旧根同样需要迁移到 .zcodium。
+      migrateLegacyZCodeDataRoot();
     }
     if (bootstrapSettings.locale) {
       loadedBootstrapLocale = true;

@@ -14,6 +14,7 @@ import {
 } from "@zcode/provider";
 import { logger } from "@/logger.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
+import { useServices } from "@/hooks/useServices.js";
 import { Switch } from "@/components/ui/switch.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { isImeComposingKeyEvent } from "@/lib/imeComposition.js";
@@ -191,6 +192,7 @@ export function InlineEditableProviderCard({
 }) {
   const { intl } = useZCodeIntl();
   const { dismissFeedback, showFeedback } = useProviderDetailFeedback();
+  const { providerSettingsService } = useServices();
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(getProviderFormLabel(provider));
   const [apiFormat, setApiFormat] = useState<ProviderApiType>(
@@ -756,6 +758,18 @@ export function InlineEditableProviderCard({
   const headerProviderName = providerDisplayName;
   const isAccountProvider = provider.config.access?.type === "zhipu-account";
   const isApiKeyProvider = isApiKeyAccess(provider.config.access);
+  // 检测入口只装配给 standard-personal 的 API Key Provider：套餐账号没有草稿 Key，
+  // zai/bigmodel 家族使用内置模型名单，不需要从远端拉取候选。
+  const detectRemoteModels =
+    isApiKeyProvider && provider.config.group === "standard-personal"
+      ? () =>
+          providerSettingsService.listRemoteModels({
+            apiType: apiFormat,
+            baseUrl: baseUrlValue,
+            apiKey: apiKeyValue,
+            ...(provider.config.api?.headers ? { headers: provider.config.api.headers } : {}),
+          })
+      : undefined;
   // 修复说明：之前只看 statusSection 是否存在，导致自定义 Provider 传余额卡后头部
   // （名称/开关/重命名/删除）被整体隐藏。这里把"是否替代头部"变成显式开关，调用方决定。
   const effectiveHeaderVisible =
@@ -865,6 +879,7 @@ export function InlineEditableProviderCard({
           onAddModel={handleAddModel}
           onReorderModelIds={onReorderModelIds ? handleReorderModelIds : undefined}
           settingsRevision={settingsRevision ?? 0}
+          onDetectRemoteModels={detectRemoteModels}
         />
       </div>
     </div>

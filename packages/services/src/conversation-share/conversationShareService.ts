@@ -1,5 +1,6 @@
 /* oxlint-disable eslint(max-lines) -- 发布、远端 staging、安全轮询和原子导入共享同一 attempt 生命周期，拆分会让清理与进度状态失去单一 owner。 */
 import { createHash, randomUUID } from "node:crypto";
+import { readExternalEnvVar } from "@zcode/shared";
 import type { Dirent } from "node:fs";
 import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
@@ -725,7 +726,7 @@ export class ConversationShareService implements IConversationShareService {
     // 优先级不变：显式 option > ZCODE_CONVERSATION_SHARE_WEB_URL > 按环境推导。
     this.shareWebUrl = (
       options.shareWebUrl ??
-      process.env.ZCODE_CONVERSATION_SHARE_WEB_URL ??
+      readExternalEnvVar(process.env, "ZCODE_CONVERSATION_SHARE_WEB_URL") ??
       `${resolveRuntimeZCodeEndpointOrigin(process.env)}/cn/share`
     ).replace(/\/+$/u, "");
     this.importIndexPath = join(this.conversationWorkspaceRoot, ".zcode-share-imports.json");

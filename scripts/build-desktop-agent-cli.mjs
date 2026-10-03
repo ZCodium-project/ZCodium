@@ -23,6 +23,12 @@ const pnpmRunEnv = {
   // 自动 install 无法解析根 workspace 包，导致 dev:desktop:test 和 E2E onPrepare 失败。
   PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
 };
+// 剔除宿主 CLI 泄漏的 builtin 配置路径（新旧前缀），staging 事实源锁回仓库 config。
+for (const key of Object.keys(pnpmRunEnv)) {
+  if (key.startsWith("ZCODE_BUILTIN_PROVIDER") || key.startsWith("ZCODIUM_BUILTIN_PROVIDER")) {
+    delete pnpmRunEnv[key];
+  }
+}
 // 桌面 Agent 构建有普通 pnpm 和 bootstrap:with-remote 直跑 tsc 两条路径。
 // 过去两条路径分别维护依赖顺序，新增 workspace 依赖时只更新了 bootstrap 依赖，
 // 干净 CI 中该依赖的 dist 尚不存在，bootstrap 会因无法解析类型入口而失败。

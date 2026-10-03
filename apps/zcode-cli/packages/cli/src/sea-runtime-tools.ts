@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
+import { readExternalEnvVar } from "@zcode/shared";
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
@@ -65,8 +66,8 @@ export async function ensureSeaRuntimeTools(
   }
 
   const env = options.env ?? process.env;
-  const configuredStorageRoot = options.storageRoot ?? env.ZCODE_STORAGE_DIR?.trim();
-  const storageRoot = configuredStorageRoot || join(homedir(), ".zcode");
+  const configuredStorageRoot = options.storageRoot ?? readExternalEnvVar(env, "ZCODE_STORAGE_DIR");
+  const storageRoot = configuredStorageRoot || join(homedir(), ".zcodium");
   const runtimeEnv: CliEnv = {};
 
   for (const tool of manifest.tools) {

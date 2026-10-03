@@ -7,7 +7,8 @@ const GIT_MARKER = ".git";
 const HOME_PREFIX = "~/";
 const PRIORITY_STEP = 10;
 const SKILLS_DIR = "skills";
-const ZCODE_DIR = ".zcode";
+const USER_ZCODE_DIR = ".zcodium";
+const PROJECT_ZCODE_DIR = ".zcode";
 const AGENTS_DIR = ".agents";
 
 export interface SkillRootResolutionOptions {
@@ -99,7 +100,7 @@ function skillRootsForBase(
   // 合并而不是 fallback：用户可能同时安装原生 `.zcode` skill 和兼容 `.agents` skill。
   // 同一级别仍保持 `.zcode` 优先，后续同名按 root 顺序解析。
   return [
-    root(join(baseDirectory, ZCODE_DIR, SKILLS_DIR), scope, "zcode", nextPriority()),
+    root(join(baseDirectory, scope === "user" ? USER_ZCODE_DIR : PROJECT_ZCODE_DIR, SKILLS_DIR), scope, "zcode", nextPriority()),
     root(join(baseDirectory, AGENTS_DIR, SKILLS_DIR), scope, "agents", nextPriority()),
   ];
 }
