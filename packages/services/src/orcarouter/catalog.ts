@@ -99,6 +99,13 @@ export function createOrcaCatalogService(deps: OrcaCatalogDeps): OrcaCatalogServ
 
   let cached: { readonly at: number; readonly records: readonly OrcaModelRecord[] } | null = null;
   let pending: Promise<readonly OrcaModelRecord[]> | null = null;
+  /**
+   * 缓存世代号。
+   *
+   * `invalidate()` 递增它，使**在途**请求的结果在落盘前失效：否则保存/清除 key 之后，
+   * 上一个账号的旧响应仍会写进 `cached`，并把旧账号目录服务满一个 TTL。
+   */
+  let epoch = 0;
 
   const fetchLive = async (): Promise<readonly OrcaModelRecord[]> => {
     const credential = await deps.credentialStore.loadUsable();
@@ -120,11 +127,13 @@ export function createOrcaCatalogService(deps: OrcaCatalogDeps): OrcaCatalogServ
       if (!response.ok) {
         throw new Error(`模型目录请求失败：HTTP ${response.status}`);
       }
-      const text = await response.text();
-      if (text.length > maxResponseBytes) {
+      // 先取字节再按 UTF-8 解码：`text.length` 是 UTF-16 码元数，
+      // 非 ASCII 目录可让有效上限膨胀到约 1.5 MB，必须按真实字节数约束。
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      if (bytes.byteLength > maxResponseBytes) {
         throw new Error("模型目录响应超过大小上限");
       }
-      return parseOrcaCatalog(JSON.parse(text) as unknown, maxItems);
+      return parseOrcaCatalog(JSON.parse(new TextDecoder().decode(bytes)) as unknown, maxItems);
     } finally {
       clearTimeout(timer);
     }
@@ -135,19 +144,26 @@ export function createOrcaCatalogService(deps: OrcaCatalogDeps): OrcaCatalogServ
       return cached.records;
     }
     if (pending) return pending;
-    pending = fetchLive()
+    const requestEpoch = epoch;
+    const request = fetchLive()
       .then((records) => {
+        // 世代校验：invalidate() 之后到达的旧响应不得写回缓存，也不得作为 live 结果发布。
+        if (requestEpoch !== epoch) {
+          throw new Error("模型目录请求已被更新的凭据取代");
+        }
         cached = { at: now(), records };
         return records;
       })
       .finally(() => {
-        pending = null;
+        if (pending === request) pending = null;
       });
-    return pending;
+    pending = request;
+    return request;
   };
 
   return {
     invalidate() {
+      epoch += 1;
       cached = null;
       pending = null;
     },

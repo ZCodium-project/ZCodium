@@ -552,7 +552,7 @@ const faIR: Record<string, string> = {
   "confirmDialog.projectRemoveDescription":
     "پروژه «{projectName}» از نوار کناری حذف می‌شود، اما فایل‌های روی دیسک دست‌نخورده باقی می‌مانند.",
   "bots.title": "بات‌ها",
-  "bots.description": "اتصال گفت‌وگوهای خارجی و وب‌هوک‌ها به بات‌های ZCode.",
+  "bots.description": "اتصال گفت‌وگوهای خارجی و وب‌هوک‌ها به بات‌های ZCodium.",
   "bots.listTitle": "بات‌ها",
   "bots.addBot": "بات جدید",
   "bots.addBinding": "افزودن پیوند",
@@ -1729,7 +1729,7 @@ const faIR: Record<string, string> = {
     "در حال برقراری اتصال {method} هستیم. می‌توانید روند راه‌اندازی را به صورت زنده اینجا دنبال کنید.",
   "webRemoteControl.trigger": "کنترل از راه دور با موبایل",
   "webRemoteControl.title": "کنترل از راه دور با موبایل",
-  "webRemoteControl.description": "کنترل فضاهای کاری ZCode از طریق چت‌بات‌ها.",
+  "webRemoteControl.description": "کنترل فضاهای کاری ZCodium از طریق چت‌بات‌ها.",
   "webRemoteControl.botChannel.title": "استفاده از کانال ربات",
   "webRemoteControl.botChannel.description": "برای دسترسی موبایلی طولانی‌مدت، یک چت‌بات متصل کنید.",
   "webRemoteControl.botChannel.weixin.title": "Weixin",
@@ -2247,10 +2247,13 @@ const faIR: Record<string, string> = {
   "settings.taskAutoArchiveDays.option.30": "بایگانی پس از 30 روز",
   "settings.dataBaseDir": "مسیر ذخیره داده‌ها",
   "settings.dataBaseDirDescription":
-    "پوشه ریشه داده‌های برنامه (به‌طور پیش‌فرض پوشه خانه کاربر). داده‌های موجود به مکان جدید کپی می‌شوند. پسوند .zcode/v2 قابل تغییر نیست.",
+    "پوشه ریشه داده‌های برنامه (به‌طور پیش‌فرض پوشه خانه کاربر). داده‌های موجود به مکان جدید کپی می‌شوند. پسوند .zcodium/v2 قابل تغییر نیست.",
   "settings.dataBaseDirPlaceholder": "پیش‌فرض: پوشه خانه کاربر",
   "settings.dataBaseDirBrowse": "انتخاب پوشه",
   "settings.dataBaseDirSave": "ذخیره",
+  "settings.dataBaseDirImport": "ورود داده قدیمی",
+  "settings.dataBaseDirImportHint":
+    "کپی داده از پوشه قدیمی و راه‌اندازی مجدد (ابتدا از پوشه فعلی نسخه پشتیبان گرفته می‌شود)",
   "settings.dataBaseDirCopying": "در حال کپی داده‌ها؛ لطفاً برنامه را نبندید...",
   "settings.dataBaseDirCopyFailed": "کپی داده‌ها ناموفق بود. مسیر تغییر نکرد.",
   "settings.dataBaseDirForbiddenInstallDir":
@@ -2787,6 +2790,7 @@ const faIR: Record<string, string> = {
   "orcaRouter.connected": "متصل · {masked}",
   "orcaRouter.notConnected": "متصل نیست",
   "orcaRouter.clear": "پاک کردن",
+  "orcaRouter.clear.failed": "پاک کردن اعتبارنامه OrcaRouter ممکن نشد. دوباره تلاش کنید.",
   "orcaRouter.needsReauth":
     "OrcaRouter این اعتبارنامه را رد کرد. برای جایگزینی دوباره متصل شوید؛ کلید ذخیره‌شده تا موفقیت ورود جدید حذف نمی‌شود.",
   "orcaRouter.model.selectPlaceholder": "انتخاب مدل",
@@ -6440,6 +6444,42 @@ const faIR: Record<string, string> = {
     "قابلیت تازه برای مشترکین: با ساخت «وظیفه در زمان بی‌کاری»، در دوره‌های مازاد توان پردازشی، وظیفه تخصیص‌یافته شما را رایگان کامل می‌کنیم.",
   "offPeak.cancel.description":
     "«{title}» از اجرا بازمی‌ایستد. فایل‌هایی که تا حالا تغییر داده حفظ می‌شوند.",
+
+  // ---- پنجره تصمیم محل داده ----
+  "dataRoot.loading": "در حال آماده‌سازی…",
+  "dataRoot.title": "محل ذخیره داده‌ها",
+  "dataRoot.status.absentWithLegacy":
+    "داده‌های نسخه قدیمی ZCodium / ZCode پیدا شد. می‌توانید آن را به پوشه داده جدید کپی کنید یا از نو شروع کنید؛ در هر دو حالت پوشه قدیمی دست‌نخورده می‌ماند.",
+  "dataRoot.status.unowned":
+    "پوشه داده فعلی متعلق به این محصول نیست (ممکن است از شاخه دیگری یا به‌صورت دستی ساخته شده باشد). ابتدا یک نسخه پشتیبان گرفته می‌شود؛ چیزی حذف یا ادغام نمی‌شود.",
+  "dataRoot.status.corrupt":
+    "اطلاعات مالکیت پوشه داده آسیب دیده یا از نسخه جدیدتر است و قابل خواندن امن نیست. ابتدا نسخه پشتیبان گرفته می‌شود.",
+  "dataRoot.conflict.notice": "پوشه متضاد ابتدا به نسخه پشتیبان تغییر نام می‌یابد: {path}",
+  "dataRoot.candidates.title": "داده‌های قدیمی قابل انتقال",
+  "dataRoot.candidate.size": "حجم",
+  "dataRoot.candidate.modified": "آخرین تغییر",
+  "dataRoot.candidate.empty": "داده قدیمی ~/.zcode پیدا نشد. فقط شروع از نو امکان‌پذیر است.",
+  "dataRoot.disk.insufficient":
+    "فضای دیسک کافی نیست: حدود {required} لازم است، {free} در دسترس است. فضا آزاد کنید و دوباره تلاش کنید.",
+  "dataRoot.progress.preparing": "در حال آماده‌سازی برای کپی…",
+  "dataRoot.progress.copying": "در حال کپی داده‌های قدیمی…",
+  "dataRoot.progress.finalizing": "در حال نهایی‌سازی انتقال…",
+  "dataRoot.error.title": "عملیات ناموفق بود",
+  "dataRoot.error.retry": "دوباره تلاش کنید یا از نو شروع کنید.",
+  "dataRoot.done.restarting": "در حال راه‌اندازی مجدد برنامه…",
+  "dataRoot.action.migrate": "انتقال داده‌های قدیمی",
+  "dataRoot.action.migrateHint":
+    "داده‌های قدیمی به پوشه جدید کپی می‌شود و پوشه قدیمی باقی می‌ماند؛ پس از آن دو طرف همگام نمی‌شوند.",
+  "dataRoot.action.fresh": "شروع از نو",
+  "dataRoot.action.freshHint":
+    "داده‌های قدیمی وارد نمی‌شود؛ پوشه قدیمی باقی می‌ماند و بعداً از تنظیمات قابل ورود است.",
+  "dataRoot.action.quit": "خروج",
+  "dataRoot.action.quitHint": "هیچ تغییری اعمال نمی‌شود؛ دفعه بعد دوباره پرسیده می‌شود.",
+  "dataRoot.import.title": "ورود از پوشه داده قدیمی",
+  "dataRoot.import.description":
+    "داده‌های قدیمی به پوشه داده فعلی کپی می‌شود. ابتدا از پوشه فعلی نسخه پشتیبان گرفته می‌شود و پس از پایان، برنامه راه‌اندازی مجدد می‌شود.",
+  "dataRoot.action.import": "ورود و راه‌اندازی مجدد",
+  "dataRoot.action.cancel": "لغو",
 };
 
 export default faIR;

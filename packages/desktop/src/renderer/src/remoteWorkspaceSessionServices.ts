@@ -30,13 +30,13 @@ export function buildRemoteWorkspaceSessionServices(
     // SSH/Docker remote 项目的 skills/plugins/commands 目录位于远端文件系统。
     // 之前这里沿用本机 base services，会拿远端 workspacePath 去本机扫描，导致项目级能力读不到。
     skillsService: remoteServices.skillsService,
-    // 远端 skill 同步的 import 必须写入 SSH 主机的 ~/.zcode/skills。
-    // 如果继续沿用 base service，UI 会显示同步成功但实际写到本机 ~/.zcode/skills。
+    // 远端 skill 同步的 import 必须写入 SSH 主机的 ~/.zcodium/skills。
+    // 如果继续沿用 base service，UI 会显示同步成功但实际写到本机 ~/.zcodium/skills。
     skillSyncService: remoteServices.skillSyncService,
-    // 远端 MCP 同步的 import 必须写入 SSH 主机的 ~/.zcode/cli/config.json。
+    // 远端 MCP 同步的 import 必须写入 SSH 主机的 ~/.zcodium/cli/config.json。
     // 这里与 skillSyncService 一样走 remote service，避免把远端配置写回本机用户目录。
     mcpSyncService: remoteServices.mcpSyncService,
-    // 远端 plugin 同步会写入 SSH 主机的 ~/.zcode/plugins 和 plugins.dirs；
+    // 远端 plugin 同步会写入 SSH 主机的 ~/.zcodium/plugins 和 plugins.dirs；
     // 必须像 skill/MCP 一样走 remote service，不能沿用本机 base service。
     pluginSyncService: remoteServices.pluginSyncService,
     pluginsService: remoteServices.pluginsService,

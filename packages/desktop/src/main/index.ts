@@ -1,6 +1,7 @@
 import { installOfficialPlatformNetworkPolicy } from "./desktopOfficialPlatformPolicy.js";
 /* eslint-disable max-lines */
-import "./desktopEarlyDataBaseDirBootstrap.js";
+import { getDesktopDataRootStartupResult } from "./desktopEarlyDataBaseDirBootstrap.js";
+import { runDesktopDataRootDecisionFlow } from "./desktopDataRootDecision.js";
 import "./desktopEarlyChromiumHardwareAccelerationBootstrap.js";
 import { powerSaveBlocker } from "electron";
 import {
@@ -459,7 +460,7 @@ async function runBrowserCommandOnView(params: {
 let currentDesktopZoomLevel = 0;
 let currentDesktopWindowSize: DesktopWindowSize | undefined;
 const preloadPath = join(import.meta.dirname, "../preload/index.cjs");
-const settingsFile = join(homedir(), ".zcode", "v2", "setting.json");
+const settingsFile = join(homedir(), ".zcodium", "v2", "setting.json");
 let activeAppShutdownPolicy = resolveAppShutdownPolicy("normal", process.platform);
 let activeAppShutdownKind: AppShutdownKind | null = null;
 const WINDOWS_AGENT_FORCE_KILL_TIMEOUT_MS = 2_000;
@@ -1781,6 +1782,17 @@ installOfficialPlatformNetworkPolicy();
 
 app.whenReady().then(async () => {
   markMainLaunchAppReady();
+  // 数据根 pending（他产品残留 / 存在旧根）时先做用户决策：
+  // 决策窗口先于主窗口与 Host，正式根在归属文件落盘前保持零写入。
+  const dataRootStartup = getDesktopDataRootStartupResult();
+  if (dataRootStartup.state === "pending") {
+    await runDesktopDataRootDecisionFlow({
+      baseDir: dataRootStartup.baseDir,
+      status: dataRootStartup.status,
+      locale: resolveSystemApplicationLocale(),
+    });
+    return;
+  }
   installLocalMediaPreviewProtocol(session.defaultSession.protocol, {
     isPathAuthorized: localMediaPreviewPathRegistry.isAuthorized,
   });
@@ -1795,6 +1807,7 @@ app.whenReady().then(async () => {
   try {
     bootstrapSettings = await mainSettingService.get();
     if (bootstrapSettings.dataBaseDir) {
+      // 自定义数据目录的判定/初始化已在 early bootstrap 完成；此处仅确保运行时 base 生效。
       setDataBaseDir(bootstrapSettings.dataBaseDir);
     }
     if (bootstrapSettings.locale) {

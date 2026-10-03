@@ -11,6 +11,7 @@
   "include": [
     "packages/shared/test/orcarouter.test.ts",
     "packages/services/test/orcarouter.test.ts",
+    "packages/services/test/orcarouterProviderOverlay.test.ts",
     "packages/services/test/orcarouter.live.test.ts",
     "packages/ui/test/orcarouterModelOptions.test.ts"
   ],

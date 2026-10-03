@@ -6,7 +6,7 @@ import type { ZCodeAgentWorkspaceTarget } from "./zcodeAgentPluginParams.js";
 // workspace 里，远程 workspace 时就在远端 agent 进程里扫远端目录。
 //
 // 全局工作流：`scope: "global"` 时文件落在 agent 机器的
-// `~/.zcode/workflows/`。调用方可以省略 workspace——此时 services 层自选**载体运行时**
+// `~/.zcodium/workflows/`。调用方可以省略 workspace——此时 services 层自选**载体运行时**
 // （活跃的本地 runtime → 管理面 workspace），协议处理器对全局档不读 workspace 的路径。
 // 项目组内的动作仍带自己的 workspace（既是运行目标又是载体），因此下面用一个 union：
 // 要么带 workspace（scope 可选，缺省 project），要么只给 `scope: "global"`（workspace 可省）。

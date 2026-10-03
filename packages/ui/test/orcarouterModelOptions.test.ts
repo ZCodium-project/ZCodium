@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   reconcileOrcaSelection,
+  resolveOrcaDiscoverySurface,
   resolveOrcaSelectorRequirements,
   selectOrcaModelOptions,
   toOrcaModelRecords,
@@ -130,4 +131,31 @@ test("toOrcaModelRecords：保持 vendor/model 命名空间原样", () => {
     model("deepseek/deepseek-v4-flash-vision-exp", ["text", "image"]),
   ]);
   assert.equal(records[0]!.id, "deepseek/deepseek-v4-flash-vision-exp");
+});
+
+/**
+ * Provider 设置页的模型输入面。
+ *
+ * 这三条断言直接对应「不得要求用户自由填写 model 字符串」：OrcaRouter 模板下
+ * Add Model / 手动元数据对话框 / 远程检测都必须关闭，只剩目录下拉；其他 Provider
+ * 保持原有手动输入能力。能力值由入口传入，不是在组件里写死。
+ */
+test("discovery surface：OrcaRouter 模板为 catalog-only，Add Model 与自由输入入口关闭", () => {
+  const surface = resolveOrcaDiscoverySurface({ templateId: "orcarouter" });
+  assert.equal(surface.mode, "catalog-only");
+  // 未指定入口能力时按文本 chat 处理（Provider 设置页维护的就是 chat 清单）。
+  assert.equal(surface.capability, "chat");
+
+  // 调用方按入口传入能力：同一模板也必须原样透传，不能在本层回落写死。
+  assert.equal(
+    resolveOrcaDiscoverySurface({ templateId: "orcarouter", capability: "embedding" }).capability,
+    "embedding",
+  );
+});
+
+test("discovery surface：其他 Provider 保持 manual，不受该规则影响", () => {
+  for (const templateId of [null, undefined, "", "custom-template", "anthropic"] as const) {
+    const surface = resolveOrcaDiscoverySurface({ templateId });
+    assert.equal(surface.mode, "manual", String(templateId));
+  }
 });

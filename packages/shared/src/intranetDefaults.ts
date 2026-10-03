@@ -2,6 +2,7 @@ export const DEFAULT_INTRANET_MACHINE_HOST = "";
 type IntranetEnv = {
   INTRANET_MACHINE_HOST?: string;
   ZCODE_DEPS_BASE_URL?: string;
+  ZCODIUM_DEPS_BASE_URL?: string;
 };
 
 function readProcessEnv(): IntranetEnv {
@@ -30,7 +31,7 @@ export const INTRANET_PROBE_SERVICE_URL = INTRANET_MACHINE_HOST
   : "";
 
 export function resolveIntranetDepsBaseUrl(env: IntranetEnv = readProcessEnv()) {
-  const depsBaseUrl = env.ZCODE_DEPS_BASE_URL?.trim();
+  const depsBaseUrl = env.ZCODIUM_DEPS_BASE_URL?.trim() || env.ZCODE_DEPS_BASE_URL?.trim();
   if (depsBaseUrl) {
     return depsBaseUrl.replace(/\/+$/, "");
   }

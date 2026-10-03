@@ -1,4 +1,7 @@
-import { pickProductEndpointEnv } from "@zcode/shared/zcodeEndpoint";
+// 构建配置必须从相对路径加载 shared 源码：tsup/vite 会把相对依赖交给 esbuild 打包，
+// 而 workspace 包（@zcode/shared）会被 externalize 交给 Node 原生加载 .ts——Node 24 的
+// strip-types 不做 .js→.ts 重映射，P1a 后 zcodeEndpoint 内部的 "./env-names.js" 会解析失败。
+import { pickProductEndpointEnv } from "../shared/src/zcodeEndpoint.js";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -193,6 +196,7 @@ export default defineConfig([
       "preload/index": "src/preload/index.ts",
       "preload/resourceManager": "src/preload/resourceManager.ts",
       "preload/cuaPermissionPanel": "src/preload/cuaPermissionPanel.ts",
+      "preload/dataRootDecision": "src/preload/dataRootDecision.ts",
     },
     outDir: "out",
     format: "cjs",

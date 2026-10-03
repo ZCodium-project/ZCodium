@@ -57,7 +57,7 @@ function resolveCliTelemetryStateFile(options: EnsureCliDeviceMidOptions): strin
   const configuredBaseDir =
     options.baseDir ?? env[ZCODE_DATA_BASE_DIR_ENV_KEY]?.trim() ?? homedir();
   const baseDir = configuredBaseDir.length > 0 ? configuredBaseDir : homedir();
-  return join(resolveUserPath(baseDir), ".zcode", "v2", "telemetry-state.json");
+  return join(resolveUserPath(baseDir), ".zcodium", "v2", "telemetry-state.json");
 }
 
 async function ensurePersistedDeviceMid(input: {

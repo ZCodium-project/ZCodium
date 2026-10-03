@@ -1,4 +1,9 @@
-import { filterOrcaModels, type OrcaCapability, type OrcaModelRecord } from "@zcode/shared";
+import {
+  filterOrcaModels,
+  ORCAROUTER_PROVIDER_TEMPLATE_ID,
+  type OrcaCapability,
+  type OrcaModelRecord,
+} from "@zcode/shared";
 
 /** 目录视图里的模型（与 host 返回的最小元数据一致） */
 export interface OrcaCatalogModel {
@@ -87,4 +92,31 @@ export function resolveOrcaSelectorRequirements(input: {
     return Object.freeze({ capability: "chat", requiredInputModality: "image" });
   }
   return Object.freeze({ capability: input.capability });
+}
+
+/** 模型输入面：目录下拉（catalog-only）还是原有手动编辑（manual） */
+export type OrcaDiscoveryMode = "catalog-only" | "manual";
+
+export interface OrcaDiscoverySurface {
+  readonly mode: OrcaDiscoveryMode;
+  /** 该入口使用的目录能力过滤值 */
+  readonly capability: OrcaCapability;
+}
+
+/**
+ * 由 provider 模板与当前入口能力决定模型输入面。
+ *
+ * OrcaRouter 是 **catalog-only**：Add Model、手动元数据对话框与远程检测都必须关闭，
+ * 用户不能在目录之外自由填写 model 字符串；唯一入口是按 `capability` 过滤的下拉。
+ * 能力值由调用方按当前入口传入，本函数不做任何写死。
+ */
+export function resolveOrcaDiscoverySurface(input: {
+  readonly templateId: string | null | undefined;
+  readonly capability?: OrcaCapability;
+}): OrcaDiscoverySurface {
+  const capability = input.capability ?? "chat";
+  if (input.templateId === ORCAROUTER_PROVIDER_TEMPLATE_ID) {
+    return Object.freeze({ mode: "catalog-only", capability });
+  }
+  return Object.freeze({ mode: "manual", capability });
 }

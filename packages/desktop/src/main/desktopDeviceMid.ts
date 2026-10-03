@@ -5,7 +5,7 @@ import { createUuid } from "@zcode/shared";
 import { getAppConfigDir } from "@zcode/services/node";
 
 interface EnsureDesktopDeviceMidSyncOptions {
-  /** state 文件所在目录，默认 getAppConfigDir()（即 ~/.zcode/v2）。仅测试注入 */
+  /** state 文件所在目录，默认 getAppConfigDir()（即 ~/.zcodium/v2）。仅测试注入 */
   configDir?: string;
   /** UUID 生成器，默认 createUuid。仅测试注入 */
   createId?: () => string;

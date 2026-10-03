@@ -29,7 +29,7 @@ const require = __zcodeCreateRequire(import.meta.url);`;
 //
 // 结果 Helper 既不装也不起、一行日志都不写，而这句 throw 被 MCP 层翻成超时，没有落盘点 ——
 // 所以它一直是隐形的。实证：宿主日志里 `[cua-product-helper]` 在 09-11（宿主路径，有 define）
-// 有 5 行，09-14 为 0 行；`~/.zcode/computer-use/logs/` 从未创建；把已安装的 Helper 改名后
+// 有 5 行，09-14 为 0 行；`~/.zcodium/computer-use/logs/` 从未创建；把已安装的 Helper 改名后
 // 也不会重装。dev 不受影响（ALLOW_UNSIGNED_LOCAL + 非 production runtime 绕过该守卫），
 // 所以只在正式包暴露，本地怎么测都测不出来。
 //

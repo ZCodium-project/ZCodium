@@ -1,4 +1,5 @@
 import { existsSync, statSync } from "node:fs";
+import { readExternalEnvVar, writeExternalEnvVar } from "@zcode/shared";
 import { homedir } from "node:os";
 import { dirname, join, parse, resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
@@ -131,9 +132,10 @@ function resolveCliRuntimeEnv(env: CliEnv, argv: readonly string[]): ZCodeRuntim
 }
 
 function applyBetaStorageDefault(env: CliEnv, argv: readonly string[]): void {
-  if (env.ZCODE_STORAGE_DIR?.trim()) return;
+  if (readExternalEnvVar(env, "ZCODE_STORAGE_DIR")) return;
   const explicitBeta = env.ZCODE_BETA === "1" || env.ZCODE_ENV === "beta";
   const invokedAsBeta = argv.some((arg) => /(^|[/\\])zcode-beta(?:$|\.)/u.test(arg));
   if (!explicitBeta && !invokedAsBeta) return;
-  env.ZCODE_STORAGE_DIR = join(homedir(), ".zcode-beta");
+  // 新名 + 旧名双写：覆盖新旧二进制混布（例如 SSH 远端旧 agent 仍读旧名）。
+  writeExternalEnvVar(env, "ZCODE_STORAGE_DIR", join(homedir(), ".zcode-beta"));
 }

@@ -1,0 +1,3 @@
+# 主分支保护配套：所有 PR 必须由仓库维护者 review。
+# 与 Ruleset「main-protection」的 require_code_owner_review 配合生效。
+* @SudoUserReal

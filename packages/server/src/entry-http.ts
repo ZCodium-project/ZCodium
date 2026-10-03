@@ -1,4 +1,10 @@
-import { createLocalServices, getAppConfigDir } from "@zcode/services/node";
+import {
+  createLocalServices,
+  getAppConfigDir,
+  initializeDataRootNonInteractive,
+  resolveDataRootActionFromEnv,
+} from "@zcode/services/node";
+import { ZCODE_VERSION } from "@zcode/shared";
 import {
   materializeBundledZCodeBuiltinProviderConfig,
   readBundledZCodeBuiltinProviderConfig,
@@ -6,6 +12,12 @@ import {
 import { createHttpServer } from "./http.js";
 
 async function main(): Promise<void> {
+  // 数据根必须先于任何路径写入完成初始化/合法化（materialize 会写 getAppConfigDir()）。
+  await initializeDataRootNonInteractive({
+    createdBy: "server",
+    appVersion: ZCODE_VERSION,
+    action: resolveDataRootActionFromEnv(),
+  });
   const zcodeBuiltinProviderConfigFilePath = await materializeBundledZCodeBuiltinProviderConfig({
     environmentConfigRoot: getAppConfigDir(),
     content: readBundledZCodeBuiltinProviderConfig(),

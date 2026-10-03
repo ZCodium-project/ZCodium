@@ -38,11 +38,16 @@ import {
 } from "@/settings/model-provider-section/ModelConfigHelp.js";
 
 import { ModelEditorAdvanced } from "@/settings/model-provider-section/ModelEditorAdvanced.js";
+import {
+  RemoteModelDetectionSection,
+  type RemoteModelDetectionControl,
+} from "@/settings/model-provider-section/RemoteModelDetectionSection.js";
 
 function selectFocusedInputText(event: Pick<FocusEvent<HTMLInputElement>, "currentTarget">) {
   event.currentTarget.select();
 }
 
+/** 检测状态由 ProviderModelsSection 持有；对话框只渲染列表并把点选回填到模型 ID 草稿。 */
 export function ProviderModelMetadataDialog({
   mode = "edit",
   open,
@@ -61,6 +66,7 @@ export function ProviderModelMetadataDialog({
   saving = false,
   modelDefaultsLoaded = false,
   onModelIdBlur,
+  remoteModelDetection,
 }: {
   mode?: "add" | "edit";
   open: boolean;
@@ -79,6 +85,7 @@ export function ProviderModelMetadataDialog({
   saving?: boolean;
   modelDefaultsLoaded?: boolean;
   onModelIdBlur?: () => void;
+  remoteModelDetection?: RemoteModelDetectionControl;
 }) {
   const { intl } = useZCodeIntl();
   const [validationAttempt, setValidationAttempt] = useState(0);
@@ -197,6 +204,14 @@ export function ProviderModelMetadataDialog({
                   onCompositionEnd={handleCompositionEnd}
                   onKeyDown={handleTechnicalInputKeyDown}
                 />
+                {mode === "add" && remoteModelDetection ? (
+                  <RemoteModelDetectionSection
+                    control={remoteModelDetection}
+                    typedModelId={draft.idValue}
+                    saving={saving}
+                    onPick={(modelId) => onDraftChange({ idValue: modelId })}
+                  />
+                ) : null}
               </div>
             </div>
           </ModelSettingsGroup>

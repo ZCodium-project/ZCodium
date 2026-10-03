@@ -40,3 +40,10 @@ export {
   type OrcaRouterModelOption,
   type OrcaRouterResolvedCredential,
 } from "./service.js";
+export {
+  createOrcaProviderCredentialBinding,
+  findOrcaRouterTemplateInstance,
+  type CreateOrcaProviderCredentialBindingInput,
+  type OrcaProviderCredentialBinding,
+  type OrcaSettingsTarget,
+} from "./providerOverlay.js";

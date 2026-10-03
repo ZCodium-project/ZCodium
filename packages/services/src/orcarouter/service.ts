@@ -11,6 +11,7 @@ import { createOrcaCatalogService, type OrcaCatalogResult } from "./catalog.js";
 import { OrcaConnectController, OrcaConnectError, type OrcaConnectState } from "./connect.js";
 import { validateOrcaApiKeyInput, type OrcaCredentialAdapters } from "./credentials.js";
 import type { OrcaCredentialStatus, OrcaCredentialStore } from "./credentialStore.js";
+import type { OrcaProviderCredentialBinding } from "./providerOverlay.js";
 
 /** 对外的目录条目最小元数据（不包含任何凭据） */
 export interface OrcaRouterModelOption {
@@ -82,11 +83,23 @@ export interface IOrcaRouterService {
     readonly generation?: number;
     readonly accountId?: string;
   }): Promise<{ readonly marked: boolean; readonly status: OrcaCredentialStatus }>;
+  /**
+   * 把当前 store 凭据对齐到 OrcaRouter provider 的推理配置。
+   *
+   * 保存/换取/清除/401 都会自动对齐；本方法是启动期的显式兜底，
+   * 也是自动化测试验证「凭据确实到达推理路径」的入口。
+   */
+  reconcileProviderCredential(): Promise<OrcaCredentialStatus>;
 }
 
 export const IOrcaRouterService = createServiceDescriptor<IOrcaRouterService>(
   ServiceChannels.OrcaRouter,
 );
+
+/** 只保留错误消息文本；绝不让可能的密钥片段进入日志。 */
+function describeError(error: unknown): string {
+  return error instanceof Error ? error.message : "未知错误";
+}
 
 export interface CreateOrcaRouterServiceInput {
   readonly store: OrcaCredentialStore;
@@ -94,6 +107,14 @@ export interface CreateOrcaRouterServiceInput {
   readonly connect: OrcaConnectController;
   readonly origins: OrcaOrigins;
   readonly catalog?: ReturnType<typeof createOrcaCatalogService>;
+  /**
+   * 把 store 凭据投递到 provider 推理配置的 seam。
+   *
+   * 推理路径只读 provider 自身的 `access.apiKey`：保存、PKCE 换取、清除与 401 标记后
+   * 都必须把同一把 key（或 null）同步进目标 provider 的 Personal Overlay，
+   * 否则会出现「设置页已连接、聊天请求却不带 key」的断链。
+   */
+  readonly credentialBinding?: OrcaProviderCredentialBinding;
 }
 
 export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IOrcaRouterService {
@@ -120,6 +141,15 @@ export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IO
     apiBase: input.origins.apiBase,
     inferenceBase: buildOrcaV1Base(input.origins.apiBase),
   });
+
+  // 凭据变更后必须立刻对齐 provider 推理配置；失败只告警，不反转已确认的凭据事实。
+  const syncCredentialToProvider = async (): Promise<void> => {
+    try {
+      await input.credentialBinding?.sync();
+    } catch (error) {
+      log("warn", `OrcaRouter 凭据未能写入 Provider 推理配置：${describeError(error)}`);
+    }
+  };
 
   const toView = (capability: OrcaCapability, result: OrcaCatalogResult): OrcaRouterCatalogView =>
     Object.freeze({
@@ -155,10 +185,13 @@ export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IO
         // 空值等价于清除；不保留旧密钥。
         await input.store.clear();
         catalog.invalidate();
+        await syncCredentialToProvider();
         return input.store.status();
       }
       await input.store.save({ apiKey: validated, source: "api-key" });
       catalog.invalidate();
+      // 推理路径只读 provider 的 access.apiKey：手填 Key 必须写回同一把。
+      await syncCredentialToProvider();
       log("info", "OrcaRouter API Key 已保存");
       return input.store.status();
     },
@@ -168,6 +201,7 @@ export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IO
       connect.cancel("用户清除凭据");
       await input.store.clear();
       catalog.invalidate();
+      await syncCredentialToProvider();
       log("info", "OrcaRouter 凭据已清除");
       return input.store.status();
     },
@@ -197,6 +231,8 @@ export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IO
       try {
         await connect.submitCode(code);
         catalog.invalidate();
+        // PKCE 换回的长期 key 与手填路径落到同一处：写回 provider 推理配置。
+        await syncCredentialToProvider();
         return { ok: true, state: connect.getState() };
       } catch (error) {
         if (error instanceof OrcaConnectError) {
@@ -238,9 +274,16 @@ export function createOrcaRouterService(input: CreateOrcaRouterServiceInput): IO
       });
       if (marked) {
         // 长期 API key 被撤销后必须重新认证；这里不伪造 refresh，也不主动删除旧密钥。
+        // 但必须立刻让推理路径停止使用这把死 key：loadUsable 已返回 null，同步即清除 provider 上的 apiKey。
+        await syncCredentialToProvider();
         log("warn", "OrcaRouter 凭据被上游拒绝，已标记为需要重新认证");
       }
       return { marked, status: await input.store.status() };
+    },
+
+    async reconcileProviderCredential() {
+      await syncCredentialToProvider();
+      return input.store.status();
     },
   };
 }

@@ -242,7 +242,7 @@ export class NodeSkillAdapter implements SkillPort {
       return true;
     }
     const canonicalPath = await realpath(resolvedPath).catch(() => resolvedPath);
-    // UI 可能把 symlink 目标真实路径写入 config，而 agent 从 ~/.zcode/skills 的链接路径扫描。
+    // UI 可能把 symlink 目标真实路径写入 config，而 agent 从 ~/.zcodium/skills 的链接路径扫描。
     // 同时比对扫描路径和真实路径，避免同一个 SKILL.md 因路径形态不同绕过禁用开关。
     return this.disabledPaths.has(canonicalPath);
   }

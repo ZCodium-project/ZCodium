@@ -3,9 +3,12 @@ import {
   disposeServiceResourcesAndWait,
   materializeZCodeBuiltinProviderConfig,
   getAppConfigDir,
+  initializeDataRootNonInteractive,
+  resolveDataRootActionFromEnv,
   ZCODE_BUILTIN_PROVIDER_CONFIG_FILE_ENV,
 } from "@zcode/services/node";
 import { IZCodeAgentService } from "@zcode/services";
+import { readExternalEnvVar } from "@zcode/shared";
 import { ZCODE_VERSION } from "@zcode/shared";
 import { createCoreHttpServer } from "./http.js";
 import { installParentDisconnectHandler } from "./parentDisconnect.js";
@@ -15,6 +18,12 @@ import { createTaskActivityTracker } from "./taskActivityTracker.js";
 declare const __ZCODE_BUILTIN_PROVIDER_CONFIG_JSON__: string | undefined;
 
 export async function runServerCore(generation: number): Promise<void> {
+  // 数据根必须先于任何路径写入完成初始化/合法化（materialize 会写 getAppConfigDir()）。
+  await initializeDataRootNonInteractive({
+    createdBy: "server",
+    appVersion: ZCODE_VERSION,
+    action: resolveDataRootActionFromEnv(),
+  });
   let shutdown: ((reason: string) => Promise<void>) | undefined;
   let parentDisconnected = false;
   let disposeParentDisconnectHandler = (): void => undefined;

@@ -248,9 +248,17 @@ export class OrcaConnectController {
     try {
       payload = await response.json();
     } catch {
+      if (this.#attempt?.generation !== attempt.generation) {
+        throw new OrcaConnectError("cancelled", "OrcaRouter 授权已被新的尝试取代");
+      }
       this.#phase = "error";
       this.#error = "OrcaRouter 返回的授权结果无法解析";
       throw new OrcaConnectError("network", "OrcaRouter 返回的授权结果无法解析");
+    }
+
+    // 解析与持久化之间再校验一次：并发的 begin()/cancel() 会让更早的交换覆盖更新的登录。
+    if (this.#attempt?.generation !== attempt.generation) {
+      throw new OrcaConnectError("cancelled", "OrcaRouter 授权已被新的尝试取代");
     }
 
     // 读取实际授予的 scope；不足时按失败处理，绝不把请求 scope 当已授权 scope。
@@ -271,6 +279,11 @@ export class OrcaConnectController {
       this.#phase = "error";
       this.#error = "OrcaRouter 返回的授权结果无法解析";
       throw new OrcaConnectError("network", "OrcaRouter 返回的授权结果无法解析");
+    }
+
+    // store.save() 之前最后一道世代校验：旧交换不得覆盖新登录。
+    if (this.#attempt?.generation !== attempt.generation) {
+      throw new OrcaConnectError("cancelled", "OrcaRouter 授权已被新的尝试取代");
     }
 
     const credential = await this.#deps.credentialStore.save({

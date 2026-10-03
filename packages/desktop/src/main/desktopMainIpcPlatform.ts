@@ -26,6 +26,7 @@ import { getApplicationIcon } from "./applicationIcons.js";
 import { exportLogs } from "./exportLogs.js";
 import { resolveCommunityUrl } from "./desktopCommandHandlers.js";
 import { openInEditor } from "./openInEditor.js";
+import { openDataRootImportWindow } from "./desktopDataRootDecision.js";
 import {
   openResourceManager,
   getResourceUsageSnapshot,
@@ -109,6 +110,11 @@ export function registerPlatformIpcHandlers(options: {
       return null;
     }
     return result.filePaths[0];
+  });
+
+  // 设置页“从旧数据目录再次导入”：打开独立窗口；文件操作与重启都在编排模块内完成。
+  ipcMain.on(PlatformChannels.OpenDataRootImport, () => {
+    openDataRootImportWindow();
   });
 
   ipcMain.handle(PlatformChannels.SelectFile, async () => {

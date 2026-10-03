@@ -16,11 +16,14 @@ export function DataBaseDirControl({
   defaultHomeDir,
   onDataBaseDirChange,
   onSelectDataBaseDir,
+  onOpenDataRootImport,
 }: {
   dataBaseDir: string;
   defaultHomeDir: string;
   onDataBaseDirChange: (dir: string) => Promise<void>;
   onSelectDataBaseDir: () => Promise<string | null>;
+  /** 打开“从旧数据目录再次导入”独立窗口；仅 Desktop 提供。 */
+  onOpenDataRootImport?: () => void;
 }) {
   const { intl } = useZCodeIntl();
   const effectiveDir = dataBaseDir || defaultHomeDir;
@@ -113,6 +116,18 @@ export function DataBaseDirControl({
             intl.formatMessage({ id: "settings.dataBaseDirSave" })
           )}
         </Button>
+        {onOpenDataRootImport ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            title={intl.formatMessage({ id: "settings.dataBaseDirImportHint" })}
+            disabled={isSaving || isPickingDataBaseDir}
+            onClick={onOpenDataRootImport}
+          >
+            {intl.formatMessage({ id: "settings.dataBaseDirImport" })}
+          </Button>
+        ) : null}
       </div>
       {saveState === "saving" ? (
         <p

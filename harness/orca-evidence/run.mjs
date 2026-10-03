@@ -32,6 +32,7 @@ const TID = {
   modelSelectTrigger: "orcarouter-model-select-trigger",
   modelSelectOption: "orcarouter-model-option",
 };
+const TID_ADD_MODEL_BUTTON = "model-provider-add-model-button";
 
 /**
  * 未脱敏的固定假密钥；仅用于把保存按钮置为可用。
@@ -154,6 +155,9 @@ async function main() {
     multimodal_opaque_background: false,
     multimodal_visible_border: false,
     multimodal_trigger_panel_right_delta: 0,
+    add_model_button_visible: true,
+    catalog_selector_visible: false,
+    free_type_model_input_present: true,
   };
   const screenshots = [];
 
@@ -332,6 +336,31 @@ async function main() {
       `multimodal-model-dropdown.png 已截图 (item_count=${ui.multimodal_item_count}, image_only=${ui.multimodal_image_only}, delta=${ui.multimodal_trigger_panel_right_delta})`,
     );
 
+    // ---- provider-models-section：OrcaRouter 下没有 Add Model / 自由填写入口 ----
+    const providerSection = page.locator("[data-evidence-provider-models-section]");
+    await providerSection.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    ui.add_model_button_visible = await providerSection
+      .locator(`[data-testid="${TID_ADD_MODEL_BUTTON}"]`)
+      .isVisible()
+      .catch(() => false);
+    ui.catalog_selector_visible = await providerSection
+      .locator(`[data-testid="${TID.modelSelectTrigger}"]`)
+      .isVisible()
+      .catch(() => false);
+    // 目录下拉是唯一入口：区块内不存在可自由编辑的 model id 文本输入。
+    ui.free_type_model_input_present = await providerSection
+      .locator('input[type="text"]')
+      .count()
+      .then((count) => count > 0)
+      .catch(() => true);
+
+    await page.screenshot({ path: resolve(OUT_DIR, "provider-model-control.png"), type: "png" });
+    screenshots.push("provider-model-control.png");
+    log(
+      `provider-model-control.png 已截图 (add_model_button_visible=${ui.add_model_button_visible}, catalog_selector_visible=${ui.catalog_selector_visible}, free_type_model_input_present=${ui.free_type_model_input_present})`,
+    );
+
     if (pageErrors.length > 0) log(`页面错误：${pageErrors.join(" | ")}`);
 
     passed =
@@ -349,7 +378,10 @@ async function main() {
       ui.multimodal_image_only &&
       ui.multimodal_opaque_background &&
       ui.multimodal_visible_border &&
-      ui.multimodal_trigger_panel_right_delta <= 2;
+      ui.multimodal_trigger_panel_right_delta <= 2 &&
+      ui.catalog_selector_visible &&
+      !ui.add_model_button_visible &&
+      !ui.free_type_model_input_present;
   } catch (error) {
     log(`运行失败：${error instanceof Error ? (error.stack ?? error.message) : String(error)}`);
     if (vite.getOutput()) log(`vite 输出末尾：${vite.getOutput().slice(-1500)}`);
@@ -385,7 +417,14 @@ async function main() {
       visible_border: ui.multimodal_visible_border,
       trigger_panel_right_delta: ui.multimodal_trigger_panel_right_delta,
     },
+    "provider-model-control": {
+      add_model_button_visible: ui.add_model_button_visible,
+      catalog_selector_visible: ui.catalog_selector_visible,
+      free_type_model_input_present: ui.free_type_model_input_present,
+    },
   };
+  // `automation` 必须是对象，唯一校验器（evidence.validate）从 `manifest.automation`
+  // 读取 framework/passed/catalog_source 与计数；`ui` 只作为 diagnostics 保留。
   const manifest = {
     automation: {
       automation: true,
@@ -396,8 +435,6 @@ async function main() {
       image_model_count: catalogImage.length,
       ui,
     },
-    passed,
-    ui,
     artifacts: screenshots.map((name) => {
       const file = resolve(OUT_DIR, name);
       const { width, height } = pngDimensions(file);
