@@ -1,0 +1,343 @@
+<!doctype html>
+<!--
+  bilingual-menu-premium · skeleton (luxe edition)
+  ------------------------------------------------
+  Drop in via `bash make.sh render --in page.html --out menu.pdf`.
+
+  PLACEHOLDERS (replace before render):
+    RESTAURANT_NAME · MONOGRAM_LETTER (single char for the wordmark seal)
+    ESTABLISHED_YEAR · LOCATION_LINE · DATE_MONTH_YEAR
+    PRICE_LABEL · PRICE_AMT · PRICE_NOTE
+    Per course: COURSE_NUM (I./II./III./IV.) · CATEGORY_JP · CATEGORY_ROMAJI ·
+                CATEGORY_EN_SUBTITLE
+    Per dish: DISH_NAME_JP · DISH_KANA_JP · DISH_DESC_JP ·
+              DISH_NAME_EN · PRICE (or "included") · DISH_DESC_EN
+    Optional pairing: PAIRING_LABEL · PAIRING_TEXT
+    Closing: CLOSING_TITLE · CHEF_PHILOSOPHY_OR_SOURCING_NOTE ·
+             CHEF_SIGNATURE · SEAL_CHAR (1-2 CJK chars for the red chop)
+    Footer: FOOTER_LEFT · FOOTER_CENTER (website) · FOOTER_RIGHT ·
+            HEALTH_DISCLAIMER · GRATUITY_NOTE · TAX_NOTE
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title><!-- RESTAURANT_NAME --> · <!-- DESCRIPTOR --></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     A4 portrait, 14mm top/bottom · 16mm left/right
+     Bilingual columns + leader dots + Roman-numeral sections + single-rule print aesthetic
+     ============================================================ */
+  @page { size: A4 portrait; margin: 14mm 16mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  :root {
+    --paper:    #faf6ed;       /* Off-white paper; change to #fff for an elegant white-paper look */
+    --ink:      #1a1814;       /* Ink black */
+    --ink-2:    #3d3528;       /* Secondary text */
+    --ink-3:    #6b5e48;       /* Notes/Roman numerals */
+    --gold:     #9a7434;       /* Dark gold accent */
+    --gold-2:   #c5a866;       /* Pale gold decorative rules */
+    --hairline: #dcc89a;       /* Hairline divider */
+    --seal:     #a82828;       /* Seal red */
+  }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Cormorant Garamond", "Hiragino Mincho ProN", "Noto Serif JP",
+                 "Yu Mincho", "Songti SC", serif;
+    font-size: 9.5pt; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Brand monogram + wordmark ────────────────────────────── */
+  header.brand { text-align: center; padding-top: 2mm; }
+  .monogram { width: 28pt; height: 28pt; margin: 0 auto 4pt; display: block; }
+  header.brand .name {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 30pt; font-weight: 500; letter-spacing: .55em;
+    margin: 0 0 5pt 0.55em;       /* Optically adjusted letter spacing */
+    color: var(--ink);
+  }
+  header.brand .tagline {
+    font-family: "Inter", sans-serif;
+    font-size: 7.5pt; letter-spacing: .42em; font-weight: 500;
+    color: var(--gold); text-transform: uppercase;
+  }
+  header.brand .tagline .sep { margin: 0 8pt; color: var(--gold-2); letter-spacing: 0; }
+
+  /* Double-rule divider, common in premium print */
+  .double-rule {
+    margin: 6pt auto 8pt; max-width: 60mm;
+    border-top:    0.6pt solid var(--gold-2);
+    border-bottom: 0.6pt solid var(--gold-2);
+    height: 2.2pt;
+  }
+
+  /* ── Prix-fixe block ────────────────────────────────────── */
+  .prix-fixe {
+    text-align: center; max-width: 90mm; margin: 0 auto 10pt;
+    padding: 5pt 0;
+    border-top:    0.4pt solid var(--gold);
+    border-bottom: 0.4pt solid var(--gold);
+  }
+  .prix-fixe .lbl {
+    font-family: "Inter", sans-serif;
+    font-size: 7.5pt; letter-spacing: .42em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500;
+  }
+  .prix-fixe .amt {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 22pt; font-weight: 500; letter-spacing: .04em;
+    color: var(--ink); margin-top: 2pt;
+  }
+  .prix-fixe .note {
+    font-size: 8.5pt; font-style: italic; color: var(--ink-3); margin-top: 1pt;
+  }
+
+  /* ── Course section ─────────────────────────────────────── */
+  section.course { margin-top: 8pt; break-inside: auto; }
+  .course-head {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: end; gap: 10pt; margin-bottom: 5pt;
+    padding-bottom: 3pt; border-bottom: 0.4pt solid var(--hairline);
+    break-after: avoid;
+  }
+  .course-head .num {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 12pt; font-style: italic; color: var(--gold);
+    letter-spacing: .04em; min-width: 20pt;
+  }
+  .course-head .title {
+    font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    font-size: 13pt; letter-spacing: .14em; color: var(--ink);
+  }
+  .course-head .romaji {
+    font-family: "Inter", sans-serif;
+    font-size: 7pt; letter-spacing: .42em; color: var(--gold);
+    text-transform: uppercase; text-align: right; padding-bottom: 1pt;
+  }
+
+  /* ── Dish row (bilingual columns + leader dots) ────────────── */
+  .row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    column-gap: 14pt; padding: 4pt 0;
+    border-bottom: 0.25pt dotted var(--hairline);
+    break-inside: avoid;
+  }
+  section.course .row:last-child { border-bottom: none; }
+
+  /* JP column */
+  .ja .name {
+    font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    font-size: 10.5pt; font-weight: 600; color: var(--ink);
+  }
+  .ja .kana {
+    font-family: "Hiragino Mincho ProN", serif;
+    font-size: 7.5pt; color: var(--ink-3); margin-left: 6pt; letter-spacing: .12em;
+  }
+  .ja .desc {
+    font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    font-size: 8.5pt; color: var(--ink-2); margin-top: 1pt; line-height: 1.5;
+  }
+
+  /* EN column */
+  .en { padding-left: 12pt; border-left: 0.3pt solid var(--hairline); }
+  .en .name-line {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: baseline; gap: 4pt;
+  }
+  .en .name {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 11pt; font-style: italic; font-weight: 500; color: var(--ink);
+  }
+  .en .leader {                        /* Classic menu leader dots */
+    border-bottom: 0.4pt dotted var(--gold-2);
+    transform: translateY(-2pt); height: 1px;
+  }
+  .en .price {
+    font-family: "Inter", sans-serif;
+    font-size: 9.5pt; font-variant-numeric: tabular-nums;
+    color: var(--gold); letter-spacing: .04em; font-weight: 500;
+    white-space: nowrap;
+  }
+  .en .price.included {
+    font-style: italic; font-size: 7.5pt; letter-spacing: .25em;
+    text-transform: uppercase; color: var(--ink-3); font-weight: 400;
+  }
+  .en .desc {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 9pt; color: var(--ink-2); margin-top: 1pt; line-height: 1.55;
+  }
+
+  /* ── Wine / sake pairing block (sidebar) ──────────────── */
+  .pairing {
+    margin: 6pt 0 0; padding: 4pt 8pt;
+    background: rgba(154,116,52,0.06);
+    border-left: 1.5pt solid var(--gold);
+    font-family: "Inter", sans-serif;
+    font-size: 7.5pt; letter-spacing: .04em; color: var(--ink-2);
+    break-inside: avoid;
+  }
+  .pairing .lbl {
+    color: var(--gold); font-weight: 600; letter-spacing: .25em;
+    text-transform: uppercase; margin-right: 5pt;
+  }
+
+  /* ── Closing / chef's note ─────────────────────────────── */
+  section.closing {
+    margin-top: 10pt; padding: 6pt 12pt 4pt;
+    border-top: 0.4pt solid var(--gold);
+    border-bottom: 0.4pt solid var(--gold);
+    break-inside: avoid;
+  }
+  .closing .head {
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    font-size: 7.5pt; letter-spacing: .42em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 3pt;
+  }
+  .closing p {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 9pt; line-height: 1.55; color: var(--ink-2);
+    margin: 0 0 3pt; text-align: center; font-style: italic;
+  }
+  .closing .signature {
+    text-align: right; margin-top: 4pt; font-style: italic;
+    font-size: 8.5pt; color: var(--ink-3); letter-spacing: .04em;
+  }
+  .closing .signature .seal {                      /* CJK seal style */
+    display: inline-block; width: 13pt; height: 13pt; margin-left: 5pt;
+    background: var(--seal); color: var(--paper);
+    font-family: "Hiragino Mincho ProN", serif;
+    font-size: 7pt; line-height: 13pt; text-align: center;
+    transform: translateY(2pt) rotate(-3deg); font-style: normal;
+    border-radius: 1pt;
+  }
+
+  /* ── Footer (two lines of fine text for a business aesthetic) ── */
+  footer {
+    margin-top: 8pt; padding-top: 5pt;
+    border-top: 0.4pt solid var(--gold-2);
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    gap: 10pt; align-items: center;
+    font-family: "Inter", sans-serif;
+    font-size: 6.5pt; letter-spacing: .15em;
+    color: var(--ink-3); text-transform: uppercase;
+    break-inside: avoid;
+  }
+  footer .l { text-align: left; }
+  footer .c {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic; font-size: 8pt; color: var(--gold);
+    letter-spacing: .04em; text-transform: none;
+  }
+  footer .r { text-align: right; }
+  footer .fineprint {
+    grid-column: 1 / -1; margin-top: 3pt; padding-top: 3pt;
+    border-top: 0.25pt dotted var(--hairline);
+    font-size: 6pt; letter-spacing: .08em; color: var(--ink-3);
+    text-align: justify; text-transform: none; line-height: 1.55;
+  }
+  footer .fineprint .star { color: var(--gold); font-weight: 600; margin-right: 2pt; }
+
+  /* === Screen-emulation: open in browser → looks like the A4 PDF =========== */
+  @media screen {
+    html { background: #d0d0d0; }
+    body { margin: 0; padding: 20px 0; }
+    body > section {
+      width: 210mm; min-height: 297mm; margin: 0 auto 20px;
+      background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      box-sizing: border-box; overflow: hidden;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== HEADER ============== -->
+<header class="brand">
+  <!-- Monogram: replace MONOGRAM_LETTER with the restaurant's initial. -->
+  <svg class="monogram" viewBox="0 0 60 60">
+    <circle cx="30" cy="30" r="28" fill="none" stroke="#9a7434" stroke-width="0.8"/>
+    <circle cx="30" cy="30" r="24" fill="none" stroke="#c5a866" stroke-width="0.4"/>
+    <text x="30" y="40" text-anchor="middle"
+          font-family="Cormorant Garamond, serif" font-size="26"
+          font-style="italic" fill="#9a7434"><!-- MONOGRAM_LETTER --></text>
+  </svg>
+  <div class="name"><!-- RESTAURANT_NAME --></div>
+  <div class="tagline">
+    EST. <!-- ESTABLISHED_YEAR --> <span class="sep">·</span>
+    <!-- LOCATION_LINE --> <span class="sep">·</span>
+    <!-- DATE_MONTH_YEAR -->
+  </div>
+</header>
+
+<div class="double-rule"></div>
+
+<div class="prix-fixe">
+  <div class="lbl"><!-- PRICE_LABEL --></div>
+  <div class="amt"><!-- PRICE_AMT --></div>
+  <div class="note"><!-- PRICE_NOTE --></div>
+</div>
+
+<!-- ============== REPEAT FOR EACH COURSE ============== -->
+<section class="course">
+  <div class="course-head">
+    <span class="num"><!-- COURSE_NUM --></span>
+    <span class="title"><!-- CATEGORY_JP --></span>
+    <span class="romaji"><!-- CATEGORY_ROMAJI --> &middot; <!-- CATEGORY_EN_SUBTITLE --></span>
+  </div>
+
+  <!-- REPEAT FOR EACH DISH IN THIS COURSE: -->
+  <div class="row">
+    <div class="ja">
+      <span class="name"><!-- DISH_NAME_JP --></span>
+      <span class="kana"><!-- DISH_KANA_JP --></span>
+      <div class="desc"><!-- DISH_DESC_JP --></div>
+    </div>
+    <div class="en">
+      <div class="name-line">
+        <span class="name"><!-- DISH_NAME_EN --></span>
+        <span class="leader"></span>
+        <span class="price"><!-- PRICE --></span>
+        <!-- For "included" courses: <span class="price included">included</span> -->
+      </div>
+      <div class="desc"><!-- DISH_DESC_EN --></div>
+    </div>
+  </div>
+  <!-- /REPEAT dish -->
+
+  <!-- Optional pairing block (drop if not needed): -->
+  <div class="pairing">
+    <span class="lbl"><!-- PAIRING_LABEL --></span><!-- PAIRING_TEXT -->
+  </div>
+</section>
+<!-- /REPEAT course -->
+
+<!-- ============== CLOSING ============== -->
+<section class="closing">
+  <div class="head"><!-- CLOSING_TITLE --></div>
+  <p><!-- CHEF_PHILOSOPHY_OR_SOURCING_NOTE --></p>
+  <div class="signature">
+    — <!-- CHEF_SIGNATURE --> <span class="seal"><!-- SEAL_CHAR --></span>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="l"><!-- FOOTER_LEFT --></div>
+  <div class="c"><!-- FOOTER_CENTER --></div>
+  <div class="r"><!-- FOOTER_RIGHT --></div>
+  <div class="fineprint">
+    <span class="star">★</span> <!-- HEALTH_DISCLAIMER -->
+    <!-- GRATUITY_NOTE -->
+    <!-- TAX_NOTE -->
+  </div>
+</footer>
+
+</body>
+</html>

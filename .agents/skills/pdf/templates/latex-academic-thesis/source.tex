@@ -1,0 +1,334 @@
+% =============================================================================
+% Compact template for integration with an empty agent: Nanjing University of Science and Technology bachelor's thesis format
+% Cover all structural components with minimal body text, focusing on format reuse
+% Compile: tectonic main.tex or xelatex && bibtex && xelatex && xelatex
+% =============================================================================
+\documentclass[a4paper, 12pt, twoside]{ctexart}
+
+% --- Page setup (A4; top 30mm, bottom 24mm, left/right 25mm; header footskip=20mm) ---
+\usepackage[
+  a4paper,
+  top=30mm, bottom=24mm, left=25mm, right=25mm,
+  headheight=15pt, headsep=10mm, footskip=20mm
+]{geometry}
+
+% --- Body: SimSun, Chinese small size 4, approximately 20pt fixed line spacing ---
+\usepackage{setspace}
+\AtBeginDocument{\zihao{-4}\songti\setlength{\baselineskip}{20pt}\setlength{\parindent}{2em}}
+
+% --- Prevent Overfull \hbox by allowing paragraph word spacing to stretch ---
+\emergencystretch=0.5em
+
+% --- Font settings ---
+% Chinese: SimSun for body text; synthetic bold SimSun for headings to meet the school's bold-SimSun requirement
+% English and numbers: Times New Roman
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setCJKmainfont[AutoFakeBold=2.5]{Songti SC}
+\setCJKfamilyfont{song}[AutoFakeBold=2.5]{Songti SC}
+\setCJKfamilyfont{hei}{Heiti SC}
+
+% --- Mathematical formulas ---
+\usepackage{amsmath, amssymb}
+
+% --- Figures and tables ---
+\usepackage{graphicx}
+\graphicspath{{../图表/}}
+\usepackage{float}
+\usepackage{subcaption}
+\DeclareCaptionFont{songwu}{\songti\zihao{5}}
+\captionsetup{font=songwu, labelfont=songwu, labelsep=space}
+\captionsetup[lstlisting]{font=songwu, labelfont=songwu, labelsep=space}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{afterpage}
+
+% --- Number figures, tables, and equations by chapter (Figure X-X, Table X-X, Equation X-X) ---
+\IfFileExists{chngcntr.sty}{\usepackage{chngcntr}}{}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
+\def\thefigure{\thesection.\arabic{figure}}
+\def\thetable{\thesection.\arabic{table}}
+\def\theequation{\thesection.\arabic{equation}}
+
+% --- Code blocks ---
+\usepackage{listings}
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\zihao{5}\ttfamily,
+    columns=fullflexible,
+    keepspaces=true,
+    literate={，}{{，}}1 {。}{{。}}1 {：}{{：}}1 {；}{{；}}1
+            {（}{{（}}1 {）}{{）}}1 {、}{{、}}1,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red!70!black},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    breaklines=true,
+    tabsize=4,
+}
+
+% --- Cross-references and hyperlinks (load hyperref as late as possible) ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=black,
+}
+
+% --- References (GB/T 7714-2015 numeric style; sort&compress compacts citation numbers) ---
+% Use natbib + gbt7714-numerical; for BibTeX, run xelatex twice, bibtex, then xelatex twice
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{gbt7714-numerical}
+
+% --- Headers and footers (different odd/even pages, page numbers on the outside) ---
+% Even pages (CE): chapter title on the left, "Bachelor's Thesis" on the right
+% Odd pages (CO): "Bachelor's Thesis" on the left, chapter title on the right
+% Page numbers at LE (left even) and RO (right odd), i.e. the outer edges
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+% Correct sectionmark definition; must precede its use
+\makeatletter
+\def\sectionmark#1{\markboth{\thesection\quad #1}{}}
+\makeatother
+\fancyhead[CO]{\songti\zihao{5} 学士学位论文\hfill <论文题目(简)>}
+\fancyhead[CE]{\songti\zihao{5} \leftmark\hfill 学士学位论文}
+\fancyfoot[LE,RO]{\songti\zihao{5}\thepage}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyhead[CO]{\songti\zihao{5} 学士学位论文\hfill <论文题目(简)>}%
+  \fancyhead[CE]{\songti\zihao{5} \leftmark\hfill 学士学位论文}%
+  \fancyfoot[LE,RO]{\songti\zihao{5}\thepage}%
+}
+
+% --- TOC depth: include three heading levels ---
+% tocloft: \cftsecnumdepth=3 includes section/sub/subsub levels
+\IfFileExists{tocloft.sty}{\usepackage[titles]{tocloft}}{}
+\def\contentsname{目\quad 录}
+\def\refname{参考文献}
+
+% --- Chapter heading format (school requirements) ---
+\ctexset{
+    section = {
+        format = \raggedright\songti\bfseries\zihao{-3},
+        beforeskip = 18pt,
+        afterskip = 18pt,
+        break = \clearpage,
+    },
+    subsection = {
+        format = \raggedright\songti\bfseries\zihao{4},
+        beforeskip = 12pt,
+        afterskip = 12pt,
+    },
+    subsubsection = {
+        format = \raggedright\songti\bfseries\zihao{-4},
+        beforeskip = 6pt,
+        afterskip = 6pt,
+    },
+    paragraph = {
+        format = \raggedright\songti\zihao{-4},
+        beforeskip = 6pt,
+        afterskip = 0pt,
+    },
+}
+
+% --- Custom commands ---
+\newcommand{\frontmattertitle}[1]{%
+  \vspace*{18pt}\begin{center}{\songti\bfseries\zihao{3}#1}\end{center}\vspace{18pt}}
+\newcommand{\centeredsectionstar}[1]{%
+  \clearpage\phantomsection\vspace*{18pt}\begin{center}{\songti\bfseries\zihao{3}#1}\end{center}\vspace{18pt}}
+
+% =============================================================================
+\begin{document}
+
+% ========================== Abstract ==========================
+\newpage
+\pagestyle{plain}
+\pagenumbering{roman}
+
+\frontmattertitle{摘\quad 要}
+\phantomsection
+\addcontentsline{toc}{section}{摘要}
+
+本文针对XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\vspace{1cm}
+\noindent{\songti\bfseries\zihao{4} 关键词：}{\songti\zihao{-4} 关键词1；关键词2；关键词3}
+
+% ========================== Abstract ==========================
+\newpage
+\markboth{Abstract}{}
+\begin{center}{\bfseries\zihao{3} Abstract}\end{center}\vspace{18pt}
+\phantomsection
+\addcontentsline{toc}{section}{Abstract}
+
+This thesis presents a systematic study of XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+
+\vspace{1cm}
+\noindent{\bfseries\zihao{4} Keywords:}{\zihao{-4} keyword1; keyword2; keyword3}
+
+% ========================== Table of contents ==========================
+\newpage
+\markboth{目\quad 录}{}
+\begingroup
+\def\contentsname{目\quad 录}
+\tableofcontents
+\endgroup
+% For duplex printing, add a blank page if the front matter has an odd page count
+\ifodd\value{page}\newpage\thispagestyle{empty}\mbox{}\fi
+
+% ========================== Main text ==========================
+\newpage
+\pagestyle{fancy}
+\pagenumbering{arabic}
+
+% ========================================================================
+%   Chapter 1: Introduction
+% ========================================================================
+\section{绪论}
+
+\subsection{研究背景与意义}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+如图\ref{fig:architecture}所示，XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{architecture.jpg}
+    \caption{系统架构图}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{国内外研究现状}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+文献\cite{author2024example}提出了XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\subsubsection{Linux调度器研究}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+% Use paragraph for level-four headings; school requirements generally omit subsubsubsection
+\paragraph{相关技术基础}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\subsection{本文创新点}
+
+本文主要创新点如下：
+
+\begin{enumerate}
+    \item 创新点一：XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+    \item 创新点二：XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+\end{enumerate}
+
+% ========================================================================
+%   Chapter 2: Technical Background
+% ========================================================================
+\section{相关技术基础}
+
+本章介绍XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\subsection{Linux调度器原理}
+
+CFS的核心思想是XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+虚拟运行时间的计算如式\eqref{eq:vruntime}所示。
+
+\begin{equation}
+    \Delta vruntime = \Delta t_{wall} \times \frac{NICE\_0\_LOAD}{weight(task)}
+    \label{eq:vruntime}
+\end{equation}
+
+表\ref{tab:cfs-params}列出了CFS的核心可调参数及其语义。
+
+\begin{table}[H]
+    \centering
+    \caption{CFS核心可调参数}
+    \label{tab:cfs-params}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{参数名称} & \textbf{基准值} & \textbf{语义} \\
+        \midrule
+        \texttt{sched\_latency\_ns} & 6\,ms & 调度周期目标 \\
+        \texttt{sched\_min\_granularity\_ns} & 0.75\,ms & 最小抢占粒度 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% ========================================================================
+%   Chapter 3: System Design
+% ========================================================================
+\section{系统设计}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\subsection{总体架构}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+\section{实验与分析}
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX。
+
+% ========================================================================
+%   References
+% ========================================================================
+% Reference page numbers continue in Arabic numerals from the main text; do not switch back to Roman numerals
+% For BibTeX, replace \begin{thebibliography}... with
+%   \bibliography{refs}, then run xelatex && bibtex && xelatex && xelatex
+\newpage
+\begin{thebibliography}{99}
+  \bibitem{author2024example} Author A, Author B. Title of the reference[J].
+    Journal Name, 2024, 1(1): 1-10. DOI: 10.0000/example.
+  \bibitem{linuxkernel} Linux Kernel Documentation[EB/OL].
+    \url{https://www.kernel.org/doc/html/latest/}.
+\end{thebibliography}
+
+% ========================== Appendix ==========================
+\appendix
+\centeredsectionstar{附\quad 录}
+\markboth{附\quad 录}{}
+\addcontentsline{toc}{section}{附录}
+
+\subsection*{附录A：实验配置}
+
+表~\ref{tab:appendix-configs}列出了实验配置。
+
+\begin{table}[H]
+    \centering
+    \caption{实验配置表}
+    \label{tab:appendix-configs}
+    \begin{tabular}{llr}
+        \toprule
+        \textbf{参数} & \textbf{符号} & \textbf{值} \\
+        \midrule
+        CPU核心数 & $N$ & 4 \\
+        调度周期 & $T$ & 10\,ms \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection*{附录B：核心代码}
+
+\begin{lstlisting}[language=C, caption={示例代码}, label={lst:sample}]
+#include <stdio.h>
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+\end{lstlisting}
+
+\end{document}

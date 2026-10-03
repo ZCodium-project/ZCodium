@@ -1,0 +1,5 @@
+[
+  { "task_family": "READ_CONTENT", "notes": "Summarize a contract" },
+  { "task_family": "APPLY_TEMPLATE", "notes": "Apply a university thesis template to an existing DOCX" },
+  { "task_family": "REPAIR_LAYOUT", "notes": "Fix an extra blank page after the TOC" }
+]

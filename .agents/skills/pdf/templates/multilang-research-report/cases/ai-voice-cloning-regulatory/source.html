@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>AI声音克隆技术的全球监管深度研究报告</title>
+<style>
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+@page { size: A4 portrait; margin: 18mm 15mm 20mm 15mm; @top-center { content: "AI声音克隆技术全球监管研究"; font-size:8pt; color:#667085; letter-spacing:.03em; } @bottom-center { content: "第 " counter(page) " 页"; font-size:8pt; color:#667085; } }
+@page:first { margin:0; @top-center { content:""; } @bottom-center { content:""; } }
+:root {
+  --primary:#17324d; --primary2:#284b63; --accent:#b7791f; --accent2:#d6a94a;
+  --ink:#111827; --muted:#667085; --line:#d0d5dd; --soft:#f7f8fa; --soft2:#eef4f5;
+  --quote:#fbf7ef; --case:#fbfcfd; --green:#2f6f67; --blue:#315a86;
+}
+html,body { margin:0; padding:0; color:var(--ink); font-family:"PingFang SC","Hiragino Sans","Hiragino Kaku Gothic ProN","Apple SD Gothic Neo","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif; font-size:10pt; line-height:1.56; }
+section { page-break-before: always; padding:0; } section.cover { page-break-before: avoid; }
+h1 { color:var(--primary); font-size:19pt; line-height:1.18; margin:0 0 10pt; padding-bottom:5pt; border-bottom:1.8pt solid var(--accent); page-break-after:avoid; letter-spacing:-.02em; }
+h2 { color:var(--primary2); font-size:12.8pt; margin:13pt 0 6pt; padding-left:7pt; border-left:3.2pt solid var(--accent); page-break-after:avoid; }
+h3 { color:#344054; font-size:10.8pt; margin:8pt 0 4pt; page-break-after:avoid; }
+p { margin:3.5pt 0 5.5pt; text-align:justify; } ul { margin:4pt 0 6pt 14pt; padding:0; } li { margin:1.7pt 0; }
+a { color:#1d4ed8; text-decoration:none; } code { font-family:"SFMono-Regular",Consolas,monospace; background:#f2f4f7; padding:0 3pt; border-radius:3pt; }
+.small { font-size:8.2pt; color:var(--muted); } .url { font-size:6.8pt; color:#475467; word-break:break-all; line-height:1.25; }
+table { width:100%; border-collapse:collapse; margin:6pt 0 9pt; font-size:8.5pt; page-break-inside:auto; } th,td { border:.45pt solid var(--line); padding:4pt 5pt; vertical-align:top; word-break:break-word; } th { background:#e8eef2; color:#17324d; font-weight:700; } tr:nth-child(even) td { background:#fbfcfd; }
+.cover { height:297mm; padding:0; position:relative; overflow:hidden; background:radial-gradient(circle at 18% 18%, rgba(214,169,74,.28), transparent 28%), linear-gradient(145deg,#0b1726 0%,#17324d 54%,#2f6f67 100%); color:white; }
+.cover:before { content:""; position:absolute; inset:16mm; border:1pt solid rgba(255,255,255,.22); }
+.cover .brand { position:absolute; top:24mm; left:24mm; font-size:8.5pt; letter-spacing:.18em; color:#d6e4e5; text-transform:uppercase; }
+.cover .wave { position:absolute; right:20mm; top:42mm; width:68mm; height:64mm; opacity:.72; }
+.cover .wave span { display:inline-block; width:2.2mm; margin-right:1.6mm; background:linear-gradient(#ffe3a3,#9ad0c8); border-radius:2mm; vertical-align:middle; }
+.cover .wave span:nth-child(1){height:14mm}.cover .wave span:nth-child(2){height:28mm}.cover .wave span:nth-child(3){height:44mm}.cover .wave span:nth-child(4){height:58mm}.cover .wave span:nth-child(5){height:36mm}.cover .wave span:nth-child(6){height:24mm}.cover .wave span:nth-child(7){height:50mm}.cover .wave span:nth-child(8){height:32mm}.cover .wave span:nth-child(9){height:18mm}
+.cover .content { position:absolute; left:24mm; right:24mm; top:92mm; text-align:left; }
+.cover h1 { border:0; color:#fff; font-size:31pt; line-height:1.16; margin:0 0 10pt; max-width:138mm; letter-spacing:-.04em; }
+.cover .subtitle { font-size:13pt; color:#e9f2f3; max-width:150mm; margin:0 0 14pt; text-align:left; }
+.cover .abstract { max-width:152mm; margin:17pt 0 0; padding:10pt 12pt; border-left:3pt solid var(--accent2); background:rgba(255,255,255,.08); text-align:left; line-height:1.6; color:#f7fbfb; }
+.cover .meta { position:absolute; left:24mm; right:24mm; bottom:28mm; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8pt; color:#eff6f6; font-size:8.8pt; }
+.cover .meta div { border-top:1pt solid rgba(255,255,255,.28); padding-top:5pt; }
+.eyebrow { display:block; color:var(--accent); font-size:8pt; letter-spacing:.14em; text-transform:uppercase; margin-bottom:4pt; font-weight:700; }
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7pt; margin:10pt 0 12pt; page-break-inside:avoid; }
+.kpi { border:1pt solid #d7e0e3; background:linear-gradient(180deg,#fff,#f7fafb); padding:7pt; border-radius:5pt; min-height:24mm; }
+.kpi .num { color:var(--primary); font-size:17pt; font-weight:800; line-height:1; } .kpi .lbl { color:#475467; font-size:8pt; margin-top:4pt; }
+.finding-grid { display:grid; grid-template-columns:1fr 1fr; gap:8pt; margin:8pt 0 10pt; }
+.finding { border:1pt solid #d0d5dd; background:#fff; padding:8pt 9pt; border-radius:5pt; page-break-inside:avoid; } .finding b { color:var(--primary); }
+.toc h1 { margin-bottom:14pt; } .toc-row { display:grid; grid-template-columns:10mm 1fr 14mm; column-gap:8pt; padding:5pt 0; border-bottom:.45pt solid #e4e7ec; align-items:baseline; } .toc-row a { color:var(--ink); font-weight:600; } .toc-row .idx { color:var(--accent); font-size:8pt; letter-spacing:.08em; } .toc-row .num { color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
+.quote { background:var(--quote); border-left:3pt solid var(--accent); padding:6pt 8pt; margin:6pt 0; font-size:8.8pt; page-break-inside:avoid; border-radius:0 4pt 4pt 0; }
+.case { border:0.7pt solid #d0d5dd; border-top:2.2pt solid var(--blue); padding:7pt 8pt; margin:7pt 0; background:var(--case); page-break-inside:avoid; border-radius:4pt; }
+.case h3 { margin-top:0; color:var(--primary); }
+.country-head { display:flex; justify-content:space-between; align-items:flex-end; gap:8pt; border-bottom:2pt solid var(--accent); margin-bottom:10pt; padding-bottom:5pt; }
+.country-head h1 { border:0; padding:0; margin:0; } .tag { display:inline-block; color:#fff; background:var(--primary2); padding:2pt 6pt; border-radius:99pt; font-size:8pt; white-space:nowrap; }
+.compare { font-size:6.8pt; line-height:1.36; table-layout:fixed; } .compare th,.compare td { padding:3.2pt 3.5pt; } .compare th:first-child,.compare td:first-child { width:18mm; } .compare th:not(:first-child),.compare td:not(:first-child) { width:30mm; } .compare b { color:var(--primary); }
+.refs { font-size:7.3pt; line-height:1.32; } .refs th:nth-child(1){width:14mm}.refs th:nth-child(3){width:28mm}.refs th:nth-child(4){width:15mm}
+.callout { background:#102a43; color:white; padding:10pt 12pt; border-radius:5pt; margin:8pt 0 10pt; page-break-inside:avoid; } .callout h2 { color:white; border-left-color:var(--accent2); margin-top:0; }
+.no-break { page-break-inside:avoid; }
+@media screen { html{background:#d0d0d0} body{margin:0;padding:20px 0} section{width:210mm;min-height:297mm;margin:0 auto 20px;background:white;box-shadow:0 4px 24px rgba(0,0,0,.18);box-sizing:border-box;padding:18mm 15mm 20mm;overflow:hidden} section.cover{padding:0} }
+</style>
+</head>
+<body>
+<section class="cover">
+  <div class="brand">Deep Regulatory Research · Synthetic Voice</div>
+  <div class="wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="content">
+    <h1>AI声音克隆技术的全球监管深度研究报告</h1>
+    <p class="subtitle">中国 · 欧盟 · 美国 · 日本 · 韩国｜法规、监管机构、案例与行业自律横向比较</p>
+    <p class="abstract"><b>摘要</b>　本报告聚焦可识别自然人声音被 AI 合成、仿声、转换或商业化使用的法律风险，按“现行法规—监管机构—典型案例—行业自律”四条线索梳理五个主要司法管辖区，并总结全球监管的共同趋势：授权、标识、可追溯、平台责任与高风险场景优先治理。</p>
+  </div>
+  <div class="meta"><div>研究日期<br><b>2026-04-25</b></div><div>交付形式<br><b>HTML/CSS → PDF</b></div><div>来源评级<br><b>Tier 1 / 2 / 3</b></div></div>
+</section>
+
+<section id="summary">
+<span class="eyebrow">Executive Summary</span>
+<h1>执行摘要</h1>
+<div class="kpi-grid"><div class="kpi"><div class="num">5</div><div class="lbl">主要司法管辖区</div></div><div class="kpi"><div class="num">25</div><div class="lbl">核心参考来源</div></div><div class="kpi"><div class="num">4</div><div class="lbl">固定分析维度</div></div><div class="kpi"><div class="num">0</div><div class="lbl">Wikipedia 引用</div></div></div>
+<p>AI声音克隆监管的共同问题不是“声音是否由AI生成”本身，而是该声音是否足以使公众识别到某个自然人、是否被用于欺骗性传播、是否处理了声纹等生物识别信息、是否复制了受保护录音或表演，以及平台或服务商是否提供了足够的标识、同意、审核和救济机制。</p>
+<p>五个司法管辖区呈现三种模式：中国采取“深度合成/生成式AI专门规章+人格权+个人信息”的强标识模式；欧盟以AI Act、GDPR和DSA形成“透明度—数据保护—平台系统风险”的组合；美国则以FCC电话规则和FTC消费者保护为执法前沿，同时由州公开权处理声音商业化。日本仍以APPI、著作权/邻接权、人格权和AI事业者指南为主，硬法专门性较弱；韩国正在形成“AI Basic Act透明度+PIPA+性深伪刑法+不正竞争声音标识”的混合模式。</p>
+<p>结论上，未来监管会从“事后侵权救济”转向“全链路可追溯”：训练数据授权、声纹/人声敏感处理、合成输出机器可读标记、平台侧元数据核验、冒充/诈骗场景快速下架与账户止付，以及演员、歌手、配音员等职业声音的合同化授权。</p>
+<div class="finding-grid"><div class="finding"><b>最强硬法路径：</b>中国、韩国已直接把合成音频/人声纳入标识或刑法规制。</div><div class="finding"><b>最快执法路径：</b>美国 FCC 已把 AI voice cloning 电话纳入 TCPA 并启动拟罚。</div><div class="finding"><b>最体系化框架：</b>欧盟 AI Act + GDPR + DSA 形成模型、数据、平台三层治理。</div><div class="finding"><b>最大不确定性：</b>日本和韩国公开“纯声音克隆”专案判例仍较少，需依相邻法理。</div></div>
+</section>
+
+<section class="toc" id="toc">
+<h1>目录</h1>
+<div class="toc-row"><span class="idx">01</span><a href="#method">研究方法与可靠性评级</a><span class="num">4</span></div>
+<div class="toc-row"><span class="idx">02</span><a href="#compare">五国/地区横向比较分析</a><span class="num">5</span></div>
+<div class="toc-row"><span class="idx">03</span><a href="#cn">中国大陆</a><span class="num">6</span></div>
+<div class="toc-row"><span class="idx">04</span><a href="#eu">欧盟</a><span class="num">8</span></div>
+<div class="toc-row"><span class="idx">05</span><a href="#us">美国</a><span class="num">10</span></div>
+<div class="toc-row"><span class="idx">06</span><a href="#jp">日本</a><span class="num">12</span></div>
+<div class="toc-row"><span class="idx">07</span><a href="#kr">韩国</a><span class="num">14</span></div>
+<div class="toc-row"><span class="idx">08</span><a href="#trend">结论与趋势展望</a><span class="num">16</span></div>
+<div class="toc-row"><span class="idx">09</span><a href="#refs">参考来源与可靠性评级</a><span class="num">17</span></div>
+</section>
+
+<section id="method">
+<h1>研究方法与评级</h1>
+<p>研究执行四阶段工作流：Phase 1 Research 在 <code>docs/</code> 与 <code>data/</code> 目录沉淀研究文件；Phase 2 Report Writing 形成中文正文；Phase 3 Fact-Checking 对法规条款和案例进行交叉核验；Phase 4 Document Formatting 使用HTML/CSS经Playwright渲染A4 PDF。检索同时使用中文、英文及日文/韩文关键词，例如“AI声音克隆 监管”“AI合成声音 侵权”“AI voice cloning regulation”“synthetic voice deepfake disclosure”“生成AI 音声 個人情報”“AI 음성 클로닝 규제”。</p>
+<table><thead><tr><th>评级</th><th>定义</th><th>使用方式</th></tr></thead><tbody><tr><td>Tier 1</td><td>官方法规、监管机构、法院/执法文件、官方法律数据库</td><td>作为条文原文、职责、处罚结果的主依据</td></tr><tr><td>Tier 2</td><td>权威行业组织、公共机构指南、专业判例数据库、官方认可自律文件</td><td>补充行业实践、软法和判例文本</td></tr><tr><td>Tier 3</td><td>媒体、律所评论、二级报道</td><td>仅用于线索；不作为未核验事实的唯一依据</td></tr></tbody></table>
+<p>本报告未引用 Wikipedia。对日本、韩国等未发现“声音克隆专案判决”的法域，报告明确区分“直接声音克隆案例”与“深伪/生物识别/公开权相邻案例”，避免把相邻案例夸大为既有专案。</p>
+</section>
+
+<section id="compare">
+<h1>五国/地区横向比较分析</h1>
+<table class="compare"><thead><tr><th>维度</th><th>中国</th><th>欧盟</th><th>美国</th><th>日本</th><th>韩国</th></tr></thead><tbody><tr><td><b>监管路径</b></td><td>深度合成规章<br>生成式AI<br>个人信息/民法典</td><td>AI Act透明义务<br>GDPR数据保护<br>DSA平台治理</td><td>FCC/TCPA电话<br>FTC消费者保护<br>州公开权</td><td>APPI<br>著作权/邻接权<br>人格权与软法</td><td>PIPA<br>AI Basic Act<br>性深伪/不正竞争</td></tr>
+<tr><td><b>声音/音频是否明示覆盖</b></td><td>明确覆盖：<br>合成人声/仿声<br>语音转换/人声生物识别</td><td>明确覆盖：<br>AI Act deep fake 含 audio<br>DSA 含 manipulated audio</td><td>明确覆盖：<br>FCC: AI voice = artificial voice<br>州法含 voice</td><td>间接覆盖：<br>APPI 含音声信息<br>指南覆盖声纹</td><td>明确覆盖：<br>AI Act含 소리/음향<br>性深伪含 음성</td></tr>
+<tr><td><b>同意/授权标准</b></td><td>人声编辑：单独同意<br>个人信息：同意/法定基础</td><td>合法基础<br>生物识别：Article 9例外/明确同意</td><td>电话：事先同意<br>商业声音：州公开权/合同</td><td>目的特定<br>目的外需同意<br>声纹高强度合规</td><td>PIPA合法基础<br>生物识别另行同意<br>名人声音需授权</td></tr>
+<tr><td><b>标识/披露</b></td><td>显式+隐式标识<br>音频提示/元数据</td><td>Article 50<br>机器可读标记<br>deep fake披露</td><td>电话开头披露发起者<br>州选举规则另行披露</td><td>软法强调透明性<br>硬法标识较弱</td><td>第31条：AI结果标示<br>难辨真实音响须告知</td></tr>
+<tr><td><b>平台/中介责任</b></td><td>应用商店核验<br>平台核验元数据并提示</td><td>通知-行动<br>理由说明<br>VLOP风险评估</td><td>运营商STIR/SHAKEN<br>州AG/FCC协作</td><td>电信秘密<br>非法/侵权信息一般规则</td><td>非法信息流通限制<br>性深伪材料可限制处理</td></tr>
+<tr><td><b>典型责任后果</b></td><td>整改/下架/停服<br>民事赔偿<br>诈骗刑责</td><td>AI Act: 1500万欧/3%<br>GDPR: 2000万欧/4%</td><td>FCC拟罚<br>FTC禁令/罚款<br>公开权赔偿</td><td>民事赔偿/差止<br>名誉/诈骗/业务妨害</td><td>PIPA罚款/整改<br>性深伪刑责<br>诈骗止付</td></tr>
+<tr><td><b>成熟度判断</b></td><td>规则最细<br>已有AI声音民事判例</td><td>体系最完整<br>专门执法仍少</td><td>执法活跃<br>州法碎片化</td><td>软法领先<br>硬法分散</td><td>透明度强化<br>性深伪/名人声音明确</td></tr></tbody></table>
+<p>横向看，中国和韩国在“音频标识/合成内容告知”上正形成明确硬法义务；欧盟以AI Act Article 50提供统一透明义务，但真正大规模适用节点在2026年；美国已经通过FCC将AI生成声音电话纳入TCPA，执法速度最快但整体州法差异较大；日本的监管重点仍是个人信息、著作权和人格权解释，更多依赖软法与个案衡量。</p>
+</section>
+
+<section id="cn">
+<div class="country-head"><h1>中国大陆</h1><span class="tag">CN · 强标识规则</span></div>
+<h2>现行法律法规（含关键条款摘录）</h2>
+<p>中国大陆没有单独“声音克隆法”，但《互联网信息服务深度合成管理规定》直接覆盖文本转语音、语音转换、语音属性编辑、合成人声和仿声，是五法域中对声音克隆术语覆盖最明确的规则之一。《生成式人工智能服务管理暂行办法》进一步覆盖向境内公众提供生成文本、图片、音频、视频等内容的服务；《人工智能生成合成内容标识办法》则把音频显式标识和文件元数据隐式标识制度化。</p>
+<div class="quote"><b>《深度合成规定》第十四条：</b>“深度合成服务提供者和技术支持者提供人脸、人声等生物识别信息编辑功能的，应当提示深度合成服务使用者依法告知被编辑的个人，并取得其单独同意。”</div>
+<div class="quote"><b>《深度合成规定》第十七条：</b>提供“合成人声、仿声等语音生成或者显著改变个人身份特征的编辑服务”，可能导致公众混淆或者误认的，应当进行显著标识。</div>
+<div class="quote"><b>《AI生成合成内容标识办法》第四条：</b>音频可在“起始、末尾或者中间适当位置添加语音提示或者音频节奏提示等标识”，并在下载、复制、导出时确保文件含显式标识。</div>
+<p>人格权基础来自《民法典》第一千零二十三条第二款：“对自然人声音的保护，参照适用肖像权保护的有关规定。”个人信息保护方面，《个人信息保护法》第二十八、二十九条将生物识别纳入敏感个人信息，处理敏感个人信息应取得单独同意。若AI克隆声音用于冒充亲友、领导或客服转账，还会进入《反电信网络诈骗法》和刑法诈骗框架。</p>
+<h2>监管机构及职责</h2>
+<ul><li><b>国家网信部门：</b>统筹深度合成、生成式AI、算法备案、安全评估、标识和个人信息保护协调监管。</li><li><b>工业和信息化部门/通信管理局：</b>互联网信息服务、应用分发、电信网络、反诈技术治理。</li><li><b>公安机关：</b>诈骗、侵犯公民个人信息、网络谣言、非法利用信息网络等违法犯罪查处。</li><li><b>广电、新闻出版、市场监管、版权部门：</b>分别处理视听节目、广告/虚假宣传、不正当竞争、著作权与邻接权问题。</li><li><b>人民法院：</b>通过声音权益、肖像权、名誉权、著作权、不正当竞争案件确立民事裁判规则。</li></ul>
+<h2>典型执法/司法案例</h2>
+<div class="case"><h3>全国首例“AI声音侵权案”（北京互联网法院，2024）</h3><p><b>案件要素：</b>配音师声音被用于AI文本转语音产品，相关公司未获合法授权。</p><p><b>裁判要点：</b>可识别的AI合成声音承载自然人人格利益；配音师的声音权益及于案涉AI声音。未经授权开发、销售或商业利用构成侵权。</p><p><b>结果：</b>被告书面赔礼道歉并赔偿25万元。来源：中国法院网/人民法院报，Tier 1。</p></div>
+<div class="case"><h3>AI合成知名育儿专家声音带货案</h3><p><b>案件要素：</b>商家在网络店铺中使用与专家声音高度近似的AI合成音频推介家庭教育图书。</p><p><b>裁判要点：</b>声音在音色、语调、发音风格上高度一致，结合原告领域知名度，足以建立对应联系；商家对推广内容负有审核注意义务。</p><p><b>结果：</b>判令赔礼道歉并赔偿损失；具体金额公开来源未披露。</p></div>
+<h2>行业自律规范</h2>
+<p>《深度合成规定》第五条直接鼓励行业组织建立行业标准、准则和自律管理制度。互联网平台通常通过服务协议、社区公约、AI生成内容标识、投诉通道、侵权快速处理和实名发布机制落实。演艺、配音行业正在推动对声纹克隆、素材抓取训练、AI复刻表演的授权和收益分配规则，但全国统一、专门针对声音克隆的行业公约仍处于形成阶段。</p>
+</section>
+
+<section id="eu">
+<div class="country-head"><h1>欧盟</h1><span class="tag">EU · AI Act/GDPR/DSA</span></div>
+<h2>现行法律法规（含关键条款摘录）</h2>
+<p>欧盟监管核心是AI Act、GDPR和DSA三层结构。AI Act直接定义deep fake包括AI生成或操纵的audio；GDPR处理训练声音样本、声纹、生物识别和数据主体权利；DSA处理合成音频在平台上的传播、通知-处理和大型平台系统性风险。</p>
+<div class="quote"><b>AI Act Article 3(60):</b> “‘deep fake’ means AI-generated or manipulated image, audio or video content that resembles existing persons... and would falsely appear... to be authentic or truthful.”</div>
+<div class="quote"><b>AI Act Article 50(2):</b> Providers of AI systems generating synthetic audio, image, video or text content shall ensure outputs are marked in a machine-readable format and detectable as artificially generated or manipulated.</div>
+<div class="quote"><b>AI Act Article 50(4):</b> Deployers of an AI system that generates or manipulates image, audio or video content constituting a deep fake shall disclose that the content has been artificially generated or manipulated.</div>
+<div class="quote"><b>GDPR Article 4(14):</b> “‘biometric data’ means personal data resulting from specific technical processing relating to the physical, physiological or behavioural characteristics... which allow or confirm the unique identification of that natural person.”</div>
+<p>AI Act Article 50透明义务通常自2026年8月适用；违反Article 50可能面临最高1500万欧元或全球年营业额3%的行政罚款。GDPR若涉及生物识别唯一识别，则可能触发Article 9特殊类别数据，通常需要明确同意或其他例外，并需DPIA。DSA Article 35明确将generated/manipulated audio的显著标记作为VLOP/VLOSE风险缓解措施之一。</p>
+<h2>监管机构及职责</h2>
+<ul><li><b>European AI Office：</b>推进AI Act实施，尤其GPAI、系统性风险、实践准则和调查。</li><li><b>成员国AI主管机关/市场监督机关：</b>执行非GPAI AI系统的市场监督、合格评定与处罚。</li><li><b>EDPB及成员国DPA：</b>监管GDPR下个人声音、声纹、生物识别和训练数据处理。</li><li><b>European Commission与Digital Services Coordinators：</b>监管DSA，尤其大型平台系统性风险、审计和数据访问。</li><li><b>成员国媒体和消费者保护机关：</b>处理视听服务、广告、误导商业实践和消费者欺骗。</li></ul>
+<h2>典型执法/司法案例</h2>
+<div class="case"><h3>Italian DPA v. Replika（AI聊天/语音接口，2023）</h3><p><b>案件要素：</b>Replika提供AI伴侣服务，含语音界面；被指隐私政策不透明、年龄验证不足、未成年人和脆弱群体风险。</p><p><b>处理要点：</b>Garante关注GDPR合法基础、透明度、未成年人保护、特殊类别数据和默认保护。</p><p><b>结果：</b>临时限制Luka Inc.处理意大利用户数据；与声音克隆不同，但对AI语音伴侣和情绪操纵风险有参考价值。</p></div>
+<div class="case"><h3>CNIL/Clearview AI（生物识别抓取，2022-2023）</h3><p><b>案件要素：</b>Clearview抓取网络照片建立面部识别数据库。</p><p><b>裁判/处理要点：</b>无合法基础处理个人和生物识别数据，未尊重访问/删除权，未配合监管。</p><p><b>结果：</b>法国CNIL罚款2000万欧元并责令停止/删除；逾期又罚520万欧元。虽为面部识别，但对网络抓取声音样本建立声纹/克隆库具有强类比意义。</p></div>
+<h2>行业自律规范</h2>
+<p>欧盟自律重点包括AI Pact、GPAI Code of Practice、AI-generated content marking and labelling Code of Practice以及Code of Conduct on Disinformation。C2PA/Content Credentials等内容来源技术规范可作为机器可读标记和可验证来源的工程基础，但是否满足AI Act Article 50仍取决于最终标准、指南和实施实践。</p>
+</section>
+
+<section id="us">
+<div class="country-head"><h1>美国</h1><span class="tag">US · FCC/FTC/州法</span></div>
+<h2>现行法律法规（含关键条款摘录）</h2>
+<p>美国没有统一联邦AI声音克隆法。现行监管主要由FCC/TCPA处理AI语音电话，FTC处理商业欺骗和冒充，州公开权保护姓名、肖像和声音，版权法保护录音和作品而非“嗓音本身”。NO FAKES Act仍属草案，不能作为现行法。</p>
+<div class="quote"><b>FCC 24-17:</b> “we confirm that the TCPA’s restrictions on the use of ‘artificial or prerecorded voice’ encompass current AI technologies that generate human voices.”</div>
+<div class="quote"><b>FCC 24-17:</b> “AI technologies such as ‘voice cloning’ fall within the TCPA’s existing prohibition... because this technology artificially simulates a human voice.”</div>
+<div class="quote"><b>FTC Act §5:</b> “Unfair methods of competition... and unfair or deceptive acts or practices... are hereby declared unlawful.”</div>
+<div class="quote"><b>17 U.S.C. §114(b):</b> sound recording rights do not extend to another independently fixed recording “even though such sounds imitate or simulate” the copyrighted sound recording.</div>
+<p>田纳西ELVIS Act把个人的name, photograph, voice, likeness商业化权利写入州法；加州Civil Code §3344长期保护未经授权为广告或销售目的使用姓名、声音、签名、照片或肖像。版权法上，AI模仿声音不必然侵害版权，但复制原录音、采样、使用歌词/乐曲/表演可能触发版权或邻接权；公开权和虚假背书更常成为声音克隆民事路径。</p>
+<h2>监管机构及职责</h2>
+<ul><li><b>FCC：</b>执行TCPA、Truth in Caller ID、STIR/SHAKEN和robocall规则；可发布解释性裁定、拟罚和运营商合规要求。</li><li><b>FTC：</b>执行FTC Act、Telemarketing Sales Rule和Impersonation Rule，治理AI语音诈骗、冒充和虚假背书。</li><li><b>州总检察长：</b>执行州消费者保护、公开权、选举深伪、反robocall规则。</li><li><b>DOJ/联邦检察：</b>处理诈骗、身份盗用、网络犯罪和选举干扰。</li><li><b>版权局与法院：</b>通过政策报告、登记与判例处理数字复制、录音和公开权边界。</li></ul>
+<h2>典型执法/司法案例</h2>
+<div class="case"><h3>FCC v. Steve Kramer（Biden deepfake robocall，2024）</h3><p><b>案件要素：</b>使用AI生成拜登声音向新罕布什尔州选民拨打电话，劝其不要在初选投票，并使用误导性caller ID。</p><p><b>处理要点：</b>FCC认为其knowingly caused misleading/inaccurate caller ID，且具有defraud/cause harm意图。</p><p><b>结果：</b>FCC提出600万美元拟罚（NAL，非最终缴纳结果）。</p></div>
+<div class="case"><h3>FCC v. Lingo Telecom（STIR/SHAKEN，2024）</h3><p><b>案件要素：</b>运营商为携带AI deepfake Biden语音的欺骗性robocall赋予错误A级认证。</p><p><b>处理要点：</b>FCC强调KYC和号码关联核验不足导致错误高等级认证。</p><p><b>结果：</b>FCC提出200万美元拟罚（NAL）。</p></div>
+<div class="case"><h3>Midler v. Ford 与 Waits v. Frito-Lay（声音模仿公开权）</h3><p><b>案件要素：</b>广告中使用sound-alike模仿名人歌手声音。</p><p><b>裁判要点：</b>“A voice is as distinctive and personal as a face.” 可识别且独特的声音被商业挪用可能构成公开权侵害和虚假背书。</p><p><b>结果：</b>第九巡回支持名人声音公开权主张继续或赔偿结论；虽非AI案，但对AI模仿歌手/演员声音高度相关。</p></div>
+<h2>行业自律规范</h2>
+<p>Partnership on AI《Responsible Practices for Synthetic Media》建议同意、披露、风险评估、追溯和救济；C2PA/Content Credentials提供来源凭证技术；ATIS/STIR-SHAKEN为通信身份认证框架并被FCC规则吸收；SAG-AFTRA等工会合同开始规范演员、配音员和录音艺术家的digital replica、同意、报酬与撤回机制。大型平台另以服务条款限制deepfake、impersonation和政治合成媒体。</p>
+</section>
+
+<section id="jp">
+<div class="country-head"><h1>日本</h1><span class="tag">JP · APPI/软法</span></div>
+<h2>现行法律法规（含关键条款摘录）</h2>
+<p>日本尚无专门AI声音克隆法。监管以APPI个人信息、著作权/邻接权、不正竞争防止法、民法人格权/名誉隐私、景品表示法和AI事业者指南组合适用。声纹特征若用于说话人识别/认证，可构成个人识别符号；录音、朗读、歌唱、配音可作为作品、实演或レコード受到保护，但“声音本身”通常不是著作物。</p>
+<div class="quote"><b>APPI Article 2(1):</b> personal information includes information “made by writing, recording, sound or motion, or other means” that can identify a specific individual.</div>
+<div class="quote"><b>APPI Article 2(2):</b> individual identification code includes codes converted for computer use to identify a specific individual by bodily features; PPC指南将从声音中提取、用于说话人认证的特征纳入说明。</div>
+<div class="quote"><b>著作权法第2条：</b>“著作物”是思想或感情的创造性表达；“実演”包括演奏、歌唱、口演、朗诵等；“レコード”为固定声音的物。</div>
+<div class="quote"><b>民法第709条：</b>故意或过失侵害他人权利或法律上受保护利益者，应承担损害赔偿责任。</div>
+<p>日本文化厅“AIと著作権”文件说明AI学习、输出与著作权第30条之4之间需个案判断，尤其要考虑是否不当地损害权利人利益。METI/MIC《AI事業者ガイドライン》则以软法形式要求透明性、安全性、隐私、知识产权、误用防止和AI治理。</p>
+<h2>监管机构及职责</h2>
+<ul><li><b>个人信息保护委员会（PPC）：</b>APPI主管，监管声音/声纹数据的采集、利用目的、安全管理、第三方提供和泄露。</li><li><b>文化厅：</b>著作权政策和AI著作权指南，处理录音、实演、歌唱、朗读等权利解释。</li><li><b>经济产业省/总务省：</b>AI事业者指南、不正竞争、产业与电信/平台治理。</li><li><b>消费者厅：</b>景品表示法，处理AI合成名人声音广告造成优良误认、有利误认或虚假授权。</li><li><b>警察与法院：</b>处理诈骗、名誉毁损、业务妨害、隐私人格权侵权和差止。</li></ul>
+<h2>典型执法/司法案例</h2>
+<div class="case"><h3>日本deepfake色情合成刑事案件（相邻案例）</h3><p><b>案件要素：</b>公开报道显示，日本警方曾针对将女性艺人面部合成至成人影片并上传/销售的deepfake视频采取刑事行动。</p><p><b>处理要点：</b>虽非声音克隆，但显示日本可用名誉毁损、著作权、隐私和刑法路径处理深伪人格冒用。</p><p><b>结果：</b>本研究未以官方法院数据库确认具体声音克隆判决案号，故仅作为相邻执法趋势。</p></div>
+<div class="case"><h3>最高裁“Pink Lady”宣传权案（相邻人格商业化法理）</h3><p><b>案件要素：</b>涉及艺人姓名、肖像等顾客吸引力的商业使用。</p><p><b>裁判要点：</b>日本法承认源自人格权、具有经济价值的パブリシティ権。声音是否当然纳入仍需个案，但对歌手、声优、主播等职业声音可作为类推基础。</p><p><b>结果：</b>确立商业吸引力人格利益的法理边界。</p></div>
+<h2>行业自律规范</h2>
+<p>日本最重要的软法是METI/MIC《AI事業者ガイドライン》，其要求开发者、提供者、利用者进行风险管理、透明说明、隐私和知识产权保护。文化厅AI著作权文件为训练和输出阶段提供版权判断框架。声优、音乐、内容行业正在通过合同条款、许可范围、二次利用、AI训练禁止/允许条款和平台规则处理AI音声合成，但尚未形成统一硬法标识制度。</p>
+</section>
+
+<section id="kr">
+<div class="country-head"><h1>韩国</h1><span class="tag">KR · AI Basic Act</span></div>
+<h2>现行法律法规（含关键条款摘录）</h2>
+<p>韩国正从分散规制走向AI透明度硬法。《个人信息保护法》（PIPA）覆盖可识别声音和声纹数据；《人工智能发展与信赖基础构建等基本法》（AI Basic Act）明确生成式AI包括“声音”，并要求生成式AI结果标示；《性暴力犯罪处罚等特例法》第14-2条已把“음성/음성물”纳入深伪性犯罪；《不正竞争防止及营业秘密保护法》明确保护他人“음성”等可识别标识的商业价值。</p>
+<div class="quote"><b>PIPA 제2조：</b>个人信息包括可通过姓名、居民登记号码、影像等识别个人的信息，以及虽不能单独识别但可与其他信息结合识别的信息。</div>
+<div class="quote"><b>AI Basic Act 제2조：</b>“생성형 인공지능”是模仿输入数据结构和特性，生成“글, 소리, 그림, 영상”等结果物的AI系统。</div>
+<div class="quote"><b>AI Basic Act 제31조：</b>AI经营者提供生成式AI产品或服务时，应标示结果物由生成式AI生成；提供难以与真实区分的虚拟“음향, 이미지 또는 영상”等结果物时，应以用户能明确识别的方式告知或标示。</div>
+<div class="quote"><b>性暴力处罚特例法 제14조의2：</b>对人的脸、身体或“음성”的拍摄物、视频物或音频物，违背对象意思进行可引发性欲或羞耻的编辑、合成、加工，可处7年以下有期徒刑或5000万韩元以下罚金。</div>
+<div class="quote"><b>不正竞争法 제2조 제1호 타목：</b>未经授权为自身营业使用在韩国广泛认知且具有经济价值的他人姓名、肖像、“음성”、签名等可识别标识，侵害经济利益的，构成不正竞争。</div>
+<h2>监管机构及职责</h2>
+<ul><li><b>PIPC个人信息保护委员会：</b>监管个人声音、声纹、生物识别、生成式AI个人信息处理和自动化决定。</li><li><b>MSIT科学技术信息通信部：</b>AI Basic Act主管，高影响AI确认、透明度、可靠性政策和下位规则。</li><li><b>广播媒体通信委员会/KCSC体系：</b>处理信息通信网非法信息、深伪音频传播、下架/限制命令。</li><li><b>警察、检察、法院：</b>性深伪音频、诈骗、恐吓、名誉毁损和非法信息刑事案件。</li><li><b>金融委员会/FSS：</b>处理voice phishing、账户止付、损害返还和金融机构风控。</li><li><b>文化体育观光部/韩国著作权委员会、KIPO：</b>分别处理著作权、生成式AI输出、人格标识商业化和不正竞争。</li></ul>
+<h2>典型执法/司法案例</h2>
+<div class="case"><h3>PIPC Worldcoin生物识别处罚（相邻案例）</h3><p><b>案件要素：</b>Worldcoin相关主体收集虹膜等生物识别信息用于身份验证服务。</p><p><b>处理要点：</b>PIPC强调生物识别信息的告知、同意、安全管理、跨境转移和删除要求。</p><p><b>结果：</b>公开资料显示PIPC对相关主体处以合计约11亿韩元级别罚款并责令整改；本报告将其作为声纹/声音生物识别的类比案例。</p></div>
+<div class="case"><h3>韩国深伪性犯罪集中治理与2024修法</h3><p><b>案件要素：</b>针对女性、学生、公众人物的deepfake性剥削材料在Telegram等渠道传播引发集中执法。</p><p><b>处理要点：</b>现行第14-2条明确加入“음성/음성물”，制作、传播、营利传播、持有/观看均有责任层级。</p><p><b>结果：</b>本研究未确认具体deepfake audio判决案号，但可确认现行刑法路径已经直接覆盖性化合成声音。</p></div>
+<div class="case"><h3>Voice phishing账户止付机制</h3><p><b>案件要素：</b>AI克隆亲友、检察官、银行或公司高管声音诱导转账。</p><p><b>处理要点：</b>《电信金融诈骗损害防止及损害金返还特别法》关注欺罔手段后的资金流，提供被害申请、账户止付和损害返还机制。</p><p><b>结果：</b>AI声音不是构成要件，但会作为欺罔方法和风险事实进入侦查、金融止付和刑事追责。</p></div>
+<h2>行业自律规范</h2>
+<p>韩国软法和自律集中于MSIT AI伦理/可信AI政策、PIPC生成式AI个人信息处理标准、假名化风险基础指南、韩国著作权委员会生成式AI作品登记和纠纷预防指南，以及内容产业中关于歌手、演员、配音员声音授权的合同化安排。随着AI Basic Act施行，软法将更可能转化为下位规则和可审计合规义务。</p>
+</section>
+
+<section id="trend">
+<div class="callout"><h2>核心判断</h2><p>声音克隆监管的重心正在从“侵权后救济”前移到“生成前授权、生成时标识、传播中追踪、投诉后快速处置”。</p></div>
+<h1>结论与趋势展望</h1>
+<h2>主要结论</h2>
+<ul><li><b>声音正在被重构为“人格+数据+内容+身份认证”的复合客体。</b>单一著作权路径不足以处理AI仿声，监管更多依赖人格权/公开权、个人信息/生物识别、消费者保护和反诈。</li><li><b>透明度义务成为全球最低共识。</b>中国、欧盟、韩国都把合成音频标识写入或即将写入硬法；美国在电话场景要求同意和发起者披露；日本软法也强调透明性。</li><li><b>执法优先级从娱乐侵权转向诈骗、选举、性剥削和未成年人风险。</b>FCC Biden robocall、韩国性深伪规则、中国反电诈与深度合成标识，均表明公共安全场景会先被严管。</li><li><b>平台与工具提供者责任上升。</b>未来监管不会只追究上传者，而会要求模型、API、应用商店、社交平台和运营商承担审核、标识、日志、元数据核验和投诉响应义务。</li></ul>
+<h2>趋势展望</h2>
+<p>第一，<b>机器可读标识与内容来源凭证</b>将成为技术合规基础。显式水印不足以应对剪辑、转码和跨平台传播，监管会要求元数据、签名、水印和检测模型组合。第二，<b>职业声音授权市场</b>将制度化：配音员、歌手、演员、主播会通过合同明确训练、复刻、二次利用、撤回、地域和收益分配。第三，<b>高风险应用白名单/黑名单</b>会增加，尤其是金融客服、语音身份认证、招聘、教育、医疗、执法和政治传播。第四，<b>跨境执法协作</b>会加强，原因是声音样本抓取、模型训练、API调用和内容传播通常跨境发生。第五，<b>证明责任会向服务商转移</b>：是否取得授权、是否完成标识、是否保留日志、是否响应投诉，将成为判断过错和处罚幅度的关键。</p>
+</section>
+
+<section id="refs">
+<h1>参考来源与可靠性评级</h1>
+<p class="small">评级：Tier 1 = 官方法规/监管/法院；Tier 2 = 权威公共机构/行业组织/判例数据库；Tier 3 = 媒体或二级报道。本表列入主要引用来源；完整研究笔记见 <code>data/phase1_research_notes.md</code>。</p>
+<table class="refs"><thead><tr><th>编号</th><th>题名 / URL</th><th>机构</th><th>评级</th></tr></thead><tbody><tr><td>[CN-1]</td><td>互联网信息服务深度合成管理规定<br><span class='url'>https://www.cac.gov.cn/2022-12/11/c_1672221949354811.htm</span></td><td>国家网信办/工信部/公安部</td><td>Tier 1</td></tr>
+<tr><td>[CN-2]</td><td>生成式人工智能服务管理暂行办法<br><span class='url'>https://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm</span></td><td>国家网信办等七部门</td><td>Tier 1</td></tr>
+<tr><td>[CN-3]</td><td>人工智能生成合成内容标识办法<br><span class='url'>https://www.cac.gov.cn/2025-03/14/c_1743654684782215.htm</span></td><td>国家网信办等四部门</td><td>Tier 1</td></tr>
+<tr><td>[CN-4]</td><td>个人信息保护法<br><span class='url'>https://www.cac.gov.cn/2021-08/20/c_1631050028355286.htm</span></td><td>全国人大/中国网信网</td><td>Tier 1</td></tr>
+<tr><td>[CN-5]</td><td>全国首例AI声音侵权案报道<br><span class='url'>https://www.chinacourt.org/article/detail/2024/04/id/7908634.shtml</span></td><td>中国法院网/人民法院报</td><td>Tier 1</td></tr>
+<tr><td>[EU-1]</td><td>Regulation (EU) 2024/1689 AI Act<br><span class='url'>https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng</span></td><td>EUR-Lex</td><td>Tier 1</td></tr>
+<tr><td>[EU-2]</td><td>GDPR Regulation (EU) 2016/679<br><span class='url'>https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng</span></td><td>EUR-Lex</td><td>Tier 1</td></tr>
+<tr><td>[EU-3]</td><td>DSA Regulation (EU) 2022/2065<br><span class='url'>https://eur-lex.europa.eu/eli/reg/2022/2065/oj/eng</span></td><td>EUR-Lex</td><td>Tier 1</td></tr>
+<tr><td>[EU-4]</td><td>AI Office<br><span class='url'>https://digital-strategy.ec.europa.eu/en/policies/ai-office</span></td><td>European Commission</td><td>Tier 1</td></tr>
+<tr><td>[EU-5]</td><td>Italian DPA Replika decision<br><span class='url'>https://www.garanteprivacy.it/home/docweb/-/docweb-display/docweb/9852214</span></td><td>Garante</td><td>Tier 1</td></tr>
+<tr><td>[US-1]</td><td>FCC AI-generated voice Declaratory Ruling FCC 24-17<br><span class='url'>https://docs.fcc.gov/public/attachments/FCC-24-17A1.txt</span></td><td>FCC</td><td>Tier 1</td></tr>
+<tr><td>[US-2]</td><td>47 CFR §64.1200<br><span class='url'>https://www.ecfr.gov/current/title-47/chapter-I/subchapter-B/part-64/subpart-L/section-64.1200</span></td><td>eCFR/FCC</td><td>Tier 1</td></tr>
+<tr><td>[US-3]</td><td>FCC Kramer NAL FCC 24-59<br><span class='url'>https://docs.fcc.gov/public/attachments/FCC-24-59A1.txt</span></td><td>FCC</td><td>Tier 1</td></tr>
+<tr><td>[US-4]</td><td>FCC Lingo NAL FCC 24-60<br><span class='url'>https://docs.fcc.gov/public/attachments/FCC-24-60A1.txt</span></td><td>FCC</td><td>Tier 1</td></tr>
+<tr><td>[US-5]</td><td>FTC Act 15 U.S.C. §45<br><span class='url'>https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title15-section45&amp;edition=prelim</span></td><td>U.S. House OLRC</td><td>Tier 1</td></tr>
+<tr><td>[JP-1]</td><td>Act on Protection of Personal Information<br><span class='url'>https://www.japaneselawtranslation.go.jp/en/laws/view/4241</span></td><td>Japanese Law Translation</td><td>Tier 1</td></tr>
+<tr><td>[JP-2]</td><td>AI Guidelines for Business<br><span class='url'>https://www.meti.go.jp/shingikai/mono_info_service/ai_shakai_jisso/20240419_report.html</span></td><td>METI</td><td>Tier 1</td></tr>
+<tr><td>[JP-3]</td><td>AI and Copyright<br><span class='url'>https://www.bunka.go.jp/seisaku/chosakuken/aiandcopyright.html</span></td><td>Agency for Cultural Affairs</td><td>Tier 1</td></tr>
+<tr><td>[JP-4]</td><td>Unfair Competition Prevention Act<br><span class='url'>https://elaws.e-gov.go.jp/api/1/lawdata/405AC0000000047</span></td><td>e-Gov</td><td>Tier 1</td></tr>
+<tr><td>[JP-5]</td><td>Courts judgment search<br><span class='url'>https://www.courts.go.jp/app/hanrei_jp/search1</span></td><td>Supreme Court of Japan</td><td>Tier 1</td></tr>
+<tr><td>[KR-1]</td><td>Personal Information Protection Act<br><span class='url'>https://www.law.go.kr/법령/개인정보보호법</span></td><td>Korea Law</td><td>Tier 1</td></tr>
+<tr><td>[KR-2]</td><td>AI Basic Act<br><span class='url'>https://www.law.go.kr/법령/인공지능%20발전과%20신뢰%20기반%20조성%20등에%20관한%20기본법</span></td><td>Korea Law</td><td>Tier 1</td></tr>
+<tr><td>[KR-3]</td><td>Act on Special Cases Concerning Sexual Crimes<br><span class='url'>https://www.law.go.kr/법령/성폭력범죄의%20처벌%20등에%20관한%20특례법</span></td><td>Korea Law</td><td>Tier 1</td></tr>
+<tr><td>[KR-4]</td><td>Information and Communications Network Act<br><span class='url'>https://www.law.go.kr/법령/정보통신망%20이용촉진%20및%20정보보호%20등에%20관한%20법률</span></td><td>Korea Law</td><td>Tier 1</td></tr>
+<tr><td>[KR-5]</td><td>Unfair Competition Prevention Act<br><span class='url'>https://www.law.go.kr/법령/부정경쟁방지%20및%20영업비밀보호에%20관한%20법률</span></td><td>Korea Law</td><td>Tier 1</td></tr></tbody></table>
+</section>
+
+<section id="appendix">
+<h1>附录：关键术语</h1>
+<table><thead><tr><th>术语</th><th>说明</th></tr></thead><tbody><tr><td>声音克隆</td><td>利用AI模型从一个或多个声音样本学习音色、语调、节奏等特征，并生成听感近似特定人的语音。</td></tr><tr><td>深度伪造音频</td><td>AI生成或操纵的音频，足以让听者误信其由真实人物说出或是真实事件记录。</td></tr><tr><td>声纹/生物识别</td><td>从声音中提取用于识别或认证个人的特征模板；在多数法域触发高风险个人信息规则。</td></tr><tr><td>显式标识</td><td>用户可感知的语音提示、文字提示、节奏提示或界面提示。</td></tr><tr><td>隐式标识</td><td>写入文件元数据、签名、水印或内容凭证中的机器可读标记。</td></tr></tbody></table>
+<p class="small">版本：v1.0 ｜ 日期：2026-04-25 ｜ 页面尺寸：A4 ｜ 视觉风格：print-academic。</p>
+</section>
+</body></html>

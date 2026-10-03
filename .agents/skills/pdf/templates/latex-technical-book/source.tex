@@ -1,0 +1,439 @@
+% =============================================================================
+% LaTeX template for Chinese technical publications
+% =============================================================================
+
+\documentclass[10pt,openany,oneside]{book}
+
+\usepackage[
+  paperwidth=176mm,
+  paperheight=250mm,
+  left=21mm,
+  right=21mm,
+  top=20mm,
+  bottom=24mm,
+  headheight=13pt,
+  headsep=6mm,
+  footskip=10mm
+]{geometry}
+
+\usepackage{fontspec}
+\usepackage[UTF8,scheme=plain]{ctex}
+\IfFontExistsTF{TeX Gyre Pagella}{\setmainfont{TeX Gyre Pagella}}{\setmainfont{Palatino}}
+\IfFontExistsTF{TeX Gyre Heros}{\setsansfont{TeX Gyre Heros}}{\setsansfont{Helvetica}}
+\IfFontExistsTF{JetBrains Mono}{\setmonofont{JetBrains Mono}[Scale=MatchLowercase]}{\setmonofont{Menlo}[Scale=MatchLowercase]}
+\IfFontExistsTF{Source Han Serif SC}{\setCJKmainfont{Source Han Serif SC}}{\setCJKmainfont{Songti SC}}
+\IfFontExistsTF{Source Han Sans SC}{\setCJKsansfont{Source Han Sans SC}}{\setCJKsansfont{Heiti SC}}
+\IfFontExistsTF{Sarasa Mono SC}{\setCJKmonofont{Sarasa Mono SC}}{}
+
+\usepackage{microtype}
+\usepackage{setspace}
+\setstretch{1.10}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt plus 1pt}
+\emergencystretch=3em
+\tolerance=1800
+\hbadness=6000
+
+\usepackage{xcolor}
+\definecolor{BookBlue}{HTML}{1F4E79}
+\definecolor{BookNavy}{HTML}{15324A}
+\definecolor{BookGold}{HTML}{C59B4B}
+\definecolor{CoverRed}{HTML}{BE1E2D}
+\definecolor{CoverBlack}{HTML}{333333}
+\definecolor{BookRed}{HTML}{8B1E1E}
+\definecolor{BookGreen}{HTML}{2D6A4F}
+\definecolor{BookGray}{HTML}{4A5568}
+\definecolor{LightBlue}{HTML}{EEF5FB}
+\definecolor{LightGray}{HTML}{F6F7F9}
+\definecolor{CodeBg}{HTML}{F7F7F3}
+\definecolor{CodeRule}{HTML}{D8DEE9}
+\definecolor{CodeKeyword}{HTML}{4B6584}
+\definecolor{CodeComment}{HTML}{6B7C6A}
+\definecolor{CodeString}{HTML}{8A5A44}
+\definecolor{CodeNumber}{HTML}{6C6F7D}
+\definecolor{TocBlack}{HTML}{111111}
+\definecolor{CoverPaper}{HTML}{FEFEFE}
+\definecolor{AccentSoft}{HTML}{FAF5F0}
+\definecolor{AccentLine}{HTML}{8A1E1E}
+\definecolor{DiagramBox}{HTML}{F7F3EF}
+\definecolor{DiagramBlue}{HTML}{E8EEF5}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\renewcommand{\proofname}{证明}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage{lettrine}
+\usepackage{enumitem}
+\usepackage{booktabs,multirow,tabularx,longtable,array,ragged2e}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash\hspace{0pt}}X}
+\usepackage{caption,subcaption}
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\usepackage{xurl}
+\Urlmuskip=0mu plus 2mu
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\floatname{algorithm}{算法 / Algorithm}
+\renewcommand{\contentsname}{目\quad 录}
+\renewcommand{\bibname}{参考文献 / Bibliography}
+\renewcommand{\indexname}{索\quad 引 / Index}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+
+\usepackage{listings}
+\lstdefinestyle{bookcode}{
+  basicstyle=\scriptsize\ttfamily,
+  backgroundcolor=\color{CodeBg},
+  frame=lines,
+  framerule=0.45pt,
+  rulecolor=\color{CodeRule},
+  numbers=left,
+  numberstyle=\tiny\sffamily\color{BookGray},
+  keywordstyle=\color{CodeKeyword}\bfseries,
+  commentstyle=\color{CodeComment}\itshape,
+  stringstyle=\color{CodeString},
+  identifierstyle=\color{CoverBlack},
+  breaklines=true,
+  breakatwhitespace=false,
+  postbreak=\mbox{\textcolor{BookGray}{$\hookrightarrow$}\space},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=2.6em,
+  xrightmargin=0.6em,
+  framexleftmargin=2.2em,
+  framexrightmargin=0.4em,
+  framesep=4pt,
+  aboveskip=0.75em,
+  belowskip=0.75em,
+  captionpos=b,
+  numbersep=0.8em,
+  alsoletter={@:-},
+  morekeywords={async,await,import,export,from,const,let,var,function,return,class,interface,type,extends,implements,public,private,protected,readonly,if,else,for,while,switch,case,break,continue,try,catch,finally,throw,new,this,null,undefined,true,false}
+}
+\lstset{style=bookcode}
+\renewcommand{\lstlistingname}{代码清单 / Listing}
+
+\usepackage[explicit]{titlesec}
+\usepackage{titletoc}
+\titleformat{\chapter}[display]
+  {\normalfont\large\bfseries\color{BookBlue}}
+  {\filleft\normalsize 第\thechapter 章}
+  {1.2ex}
+  {\titlerule[1.2pt]\vspace{1.4ex}\filright #1}
+  [\vspace{1.1ex}\titlerule]
+\titlespacing*{\chapter}{0pt}{0pt}{22pt}
+\titleformat{\section}
+  {\normalfont\small\bfseries\color{BookBlue}}
+  {\thesection}{0.8em}{#1}
+\titleformat{\subsection}
+  {\normalfont\small\bfseries\color{BookGray}}
+  {\thesubsection}{0.8em}{#1}
+\titleformat{\subsubsection}
+  {\normalfont\small\bfseries\color{BookGray}}
+  {\thesubsubsection}{0.8em}{#1}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\titlecontents{chapter}
+  [0pt]
+  {\addvspace{0.65em}\small\bfseries\color{TocBlack}}
+  {\textcolor{BookRed}{\contentslabel{2.2em}}}
+  {}
+  {\titlerule*[0.55em]{.}\textcolor{BookRed}{\contentspage}}
+\titlecontents{section}
+  [2.2em]
+  {\small\color{TocBlack}}
+  {\textcolor{BookRed}{\contentslabel{2.8em}}}
+  {}
+  {\titlerule*[0.55em]{.}\textcolor{BookRed}{\contentspage}}
+\titlecontents{subsection}
+  [5.0em]
+  {\footnotesize\color{TocBlack!85}}
+  {\textcolor{BookRed!80!black}{\contentslabel{3.2em}}}
+  {}
+  {\titlerule*[0.55em]{.}\textcolor{BookRed!80!black}{\contentspage}}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+\fancyhead[L]{\footnotesize\sffamily\color{BookGray}\nouppercase{\rightmark}}
+\fancyhead[R]{\footnotesize\sffamily\color{BookGray}\thepage}
+\fancyfoot[L]{\scriptsize\sffamily\color{BookGray}\BookTitle}
+\fancyfoot[C]{\scriptsize\sffamily\color{BookGray!75}\BookPublisher}
+\fancyfoot[R]{\scriptsize\sffamily\color{BookGray}\thepage}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[L]{\scriptsize\sffamily\color{BookGray}\BookTitle}
+  \fancyfoot[C]{\scriptsize\sffamily\color{BookGray!75}\BookPublisher}
+  \fancyfoot[R]{\scriptsize\sffamily\color{BookGray}\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.35pt}
+}
+\renewcommand{\headrulewidth}{0.35pt}
+\renewcommand{\footrulewidth}{0.35pt}
+
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{breakable,skins,theorems,listings}
+\newtcolorbox{insightbox}[1][]{
+  enhanced,breakable,colback=white,colframe=BookRed,
+  title={要点 / Insight},fonttitle=\bfseries,coltitle=white,
+  colbacktitle=BookRed,#1
+}
+\newtcolorbox{pullquotebox}{
+  enhanced,breakable,colback=AccentSoft,colframe=AccentLine,
+  borderline west={2.2pt}{0pt}{AccentLine},boxrule=0pt,
+  left=4mm,right=4mm,top=2.6mm,bottom=2.6mm,
+  fontupper=\itshape\small
+}
+\newtcolorbox{diagramBox}[1][]{
+  enhanced,breakable,colback=DiagramBox,colframe=CodeRule,
+  boxrule=0.45pt,arc=1.5pt,left=4mm,right=4mm,top=3mm,bottom=3mm,#1
+}
+\newcommand{\fancydropcap}[2]{\lettrine[lines=2,lhang=0.08,nindent=0.18em,findent=0.12em]{\textcolor{BookRed}{#1}}{#2}}
+
+\newtcbtheorem[number within=chapter]{definition}{定义 / Definition}{
+  enhanced,breakable,colback=LightBlue,colframe=BookBlue,
+  coltitle=white,fonttitle=\bfseries,
+  attach boxed title to top left={xshift=2mm,yshift=-2mm},
+  boxed title style={colback=BookBlue,sharp corners},
+  separator sign={.}
+}{def}
+
+\newtcbtheorem[number within=chapter]{theorem}{定理 / Theorem}{
+  enhanced,breakable,colback=white,colframe=BookBlue,
+  coltitle=white,fonttitle=\bfseries,
+  attach boxed title to top left={xshift=2mm,yshift=-2mm},
+  boxed title style={colback=BookBlue,sharp corners},
+  separator sign={.}
+}{thm}
+
+\newtcbtheorem[number within=chapter]{example}{例 / Example}{
+  enhanced,breakable,colback=LightGray,colframe=BookGray,
+  coltitle=white,fonttitle=\bfseries,
+  attach boxed title to top left={xshift=2mm,yshift=-2mm},
+  boxed title style={colback=BookGray,sharp corners},
+  separator sign={.}
+}{ex}
+
+\newtcolorbox{warningbox}[1][]{
+  enhanced,breakable,colback=BookRed!3,colframe=BookRed,
+  title={常见误区 / Common Pitfall},fonttitle=\bfseries,coltitle=white,
+  colbacktitle=BookRed,#1
+}
+
+\newcounter{exercise}[chapter]
+\renewcommand{\theexercise}{\thechapter.\arabic{exercise}}
+\newenvironment{exercise}[1][]{%
+  \refstepcounter{exercise}\par\medskip
+  \noindent\textbf{习题 / Exercise~\theexercise\quad #1}\itshape\quad
+}{\par\medskip}
+
+\newenvironment{chapterbibliography}{%
+  \section*{本章延伸阅读 / Further Reading}\addcontentsline{toc}{section}{本章延伸阅读 / Further Reading}
+  \small
+}{\normalsize}
+
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{plainnat}
+\usepackage{makeidx}
+\makeindex
+\usepackage{hyperref}
+\hypersetup{
+  unicode=true,
+  colorlinks=true,
+  linkcolor=TocBlack,
+  citecolor=TocBlack,
+  urlcolor=BookGray,
+  pdftitle={技术系统},
+  pdfauthor={作者姓名},
+  pdfsubject={中文技术出版读物模板}
+}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\newcommand{\BookTitle}{技术系统}
+\newcommand{\BookTitleDetail}{算法、设计与工程实践}
+\newcommand{\BookTitleEN}{}
+\newcommand{\BookTitleDetailEN}{}
+\newcommand{\BookSubtitle}{}
+\newcommand{\BookSubtitleEN}{}
+\newcommand{\BookAuthor}{作者姓名}
+\newcommand{\BookEdition}{第 1 版}
+\newcommand{\BookPublisher}{某某出版社}
+\newcommand{\BookYear}{2026}
+
+
+% Legacy cover retained for reference; not used by the document.
+\newcommand{\maketechbooktitleClassic}{%
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \begingroup
+    \newgeometry{left=0mm,right=0mm,top=0mm,bottom=0mm}%
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[CoverPaper] (current page.south west) rectangle (current page.north east);
+      \IfFileExists{figures/cover-background.png}{%
+        \node[inner sep=0pt,opacity=0.22] at (current page.center)
+          {\includegraphics[width=176mm,height=250mm]{figures/cover-background.png}};
+      }{}
+      \fill[CoverRed] (current page.north west) rectangle ([yshift=-6mm]current page.north east);
+      \fill[CoverRed] (current page.south west) rectangle ([yshift=6mm]current page.south east);
+      \fill[CoverRed!4] ([xshift=12mm,yshift=-12mm]current page.north west) rectangle
+        ([xshift=38mm,yshift=12mm]current page.south west);
+      \draw[CoverBlack,line width=0.55pt]
+        ([xshift=12mm,yshift=-12mm]current page.north west) rectangle
+        ([xshift=-12mm,yshift=12mm]current page.south east);
+      \draw[CoverRed,line width=1.2pt]
+        ([xshift=20mm,yshift=-18mm]current page.north west) --
+        ([xshift=20mm,yshift=18mm]current page.south west);
+      \draw[CoverBlack,line width=0.35pt]
+        ([xshift=23mm,yshift=-18mm]current page.north west) --
+        ([xshift=23mm,yshift=18mm]current page.south west);
+      \IfFileExists{figures/minimax-logo.png}{%
+        \node[anchor=north east,inner sep=0pt]
+          at ([xshift=-20mm,yshift=-24mm]current page.north east)
+          {\includegraphics[width=36mm]{figures/minimax-logo.png}};
+      }{}
+      \node[anchor=north west,align=left,text=BookGray,font=\sffamily\bfseries\scriptsize]
+        at ([xshift=31mm,yshift=-24mm]current page.north west)
+        {HARNESS ENGINEERING SERIES};
+      \node[anchor=north west,align=left,text=black,text width=118mm,font=\rmfamily\bfseries\fontsize{34pt}{39pt}\selectfont]
+        at ([xshift=31mm,yshift=-58mm]current page.north west)
+        {\BookTitle};
+      \node[anchor=north west,align=left,text=CoverBlack,text width=118mm,font=\rmfamily\fontsize{18pt}{25pt}\selectfont]
+        at ([xshift=31mm,yshift=-93mm]current page.north west)
+        {\BookTitleDetail};
+      \draw[CoverRed,line width=1pt]
+        ([xshift=31mm,yshift=-150mm]current page.north west) --
+        ([xshift=139mm,yshift=-150mm]current page.north west);
+      \draw[CoverBlack,line width=0.35pt]
+        ([xshift=31mm,yshift=43mm]current page.south west) --
+        ([xshift=-16mm,yshift=43mm]current page.south east);
+      \draw[CoverRed,line width=0.8pt]
+        ([xshift=31mm,yshift=40mm]current page.south west) --
+        ([xshift=-16mm,yshift=40mm]current page.south east);
+      \node[anchor=south,align=center,text=CoverBlack,font=\sffamily\small]
+        at ([yshift=26mm]current page.south)
+        {\BookAuthor};
+      \node[anchor=south,align=center,text=BookGray,font=\sffamily\scriptsize]
+        at ([yshift=18mm]current page.south)
+        {\BookYear};
+    \end{tikzpicture}%
+    \null\clearpage
+    \restoregeometry
+    \endgroup
+  \end{titlepage}
+}
+
+\newcommand{\drawpangolincover}{%
+  \begin{scope}[x=1mm,y=1mm,shift={(88mm,-151mm)},scale=0.9]
+    \draw[CoverBlack!68,line width=0.55pt]
+      (-36,5) .. controls (-26,25) and (5,31) .. (26,16)
+      .. controls (43,4) and (46,-18) .. (27,-26)
+      .. controls (4,-36) and (-25,-25) .. (-33,-9)
+      .. controls (-38,1) and (-38,1) .. (-36,5);
+    \draw[CoverBlack!54,line width=0.45pt]
+      (-22,17) .. controls (-11,23) and (4,23) .. (18,14);
+    \foreach \x/\y/\r in {-24/9/9,-10/14/10,5/13/10,18/6/9,27/-7/8,15/-18/9,-3/-22/9,-19/-15/8}{%
+      \draw[CoverBlack!32,line width=0.35pt] (\x,\y) ellipse (\r mm and 4.2mm);
+    }
+    \draw[CoverBlack!62,line width=0.5pt]
+      (23,13) .. controls (39,22) and (54,14) .. (61,1);
+    \fill[CoverBlack!62] (57,3) circle (0.8mm);
+    \draw[CoverBlack!55,line width=0.45pt]
+      (-32,-8) .. controls (-53,-13) and (-56,-34) .. (-39,-42)
+      .. controls (-27,-48) and (-11,-43) .. (-5,-31);
+    \draw[CoverBlack!48,line width=0.45pt] (-8,-27) -- (-12,-39);
+    \draw[CoverBlack!48,line width=0.45pt] (12,-27) -- (9,-39);
+    \draw[CoverBlack!48,line width=0.45pt] (30,-20) -- (35,-32);
+  \end{scope}%
+}
+
+\newcommand{\maketechbooktitle}{%
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \begingroup
+    \newgeometry{left=0mm,right=0mm,top=0mm,bottom=0mm}%
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[CoverPaper] (current page.south west) rectangle (current page.north east);
+      \fill[CoverRed] (current page.north west) rectangle ([yshift=-7mm]current page.north east);
+      \fill[CoverRed] (current page.south west) rectangle ([yshift=7mm]current page.south east);
+      \draw[CoverBlack,line width=0.6pt]
+        ([xshift=12mm,yshift=-12mm]current page.north west) rectangle
+        ([xshift=-12mm,yshift=12mm]current page.south east);
+      \draw[CoverRed,line width=0.8pt]
+        ([xshift=14mm,yshift=-15mm]current page.north west) --
+        ([xshift=-14mm,yshift=-15mm]current page.north east);
+      \draw[CoverBlack,line width=0.4pt]
+        ([xshift=14mm,yshift=-17mm]current page.north west) --
+        ([xshift=-14mm,yshift=-17mm]current page.north east);
+      \node[anchor=north west,align=left,text=BookGray,font=\sffamily\scriptsize]
+        at ([xshift=16mm,yshift=-20mm]current page.north west)
+        {HARNESS ENGINEERING SERIES};
+      \node[anchor=north east,align=right,text=BookGray,font=\sffamily\bfseries\scriptsize]
+        at ([xshift=-16mm,yshift=-20mm]current page.north east)
+        {\MakeUppercase{\BookPublisher}};
+      \node[anchor=north west,align=left,text=black,text width=142mm,font=\rmfamily\fontsize{42pt}{48pt}\selectfont]
+        at ([xshift=16mm,yshift=-42mm]current page.north west)
+        {\BookTitle};
+      \node[anchor=north west,align=left,text=CoverBlack,text width=142mm,font=\rmfamily\fontsize{19pt}{27pt}\selectfont]
+        at ([xshift=16mm,yshift=-76mm]current page.north west)
+        {\BookTitleDetail};
+      \drawpangolincover
+      \draw[CoverBlack,line width=0.4pt]
+        ([xshift=14mm,yshift=44mm]current page.south west) --
+        ([xshift=-14mm,yshift=44mm]current page.south east);
+      \draw[CoverRed,line width=0.8pt]
+        ([xshift=14mm,yshift=42mm]current page.south west) --
+        ([xshift=-14mm,yshift=42mm]current page.south east);
+      \node[anchor=south west,align=left,text=CoverBlack,font=\sffamily\small]
+        at ([xshift=16mm,yshift=29mm]current page.south west)
+        {\BookAuthor};
+      \node[anchor=south west,align=left,text=BookGray,font=\sffamily\scriptsize]
+        at ([xshift=16mm,yshift=21mm]current page.south west)
+        {Cover illustration placeholder};
+      \node[anchor=south east,align=right,text=BookGray,font=\sffamily\scriptsize]
+        at ([xshift=-16mm,yshift=16mm]current page.south east)
+        {\MakeUppercase{\BookPublisher}\\\BookYear};
+    \end{tikzpicture}%
+    \null\clearpage
+    \restoregeometry
+    \endgroup
+  \end{titlepage}
+}
+
+
+
+\begin{document}
+\frontmatter
+\maketechbooktitle
+
+\chapter*{前言}
+\addcontentsline{toc}{chapter}{前言}
+
+这里写入本书前言。建议说明本书的写作动机、适合读者、阅读路径，以及章节组织方式。前言不必解释模板本身，而应面向真实读者介绍这本书为什么值得阅读。
+
+\phantomsection
+\pdfbookmark[0]{目录}{toc}
+\tableofcontents
+\clearpage
+
+\mainmatter
+\input{chapters/chapter01}
+\input{chapters/chapter02}
+\input{chapters/chapter03}
+
+\appendix
+\input{backmatter/appendix}
+
+\backmatter
+\phantomsection
+\addcontentsline{toc}{chapter}{参考文献 / Bibliography}
+\bibliography{references}
+\phantomsection
+\addcontentsline{toc}{chapter}{索引 / Index}
+\printindex
+\end{document}
