@@ -34,7 +34,7 @@ triggers:
 Copied from MiniMaxAI/minimax-code (packages/local-runtime/assets/skills/docx)
 at revision 564e9166d81f87b0b767b005e4779d4697b512be.
 Copyright (c) 2026 MiniMax Code. Licensed under MIT.
-Modified by ZCode: added this provenance notice only; skill content is otherwise unchanged.
+Modified by ZCode: added the provenance notice; added a ZCodium capability-matrix section (read / render / full and what each level needs), and documented that setup.sh is report-only unless --install-dotnet is passed. Skill instructions are otherwise unchanged.
 See THIRD-PARTY-NOTICES.md in the repository root for license and provenance.
 -->
 
@@ -104,6 +104,26 @@ Requires (in addition to render): `dotnet` >= 9, `pandoc`, `zip` (or `Compress-A
 dotnet project built.
 
 If the full gate fails, stop and report. Do not attempt generation with missing dependencies.
+
+### Capability matrix in ZCodium
+
+The levels above assume a machine where the skill may install its own toolchain. In ZCodium the
+repo skills must not silently change the host, so `scripts/setup.sh` is report-only unless you
+opt in. Check the level you actually need before promising a deliverable:
+
+| Level | Needs | Without it |
+| --- | --- | --- |
+| `read` | `python3` (+ `pdftoppm` for page images) | — |
+| `render` | read + `soffice` / `pandoc` | no PDF/PNG preview of the result |
+| `full` | render + `dotnet` >= 9 + `zip` | **creation, template application, validation and track-changes editing are unavailable** — say so instead of guessing |
+
+`.NET` is a global SDK and the upstream installer fetched it with `curl | sh`, so this fork makes it
+opt-in: run `bash scripts/setup.sh --install-dotnet` (writes `~/.dotnet`, no sudo) only after the
+user agrees. The setup script never edits `~/.zprofile` / `~/.zshrc` and never installs global npm
+packages; it prints the lines the user may want to add themselves.
+
+**On an air-gapped or intranet host** the `curl | sh` and package-manager paths cannot work at all.
+Plan for `read` / `render` and use the `full` gate only where a pre-provisioned SDK exists.
 
 ### Cross-platform path & temp-dir convention
 

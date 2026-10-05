@@ -1,3 +1,7 @@
+# Modified by ZCode: --author now defaults to redlining_author.DEFAULT_REDLINING_AUTHOR and is
+# overridable via ZCODE_REDLINING_AUTHOR, instead of the upstream host product's name.
+
+
 """
 Command line tool to validate Office document XML files against XSD schemas and tracked changes.
 
@@ -13,6 +17,7 @@ Auto-repair fixes:
 - Missing xml:space="preserve" on w:t elements with whitespace
 """
 
+from redlining_author import DEFAULT_REDLINING_AUTHOR
 import argparse
 import sys
 import tempfile
@@ -47,8 +52,12 @@ def main():
     )
     parser.add_argument(
         "--author",
-        default="Mavis",
-        help="Author name for redlining validation (default: Mavis)",
+        default=DEFAULT_REDLINING_AUTHOR,
+        help=(
+            "Author name for redlining validation "
+            f"(default: {DEFAULT_REDLINING_AUTHOR}; override per run or via "
+            "ZCODE_REDLINING_AUTHOR)"
+        ),
     )
     args = parser.parse_args()
 

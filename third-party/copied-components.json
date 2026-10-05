@@ -276,10 +276,12 @@
     "roots": [
       ".agents/skills/docx"
     ],
-    "scope": "DOCX create/template-apply/edit/read/repair/compare instructions, reference documents and the bundled .NET CLI sources. The skill declares GB/T 9704-2012 (Layout Standard for Official Documents) among its formatting references.",
+    "scope": "DOCX create/template-apply/edit/read/repair/compare instructions and the bundled OOXML toolchain. ZCodium adaptations: host-product daemon references reworded, setup.sh no longer edits shell rc and gates the .NET SDK install behind an explicit flag, and SKILL.md documents a ZCodium capability matrix for hosts that cannot provision the toolchain.",
     "license": "MIT",
     "modifiedFiles": [
       ".agents/skills/docx/SKILL.md",
+      ".agents/skills/docx/scripts/setup.sh",
+      ".agents/skills/docx/scripts/env_check.sh",
       ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Commands/CreateCommand.cs",
       ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Typography/CjkHelper.cs"
     ]
@@ -295,44 +297,16 @@
     "roots": [
       ".agents/skills/xlsx"
     ],
-    "scope": "Spreadsheet read/edit/create/convert instructions, conventions and recalculation guide, plus the bundled Python and LibreOffice helper scripts.",
+    "scope": "Spreadsheet read/edit/create/convert instructions, conventions and the openpyxl/LibreOffice helper library. ZCodium adaptations: the dangling cross-skill bootstrap pointer is replaced with a self-contained Windows tool table, and the track-changes author default is resolved from --author / ZCODE_REDLINING_AUTHOR / a neutral placeholder instead of the upstream host name.",
     "license": "MIT",
     "modifiedFiles": [
-      ".agents/skills/xlsx/SKILL.md"
-    ]
-  },
-  {
-    "id": "minimax-code pptx skill",
-    "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-    "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-    "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-    "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/pptx in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
-    "roots": [
-      ".agents/skills/pptx"
-    ],
-    "scope": "PowerPoint read/create/edit instructions, element map and preview writeback references, plus the bundled helper scripts. Includes the optional upstream .mavis-ppt-map.json sidecar protocol, which is inert in ZCode.",
-    "license": "MIT",
-    "modifiedFiles": [
-      ".agents/skills/pptx/SKILL.md"
-    ]
-  },
-  {
-    "id": "minimax-code pdf skill",
-    "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-    "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-    "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-    "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/pdf in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
-    "roots": [
-      ".agents/skills/pdf"
-    ],
-    "scope": "PDF generate/reformat/fill/read instructions, route guides, LaTeX and brand-guide templates, and the bundled Python helper scripts.",
-    "license": "MIT",
-    "modifiedFiles": [
-      ".agents/skills/pdf/SKILL.md"
+      ".agents/skills/xlsx/SKILL.md",
+      ".agents/skills/xlsx/docs/recalc-guide.md",
+      ".agents/skills/xlsx/scripts/office/pack.py",
+      ".agents/skills/xlsx/scripts/office/validate.py",
+      ".agents/skills/xlsx/scripts/office/redlining_author.py",
+      ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py",
+      ".agents/skills/xlsx/scripts/office/validators/redlining.py"
     ]
   }
 ]

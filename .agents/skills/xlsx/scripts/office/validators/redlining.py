@@ -1,7 +1,12 @@
+# Modified by ZCode: the author default was the upstream host product's name; it now uses
+# redlining_author.DEFAULT_REDLINING_AUTHOR.
+
+
 """
 Validator for tracked changes in Word documents.
 """
 
+from redlining_author import DEFAULT_REDLINING_AUTHOR
 import subprocess
 import tempfile
 import zipfile
@@ -10,7 +15,9 @@ from pathlib import Path
 
 class RedliningValidator:
 
-    def __init__(self, unpacked_dir, original_docx, verbose=False, author="Mavis"):
+    def __init__(
+        self, unpacked_dir, original_docx, verbose=False, author=DEFAULT_REDLINING_AUTHOR
+    ):
         self.unpacked_dir = Path(unpacked_dir)
         self.original_docx = Path(original_docx)
         self.verbose = verbose

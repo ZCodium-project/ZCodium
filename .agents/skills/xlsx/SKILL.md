@@ -13,7 +13,7 @@ license: MIT
 Copied from MiniMaxAI/minimax-code (packages/local-runtime/assets/skills/xlsx)
 at revision 564e9166d81f87b0b767b005e4779d4697b512be.
 Copyright (c) 2026 MiniMax Code. Licensed under MIT.
-Modified by ZCode: added this provenance notice only; skill content is otherwise unchanged.
+Modified by ZCode: added the provenance notice; replaced a pointer into a different skill in the upstream host product with a self-contained Windows tool table (detect + install command), and stated that this fork ships no auto-installer. All other skill instructions unchanged.
 See THIRD-PARTY-NOTICES.md in the repository root for license and provenance.
 -->
 
@@ -505,5 +505,17 @@ bash -c "python -c \"from openpyxl import load_workbook; wb=load_workbook('file.
 | `brew install --cask libreoffice` | `winget install TheDocumentFoundation.LibreOffice` |
 | `coreutils` (`gtimeout`) | Not needed — `recalc.py` falls back to `subprocess` timeout kwarg |
 
-**If Git Bash or any tool is missing**, read the `mavis` skill's
-`references/windows-tool-bootstrap.md` for detection + auto-install commands.
+**If Git Bash or any tool is missing**, detect before installing anything:
+
+| Tool | Detect | Install (run by the user, not the agent) |
+| --- | --- | --- |
+| Python | `python --version` | `winget install Python.Python.3.12` |
+| Git Bash | `ls "$PROGRAMFILES/Git/bin/bash.exe"` | `winget install Git.Git` |
+| LibreOffice | `ls "$PROGRAMFILES/LibreOffice/program/soffice.exe"` | `winget install TheDocumentFoundation.LibreOffice` |
+| openpyxl | `python -c "import openpyxl; print(openpyxl.__version__)"` | `python -m pip install openpyxl` |
+
+This fork deliberately does **not** ship an auto-installer. Upstream delegated the bootstrap to a
+reference inside a different skill in its own host product; that skill is not part of ZCodium, so
+the pointer dangles. A skill that also writes to the user's shell config or installs global
+packages is the wrong default on a managed host anyway. Report what is missing and let the user
+run the install command.

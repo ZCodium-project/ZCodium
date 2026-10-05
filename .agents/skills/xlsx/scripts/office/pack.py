@@ -1,3 +1,8 @@
+# Modified by ZCode: the redlining author fallback was the upstream host product's name, which
+# would be stamped into the revision history of every document produced here. It now comes from
+# redlining_author.DEFAULT_REDLINING_AUTHOR (--author / ZCODE_REDLINING_AUTHOR / neutral default).
+
+
 """Pack a directory into a DOCX, PPTX, or XLSX file.
 
 Validates with auto-repair, condenses XML formatting, and creates the Office file.
@@ -10,6 +15,7 @@ Examples:
     python pack.py unpacked/ output.pptx --validate false
 """
 
+from redlining_author import DEFAULT_REDLINING_AUTHOR
 import argparse
 import sys
 import shutil
@@ -76,12 +82,15 @@ def _run_validation(
     validators = []
 
     if suffix == ".docx":
-        author = "Mavis"
+        author = DEFAULT_REDLINING_AUTHOR
         if infer_author_func:
             try:
                 author = infer_author_func(unpacked_dir, original_file)
             except ValueError as e:
-                print(f"Warning: {e} Using default author 'Mavis'.", file=sys.stderr)
+                print(
+                f"Warning: {e} Using default author {DEFAULT_REDLINING_AUTHOR!r}.",
+                file=sys.stderr,
+            )
 
         validators = [
             DOCXSchemaValidator(unpacked_dir, original_file),

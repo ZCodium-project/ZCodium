@@ -1,3 +1,8 @@
+# Modified by ZCode: locale advisory messages referred to the upstream host product's daemon by
+# name; reworded to 'the host application' so the diagnostics stay accurate in ZCodium. No logic
+# change.
+
+
 #!/usr/bin/env bash
 # docx strict environment check
 # This script is authoritative for whether the skill may run.
@@ -244,19 +249,19 @@ if [ "$STATUS" = "READY" ]; then
     echo "[locale] Self-healed to '$LOCALE_HEALED_TO' for this run (was LANG='$LOCALE_HEALED_FROM_LANG', charmap='$LOCALE_HEALED_FROM_CHARMAP')."
     echo "  Skill scripts in THIS shell will keep working — no further action needed."
     echo "  But every NEW subprocess starts from scratch and must self-heal again."
-    echo "  To make UTF-8 sticky for the Mavis daemon and its workers:"
+    echo "  To make UTF-8 sticky for the host application and its workers:"
     if [ "$OS" = "macos" ]; then
       echo "    launchctl setenv LANG en_US.UTF-8"
       echo "    launchctl setenv LC_ALL en_US.UTF-8"
-      echo "    # then restart the daemon so it inherits the new env"
+      echo "    # then restart the host application so it inherits the new env"
     elif [ "$OS" = "linux" ] || [ "$OS" = "wsl" ]; then
-      echo "    # daemon launched via systemd: add to your unit file's [Service] section:"
+      echo "    # host launched via systemd: add to your unit file's [Service] section:"
       echo "    Environment=LANG=en_US.UTF-8"
       echo "    Environment=LC_ALL=en_US.UTF-8"
-      echo "    # daemon launched from shell: export the two vars in the parent shell"
-      echo "    # before starting the daemon (NOT in ~/.zshrc — see below)."
+      echo "    # host launched from shell: export the two vars in the parent shell"
+      echo "    # before starting the host (NOT in ~/.zshrc — see below)."
     fi
-    echo "  Note: editing ~/.zshrc does NOT help — Mavis subprocesses are non-interactive"
+    echo "  Note: editing ~/.zshrc does NOT help — non-interactive subprocesses"
     echo "  and never source it. Use the launchctl / systemd / parent-shell paths above."
   fi
 else
@@ -271,10 +276,10 @@ else
     echo "  Caller (one-shot, no system changes):"
     echo "    LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bash $0 --level $LEVEL"
     if [ "$OS" = "macos" ]; then
-      echo "  macOS (persist for GUI apps + Mavis daemon; survives reboot once set in launchd):"
+      echo "  macOS (persist for GUI apps + host daemon; survives reboot once set in launchd):"
       echo "    launchctl setenv LANG en_US.UTF-8"
       echo "    launchctl setenv LC_ALL en_US.UTF-8"
-      echo "  Then restart the daemon so it inherits the new env."
+      echo "  Then restart the host application so it inherits the new env."
     elif [ "$OS" = "linux" ] || [ "$OS" = "wsl" ]; then
       echo "  Linux/WSL (persist for interactive shells):"
       echo "    echo 'export LANG=en_US.UTF-8'   >> ~/.bashrc"
@@ -282,7 +287,7 @@ else
       echo "  If your distro has no en_US.UTF-8, install glibc-locale-source / glibc-langpack-en"
       echo "  or add 'en_US.UTF-8 UTF-8' to /etc/locale.gen and run 'sudo locale-gen'."
     fi
-    echo "  Note: editing ~/.zshrc does NOT help — Mavis subprocesses are non-interactive"
+    echo "  Note: editing ~/.zshrc does NOT help — non-interactive subprocesses"
     echo "  and never source it. Use launchctl (macOS) or the caller-prefix approach."
   fi
 
