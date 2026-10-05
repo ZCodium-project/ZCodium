@@ -56,6 +56,9 @@ concurrency:
   group: licenses-notices-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   notices:
     runs-on: ubuntu-latest
