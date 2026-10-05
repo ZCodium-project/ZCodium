@@ -69,3 +69,6 @@ packages/desktop/.e2e-artifacts/
 packages/desktop/.e2e-cache/
 packages/desktop/.e2e-network-capture/
 .zcode-runtime/
+# OrcaRouter GUI 证据产物：由 `pnpm orca:evidence` 在本地渲染真实组件后生成，
+# 属于可再生的验证输出，随环境变化且不应入库。
+/orca-evidence/

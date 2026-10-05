@@ -14,6 +14,7 @@ import type {
 import type { ModelConnectivityResult } from "@zcode/shared";
 import type { ProviderApiType, RemoteModelCatalogResult } from "@zcode/provider";
 import {
+  type OrcaCapability,
   TID_MODEL_PROVIDER_ADD_MODEL_BUTTON,
   TID_MODEL_PROVIDER_BASE_URL_INPUT,
   TID_MODEL_PROVIDER_MODEL_DELETE_BUTTON,
@@ -37,6 +38,8 @@ import { useServices } from "@/hooks/useServices.js";
 import { TECHNICAL_INPUT_ATTRIBUTES } from "@/lib/technicalInputAttributes.js";
 import { ApiKeyInput } from "./ApiKeyInput.js";
 import { ModelRowInput } from "./ProviderFormControls.js";
+import { OrcaRouterModelSelector } from "./OrcaRouterModelSelector.js";
+import { resolveOrcaDiscoverySurface } from "./orcaRouterModelOptions.js";
 import { PresetProviderApiKeyBanner } from "./PresetProviderApiKeyBanner.js";
 import { type ProviderModelDraftValues } from "@/settings/model-provider-section/ProviderModelMetadata.js";
 import { ProviderModelMetadataDialog } from "@/settings/model-provider-section/ProviderModelMetadataDialog.js";
@@ -357,6 +360,8 @@ export function ProviderModelsSection({
   onReorderModelIds,
   settingsRevision = 0,
   onDetectRemoteModels,
+  discoveryTemplateId = null,
+  discoveryCapability = "chat",
 }: {
   providerId: string;
   providerName?: string;
@@ -376,6 +381,15 @@ export function ProviderModelsSection({
   settingsRevision?: number;
   /** 装配后对话框内出现"检测可用模型"入口；未装配（账号/套餐 Provider）则保持手输。 */
   onDetectRemoteModels?: () => Promise<RemoteModelCatalogResult>;
+  /** OrcaRouter 模板：模型只能从真实目录生成的下拉中选择，不支持自由输入。 */
+  discoveryTemplateId?: string | null;
+  /**
+   * 目录下拉按哪个 AI 入口的能力过滤，由调用方按当前入口传入。
+   *
+   * Provider 设置页维护的是文本 chat/agent 的模型清单，因此默认 `chat`；
+   * 参数化是为了让后续新增的非文本入口显式传入自己的能力，而不是在本组件里写死。
+   */
+  discoveryCapability?: OrcaCapability;
 }) {
   const { intl } = useZCodeIntl();
   const { providerSettingsService } = useServices();
@@ -508,24 +522,57 @@ export function ProviderModelsSection({
       })
     : null;
 
+  // OrcaRouter：模型不能自由输入，只能从真实目录生成、按当前入口能力过滤的下拉中选择。
+  // 判定逻辑收敛在 resolveOrcaDiscoverySurface（可用纯函数测试证明，而不是内联比较）。
+  const discoverySurface = resolveOrcaDiscoverySurface({
+    templateId: discoveryTemplateId,
+    capability: discoveryCapability,
+  });
+  const orcaRouterTemplate = discoverySurface.mode === "catalog-only";
+  const handleSelectOrcaModel = useCallback(
+    async (modelId: string | null) => {
+      if (!modelId) return;
+      const existing = models.find((model) => model.modelId === modelId);
+      await onAddModel(
+        existing
+          ? { ...existing, hasPersonalConfig: true }
+          : { ...createEmptyModel(), modelId, hasPersonalConfig: true },
+      );
+    },
+    [models, onAddModel],
+  );
+
   return (
     <div>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <span className="text-ui-base text-foreground-subtle">
           {intl.formatMessage({ id: "settings.modelProvider.models" })}
         </span>
-        <Button
-          type="button"
-          variant="secondary"
-          size="default"
-          className="rounded-lg"
-          data-testid={TID_MODEL_PROVIDER_ADD_MODEL_BUTTON}
-          onClick={openAddDialog}
-        >
-          <Plus data-icon="inline-start" aria-hidden="true" />
-          {intl.formatMessage({ id: "settings.modelProvider.addModel" })}
-        </Button>
+        {orcaRouterTemplate ? null : (
+          <Button
+            type="button"
+            variant="secondary"
+            size="default"
+            className="rounded-lg"
+            data-testid={TID_MODEL_PROVIDER_ADD_MODEL_BUTTON}
+            onClick={openAddDialog}
+          >
+            <Plus data-icon="inline-start" aria-hidden="true" />
+            {intl.formatMessage({ id: "settings.modelProvider.addModel" })}
+          </Button>
+        )}
       </div>
+      {orcaRouterTemplate ? (
+        <div className="mb-2">
+          <OrcaRouterModelSelector
+            capability={discoveryCapability}
+            selectedModelId={models[0]?.modelId ?? null}
+            onSelectModel={(modelId) => {
+              void handleSelectOrcaModel(modelId);
+            }}
+          />
+        </div>
+      ) : null}
       {models.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-input-border bg-input">
           <SortableProviderModelList
@@ -567,6 +614,7 @@ export function ProviderModelsSection({
                       })
                     }
                     settingsRevision={settingsRevision}
+                    modelIdReadOnly={orcaRouterTemplate}
                     onDelete={!model.builtin ? () => onDeleteModel(model.modelId) : undefined}
                     onEnabledChange={(enabled) => {
                       void Promise.resolve(onModelEnabledChange?.(model.modelId, enabled)).catch(
@@ -592,7 +640,8 @@ export function ProviderModelsSection({
           {intl.formatMessage({ id: "settings.modelProvider.modelsEmpty" })}
         </div>
       )}
-      <>
+      {/* OrcaRouter 的模型只能来自目录下拉，不提供任何自由填写入口（含"检测可用模型"对话框）。 */}
+      {orcaRouterTemplate ? null : (
         <ProviderModelMetadataDialog
           onRestore={() => {
             setAddDraftErrorField(null);
@@ -630,7 +679,7 @@ export function ProviderModelsSection({
             void editor.flush().catch(() => undefined);
           }}
         />
-      </>
+      )}
     </div>
   );
 }

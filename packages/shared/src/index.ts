@@ -250,6 +250,7 @@ export * from "./intranetProbe.js";
 export * from "./intranetDefaults.js";
 export * from "./hooks.js";
 export * from "./openrouter-attribution.js";
+export * from "./orcarouter.js";
 export * from "./workspaceSessionRestore.js";
 export * from "./skill-scan-policy.js";
 export * from "./browser-use/index.js";

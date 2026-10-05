@@ -27,6 +27,7 @@ export function ModelRowInput({
   onDelete,
   onEnabledChange,
   onTest,
+  modelIdReadOnly = false,
 }: {
   model: ProviderSettingsFormModel;
   providerId: string;
@@ -44,6 +45,8 @@ export function ModelRowInput({
   onDelete?: () => void;
   onEnabledChange?: (enabled: boolean) => void;
   onTest?: (model: string) => Promise<ModelConnectivityResult>;
+  /** OrcaRouter 的模型 ID 由目录下拉决定：编辑元数据时不得改写成另一个自由字符串。 */
+  modelIdReadOnly?: boolean;
 }) {
   const { intl, locale } = useZCodeIntl();
   const { showFeedback } = useProviderDetailFeedback();
@@ -313,7 +316,7 @@ export function ModelRowInput({
           onModelIdBlur={() => {
             void editor.flush().catch(() => undefined);
           }}
-          modelIdReadOnly={model.builtin}
+          modelIdReadOnly={modelIdReadOnly || model.builtin}
         />
         {onDelete ? (
           <Button

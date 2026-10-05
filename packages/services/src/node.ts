@@ -399,6 +399,15 @@ import { createBotRemoteWorkspaceService } from "./bots/botRemoteWorkspaceBridge
 import type { SessionMessageSendRequested } from "#src/session/sessionMailbox.js";
 import { createFileWatcherService } from "./fileWatcher/fileWatcherService.js";
 import { createOAuthService } from "./oauth/oauthService.js";
+import {
+  IOrcaRouterService,
+  OrcaConnectController,
+  createOrcaCredentialAdapters,
+  createOrcaCredentialStore,
+  createOrcaProviderCredentialBinding,
+  createOrcaRouterService,
+} from "./orcarouter/index.js";
+import { resolveOrcaOrigins } from "@zcode/shared";
 import { isCurrentOAuthCredentialRequest } from "#src/oauth/oauthUnauthorizedRequest.js";
 import { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js";
 import { OAuthCredentialRepo } from "./oauth/repo/oauthCredentialRepo.js";
@@ -2376,6 +2385,35 @@ export function createLocalServices(options: {
     apiClient,
     onProviderLogout: handleOAuthProviderLogout,
   });
+  // OrcaRouter：API Key 与 OAuth 2.0 + PKCE 两个入口共用同一凭据 seam，
+  // 密钥只落在既有的加密 Credential Store，模型目录由 host 持 key 拉取。
+  // 凭据还必须写回 OrcaRouter provider 的 Personal Overlay：推理路径只读 `access.apiKey`。
+  const orcaOverlayLogger = createServiceLogger("orcarouter-provider-overlay");
+  const orcaOrigins = resolveOrcaOrigins(process.env);
+  const orcaCredentialStore = createOrcaCredentialStore({ credentialService });
+  const orcaConnect = new OrcaConnectController({
+    credentialStore: orcaCredentialStore,
+    origins: orcaOrigins,
+    appName: "ZCodium",
+  });
+  const orcaCredentialBinding = createOrcaProviderCredentialBinding({
+    store: orcaCredentialStore,
+    settings: providerRuntime.providerSettings,
+    onError: (error) => {
+      orcaOverlayLogger.warn(
+        `OrcaRouter 凭据未能写入 Provider 推理配置：${
+          error instanceof Error ? error.message : "未知错误"
+        }`,
+      );
+    },
+  });
+  const orcaRouterService = createOrcaRouterService({
+    store: orcaCredentialStore,
+    adapters: createOrcaCredentialAdapters({ store: orcaCredentialStore }),
+    connect: orcaConnect,
+    origins: orcaOrigins,
+    credentialBinding: orcaCredentialBinding,
+  });
   const zcodeJwtLogoutLogger = createServiceLogger("zcode-jwt-logout");
   zcodeJwtLogoutHandlerRef.current = (input, headers) => {
     // 条件退出本身已串行去重；不能丢弃等待旧候选期间到来的新凭据 401。
@@ -2499,6 +2537,7 @@ export function createLocalServices(options: {
     )
     .register(IFileWatcherService, createFileWatcherService())
     .register(IOAuthService, oauthService)
+    .register(IOrcaRouterService, orcaRouterService)
     .register(
       IUsageStatsService,
       createUsageStatsService({
@@ -2678,12 +2717,14 @@ export function createLocalServices(options: {
   }
   const log = createServiceLogger("provider-runtime");
   void providerRuntime.start().then(
-    () => {
+    async () => {
       const snapshot = providerRuntime.registryService.getSnapshot()!;
       log.info("Provider Registry 已就绪", {
         configRevision: snapshot.sourceRevisions.config,
         providerCount: snapshot.registry.providers.length,
       });
+      // 启动对齐：重启后在 PKCE/手填路径再次触发之前，也让 provider 推理配置持有 store 里的同一把 key。
+      await orcaRouterService.reconcileProviderCredential();
     },
     (error: unknown) => {
       log.error("Provider 配置事实初始化失败", error);

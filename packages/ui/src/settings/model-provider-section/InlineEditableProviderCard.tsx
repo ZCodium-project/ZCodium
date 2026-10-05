@@ -880,6 +880,7 @@ export function InlineEditableProviderCard({
           onReorderModelIds={onReorderModelIds ? handleReorderModelIds : undefined}
           settingsRevision={settingsRevision ?? 0}
           onDetectRemoteModels={detectRemoteModels}
+          discoveryTemplateId={provider.templateId}
         />
       </div>
     </div>

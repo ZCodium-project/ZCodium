@@ -3,6 +3,7 @@ import { useCodingPlanEntryGate } from "@/settings/CodingPlanEntryButton.js";
 import {
   BIGMODEL_PROVIDER_ID,
   BUILTIN_MODEL_PROVIDER_IDS,
+  ORCAROUTER_PROVIDER_TEMPLATE_ID,
   ZAI_PROVIDER_ID,
   type BuiltinModelProviderId,
   type ProviderFamilyConnectionSelectionSettings,
@@ -26,6 +27,7 @@ import {
   type ModelProviderNavItem,
 } from "./constants.js";
 import { InlineEditableProviderCard } from "./InlineEditableProviderCard.js";
+import { OrcaRouterProviderFields } from "./OrcaRouterProviderFields.js";
 import {
   ModelProviderEmptyCard,
   ModelProviderLoadingCard,
@@ -848,6 +850,9 @@ export function ModelProviderSectionDetail({
   const customApiKeyUrl = customProvider.templateId
     ? getProviderFormApiKeyManagementUrl(customProvider)
     : undefined;
+  // OrcaRouter 模板：API Key 与 OAuth 2.0 + PKCE 两个入口必须并列可用，
+  // 模型选项来自真实目录而不是自由输入。
+  const isOrcaRouterProvider = customProvider.templateId === ORCAROUTER_PROVIDER_TEMPLATE_ID;
   return (
     // 仅展示预设模板声明的入口，不根据地址猜测自定义 Provider 的 Key 控制台。
     <InlineEditableProviderCard
@@ -872,14 +877,16 @@ export function ModelProviderSectionDetail({
           : undefined
       }
       statusSection={
-        customProvider.config.access?.type === "api-key" ? (
+        isOrcaRouterProvider ? (
+          <OrcaRouterProviderFields providerId={customProvider.providerId} />
+        ) : customProvider.config.access?.type === "api-key" ? (
           <ProviderBalanceCard
             providerId={customProvider.providerId}
             recheckKey={resolveProviderBalanceRecheckKey(customProvider)}
           />
         ) : undefined
       }
-      // 自定义 Provider 没有外层 family 头部，余额卡必须与卡片头部共存。
+      // 自定义 Provider 没有外层 family 头部，余额卡/双认证面板必须与卡片头部共存。
       statusSectionSuppressesHeader={false}
     />
   );

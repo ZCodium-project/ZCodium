@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>OrcaRouter GUI evidence</title>
+    <script>
+      // 与 packages/web/index.html 的首屏主题引导一致：在 JS bundle 执行前加上 dark class，
+      // 让 Tailwind 主题变量（border/background/foreground）立即生效。
+      document.documentElement.classList.add("dark");
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

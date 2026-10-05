@@ -2757,6 +2757,38 @@ const faIR: Record<string, string> = {
   "settings.modelProvider.apiFormat.title.anthropicMessages": "Anthropic messages",
   "settings.modelProvider.apiKey": "کلید API",
   "settings.modelProvider.apiKeyPlaceholder": "کلید API را وارد کنید",
+  "orcaRouter.title": "OrcaRouter",
+  "orcaRouter.description":
+    "OrcaRouter یک درگاه هوش مصنوعی سازگار با OpenAI است. از کلید API موجود استفاده کنید یا حساب OrcaRouter خود را متصل کنید؛ هر دو به یک کلید API یکسان در {baseUrl} منتهی می‌شوند.",
+  "orcaRouter.apiKey.title": "استفاده از کلید API",
+  "orcaRouter.apiKey.save": "ذخیره کلید",
+  "orcaRouter.apiKey.invalid":
+    "کلیدهای API OrcaRouter با sk-orca- شروع می‌شوند. مقدار را بررسی و دوباره تلاش کنید.",
+  "orcaRouter.pkce.title": "اتصال با OrcaRouter",
+  "orcaRouter.pkce.description":
+    "OAuth 2.0 + PKCE. بدون client secret و بدون ثبت نشانی بازگشت؛ صفحه مجوز کدی نشان می‌دهد که آن را اینجا وارد می‌کنید.",
+  "orcaRouter.pkce.connect": "اتصال با OrcaRouter",
+  "orcaRouter.pkce.openHint": "این نشانی را باز کنید، تأیید کنید و کد را در پایین وارد کنید",
+  "orcaRouter.pkce.open": "باز کردن صفحه مجوز",
+  "orcaRouter.pkce.copy": "کپی نشانی مجوز",
+  "orcaRouter.pkce.copied": "نشانی مجوز کپی شد",
+  "orcaRouter.pkce.codePlaceholder": "کد مجوز را وارد کنید",
+  "orcaRouter.pkce.submitCode": "پایان اتصال",
+  "orcaRouter.connect.failed": "شروع مجوز OrcaRouter ممکن نشد",
+  "orcaRouter.connected": "متصل · {masked}",
+  "orcaRouter.notConnected": "متصل نیست",
+  "orcaRouter.clear": "پاک کردن",
+  "orcaRouter.clear.failed": "پاک کردن اعتبارنامه OrcaRouter ممکن نشد. دوباره تلاش کنید.",
+  "orcaRouter.needsReauth":
+    "OrcaRouter این اعتبارنامه را رد کرد. برای جایگزینی دوباره متصل شوید؛ کلید ذخیره‌شده تا موفقیت ورود جدید حذف نمی‌شود.",
+  "orcaRouter.model.selectPlaceholder": "انتخاب مدل",
+  "orcaRouter.model.search": "جستجوی مدل",
+  "orcaRouter.model.empty": "هیچ مدلی در فهرست کنونی با توان این ورودی سازگار نیست.",
+  "orcaRouter.catalog.failed": "فهرست مدل‌های OrcaRouter در دسترس نیست.",
+  "orcaRouter.catalog.degradedSeed":
+    "فهرست زنده مدل‌ها در دسترس نیست؛ فهرست تأییدشدهٔ آفلاین نمایش داده می‌شود ({count} مدل).",
+  "orcaRouter.catalog.degradedLastKnownGood":
+    "به‌روزرسانی فهرست مدل‌ها ناموفق بود؛ آخرین فهرست موفق نمایش داده می‌شود ({count} مدل).",
   "settings.modelProvider.apiKeyDisabledHint":
     "برای فعال‌سازی این فراهم‌کننده، یک کلید API تنظیم کنید.",
   "settings.modelProvider.getApiKey": "دریافت کلید API",
