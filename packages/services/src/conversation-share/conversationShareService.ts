@@ -16,6 +16,7 @@ import type {
   Locale,
 } from "@zcode/shared";
 import {
+  assertConversationShareRemoved,
   decodeConversationShareRows,
   buildConversationPreviewArtifactCandidates,
   CONVERSATION_PREVIEW_CARD_VISIBLE_LIMIT,
@@ -720,9 +721,10 @@ export class ConversationShareService implements IConversationShareService {
     this.downloadTimeoutMs = options.downloadTimeoutMs ?? DOWNLOAD_TIMEOUT_MS;
     this.conversationWorkspaceRoot =
       options.conversationWorkspaceRoot ?? getConversationWorkspaceDir();
-    // 兜底写死生产站 https://zcode.z.ai/cn/share，于是测试环境（API base 走
-    // 配置的 ZCode origin）导入后回链仍指向生产站，点分割线打开的是另一个环境的分享。
+    // 之前兜底写死生产站分享页，于是测试环境（API base 走配置的 ZCode origin）
+    // 导入后回链仍指向生产站，点分割线打开的是另一个环境的分享。
     // 改用与 API base 同一个环境解析器（buildRuntimeZCodeApiUrl 也走它），保证同环境。
+    // （审计规则：运行时源码不得出现官方平台域名的字面量，这里不写 URL。）
     // 优先级不变：显式 option > ZCODE_CONVERSATION_SHARE_WEB_URL > 按环境推导。
     this.shareWebUrl = (
       options.shareWebUrl ??
@@ -772,6 +774,8 @@ export class ConversationShareService implements IConversationShareService {
   async preflight(
     input: ConversationSharePreflightInput,
   ): Promise<ConversationSharePreflightResult> {
+    // 对话分享已永久下线：边界先行拒绝，不读取凭据/状态，也避免下探到传输层才失败。
+    assertConversationShareRemoved();
     try {
       return await this.preflightWithAgent(input, this.zcodeAgentService);
     } catch (error) {
@@ -1323,6 +1327,8 @@ export class ConversationShareService implements IConversationShareService {
     input: ImportConversationShareInput,
     operationId: string,
   ): Promise<ImportConversationShareResult> {
+    // 对话分享已永久下线：入口即拒绝。
+    assertConversationShareRemoved();
     await this.completedImportsLoaded;
     const workspaceKey = workspaceKeyOf(input.targetWorkspacePath, input.targetWorkspaceIdentity);
     const workspaceKeyedShare = importDedupeKey(input.shareCode, workspaceKey);
@@ -1834,6 +1840,8 @@ export class ConversationShareService implements IConversationShareService {
   }
 
   async publish(input: PublishTextConversationInput, operationId: string) {
+    // 对话分享已永久下线：入口即拒绝。
+    assertConversationShareRemoved();
     return this.publishWithAgent(input, operationId, this.zcodeAgentService);
   }
 

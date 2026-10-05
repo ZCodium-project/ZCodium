@@ -253,14 +253,26 @@ test("all platform service boundaries guard before touching credentials, state o
       const body = ts.transpileModule(`async function boundary() ${bodies.get(name)}`, {
         compilerOptions: { target: ts.ScriptTarget.ES2022 },
       }).outputText;
+      // 去智谱化后边界方法体引用 isOfficialServiceRemoved / assertOfficialServiceRemoved
+      //（恒短路/恒抛）；与旧守卫一起注入，真实执行方法体验证短路位置。
       const run = new Function(
         "assertOfficialPlatformAvailable",
         "isOfficialPlatformEnabled",
+        "isOfficialServiceRemoved",
+        "assertOfficialServiceRemoved",
+        "assertConversationShareRemoved",
         "fail",
         `${body}; return boundary;`,
-      )(policy.assertOfficialPlatformAvailable, policy.isOfficialPlatformEnabled, () => ({
-        ok: false,
-      }));
+      )(
+        policy.assertOfficialPlatformAvailable,
+        policy.isOfficialPlatformEnabled,
+        policy.isOfficialServiceRemoved,
+        policy.assertOfficialServiceRemoved,
+        policy.assertConversationShareRemoved,
+        () => ({
+          ok: false,
+        }),
+      );
       if (expected === "reject") await assert.rejects(run(), /ZCodium/, `${file}: ${name}`);
       else assert.deepEqual(await run(), expected, `${file}: ${name}`);
     }
@@ -283,7 +295,9 @@ test("historical built-in platform model endpoints cannot escape the model trans
     else if (value && typeof value === "object") Object.values(value).forEach(visit);
   }
   visit(config);
-  assert.ok(urls.length > 0);
+  // 去智谱化后 builtin 已不含平台端点（account:* 全部移除）；显式补一个历史样本，
+  // 保证「平台端点不得逃逸 transport」这条拦截路径始终被覆盖，不随数据变化失效。
+  if (urls.length === 0) urls.push("https://zcode.z.ai/api/v1/zcode-plan/anthropic");
   for (const url of urls) await assert.rejects(fetch(url), /ZCodium/);
 });
 
