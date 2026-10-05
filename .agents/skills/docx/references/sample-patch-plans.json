@@ -1,0 +1,22 @@
+[
+  {
+    "ops": [
+      {
+        "op": "fill_anchor",
+        "anchor": "@@FIELD:author@@",
+        "value": "Shiki"
+      },
+      {
+        "op": "insert_paragraph_after",
+        "locator": {
+          "type": "heading_text",
+          "value": "方案设计"
+        },
+        "content": {
+          "format": "markdown",
+          "value": "新增一段说明。"
+        }
+      }
+    ]
+  }
+]
