@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inputHashEncoding": "UTF-8 with CRLF normalized to LF; notice and source snapshot hashes remain byte-exact",
   "scope": "Production dependency union across current workspace projects, copied source/assets and native tools; not a per-installer SBOM or a certification of all licensing obligations.",
-  "noticesSha256": "64f537ee3ab1492cb3bea7e904eaaccd3a5a5840f93643a53efe1ab9b43bf830",
+  "noticesSha256": "ffd77552066155c598480a7449a5c5406b8bee401a36ff35c0856960d2825071",
   "inputs": {
     ".agents/skills/agent-browser/references/authentication.md": "e2c3b0f4a1dc1368dee821f03c000d818a48421d09f3872525dddffe73f2112b",
     ".agents/skills/agent-browser/references/commands.md": "17522fc56d742663f47231ff06c4811abc87e12c7f78e11f94d253ddd540a909",
@@ -248,122 +248,22 @@
     ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Validation/XsdValidator.cs": "d6ca121941dcb906047f2c591eaf80f1e69bd8cd5c687a238c5b6f80f89f6a6d",
     ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.slnx": "145f185521c15cfc13a3cc1bd6ca5494132a88f5c242b1f0994c330faa9b2aeb",
     ".agents/skills/docx/scripts/env_check.ps1": "3739be1bb87a2261342827533d96d9baf7220dee86e1ec0893cf43721e8556cf",
-    ".agents/skills/docx/scripts/env_check.sh": "1b55ee98786ac01a729459580242406ad26f439a2eba407a6cf76745b1ed6bc3",
+    ".agents/skills/docx/scripts/env_check.sh": "01f72343e3c1ab15ded192b4978709cf98eed5f9de69c6ead9bab1d5e5c4f686",
     ".agents/skills/docx/scripts/extract_docx_text.py": "2b6264fbff569aab1cd2455cb5440a7f922dd5adc940bd3d8b97122fdfd6472a",
     ".agents/skills/docx/scripts/pack_docx.py": "62101fe0756fb4fb9581c480940740407247f53d182c77cd4d86b94e54ac1c52",
     ".agents/skills/docx/scripts/read_docx_structure.py": "2ebd5b74265577313249d97e0781a276549876b015add4a247ba075a19cb1977",
     ".agents/skills/docx/scripts/render_docx_pages.py": "9f26155f105d61705f24b359acc1f261f8a21f85b206ea092577753e69023bb6",
     ".agents/skills/docx/scripts/rendered_report.py": "b7828b6ff90c94169ef9b9d5b4ab7712df793144e92e92174bf567d9e76c4f5e",
     ".agents/skills/docx/scripts/setup.ps1": "cf8cc43ba237cd070d39ffbdf5c641ea9aa54519271d4c65a9cbf250c3409d3b",
-    ".agents/skills/docx/scripts/setup.sh": "62fa4b498a1ece9860c2645cbd1bef8b02184b20fb13951e8f963e1b179446b0",
+    ".agents/skills/docx/scripts/setup.sh": "2cc401906a9ac73ce75e21851f38262d8301d7304347488c1187e92ac91e20e7",
     ".agents/skills/docx/scripts/unpack_docx.py": "2c69bd5555b757ecd4784434cf0b5aff2dabe25e45f9c89440476e8bcaaf2ef3",
     ".agents/skills/docx/scripts/validate_template_manifest.py": "544710a3ef82229b0f8413ee04246dcf7a28ed87e077f0aa6145f506c88ea8a9",
     ".agents/skills/docx/scripts/verify_anchor_atomicity.py": "8f4301c46cc03053c162e478779536a4af864e3971f672921033de56cb93f28c",
-    ".agents/skills/docx/SKILL.md": "843b7c45f42f674ebc1206909086b1019faa2192945950dee00f233d3f3013b1",
+    ".agents/skills/docx/SKILL.md": "aed37e4335e6446757568546683302f91e132ba2a821febe286ac183bc52ea6f",
     ".agents/skills/dogfood/references/issue-taxonomy.md": "fa3eaceec546c2918e5a0d5c861bb61f9fb47cfb44dde31a16c98e16f8f143e6",
     ".agents/skills/dogfood/SKILL.md": "984bd5aa263aa91c818394459f90d46477ddfad07c49cc2f61db2ece3f626564",
     ".agents/skills/dogfood/templates/dogfood-report-template.md": "8b5c1672e32354c10c045f68f59f1103891fdf6e1410ed7d3c8220a00d8f9465",
     ".agents/skills/electron/SKILL.md": "989a15a88409e079d3dff3f9b7d41bf653e565a4f1e46854dac6669c116aecb4",
-    ".agents/skills/pdf/.gitignore": "ac2de72f51a815d5d4c3b2c16f8aa800a4c817c4b4f5e054218e300c661b47fa",
-    ".agents/skills/pdf/docs/advanced-reference.md": "79c7e20eabf41aebe31a64c8a032861d14b878a9a6224e7329e5676b001f3ce9",
-    ".agents/skills/pdf/docs/ai-voice-cloning-regulatory-report-case.md": "255df2c269df0f28a305bc517e412220f766f11332410c650f13a48ecd75ef24",
-    ".agents/skills/pdf/docs/annual-report-financial-digest-latex-case.md": "b2b6df8d179cdb9bc1caff3fc28d9abc034da23ca0b1b81696bce28c5ce82f4b",
-    ".agents/skills/pdf/docs/create-guide.md": "63d5815eba8aaa3f3566d6d5407ac93f04aeed9fc8a66ac8de49eaad03e68e07",
-    ".agents/skills/pdf/docs/design-guide.md": "9fede09ba61f9dc5529cdf51c4e199d5cbefd20da15a31c8e7fd99b418c1e48c",
-    ".agents/skills/pdf/docs/docx-contract-roundtrip-professional-case.md": "ea94d9c209ac4d92f4677a33b23725a4fe541dce616d48cc165131340c26fe32",
-    ".agents/skills/pdf/docs/email-translation-goldman-two-sessions-case.md": "c56c59c98fc1701cc086e0dfcd6d00ceedc112e676eedc705377b813eaff5325",
-    ".agents/skills/pdf/docs/forms-guide.md": "154076abda96d12c442765e55d0ab94886a4d7eacfa6e285206c659beffdf8de",
-    ".agents/skills/pdf/docs/html-pdf-spec.md": "533d2b46aaa2a40ee30cc742e44afc30a5229bfccc7cee823c58cb7ad1ea8187",
-    ".agents/skills/pdf/docs/italy-schengen-visa-acroform-case.md": "fe4e366d9ba617041086331b741040927edb44fa122f0773d0004ee0738192cb",
-    ".agents/skills/pdf/docs/latex-academic-thesis-guide.md": "1baa3aebb913d3a9831cbfa3c895ddccebdf97a5918fcb8f5b6c9249cdba623b",
-    ".agents/skills/pdf/docs/latex-technical-book-guide.md": "db1cbad472258ea2a43935a24ae03785a0fc0a7a0cf93249a9ab8cd2e6b399e0",
-    ".agents/skills/pdf/docs/markdown-static-academic-data-viz-case.md": "a7cdcdb110b3fa6dab7217344e294fe312369ba686f441967885ea0861a63469",
-    ".agents/skills/pdf/docs/pitfalls-index.md": "facbdf70a5bcac02bcc38dc1d7494e562300097faae73e1b9b4291abf6097fad",
-    ".agents/skills/pdf/docs/read-guide.md": "621612d6849032ec8c1beb391df34f7e90495305336e775394b40d072a3a77f5",
-    ".agents/skills/pdf/docs/reformat-guide.md": "af2357e2ed79e466d6f8df21949d6b8ee4b146611861051c799c104d50437b2d",
-    ".agents/skills/pdf/docs/skill-readme-archive.md": "8ba7c75900b5a848bc2a18f45af53ed11bb715bc6dbd3d09265206ea6a1e522c",
-    ".agents/skills/pdf/docs/troubleshooting.md": "f8b72be22c2ceeb704f616b59b220a8f25f9ad58b418028ea66c9a9e7df5ac26",
-    ".agents/skills/pdf/docs/vision-guide.md": "ed697b9b0939cb915c7e4381b43f59bfb76aee7ed63e1b44a1d48ebedb88541d",
-    ".agents/skills/pdf/scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/_pdf_read_lib.py": "c1c447f3e7db8ac3df39577ec29d53dfe488da9cf18b399e2201c93ba835d311",
-    ".agents/skills/pdf/scripts/fill/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/fill/acroform_apply.py": "30f347feac06af7e492a9d9af809b6ebcdaefb5d5f365255604c11f70cc80027",
-    ".agents/skills/pdf/scripts/fill/overlay_apply.py": "f557315b2555352d2e65893f4d7ad9c0b6ded89fb0fb07af43207177272edc3f",
-    ".agents/skills/pdf/scripts/lib/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/lib/acroform_io.py": "f5fe971d3d7a6ee0cf70910a5c54db25c0ba260c9840a42b8de518d54cfc1c44",
-    ".agents/skills/pdf/scripts/lib/cli_utils.py": "3a8e4b4a548b6f1013836e544910dce3607fd891639faa4796c4c873f36f4648",
-    ".agents/skills/pdf/scripts/lib/geometry.py": "0c7f815537aea3fc832598d5b77b75bb715343aa1cfec60fcdb197f80b32ce61",
-    ".agents/skills/pdf/scripts/make.sh": "b35802d22d3497e9a80f1b56fc261a019d34071932a2e7956be68854ae48520a",
-    ".agents/skills/pdf/scripts/merge.py": "fa9348007a40382e4e20d0864e702d25dc5671ba2d2716b10868b39a524de614",
-    ".agents/skills/pdf/scripts/pdf_inspect/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/pdf_inspect/acroform_inspect.py": "0da0ec1189a4a27ffb9c5c639186ef2ccb3de72573a4942223cc7f42018742f4",
-    ".agents/skills/pdf/scripts/pdf_inspect/acroform_probe.py": "2953eba80df8f08a6fc8a0bb64a0dc13004f41345d4ff6eaf737b2edc4cce961",
-    ".agents/skills/pdf/scripts/pdf_inspect/layout_scan.py": "e8bde17719410769370944c15f7c26507d0a965b6557fac9763b501dbbdce086",
-    ".agents/skills/pdf/scripts/read_pdf_vision.py": "2e4cc12952f345c7d73fa48d30707f81b2e4a66af7c720ea272c0c44080fa530",
-    ".agents/skills/pdf/scripts/reformat_parse.py": "805c1452d7bc66f934512e63a0b30c683b59036485b2bfb8fa5e600e3112054d",
-    ".agents/skills/pdf/scripts/render_html.cjs": "720c73bad28d3389f5ab879a62a81d1e45bcff0ff3c00a4694b8776bf547ad70",
-    ".agents/skills/pdf/scripts/render/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/render/overlay_preview.py": "320cd502203a846236a17d8a4508786dc7b387dc1f308988e569c1fda5e36dfb",
-    ".agents/skills/pdf/scripts/render/page_rasterize.py": "ead468d88686b0d0220363f83026bd1cf3872882cdc894a43e822c60520520b6",
-    ".agents/skills/pdf/scripts/validate/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/pdf/scripts/validate/geometry_lint.py": "222654bc4dd9c637805febd6461d1b5a8d93c4bfe17e7bf7579bacad6ae55524",
-    ".agents/skills/pdf/SKILL.md": "2bf8e5972078514f299db53ba0db2da3383e6efda332cdf0bc27b719f0f1414b",
-    ".agents/skills/pdf/templates/bilingual-menu-premium/README.md": "1a915b71fb6d436586a53bab63d4320c197df70ec315ba8b3516f1549b8ec219",
-    ".agents/skills/pdf/templates/bilingual-menu-premium/skeleton.html": "a801dd4703e3bcfbc645062586023473051645bb1d86b5307cb8fa5e6833eadc",
-    ".agents/skills/pdf/templates/brand-guide-2page/cases/minimax-web-brand-guide/README.md": "88dabcc5b07d787e8493ea9a4a2404446796556295b15c7aa2aeaef2713b3c72",
-    ".agents/skills/pdf/templates/brand-guide-2page/cases/minimax-web-brand-guide/source.html": "69b7597bbdcc19976b66c1b6b3a0730902c5ae281e168dfa1543f02ed0441f1f",
-    ".agents/skills/pdf/templates/brand-guide-2page/README.md": "c327a3cb0c2f8505bb4f86059b3419a596c3b202e5370d283094e0fb51e1733f",
-    ".agents/skills/pdf/templates/brand-guide-2page/skeleton.html": "8c78e6224912ac0267c7bb0429a80d582259287280773ee7d6cfd9dfd2a1cb2d",
-    ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/build_charts.py": "de72ef613c1b0732a640d4a0e7a44e39091e7b83119feb1900df03b8218d2fbd",
-    ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/README.md": "aabc5c21c645a80de49c42b8e1fe535d9614cce904634047c7487724722b07d7",
-    ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/source.tex": "6b8bb0a5d4005e1b5a1a523d41e2ae8782d92ef9381914800e0993ef8a51f131",
-    ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_1_table_1_1_specs.png": "88253851f04147f1688cf910ce6be7eb7814921cf5a69d6aff14a6ffe5274f4a",
-    ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_2_table_1_2_geekbench.png": "b27e89c64500e71f0e1081fd95b490ee0717f0954e0fc08540826e49ace26269",
-    ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_3_mmax_generation.png": "b680bd5e2c469366804b9263d0cd1479d8d1ffb4c95abcce21d9c2f6fc88cd17",
-    ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/source.html": "4ed72226b8fca7cceb0747f5c5c3def4b960986d63354bac1ede80722eb24441",
-    ".agents/skills/pdf/templates/data-viz-report/README.md": "827e04fba772d49215f58de4194d18118927291c485af8ed6874756c663b002f",
-    ".agents/skills/pdf/templates/data-viz-report/skeleton.html": "a59a2d34330df75e9aac61d49afdf925d221bda80b420821d27ad6a03ec206c5",
-    ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/extract_pdfs_key_info.py": "66573bb6c7f89cff52584340c3036d04f8596c2de0befdf1b2b4d3e123d35dac",
-    ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/field_values.case.json": "3dfa744a2f898de9462a890f50792fa4b7d77dd9f395c29b4de0f8920b7989a0",
-    ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/USER-FINAL-SUMMARY.template.md": "06b53ddbfdabfea970c0a5a9f4eb8aaf0543eb0161df970105150d1231f68d51",
-    ".agents/skills/pdf/templates/form-fill-acroform/field_values.template.json": "22cd44f4931e587d392bb596f942d6783fdddf965b23b37975096fd4a9f84810",
-    ".agents/skills/pdf/templates/form-fill-acroform/README.md": "cc46cd89fab390abbffa48653f1f6bbe67b3b755bb19b2ee031c6dbd01ee32af",
-    ".agents/skills/pdf/templates/INDEX.md": "678a3b13ac1a65ff944ff33f9242d698129a3c008d38200e4f90f401ca8fc07c",
-    ".agents/skills/pdf/templates/latex-academic-thesis/README.md": "52f2a0d36dbaed4be6f22cf9d568dd48c6c7ccf10be522c68049c6fb4837bc1e",
-    ".agents/skills/pdf/templates/latex-academic-thesis/source.tex": "16b6f74a0e32d71f4c5c5aab0d652e67246e1aecc9fd4ddb4e46bf6a0e4e1028",
-    ".agents/skills/pdf/templates/latex-technical-book/README.md": "feb8d6e86c8342557a5d484fb1ebf21fdda2d7e7adf8073225d441a3d9879177",
-    ".agents/skills/pdf/templates/latex-technical-book/README.template-source.md": "f89e9756f3d420b620158f417b864559165e173bc3c3fb2e9ff8740df74600a1",
-    ".agents/skills/pdf/templates/latex-technical-book/source.tex": "20e7dc52f00e8dde0d30d4203647cd09f5fe83d76064b9c5c8333c3869c57f5a",
-    ".agents/skills/pdf/templates/multi-article-aggregator/pipeline.md": "0bc5aa3adb4160c069a03934485f9fdeb4d9bb37d036dbb2551e01b53b0b0feb",
-    ".agents/skills/pdf/templates/multi-article-aggregator/README.md": "6e8ec78e52f291e1d1a2544b64aeb90dfa6e3a34c43d29d2fd9ee2700d1c1c6d",
-    ".agents/skills/pdf/templates/multilang-research-report/cases/ai-voice-cloning-regulatory/source.html": "02bc18f9dd084b8d97b31bd12de11e727bd685d07dba2fab66fde1b1e5f977a1",
-    ".agents/skills/pdf/templates/multilang-research-report/README.md": "88dbe73c3c76572e71481861b647a34c3d4ab0aeb18467f925c36baffb16d1d9",
-    ".agents/skills/pdf/templates/multilang-research-report/skeleton.html": "81a48d79733255e829ccf55ace40982e6f97f6866486fafc124cec54c7822dc7",
-    ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/docx_engine.py": "cb7d025ce169f5fe06489c57ef5f261928d5613ef1fbb29659ed209b2e37c3c5",
-    ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/source.html": "cc305735e96ca19cf793b762038a36d23b5da5bcacf471bf646be6902249045f",
-    ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/source.md": "080aba53e3ddc23b14f66366610db2887ce2dd078741e21c8316ff24ba504e40",
-    ".agents/skills/pdf/templates/reformat-default/README.md": "c498d46a8962835fc08fa8a0ad5eb2cb8f2d72b3e029edfec470344e755a75e1",
-    ".agents/skills/pdf/templates/reformat-default/skeleton.html": "1fa4725aa5bbb38a76b7ac7b03c9e7f4df4f5b48c6b1bec5236f9f8fbb6fe5be",
-    ".agents/skills/pdf/templates/translate-preserve-layout/cases/goldman-china-two-sessions-cn.html": "dc2b5772302a86ffb76a7f8a53d4f1b367cd8f0a27345f634907698b225d6f98",
-    ".agents/skills/pdf/templates/translate-preserve-layout/README.md": "260373946d16ef2c2a3e27825490bbb5f7586b219cf8565bf1ea3208966ddcf2",
-    ".agents/skills/pdf/templates/translate-preserve-layout/skeleton.html": "38f4a92811b6baca2932f101993680341adc576797ee9b78ec7baa9d2a81ea1a",
-    ".agents/skills/pdf/templates/translate-preserve-layout/terminology.template.json": "71ec83e653cea9fcc65dbad396a886d61eb7a50f011a63d9b943bcaa78ce28e8",
-    ".agents/skills/pptx/references/design-system.md": "3131bc4ab70720087e4f7c41c90a653ef041e29b4ef70ccc12f5ee6ea6dd47fc",
-    ".agents/skills/pptx/references/editing.md": "f8d6f724c4bd7e92f11ed8775ddd37b4a68fee5669209a529796d043039395ee",
-    ".agents/skills/pptx/references/element-map.md": "429b2b7e71b96dd7a81d9f72a06ca8ab5ea3fdb872db6e17b7cc58f1f6651189",
-    ".agents/skills/pptx/references/pitfalls.md": "aaf35900e97171e2c59d0864debcde28e144749e7a82ad26fbb58ee8ea7ee8e5",
-    ".agents/skills/pptx/references/pptxgenjs.md": "4b66df00dd581c2eeadb140fd9bbad71daea6fb48b424f97b993f8521e41d470",
-    ".agents/skills/pptx/references/preview-selection-writeback.md": "e89f2a69bb21c38620a885c4cd54fd723717ab885b33d25e38aeb4db4a4930fc",
-    ".agents/skills/pptx/references/python-pptx-recipes.md": "0d6693b661392186e9b4717a53a77173b198f4e2526c3426282fc56e66c98cc4",
-    ".agents/skills/pptx/references/slide-types.md": "fa2c0da76d420463990317dc5932e607cea5e126389ca391e3e5718629b0cb38",
-    ".agents/skills/pptx/scripts/audit_pptx.py": "5f354e9468b896f013496f049b5a17acdf672bbef0a40c327509e0f8d75e50b7",
-    ".agents/skills/pptx/scripts/extract_comments.py": "0af25aa907f691128dcbc61e344d3f488379027faa2a001885164b7379c95343",
-    ".agents/skills/pptx/scripts/extract_images.py": "af69a9395f4903a7e455623413394a9baff9d595ade9a39af534893eeef96456",
-    ".agents/skills/pptx/scripts/extract_pptx.py": "f142acd15d31f155c80205ae9c9361f92b4c9180bae97d7aebd96756cdef22da",
-    ".agents/skills/pptx/scripts/mavis-ppt-map.cjs": "0629aa435ec4af54b38568d56decb4d91921891b8ebe02d95fa1d97ca80d523f",
-    ".agents/skills/pptx/scripts/pdf2png.swift": "feb505d04494420880aabcc1d20c5d9827d431af4dba8a74a87b921a3b1099a3",
-    ".agents/skills/pptx/scripts/pptx-screenshot.sh": "08ff4197a74322deca802cca75b5a1e4570108b7d57fc7997b6a89f3e65cf360",
-    ".agents/skills/pptx/SKILL.md": "b0d89403ef60cd7bf1f0354a2f4351575ce501db3423483e9319047a13678a33",
     ".agents/skills/react-best-practices/AGENTS.md": "9d0d1c4f1922a65ddead8b869b4f2653bf3c10c84b1c8c9dd2507e0a4a4c82cb",
     ".agents/skills/react-best-practices/metadata.json": "c4e18bac3290fbe1b471a605867d4df68b03144ea26b8befdbe8f9d8fd124354",
     ".agents/skills/react-best-practices/README.md": "e49f5e0088d47dab6687a7d501e9f3b23ce8ce7e8a8e428a2fd590e582f966da",
@@ -447,12 +347,22 @@
     ".agents/skills/xlsx/docs/create-edit-guide.md": "f795b1a7cdac0d9733e7f6f805ddc3bb7414f0f7126e189ed82124a104c6ead8",
     ".agents/skills/xlsx/docs/pitfalls-index.md": "2abe3cfaf86cb4e17657606972a0d0be47c92d9f61d3bbc399b11cc5e419c2a1",
     ".agents/skills/xlsx/docs/raw-xml-escape-hatch.md": "a2a3e757cbf4da30a79017eb7de7dccd1734946759be437c79259440ccb5e3d3",
-    ".agents/skills/xlsx/docs/recalc-guide.md": "415168fc9da3775a3db0bcf4a44f7caaf4f6ddd33789a08beaece0ca0e00137a",
+    ".agents/skills/xlsx/docs/recalc-guide.md": "468868bdd277f54bacde4873c4622f370dd68c2e3b1b2f60bb4e2480c4e63ac0",
     ".agents/skills/xlsx/docs/superstore-multiformat-conversion-case.md": "b7606b3f540a46dfd5a605e5b09689a96c580f6caf5ce5faab05867883d9300a",
+    ".agents/skills/xlsx/scripts/__pycache__/recalc.cpython-314.pyc": "532f31aa216047ab10442b0f66bc8265f9685c2626e7b8c24bd246bd0e17d879",
+    ".agents/skills/xlsx/scripts/office/__pycache__/pack.cpython-314.pyc": "b8bb2e6615779f16ef0b472a3939b6bafe74b6ab5288482b7cb1be2197ddcca6",
+    ".agents/skills/xlsx/scripts/office/__pycache__/redlining_author.cpython-314.pyc": "067ec592e710bf6c95aa2a67ee23c7f5f46a7126571c972feba1f2c9a52de93d",
+    ".agents/skills/xlsx/scripts/office/__pycache__/soffice.cpython-314.pyc": "2a587fa3131b1d313f3b9c2ca32d77b20aa2e527aba6767f36611e72b2288206",
+    ".agents/skills/xlsx/scripts/office/__pycache__/unpack.cpython-314.pyc": "9c2969772629266ee6146de5d3f51492b57e2adbd43dc5c23fb19476030592e3",
+    ".agents/skills/xlsx/scripts/office/__pycache__/validate.cpython-314.pyc": "98f45394bc9d8023a420f160215f04c1b918a190505960ecb9850eab46b213f4",
     ".agents/skills/xlsx/scripts/office/helpers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/__init__.cpython-314.pyc": "d155e6e1f7ee10066ef5eeb842289e93c2cf04dc1843552ac01f8192a835d3a0",
+    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/merge_runs.cpython-314.pyc": "c9da3976103e8c08a73adb7cdc733ef9c58d3482c7126426d1ba27547dffa58b",
+    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/simplify_redlines.cpython-314.pyc": "c3a50e3c0928815185da92e31f9b907904083560dab52cac0213416e14412986",
     ".agents/skills/xlsx/scripts/office/helpers/merge_runs.py": "7c40ed838b88639c51f9ffdcfd564b568f26832b78fe44008c0e01b742669ca7",
-    ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py": "601e6d89c27258b5280a56c0b87f6938a7f470e77afa06a90d0caa4e4d9f248f",
-    ".agents/skills/xlsx/scripts/office/pack.py": "7d4ca2835ab7fd200ecebe7d269a6319b7dacce434209ab59479a255ca490b21",
+    ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py": "6b645b6a776147acaee0e239ffa454b7abf6837fada5343fb778ba84fef15096",
+    ".agents/skills/xlsx/scripts/office/pack.py": "31f9393def2f373fac950e46fffc2db8b8214977a6d50a02344d8bdba8f7bcd4",
+    ".agents/skills/xlsx/scripts/office/redlining_author.py": "96dcdaaaa5f193762439a51c4477b549a7e28f78fb46fd2a99146dc48ad3306b",
     ".agents/skills/xlsx/scripts/office/schemas/ecma/fouth-edition/opc-contentTypes.xsd": "9e0b7209fc69ab11987900404540969976000c5ebe4d4f58c43dc3842886bf3a",
     ".agents/skills/xlsx/scripts/office/schemas/ecma/fouth-edition/opc-coreProperties.xsd": "451958454e8588dfc7cd945981ada142ca06ff3307937f5700df059c2b307fa8",
     ".agents/skills/xlsx/scripts/office/schemas/ecma/fouth-edition/opc-digSig.xsd": "6de111e11403f7cd49027400755bae0ea1cabef2815f09bd40a24f0017613b24",
@@ -494,14 +404,19 @@
     ".agents/skills/xlsx/scripts/office/schemas/microsoft/wml-symex-2015.xsd": "16f6f8072249f431370723c2cd8974672e0d9c897e00e97dd918079df934871b",
     ".agents/skills/xlsx/scripts/office/soffice.py": "501f397a0d45d769f3bfbd65ef9507bfdc23ca59ca79d2c81cc1d887ce32a3be",
     ".agents/skills/xlsx/scripts/office/unpack.py": "83f69cecc87910183654c06345837244402e8a99edbf3bdddc1cf72f11304b62",
-    ".agents/skills/xlsx/scripts/office/validate.py": "8d802cbf8eaedd1fb0f3b2589715b68989a634a93b9e96a785761cb574d809e4",
+    ".agents/skills/xlsx/scripts/office/validate.py": "d5ce346bd64ab28f954abc3ad3bc6b29d4701a262bdab76b6f85182152267924",
     ".agents/skills/xlsx/scripts/office/validators/__init__.py": "83e0f035c5abea238d3f2c3968afbd511ed022b527b7c9cb60a9434cc34ff987",
+    ".agents/skills/xlsx/scripts/office/validators/__pycache__/__init__.cpython-314.pyc": "2c2a70e56092e9e35477b249197dc8cca315258aaa8bb1e196e00026213c9001",
+    ".agents/skills/xlsx/scripts/office/validators/__pycache__/base.cpython-314.pyc": "bf971eb38fd2bde776151248bc316878594d8a59262bda659d3dd8ded65ec34e",
+    ".agents/skills/xlsx/scripts/office/validators/__pycache__/docx.cpython-314.pyc": "dd94f00dbc157ce5cad39bd8c45712fe127c36126907b4debff5d73cdfccbf49",
+    ".agents/skills/xlsx/scripts/office/validators/__pycache__/pptx.cpython-314.pyc": "124ed67a047d6af63dea9c95ca512d6603fc87191aa2c31f9b7d832203eb9329",
+    ".agents/skills/xlsx/scripts/office/validators/__pycache__/redlining.cpython-314.pyc": "092487d08b01aded28202373e9c28a9da7a1a9d55fc82529bb070d6cefa18380",
     ".agents/skills/xlsx/scripts/office/validators/base.py": "a6e577837a69cae934f0379df2470dfedaeb1d72b485a191e78649e78bc72256",
     ".agents/skills/xlsx/scripts/office/validators/docx.py": "0ef04ce86b2e6b6a1cb088c0276fd0bd5b770d96fdfe7a6cc73d005feb3f0345",
     ".agents/skills/xlsx/scripts/office/validators/pptx.py": "f937961e62a5fa0d002b8dc51a4c4e2cd8fcd59fe65853fa54edaca3fe99eccc",
-    ".agents/skills/xlsx/scripts/office/validators/redlining.py": "9a2366d972bb7a129ffdc57fad30e115590d195f39d3a1cd0c1b03cbdc39fa68",
+    ".agents/skills/xlsx/scripts/office/validators/redlining.py": "daf964d266f28694b059f0213fec746acc9de03a672dd758ce5fdba309e30187",
     ".agents/skills/xlsx/scripts/recalc.py": "483cf07b175e8de51bcd3e3dcc61f02c67915269065843bd034b04597df73608",
-    ".agents/skills/xlsx/SKILL.md": "e6e2b2c237eeabbdc42b019c28061ba7ae3a924c858cffcd917e745b9382ce34",
+    ".agents/skills/xlsx/SKILL.md": "6b1f3706f63ccea17cbb9d6a7104c4ccabe06be67864bb96b4f32ef0ee4778ee",
     "apps/zcode-cli/package.json": "6c48017b05d8a7215c5bf7dea12f50edd1487bf5b8b22e11c21703d32e8f7742",
     "apps/zcode-cli/packages/adapters/package.json": "da99aebdd4d463b7705a2a0febc12adb9ad7e792f74f4ba7c4e258b8bb6a13dc",
     "apps/zcode-cli/packages/bootstrap/package.json": "0e175ac8b64cd5b478c15e6bf71fb3940c17ddb7f95fb7cbcdd426bb61ce5bef",
@@ -2949,7 +2864,7 @@
     "scripts/license-texts/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "scripts/native-search-tools-config.mjs": "281d368464f61363fa2d8ab74f416962fe730dd0a0572db5564475f876bb65aa",
     "scripts/remote-native-search-tools-config.mjs": "472322a66f84c7452f96aa9e16e9c4e0600f7c2588a03dc6bc869229161b1cb2",
-    "third-party/copied-components.json": "8ae4afc1129eaf6266f73e43964982d4c45707d83bc01b58384a6b1caa29b2eb",
+    "third-party/copied-components.json": "680b66762d848be2749f4f043174e962a7cf79812956d6b9e8093f39fdebdd34",
     "third-party/embedded-components.json": "9586ccca15897f56d4ca1d703dffe9e02880fedd766c1dff93f7ac1f52ea891a",
     "third-party/native-search/licenses/00373c9bf56a894b2ed67586596bc1e8b0630cabbaf1ab46c75fc754b6bcd1ce.txt": "00373c9bf56a894b2ed67586596bc1e8b0630cabbaf1ab46c75fc754b6bcd1ce",
     "third-party/native-search/licenses/01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f.txt": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
@@ -29288,10 +29203,12 @@
       "roots": [
         ".agents/skills/docx"
       ],
-      "scope": "DOCX create/template-apply/edit/read/repair/compare instructions, reference documents and the bundled .NET CLI sources. The skill declares GB/T 9704-2012 (Layout Standard for Official Documents) among its formatting references.",
+      "scope": "DOCX create/template-apply/edit/read/repair/compare instructions and the bundled OOXML toolchain. ZCodium adaptations: host-product daemon references reworded, setup.sh no longer edits shell rc and gates the .NET SDK install behind an explicit flag, and SKILL.md documents a ZCodium capability matrix for hosts that cannot provision the toolchain.",
       "license": "MIT",
       "modifiedFiles": [
         ".agents/skills/docx/SKILL.md",
+        ".agents/skills/docx/scripts/setup.sh",
+        ".agents/skills/docx/scripts/env_check.sh",
         ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Commands/CreateCommand.cs",
         ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Typography/CjkHelper.cs"
       ],
@@ -29306,7 +29223,7 @@
         },
         {
           "file": ".agents/skills/docx/SKILL.md",
-          "sha256": "843b7c45f42f674ebc1206909086b1019faa2192945950dee00f233d3f3013b1"
+          "sha256": "aed37e4335e6446757568546683302f91e132ba2a821febe286ac183bc52ea6f"
         },
         {
           "file": ".agents/skills/docx/assets/styles/academic_styles.xml",
@@ -29718,7 +29635,7 @@
         },
         {
           "file": ".agents/skills/docx/scripts/env_check.sh",
-          "sha256": "1b55ee98786ac01a729459580242406ad26f439a2eba407a6cf76745b1ed6bc3"
+          "sha256": "01f72343e3c1ab15ded192b4978709cf98eed5f9de69c6ead9bab1d5e5c4f686"
         },
         {
           "file": ".agents/skills/docx/scripts/extract_docx_text.py",
@@ -29746,7 +29663,7 @@
         },
         {
           "file": ".agents/skills/docx/scripts/setup.sh",
-          "sha256": "62fa4b498a1ece9860c2645cbd1bef8b02184b20fb13951e8f963e1b179446b0"
+          "sha256": "2cc401906a9ac73ce75e21851f38262d8301d7304347488c1187e92ac91e20e7"
         },
         {
           "file": ".agents/skills/docx/scripts/unpack_docx.py",
@@ -29773,15 +29690,21 @@
       "roots": [
         ".agents/skills/xlsx"
       ],
-      "scope": "Spreadsheet read/edit/create/convert instructions, conventions and recalculation guide, plus the bundled Python and LibreOffice helper scripts.",
+      "scope": "Spreadsheet read/edit/create/convert instructions, conventions and the openpyxl/LibreOffice helper library. ZCodium adaptations: the dangling cross-skill bootstrap pointer is replaced with a self-contained Windows tool table, and the track-changes author default is resolved from --author / ZCODE_REDLINING_AUTHOR / a neutral placeholder instead of the upstream host name.",
       "license": "MIT",
       "modifiedFiles": [
-        ".agents/skills/xlsx/SKILL.md"
+        ".agents/skills/xlsx/SKILL.md",
+        ".agents/skills/xlsx/docs/recalc-guide.md",
+        ".agents/skills/xlsx/scripts/office/pack.py",
+        ".agents/skills/xlsx/scripts/office/validate.py",
+        ".agents/skills/xlsx/scripts/office/redlining_author.py",
+        ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py",
+        ".agents/skills/xlsx/scripts/office/validators/redlining.py"
       ],
       "files": [
         {
           "file": ".agents/skills/xlsx/SKILL.md",
-          "sha256": "e6e2b2c237eeabbdc42b019c28061ba7ae3a924c858cffcd917e745b9382ce34"
+          "sha256": "6b1f3706f63ccea17cbb9d6a7104c4ccabe06be67864bb96b4f32ef0ee4778ee"
         },
         {
           "file": ".agents/skills/xlsx/docs/advanced-reference.md",
@@ -29813,15 +29736,51 @@
         },
         {
           "file": ".agents/skills/xlsx/docs/recalc-guide.md",
-          "sha256": "415168fc9da3775a3db0bcf4a44f7caaf4f6ddd33789a08beaece0ca0e00137a"
+          "sha256": "468868bdd277f54bacde4873c4622f370dd68c2e3b1b2f60bb4e2480c4e63ac0"
         },
         {
           "file": ".agents/skills/xlsx/docs/superstore-multiformat-conversion-case.md",
           "sha256": "b7606b3f540a46dfd5a605e5b09689a96c580f6caf5ce5faab05867883d9300a"
         },
         {
+          "file": ".agents/skills/xlsx/scripts/__pycache__/recalc.cpython-314.pyc",
+          "sha256": "c23655c7febbb625f699242e41a9b67611c5b4607c0b33fee1e0d179ba0da2ba"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/__pycache__/pack.cpython-314.pyc",
+          "sha256": "fbd447b9fae94991568e97a2f5a2c1e9ab3d410baf148c767a2c0ccd91ea4f5f"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/__pycache__/redlining_author.cpython-314.pyc",
+          "sha256": "c89451c13763da5ae1aff300d222a9d65c2b166cc88e9de935f322a0fbd66371"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/__pycache__/soffice.cpython-314.pyc",
+          "sha256": "9babd582a2afb215f71ee8e79b897638cdd0c5a86a723c3418c86f7e15e62877"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/__pycache__/unpack.cpython-314.pyc",
+          "sha256": "935d45069837f618f9471552240cae6a9a51d8b257755d0b91bcab5015931071"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/__pycache__/validate.cpython-314.pyc",
+          "sha256": "81964dc7be5536366b14c85b44fd3fe9775c3e5e5621a17accfd3d56df4e852a"
+        },
+        {
           "file": ".agents/skills/xlsx/scripts/office/helpers/__init__.py",
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/__init__.cpython-314.pyc",
+          "sha256": "a0dd980585b1fd8ea98412b9ba512eeda96508f9695ce247cecd863adc458e29"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/merge_runs.cpython-314.pyc",
+          "sha256": "bb512791bfe6a56765f53fc27d3e13383c048ce5e9579f3b1d053bc89a21a05c"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/simplify_redlines.cpython-314.pyc",
+          "sha256": "c9b08f0920e4161a1a29572aab7ea34a58717432fb305e90f6cfbd411e6cee3c"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/helpers/merge_runs.py",
@@ -29829,11 +29788,15 @@
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py",
-          "sha256": "601e6d89c27258b5280a56c0b87f6938a7f470e77afa06a90d0caa4e4d9f248f"
+          "sha256": "6b645b6a776147acaee0e239ffa454b7abf6837fada5343fb778ba84fef15096"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/pack.py",
-          "sha256": "7d4ca2835ab7fd200ecebe7d269a6319b7dacce434209ab59479a255ca490b21"
+          "sha256": "31f9393def2f373fac950e46fffc2db8b8214977a6d50a02344d8bdba8f7bcd4"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/redlining_author.py",
+          "sha256": "96dcdaaaa5f193762439a51c4477b549a7e28f78fb46fd2a99146dc48ad3306b"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/schemas/ISO-IEC29500-4_2016/dml-chart.xsd",
@@ -30001,11 +29964,31 @@
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/validate.py",
-          "sha256": "8d802cbf8eaedd1fb0f3b2589715b68989a634a93b9e96a785761cb574d809e4"
+          "sha256": "d5ce346bd64ab28f954abc3ad3bc6b29d4701a262bdab76b6f85182152267924"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/validators/__init__.py",
           "sha256": "83e0f035c5abea238d3f2c3968afbd511ed022b527b7c9cb60a9434cc34ff987"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/__init__.cpython-314.pyc",
+          "sha256": "c936a95d3bfd80c7ff26882c8d123b8eb7263f44bb76704ed50ffd0ab4878c9b"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/base.cpython-314.pyc",
+          "sha256": "585f1cf97e9c67ecb80fb099d64a3e6276604e55de5fd547bf974fea7adc7982"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/docx.cpython-314.pyc",
+          "sha256": "e3a30168dcb8c0a9f72707389b1710dfb0657abf9f1d657c0a974b19014731f7"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/pptx.cpython-314.pyc",
+          "sha256": "fe219bff61ce75ccb47299fdc97dedd34274f548f55e098ca7882d589d3d7434"
+        },
+        {
+          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/redlining.cpython-314.pyc",
+          "sha256": "ba58a3c7e43720319f77f6aaacd10c90832ede007ea7e8d808a4ae5bb6e3b315"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/validators/base.py",
@@ -30021,449 +30004,11 @@
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/validators/redlining.py",
-          "sha256": "9a2366d972bb7a129ffdc57fad30e115590d195f39d3a1cd0c1b03cbdc39fa68"
+          "sha256": "daf964d266f28694b059f0213fec746acc9de03a672dd758ce5fdba309e30187"
         },
         {
           "file": ".agents/skills/xlsx/scripts/recalc.py",
           "sha256": "483cf07b175e8de51bcd3e3dcc61f02c67915269065843bd034b04597df73608"
-        }
-      ]
-    },
-    {
-      "id": "minimax-code pptx skill",
-      "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-      "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-      "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-      "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-      "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-      "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/pptx in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
-      "roots": [
-        ".agents/skills/pptx"
-      ],
-      "scope": "PowerPoint read/create/edit instructions, element map and preview writeback references, plus the bundled helper scripts. Includes the optional upstream .mavis-ppt-map.json sidecar protocol, which is inert in ZCode.",
-      "license": "MIT",
-      "modifiedFiles": [
-        ".agents/skills/pptx/SKILL.md"
-      ],
-      "files": [
-        {
-          "file": ".agents/skills/pptx/SKILL.md",
-          "sha256": "b0d89403ef60cd7bf1f0354a2f4351575ce501db3423483e9319047a13678a33"
-        },
-        {
-          "file": ".agents/skills/pptx/references/design-system.md",
-          "sha256": "3131bc4ab70720087e4f7c41c90a653ef041e29b4ef70ccc12f5ee6ea6dd47fc"
-        },
-        {
-          "file": ".agents/skills/pptx/references/editing.md",
-          "sha256": "f8d6f724c4bd7e92f11ed8775ddd37b4a68fee5669209a529796d043039395ee"
-        },
-        {
-          "file": ".agents/skills/pptx/references/element-map.md",
-          "sha256": "429b2b7e71b96dd7a81d9f72a06ca8ab5ea3fdb872db6e17b7cc58f1f6651189"
-        },
-        {
-          "file": ".agents/skills/pptx/references/pitfalls.md",
-          "sha256": "aaf35900e97171e2c59d0864debcde28e144749e7a82ad26fbb58ee8ea7ee8e5"
-        },
-        {
-          "file": ".agents/skills/pptx/references/pptxgenjs.md",
-          "sha256": "4b66df00dd581c2eeadb140fd9bbad71daea6fb48b424f97b993f8521e41d470"
-        },
-        {
-          "file": ".agents/skills/pptx/references/preview-selection-writeback.md",
-          "sha256": "e89f2a69bb21c38620a885c4cd54fd723717ab885b33d25e38aeb4db4a4930fc"
-        },
-        {
-          "file": ".agents/skills/pptx/references/python-pptx-recipes.md",
-          "sha256": "0d6693b661392186e9b4717a53a77173b198f4e2526c3426282fc56e66c98cc4"
-        },
-        {
-          "file": ".agents/skills/pptx/references/slide-types.md",
-          "sha256": "fa2c0da76d420463990317dc5932e607cea5e126389ca391e3e5718629b0cb38"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/audit_pptx.py",
-          "sha256": "5f354e9468b896f013496f049b5a17acdf672bbef0a40c327509e0f8d75e50b7"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/extract_comments.py",
-          "sha256": "0af25aa907f691128dcbc61e344d3f488379027faa2a001885164b7379c95343"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/extract_images.py",
-          "sha256": "af69a9395f4903a7e455623413394a9baff9d595ade9a39af534893eeef96456"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/extract_pptx.py",
-          "sha256": "f142acd15d31f155c80205ae9c9361f92b4c9180bae97d7aebd96756cdef22da"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/mavis-ppt-map.cjs",
-          "sha256": "0629aa435ec4af54b38568d56decb4d91921891b8ebe02d95fa1d97ca80d523f"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/pdf2png.swift",
-          "sha256": "feb505d04494420880aabcc1d20c5d9827d431af4dba8a74a87b921a3b1099a3"
-        },
-        {
-          "file": ".agents/skills/pptx/scripts/pptx-screenshot.sh",
-          "sha256": "08ff4197a74322deca802cca75b5a1e4570108b7d57fc7997b6a89f3e65cf360"
-        }
-      ]
-    },
-    {
-      "id": "minimax-code pdf skill",
-      "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-      "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-      "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-      "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-      "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-      "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/pdf in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
-      "roots": [
-        ".agents/skills/pdf"
-      ],
-      "scope": "PDF generate/reformat/fill/read instructions, route guides, LaTeX and brand-guide templates, and the bundled Python helper scripts.",
-      "license": "MIT",
-      "modifiedFiles": [
-        ".agents/skills/pdf/SKILL.md"
-      ],
-      "files": [
-        {
-          "file": ".agents/skills/pdf/.gitignore",
-          "sha256": "ac2de72f51a815d5d4c3b2c16f8aa800a4c817c4b4f5e054218e300c661b47fa"
-        },
-        {
-          "file": ".agents/skills/pdf/SKILL.md",
-          "sha256": "2bf8e5972078514f299db53ba0db2da3383e6efda332cdf0bc27b719f0f1414b"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/advanced-reference.md",
-          "sha256": "79c7e20eabf41aebe31a64c8a032861d14b878a9a6224e7329e5676b001f3ce9"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/ai-voice-cloning-regulatory-report-case.md",
-          "sha256": "255df2c269df0f28a305bc517e412220f766f11332410c650f13a48ecd75ef24"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/annual-report-financial-digest-latex-case.md",
-          "sha256": "b2b6df8d179cdb9bc1caff3fc28d9abc034da23ca0b1b81696bce28c5ce82f4b"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/create-guide.md",
-          "sha256": "63d5815eba8aaa3f3566d6d5407ac93f04aeed9fc8a66ac8de49eaad03e68e07"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/design-guide.md",
-          "sha256": "9fede09ba61f9dc5529cdf51c4e199d5cbefd20da15a31c8e7fd99b418c1e48c"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/docx-contract-roundtrip-professional-case.md",
-          "sha256": "ea94d9c209ac4d92f4677a33b23725a4fe541dce616d48cc165131340c26fe32"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/email-translation-goldman-two-sessions-case.md",
-          "sha256": "c56c59c98fc1701cc086e0dfcd6d00ceedc112e676eedc705377b813eaff5325"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/forms-guide.md",
-          "sha256": "154076abda96d12c442765e55d0ab94886a4d7eacfa6e285206c659beffdf8de"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/html-pdf-spec.md",
-          "sha256": "533d2b46aaa2a40ee30cc742e44afc30a5229bfccc7cee823c58cb7ad1ea8187"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/italy-schengen-visa-acroform-case.md",
-          "sha256": "fe4e366d9ba617041086331b741040927edb44fa122f0773d0004ee0738192cb"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/latex-academic-thesis-guide.md",
-          "sha256": "1baa3aebb913d3a9831cbfa3c895ddccebdf97a5918fcb8f5b6c9249cdba623b"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/latex-technical-book-guide.md",
-          "sha256": "db1cbad472258ea2a43935a24ae03785a0fc0a7a0cf93249a9ab8cd2e6b399e0"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/markdown-static-academic-data-viz-case.md",
-          "sha256": "a7cdcdb110b3fa6dab7217344e294fe312369ba686f441967885ea0861a63469"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/pitfalls-index.md",
-          "sha256": "facbdf70a5bcac02bcc38dc1d7494e562300097faae73e1b9b4291abf6097fad"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/read-guide.md",
-          "sha256": "621612d6849032ec8c1beb391df34f7e90495305336e775394b40d072a3a77f5"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/reformat-guide.md",
-          "sha256": "af2357e2ed79e466d6f8df21949d6b8ee4b146611861051c799c104d50437b2d"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/skill-readme-archive.md",
-          "sha256": "8ba7c75900b5a848bc2a18f45af53ed11bb715bc6dbd3d09265206ea6a1e522c"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/troubleshooting.md",
-          "sha256": "f8b72be22c2ceeb704f616b59b220a8f25f9ad58b418028ea66c9a9e7df5ac26"
-        },
-        {
-          "file": ".agents/skills/pdf/docs/vision-guide.md",
-          "sha256": "ed697b9b0939cb915c7e4381b43f59bfb76aee7ed63e1b44a1d48ebedb88541d"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/_pdf_read_lib.py",
-          "sha256": "c1c447f3e7db8ac3df39577ec29d53dfe488da9cf18b399e2201c93ba835d311"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/fill/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/fill/acroform_apply.py",
-          "sha256": "30f347feac06af7e492a9d9af809b6ebcdaefb5d5f365255604c11f70cc80027"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/fill/overlay_apply.py",
-          "sha256": "f557315b2555352d2e65893f4d7ad9c0b6ded89fb0fb07af43207177272edc3f"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/lib/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/lib/acroform_io.py",
-          "sha256": "f5fe971d3d7a6ee0cf70910a5c54db25c0ba260c9840a42b8de518d54cfc1c44"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/lib/cli_utils.py",
-          "sha256": "3a8e4b4a548b6f1013836e544910dce3607fd891639faa4796c4c873f36f4648"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/lib/geometry.py",
-          "sha256": "0c7f815537aea3fc832598d5b77b75bb715343aa1cfec60fcdb197f80b32ce61"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/make.sh",
-          "sha256": "b35802d22d3497e9a80f1b56fc261a019d34071932a2e7956be68854ae48520a"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/merge.py",
-          "sha256": "fa9348007a40382e4e20d0864e702d25dc5671ba2d2716b10868b39a524de614"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/pdf_inspect/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/pdf_inspect/acroform_inspect.py",
-          "sha256": "0da0ec1189a4a27ffb9c5c639186ef2ccb3de72573a4942223cc7f42018742f4"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/pdf_inspect/acroform_probe.py",
-          "sha256": "2953eba80df8f08a6fc8a0bb64a0dc13004f41345d4ff6eaf737b2edc4cce961"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/pdf_inspect/layout_scan.py",
-          "sha256": "e8bde17719410769370944c15f7c26507d0a965b6557fac9763b501dbbdce086"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/read_pdf_vision.py",
-          "sha256": "2e4cc12952f345c7d73fa48d30707f81b2e4a66af7c720ea272c0c44080fa530"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/reformat_parse.py",
-          "sha256": "805c1452d7bc66f934512e63a0b30c683b59036485b2bfb8fa5e600e3112054d"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/render/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/render/overlay_preview.py",
-          "sha256": "320cd502203a846236a17d8a4508786dc7b387dc1f308988e569c1fda5e36dfb"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/render/page_rasterize.py",
-          "sha256": "ead468d88686b0d0220363f83026bd1cf3872882cdc894a43e822c60520520b6"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/render_html.cjs",
-          "sha256": "720c73bad28d3389f5ab879a62a81d1e45bcff0ff3c00a4694b8776bf547ad70"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/validate/__init__.py",
-          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/pdf/scripts/validate/geometry_lint.py",
-          "sha256": "222654bc4dd9c637805febd6461d1b5a8d93c4bfe17e7bf7579bacad6ae55524"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/INDEX.md",
-          "sha256": "678a3b13ac1a65ff944ff33f9242d698129a3c008d38200e4f90f401ca8fc07c"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/bilingual-menu-premium/README.md",
-          "sha256": "1a915b71fb6d436586a53bab63d4320c197df70ec315ba8b3516f1549b8ec219"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/bilingual-menu-premium/skeleton.html",
-          "sha256": "a801dd4703e3bcfbc645062586023473051645bb1d86b5307cb8fa5e6833eadc"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/brand-guide-2page/README.md",
-          "sha256": "c327a3cb0c2f8505bb4f86059b3419a596c3b202e5370d283094e0fb51e1733f"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/brand-guide-2page/cases/minimax-web-brand-guide/README.md",
-          "sha256": "88dabcc5b07d787e8493ea9a4a2404446796556295b15c7aa2aeaef2713b3c72"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/brand-guide-2page/cases/minimax-web-brand-guide/source.html",
-          "sha256": "69b7597bbdcc19976b66c1b6b3a0730902c5ae281e168dfa1543f02ed0441f1f"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/brand-guide-2page/skeleton.html",
-          "sha256": "8c78e6224912ac0267c7bb0429a80d582259287280773ee7d6cfd9dfd2a1cb2d"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/README.md",
-          "sha256": "827e04fba772d49215f58de4194d18118927291c485af8ed6874756c663b002f"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/README.md",
-          "sha256": "aabc5c21c645a80de49c42b8e1fe535d9614cce904634047c7487724722b07d7"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/build_charts.py",
-          "sha256": "de72ef613c1b0732a640d4a0e7a44e39091e7b83119feb1900df03b8218d2fbd"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/annual-report-financial-digest-latex/source.tex",
-          "sha256": "6b8bb0a5d4005e1b5a1a523d41e2ae8782d92ef9381914800e0993ef8a51f131"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_1_table_1_1_specs.png",
-          "sha256": "edd0e1f19fadd2872bf37cf306e27c9c97955956208f06063f17525532215c4f"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_2_table_1_2_geekbench.png",
-          "sha256": "ea45c711e401d0be88d6c60a14c27a3404f91a058ab65cdb3b30d629425c49a3"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/assets/fig_1_3_mmax_generation.png",
-          "sha256": "b723158e3580ca43eb45101926f5f1e8e03d1d8b2409c6beee9bcddbb1261567"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/cases/apple-m-ai-static-academic/source.html",
-          "sha256": "4ed72226b8fca7cceb0747f5c5c3def4b960986d63354bac1ede80722eb24441"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/data-viz-report/skeleton.html",
-          "sha256": "a59a2d34330df75e9aac61d49afdf925d221bda80b420821d27ad6a03ec206c5"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/form-fill-acroform/README.md",
-          "sha256": "cc46cd89fab390abbffa48653f1f6bbe67b3b755bb19b2ee031c6dbd01ee32af"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/USER-FINAL-SUMMARY.template.md",
-          "sha256": "06b53ddbfdabfea970c0a5a9f4eb8aaf0543eb0161df970105150d1231f68d51"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/extract_pdfs_key_info.py",
-          "sha256": "66573bb6c7f89cff52584340c3036d04f8596c2de0befdf1b2b4d3e123d35dac"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/form-fill-acroform/cases/italy-schengen-visa-example/field_values.case.json",
-          "sha256": "3dfa744a2f898de9462a890f50792fa4b7d77dd9f395c29b4de0f8920b7989a0"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/form-fill-acroform/field_values.template.json",
-          "sha256": "22cd44f4931e587d392bb596f942d6783fdddf965b23b37975096fd4a9f84810"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/latex-academic-thesis/README.md",
-          "sha256": "52f2a0d36dbaed4be6f22cf9d568dd48c6c7ccf10be522c68049c6fb4837bc1e"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/latex-academic-thesis/source.tex",
-          "sha256": "16b6f74a0e32d71f4c5c5aab0d652e67246e1aecc9fd4ddb4e46bf6a0e4e1028"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/latex-technical-book/README.md",
-          "sha256": "feb8d6e86c8342557a5d484fb1ebf21fdda2d7e7adf8073225d441a3d9879177"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/latex-technical-book/README.template-source.md",
-          "sha256": "f89e9756f3d420b620158f417b864559165e173bc3c3fb2e9ff8740df74600a1"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/latex-technical-book/source.tex",
-          "sha256": "20e7dc52f00e8dde0d30d4203647cd09f5fe83d76064b9c5c8333c3869c57f5a"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/multi-article-aggregator/README.md",
-          "sha256": "6e8ec78e52f291e1d1a2544b64aeb90dfa6e3a34c43d29d2fd9ee2700d1c1c6d"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/multi-article-aggregator/pipeline.md",
-          "sha256": "0bc5aa3adb4160c069a03934485f9fdeb4d9bb37d036dbb2551e01b53b0b0feb"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/multilang-research-report/README.md",
-          "sha256": "88dbe73c3c76572e71481861b647a34c3d4ab0aeb18467f925c36baffb16d1d9"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/multilang-research-report/cases/ai-voice-cloning-regulatory/source.html",
-          "sha256": "02bc18f9dd084b8d97b31bd12de11e727bd685d07dba2fab66fde1b1e5f977a1"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/multilang-research-report/skeleton.html",
-          "sha256": "81a48d79733255e829ccf55ace40982e6f97f6866486fafc124cec54c7822dc7"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/reformat-default/README.md",
-          "sha256": "c498d46a8962835fc08fa8a0ad5eb2cb8f2d72b3e029edfec470344e755a75e1"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/docx_engine.py",
-          "sha256": "cb7d025ce169f5fe06489c57ef5f261928d5613ef1fbb29659ed209b2e37c3c5"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/source.html",
-          "sha256": "cc305735e96ca19cf793b762038a36d23b5da5bcacf471bf646be6902249045f"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/reformat-default/cases/pku-contract-roundtrip/source.md",
-          "sha256": "080aba53e3ddc23b14f66366610db2887ce2dd078741e21c8316ff24ba504e40"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/reformat-default/skeleton.html",
-          "sha256": "1fa4725aa5bbb38a76b7ac7b03c9e7f4df4f5b48c6b1bec5236f9f8fbb6fe5be"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/translate-preserve-layout/README.md",
-          "sha256": "260373946d16ef2c2a3e27825490bbb5f7586b219cf8565bf1ea3208966ddcf2"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/translate-preserve-layout/cases/goldman-china-two-sessions-cn.html",
-          "sha256": "dc2b5772302a86ffb76a7f8a53d4f1b367cd8f0a27345f634907698b225d6f98"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/translate-preserve-layout/skeleton.html",
-          "sha256": "38f4a92811b6baca2932f101993680341adc576797ee9b78ec7baa9d2a81ea1a"
-        },
-        {
-          "file": ".agents/skills/pdf/templates/translate-preserve-layout/terminology.template.json",
-          "sha256": "71ec83e653cea9fcc65dbad396a886d61eb7a50f011a63d9b943bcaa78ce28e8"
         }
       ]
     }

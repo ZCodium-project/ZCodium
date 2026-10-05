@@ -1,3 +1,9 @@
+# Modified by ZCode: persist_macos_paths no longer appends to ~/.zprofile / ~/.zshrc -- it now
+# only affects the current process and prints the lines the user may choose to add. The helper
+# ensure_shell_export was removed as dead code. The .NET SDK install is now opt-in behind
+# --install-dotnet (it was curl | sh writing ~/.dotnet, which cannot work on an air-gapped host).
+
+
 #!/usr/bin/env bash
 # docx Environment Setup & Initialization Script
 # Focus: macOS full-fidelity DOCX environment with no sudo requirement.
@@ -27,6 +33,8 @@ step()  { echo -e "\n${BLUE}=== $* ===${NC}"; }
 OS="unknown"
 PKG_MGR="unknown"
 ARCH="$(uname -m)"
+# .NET SDK 自动安装默认关闭，需显式 --install-dotnet。
+ALLOW_DOTNET_INSTALL=0
 BREW_BIN=""
 BREW_PREFIX=""
 
@@ -37,13 +45,9 @@ path_prepend_now() {
   esac
 }
 
-ensure_shell_export() {
-  local file="$1"
-  local line="$2"
-  touch "$file"
-  grep -Fqx "$line" "$file" 2>/dev/null || printf '%s\n' "$line" >> "$file"
-}
-
+# ZCodium 改动：原实现会 append ~/.zprofile 与 ~/.zshrc。仓库技能不应静默改用户 shell
+# 配置——尤其它跑在办公机上，改 rc 会影响用户所有终端会话。这里只对当前进程生效，
+# 并把需要用户自行持久化的行打印出来，由人决定是否写进 rc。
 persist_macos_paths() {
   [ "$OS" = "macos" ] || return 0
 
@@ -64,11 +68,11 @@ persist_macos_paths() {
     lines+=("export PATH=\"$BREW_PREFIX/bin:$BREW_PREFIX/sbin:\$PATH\"")
   fi
 
-  for rc in "$HOME/.zprofile" "$HOME/.zshrc"; do
-    for line in "${lines[@]}"; do
-      ensure_shell_export "$rc" "$line"
-    done
+  echo "  已对当前进程生效。若要让后续终端也带上这些路径，请自行决定是否写入 rc："
+  for line in "${lines[@]}"; do
+    echo "    $line"
   done
+  echo "  （本脚本不再自动改写 ~/.zprofile / ~/.zshrc。）"
 }
 
 resolve_brew() {
@@ -201,6 +205,17 @@ install_dotnet() {
       return 0
     fi
     warn "dotnet $ver found but < $DOTNET_REQUIRED_MAJOR.0, upgrading..."
+  fi
+
+  # ZCodium 改动：.NET 是 docx 技能的 full 级（create/applyTemplate/validate）硬依赖，
+  # 但它是全局 SDK 变更且原实现是 curl|sh 执行外网脚本——内网办公机上跑不通，也是供应链
+  # 风险。默认只报告缺口并给出手动安装指引；确认要装再显式传 --install-dotnet。
+  if [ "$ALLOW_DOTNET_INSTALL" -ne 1 ]; then
+    warn "缺少 .NET SDK >= $DOTNET_REQUIRED_MAJOR.0。docx 技能降级为 read/render 级可用"
+    warn "（创建 / 套模板 / 校验 / 修订等 full 级功能需要它）。"
+    warn "手动安装：https://dotnet.microsoft.com/download"
+    warn "确认要自动安装（会写入 ~/.dotnet）请显式加 --install-dotnet。"
+    return 0
   fi
 
   if [ "$OS" = "macos" ]; then
@@ -503,10 +518,16 @@ main() {
     case "$arg" in
       --minimal) skip_optional=true ;;
       --skip-verify) skip_verify=true ;;
+      --install-dotnet) ALLOW_DOTNET_INSTALL=1 ;;
       --help|-h)
         echo "Usage: setup.sh [options]"
-        echo "  --minimal       Skip font check only (runtime deps are still installed)"
-        echo "  --skip-verify   Skip the final create-document verification"
+        echo "  --minimal          Skip font check only (runtime deps are still installed)"
+        echo "  --skip-verify      Skip the final create-document verification"
+        echo "  --install-dotnet   Allow writing the .NET SDK to ~/.dotnet (off by default;"
+        echo "                     without it the skill degrades to read/render level)"
+        echo
+        echo "This script does NOT edit ~/.zprofile / ~/.zshrc and does NOT install"
+        echo "global npm packages. It reports what is missing and how to install it."
         exit 0
         ;;
     esac

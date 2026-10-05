@@ -2300,10 +2300,6 @@ The original import revisions of copied components are not recorded in the curre
 
 - minimax-code xlsx skill (MIT): .agents/skills/xlsx. License reference: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE. Original import revision: 564e9166d81f87b0b767b005e4779d4697b512be.
 
-- minimax-code pptx skill (MIT): .agents/skills/pptx. License reference: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE. Original import revision: 564e9166d81f87b0b767b005e4779d4697b512be.
-
-- minimax-code pdf skill (MIT): .agents/skills/pdf. License reference: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE. Original import revision: 564e9166d81f87b0b767b005e4779d4697b512be.
-
 Fig autocomplete source carries the repository's MIT license; the generated registry records npm @withfig/autocomplete@2.692.3 metadata as ISC. The original source MIT notice is retained below.
 
 ## Embedded native and WASM components
@@ -37556,10 +37552,6 @@ SOFTWARE.
 - minimax-code docx skill: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE
 
 - minimax-code xlsx skill: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE
-
-- minimax-code pptx skill: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE
-
-- minimax-code pdf skill: https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE
 
 
 
