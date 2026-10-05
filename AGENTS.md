@@ -35,6 +35,12 @@
 - `CONTEXT.md`：插件商店领域词汇；修改相关 UI 前阅读。
 - `DESIGN.md`：UI 设计规范；修改 UI 前阅读。
 
+## GitHub 流程
+
+- 每个 PR 必须关联至少一个 Issue：在 PR 正文写 `Closes #<编号>`（合并后自动关闭），或在 PR 右侧 Development 手动关联。
+- 关联与否以 GitHub 原生语义为准（`closingIssuesReferences`），由 `.github/workflows/require-issue.yml` 的 `linked-issue` 检查执行；该检查已加入 `main-protection` ruleset 的必需状态检查，无豁免，机器人 / draft PR 同样适用。
+- 动手前先创建或认领对应 Issue，再开 PR；未关联 Issue 的 PR 无法合并。
+
 ## 实现与验证
 
 - 代码改动使用 `.agents/skills/architecture-governance/SKILL.md`，先运行架构检查，再读取目标模块的受控上下文。

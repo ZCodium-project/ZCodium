@@ -1,0 +1,34 @@
+# 门禁：每个 PR 必须关联至少一个 Issue，否则不能合并到 main。
+# - 判定口径为 GitHub 原生关联语义（closingIssuesReferences）：
+#   PR 正文含 `Closes #<编号>` / `Fixes #<编号>` / `Resolves #<编号>`，或在右侧 Development 手动关联。
+# - job 名 linked-issue 已加入 main-protection ruleset 的必需状态检查（required status checks），未通过不能合并。
+# - 无豁免：机器人自动 PR、draft PR 同样检查。
+# - 修改 PR 正文 / 推送提交会自动重跑；也可在 Checks 中手动重跑该 job。
+name: require-issue
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  linked-issue:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Check linked issue
+        run: |
+          set -euo pipefail
+          LINKED=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json closingIssuesReferences --jq '.closingIssuesReferences | length')
+          if [ "$LINKED" -ge 1 ]; then
+            echo "PR #$PR_NUMBER 已关联 $LINKED 个 Issue，检查通过。"
+            exit 0
+          fi
+          echo "::error::PR #$PR_NUMBER 未关联任何 Issue。请在 PR 正文添加 Closes #<编号>（例如 Closes #123），或在右侧 Development 中关联 Issue；合并后 Issue 会自动关闭。"
+          exit 1
