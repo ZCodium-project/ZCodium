@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import type { ApiClient } from "@zcode/shared";
 import { readApiJson } from "#src/providers/api/apiJson.js";
 
@@ -105,7 +105,7 @@ export async function ensureBigModelTeamPlanProjectApiKeyWithStatus(params: {
   timeoutMs: number;
 }): Promise<BigModelTeamPlanApiKeyEnsureResult> {
   // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-  assertOfficialServiceAvailable("codingPlan");
+  assertOfficialServiceRemoved("codingPlan");
 
   const listUrl = buildBigModelTeamPlanApiKeysUrl(params.host, params.teamContext);
   const listPayload = await readApiJson<BigModelBizEnvelope<BigModelTeamPlanApiKeySummary[]>>(
@@ -170,7 +170,7 @@ export async function copyBigModelTeamPlanProjectApiKeySecret(params: {
   timeoutMs: number;
 }): Promise<string | null> {
   // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-  assertOfficialServiceAvailable("codingPlan");
+  assertOfficialServiceRemoved("codingPlan");
 
   const copyPayload = await readApiJson<BigModelBizEnvelope<BigModelTeamPlanApiKeySecret>>(
     params.apiClient,

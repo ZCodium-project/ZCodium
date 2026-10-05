@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import {
   resolveBigModelApiOrigin,
   resolveZaiBusinessBaseUrl,
@@ -20,7 +20,7 @@ export function createLegacyTeamOrganizationResolver(dependencies: {
 }): (connection: LegacyTeamConnection) => Promise<string | null> {
   return async ({ family, projectId }) => {
     // 审计版不连接官方服务。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
     const tokens = await dependencies.loadOAuthTokenSet(family);
     const token = tokens?.accessToken.trim();
     if (!token || (family === "bigmodel" && token === tokens?.zcodeJwtToken)) return null;

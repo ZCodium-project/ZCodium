@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import { redactFeedbackText } from "@zcode/shared";
 /* eslint-disable max-lines -- 反馈 HTTP 客户端集中维护新后端协议、鉴权头合并、OSS 表单直传和响应归一化。 */
 import { randomUUID } from "node:crypto";
@@ -316,7 +316,7 @@ export class FeedbackHttpClient {
     authHeaders?: Record<string, string>,
   ): Promise<T> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("feedback");
+    assertOfficialServiceRemoved("feedback");
 
     const headers = mergeFeedbackRequestHeaders(
       authHeaders ?? (await this.options.getAuthHeaders()),

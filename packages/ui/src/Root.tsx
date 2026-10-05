@@ -69,7 +69,10 @@ import { useCodeCommentPreviewStore } from "@/store/codeCommentPreviewStore.js";
 import { RootStartupLoading } from "@/root/RootStartupLoading.js";
 import { resolveProviderAvailabilityState } from "@/lib/modelProviderAvailability.js";
 import { useProviderAvailabilityLoginEntryGuard } from "@/root/useProviderAvailabilityLoginEntryGuard.js";
-import { ensureProviderFamilyDomainMigration } from "@/lib/providerFamilyDomainMigration.js";
+import {
+  ensureProviderFamilyDomainMigration,
+  ensureRetiredProviderFamilySettingsPurge,
+} from "@/lib/providerFamilyDomainMigration.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import { CLOSE_ACTIVE_CONTEXT_REQUEST_EVENT } from "@/lib/closeActiveContext.js";
 import { AssistantCodeCommentFeatureProvider } from "@/AssistantCodeCommentFeatureProvider.js";
@@ -177,10 +180,13 @@ function RootInner({
     refresh: refreshAppSettings,
     update: updateAppSettings,
   } = useSettings();
+  // 智谱账号体系移除后欢迎屏（套餐/API Key 引导）不可达：reason 恒 null。
+  // JWT 重启标记仍消费，防止陈旧标记跨启动残留。
   const [welcomeScreenOpenReason, setWelcomeScreenOpenReason] =
-    useState<WelcomeScreenOpenReason | null>(() =>
-      consumeZcodeJwtInvalidRestartMarker() ? "session-expired" : null,
-    );
+    useState<WelcomeScreenOpenReason | null>(() => {
+      consumeZcodeJwtInvalidRestartMarker();
+      return null;
+    });
   const [providerFamilyDomainMigrationComplete, setProviderFamilyDomainMigrationComplete] =
     useState(false);
   const loginEntryRequest = useZCodeStore((state) => state.loginEntryRequest);
@@ -367,6 +373,8 @@ function RootInner({
 
     void (async () => {
       try {
+        // 先清存量再推断：顺序反了的话，旧的 family 推断会把刚清掉的 domain 写回来。
+        await ensureRetiredProviderFamilySettingsPurge(services);
         await ensureProviderFamilyDomainMigration(services);
       } catch (error) {
         logger.warn("[Root] provider family domain 迁移失败，继续启动", {
@@ -459,7 +467,7 @@ function RootInner({
     setDirectoryBrowserOpen(true);
   }, []);
   const handleReauthenticationRequired = useCallback(() => {
-    setWelcomeScreenOpenReason("session-expired");
+    // 账号体系移除后无再认证语义；保留回调签名兼容 dormant 调用方。
   }, []);
   const {
     setWorkspaceActionError,
@@ -493,7 +501,7 @@ function RootInner({
     setOAuthError,
     setUser,
     onProviderFamilyDomainClearedAfterLogout: () => {
-      setWelcomeScreenOpenReason("logout-provider-required");
+      // 账号体系移除后登出不再回欢迎屏。
     },
     userId: user?.id,
     onOpenRemoteConnection: allowRemoteWorkspace ? handleOpenRemoteConnection : undefined,
@@ -796,12 +804,8 @@ function RootInner({
   }, [isSettingsTabActive, workspaceShellPath]);
 
   useEffect(() => {
-    if (!loginEntryRequest) {
-      return;
-    }
-    // 登录入口已从模态弹窗收敛为 WelcomeScreen。
-    // provider 连接请求仍要先退出首次启动引导语义，避免连接完成后误创建默认 workspace。
-    setWelcomeScreenOpenReason("provider-request");
+    // 账号体系移除后登录入口不再存在：loginEntryRequest 仅剩 dormant dispatch 方，
+    // 这里消费掉请求但不渲染欢迎屏（其表单引用的套餐模板已删除）。
   }, [loginEntryRequest]);
 
   const handleOpenLoginEntry = () => {

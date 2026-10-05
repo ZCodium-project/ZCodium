@@ -41,7 +41,9 @@ export function shouldShowRootStartupLoading(state: RootStartupLoadingVisibility
 }
 
 export function shouldEnableProviderAvailabilityLoginEntryGuard(): boolean {
-  return true;
+  // 智谱账号体系移除后，"未登录且无可用模型则强制欢迎屏"的启动门禁失去前提；
+  // 无 Provider 时应用直接可用，用户从模型设置自行添加。
+  return false;
 }
 
 export function shouldResolveProviderStartupState(state: ProviderStartupResolutionState): boolean {

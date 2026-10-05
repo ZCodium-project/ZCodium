@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "@zcode/shared";
 import type { OAuthTokenSet, UserInfo } from "@zcode/shared";
 import type { WebOAuthProviderId } from "./browserOAuthCredentialRepo.js";
@@ -172,7 +172,7 @@ export class ZaiWebOAuthProvider {
     provider?: WebOAuthProviderId;
   }): string {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
 
     const redirectUri = params.redirectUri ?? this.config.redirectUri;
     // 两家的授权参数名完全不同，没有共通形状可抽；直接分支比造一层映射配置更好读。
@@ -219,7 +219,7 @@ export class ZaiWebOAuthProvider {
     provider?: WebOAuthProviderId;
   }): Promise<WebZaiTokenExchangeResult> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("account");
+    assertOfficialServiceRemoved("account");
 
     const provider = params.provider ?? ZAI_PROVIDER_ID;
     const response = await fetch(this.config.tokenUrl, {

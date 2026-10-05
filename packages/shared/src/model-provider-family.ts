@@ -1,7 +1,6 @@
-import { BIGMODEL_PROVIDER_ID, type OAuthProviderId, ZAI_PROVIDER_ID } from "./oauth.js";
+import type { OAuthProviderId } from "./oauth.js";
+import { BIGMODEL_PROVIDER_ID, ZAI_PROVIDER_ID } from "./oauth.js";
 import { BUILTIN_MODEL_PROVIDER_IDS, type BuiltinModelProviderId } from "./model-provider-types.js";
-import { ZCODE_ENV } from "./env.js";
-import { buildBigModelCodingPlanTeamManageUrl } from "./zcodeEndpoint.js";
 
 export type ModelProviderFamilyId = "zai" | "bigmodel";
 export type ProviderFamilyDomain = ModelProviderFamilyId;
@@ -23,28 +22,13 @@ export interface ModelProviderFamilySpec {
   teamCodingPlanManageUrl: string;
 }
 
-export const MODEL_PROVIDER_FAMILY_SPECS = [
-  {
-    id: "zai",
-    label: "Z.ai",
-    rootDomain: "z.ai",
-    oauthProviderId: ZAI_PROVIDER_ID,
-    startPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiStartPlan,
-    individualCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiIndividualCodingPlan,
-    teamCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiTeamCodingPlan,
-    teamCodingPlanManageUrl: "https://z.ai/manage-apikey/subscription",
-  },
-  {
-    id: "bigmodel",
-    label: "BigModel",
-    rootDomain: "bigmodel.cn",
-    oauthProviderId: BIGMODEL_PROVIDER_ID,
-    startPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.bigmodelStartPlan,
-    individualCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.bigmodelIndividualCodingPlan,
-    teamCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.bigmodelTeamCodingPlan,
-    teamCodingPlanManageUrl: buildBigModelCodingPlanTeamManageUrl({ ZCODE_ENV }),
-  },
-] as const satisfies readonly ModelProviderFamilySpec[];
+/**
+ * ZCodium 已移除智谱套餐体系（zhipu-account / Coding Plan）：Z.ai 与 BigModel
+ * 降级为普通 api-key 预设供应商。本表清空后所有 family 解析恒返回 null、
+ * shouldShow* 恒为 true；类型与函数保留以兼容 dormant 的账号子系统代码，
+ * 待该子系统物理删除后一并移除。
+ */
+export const MODEL_PROVIDER_FAMILY_SPECS: readonly ModelProviderFamilySpec[] = [];
 
 const MODEL_PROVIDER_FAMILY_SPEC_BY_ID = new Map<ModelProviderFamilyId, ModelProviderFamilySpec>(
   MODEL_PROVIDER_FAMILY_SPECS.map((spec) => [spec.id, spec]),
@@ -63,10 +47,24 @@ const MODEL_PROVIDER_FAMILY_ID_BY_PROVIDER_ID = new Map<
   ),
 );
 
+// specs 清空后的兜底：dormant 消费点（套餐 hooks / OAuth effects）仍会解构字段，
+// 返回空值 spec 保证它们拿到无害占位而不是 undefined 崩溃；无 account provider
+// 可选，这些字段不会被用于真实请求。
+const EMPTY_MODEL_PROVIDER_FAMILY_SPEC: ModelProviderFamilySpec = {
+  id: "zai",
+  label: "",
+  rootDomain: "",
+  oauthProviderId: ZAI_PROVIDER_ID,
+  startPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiStartPlan,
+  individualCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiIndividualCodingPlan,
+  teamCodingPlanProviderId: BUILTIN_MODEL_PROVIDER_IDS.zaiTeamCodingPlan,
+  teamCodingPlanManageUrl: "",
+};
+
 export function getModelProviderFamilySpec(
   familyId: ModelProviderFamilyId,
 ): ModelProviderFamilySpec {
-  return MODEL_PROVIDER_FAMILY_SPEC_BY_ID.get(familyId)!;
+  return MODEL_PROVIDER_FAMILY_SPEC_BY_ID.get(familyId) ?? EMPTY_MODEL_PROVIDER_FAMILY_SPEC;
 }
 
 export function resolveModelProviderFamilyIdByProviderId(

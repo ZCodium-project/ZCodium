@@ -17,6 +17,7 @@ import {
   NodePersonalProviderConfigRepository,
   type PersonalProviderConfigRecoveryEvent,
 } from "./personal-provider-config-repository.js";
+import { createRetiredZhipuProviderMigrationUpdate } from "./retired-zhipu-provider-migration.js";
 
 export interface NodeProviderConfigRuntimeOptions {
   readonly zcodeBuiltinFilePath: string;
@@ -31,6 +32,7 @@ export interface NodeProviderConfigRuntimeOptions {
   readonly onPersonalConfigPollingError?: (error: unknown) => void;
   readonly personalFilePath: string;
   readonly personalPollingIntervalMs?: number | false;
+  readonly onRetiredProviderMigrationError?: (error: unknown) => void;
   readonly importLegacy?: (
     zcodeBuiltin: ProviderConfigLayerSnapshot,
   ) => Promise<ProviderConfigLayerUpdate | null>;
@@ -46,6 +48,7 @@ export class NodeProviderConfigRuntime {
   readonly #personalRepository: NodePersonalProviderConfigRepository;
   readonly #remoteSynchronizer?: ZCodeBuiltinRemoteSynchronizer;
   readonly #onRemoteRefreshError?: (error: unknown) => void;
+  readonly #onRetiredProviderMigrationError?: (error: unknown) => void;
   #startPromise: Promise<void> | null = null;
   #disposed = false;
   readonly #checkListeners = new Set<() => Promise<void>>();
@@ -72,6 +75,7 @@ export class NodeProviderConfigRuntime {
           })
         : undefined;
     this.#onRemoteRefreshError = options.onZCodeBuiltinRefreshError;
+    this.#onRetiredProviderMigrationError = options.onRetiredProviderMigrationError;
     this.#personalRepository = new NodePersonalProviderConfigRepository({
       filePath: options.personalFilePath,
       onRecovery: options.onPersonalConfigRecovery,
@@ -108,21 +112,24 @@ export class NodeProviderConfigRuntime {
   start(): Promise<void> {
     if (this.#disposed) throw new Error("NodeProviderConfigRuntime 已 dispose");
     if (this.#startPromise) return this.#startPromise;
-    const startPromise = this.configService.read().then(() => {
-      if (this.#disposed) return;
-      void this.#checkBackground();
-      // Managed Worker 无下载配置也无恢复 owner，不建立周期任务。
-      if (
-        this.#remoteSynchronizer ||
-        this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource ||
-        this.#checkListeners.size > 0
-      ) {
-        this.#checkTimer = setInterval(() => {
-          void this.#checkBackground();
-        }, 60_000);
-        this.#checkTimer.unref?.();
-      }
-    });
+    const startPromise = this.configService
+      .read()
+      .then(() => this.#retireZhipuProviderResidue())
+      .then(() => {
+        if (this.#disposed) return;
+        void this.#checkBackground();
+        // Managed Worker 无下载配置也无恢复 owner，不建立周期任务。
+        if (
+          this.#remoteSynchronizer ||
+          this.#zcodeBuiltinSource instanceof EndpointScopedZCodeBuiltinSource ||
+          this.#checkListeners.size > 0
+        ) {
+          this.#checkTimer = setInterval(() => {
+            void this.#checkBackground();
+          }, 60_000);
+          this.#checkTimer.unref?.();
+        }
+      });
     this.#startPromise = startPromise;
     void startPromise.catch(() => {
       if (this.#startPromise === startPromise) this.#startPromise = null;
@@ -136,6 +143,37 @@ export class NodeProviderConfigRuntime {
       return this.#zcodeBuiltinSource.refresh(options);
     }
     return this.#remoteSynchronizer?.refresh(options) ?? Promise.resolve("skipped");
+  }
+
+  /**
+   * 去智谱化的一次性对账：把 Personal 层里指向已下线 account:* Provider 的残留条目清掉，
+   * 并把 defaultModelSelection 迁到同族保留的 api-key 标准预设。
+   *
+   * 挂在 Config Runtime 启动边界而不是 UI：desktop / CLI / server 共用这一个 Personal
+   * Repository 所有者，放 UI 会留下「只有渲染进程才迁移」的缺口。写入必须走
+   * `personalRepository.update()`，它才有文件锁与失效通知。
+   */
+  async #retireZhipuProviderResidue(): Promise<void> {
+    if (this.#disposed) return;
+    try {
+      const zcodeBuiltin = await this.#zcodeBuiltinSource.read();
+      // 先按当前快照空跑一次：绝大多数启动在这里就返回，不产生文件 IO 与失效通知。
+      if (
+        !createRetiredZhipuProviderMigrationUpdate(
+          await this.#personalRepository.read(),
+          zcodeBuiltin,
+        )
+      )
+        return;
+      // 真正写入时从锁内快照重新判定，避免用加锁前的旧判定覆盖其他 writer 的写入。
+      await this.#personalRepository.update(
+        (current) => createRetiredZhipuProviderMigrationUpdate(current, zcodeBuiltin) ?? current,
+      );
+    } catch (error) {
+      // 迁移失败不能阻断启动：数据本身仍可加载，悬空条目只是不可用而非非法。
+      // 迁移幂等，下次启动会重试。
+      this.#onRetiredProviderMigrationError?.(error);
+    }
   }
 
   #checkBackground(): Promise<void> {

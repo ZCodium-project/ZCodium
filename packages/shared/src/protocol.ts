@@ -326,6 +326,8 @@ export interface AppSettings {
   providerFamilyDomainUpdatedAt?: number;
   /** 旧 oauth/provider 状态是否已经尝试迁移到 providerFamilyDomain。 */
   providerFamilyDomainMigrated?: boolean;
+  /** 去智谱化的一次性清理是否已执行：存量 providerFamilyDomain 与按 family 的连接选择已被清空。 */
+  retiredProviderFamilySettingsPurged?: boolean;
   /** 新建或冷恢复 Session 是否为 Bash 注入 bfs/ugrep 增强；默认启用。 */
   nativeSearchEnhancementsEnabled?: boolean;
   /** 新建或冷恢复 Session 是否启用 Memory；默认关闭。 */

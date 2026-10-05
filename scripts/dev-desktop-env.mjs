@@ -25,6 +25,9 @@ if (requestedEnv === "test" && !legacyDataBaseDirSet) {
   process.env.ZCODIUM_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
   process.env.ZCODE_DATA_BASE_DIR = DEFAULT_ISOLATED_DATA_BASE_DIR;
 }
+// 同上：剔除宿主 CLI 泄漏的 builtin 配置路径，Host env 解析不得命中宿主运行时副本。
+delete process.env.ZCODE_BUILTIN_PROVIDER_CONFIG_FILE;
+delete process.env.ZCODE_BUILTIN_PROVIDER_BUNDLED_CONFIG_FILE;
 console.log(
   `[dev] ZCODE_ENV=${requestedEnv} 数据目录: ${
     process.env.ZCODE_DATA_BASE_DIR?.trim() || "(未注入 — 将使用真实 HOME，dogfood 模式)"

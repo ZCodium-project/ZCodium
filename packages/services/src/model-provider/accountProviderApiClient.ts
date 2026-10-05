@@ -1,4 +1,4 @@
-import { assertOfficialServiceAvailable } from "@zcode/shared";
+import { assertOfficialServiceRemoved } from "@zcode/shared";
 import { type ApiClient } from "@zcode/shared";
 import { readApiJson } from "../providers/api/apiJson.js";
 import type { RemoteEnvelope } from "./accountProviderApiTypes.js";
@@ -21,7 +21,7 @@ export class AccountProviderApiClient {
 
   async fetchRemoteData<T>(url: string, init: RequestInit): Promise<T | null> {
     // 审计版不连接官方服务：必须在凭证读取与网络请求前短路。
-    assertOfficialServiceAvailable("codingPlan");
+    assertOfficialServiceRemoved("codingPlan");
 
     const payload = await readApiJson<RemoteEnvelope<T>>(this.apiClient, url, init);
     // BigModel 部分业务接口成功时返回 code=200，而不是 code=0。
