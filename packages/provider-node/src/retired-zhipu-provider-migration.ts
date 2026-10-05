@@ -30,13 +30,14 @@ export const RETIRED_ZHIPU_PROVIDER_IDS: readonly ProviderId[] = Object.freeze([
 ]);
 
 /**
- * 同一批删除的两条套餐模板（access=zhipu-coding-plan-api-key）。
- * 保留 `zai-standard-api` / `bigmodel-standard-api`——它们是 api-key 预设，与 DeepSeek 同类。
+ * 已下线模板清单（当前为空）。
+ *
+ * 原为 `zai-api` / `bigmodel-api`（套餐模板）；「Coding Plan API Key 预设」恢复后
+ * 它们不再是已下线实体——账号体系仍移除，这两条只是普通 api-key 预设
+ * （见 docs/specs/flatten-provider-zones.md 的修订节）。保留导出与过滤逻辑，
+ * 后续若再有模板下线仍从这里统一清理。
  */
-export const RETIRED_ZHIPU_PROVIDER_TEMPLATE_IDS: readonly ProviderTemplateId[] = Object.freeze([
-  "zai-api",
-  "bigmodel-api",
-]);
+export const RETIRED_ZHIPU_PROVIDER_TEMPLATE_IDS: readonly ProviderTemplateId[] = Object.freeze([]);
 
 /**
  * 已下线账号 Provider 的选中模型回退目标。

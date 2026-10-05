@@ -11,8 +11,8 @@ ZCodium 是去智谱化的社区 fork，但剥离不彻底：模型设置仍保�
 ## 产品行为
 
 1. 模型设置导航不再有「智谱 / 自定义供应商」两个分区，所有 Provider 平铺；
-   「添加供应商」模板列表不再出现 Coding Plan 条目，Z.ai API / BigModel API 与
-   DeepSeek 等并列。
+   「添加供应商」模板列表不再出现订阅/账号条目；Coding Plan 的 API Key 预设
+   与 Z.ai API / BigModel API、DeepSeek 等并列（见文末修订节）。
 2. Start Plan（订阅）相关条目、连接方式选择、套餐状态卡全部不再出现。
 3. 首次启动不再弹出 API Key / 套餐引导屏；无 Provider 时应用直接可用，
    用户从模型设置自行添加。
@@ -24,8 +24,8 @@ ZCodium 是去智谱化的社区 fork，但剥离不彻底：模型设置仍保�
 
 - 删除 8 条 `account:*` providerRules（zai-family / bigmodel-family 的全部实体，
   access=zhipu-account）；
-- 删除 `zai-api`（Z.ai Coding Plan）与 `bigmodel-api`（BigModel Coding Plan）两条
-  套餐模板（access=zhipu-coding-plan-api-key）；
+- 【修订】`zai-api`（Z.ai Coding Plan）与 `bigmodel-api`（BigModel Coding Plan）
+  两条 API Key 模板曾随本 PR 删除，后于修订恢复（revision 31 → 32，见文末修订节）；
 - 删除上述条目对应的孤儿 modelConfigRules；
 - 保留 `zai-standard-api`（Z.ai API）与 `bigmodel-standard-api`（BigModel API）
   —— api-key 预设，与 DeepSeek 同类。
@@ -120,7 +120,8 @@ builtin 删除只改变「可选项」，不会回头修改用户磁盘上的数
 
 - 8 条 `account:*` providerRules：`account:{zai,bigmodel}-{individual-coding-plan,
 offpeak-idle-plan,start-plan,team-coding-plan}`；
-- 2 条套餐模板：`zai-api`、`bigmodel-api`。
+- 【修订】`zai-api`、`bigmodel-api` 两条模板恢复为普通 API Key 预设后，已从下线
+  清单移除（`RETIRED_ZHIPU_PROVIDER_TEMPLATE_IDS` 为空），不再清理。
 
 清理动作：剔除 `providers` 与 `providerOrder` 中的命中项、剔除 `models` 里
 按已下线 providerId 命名的精确规则、剔除 `providerTemplates` 中的命中模板。
@@ -176,7 +177,7 @@ warn 上报。迁移幂等，下次启动会重试。
 
 1. 全新数据目录启动：无首启套餐屏，直接进入工作区。
 2. 模型设置：左侧无「智谱」分区与 Start Plan；「添加供应商」列表中 Z.ai API /
-   BigModel API 与 DeepSeek 并列，无 Coding Plan 条目。
+   BigModel API、Coding Plan（API Key 预设）与 DeepSeek 并列，无订阅/账号条目。
 3. 选择 Z.ai API 预设 + API Key + 添加模型（可用检测）→ 可执行、可对话。
 4. 旧数据目录（曾有 account provider 残留配置）启动不崩溃：残留条目不自动消失，
    由「存量数据一次性迁移」在启动边界显式对账——`providerOrder` / `providers` /
@@ -187,3 +188,19 @@ warn 上报。迁移幂等，下次启动会重试。
    未命中清单的选中项不受影响。
 5. 迁移幂等：第二次启动不再写入 personal 配置，文件内容与 revision 逐字节不变；
    `setting.json` 也不再产生第二次 family 清理写入。
+
+## 修订：恢复 Coding Plan 的 API Key 预设（revision 31 → 32）
+
+剥离对象是**账号订阅体系**：OAuth 登录、`zcode.z.ai` 中转、套餐额度查询与订阅状态卡。
+Coding Plan 的基础模型接入按智谱官方文档本身是**纯 API Key**（三种协议的公开端点：
+`api.z.ai/api/anthropic`、`api.z.ai/api/coding/paas/v4`、`api.z.ai/api/v1`，BigModel 同构），
+与账号体系无关，属于普通服务商端点预设。
+
+因此恢复 `zai-api` / `bigmodel-api` 两条模板（`access=zhipu-coding-plan-api-key`，
+Anthropic 端点，模型 GLM-5.3 / GLM-5.3-Flash），并从已下线清单移除；模型规则与
+UI（添加供应商列表）随 builtin 数据自动生效。
+
+- 账号登录（8 条 `account:*`）与官方中转通道保持移除；
+- `zai-standard-api` / `bigmodel-standard-api`（平台按量端点 `api/paas/v4`）不受影响；
+- 同 PR 顺带修复去智谱化后 `no-official-platform.test.mjs` 的三处失效
+  （守卫注入、builtin 平台端点样本、运行时字面量注释）。
