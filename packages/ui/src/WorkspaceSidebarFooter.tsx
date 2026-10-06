@@ -33,6 +33,7 @@ import { usePlatform } from "@/hooks/usePlatform.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useShortcutCommandLabel } from "@/shortcuts/useShortcutBindings.js";
 import { useZCodeStore } from "@/store/StoreProvider.js";
+import { ZCODE_VERSION } from "@zcode/shared";
 import { normalizeInterfaceMode } from "@/lib/interfaceMode.js";
 import type { Theme } from "@/useTheme.js";
 import { WorkspaceWebRemoteControlTrigger } from "@/WorkspaceWebRemoteControlTrigger.js";
@@ -145,6 +146,10 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="min-w-0 truncate text-ui-base font-semibold text-foreground">
             {profileBadge}
+          </span>
+          {/* 审计版没有账户体系与关于页入口，应用名旁边直接露出版本号，省得用户去找。 */}
+          <span className="shrink-0 text-[11px] leading-none text-muted-foreground">
+            v{ZCODE_VERSION}
           </span>
           {user ? <WorkspaceSidebarFooterPlanBadge state={usageSummaryState} /> : null}
         </div>
