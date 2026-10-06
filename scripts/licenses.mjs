@@ -73,6 +73,9 @@ function classify(raw) {
     .map((x) => x.trim())
     .filter(Boolean);
   if (and.length > 1 && and.every((x) => GREEN.test(x))) return "green";
+  // AND 表达式的义务取最严成员：含弱 copyleft（MPL/EPL/CDDL）成分即按该档分类，
+  // 使 weakAllowReason 的逐包复核登记机制有机会介入——否则整串落 "review" 永远进 bad。
+  if (and.length > 1 && and.some((x) => /^(MPL|EPL|CDDL)/i.test(x))) return "yellow-weak";
   const t = or[0] || and[0] || s;
   if (/\bAGPL/i.test(t)) return "red-agpl";
   if (/\bLGPL/i.test(t)) return "yellow-lgpl";
