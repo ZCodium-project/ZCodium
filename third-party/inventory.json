@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inputHashEncoding": "UTF-8 with CRLF normalized to LF; notice and source snapshot hashes remain byte-exact",
   "scope": "Production dependency union across current workspace projects, copied source/assets and native tools; not a per-installer SBOM or a certification of all licensing obligations.",
-  "noticesSha256": "ffd77552066155c598480a7449a5c5406b8bee401a36ff35c0856960d2825071",
+  "noticesSha256": "cf423fb93f1d2e415504526e7b32d3373e28341e9d35c2a678f4e4629663be1f",
   "inputs": {
     ".agents/skills/agent-browser/references/authentication.md": "e2c3b0f4a1dc1368dee821f03c000d818a48421d09f3872525dddffe73f2112b",
     ".agents/skills/agent-browser/references/commands.md": "17522fc56d742663f47231ff06c4811abc87e12c7f78e11f94d253ddd540a909",
@@ -349,16 +349,7 @@
     ".agents/skills/xlsx/docs/raw-xml-escape-hatch.md": "a2a3e757cbf4da30a79017eb7de7dccd1734946759be437c79259440ccb5e3d3",
     ".agents/skills/xlsx/docs/recalc-guide.md": "468868bdd277f54bacde4873c4622f370dd68c2e3b1b2f60bb4e2480c4e63ac0",
     ".agents/skills/xlsx/docs/superstore-multiformat-conversion-case.md": "b7606b3f540a46dfd5a605e5b09689a96c580f6caf5ce5faab05867883d9300a",
-    ".agents/skills/xlsx/scripts/__pycache__/recalc.cpython-314.pyc": "532f31aa216047ab10442b0f66bc8265f9685c2626e7b8c24bd246bd0e17d879",
-    ".agents/skills/xlsx/scripts/office/__pycache__/pack.cpython-314.pyc": "b8bb2e6615779f16ef0b472a3939b6bafe74b6ab5288482b7cb1be2197ddcca6",
-    ".agents/skills/xlsx/scripts/office/__pycache__/redlining_author.cpython-314.pyc": "067ec592e710bf6c95aa2a67ee23c7f5f46a7126571c972feba1f2c9a52de93d",
-    ".agents/skills/xlsx/scripts/office/__pycache__/soffice.cpython-314.pyc": "2a587fa3131b1d313f3b9c2ca32d77b20aa2e527aba6767f36611e72b2288206",
-    ".agents/skills/xlsx/scripts/office/__pycache__/unpack.cpython-314.pyc": "9c2969772629266ee6146de5d3f51492b57e2adbd43dc5c23fb19476030592e3",
-    ".agents/skills/xlsx/scripts/office/__pycache__/validate.cpython-314.pyc": "98f45394bc9d8023a420f160215f04c1b918a190505960ecb9850eab46b213f4",
     ".agents/skills/xlsx/scripts/office/helpers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/__init__.cpython-314.pyc": "d155e6e1f7ee10066ef5eeb842289e93c2cf04dc1843552ac01f8192a835d3a0",
-    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/merge_runs.cpython-314.pyc": "c9da3976103e8c08a73adb7cdc733ef9c58d3482c7126426d1ba27547dffa58b",
-    ".agents/skills/xlsx/scripts/office/helpers/__pycache__/simplify_redlines.cpython-314.pyc": "c3a50e3c0928815185da92e31f9b907904083560dab52cac0213416e14412986",
     ".agents/skills/xlsx/scripts/office/helpers/merge_runs.py": "7c40ed838b88639c51f9ffdcfd564b568f26832b78fe44008c0e01b742669ca7",
     ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py": "6b645b6a776147acaee0e239ffa454b7abf6837fada5343fb778ba84fef15096",
     ".agents/skills/xlsx/scripts/office/pack.py": "31f9393def2f373fac950e46fffc2db8b8214977a6d50a02344d8bdba8f7bcd4",
@@ -406,11 +397,6 @@
     ".agents/skills/xlsx/scripts/office/unpack.py": "83f69cecc87910183654c06345837244402e8a99edbf3bdddc1cf72f11304b62",
     ".agents/skills/xlsx/scripts/office/validate.py": "d5ce346bd64ab28f954abc3ad3bc6b29d4701a262bdab76b6f85182152267924",
     ".agents/skills/xlsx/scripts/office/validators/__init__.py": "83e0f035c5abea238d3f2c3968afbd511ed022b527b7c9cb60a9434cc34ff987",
-    ".agents/skills/xlsx/scripts/office/validators/__pycache__/__init__.cpython-314.pyc": "2c2a70e56092e9e35477b249197dc8cca315258aaa8bb1e196e00026213c9001",
-    ".agents/skills/xlsx/scripts/office/validators/__pycache__/base.cpython-314.pyc": "bf971eb38fd2bde776151248bc316878594d8a59262bda659d3dd8ded65ec34e",
-    ".agents/skills/xlsx/scripts/office/validators/__pycache__/docx.cpython-314.pyc": "dd94f00dbc157ce5cad39bd8c45712fe127c36126907b4debff5d73cdfccbf49",
-    ".agents/skills/xlsx/scripts/office/validators/__pycache__/pptx.cpython-314.pyc": "124ed67a047d6af63dea9c95ca512d6603fc87191aa2c31f9b7d832203eb9329",
-    ".agents/skills/xlsx/scripts/office/validators/__pycache__/redlining.cpython-314.pyc": "092487d08b01aded28202373e9c28a9da7a1a9d55fc82529bb070d6cefa18380",
     ".agents/skills/xlsx/scripts/office/validators/base.py": "a6e577837a69cae934f0379df2470dfedaeb1d72b485a191e78649e78bc72256",
     ".agents/skills/xlsx/scripts/office/validators/docx.py": "0ef04ce86b2e6b6a1cb088c0276fd0bd5b770d96fdfe7a6cc73d005feb3f0345",
     ".agents/skills/xlsx/scripts/office/validators/pptx.py": "f937961e62a5fa0d002b8dc51a4c4e2cd8fcd59fe65853fa54edaca3fe99eccc",
@@ -418,7 +404,7 @@
     ".agents/skills/xlsx/scripts/recalc.py": "483cf07b175e8de51bcd3e3dcc61f02c67915269065843bd034b04597df73608",
     ".agents/skills/xlsx/SKILL.md": "6b1f3706f63ccea17cbb9d6a7104c4ccabe06be67864bb96b4f32ef0ee4778ee",
     "apps/zcode-cli/package.json": "6c48017b05d8a7215c5bf7dea12f50edd1487bf5b8b22e11c21703d32e8f7742",
-    "apps/zcode-cli/packages/adapters/package.json": "da99aebdd4d463b7705a2a0febc12adb9ad7e792f74f4ba7c4e258b8bb6a13dc",
+    "apps/zcode-cli/packages/adapters/package.json": "aaef2ecc7910c51ca2f543d9a115be2c20bb97da3a4656b2edf4e6eb101954aa",
     "apps/zcode-cli/packages/bootstrap/package.json": "0e175ac8b64cd5b478c15e6bf71fb3940c17ddb7f95fb7cbcdd426bb61ce5bef",
     "apps/zcode-cli/packages/browser-use-plugin/package.json": "ce300c485d47bf6253067aaf0490d5562e965e76368a7bd3ee84b4eae2e4f1a1",
     "apps/zcode-cli/packages/cli/package.json": "a40eafa02deb90683c09bbde5b09d93919d661c796e98ffbb1eb91bb226fa045",
@@ -436,7 +422,7 @@
     "apps/zcode-cli/packages/tui/package.json": "097d5896b0b37a455eafaf015f21113dfbea7b05bb3f92666f423f7753720eb1",
     "apps/zcode-cli/tools/prompt-trajectory/package.json": "7f161fc87f36691f01eb8c2034bd89cf28107da36db02bc20e76f059edd36af6",
     "apps/zcode-cli/tools/typescript/package.json": "23d7e50d2089d205ce3022c5bafbb6b3e31d000e41ac678a5934e0b72627cf3a",
-    "package.json": "d04ef4824d74afd00bd3ffc2fa6710c184ceba65802411ad1e1ae1f78e9520bf",
+    "package.json": "2673667ab0741866d5dafc94e1b374287b4d2347461fb4d13352ac3072793aa8",
     "packages/client/package.json": "e76f441549130dc3e5e68072a36b6cb9044e19a6625f1e813f19a4def2b1b689",
     "packages/desktop/package.json": "896b85e37ff6dbb182b6f0d11b61ecc1967ff967f847810f8176acf09d1fec25",
     "packages/desktop/src/renderer/public/material-icons/3d.svg": "9527b849f0fba57ca7640e2717b3a19cb5f5e046712cbbd8b75d73af338c68fb",
@@ -2859,7 +2845,7 @@
     "packages/zcode-server-cli/package.json": "6e294c4409cb90863d85b2e3d60f92766b156ccee577ebfeaffcb85e94194004",
     "patches/@ai-sdk__anthropic@3.0.81.patch": "d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18",
     "patches/@ai-sdk__openai-compatible@2.0.60.patch": "9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b",
-    "pnpm-lock.yaml": "55651a32683365be9d24dace36f29d02d407289977fe902bd0d00301c37e3934",
+    "pnpm-lock.yaml": "8fcbce8e0276d0cd7a13f0d1a377f91687cb6da73e57d4a6135c644226996b58",
     "pnpm-workspace.yaml": "f18a18233e82cda1dc40be61bf2ad1bc99de25de63ad0be64bc652761a638372",
     "scripts/license-texts/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "scripts/native-search-tools-config.mjs": "281d368464f61363fa2d8ab74f416962fe730dd0a0572db5564475f876bb65aa",
@@ -18215,6 +18201,18 @@
       ]
     },
     {
+      "name": "yauzl",
+      "version": "3.4.0",
+      "license": "MIT",
+      "repository": "git+https://github.com/thejoshwolfe/yauzl.git",
+      "notices": [
+        {
+          "member": "LICENSE",
+          "sha256": "b303783d5eb7ca50b853ffa5f145e4e7998fab339831d848f507ca6cd970577a"
+        }
+      ]
+    },
+    {
       "name": "yazl",
       "version": "3.3.1",
       "license": "MIT",
@@ -29743,44 +29741,8 @@
           "sha256": "b7606b3f540a46dfd5a605e5b09689a96c580f6caf5ce5faab05867883d9300a"
         },
         {
-          "file": ".agents/skills/xlsx/scripts/__pycache__/recalc.cpython-314.pyc",
-          "sha256": "c23655c7febbb625f699242e41a9b67611c5b4607c0b33fee1e0d179ba0da2ba"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/__pycache__/pack.cpython-314.pyc",
-          "sha256": "fbd447b9fae94991568e97a2f5a2c1e9ab3d410baf148c767a2c0ccd91ea4f5f"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/__pycache__/redlining_author.cpython-314.pyc",
-          "sha256": "c89451c13763da5ae1aff300d222a9d65c2b166cc88e9de935f322a0fbd66371"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/__pycache__/soffice.cpython-314.pyc",
-          "sha256": "9babd582a2afb215f71ee8e79b897638cdd0c5a86a723c3418c86f7e15e62877"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/__pycache__/unpack.cpython-314.pyc",
-          "sha256": "935d45069837f618f9471552240cae6a9a51d8b257755d0b91bcab5015931071"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/__pycache__/validate.cpython-314.pyc",
-          "sha256": "81964dc7be5536366b14c85b44fd3fe9775c3e5e5621a17accfd3d56df4e852a"
-        },
-        {
           "file": ".agents/skills/xlsx/scripts/office/helpers/__init__.py",
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/__init__.cpython-314.pyc",
-          "sha256": "a0dd980585b1fd8ea98412b9ba512eeda96508f9695ce247cecd863adc458e29"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/merge_runs.cpython-314.pyc",
-          "sha256": "bb512791bfe6a56765f53fc27d3e13383c048ce5e9579f3b1d053bc89a21a05c"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/helpers/__pycache__/simplify_redlines.cpython-314.pyc",
-          "sha256": "c9b08f0920e4161a1a29572aab7ea34a58717432fb305e90f6cfbd411e6cee3c"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/helpers/merge_runs.py",
@@ -29969,26 +29931,6 @@
         {
           "file": ".agents/skills/xlsx/scripts/office/validators/__init__.py",
           "sha256": "83e0f035c5abea238d3f2c3968afbd511ed022b527b7c9cb60a9434cc34ff987"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/__init__.cpython-314.pyc",
-          "sha256": "c936a95d3bfd80c7ff26882c8d123b8eb7263f44bb76704ed50ffd0ab4878c9b"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/base.cpython-314.pyc",
-          "sha256": "585f1cf97e9c67ecb80fb099d64a3e6276604e55de5fd547bf974fea7adc7982"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/docx.cpython-314.pyc",
-          "sha256": "e3a30168dcb8c0a9f72707389b1710dfb0657abf9f1d657c0a974b19014731f7"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/pptx.cpython-314.pyc",
-          "sha256": "fe219bff61ce75ccb47299fdc97dedd34274f548f55e098ca7882d589d3d7434"
-        },
-        {
-          "file": ".agents/skills/xlsx/scripts/office/validators/__pycache__/redlining.cpython-314.pyc",
-          "sha256": "ba58a3c7e43720319f77f6aaacd10c90832ede007ea7e8d808a4ae5bb6e3b315"
         },
         {
           "file": ".agents/skills/xlsx/scripts/office/validators/base.py",
