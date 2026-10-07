@@ -104,6 +104,16 @@ export function observeSessionDebug(record: SessionRecord, event: SessionEvent):
   const first = token(payload.timeToFirstContentMs);
   const generationDurationMs =
     duration !== undefined && first !== undefined && duration > first ? duration - first : null;
+  // prefill ≈ TTFT 段：提示词处理吞吐 = inputTokens / TTFT 秒。TTFT=0（全缓存直出）
+  // 或任一项未知时为 null，不伪造速度。
+  const prefillTokensPerSecond =
+    inputTokens !== undefined &&
+    inputTokens > 0 &&
+    first !== undefined &&
+    first > 0 &&
+    Number.isFinite(first)
+      ? Number(((inputTokens * 1000) / first).toFixed(1))
+      : null;
   observation.hasUnknownCacheUsage ||= inputTokens === undefined || cacheReadTokens === undefined;
   const previous = state.cache;
   const totalInputTokens = (previous?.totalInputTokens ?? 0) + (inputTokens ?? 0);
@@ -143,6 +153,8 @@ export function observeSessionDebug(record: SessionRecord, event: SessionEvent):
           : null,
       generationDurationMs,
       tokensPerSecond: calculateOutputTps(outputTokens, generationDurationMs),
+      prefillDurationMs: first ?? null,
+      prefillTokensPerSecond,
     },
   ].slice(-SESSION_DEBUG_LIMITS.rounds);
 }

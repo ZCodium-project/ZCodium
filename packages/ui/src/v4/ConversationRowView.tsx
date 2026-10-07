@@ -127,6 +127,7 @@ import { ConversationHookDetailsAction } from "@/v4/ConversationHookDetailsActio
 import { ConnectedBotGroupDeliveryAction } from "@/v4/BotGroupDeliveryAction.js";
 import { formatModelChangeLabel } from "@/v4/composer/modelTriggerDisplay.js";
 import { formatMessageTimeLabel } from "@/v4/messageTimeLabel.js";
+import { useSessionDebug } from "@/hooks/useSessionDebug.js";
 import { parseConversationShareContext } from "@/lib/conversationShareContext.js";
 
 function RowShell({
@@ -1315,6 +1316,8 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   sessionId,
   turnId,
   sourceCommandIds = EMPTY_SOURCE_COMMAND_IDS,
+  workspacePath,
+  workspaceIdentity,
   onFork,
   onFeedbackChange,
   className,
@@ -1329,6 +1332,8 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   sessionId?: string | null;
   turnId?: string;
   sourceCommandIds?: readonly string[];
+  workspacePath?: string;
+  workspaceIdentity?: string;
   onFork?: (target: ConversationRowTarget) => void;
   onRetry?: (target: ConversationRowTarget) => void;
   onFeedbackChange?: AssistantFeedbackHandler;
@@ -1336,6 +1341,25 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
 }) {
   const { intl, locale } = useZCodeIntl();
   const platform = useOptionalPlatform();
+  // 本条回复的模型速度（prefill/decode）：轮询 session-debug 快照，取
+  // 「row 创建之后首个完成的模型轮」——即产出这条回复的那一轮请求。
+  const debug = useSessionDebug({
+    workspacePath,
+    workspaceIdentity,
+    taskId: sessionId ?? null,
+    enabled: Boolean(sessionId) && Boolean(workspacePath),
+  });
+  const producingRound = debug.rounds.find((round) => round.recordedAt >= createdAt);
+  const numberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const decodeLabel =
+    producingRound?.tokensPerSecond === null || producingRound?.tokensPerSecond === undefined
+      ? null
+      : numberFormat.format(producingRound.tokensPerSecond);
+  const prefillLabel =
+    producingRound?.prefillTokensPerSecond === null ||
+    producingRound?.prefillTokensPerSecond === undefined
+      ? null
+      : numberFormat.format(producingRound.prefillTokensPerSecond);
   const [localFeedback, setLocalFeedback] = useState<AssistantMessageFeedback | null>(feedback);
   const copyLabel = intl.formatMessage({ id: "chat.message.copy" });
   const likeLabel = intl.formatMessage({

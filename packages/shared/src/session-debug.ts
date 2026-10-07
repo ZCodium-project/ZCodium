@@ -23,6 +23,10 @@ export const sessionDebugRoundSchema = z
     hitRate: count.nullable(),
     generationDurationMs: count.nullable(),
     tokensPerSecond: count.nullable(),
+    // prefill（TTFT≈首 token 前的提示词处理段）时长与吞吐：inputTokens / prefill 秒。
+    // inputTokens 含缓存读取，缓存命中时是「有效 prefill 吞吐」口径。
+    prefillDurationMs: count.nullable(),
+    prefillTokensPerSecond: count.nullable(),
   })
   .strict();
 export const sessionDebugNetworkEntrySchema = z
