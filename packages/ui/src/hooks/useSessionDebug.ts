@@ -11,7 +11,7 @@ export function useSessionDebug({
   taskId,
   enabled = true,
 }: {
-  workspacePath: string;
+  workspacePath?: string;
   workspaceIdentity?: string;
   taskId: string | null;
   enabled?: boolean;
@@ -25,7 +25,8 @@ export function useSessionDebug({
     error: boolean;
   } | null>(null);
   useEffect(() => {
-    if (!enabled || !taskId) return;
+    // workspacePath 是 workspace 定位必填项（身份 key 兜底）；缺席时无法定位会话，不轮询。
+    if (!enabled || !taskId || !workspacePath) return;
     let disposed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const refresh = async () => {
