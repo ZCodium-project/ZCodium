@@ -126,6 +126,7 @@ import {
 import { ConversationHookDetailsAction } from "@/v4/ConversationHookDetailsAction.js";
 import { formatModelChangeLabel } from "@/v4/composer/modelTriggerDisplay.js";
 import { formatMessageTimeLabel } from "@/v4/messageTimeLabel.js";
+import { useSessionDebug } from "@/hooks/useSessionDebug.js";
 import { parseConversationShareContext } from "@/lib/conversationShareContext.js";
 
 function RowShell({
@@ -854,10 +855,12 @@ const UserInputRowView = memo(function UserInputRowView({
   editWorkspaceRewindAvailability?: EditWorkspaceRewindAvailability;
   status?: string;
 }) {
-  const { intl } = useZCodeIntl();
+  const { intl, locale } = useZCodeIntl();
   // 引擎尾注折叠：正文只到 epilogueStart，
   // 之后的引擎文本折进气泡底部的披露。提示词上下文解析也只看正文——尾注里没有用户引用。
   const { body: bodyText, epilogue } = splitUserInputEpilogue(row.text, row.epilogueStart);
+  // 用户行时间戳：与 assistant 动作栏共用 messageTimeLabel 的相对日判定。
+  const timeLabel = formatMessageTimeLabel(row.createdAt, locale, intl);
   const parsedPrompt = useMemo(
     () =>
       parseComposerPromptContexts(bodyText, {
@@ -1272,14 +1275,9 @@ const UserInputRowView = memo(function UserInputRowView({
           {status}
         </div>
       ) : null}
-      {/* 手机远控没有 hover，v4 迁移时漏掉了旧 UserMessage 的常显分支，
-          导致复制和编辑入口不可发现；远控直接显示，桌面端继续通过 hover/focus 降噪。 */}
-      <MessageActions
-        className={cn(
-          "mt-1",
-          "opacity-0 transition-opacity group-hover/user-row:opacity-100 focus-within:opacity-100",
-        )}
-      >
+      {/* 动作行常驻（复制 / 编辑 / 时间）：hover 降噪方案在远控、触屏和大屏场景
+          都出现过入口不可发现的问题；时间来自 row.createdAt 的只读派生。 */}
+      <MessageActions className="mt-1">
         <CopyRowAction
           text={row.text}
           rowId={row.rowId}
@@ -1295,6 +1293,9 @@ const UserInputRowView = memo(function UserInputRowView({
             <PencilIcon className="size-3.5" />
           </MessageAction>
         ) : null}
+        {timeLabel ? (
+          <span className="select-none text-ui-sm text-foreground-subtlest">{timeLabel}</span>
+        ) : null}
       </MessageActions>
     </RowShell>
   );
@@ -1309,6 +1310,8 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   hookInvocations,
   sessionId,
   turnId,
+  workspacePath,
+  workspaceIdentity,
   onFork,
   onFeedbackChange,
   className,
@@ -1321,6 +1324,8 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   hookInvocations?: readonly HookInvocationRow[];
   sessionId?: string | null;
   turnId?: string;
+  workspacePath?: string;
+  workspaceIdentity?: string;
   onFork?: (target: ConversationRowTarget) => void;
   onRetry?: (target: ConversationRowTarget) => void;
   onFeedbackChange?: AssistantFeedbackHandler;
@@ -1328,6 +1333,25 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
 }) {
   const { intl, locale } = useZCodeIntl();
   const platform = useOptionalPlatform();
+  // 本条回复的模型速度（prefill/decode）：轮询 session-debug 快照，取
+  // 「row 创建之后首个完成的模型轮」——即产出这条回复的那一轮请求。
+  const debug = useSessionDebug({
+    workspacePath,
+    workspaceIdentity,
+    taskId: sessionId ?? null,
+    enabled: Boolean(sessionId) && Boolean(workspacePath),
+  });
+  const producingRound = debug.rounds.find((round) => round.recordedAt >= createdAt);
+  const numberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const decodeLabel =
+    producingRound?.tokensPerSecond === null || producingRound?.tokensPerSecond === undefined
+      ? null
+      : numberFormat.format(producingRound.tokensPerSecond);
+  const prefillLabel =
+    producingRound?.prefillTokensPerSecond === null ||
+    producingRound?.prefillTokensPerSecond === undefined
+      ? null
+      : numberFormat.format(producingRound.prefillTokensPerSecond);
   const [localFeedback, setLocalFeedback] = useState<AssistantMessageFeedback | null>(feedback);
   const copyLabel = intl.formatMessage({ id: "chat.message.copy" });
   const likeLabel = intl.formatMessage({
@@ -1539,8 +1563,8 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           />
         </div>
       ) : null}
-      {/* 完成态动作行悬停显现（对齐旧 MessageActions）：复制 + fork（图标 ghost）。
-          一轮对用户是一个回复：action 只在轮尾段（hideActions 由 TurnGroup 裁决），
+      {/* 完成态动作行常驻（复制 + fork + 反馈 + 时间）：一轮对用户是一个回复，
+          action 只在轮尾段（hideActions 由 TurnGroup 裁决），
           复制内容 = 整轮全部 text 段合并（copyText 覆盖）。 */}
       {row.state === "complete" && !hideActions && !deferActions ? (
         <ConversationAssistantTextActions
@@ -1553,10 +1577,7 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           onFork={onFork}
           onRetry={onRetry}
           onFeedbackChange={onFeedbackChange}
-          className={cn(
-            "mt-1",
-            "opacity-0 transition-opacity group-hover/assistant-row:opacity-100 focus-within:opacity-100",
-          )}
+          className="mt-1"
         />
       ) : null}
     </RowShell>
