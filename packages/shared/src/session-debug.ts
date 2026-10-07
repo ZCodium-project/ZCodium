@@ -25,8 +25,10 @@ export const sessionDebugRoundSchema = z
     tokensPerSecond: count.nullable(),
     // prefill（TTFT≈首 token 前的提示词处理段）时长与吞吐：inputTokens / prefill 秒。
     // inputTokens 含缓存读取，缓存命中时是「有效 prefill 吞吐」口径。
-    prefillDurationMs: count.nullable(),
-    prefillTokensPerSecond: count.nullable(),
+    // optional：旧版 server 的快照缺这两个字段，strict 校验必须放行（整包降级为不显示速度），
+    // 否则新旧版本混布时每个轮次都校验失败。
+    prefillDurationMs: count.nullable().optional(),
+    prefillTokensPerSecond: count.nullable().optional(),
   })
   .strict();
 export const sessionDebugNetworkEntrySchema = z
