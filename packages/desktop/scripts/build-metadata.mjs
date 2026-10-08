@@ -84,7 +84,7 @@ export function collectBuildMetadata() {
   const desktopPackageJson = readJson(resolve(desktopDir, "package.json"));
 
   return {
-    // CI 发布时把完整 tag 版本（如 3.14.0-audit.20260922.6）通过 ZCODE_APP_VERSION 注入，
+    // CI 发布时把完整 tag 版本（如 1.0.0-audit.20260922.6）通过 ZCODE_APP_VERSION 注入，
     // 安装包文件名与应用版本都会带上审计序号；本地构建回退到 package.json 版本。
     appVersion: normalizeVersion(process.env.ZCODE_APP_VERSION?.trim() || rootPackageJson.version),
     buildCommitId: resolveCommitId(),

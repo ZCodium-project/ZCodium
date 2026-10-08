@@ -1,7 +1,8 @@
 {
   "name": "zcode",
-  "version": "3.15.1",
+  "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev:web": "concurrently -k -n server,web -c blue,green \"pnpm --filter @zcode/server dev\" \"pnpm --filter @zcode/web dev\"",

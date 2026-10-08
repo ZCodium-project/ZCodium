@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "版本号：3.14.0（勾选预发布=自动生成 3.14.0-audit.<当天日期>，同日重复构建自动加 .2/.3；不勾选=正式版 v3.14.0）；也可直接填完整日期形式 3.14.0-audit.20260922[.2]"
+        description: "版本号：1.0.0（勾选预发布=自动生成 1.0.0-audit.<当天日期>，同日重复构建自动加 .2/.3；不勾选=正式版 v1.0.0）；也可直接填完整日期形式 1.0.0-audit.20260922[.2]"
         required: true
         type: string
       prerelease:
@@ -54,8 +54,8 @@ jobs:
         run: |
           set -euo pipefail
           # 版本命名：
-          #   3.14.0 + 勾选预发布 -> 3.14.0-audit.<YYYYMMDD>（同一天重复构建自动追加 .2/.3/...）
-          #   3.14.0 + 不勾选     -> v3.14.0（正式版，成为 GitHub Latest，/releases/latest 可用）
+          #   1.0.0 + 勾选预发布 -> 1.0.0-audit.<YYYYMMDD>（同一天重复构建自动追加 .2/.3/...）
+          #   1.0.0 + 不勾选     -> v1.0.0（正式版，成为 GitHub Latest，/releases/latest 可用）
           #   完整日期形式         -> 严格按给定版本使用，不自动递增
           DATE="$(date -u +%Y%m%d)"
           if printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' && [ "$PRERELEASE" != "true" ]; then
@@ -77,11 +77,11 @@ jobs:
           elif printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-audit\.[0-9]{8}(\.[0-9]+)?$'; then
             TAG="v$VERSION"
             if git ls-remote --tags origin "refs/tags/$TAG" | grep -q .; then
-              echo "::error::Tag $TAG already exists; pass the base version (e.g. 3.14.0) to auto-sequence, or pick another date/suffix"
+              echo "::error::Tag $TAG already exists; pass the base version (e.g. 1.0.0) to auto-sequence, or pick another date/suffix"
               exit 1
             fi
           else
-            echo "::error::Invalid version \"$VERSION\". Use 3.14.0 (pre-release: date and same-day sequence are appended; stable: v3.14.0) or the full form 3.14.0-audit.20260922[.2]"
+            echo "::error::Invalid version \"$VERSION\". Use 1.0.0 (pre-release: date and same-day sequence are appended; stable: v1.0.0) or the full form 1.0.0-audit.20260922[.2]"
             exit 1
           fi
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -191,7 +191,7 @@ jobs:
           NOTES
           sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
           # 自动生成版本差异 Changelog：对比最近的正式 tag（排除 ci 类提交），插入到标题之后。
-          # 审计/预发布 tag（v3.14.4-audit.20260929.2 这类）会被 draft 构建打在 main 上；
+          # 审计/预发布 tag（v1.0.0-audit.20260929.2 这类）会被 draft 构建打在 main 上；
           # 若让它们参与 describe，正式版的基线会切到 draft tag，Changelog 只剩一行。
           # 只接受正式版 tag（v<semver>，无连字符）。
           # 条目按 .github/changelog-zh.json 渲染为中英双语；缺翻译时附隐藏 TODO 注释。
@@ -361,7 +361,7 @@ jobs:
       - name: Bundle desktop app
         env:
           ZCODE_ENV: production
-          # 文件名与应用版本带上完整审计版本（如 3.14.0-audit.20260922.6），不再只写 3.14.0。
+          # 文件名与应用版本带上完整审计版本（如 1.0.0-audit.20260922.6），不再只写 1.0.0。
           ZCODE_APP_VERSION: ${{ needs.release.outputs.version }}
           # 内置远程资源默认源：指向本仓库该 tag 的 GitHub Release 资产（zz- 布局）。
           # 安装后的客户端开箱即可连接 WSL/SSH，不再要求用户配置环境变量。
