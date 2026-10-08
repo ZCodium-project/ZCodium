@@ -61,7 +61,7 @@ The audit is a static code search, not full dynamic forensics. Findings and limi
 
 ## Versioning
 
-ZCodium uses its own version line starting at `1.0.0`, independent of the upstream `3.14.x` numbering:
+ZCodium uses its own version line starting at `1.0.0`, independent of the upstream `3.x` numbering:
 
 - **y (minor) — upstream sync**: bumped when a release carries changes audited and synced from upstream [zai-org/ZCode](https://github.com/zai-org/ZCode). The exact upstream commit is recorded in that release's notes.
 - **z (patch) — ZCodium's own iteration**: bumped for ZCodium-only features, fixes and product changes.

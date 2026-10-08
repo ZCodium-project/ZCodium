@@ -61,7 +61,7 @@ ZCodium 保留了产品本身——桌面端、浏览器端和终端三端的 AI
 
 ## 版本体系
 
-ZCodium 使用自己的版本线，从 `1.0.0` 起步，与上游 `3.14.x` 编号无关：
+ZCodium 使用自己的版本线，从 `1.0.0` 起步，与上游 `3.x` 编号无关：
 
 - **y（次版本）——同步上游**：某个 release 包含经审计后同步的上游 [zai-org/ZCode](https://github.com/zai-org/ZCode) 变更时递增。对应的上游 commit 记录在该 release 说明里。
 - **z（修订号）——ZCodium 自身迭代**：ZCodium 自己的功能、修复与产品变更时递增。
