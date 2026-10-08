@@ -59,6 +59,17 @@ ZCodium 保留了产品本身——桌面端、浏览器端和终端三端的 AI
 - 每次同步后重新构建、发布新的审计版本（见 [Releases](https://github.com/ZCodium-project/ZCodium/releases)）。
 - 审计方法和结论留在仓库和[项目网站](https://zcodium-project.github.io/)，欢迎复核和质疑。
 
+## 版本体系
+
+ZCodium 使用自己的版本线，从 `1.0.0` 起步，与上游 `3.14.x` 编号无关：
+
+- **y（次版本）——同步上游**：某个 release 包含经审计后同步的上游 [zai-org/ZCode](https://github.com/zai-org/ZCode) 变更时递增。对应的上游 commit 记录在该 release 说明里。
+- **z（修订号）——ZCodium 自身迭代**：ZCodium 自己的功能、修复与产品变更时递增。
+- 同日重复构建追加 `-audit.<日期>[.n]` 后缀；一次同步若同时携带 ZCodium 自身变更，y 与 z 按情况同时递增。
+- 破坏性变更（如数据目录迁移）会在 release 说明中显式标注。
+
+版本号不编码上游 revision——每个 release 基于的上游 commit 以其 release 说明为准。
+
 ## 背景
 
 事情的起因和细节以外部报道为准，这里不做事实认定：
@@ -145,7 +156,7 @@ zcode --help        # 或直接运行：node bin/zcode.mjs --help
 ## 构建与发布
 
 - **GitHub 构建**：审计后的代码在本仓库通过 GitHub Actions 构建，CLI 发行包随版本发布到 [Releases](https://github.com/ZCodium-project/ZCodium/releases)，站点由独立仓库构建，部署在 https://zcodium-project.github.io/。所有产物都来自本仓库经过审计的源码，不包含上游未同步的改动。
-- **发版流程**：在 Actions 中手动运行 [Release](https://github.com/ZCodium-project/ZCodium/actions/workflows/release.yml) workflow，版本号填 `3.14.0`：勾选“预发布”生成 `3.14.0-audit.<当天日期>`（同一天重复构建自动追加 `.2`、`.3`，也可直接填完整形式 `3.14.0-audit.20260922[.2]`）；不勾选则发布正式版 `v3.14.0`（干净版本号，成为 GitHub Latest）。Release 说明固定为“相对 ZCode 的改动”在前、安装说明在后，英文在上、中文在下（内容严格对应），末尾列出产物。所有产物先上传到 **draft** release，只有 CLI 与各桌面平台全部上传成功后才发布；构建失败会保持 draft，下载页不会解析到仍在构建中的版本。
+- **发版流程**：在 Actions 中手动运行 [Release](https://github.com/ZCodium-project/ZCodium/actions/workflows/release.yml) workflow，版本号填 `1.0.0`：勾选“预发布”生成 `1.0.0-audit.<当天日期>`（同一天重复构建自动追加 `.2`、`.3`，也可直接填完整形式 `1.0.0-audit.20260922[.2]`）；不勾选则发布正式版 `v1.0.0`（干净版本号，成为 GitHub Latest）。Release 说明固定为“相对 ZCode 的改动”在前、安装说明在后，英文在上、中文在下（内容严格对应），末尾列出产物。所有产物先上传到 **draft** release，只有 CLI 与各桌面平台全部上传成功后才发布；构建失败会保持 draft，下载页不会解析到仍在构建中的版本。
 - **上游同步**：先审阅改动，再逐版本 diff 审计，只合入无风险部分；结论写在审计记录里。
 
 ## 社区

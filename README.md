@@ -59,6 +59,17 @@ The audit is a static code search, not full dynamic forensics. Findings and limi
 - Every sync is followed by a rebuild and a new audited release (see [Releases](https://github.com/ZCodium-project/ZCodium/releases)).
 - Audit methods and conclusions stay in this repository and on the [project site](https://zcodium-project.github.io/). Review and challenge are welcome.
 
+## Versioning
+
+ZCodium uses its own version line starting at `1.0.0`, independent of the upstream `3.14.x` numbering:
+
+- **y (minor) — upstream sync**: bumped when a release carries changes audited and synced from upstream [zai-org/ZCode](https://github.com/zai-org/ZCode). The exact upstream commit is recorded in that release's notes.
+- **z (patch) — ZCodium's own iteration**: bumped for ZCodium-only features, fixes and product changes.
+- Same-day rebuilds get an `-audit.<date>[.n]` suffix. A sync that also carries ZCodium's own changes bumps both y and z as appropriate.
+- Breaking changes (e.g. data-directory migrations) are called out in the release notes.
+
+The version number does not encode the upstream revision — check each release's notes for the exact upstream commits it is based on.
+
 ## Background
 
 For the background and details, read the external coverage below; this repository makes no finding of fact about it:
@@ -145,7 +156,7 @@ zcodium --help      # or run directly: node bin/zcode.mjs --help
 ## Build and Release
 
 - **GitHub builds**: audited code is built in this repository with GitHub Actions. CLI distributions are published to [Releases](https://github.com/ZCodium-project/ZCodium/releases), and the project site is built in [its own repository](https://github.com/ZCodium-project/zcodium-project.github.io) and served at https://zcodium-project.github.io/. Every artifact comes from the audited source in this repository and contains no unsynced upstream changes.
-- **Release flow**: run the [Release](https://github.com/ZCodium-project/ZCodium/actions/workflows/release.yml) workflow manually in Actions. Enter `3.14.0` with pre-release checked to get `3.14.0-audit.<date>` (repeat builds on the same day get `.2`, `.3`, …; the full form `3.14.0-audit.20260922[.2]` is also accepted). With pre-release unchecked it publishes the stable `v3.14.0` (clean tag, GitHub Latest, so `/releases/latest` works). Release notes always lead with "what changed vs ZCode", then the install steps — the English block first, an exact Chinese mirror below — and the downloads list last. Every artifact is uploaded into a **draft** release first; the release is published only after the CLI and all desktop platform artifacts are uploaded, and a failed build leaves it as a draft, so download pages never resolve to a still-building version.
+- **Release flow**: run the [Release](https://github.com/ZCodium-project/ZCodium/actions/workflows/release.yml) workflow manually in Actions. Enter `1.0.0` with pre-release checked to get `1.0.0-audit.<date>` (repeat builds on the same day get `.2`, `.3`, …; the full form `1.0.0-audit.20260922[.2]` is also accepted). With pre-release unchecked it publishes the stable `v1.0.0` (clean tag, GitHub Latest, so `/releases/latest` works). Release notes always lead with "what changed vs ZCode", then the install steps — the English block first, an exact Chinese mirror below — and the downloads list last. Every artifact is uploaded into a **draft** release first; the release is published only after the CLI and all desktop platform artifacts are uploaded, and a failed build leaves it as a draft, so download pages never resolve to a still-building version.
 - **Upstream sync**: review the change first, diff-audit it per version, and merge only the risk-free parts; conclusions go into the audit record.
 
 ## Community
