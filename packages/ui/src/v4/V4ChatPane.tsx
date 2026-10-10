@@ -29,11 +29,12 @@ import type {
   ConversationFindMatchState,
 } from "@/v4/legacyChatViewTypes.js";
 
-interface V4ChatPaneProps {
+export interface V4ChatPaneProps {
   workspacePath: string;
   workspaceIdentity?: string;
   isDesktop?: boolean;
   readOnly?: boolean;
+  compactForRemoteControl?: boolean;
   /** CLI session id；null = draft 首发。 */
   sessionId: string | null;
   provider?: ZCodeProvider;
@@ -83,6 +84,7 @@ export function V4ChatPane({
   workspaceIdentity,
   isDesktop = false,
   readOnly = false,
+  compactForRemoteControl = false,
   sessionId,
   provider,
   onSessionCreated,
@@ -128,6 +130,7 @@ export function V4ChatPane({
         workspacePath={workspacePath}
         workspaceIdentity={workspaceIdentity}
         isDesktop={isDesktop}
+        compactForRemoteControl={compactForRemoteControl}
         provider={provider}
         onSessionCreated={onSessionCreated}
         onSessionDeleted={onSessionDeleted}

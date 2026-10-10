@@ -1,4 +1,5 @@
 import { DatabaseStartupAdmission } from "./databaseStartupAdmission.js";
+import { initializeDesktopLocalTtft } from "./localTtftBootstrap.js";
 import { createRoot } from "react-dom/client";
 import { useEffect } from "react";
 import {
@@ -10,8 +11,10 @@ import {
   registerBaseWorkspaceServices,
   registerRemoteWorkspaceSession,
   createRemoteWorkspaceDisconnectedError,
+  installDocumentHiddenMotionPause,
   playTaskNotificationSound,
   setStreamClientId,
+  setReactErrorArmsReporter,
 } from "@zcode/ui";
 import "@zcode/ui/styles.css";
 import { connectViaMessagePort, createMessagePortServiceConnection } from "@zcode/client";
@@ -19,6 +22,7 @@ import {
   InternalChannels,
   databaseStartupStateSchema,
   type DatabaseStartupControl,
+  collectTelemetryRendererContext,
   parseLaunchMarks,
   LAUNCH_MARKS_QUERY_KEY,
   type LaunchMarks,
@@ -26,9 +30,14 @@ import {
 } from "@zcode/shared";
 import type { Locale } from "@zcode/shared";
 import type { IServiceAccessor } from "@zcode/services";
+import { syncAppTelemetryContext } from "../appTelemetryBridge.js";
 import { createDesktopPlatform } from "./desktopPlatform.js";
 import { startPerformanceTimelineCleanup } from "./performanceTimelineCleanup.js";
-import { buildRemoteWorkspaceSessionServices } from "./remoteWorkspaceSessionServices.js";
+import { initializeDesktopUserActionTrace } from "./userActionTraceBootstrap.js";
+import {
+  buildRemoteWorkspaceSessionServices,
+  buildServerRemoteWorkspaceSessionServices,
+} from "./remoteWorkspaceSessionServices.js";
 import {
   notifyRemoteWorkspaceServicePortReady,
   parseRemoteWorkspaceServicePortMessage,
@@ -129,13 +138,19 @@ const unavailableWorkspacePath = readStringFlag("unavailableWorkspacePath");
 const windowKind = readStringFlag("windowKind");
 const initialLocaleFlag = readStringFlag("locale");
 const initialLocale: Locale =
-  initialLocaleFlag === "zh-CN" || initialLocaleFlag === "en-US" || initialLocaleFlag === "fa-IR"
+  initialLocaleFlag === "zh-CN" || initialLocaleFlag === "en-US"
     ? initialLocaleFlag
     : DEFAULT_LOCALE;
 let baseServicesForRemoteSessions: IServiceAccessor | null = null;
 const pendingRemoteWorkspaceServicePorts: RemoteWorkspaceServicePortRegistration[] = [];
 
 const desktopPlatform = createDesktopPlatform({ isLocalDevelopmentRuntime });
+initializeDesktopLocalTtft(desktopPlatform);
+initializeDesktopUserActionTrace({
+  platform: desktopPlatform,
+  isLocalDevelopmentRuntime,
+});
+
 /**
  * 等待 preload 通过 window.postMessage 转发 MessagePort。
  *
@@ -145,6 +160,8 @@ const desktopPlatform = createDesktopPlatform({ isLocalDevelopmentRuntime });
  */
 // 之前用匿名函数注册 addEventListener("message")，reload/HMR 时会重复注册，
 // 导致多次 createRoot 在同一 DOM 节点上挂载。用 flag 防止重复初始化。
+// 窗口 hidden 时禁用 CSS 动画，避免 DocumentTimeline 持有已卸载的 DOM 子树。
+installDocumentHiddenMotionPause();
 let appInitialized = false;
 const databaseStartupAdmission = new DatabaseStartupAdmission();
 const appRoot =
@@ -207,10 +224,10 @@ function registerRemoteWorkspaceServicePort(params: RemoteWorkspaceServicePortRe
 
   const remoteConnection = createMessagePortServiceConnection(params.port);
   const remoteServices = remoteConnection.services;
-  const services = buildRemoteWorkspaceSessionServices(
-    baseServicesForRemoteSessions,
-    remoteServices,
-  );
+  const services =
+    params.target.kind === "server"
+      ? buildServerRemoteWorkspaceSessionServices(baseServicesForRemoteSessions, remoteServices)
+      : buildRemoteWorkspaceSessionServices(baseServicesForRemoteSessions, remoteServices);
   registerRemoteWorkspaceSession({
     sessionId: params.sessionId,
     target: params.target,
@@ -296,8 +313,21 @@ function initializeBusinessRoot(port: MessagePort): void {
   registerBaseWorkspaceServices(services);
   flushPendingRemoteWorkspaceServicePorts();
   const settingService = supportsSettings ? services.settingService : undefined;
+
+  syncAppTelemetryContext({
+    bridge: {
+      syncTelemetryContext: (context) => window.zcode.syncTelemetryContext(context),
+    },
+    createRendererContext: collectTelemetryRendererContext,
+  });
+
   // 初始化稳定的设备 ID，确保所有 hook 在首次渲染前就使用正确的值
   setStreamClientId(desktopPlatform.getDeviceId());
+
+  // React 错误边界捕获的异常不会冒泡到 window.onerror，RUM Browser SDK 默认收不到。
+  // 必须在 createRoot 之前注入 reporter：根级 AppErrorBoundary 的职责正是兜住 Root 自身
+  // 渲染崩溃，若依赖 Root 的 effect 注入，则 Root 首帧就崩时上报会丢失。
+  setReactErrorArmsReporter(desktopPlatform);
 
   appRoot?.render(
     <AppErrorBoundary isDesktop isMacDesktop={isMacDesktop} isWindowsDesktop={isWindowsDesktop}>

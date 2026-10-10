@@ -112,6 +112,9 @@ export function PluginStoreListView({
 
   // 个人分段：按市场分组，最近刷新的市场排最前（见 sortPersonalMarketplaceGroups）。
   const personalGroups = useMemo(() => {
+    const claudeCodePlugins = intl.formatMessage({
+      id: "settings.plugins.marketplace.claudeCodePlugins",
+    });
     const groups = new Map<string, StorePluginItem[]>();
     for (const item of personalItems) {
       const group = groups.get(item.marketplace) ?? [];
@@ -121,7 +124,7 @@ export function PluginStoreListView({
     const titled: PersonalMarketplaceGroup[] = [...groups.entries()].map(
       ([marketplace, groupItems]) => ({
         marketplace,
-        title: resolveMarketplaceDisplayName(marketplace, marketplaces),
+        title: resolveMarketplaceDisplayName(marketplace, marketplaces, claudeCodePlugins),
         items: groupItems.toSorted((left, right) =>
           resolveItemDisplayName(left, locale).localeCompare(
             resolveItemDisplayName(right, locale),

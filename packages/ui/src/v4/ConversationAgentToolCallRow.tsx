@@ -6,7 +6,7 @@ import type { ConversationAssistantWorkRenderItem } from "@/v4/conversationAssis
 import type { ConversationRowRenderContext } from "@/v4/conversationRowContext.js";
 import { toolCallRowToLegacyNode } from "@/v4/toolCallRowAdapter.js";
 
-function openSubagentSessionFromSummary({
+export function openSubagentSessionFromSummary({
   backgrounded: _backgrounded = false,
   childSessionId,
   context,

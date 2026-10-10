@@ -22,7 +22,7 @@ interface RendererHeapSnapshot {
 }
 
 /** Chromium 专有的 `performance.memory`；Web 端浏览器缺失时返回 undefined。 */
-function readRendererHeapSnapshot(): RendererHeapSnapshot | undefined {
+export function readRendererHeapSnapshot(): RendererHeapSnapshot | undefined {
   if (typeof performance === "undefined") {
     return undefined;
   }
@@ -41,7 +41,7 @@ interface StartMemoryDiagnosticsLoggerOptions {
   registry?: MemoryDiagnosticsRegistry;
 }
 
-interface MemoryDiagnosticsLoggerHandle {
+export interface MemoryDiagnosticsLoggerHandle {
   sampleNow(): boolean;
   stop(): void;
 }

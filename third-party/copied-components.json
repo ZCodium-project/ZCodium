@@ -7,10 +7,7 @@
     "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
     "importRevision": null,
     "provenance": "The original copy revision is not recorded in the current checkout; this pinned license reference is not asserted to be the original import version.",
-    "roots": [
-      "packages/ui/src/components/ui",
-      "packages/ui/src/styles.css"
-    ],
+    "roots": ["packages/ui/src/components/ui", "packages/ui/src/styles.css"],
     "scope": "Upstream-derived portions only; ZCode-specific files in the same directory are not attributed to the upstream project.",
     "license": "MIT"
   },
@@ -22,10 +19,7 @@
     "sha256": "b4f9adb7c568904834d0dd6cc98d16c390d21ca32fc17ae7a267715269bd5529",
     "importRevision": null,
     "provenance": "The original copy revision is not recorded in the current checkout; this pinned license reference is not asserted to be the original import version.",
-    "roots": [
-      "packages/ui/src/components/ai-elements",
-      ".agents/skills/ai-elements"
-    ],
+    "roots": ["packages/ui/src/components/ai-elements", ".agents/skills/ai-elements"],
     "scope": "Upstream-derived UI components, skill instructions, reference documentation and example scripts only; locally adapted for ZCode imports, styling and agent workflow. Original import revision not recorded.",
     "license": "Apache-2.0",
     "modifiedFiles": [
@@ -172,9 +166,7 @@
   },
   {
     "id": "Fig autocomplete registry",
-    "roots": [
-      "apps/zcode-cli/packages/core/src/tool/handlers/generated/bash-command-registry.ts"
-    ],
+    "roots": ["apps/zcode-cli/packages/core/src/tool/handlers/generated/bash-command-registry.ts"],
     "license": "MIT",
     "source": "https://raw.githubusercontent.com/withfig/autocomplete/aef52acff84c45edde61ae610cc2c964802b9a38/LICENSE",
     "file": "third-party/upstream/5129f8779dca579cfcb235570688a2f15822b270575e04f27ef906aabbcc0355.txt",
@@ -203,11 +195,7 @@
     "sha256": "014bb31e83d5c2e76aea1cc6e82217346ab41362f32cb355ad0f5c10aa0aeaff",
     "importRevision": null,
     "provenance": "Original import revision is not recorded. This pinned upstream license/source reference is not asserted to be the original import version.",
-    "roots": [
-      ".agents/skills/agent-browser",
-      ".agents/skills/dogfood",
-      ".agents/skills/electron"
-    ],
+    "roots": [".agents/skills/agent-browser", ".agents/skills/dogfood", ".agents/skills/electron"],
     "scope": "Upstream-derived instructions, reference documents and shell templates; locally adapted for the ZCode workspace. Reference release v0.20.0 contains all three skills.",
     "license": "Apache-2.0",
     "modifiedFiles": [
@@ -258,55 +246,59 @@
     "referenceRevision": "063bee94c3f4df8453406c830b0a7df0f2860278",
     "source": "https://github.com/vercel-labs/agent-skills/tree/063bee94c3f4df8453406c830b0a7df0f2860278",
     "importRevision": null,
-    "roots": [
-      ".agents/skills/react-best-practices"
-    ],
+    "roots": [".agents/skills/react-best-practices"],
     "license": "MIT",
     "scope": "Vendored React/Next.js guidance and local adaptations; local README preserves Shu Ding / Vercel attribution.",
     "reviewRequired": "Pinned upstream README and skill declare MIT, but a complete original copyright/license notice has not been obtained."
   },
   {
-    "id": "minimax-code docx skill",
-    "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-    "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-    "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-    "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/docx in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
-    "roots": [
-      ".agents/skills/docx"
-    ],
-    "scope": "DOCX create/template-apply/edit/read/repair/compare instructions and the bundled OOXML toolchain. ZCodium adaptations: host-product daemon references reworded, setup.sh no longer edits shell rc and gates the .NET SDK install behind an explicit flag, and SKILL.md documents a ZCodium capability matrix for hosts that cannot provision the toolchain.",
-    "license": "MIT",
-    "modifiedFiles": [
-      ".agents/skills/docx/SKILL.md",
-      ".agents/skills/docx/scripts/setup.sh",
-      ".agents/skills/docx/scripts/env_check.sh",
-      ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Commands/CreateCommand.cs",
-      ".agents/skills/docx/scripts/dotnet/MiniMaxAIDocx.Core/Typography/CjkHelper.cs"
-    ]
+    "id": "Knip documentation mirror",
+    "referenceRevision": "d5d20e5e21d64590c0e735c6bc840295cda665cd",
+    "source": "https://raw.githubusercontent.com/webpro-nl/knip/d5d20e5e21d64590c0e735c6bc840295cda665cd/license",
+    "file": "docs/knip/docs/LICENSE",
+    "roots": ["docs/knip/docs"],
+    "license": "ISC",
+    "provenance": "All 169 files in the original local import have identical Git blob SHA-1 hashes to packages/docs at this reference revision (Knip 6.0.6). The original import did not record a revision; this establishes a matching snapshot, not a unique original import commit.",
+    "scope": "Knip-authored source and documentation. Bundled Source Sans Pro and Hack fonts retain their separately registered licenses; local mirror notes and added license materials are not attributed to Knip.",
+    "importRevision": null,
+    "sha256": "ef3e637bb6cc9fa34bacda2f2d31a794ca65abfe3109c150e00bb10dca25e431"
   },
   {
-    "id": "minimax-code xlsx skill",
-    "referenceRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "source": "https://raw.githubusercontent.com/MiniMaxAI/minimax-code/564e9166d81f87b0b767b005e4779d4697b512be/LICENSE",
-    "file": "third-party/upstream/28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea.txt",
-    "sha256": "28bb5c2948742f9f8d27ed84882844d09dff07cb5df64f20729875e8582a18ea",
-    "importRevision": "564e9166d81f87b0b767b005e4779d4697b512be",
-    "provenance": "Copied byte-for-byte from packages/local-runtime/assets/skills/xlsx in the upstream repository; the import revision is verified against a local clone whose working tree is clean at that commit. Only a provenance notice was added to SKILL.md.",
+    "id": "Source Sans Pro 2.020 in Knip docs",
+    "referenceRevision": "778e10a3656a899e0bc9f8a54d50a1ab4ba55308",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/778e10a3656a899e0bc9f8a54d50a1ab4ba55308/LICENSE.txt",
+    "file": "docs/knip/docs/licenses/SourceSansPro-2.020-LICENSE.txt",
+    "roots": ["docs/knip/docs/public/fonts/SourceSansPro-Regular.otf"],
+    "license": "OFL-1.1",
+    "provenance": "Bundled font name table identifies Source Sans Pro version 2.020, Adobe copyright 2010, 2012, 2014, and SIL OFL 1.1. License reference is the upstream 2.020R-ro/1.075R-it release.",
+    "importRevision": null,
+    "sha256": "653aaf9819e33cf1e2b3523c5d4d6c3dae925d770cb4563030f96655321ca2e9"
+  },
+  {
+    "id": "Source Sans Pro 2.045 and 1.095 in Knip docs",
+    "referenceRevision": "ce77773581f4d454f0fa985c073bb25c721bfcf5",
+    "source": "https://raw.githubusercontent.com/adobe-fonts/source-sans/ce77773581f4d454f0fa985c073bb25c721bfcf5/LICENSE.txt",
+    "file": "docs/knip/docs/licenses/SourceSansPro-2.045-1.095-LICENSE.txt",
     "roots": [
-      ".agents/skills/xlsx"
+      "docs/knip/docs/src/fonts/6xK3dSBYKcSV-LCoeQqfX1RYOo3qOK7lujVj9w.woff2",
+      "docs/knip/docs/src/fonts/6xKwdSBYKcSV-LCoeQqfX1RYOo3qPZYokSds18S0xR41.woff2",
+      "docs/knip/docs/src/fonts/6xKwdSBYKcSV-LCoeQqfX1RYOo3qPZZMkids18S0xR41.woff2",
+      "docs/knip/docs/src/fonts/6xKydSBYKcSV-LCoeQqfX1RYOo3ik4zwlxdu3cOWxw.woff2"
     ],
-    "scope": "Spreadsheet read/edit/create/convert instructions, conventions and the openpyxl/LibreOffice helper library. ZCodium adaptations: the dangling cross-skill bootstrap pointer is replaced with a self-contained Windows tool table, and the track-changes author default is resolved from --author / ZCODE_REDLINING_AUTHOR / a neutral placeholder instead of the upstream host name.",
-    "license": "MIT",
-    "modifiedFiles": [
-      ".agents/skills/xlsx/SKILL.md",
-      ".agents/skills/xlsx/docs/recalc-guide.md",
-      ".agents/skills/xlsx/scripts/office/pack.py",
-      ".agents/skills/xlsx/scripts/office/validate.py",
-      ".agents/skills/xlsx/scripts/office/redlining_author.py",
-      ".agents/skills/xlsx/scripts/office/helpers/simplify_redlines.py",
-      ".agents/skills/xlsx/scripts/office/validators/redlining.py"
-    ]
+    "license": "OFL-1.1",
+    "provenance": "Bundled WOFF2 name tables identify Source Sans Pro 2.045 (roman) and 1.095 (italic), Adobe copyright 2010-2018, and SIL OFL. License reference is the matching upstream 2.045R-ro/1.095R-it release.",
+    "importRevision": null,
+    "sha256": "e1d1fdcefb57985226c06fa9500d29caacfa2b1f8b8c74db911f13c6cad186a1"
+  },
+  {
+    "id": "Hack 3.003 in Knip docs",
+    "referenceRevision": "b47d21f808fbf4784565feccde2213ef2af924b3",
+    "source": "https://raw.githubusercontent.com/source-foundry/Hack/b47d21f808fbf4784565feccde2213ef2af924b3/LICENSE.md",
+    "file": "docs/knip/docs/licenses/Hack-3.003-LICENSE.md",
+    "roots": ["docs/knip/docs/src/fonts/hack-regular-subset.woff2"],
+    "license": "MIT AND Bitstream-Vera",
+    "provenance": "Bundled font name table identifies Hack 3.003 and retains Source Foundry, Bitstream Vera, and DejaVu license statements. The upstream v3.003 license is retained verbatim, including the DejaVu public-domain statement.",
+    "importRevision": null,
+    "sha256": "1f61bb7c790c59b4b0ecdf304628b94e42ae4c8020094a8c3da73381ab212623"
   }
 ]

@@ -6,7 +6,7 @@ import type {
 } from "@zcode/services";
 import type { ConversationTelemetryFact } from "@zcode/shared/zcode-protocol-v4";
 
-interface TaskActivityTracker extends IDisposable {
+export interface TaskActivityTracker extends IDisposable {
   readonly onDidChangeRunningTaskCount: Event<number>;
   readRunningTaskCount(): number;
 }
@@ -19,7 +19,7 @@ type AgentActivitySource = Pick<
 interface WorkspaceActivity {
   activeSessionIds: Set<string>;
   runtimeIdentity: string;
-  facts: IDisposable;
+  telemetry: IDisposable;
 }
 
 function workspaceKey(target: ZCodeAgentWorkspaceTarget): string {
@@ -47,7 +47,7 @@ export function createTaskActivityTracker(
   const removeWorkspace = (key: string, runtimeIdentity?: string): void => {
     const current = workspaces.get(key);
     if (!current || (runtimeIdentity && current.runtimeIdentity !== runtimeIdentity)) return;
-    current.facts.dispose();
+    current.telemetry.dispose();
     workspaces.delete(key);
     publishCount();
   };
@@ -74,14 +74,12 @@ export function createTaskActivityTracker(
     }
     removeWorkspace(key);
     const activeSessionIds = new Set<string>();
-    const facts = source?.onDynamicConversationTelemetryFact(event)((fact) =>
-      acceptFact(key, fact),
-    );
-    if (!facts) return;
+    const telemetry = source?.onDynamicConversationTelemetryFact(event)((fact) => acceptFact(key, fact));
+    if (!telemetry) return;
     workspaces.set(key, {
       activeSessionIds,
       runtimeIdentity: event.runtimeIdentity.identity,
-      facts,
+      telemetry,
     });
   };
 
@@ -93,7 +91,7 @@ export function createTaskActivityTracker(
       if (disposed) return;
       disposed = true;
       lifecycle?.dispose();
-      for (const workspace of workspaces.values()) workspace.facts.dispose();
+      for (const workspace of workspaces.values()) workspace.telemetry.dispose();
       workspaces.clear();
       runningTaskCount = 0;
       changed.dispose();

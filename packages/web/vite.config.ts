@@ -6,7 +6,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { pdfJsCMapsPlugin } from "../ui/vite/pdfJsCMapsPlugin.js";
 import { thirdPartyNoticesVitePlugin } from "../../scripts/third-party-notices.mjs";
-// Vite 配置在 Node 加载期执行，不能导入 @zcode/shared 根入口。
+import { resolveRemoteFrontendVersion } from "./vite/remoteFrontendVersion.mjs";
+// Bugfix: Vite 配置在 Node 加载期执行，不能导入 @zcode/shared 根入口。
 // 根入口包含 NodeNext 风格的源码 re-export，Node 会按真实文件查找 .js 并在 bootstrap 阶段失败。
 //
 // 子路径 @zcode/shared/zcodeEndpoint 同样不行：它仍指向同一份 TS 源码，而该文件内部
@@ -15,7 +16,6 @@ import { thirdPartyNoticesVitePlugin } from "../../scripts/third-party-notices.m
 // 与 packages/desktop/tsup.config.ts 同一处理：改从相对路径引源码，交给 Vite 自身打包。
 import {
   resolveRuntimeZCodeEndpointOrigin,
-  pickProductEndpointEnv,
   resolveZaiOAuthClientId,
   resolveZaiOAuthOrigin,
 } from "../shared/src/zcodeEndpoint.js";
@@ -87,8 +87,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      __ZCODE_ENDPOINT_ENV__: JSON.stringify(pickProductEndpointEnv(env)),
-      __ZCODE_VERSION__: JSON.stringify(version),
+      __ZCODE_VERSION__: JSON.stringify(
+        resolveRemoteFrontendVersion(version, process.env.WEB_REMOTE_FRONTEND_VERSION),
+      ),
       __ZCODE_COMMIT__: JSON.stringify(env.ZCODE_COMMIT || "unknown"),
       __ZCODE_ENV__: JSON.stringify(zcodeEnv),
       "import.meta.env.VITE_ZCODE_BASE_URL": JSON.stringify(zcodeEndpointOrigin),

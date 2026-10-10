@@ -1,36 +1,26 @@
 /* path 规则集中维护：旧 task 快照与 provider 配置路径仍在这里收口。 */
 import { lstatSync } from "node:fs";
-import { readExternalEnvVar } from "@zcode/shared";
 import { cp } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { basename, join, win32 } from "node:path";
 import { homedir } from "node:os";
 import {
   DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE,
-  ZCODE_DATA_ROOT_DIR_NAME,
+  ZCODE_AGENT_RUNTIME,
 } from "@zcode/shared";
 
 let _dataBaseDir: string | null = null;
 export const ZCODE_WINDOWS_APP_INSTALL_DIR_ENV = "ZCODE_WINDOWS_APP_INSTALL_DIR";
-const envDataBaseDir = readExternalEnvVar(process.env, "ZCODE_DATA_BASE_DIR") ?? null;
+const envDataBaseDir = process.env.ZCODE_DATA_BASE_DIR?.trim() || null;
 const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
 
-/**
- * 显式注入的 ZCODE_DATA_BASE_DIR 是 dev test / e2e 的数据目录隔离硬边界：
- * 一旦生效，设置文件里发现的自定义 dataBaseDir（来自真实 HOME）不得再把
- * 运行时拉回真实数据目录，否则隔离实例会读写开发者的真实凭据与配置。
- */
-export function isDataBaseDirEnvOverrideActive(): boolean {
-  return envDataBaseDir !== null;
-}
-
-interface DataBaseDirTargetValidationOptions {
+export interface DataBaseDirTargetValidationOptions {
   platform?: NodeJS.Platform | string;
   env?: Record<string, string | undefined>;
   appInstallDir?: string | null;
 }
 
-type DataBaseDirTargetValidationResult =
+export type DataBaseDirTargetValidationResult =
   | { ok: true }
   | {
       ok: false;
@@ -40,12 +30,10 @@ type DataBaseDirTargetValidationResult =
 
 /** Set the base directory for app data (replaces homedir() prefix). */
 export function setDataBaseDir(dir: string | null): void {
-  // 环境变量生效时本函数是 no-op：隔离运行不得被设置文件 bootstrap 或设置页改写目录。
-  if (isDataBaseDirEnvOverrideActive()) return;
   _dataBaseDir = dir?.trim() || null;
 }
 
-/** Get the current base directory. Priority: env ZCODE_DATA_BASE_DIR > setDataBaseDir() > homedir(). */
+/** Get the current base directory. Priority: setDataBaseDir() > env ZCODE_DATA_BASE_DIR > homedir(). */
 export function getDataBaseDir(): string {
   if (_dataBaseDir) return _dataBaseDir;
   if (envDataBaseDir) return envDataBaseDir;
@@ -54,29 +42,17 @@ export function getDataBaseDir(): string {
   return defaultDataBaseDir;
 }
 
-/**
- * 数据根解析重定向（仅供数据根初始化器在 pending 期间设置）：
- * 归属文件落盘前，所有路径必须指向进程诊断根，保证正式根零写入。
- */
-let _dataRootOverride: string | null = null;
-
-/** @internal 仅数据根初始化器可调用。 */
-export function setDataRootPathOverride(dir: string | null): void {
-  _dataRootOverride = dir?.trim() || null;
-}
-
-/** {dataBaseDir}/.zcodium —— 与官方 ZCode 客户端的 ~/.zcode 命名空间隔离。 */
+/** {dataBaseDir}/.zcode */
 export function getZCodeDataRootDir(): string {
-  if (_dataRootOverride) return _dataRootOverride;
-  return join(getDataBaseDir(), ZCODE_DATA_ROOT_DIR_NAME);
+  return join(getDataBaseDir(), ".zcode");
 }
 
-/** 非项目对话共享的真实工作目录；默认 ~/.zcodium/workspace/default。 */
+/** 非项目对话共享的真实工作目录；默认 ~/.zcode/workspace/default。 */
 export function getConversationWorkspaceDir(): string {
   return join(getZCodeDataRootDir(), "workspace", "default");
 }
 
-/** {dataBaseDir}/.zcodium/v2 */
+/** {dataBaseDir}/.zcode/v2 */
 export function getAppConfigDir(): string {
   return join(getZCodeDataRootDir(), "v2");
 }
@@ -209,7 +185,7 @@ export function getGitCheckpointIndexRootDir(): string {
   return join(getZCodeDataRootDir(), "git-checkpoint-index");
 }
 
-/** ~/.zcodium/v2/tasks-index.sqlite */
+/** ~/.zcode/v2/tasks-index.sqlite */
 export function getTasksIndexDatabasePath(): string {
   return join(getAppConfigDir(), "tasks-index.sqlite");
 }
@@ -227,12 +203,12 @@ export function getWorkspaceHash(workspacePath: string, workspaceIdentity?: stri
     .slice(0, 12);
 }
 
-/** ~/.zcodium/v2/sessions/{workspaceHash} */
+/** ~/.zcode/v2/sessions/{workspaceHash} */
 function getTaskSessionDir(workspacePath: string, workspaceIdentity?: string): string {
   return join(getAppConfigDir(), "sessions", getWorkspaceHash(workspacePath, workspaceIdentity));
 }
 
-/** ~/.zcodium/v2/sessions/{workspaceHash}/{taskId}.json */
+/** ~/.zcode/v2/sessions/{workspaceHash}/{taskId}.json */
 export function getLegacyTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -241,7 +217,7 @@ export function getLegacyTaskSessionSnapshotPath(
   return join(getTaskSessionDir(workspacePath, workspaceIdentity), `${taskId}.json`);
 }
 
-/** ~/.zcodium/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
+/** ~/.zcode/v2/sessions/{workspaceHash}/{taskId}.deleted.json */
 export function getLegacyDeletedTaskSessionSnapshotPath(
   workspacePath: string,
   taskId: string,
@@ -251,13 +227,24 @@ export function getLegacyDeletedTaskSessionSnapshotPath(
 }
 
 /**
+ * GLM（唯一 agent provider）的配置目录：~/.zcode/cli。
+ * Bugfix：GLM 配置改为直接读写新版 zcode-cli 的全局配置目录，不做 workspace 隔离，
+ * 避免同机不同工作区配置漂移。
+ */
+export function getProviderWorkspaceConfigDir(): string {
+  return ZCODE_AGENT_RUNTIME.nativeConfigDir
+    ? join(getDataBaseDir(), ZCODE_AGENT_RUNTIME.nativeConfigDir)
+    : join(getDataBaseDir(), ".zcode", "cli");
+}
+
+/**
  * Copy the .zcode/v2 data directory from one base dir to another.
  * Excludes setting.json and its transient atomic-write siblings — bootstrap
  * state must only live at the default homedir location.
  */
 export async function copyDataDirectory(oldBaseDir: string, newBaseDir: string): Promise<void> {
-  const oldDir = join(oldBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
-  const newDir = join(newBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
+  const oldDir = join(oldBaseDir, ".zcode", "v2");
+  const newDir = join(newBaseDir, ".zcode", "v2");
   await cp(oldDir, newDir, {
     recursive: true,
     force: false,

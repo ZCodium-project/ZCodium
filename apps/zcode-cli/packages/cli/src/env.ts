@@ -48,7 +48,7 @@ export function applyCliRuntimeEnvSanitization(
   applyCliRuntimeEnvDefaults(env, argv);
 }
 
-const findDotenv = (startDir: string): string | undefined => {
+export const findDotenv = (startDir: string): string | undefined => {
   let current = resolve(startDir);
   const root = parse(current).root;
 

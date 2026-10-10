@@ -32,7 +32,12 @@ import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { cn } from "@/components/lib/utils.js";
 import { Badge } from "@/components/ui/badge.js";
 import { Button } from "@/components/ui/button.js";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,10 +57,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 
 type ImportStep = "selection" | "importing" | "complete";
-export type ImportResourceCategory = Extract<
-  SettingsSyncCategory,
-  "skills" | "commands" | "plugins" | "mcpServers"
->;
+export type ImportResourceCategory = Extract<SettingsSyncCategory, "skills" | "commands" | "plugins" | "mcpServers">;
 type ImportItemSummary =
   | SettingsSyncSourceSkillSummary
   | SettingsSyncSourceCommandSummary
@@ -123,7 +125,7 @@ function readResourceSelectionKey(key: string): ResourceSelectionKeyPayload | nu
   }
 }
 
-function buildExternalAgentImportSelections(
+export function buildExternalAgentImportSelections(
   selectedKeys: string[],
   targetScope: SettingsSyncSourceScope,
   importMode: SettingsSyncImportMode,
@@ -134,7 +136,11 @@ function buildExternalAgentImportSelections(
     if (!payload) {
       continue;
     }
-    const groupKey = JSON.stringify([payload.agent, payload.category, payload.sourceScope ?? null]);
+    const groupKey = JSON.stringify([
+      payload.agent,
+      payload.category,
+      payload.sourceScope ?? null,
+    ]);
     const selection = grouped.get(groupKey) ?? {
       agent: payload.agent as SettingsSyncSelection["agent"],
       category: payload.category as SettingsSyncSelection["category"],
@@ -171,20 +177,21 @@ function getImportResults(
   result: SettingsSyncImportResult | null,
   category: ImportResourceCategory,
 ): ImportItemResult[] {
-  return (
-    result?.taskResults.flatMap((taskResult) =>
-      category === "skills"
-        ? (taskResult.skillResults ?? [])
-        : category === "commands"
-          ? (taskResult.commandResults ?? [])
-          : category === "plugins"
-            ? (taskResult.pluginResults ?? [])
-            : (taskResult.mcpServerResults ?? []),
-    ) ?? []
-  );
+  return result?.taskResults.flatMap((taskResult) =>
+    category === "skills"
+      ? taskResult.skillResults ?? []
+      : category === "commands"
+        ? taskResult.commandResults ?? []
+        : category === "plugins"
+          ? taskResult.pluginResults ?? []
+          : taskResult.mcpServerResults ?? [],
+  ) ?? [];
 }
 
-function formatAgentName(agent: string, intl: ReturnType<typeof useZCodeIntl>["intl"]): string {
+function formatAgentName(
+  agent: string,
+  intl: ReturnType<typeof useZCodeIntl>["intl"],
+): string {
   switch (agent) {
     case "claudeCode":
       return intl.formatMessage({ id: "settingsSync.agent.claudeCode" });
@@ -250,12 +257,12 @@ function getSourceRootItems(
   resourceCategory: ImportResourceCategory,
 ): ImportItemSummary[] {
   return resourceCategory === "skills"
-    ? (sourceRoot.skills ?? [])
+    ? sourceRoot.skills ?? []
     : resourceCategory === "commands"
-      ? (sourceRoot.commands ?? [])
+      ? sourceRoot.commands ?? []
       : resourceCategory === "plugins"
-        ? (sourceRoot.plugins ?? [])
-        : (sourceRoot.mcpServers ?? []);
+        ? sourceRoot.plugins ?? []
+        : sourceRoot.mcpServers ?? [];
 }
 
 function normalizePathForScope(path: string): string {
@@ -330,6 +337,10 @@ export function CommandsImportDialog(props: ExternalAgentImportDialogProps) {
   return <ExternalAgentImportDialog {...props} category="commands" />;
 }
 
+export function PluginsImportDialog(props: ExternalAgentImportDialogProps) {
+  return <ExternalAgentImportDialog {...props} category="plugins" />;
+}
+
 export function McpServersImportDialog(props: ExternalAgentImportDialogProps) {
   return <ExternalAgentImportDialog {...props} category="mcpServers" />;
 }
@@ -373,7 +384,8 @@ export function useExternalAgentImportCategoryState({
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [expandedSourceKeys, setExpandedSourceKeys] = useState<string[]>([]);
   const [activeScope, setActiveScope] = useState<SettingsSyncSourceScope>("global");
-  const [importTargetScope, setImportTargetScope] = useState<SettingsSyncSourceScope>("global");
+  const [importTargetScope, setImportTargetScope] =
+    useState<SettingsSyncSourceScope>("global");
   const [importMode, setImportMode] = useState<SettingsSyncImportMode>("symlink");
   const [error, setError] = useState<string | null>(null);
 
@@ -452,7 +464,9 @@ export function useExternalAgentImportCategoryState({
 
   const toggleExpanded = useCallback((key: string) => {
     setExpandedSourceKeys((current) =>
-      current.includes(key) ? current.filter((item) => item !== key) : [...current, key],
+      current.includes(key)
+        ? current.filter((item) => item !== key)
+        : [...current, key],
     );
   }, []);
 
@@ -535,53 +549,49 @@ function ExternalAgentImportDialog({
     setStep("selection");
   }, [open]);
 
-  const startImport = useCallback(
-    async (targetScope: SettingsSyncSourceScope) => {
-      if (selectedKeys.length === 0) {
-        return;
-      }
-      setImporting(true);
-      setStep("importing");
-      setImportError(null);
-      try {
-        logger.debug("[ExternalAgentImportDialog] import start", {
-          category,
-          targetScope,
-          importMode,
-          selectedCount: selectedKeys.length,
-        });
-        const importResult = await settingsSyncService.importSelected({
-          workspacePath: workspacePath ?? undefined,
-          workspaceIdentity,
-          selections: buildExternalAgentImportSelections(selectedKeys, targetScope, importMode),
-        });
-        setResult(importResult);
-        setStep("complete");
-        await onImported();
-      } catch (importError) {
-        const message = normalizeError(importError);
-        logger.error("[ExternalAgentImportDialog] import failed", { category, error: message });
-        setImportError(message);
-        setStep("selection");
-      } finally {
-        setImporting(false);
-      }
-    },
-    [
-      onImported,
-      category,
-      importMode,
-      selectedKeys,
-      settingsSyncService,
-      workspaceIdentity,
-      workspacePath,
-    ],
-  );
+  const startImport = useCallback(async (targetScope: SettingsSyncSourceScope) => {
+    if (selectedKeys.length === 0) {
+      return;
+    }
+    setImporting(true);
+    setStep("importing");
+    setImportError(null);
+    try {
+      logger.debug("[ExternalAgentImportDialog] import start", {
+        category,
+        targetScope,
+        importMode,
+        selectedCount: selectedKeys.length,
+      });
+      const importResult = await settingsSyncService.importSelected({
+        workspacePath: workspacePath ?? undefined,
+        workspaceIdentity,
+        selections: buildExternalAgentImportSelections(selectedKeys, targetScope, importMode),
+      });
+      setResult(importResult);
+      setStep("complete");
+      await onImported();
+    } catch (importError) {
+      const message = normalizeError(importError);
+      logger.error("[ExternalAgentImportDialog] import failed", { category, error: message });
+      setImportError(message);
+      setStep("selection");
+    } finally {
+      setImporting(false);
+    }
+  }, [
+    onImported,
+    category,
+    importMode,
+    selectedKeys,
+    settingsSyncService,
+    workspaceIdentity,
+    workspacePath,
+  ]);
 
-  const closeLabel =
-    step === "complete"
-      ? intl.formatMessage({ id: `settings.${category}.import.finish` })
-      : intl.formatMessage({ id: "settingsSync.action.skip" });
+  const closeLabel = step === "complete"
+    ? intl.formatMessage({ id: `settings.${category}.import.finish` })
+    : intl.formatMessage({ id: "settingsSync.action.skip" });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -589,7 +599,7 @@ function ExternalAgentImportDialog({
         <div className="flex h-full min-h-0 min-w-0 flex-col">
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden p-4 sm:p-5">
             <DialogHeader className="shrink-0 sm:-mt-1">
-              <div className="flex flex-col gap-3 pe-8 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 pr-8 sm:flex-row sm:items-center sm:justify-between">
                 <DialogTitle className="flex min-w-0 items-center text-ui-lg">
                   <span className="min-w-0 truncate">
                     {intl.formatMessage({ id: `settings.${category}.import.title` })}
@@ -637,9 +647,7 @@ function ExternalAgentImportDialog({
                 ) : step === "importing" ? (
                   <div className="space-y-4 rounded-lg bg-surface px-4 py-5">
                     <div className="flex items-center justify-between gap-3 text-ui-base text-foreground-subtle">
-                      <span>
-                        {intl.formatMessage({ id: `settings.${category}.import.importing` })}
-                      </span>
+                      <span>{intl.formatMessage({ id: `settings.${category}.import.importing` })}</span>
                       <span>{importProgress}%</span>
                     </div>
                     <Progress value={importProgress} className="h-2 rounded-full bg-background" />
@@ -694,7 +702,11 @@ function ExternalAgentImportDialog({
               )}
               <div className="flex flex-wrap items-center gap-2">
                 {step === "complete" ? (
-                  <Button type="button" size="lg" onClick={() => onOpenChange(false)}>
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={() => onOpenChange(false)}
+                  >
                     {closeLabel}
                   </Button>
                 ) : null}
@@ -742,7 +754,9 @@ export function ExternalAgentImportSelectionPanel({
             activeScope={state.activeScope}
             onActiveScopeChange={state.setActiveSourceScope}
           />
-          <ControlHintTooltip title={intl.formatMessage({ id: "settingsSync.action.rescan" })}>
+          <ControlHintTooltip
+            title={intl.formatMessage({ id: "settingsSync.action.rescan" })}
+          >
             <Button
               type="button"
               variant="ghost"
@@ -849,7 +863,7 @@ function ImportModeSelect({
           size="sm"
           variant="ghost"
           aria-label={intl.formatMessage({ id: `settings.${category}.import.modeLabel` })}
-          className="w-fit shrink-0 justify-end border-border bg-surface text-end font-medium text-foreground hover:bg-surface-hover hover:text-foreground aria-expanded:bg-selected *:data-[slot=select-value]:justify-end"
+          className="w-fit shrink-0 justify-end border-border bg-surface text-right font-medium text-foreground hover:bg-surface-hover hover:text-foreground aria-expanded:bg-selected *:data-[slot=select-value]:justify-end"
         >
           <SelectValue />
         </SelectTrigger>
@@ -864,10 +878,9 @@ function ImportModeSelect({
       <ControlHintTooltip
         title={intl.formatMessage({ id: `settings.${category}.import.modeLabel` })}
         description={intl.formatMessage({
-          id:
-            importMode === "symlink"
-              ? `settings.${category}.import.mode.symlink.description`
-              : `settings.${category}.import.mode.copy.description`,
+          id: importMode === "symlink"
+            ? `settings.${category}.import.mode.symlink.description`
+            : `settings.${category}.import.mode.copy.description`,
         })}
         side="top"
         align="start"
@@ -902,10 +915,9 @@ function ImportTargetDropdownButton({
   const { intl } = useZCodeIntl();
   const hasWorkspaceTarget = Boolean(workspacePath);
   const canImportToTarget = targetScope === "global" || hasWorkspaceTarget;
-  const activeTargetLabelId =
-    targetScope === "project"
-      ? `settings.${category}.import.target.project`
-      : `settings.${category}.import.target.global`;
+  const activeTargetLabelId = targetScope === "project"
+    ? `settings.${category}.import.target.project`
+    : `settings.${category}.import.target.global`;
   return (
     <div className="flex items-center">
       <Button
@@ -913,7 +925,7 @@ function ImportTargetDropdownButton({
         size="lg"
         disabled={disabled || !canImportToTarget}
         aria-label={intl.formatMessage({ id: activeTargetLabelId })}
-        className="rounded-e-none border-e-0"
+        className="rounded-r-none border-r-0"
         onClick={() => onImport(targetScope)}
       >
         {intl.formatMessage({ id: activeTargetLabelId })}
@@ -923,7 +935,7 @@ function ImportTargetDropdownButton({
           <Button
             type="button"
             size="lg"
-            className="rounded-s-none border-s-0 px-2"
+            className="rounded-l-none border-l-0 px-2"
             disabled={disabled}
             aria-label={intl.formatMessage({ id: `settings.${category}.import.targetLabel` })}
           >
@@ -970,7 +982,7 @@ function ImportTargetScopeSelect({
         size="sm"
         variant="ghost"
         aria-label={intl.formatMessage({ id: `settings.${category}.import.targetLabel` })}
-        className="w-fit shrink-0 justify-end border-border bg-surface text-end font-medium text-foreground hover:bg-surface-hover hover:text-foreground aria-expanded:bg-selected *:data-[slot=select-value]:justify-end"
+        className="w-fit shrink-0 justify-end border-border bg-surface text-right font-medium text-foreground hover:bg-surface-hover hover:text-foreground aria-expanded:bg-selected *:data-[slot=select-value]:justify-end"
       >
         <SelectValue />
       </SelectTrigger>
@@ -1089,23 +1101,21 @@ function ImportStatusBadge({
 }) {
   const { intl } = useZCodeIntl();
   const label = intl.formatMessage({
-    id:
-      result.status === "imported"
-        ? `settings.${category}.import.imported`
-        : result.status === "skipped"
-          ? `settings.${category}.import.skipped`
-          : `settings.${category}.import.failed`,
+    id: result.status === "imported"
+      ? `settings.${category}.import.imported`
+      : result.status === "skipped"
+        ? `settings.${category}.import.skipped`
+        : `settings.${category}.import.failed`,
   });
   const reasonLabel = result.skipReason
     ? intl.formatMessage({ id: `settings.${category}.import.skipReason.${result.skipReason}` })
     : null;
   const accessibleLabel = reasonLabel ? `${label}: ${reasonLabel}` : label;
-  const Icon =
-    result.status === "imported"
-      ? CheckIcon
-      : result.status === "skipped"
-        ? AlertCircleIcon
-        : XIcon;
+  const Icon = result.status === "imported"
+    ? CheckIcon
+    : result.status === "skipped"
+      ? AlertCircleIcon
+      : XIcon;
 
   return (
     <span
@@ -1145,7 +1155,7 @@ function SourceScopeSelect({
         size="sm"
         variant="ghost"
         aria-label={intl.formatMessage({ id: `settings.${category}.import.scopeLabel` })}
-        className="w-fit shrink-0 justify-end text-end text-foreground-subtle hover:text-foreground *:data-[slot=select-value]:justify-end"
+        className="w-fit shrink-0 justify-end text-right text-foreground-subtle hover:text-foreground *:data-[slot=select-value]:justify-end"
       >
         <SelectValue />
       </SelectTrigger>
@@ -1233,7 +1243,7 @@ function ImportSelectionList({
             aria-checked={partiallyActiveSelected ? "mixed" : allActiveSelected}
             aria-label={toggleAllLabel}
             onClick={() => onSetResourceSelection(activeImportableResourceKeys, !allActiveSelected)}
-            className="flex min-w-0 items-center gap-2 rounded-md py-1 pe-2 text-start text-ui-base text-foreground-subtle transition-colors hover:text-foreground"
+            className="flex min-w-0 items-center gap-2 rounded-md py-1 pr-2 text-left text-ui-base text-foreground-subtle transition-colors hover:text-foreground"
           >
             <span
               className={cn(
@@ -1249,7 +1259,7 @@ function ImportSelectionList({
             </span>
             <span className="shrink-0">{toggleAllLabel}</span>
           </button>
-          <div className="min-w-0 text-end text-ui-xs text-foreground-subtle">
+          <div className="min-w-0 text-right text-ui-xs text-foreground-subtle">
             {intl.formatMessage(
               { id: `settings.${category}.import.selectionCount` },
               {
@@ -1274,14 +1284,15 @@ function ImportSelectionList({
           const key = getSourceSelectionKey(agent.agent, category, sourceRoot.scope);
           const sourceKey = `${key}:${sourceRoot.path}`;
           const items = getSourceRootItems(sourceRoot, category).filter((item) => item.importable);
-          const importableResourceKeys = items.map((item) =>
-            getResourceSelectionKey({
-              agent: agent.agent,
-              category,
-              sourceScope: sourceRoot.scope,
-              resourcePath: item.path,
-            }),
-          );
+          const importableResourceKeys = items
+            .map((item) =>
+              getResourceSelectionKey({
+                agent: agent.agent,
+                category,
+                sourceScope: sourceRoot.scope,
+                resourcePath: item.path,
+              }),
+            );
           const selectedImportableCount = importableResourceKeys.filter((itemKey) =>
             selected.has(itemKey),
           ).length;
@@ -1297,8 +1308,10 @@ function ImportSelectionList({
             <div key={sourceKey} className="rounded-lg">
               <div
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start transition-colors",
-                  disabled ? "opacity-70" : "hover:bg-surface-hover/50",
+                  "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors",
+                  disabled
+                    ? "opacity-70"
+                    : "hover:bg-surface-hover/50",
                 )}
               >
                 <button
@@ -1318,8 +1331,7 @@ function ImportSelectionList({
                   <span
                     className={cn(
                       "flex size-4 items-center justify-center rounded-sm border border-border",
-                      (checked || partiallyChecked) &&
-                        !disabled &&
+                      (checked || partiallyChecked) && !disabled &&
                         "border-primary bg-primary text-primary-foreground",
                     )}
                   >
@@ -1330,7 +1342,7 @@ function ImportSelectionList({
                 <button
                   type="button"
                   onClick={() => onToggleExpanded(sourceKey)}
-                  className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-1 text-start"
+                  className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-1 text-left"
                 >
                   <span className="text-ui-base font-medium text-foreground">
                     {formatAgentName(agent.agent, intl)}
@@ -1367,7 +1379,7 @@ function ImportSelectionList({
                 </Button>
               </div>
               {isExpanded ? (
-                <div className="ms-9 border-s border-border ps-3">
+                <div className="ml-9 border-l border-border pl-3">
                   {items.map((item) => (
                     <ResourceSelectionRow
                       key={`${sourceKey}:${item.path}`}
@@ -1416,7 +1428,7 @@ function ResourceSelectionRow({
     <button
       type="button"
       onClick={() => onToggleSelection(itemKey)}
-      className="flex w-full min-w-0 items-center gap-3 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-surface-hover/50"
+      className="flex w-full min-w-0 items-center gap-3 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-surface-hover/50"
     >
       <span className="flex min-w-0 items-center gap-2">
         <span
@@ -1427,7 +1439,9 @@ function ResourceSelectionRow({
         >
           {checked ? <CheckIcon className="size-3.5" /> : null}
         </span>
-        <span className="min-w-0 truncate text-ui-base text-foreground">{item.name}</span>
+        <span className="min-w-0 truncate text-ui-base text-foreground">
+          {item.name}
+        </span>
         {"version" in item && item.version ? (
           <Badge
             variant="outline"

@@ -65,7 +65,7 @@ const mcpUsageEnvelopeSchema = z.object({
 });
 
 /** 本次 entitlement 查询的连接归属，用于和凭证归属比对。 */
-interface McpQuotaRequestScope {
+export interface McpQuotaRequestScope {
   providerFamily: "zai" | "bigmodel";
   organizationId?: string | null;
   projectId?: string | null;
@@ -78,7 +78,10 @@ interface McpQuotaRequestScope {
  * 同时持有 Z.ai 与 BigModel Coding Plan（或个人 + Team）的用户，如果不做这层比对，
  * 就会在另一个 tab 下看到不属于它的 MCP 额度。
  */
-function matchesMcpQuotaScope(scope: UsageMcpQuotaScope, request: McpQuotaRequestScope): boolean {
+export function matchesMcpQuotaScope(
+  scope: UsageMcpQuotaScope,
+  request: McpQuotaRequestScope,
+): boolean {
   if (scope.providerFamily !== request.providerFamily) {
     return false;
   }
@@ -100,7 +103,7 @@ function matchesMcpQuotaScope(scope: UsageMcpQuotaScope, request: McpQuotaReques
  *
  * percentage 沿用 quota 接口语义（**已使用**占比），展示端统一反转成剩余。
  */
-function buildMcpQuotaAggregateLimit(params: {
+export function buildMcpQuotaAggregateLimit(params: {
   totalUsage: { used: number; limit: number; remaining: number };
   nextResetTime?: number;
 }): UsageQuotaLimit | null {

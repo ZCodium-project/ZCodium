@@ -4,6 +4,8 @@ import type { AppSettings } from "./protocol.js";
 import { REMOTE_ASSET_INSTALL_MODES } from "./remoteAssetInstallMode.js";
 import { isKnownRemoteResourcePackageId } from "./remoteResourcePackages.js";
 import { wslUserSchema } from "./wslUserValidation.js";
+import { ZCODE_ENABLED_AGENT_PROVIDERS } from "./zcode-agent-policy.js";
+import { DYNAMIC_WORKFLOW_MODES } from "./dynamic-workflow-feature.js";
 import { normalizeZCodeEndpointOrigin } from "./zcodeEndpoint.js";
 import {
   DEFAULT_EMBEDDED_BROWSER_VIEWPORT_PREFERENCE,
@@ -32,9 +34,12 @@ export const appSettingsOccupationEnum = appSettingsOccupationSchema;
 
 const nonEmptyStringSchema = z.string().trim().min(1);
 
-export const localeSchema = z.enum(["zh-CN", "en-US", "fa-IR"]);
-const localePreferenceSchema = z.enum(["system", "zh-CN", "en-US", "fa-IR"]);
+export const localeSchema = z.enum(["zh-CN", "en-US"]);
+export const localePreferenceSchema = z.enum(["system", "zh-CN", "en-US"]);
 const zcodeInteractionBehaviorSchema = z.enum(["queue", "guide"]);
+// launch.md「The user's choice」：读文件时未知取值（降级后读到新版本写的值）按「跟随」处理，
+// 不能让一个偏好字段把整份设置读坏。
+const dynamicWorkflowModeSettingSchema = z.enum(DYNAMIC_WORKFLOW_MODES).optional().catch(undefined);
 const electronReleaseChannelSchema = z.enum(["stable", "preview"]);
 const desktopZoomLevelSchema = z.number().int().min(-3).max(5);
 const desktopWindowSizeSchema = z.object({
@@ -54,6 +59,10 @@ export const integratedTerminalShellSelectionSchema = z.discriminatedUnion("mode
     path: nonEmptyStringSchema,
   }),
 ]);
+const enabledBuiltinAgentCliProvidersSchema = z
+  // 兼容旧 settings：历史列表可能残留三方 CLI provider，解析后统一归一为 ZCode Agent。
+  .array(z.enum(["claude", "opencode", "gemini", "codex", "glm"]))
+  .transform(() => [...ZCODE_ENABLED_AGENT_PROVIDERS]);
 const providerFamilyDomainSchema = z.enum(["zai", "bigmodel"]);
 
 export const postUpdateReleaseNotesPayloadSchema = z.object({
@@ -100,6 +109,14 @@ const remoteWorkspaceTargetSchema = z.discriminatedUnion("kind", [
     kind: z.literal("docker"),
     container: nonEmptyStringSchema,
   }),
+  z.object({
+    kind: z.literal("server"),
+    url: z.string().url(),
+    name: nonEmptyStringSchema.optional(),
+    workspacePath: z.string().optional(),
+    serverId: nonEmptyStringSchema.optional(),
+    tokenCredentialKey: nonEmptyStringSchema.optional(),
+  }),
 ]);
 
 const appWorkspaceSessionEntrySchema = z.discriminatedUnion("kind", [
@@ -120,6 +137,14 @@ const appWorkspaceSessionEntrySchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+const webRemoteControlExternalRelayDeviceSchema = z.object({
+  deviceSid: nonEmptyStringSchema,
+});
+const webRemoteControlLastEnabledContextSchema = z.object({
+  workspacePath: nonEmptyStringSchema,
+  workspaceIdentity: nonEmptyStringSchema.optional(),
+  initialTaskId: nonEmptyStringSchema.optional(),
+});
 const zcodeEndpointOriginSchema = z.preprocess((value) => {
   if (typeof value !== "string") {
     return undefined;
@@ -257,6 +282,24 @@ const legacyRemoteWorkspaceHistoryEntrySchema = z.object({
   lastConnectionStatus: z.enum(["connected", "failed"]),
   lastConnectionError: z.string().optional(),
 });
+
+function migrateLegacyBuiltinAgentCliProviders(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return value;
+  }
+
+  const raw = value as {
+    enabledBuiltinAgentCliProviders?: unknown;
+  };
+
+  // Bugfix: 单 ZCode Agent 迁移后，旧 setting.json 可能还保存已移除的第三方 CLI provider
+  // 的启用状态。若这些值继续进入 UI / bot 的 provider 选项，会和 server 侧唯一 glm 状态打架。
+  // 这里在 schema 入口统一归一到 ZCode Agent，让核心 provider 状态只有一个事实源。
+  return {
+    ...raw,
+    enabledBuiltinAgentCliProviders: [...ZCODE_ENABLED_AGENT_PROVIDERS],
+  };
+}
 
 function stripHistoricalRemoteResourcePackages(target: unknown): unknown {
   if (!target || typeof target !== "object" || Array.isArray(target)) {
@@ -417,15 +460,6 @@ function migrateLegacyWorkspaceSession(value: unknown): unknown {
   return migrated;
 }
 
-/** 官方平台服务开关；缺省全部关闭。
- * 对话分享已永久下线；account / feedback / codingPlan / officialMcp / offPeak 随去智谱化移除，
- * 不再登记字段——存量用户已存的这些键会在写盘时被 zod strip，属于预期的 BREAKING 行为。
- */
-export const officialServiceSwitchesSchema = z.object({
-  marketplace: z.boolean().optional(),
-  clientConfig: z.boolean().optional(),
-});
-
 const appSettingsObjectSchema = z.object({
   recentProjects: z.array(z.string()).default([]),
   locale: localeSchema.default("zh-CN"),
@@ -449,6 +483,8 @@ const appSettingsObjectSchema = z.object({
   taskAutoArchiveOlderThanDays: z.number().int().positive().max(365).default(7),
   closeToTrayOnWindows: z.boolean().default(true),
   closeToTrayOnWindowsMigrationInitialized: z.boolean().default(true),
+  // default(false)：新装与存量用户首次启动都视为未归位，由 main 进程按平台决定是否迁移。
+  closeToTrayLinuxMigrationInitialized: z.boolean().default(false),
   keepAwakeWhileRunning: z.boolean().default(false),
   desktopZoomLevel: desktopZoomLevelSchema.optional(),
   desktopWindowSize: desktopWindowSizeSchema.optional(),
@@ -462,14 +498,15 @@ const appSettingsObjectSchema = z.object({
   zcodeInteractionBehavior: zcodeInteractionBehaviorSchema.default("queue"),
   askUserQuestionAutoResolutionEnabled: z.boolean().default(true),
   modelIoFullRetentionEnabled: z.boolean().default(false),
+  dynamicWorkflowMode: dynamicWorkflowModeSettingSchema,
+  enabledBuiltinAgentCliProviders: enabledBuiltinAgentCliProvidersSchema.default([
+    ...ZCODE_ENABLED_AGENT_PROVIDERS,
+  ]),
   startPlanRecommendationDismissed: z.boolean().default(false),
   providerFamilyConnectionSelections: providerFamilyConnectionSelectionSettingsSchema.default({}),
   providerFamilyDomain: providerFamilyDomainSchema.optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().default(false),
-  // 去智谱化后 providerFamilyDomain 只剩 zai/bigmodel 两个已下线取值，存量值没有合法语义。
-  // 独立于 providerFamilyDomainMigrated：老用户恰恰已经迁移过，靠那个守卫会跳过清理。
-  retiredProviderFamilySettingsPurged: z.boolean().default(false),
   nativeSearchEnhancementsEnabled: z.boolean().default(true),
   onboardingOccupation: appSettingsOccupationSchema.nullish(),
   proactiveSuggestionsEnabled: z.boolean().optional(),
@@ -483,10 +520,9 @@ const appSettingsObjectSchema = z.object({
   autoDownloadAndInstallUpdates: z.boolean().default(false),
   skippedElectronUpdateVersions: skippedElectronUpdateVersionsSchema,
   settingsSyncFirstRunPromptHandled: z.boolean().optional(),
+  webRemoteControlExternalRelayDevice: webRemoteControlExternalRelayDeviceSchema.optional(),
+  webRemoteControlLastEnabledContext: webRemoteControlLastEnabledContextSchema.optional(),
   zcodeEndpointOrigin: zcodeEndpointOriginSchema.optional(),
-  // 官方服务开关必须登记在存储 schema 里：只进 patch schema 会在写盘时被 zod strip，
-  // 开关看起来能切但永远读不回来，UI 表现为点击后立刻回弹。
-  officialServices: officialServiceSwitchesSchema.optional(),
 });
 
 export const appSettingsSchema = z.preprocess(
@@ -496,7 +532,9 @@ export const appSettingsSchema = z.preprocess(
         migrateMessageStreamShowReasoningDefault(
           migrateCloseToTrayOnWindowsDefault(
             migrateLegacyLocalePreference(
-              sanitizeZCodeEndpointOrigin(migrateLegacyWorkspaceSession(value)),
+              sanitizeZCodeEndpointOrigin(
+                migrateLegacyWorkspaceSession(migrateLegacyBuiltinAgentCliProviders(value)),
+              ),
             ),
           ),
         ),
@@ -506,7 +544,6 @@ export const appSettingsSchema = z.preprocess(
 );
 
 export const appSettingsPatchSchema = z.object({
-  officialServices: officialServiceSwitchesSchema.optional(),
   recentProjects: z.array(z.string()).optional(),
   locale: localeSchema.optional(),
   shortcutBindings: z.record(z.string(), z.array(z.string())).optional(),
@@ -525,6 +562,7 @@ export const appSettingsPatchSchema = z.object({
   closeToTrayOnWindows: z.boolean().optional(),
   keepAwakeWhileRunning: z.boolean().optional(),
   closeToTrayOnWindowsMigrationInitialized: z.boolean().optional(),
+  closeToTrayLinuxMigrationInitialized: z.boolean().optional(),
   desktopZoomLevel: desktopZoomLevelSchema.optional(),
   desktopWindowSize: desktopWindowSizeSchema.optional(),
   desktopChromiumHardwareAccelerationEnabled: z.boolean().optional(),
@@ -537,12 +575,14 @@ export const appSettingsPatchSchema = z.object({
   zcodeInteractionBehavior: zcodeInteractionBehaviorSchema.optional(),
   askUserQuestionAutoResolutionEnabled: z.boolean().optional(),
   modelIoFullRetentionEnabled: z.boolean().optional(),
+  // 空串是「删除选择、回到跟随」的哨兵：RPC 会吞掉 undefined，normalizeSettingsPatch 把它归一成删除。
+  dynamicWorkflowMode: z.union([z.enum(DYNAMIC_WORKFLOW_MODES), z.literal("")]).optional(),
+  enabledBuiltinAgentCliProviders: enabledBuiltinAgentCliProvidersSchema.optional(),
   startPlanRecommendationDismissed: z.boolean().optional(),
   providerFamilyConnectionSelections: providerFamilyConnectionSelectionSettingsSchema.optional(),
   providerFamilyDomain: z.union([providerFamilyDomainSchema, z.literal("")]).optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().optional(),
-  retiredProviderFamilySettingsPurged: z.boolean().optional(),
   nativeSearchEnhancementsEnabled: z.boolean().optional(),
   onboardingOccupation: z
     .enum([
@@ -575,5 +615,7 @@ export const appSettingsPatchSchema = z.object({
     .partialRecord(electronReleaseChannelSchema, nonEmptyStringSchema)
     .optional(),
   settingsSyncFirstRunPromptHandled: z.boolean().optional(),
+  webRemoteControlExternalRelayDevice: webRemoteControlExternalRelayDeviceSchema.optional(),
+  webRemoteControlLastEnabledContext: webRemoteControlLastEnabledContextSchema.optional(),
   zcodeEndpointOrigin: zcodeEndpointOriginSchema.optional(),
 });

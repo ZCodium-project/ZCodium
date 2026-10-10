@@ -66,6 +66,7 @@ import {
   buildConversationShareConfirmRequest,
   sha256ConversationShareJson,
 } from "./conversationShareIntegrity.js";
+import { materializeConversationShareInlineImages } from "./conversationShareInlineImages.js";
 import { buildConversationSharePublicProjection } from "./conversationSharePublicProjection.js";
 import type { ConversationShareArtifactSource } from "./conversationShareArtifactSource.js";
 import { formatSharedContextV1 } from "./sharedContextFormatter.js";
@@ -161,7 +162,7 @@ function uniqueImportedFileName(
   return candidate;
 }
 
-interface ConversationShareServiceOptions {
+export interface ConversationShareServiceOptions {
   zcodeAgentService: ConversationShareAgentService;
   client: ConversationShareHttpClient;
   artifactSource: ConversationShareArtifactSource;
@@ -328,14 +329,6 @@ function hasUnsupportedArtifactReference(value: unknown): boolean {
 function sanitizeUnsupportedShareStructures(rows: readonly ConversationRow[]): ConversationRow[] {
   const sanitized: ConversationRow[] = [];
   for (const row of rows) {
-    if (row.kind === "toolCall" && row.display?.kind === "node_repl_images") {
-      // 内嵌图片就在 display.images 的 base64 里，删掉 display 即移除全部图片字节。
-      const { display: _display, ...rest } = row;
-      // 这些图片无法在公开 projection 中闭合，但不需要用户处理；静默移除，避免把内部
-      // renderer 结构误报成“有文件被跳过”。
-      sanitized.push(rest);
-      continue;
-    }
     if (row.kind === "timelineMarker") {
       // 运行中的 marker 留着，让 collectShareStructureIssues 照旧阻断——内容尚未定稿。
       // 被阻断的发布不会进入投影，保留该 marker 无副作用。
@@ -580,7 +573,7 @@ function buildTurnPreflightResults(
 }
 
 function removeIndependentArtifactRows(rows: readonly ConversationRow[]): ConversationRow[] {
-  // 分享候选只有用户输入附件和最终可见的 Assistant 预览卡片；历史 artifact row
+  // 文件候选来自用户输入附件和最终可见的 Assistant 预览卡片；内嵌图片随后独立转换。历史 artifact row
   // 若没有对应预览卡片，不再作为第三条独立发现来源进入公开 projection。
   return rows.filter((row) => row.kind !== "artifact");
 }
@@ -818,14 +811,18 @@ export class ConversationShareService implements IConversationShareService {
       };
     }
 
-    const structureSanitized = sanitizeUnsupportedShareStructures(selected.rows);
+    const inlineImages = materializeConversationShareInlineImages(
+      removeIndependentArtifactRows(sanitizeUnsupportedShareStructures(selected.rows)),
+      capabilities,
+      turnOrdinalByProductTurn(conversation.rows),
+    );
     const artifactSanitized = sanitizeUnsupportedShareArtifacts(
-      removeIndependentArtifactRows(structureSanitized),
+      inlineImages.rows,
       capabilities,
       conversation.rows,
     );
     const selectedRows = artifactSanitized.rows;
-    skippableWarnings.push(...artifactSanitized.warnings);
+    skippableWarnings.push(...inlineImages.warnings, ...artifactSanitized.warnings);
     blockingIssues.push(...collectShareStructureIssues(selectedRows, conversation.rows));
     let hasShareableContent = selectedRows.some((row) => {
       if (row.kind === "turnHeader" || row.kind === "timelineMarker") return false;
@@ -1014,10 +1011,32 @@ export class ConversationShareService implements IConversationShareService {
       rows: selectedRows,
       selectedProductTurnIds: selected.productTurnIds,
     });
+    if (registeredProjection.rows.length > capabilities.max_rows) {
+      blockingIssues.push({
+        code: "rows_limit",
+        scope: "conversation",
+        actual: registeredProjection.rows.length,
+        limit: capabilities.max_rows,
+      });
+    }
     const manifestIssues = this.collectArtifactManifestIssues(
       capabilities,
       registeredProjection.artifacts,
-    );
+    ).map((issue) => {
+      // 内嵌图片的容量问题必须带轮次定位，否则拆分 turn 缓存时会漏掉文件级阻断。
+      const row = selectedRows.find(
+        (candidate) =>
+          candidate.kind === "artifact" && candidate.displayName === issue.artifactDisplayName,
+      );
+      return row
+        ? {
+            ...issue,
+            rowId: row.rowId,
+            productTurnId: row.productTurnId,
+            turnOrdinal: rowTurnOrdinal(row, turnOrdinalByProductTurnId),
+          }
+        : issue;
+    });
     blockingIssues.push(
       ...manifestIssues.filter((issue) => issue.code !== "artifact_type_not_allowed"),
     );
@@ -1203,7 +1222,19 @@ export class ConversationShareService implements IConversationShareService {
         sanitizedBlockingIssues.issues,
         sanitizedWarnings.issues,
         sanitizedDeferred.issues,
-      ),
+      ).map((result) => ({
+        ...result,
+        rowBudget: {
+          count: registeredProjection.rows.filter(
+            (row) =>
+              row.productTurnId ===
+              registeredProjection.selectedProductTurnIds[
+                selected.productTurnIds.indexOf(result.productTurnId)
+              ],
+          ).length,
+          limit: capabilities.max_rows,
+        },
+      })),
     };
   }
 
@@ -1881,6 +1912,9 @@ export class ConversationShareService implements IConversationShareService {
         ...(typeof record?.status === "number" ? { status: record.status } : {}),
         ...(typeof record?.code === "number" ? { code: record.code } : {}),
         ...(typeof record?.requestId === "string" ? { requestId: record.requestId } : {}),
+        ...(error instanceof ConversationShareClientError && error.details?.clientRequestId
+          ? { clientRequestId: error.details.clientRequestId }
+          : {}),
         errorName:
           typeof record?.name === "string"
             ? record.name
@@ -1948,16 +1982,23 @@ export class ConversationShareService implements IConversationShareService {
     const selected = selectRows(conversation.rows, input.selection);
     // 无法公开承载的已定稿结构先降级：删字段或丢整行，换成非阻断提示，
     // 后续所有投影与产物发现都基于这份 sanitized rows。
-    const structureSanitized = sanitizeUnsupportedShareStructures(selected.rows);
+    const inlineImages = materializeConversationShareInlineImages(
+      removeIndependentArtifactRows(sanitizeUnsupportedShareStructures(selected.rows)),
+      capabilities,
+      turnOrdinalByProductTurn(conversation.rows),
+    );
     const artifactSanitized = sanitizeUnsupportedShareArtifacts(
-      removeIndependentArtifactRows(structureSanitized),
+      inlineImages.rows,
       capabilities,
       conversation.rows,
     );
     const selectedRows = artifactSanitized.rows;
-    const publishWarnings: ConversationShareFailureIssue[] = [...artifactSanitized.warnings];
-    // 公开投影不能遇到第一个不支持结构就直接退出，用户要知道还有哪些轮次需要取消；
-    // 先完成整组选中内容的结构预检，返回脱敏 issues 让 UI 给出逐项可操作建议。
+    const publishWarnings: ConversationShareFailureIssue[] = [
+      ...inlineImages.warnings,
+      ...artifactSanitized.warnings,
+    ];
+    // 修复原因：此前公开投影遇到第一个不支持结构就直接退出，用户无法知道还有哪些轮次需要取消；
+    // 现在先完成整组选中内容的结构预检，返回脱敏 issues 让 UI 给出逐项可操作建议。
     const structureIssues = collectShareStructureIssues(selectedRows, conversation.rows);
     if (structureIssues.length > 0) {
       const structureKind = structureIssues.some(
@@ -1993,6 +2034,7 @@ export class ConversationShareService implements IConversationShareService {
       input,
       selectedRows,
       registeredArtifacts: registeredProjection.artifacts,
+      inlineBytesBySourceRef: inlineImages.bytesBySourceRef,
       capabilities,
       revision: conversation.revision,
       logEpoch: conversation.logEpoch,
@@ -2012,7 +2054,7 @@ export class ConversationShareService implements IConversationShareService {
     }
     if (publishWarnings.length > 0) {
       // 非阻断：正文引用的文件或用户输入附件无法物化时，发布照常继续，但要让分享者
-      // 知道哪些真实文件没有进入链接；内部 marker/inline image 已在前面静默移除。
+      // 知道哪些真实文件没有进入链接；内部 marker 已移除，内嵌图片已转换为 artifact。
       report("collecting", 0, 0, sanitizeConversationShareIssues(publishWarnings));
     }
     const publicProjection = buildConversationSharePublicProjection({
