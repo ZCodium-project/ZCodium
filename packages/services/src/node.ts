@@ -148,7 +148,7 @@ export { createFileWatcherService } from "./fileWatcher/fileWatcherService.js";
 export { createOAuthService } from "./oauth/oauthService.js";
 export { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js";
 export { OAuthCredentialRepo } from "./oauth/repo/oauthCredentialRepo.js";
-// 审计版：设备身份由原业务所有者 device/deviceMid.ts 提供，移除 telemetryCore 的 createTelemetryCore；
+// 审计版：设备身份由原业务所有者 device/deviceMid.ts 提供，移除独立遥测核心模块；
 // 保留 ensureTelemetryDeviceMid 名称以兼容上游仍引用该名称的调用点。
 export { ensureDeviceMid, ensureDeviceMid as ensureTelemetryDeviceMid } from "./device/deviceMid.js";
 export type {
@@ -568,7 +568,6 @@ import {
   ZCODE_CUA_PLUGIN_AUTHORITY_ENV_KEY,
   type ZCodeAutomation,
   type ZCodeAutomationRun,
-  getCapturedZCodeAgentTelemetryEnv,
   ZAI_PROVIDER_ID,
   zcodeAccountAccessSchema,
   zcodeProviderAccountAccessSchema,
@@ -2711,32 +2710,6 @@ export function createTelemetryUserIdLoader(
       // 对损坏凭据做半套清理；否则会漏掉派生模型 provider key 的 logout 收口。
       log.warn(undefined, "skip telemetry user id: OAuth credential decrypt failed", error);
       return "";
-    }
-  };
-}
-
-/** 仅给同一事件账号返回当前 ZCode JWT；不缓存、不修改登录凭据。 */
-export function createTelemetryAuthorizationLoader(
-  credentialService: Pick<ICredentialService, "load">,
-): (userId: string) => Promise<string | null> {
-  return async (userId) => {
-    if (!userId) return null;
-    try {
-      const provider = (await credentialService.load("oauth:active_provider"))?.trim();
-      if (provider !== "zai" && provider !== "bigmodel") return null;
-      const readUserId = async () =>
-        readTelemetryOAuthUserId(await credentialService.load(`oauth:${provider}:user_info`));
-      if ((await readUserId()) !== userId) return null;
-      const jwt = (await credentialService.load("zcodejwttoken"))?.trim();
-      // 退出/切账号可能发生在异步读取期间；禁止将旧身份的 token 附到其他账号事件上。
-      if (
-        (await credentialService.load("oauth:active_provider"))?.trim() !== provider ||
-        (await readUserId()) !== userId
-      )
-        return null;
-      return jwt && /^[\x21-\x7e]+$/.test(jwt) ? `Bearer ${jwt}` : null;
-    } catch {
-      return null;
     }
   };
 }
