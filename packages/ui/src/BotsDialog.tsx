@@ -45,8 +45,8 @@ import {
   BotReplyGranularityCard,
   BotSummaryCard,
 } from "@/BotsDialog/BotSummaryCard.js";
-import { AstrBotSettingsCard, ASTRBOT_PLUGIN_URL } from "@/BotsDialog/AstrBotSettingsCard.js";
 import { ProviderSettingsCard } from "@/BotsDialog/ProviderSettingsCard.js";
+import { BoundGroupsCard } from "@/BotsDialog/BoundGroupsCard.js";
 import { WorkspaceAccessCard } from "@/BotsDialog/WorkspaceAccessCard.js";
 import { SettingsGroupCard } from "@/settings/SettingsPageParts.js";
 import {
@@ -1031,19 +1031,19 @@ export function BotsDialog({
         onEscapeKeyDown={handleDialogEscapeKeyDown}
       >
         <DialogHeader>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Bot className="size-5 text-foreground" />
-            <DialogTitle className="text-lg font-medium text-foreground">
+            <DialogTitle className="text-ui-lg font-medium text-foreground">
               {intl.formatMessage({ id: "bots.title" })}
             </DialogTitle>
-            <DialogDescription className="ms-3">
+            <DialogDescription className="ml-3">
               {intl.formatMessage({ id: "bots.description" })}
             </DialogDescription>
           </div>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 gap-3">
-          <aside className="flex w-64 shrink-0 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 md:flex-row">
+          <aside className="flex max-h-40 w-full shrink-0 flex-col md:max-h-none md:w-64">
             <div className="min-h-0 flex-1 overflow-y-auto">
               <Button
                 type="button"
@@ -1078,7 +1078,7 @@ export function BotsDialog({
                         setSelectedBotId(bot.id);
                       }}
                       className={cn(
-                        "mb-1 w-full rounded-xl px-2.5 pe-4 py-3 text-start transition-colors",
+                        "mb-1 w-full rounded-xl px-2.5 pr-4 py-3 text-left transition-colors",
                         selected
                           ? "bg-surface-hover text-foreground"
                           : "text-foreground-subtle hover:bg-surface-hover hover:text-foreground",
@@ -1135,7 +1135,7 @@ export function BotsDialog({
                         aria-busy={isCreatingThisProvider}
                         onClick={() => (implemented ? void handleAddBot(provider.id) : undefined)}
                         className={cn(
-                          "flex items-start gap-3 rounded-lg border border-card-border bg-card py-4 px-3 text-start transition-colors",
+                          "flex items-start gap-3 rounded-lg border border-card-border bg-card py-4 px-3 text-left transition-colors",
                           implemented && !isCreatingAnyProvider
                             ? "hover:border-input-border-focused hover:bg-surface-hover"
                             : "cursor-not-allowed opacity-60",
@@ -1203,45 +1203,30 @@ export function BotsDialog({
                   onPatchBot={patchSelectedBot}
                 />
 
-                {selectedBot.provider === "astrbot" ? (
-                  <AstrBotSettingsCard
-                    bot={selectedBot}
-                    runtime={selectedRuntime}
-                    bindCode={bindCode}
-                    bindExpired={bindExpired}
-                    bindRemainingMs={bindRemainingMs}
-                    bindCountdownProgress={bindCountdownProgress}
-                    onCreateBindCode={() => void handleCreateBindCode()}
-                    onUnbind={() => void handleUnbind()}
-                    onCopyBindCommand={() => void copyBindCommand()}
-                    onOpenPlugin={() => platform.openExternal(ASTRBOT_PLUGIN_URL)}
-                  />
-                ) : (
-                  <ProviderSettingsCard
-                    bot={selectedBot}
-                    runtime={selectedRuntime}
-                    credentialValue={credentialValue}
-                    bindCode={bindCode}
-                    bindExpired={bindExpired}
-                    bindRemainingMs={bindRemainingMs}
-                    bindCountdownProgress={bindCountdownProgress}
-                    feishuRegistration={feishuRegistration}
-                    feishuRegistrationLoading={feishuRegistrationLoading}
-                    weixinRegistration={weixinRegistration}
-                    weixinRegistrationLoading={weixinRegistrationLoading}
-                    weixinActivated={Boolean(selectedBotState?.weixinActivatedAt)}
-                    secretSaving={secretSaving}
-                    onCredentialValueChange={setCredentialValue}
-                    onSaveSecret={() => void handleSaveSecret()}
-                    onRemoveSecret={() => void handleRemoveSecret()}
-                    onOpenTelegramBotFather={handleOpenTelegramBotFather}
-                    onStartWeixinRegistration={() => void handleStartWeixinRegistration()}
-                    onStartFeishuRegistration={() => void handleStartFeishuRegistration()}
-                    onCreateBindCode={() => void handleCreateBindCode()}
-                    onUnbind={() => void handleUnbind()}
-                    onCopyBindCommand={() => void copyBindCommand()}
-                  />
-                )}
+                <ProviderSettingsCard
+                  bot={selectedBot}
+                  runtime={selectedRuntime}
+                  credentialValue={credentialValue}
+                  bindCode={bindCode}
+                  bindExpired={bindExpired}
+                  bindRemainingMs={bindRemainingMs}
+                  bindCountdownProgress={bindCountdownProgress}
+                  feishuRegistration={feishuRegistration}
+                  feishuRegistrationLoading={feishuRegistrationLoading}
+                  weixinRegistration={weixinRegistration}
+                  weixinRegistrationLoading={weixinRegistrationLoading}
+                  weixinActivated={Boolean(selectedBotState?.weixinActivatedAt)}
+                  secretSaving={secretSaving}
+                  onCredentialValueChange={setCredentialValue}
+                  onSaveSecret={() => void handleSaveSecret()}
+                  onRemoveSecret={() => void handleRemoveSecret()}
+                  onOpenTelegramBotFather={handleOpenTelegramBotFather}
+                  onStartWeixinRegistration={() => void handleStartWeixinRegistration()}
+                  onStartFeishuRegistration={() => void handleStartFeishuRegistration()}
+                  onCreateBindCode={() => void handleCreateBindCode()}
+                  onUnbind={() => void handleUnbind()}
+                  onCopyBindCommand={() => void copyBindCommand()}
+                />
 
                 <SettingsGroupCard>
                   <BotReplyGranularityCard bot={selectedBot} onPatchBot={patchSelectedBot} />
@@ -1260,6 +1245,13 @@ export function BotsDialog({
                     onToggleWorkspaceAccess={toggleWorkspaceAccess}
                   />
                 </SettingsGroupCard>
+
+                {isFeishuBotProvider(selectedBot.provider) && (
+                  <BoundGroupsCard
+                    key={selectedBot.id + ":" + selectedBot.providerUserId}
+                    bot={selectedBot}
+                  />
+                )}
 
                 <BotDangerCard onDelete={() => void handleDelete()} />
               </div>

@@ -10,8 +10,18 @@ import { dismissToast, toast, updateToast } from "@/components/ui/toast.js";
 import { matchesPrimaryShortcut } from "@/lib/keyboardShortcuts.js";
 import { isShortcutRecordingActive } from "@/shortcuts/bindings.js";
 import { isRendererReloadNavigation } from "@/lib/rendererNavigation.js";
+import {
+  buildConnectedRemoteWorkspaceSessionTargets,
+  buildWebRemoteControlWorkspaceTargets,
+  shouldPublishCompleteWorkspaceSnapshot,
+} from "@/root/rootPlatformWorkspaceSync.js";
 import { useOptionalBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
-import { shouldPublishCompleteWorkspaceSnapshot } from "@/root/rootPlatformWorkspaceSync.js";
+import {
+  createShareImportIntent,
+  isShareImportIntentSame,
+  resolveShareImportFailurePresentation,
+  type ShareImportIntent,
+} from "@/root/shareImportIntent.js";
 
 export function useRootPlatformEffects({
   initialWorkspaceAbsPath,
@@ -37,6 +47,8 @@ export function useRootPlatformEffects({
   reconnectingRemoteWorkspaceKeys = [],
   remoteWorkspaceErrorByWorkspaceKey = {},
   totalUnreadTaskCount,
+  webRemoteControlFeatureEnabled = false,
+  webRemoteControlSessionActive = false,
   hasCompletedFullTabRestore = true,
   intl,
   isRestoringOAuthSession,
@@ -70,12 +82,20 @@ export function useRootPlatformEffects({
   reconnectingRemoteWorkspaceKeys?: string[];
   remoteWorkspaceErrorByWorkspaceKey?: Record<string, string>;
   totalUnreadTaskCount: number;
+  webRemoteControlFeatureEnabled?: boolean;
+  webRemoteControlSessionActive?: boolean;
   hasCompletedFullTabRestore?: boolean;
   intl: ReturnType<typeof import("@/i18n/IntlProvider.js").useZCodeIntl>["intl"];
   isRestoringOAuthSession: boolean;
 }) {
   const didBootstrapInitialWorkspaceRef = useRef(false);
   const baseServices = useOptionalBaseWorkspaceServices();
+  const pendingShareImportRef = useRef<ShareImportIntent | null>(null);
+  const [shareImportRevision, setShareImportRevision] = useState(0);
+  const activeShareImportRef = useRef<ShareImportIntent | null>(null);
+  const importOperationRef = useRef<string | null>(null);
+  const lastImportProgressToastRef = useRef<{ phase: string; at: number } | null>(null);
+  const importToastIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     // 启动时必须先判断 OAuth 本地会话，再恢复历史/初始 workspace。
@@ -159,6 +179,37 @@ export function useRootPlatformEffects({
           openWorkspacePath(path);
         })
       : () => {};
+    const disposeShareImport = platform.onShareImport
+      ? platform.onShareImport((payload) => {
+          const current = pendingShareImportRef.current ?? activeShareImportRef.current;
+          if (current && isShareImportIntentSame(current, payload)) {
+            logger.info("[Root] 忽略重复的 share import deep link", {
+              shareCodeLength: payload.shareCode.length,
+            });
+            return;
+          }
+          const activeTab = tabs.find(
+            (tab): tab is Extract<WindowTabState, { kind: "workspace" }> =>
+              tab.kind === "workspace" &&
+              tab.workspacePath === activeWorkspacePath &&
+              (activeWorkspaceIdentity
+                ? tab.workspaceIdentity === activeWorkspaceIdentity
+                : !tab.workspaceIdentity),
+          );
+          pendingShareImportRef.current = createShareImportIntent(payload.shareCode, undefined, {
+            ...(activeWorkspacePath ? { targetWorkspacePath: activeWorkspacePath } : {}),
+            ...(activeWorkspaceIdentity
+              ? { targetWorkspaceIdentity: activeWorkspaceIdentity }
+              : {}),
+            targetWorkspaceKind:
+              activeTab?.remoteSessionId || activeTab?.remoteTarget ? "remote" : "local",
+          });
+          setShareImportRevision((revision) => revision + 1);
+          logger.info("[Root] 收到 share import deep link", {
+            shareCodeLength: payload.shareCode.length,
+          });
+        })
+      : () => {};
     const disposeNotificationClick = platform.onTaskNotificationClick((taskId: string) => {
       logger.info("[Root] onTaskNotificationClick:", taskId);
       // 遍历所有 workspace 找到 taskId 所属的 workspace，然后激活对应 tab 并切换任务
@@ -234,11 +285,218 @@ export function useRootPlatformEffects({
       disposeNewTask();
       disposeOpenWorkspace();
       disposeOpenWorkspacePath();
+      disposeShareImport();
       disposeNotificationClick();
       disposeUpdateCheckResult();
     };
   }, [activeWorkspaceIdentity, activeWorkspacePath, platform, tabs]);
 
+  useEffect(() => {
+    const pending = pendingShareImportRef.current;
+    if (!pending || !baseServices || activeShareImportRef.current || importOperationRef.current) {
+      return;
+    }
+    if (isRestoringOAuthSession) {
+      return;
+    }
+
+    // 分享页 Deep Link 不应在 Root 层按登录态分叉；未登录与已登录都
+    // 走同一份 continuation/import 流程。公开可导入分享由接口自身决定是否可用。
+    pending.status = "importing";
+    pendingShareImportRef.current = null;
+    activeShareImportRef.current = pending;
+    if (importToastIdRef.current !== null) {
+      dismissToast(importToastIdRef.current);
+      importToastIdRef.current = null;
+    }
+    const operationId = `share-import-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`;
+    importOperationRef.current = operationId;
+    lastImportProgressToastRef.current = null;
+    const progressEvent =
+      baseServices.conversationShareService.onDynamicImportProgress(operationId);
+    const disposeProgress = progressEvent((progress) => {
+      const now = Date.now();
+      const last = lastImportProgressToastRef.current;
+      if (
+        last &&
+        last.phase === progress.phase &&
+        now - last.at < 800 &&
+        progress.phase !== "complete"
+      ) {
+        return;
+      }
+      // complete 只表示导入事务已经收口；成功结果会在下方统一替换进度提示，避免短暂闪过
+      // “导入完成”后又紧接着出现“已从分享导入”的两条成功 Toast。
+      if (progress.phase === "complete") {
+        return;
+      }
+      lastImportProgressToastRef.current = { phase: progress.phase, at: now };
+      const label =
+        progress.phase === "downloading"
+          ? intl.formatMessage(
+              { id: "conversationShare.import.downloading" },
+              { completed: progress.completedArtifacts, total: progress.totalArtifacts },
+            )
+          : progress.phase === "installing"
+            ? intl.formatMessage({ id: "conversationShare.import.installing" })
+            : intl.formatMessage({ id: "conversationShare.import.committing" });
+      if (importToastIdRef.current === null) {
+        importToastIdRef.current = toast(label, { durationMs: 0, variant: "info" });
+      } else {
+        updateToast(importToastIdRef.current, {
+          message: label,
+          durationMs: 0,
+          variant: "info",
+          actionLabel: undefined,
+          onAction: undefined,
+          dismissible: false,
+        });
+      }
+    });
+
+    void baseServices.conversationShareService
+      .importShare(
+        {
+          shareCode: pending.shareCode,
+          clientRequestId: pending.clientRequestId,
+          ...(pending.targetWorkspacePath
+            ? { targetWorkspacePath: pending.targetWorkspacePath }
+            : {}),
+          ...(pending.targetWorkspaceIdentity
+            ? { targetWorkspaceIdentity: pending.targetWorkspaceIdentity }
+            : {}),
+          ...(pending.targetWorkspaceKind
+            ? { targetWorkspaceKind: pending.targetWorkspaceKind }
+            : {}),
+          locale,
+        },
+        operationId,
+      )
+      .then((result) => {
+        pending.status = "complete";
+        // 先准备实际落地工作区的独立草稿，再激活；复用导入不覆盖会话选择。
+        seedImportedSessionDraft(result);
+        const activated = activateTabByPath(
+          result.workspacePath,
+          result.workspaceIdentity ? { workspaceIdentity: result.workspaceIdentity } : undefined,
+        );
+        if (!activated) {
+          addTab(result.workspacePath, {
+            ...(result.workspaceIdentity ? { workspaceIdentity: result.workspaceIdentity } : {}),
+            workspacePurpose: "conversation",
+          });
+        }
+        const sessionStore = useZCodeSessionStore.getState();
+        sessionStore.setActiveTaskId(
+          result.workspacePath,
+          result.sessionId,
+          result.workspaceIdentity,
+        );
+        // 导入可能复用当前已打开的 session；仅 setActiveTaskId 不会产生可观察的切换。
+        // 每次成功都显式发出一次定位请求，目标 pane 准备好分享内容后再消费。
+        sessionStore.requestTimelineBottom(
+          result.workspacePath,
+          result.sessionId,
+          result.workspaceIdentity,
+        );
+        // 回退过的导入会落在与用户当前所看不同的 workspace，必须讲清落在哪、为何回退，
+        // 否则用户只会看到会话“跑到别处去了”。
+        const resultMessage = result.fallbackReason
+          ? intl.formatMessage(
+              {
+                id:
+                  result.fallbackReason === "remote_workspace"
+                    ? "conversationShare.import.fallbackRemoteWorkspace"
+                    : "conversationShare.import.fallbackDefaultWorkspace",
+              },
+              { title: result.title, workspacePath: result.workspacePath },
+            )
+          : intl.formatMessage({ id: "conversationShare.import.source" }, { title: result.title });
+        const resultToastOptions = {
+          durationMs: result.fallbackReason ? 7000 : 3000,
+          variant: result.fallbackReason ? ("info" as const) : ("default" as const),
+          actionLabel: undefined,
+          onAction: undefined,
+          dismissible: false,
+        };
+        if (importToastIdRef.current === null) {
+          importToastIdRef.current = toast(resultMessage, resultToastOptions);
+        } else {
+          updateToast(importToastIdRef.current, { message: resultMessage, ...resultToastOptions });
+        }
+      })
+      .catch((error) => {
+        pending.status = "failed";
+        const record = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
+        const kind = typeof record.kind === "string" ? record.kind : "unknown";
+        const reasonCode = typeof record.reasonCode === "string" ? record.reasonCode : undefined;
+        const firstIssue = Array.isArray(record.issues) ? record.issues[0] : undefined;
+        const firstIssueRecord =
+          firstIssue && typeof firstIssue === "object" && !Array.isArray(firstIssue)
+            ? (firstIssue as Record<string, unknown>)
+            : undefined;
+        const artifactDisplayName =
+          typeof firstIssueRecord?.artifactDisplayName === "string"
+            ? firstIssueRecord.artifactDisplayName
+            : undefined;
+        logger.warn("[Root] share import failed", {
+          operationId,
+          clientRequestId: pending.clientRequestId,
+          kind,
+          ...(reasonCode ? { reasonCode } : {}),
+          ...(typeof record.issueCount === "number" ? { issueCount: record.issueCount } : {}),
+        });
+        const failurePresentation = resolveShareImportFailurePresentation(kind);
+        const retryImport = () => {
+          pending.status = "received";
+          pendingShareImportRef.current = pending;
+          setShareImportRevision((revision) => revision + 1);
+        };
+        const detailedMessageId =
+          artifactDisplayName && kind === "invalid_contract"
+            ? "conversationShare.import.integrityFailedWithArtifact"
+            : artifactDisplayName && kind === "network"
+              ? "conversationShare.import.failedWithArtifact"
+              : failurePresentation.messageId;
+        const failureMessage = intl.formatMessage(
+          { id: detailedMessageId },
+          artifactDisplayName ? { artifactDisplayName } : undefined,
+        );
+        const failureToastOptions = {
+          durationMs: 7000,
+          ...(failurePresentation.retryable
+            ? {
+                actionLabel: intl.formatMessage({ id: "conversationShare.import.retry" }),
+                onAction: retryImport,
+              }
+            : {}),
+          dismissible: true,
+          variant: "default" as const,
+        };
+        if (importToastIdRef.current === null) {
+          importToastIdRef.current = toast(failureMessage, failureToastOptions);
+        } else {
+          updateToast(importToastIdRef.current, {
+            message: failureMessage,
+            ...failureToastOptions,
+          });
+        }
+      })
+      .finally(() => {
+        disposeProgress.dispose();
+        activeShareImportRef.current = null;
+        importOperationRef.current = null;
+        setShareImportRevision((revision) => revision + 1);
+      });
+  }, [
+    activateTabByPath,
+    addTab,
+    baseServices,
+    intl,
+    isRestoringOAuthSession,
+    locale,
+    shareImportRevision,
+  ]);
 
   useEffect(() => {
     if (!isDesktop || !shouldPublishCompleteWorkspaceSnapshot(hasCompletedFullTabRestore)) {
@@ -254,6 +512,44 @@ export function useRootPlatformEffects({
       .map((tab) => tab.workspacePath);
     platform.syncWindowTabs(paths);
   }, [hasCompletedFullTabRestore, isDesktop, platform, tabs]);
+
+  useEffect(() => {
+    if (
+      !isDesktop ||
+      !shouldPublishCompleteWorkspaceSnapshot(hasCompletedFullTabRestore) ||
+      !platform.syncWebRemoteControlWorkspaces
+    ) {
+      return;
+    }
+
+    const connectedRemoteWorkspaces = buildConnectedRemoteWorkspaceSessionTargets({ tabs });
+    if (connectedRemoteWorkspaces.length > 0) {
+      // Bugfix: Bot 远端连接状态查询依赖 main 进程里 remoteSessionId -> workspaceIdentity 的绑定。
+      // 之前这条绑定复用 Web 远控 workspace 同步，Web 远控未开启时不会执行，导致 UI 已连接但 Bot 误判未连接。
+      platform.syncWebRemoteControlWorkspaces(connectedRemoteWorkspaces);
+    }
+
+    if (!webRemoteControlFeatureEnabled || !webRemoteControlSessionActive) {
+      return;
+    }
+
+    const workspaces = buildWebRemoteControlWorkspaceTargets({
+      tabs,
+      reconnectingRemoteWorkspaceKeys,
+      remoteWorkspaceErrorByWorkspaceKey,
+    });
+
+    platform.syncWebRemoteControlWorkspaces(workspaces);
+  }, [
+    hasCompletedFullTabRestore,
+    isDesktop,
+    platform,
+    reconnectingRemoteWorkspaceKeys,
+    remoteWorkspaceErrorByWorkspaceKey,
+    tabs,
+    webRemoteControlFeatureEnabled,
+    webRemoteControlSessionActive,
+  ]);
 
   useEffect(() => {
     if (isDesktop) {

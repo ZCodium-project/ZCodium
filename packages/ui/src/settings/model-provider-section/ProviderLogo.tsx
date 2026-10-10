@@ -48,7 +48,7 @@ const BUILTIN_PROVIDER_LOGO_ASSETS: Readonly<Record<string, BuiltinProviderLogoA
   orcarouter: { light: orcaRouterLogo },
 };
 
-function resolveBuiltinProviderLogoAsset(
+export function resolveBuiltinProviderLogoAsset(
   logo: ProviderLogoRef | null | undefined,
   theme: ResolvedTheme,
 ): string | null {

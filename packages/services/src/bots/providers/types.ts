@@ -55,10 +55,36 @@ export interface BotProviderAcknowledgeResult {
 export type BotTaskLifecyclePhase = "started" | "awaiting_input" | "completed" | "failed";
 
 export interface BotProviderAdapter {
+  readTopicResourceMessage?(
+    bot: BotConfig,
+    target: { messageId: string; chatId: string; threadId: string },
+    signal?: AbortSignal,
+  ): Promise<import("#src/bots/topicResource.js").TopicResourceMessage>;
+  resolveTopic?(
+    bot: BotConfig,
+    actor: BotActor,
+  ): Promise<{ threadId: string; rootMessageId: string; topicTitle: string; topicUrl?: string }>;
+  readTopicHistory?(
+    bot: BotConfig,
+    request: import("@zcode/shared").BotTopicHistoryRequest,
+  ): Promise<import("@zcode/shared").BotTopicHistoryBatch>;
+  getGroupMemberNames?(bot: BotConfig, chatId: string): Promise<Record<string, string>>;
+  getGroupInfo?(
+    bot: BotConfig,
+    chatId: string,
+  ): Promise<{ name: string; chatMode?: "group" | "topic" }>;
   test(bot: BotConfig): Promise<{ ok: boolean; message: string }>;
   resolveName?(bot: BotConfig): Promise<string | null>;
   syncCommands?(bot: BotConfig): Promise<void>;
-  send(bot: BotConfig, message: BotOutboundMessage): Promise<void>;
+  send(
+    bot: BotConfig,
+    message: BotOutboundMessage,
+  ): Promise<void | BotTransientInteractionCardHandle>;
+  updateInputReaction?(
+    bot: BotConfig,
+    messageId: string,
+    state: import("#src/bots/providers/groupInputReaction.js").GroupInputReaction,
+  ): Promise<void>;
   sendTyping?(bot: BotConfig, target: BotTypingTarget): Promise<void>;
   startTyping?(bot: BotConfig, target: BotTypingTarget): Promise<void>;
   stopTyping?(bot: BotConfig, target: BotTypingTarget): Promise<void>;
@@ -104,6 +130,7 @@ export interface BotProviderAdapter {
     bot: BotConfig,
     attachment: BotInboundAttachment,
     actor?: BotActor,
+    signal?: AbortSignal,
   ): Promise<BotProviderDownloadedAttachment | null>;
   /**
    * 任务流生命周期通知（可选）。仅在 provider 需要把官方轮次映射成自有传输信号时实现，

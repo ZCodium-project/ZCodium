@@ -1,30 +1,30 @@
+import { getPluginSandboxHost } from "./pluginSandbox/index.js";
 /* eslint-disable max-lines -- 桌面命令分发需要共享窗口与平台上下文，集中维护更便于一致性 */
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { app, BrowserWindow, dialog, session, shell } from "electron";
-import type { MessageBoxOptions } from "electron";
+import { readZCodeStdioTapDevState, setZCodeStdioTapDevEnabled } from "@zcode/services/node";
 import {
+  buildZCodeEndpointUrls,
   DEFAULT_ZCODE_ENDPOINT_ORIGIN,
   DesktopCommandIds,
+  REWARDS_PARTITION,
+  TEST_ZCODE_ENDPOINT_ORIGIN,
+  getCommunityUrlFromConfigs,
+  getFeedbackUrlFromConfig,
+  normalizeZCodeEndpointOrigin,
   PlatformChannels,
+  resolveHelpAppConfig,
+  resolveZCodeEndpointOrigin,
+  ZCODE_ENV,
+  ZCODE_PRODUCT_FLAVOR,
   type AppSettings,
   type DesktopCommandId,
   type Locale,
-  resolveRuntimeZCodeEndpointOrigin,
-  ZCODE_ENV,
-  ZCODE_PRODUCT_FLAVOR,
-  buildZCodeEndpointUrls,
-  getCommunityUrlFromConfigs,
-  getFeedbackUrlFromConfig,
-  resolveHelpAppConfig,
-  normalizeZCodeEndpointOrigin,
-  resolveZCodeEndpointOrigin,
 } from "@zcode/shared";
-import { readZCodeStdioTapDevState, setZCodeStdioTapDevEnabled } from "@zcode/services/node";
+import type { MessageBoxOptions } from "electron";
+import { app, BrowserWindow, dialog, session, shell } from "electron";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { showAboutDialog } from "./about.js";
 import { checkForUpdateMenuClick } from "./autoUpdater.js";
-import { exportLogs } from "./exportLogs.js";
-import { openResourceManager } from "./resourceManagerWindow.js";
 import { resolveCuaOsSupport } from "./cuaOsSupport.js";
 import { syncWindowControlsOverlayForZoomLevel } from "./desktopWindowButtonPosition.js";
 import {
@@ -36,6 +36,8 @@ import {
   resolveDesktopZoomFactorForLevel,
   resolveDesktopZoomLevelFromFactor,
 } from "./desktopZoom.js";
+import { exportLogs } from "./exportLogs.js";
+import { openResourceManager } from "./resourceManagerWindow.js";
 
 export const HELP_TOGGLE_DEV_TOOLS_MENU_ID = "help.toggle-dev-tools";
 export const HELP_TOGGLE_ZCODE_STDIO_TAP_MENU_ID = "help.toggle-zcode-stdio-tap";
@@ -50,7 +52,7 @@ function resolveTargetWindow(senderWindow?: BrowserWindow | null) {
 
   return BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0] ?? null;
 }
-function updateDesktopZoomLevel(
+export function updateDesktopZoomLevel(
   targetWindow: BrowserWindow | null | undefined,
   action: "reset" | "in" | "out",
 ) {
@@ -93,18 +95,19 @@ async function clearAllDataAndRelaunch(options: {
     title: "Clear All Data",
     message: "确定要清除所有数据吗？",
     detail:
-      "将删除 ~/.zcodium/v2（配置、凭据、日志）和浏览器缓存（localStorage）。操作不可恢复，清除后应用将自动重启。",
+      "将删除 ~/.zcode/v2（配置、凭据、日志）和浏览器缓存（localStorage）。操作不可恢复，清除后应用将自动重启。",
   });
   if (response !== 1) {
     return;
   }
 
+  await getPluginSandboxHost()?.clearBrowserData();
   const { rm } = await import("node:fs/promises");
   try {
     await rm(options.credentialsDir, { recursive: true, force: true });
-    options.logger.info("[clear-all-data] deleted ~/.zcodium/v2");
+    options.logger.info("[clear-all-data] deleted ~/.zcode/v2");
   } catch (error) {
-    options.logger.error("[clear-all-data] failed to delete ~/.zcodium/v2:", error);
+    options.logger.error("[clear-all-data] failed to delete ~/.zcode/v2:", error);
   }
 
   for (const win of BrowserWindow.getAllWindows()) {
@@ -139,6 +142,7 @@ export async function clearCodingPlanWebviewStorage(options: {
     // Coding Plan webview 使用独立持久 partition，默认窗口 session.clearStorageData()
     // 不会覆盖它；退出登录/清理数据时必须显式清除，避免旧账号 token 被下一次官网首屏读到。
     await session.fromPartition(CODING_PLAN_WEBVIEW_PARTITION).clearStorageData();
+    await session.fromPartition(REWARDS_PARTITION).clearStorageData();
     options.logger.info("[coding-plan-webview] cleared persistent partition storage");
   } catch (error) {
     options.logger.warn(
@@ -153,7 +157,7 @@ async function fetchRemoteAppConfig(fetchRemoteConfig?: () => Promise<unknown>):
   return fetchRemoteConfig();
 }
 
-function resolveLocalAppConfigPath(options?: {
+export function resolveLocalAppConfigPath(options?: {
   appPath?: string;
   isPackaged?: boolean;
   resourcesPath?: string;
@@ -308,7 +312,7 @@ function buildZCodeEndpointPromptHtml(currentValue: string): string {
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ZCodium Endpoint</title>
+    <title>ZCode Endpoint</title>
     <style>
       :root { color-scheme: light dark; }
       body { margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
@@ -321,9 +325,9 @@ function buildZCodeEndpointPromptHtml(currentValue: string): string {
   </head>
   <body>
     <form id="form">
-      <label for="endpoint">ZCodium endpoint origin</label>
-      <input id="endpoint" value="${value}" placeholder="https://endpoint.example.com" spellcheck="false" />
-      <div class="hint">Use an http or https origin, for example https://endpoint.example.com.</div>
+      <label for="endpoint">ZCode endpoint origin</label>
+      <input id="endpoint" value="${value}" placeholder="https://zcode.z.ai" spellcheck="false" />
+      <div class="hint">Use an http or https origin, for example https://zcode.z.ai.</div>
       <div class="actions">
         <button id="cancel" type="button">Cancel</button>
         <button type="submit">Save</button>
@@ -360,7 +364,7 @@ function showZCodeEndpointPromptWindow(options: {
       resizable: false,
       minimizable: false,
       maximizable: false,
-      title: "ZCodium Endpoint",
+      title: "ZCode Endpoint",
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
@@ -634,7 +638,7 @@ export async function executeDesktopCommand(options: {
       return;
     case DesktopCommandIds.SetZCodeEndpointTest:
       await setZCodeEndpointOverride({
-        value: options.zcodeEndpointEnvBaseOrigin ?? resolveRuntimeZCodeEndpointOrigin(),
+        value: TEST_ZCODE_ENDPOINT_ORIGIN,
         settingService: options.settingService,
         onZCodeEndpointChanged: options.onZCodeEndpointChanged,
         logger: options.logger,
@@ -657,7 +661,7 @@ export async function executeDesktopCommand(options: {
       } catch (error) {
         await showMessageBoxWithOptionalParent(targetWindow, {
           type: "error",
-          title: "ZCodium Endpoint",
+          title: "ZCode Endpoint",
           message: "Endpoint 无效",
           detail: error instanceof Error ? error.message : String(error),
         });

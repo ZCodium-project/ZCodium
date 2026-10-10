@@ -1,13 +1,26 @@
 import { GitGraph, GitMergeIcon, RefreshCwIcon } from "lucide-react";
-import { useCallback, useMemo, useState, type UIEvent } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type UIEvent,
+} from "react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { GitGraphCommitDetail } from "./GitGraphCommitDetail.js";
-import { formatCommitTime, getRefIcon, getShortHash } from "./GitGraphDisplay.js";
-import { type GitGraphCommit, type GitGraphLayoutPath, layoutGitGraph } from "./layout.js";
+import {
+  formatCommitTime,
+  getRefIcon,
+  getShortHash,
+} from "./GitGraphDisplay.js";
+import {
+  type GitGraphCommit,
+  type GitGraphLayoutPath,
+  layoutGitGraph,
+} from "./layout.js";
 
-interface GitGraphPaneProps {
+export interface GitGraphPaneProps {
   commits: readonly GitGraphCommit[];
   hasMore?: boolean;
   loadingMore?: boolean;
@@ -74,7 +87,8 @@ export function GitGraphPane({
   const highlightedHash = hoveredCommitHash;
   const tableColumnStyle = getTableColumnStyle();
   const graphColumnWidth = Math.max(layout.width + 12, GRAPH_COLUMN_MIN_WIDTH_PX);
-  const expandedCommit = commits.find((commit) => commit.hash === expandedCommitHash) ?? null;
+  const expandedCommit =
+    commits.find((commit) => commit.hash === expandedCommitHash) ?? null;
   const handleGraphScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
       if (!hasMore || loadingMore || !onLoadMore) {
@@ -82,7 +96,8 @@ export function GitGraphPane({
       }
 
       const target = event.currentTarget;
-      const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+      const distanceToBottom =
+        target.scrollHeight - target.scrollTop - target.clientHeight;
       if (distanceToBottom <= LOAD_MORE_SCROLL_THRESHOLD_PX) {
         onLoadMore();
       }
@@ -110,10 +125,12 @@ export function GitGraphPane({
               disabled={refreshing}
               aria-label={intl.formatMessage({ id: "gitGraph.refresh" })}
               title={intl.formatMessage({ id: "gitGraph.refresh" })}
-              className="me-8 text-foreground-subtle hover:text-foreground"
+              className="mr-8 text-foreground-subtle hover:text-foreground"
               onClick={onRefresh}
             >
-              <RefreshCwIcon className={cn("size-3.5", refreshing && "animate-spin")} />
+              <RefreshCwIcon
+                className={cn("size-3.5", refreshing && "animate-spin")}
+              />
             </Button>
           ) : null}
         </div>
@@ -140,20 +157,22 @@ export function GitGraphPane({
                 gridTemplateColumns: `minmax(${GRAPH_COLUMN_MIN_WIDTH_PX}px, ${layout.width + 12}px) minmax(0, 1fr)`,
               }}
             >
-              <div className="border-b border-e border-border bg-surface/60 px-3 py-2 text-ui-base font-medium text-foreground-subtle">
+              <div
+                className="border-b border-r border-border bg-surface/60 px-3 py-2 text-ui-base font-medium text-foreground-subtle"
+              >
                 {intl.formatMessage({ id: "gitGraph.column.graph" })}
               </div>
               <div
                 className="grid border-b border-border bg-surface/60 text-ui-base font-medium text-foreground-subtle"
                 style={tableColumnStyle}
               >
-                <div className="border-e border-border px-3 py-2">
+                <div className="border-r border-border px-3 py-2">
                   {intl.formatMessage({ id: "gitGraph.column.description" })}
                 </div>
-                <div className="border-e border-border px-3 py-2">
+                <div className="border-r border-border px-3 py-2">
                   {intl.formatMessage({ id: "gitGraph.column.date" })}
                 </div>
-                <div className="border-e border-border px-3 py-2">
+                <div className="border-r border-border px-3 py-2">
                   {intl.formatMessage({ id: "gitGraph.column.author" })}
                 </div>
                 <div className="px-3 py-2">
@@ -162,7 +181,7 @@ export function GitGraphPane({
               </div>
 
               <div
-                className="relative border-e border-border bg-background-alt/35"
+                className="relative border-r border-border bg-background-alt/35"
                 style={{ height: layout.height + layout.rowHeight }}
               >
                 <svg
@@ -180,7 +199,9 @@ export function GitGraphPane({
                       className={cn(
                         "fill-none stroke-[2] opacity-55 transition-opacity",
                         getLaneStrokeClass(path.laneIndex),
-                        highlightedHash && !isPathRelated(path, highlightedHash) && "opacity-30",
+                        highlightedHash &&
+                          !isPathRelated(path, highlightedHash) &&
+                          "opacity-30",
                         isPathRelated(path, highlightedHash) && "opacity-100",
                       )}
                     />
@@ -228,7 +249,7 @@ export function GitGraphPane({
                       key={row.commit.hash}
                       type="button"
                       className={cn(
-                        "grid w-full min-w-0 items-center border-y border-transparent text-start transition-colors",
+                        "grid w-full min-w-0 items-center border-y border-transparent text-left transition-colors",
                         "hover:bg-hover focus-visible:bg-hover focus-visible:outline-none",
                         isSelected && "border-b-border bg-selected",
                         isSelected && row.rowIndex > 0 && "border-t-border",
@@ -274,7 +295,7 @@ export function GitGraphPane({
                       </span>
                       <span
                         className={cn(
-                          "truncate border-s border-transparent px-3 text-ui-base text-foreground-subtle",
+                          "truncate border-l border-transparent px-3 text-ui-base text-foreground-subtle",
                           isSelected && "border-border",
                         )}
                       >
@@ -282,7 +303,7 @@ export function GitGraphPane({
                       </span>
                       <span
                         className={cn(
-                          "truncate border-s border-transparent px-3 text-ui-base font-medium text-foreground-subtle",
+                          "truncate border-l border-transparent px-3 text-ui-base font-medium text-foreground-subtle",
                           isSelected && "border-border",
                         )}
                       >
@@ -290,7 +311,7 @@ export function GitGraphPane({
                       </span>
                       <span
                         className={cn(
-                          "truncate border-s border-transparent px-3 font-mono text-ui-base text-foreground-subtle",
+                          "truncate border-l border-transparent px-3 font-mono text-ui-base text-foreground-subtle",
                           isSelected && "border-border",
                         )}
                       >

@@ -5,19 +5,11 @@ import { HookEventName as HookEventNameValue } from "@zcode/contracts";
 import { fileExists, isRecord, resolveInside } from "./helpers.js";
 import type { LoadedPlugin } from "./types.js";
 
-const STANDARD_HOOKS_PATH = join("hooks", "hooks.json");
-/**
- * Codex 插件规范把 hooks 放在插件根 `hooks.json`；ZCodium 原实现只探测
- * `hooks/hooks.json`，Codex 布局的 hooks 会被静默丢弃。
- * 仅在标准位置缺席时读取根文件：多生态插件可能同时维护两份、内容按生态定制
- * （例如钩子命令里的变量前缀不同），ZCodium 的运行时语义对齐 Claude 语境，
- * 以 `hooks/hooks.json` 为准，避免两份 hook 同时触发。
- */
-const CODEX_HOOKS_PATH = "hooks.json";
+export const STANDARD_HOOKS_PATH = join("hooks", "hooks.json");
 
 const SUPPORTED_HOOK_EVENTS = new Set<string>(Object.values(HookEventNameValue));
 
-interface PluginHookSource {
+export interface PluginHookSource {
   rawHooks: unknown;
   sourcePath: string;
   wrapper: boolean;
@@ -34,25 +26,16 @@ export function listPluginHookSources(input: {
   const sources: PluginHookSource[] = [];
   const loadedHookPaths = new Set<string>();
   const standardHooksPath = join(input.loaded.rootPath, STANDARD_HOOKS_PATH);
-  const codexHooksPath = join(input.loaded.rootPath, CODEX_HOOKS_PATH);
 
-  // 优先 ZCode/Claude 约定的 hooks/hooks.json；缺席时回退到 Codex 的根 hooks.json。
-  let primaryHooksPath: string | undefined;
   if (fileExists(standardHooksPath)) {
-    primaryHooksPath = standardHooksPath;
-  } else if (fileExists(codexHooksPath)) {
-    primaryHooksPath = codexHooksPath;
-  }
-
-  if (primaryHooksPath) {
     const source = loadPluginHookSource({
       diagnostics: input.diagnostics,
       loaded: input.loaded,
-      path: primaryHooksPath,
+      path: standardHooksPath,
     });
     if (source) {
       sources.push(source);
-      loadedHookPaths.add(realpathOrSelf(primaryHooksPath));
+      loadedHookPaths.add(realpathOrSelf(standardHooksPath));
     }
   }
 
@@ -176,8 +159,7 @@ function loadPluginHookSource(input: {
   } catch (error) {
     input.diagnostics.push({
       code: "plugin_hook_read_failed",
-      message:
-        error instanceof Error ? error.message : `Failed to read plugin hooks: ${input.path}`,
+      message: error instanceof Error ? error.message : `Failed to read plugin hooks: ${input.path}`,
       path: input.path,
       pluginId: input.loaded.id,
       severity: "error",

@@ -1,53 +1,120 @@
-import { isOfficialServiceEnabled, ZCODE_VERSION, type ZCodeEnv } from "@zcode/shared";
+import { ZCODE_VERSION, type ZCodeEnv } from "@zcode/shared";
 
-declare const __ZCODE_CDN_BASE_URL__: string | undefined;
-declare const __ZCODIUM_REMOTE_ASSET_CDN_BASE_URL__: string | undefined;
-const DEFAULT_CDN_BASE_URL = "";
+declare const __ZCODE_REMOTE_CDN_RELEASE_ROOTS__: readonly string[] | undefined;
+
+const REMOTE_CDN_RELEASE_ROOTS = {
+  domestic: "https://cdn.codegeex.cn/zcode/electron/releases",
+  // 开发构建未注入 CDN_DOMAIN 时也须使用当前发布域名，避免仍请求旧域名。
+  overseas: "https://cdn-zcode.z.ai/zcode/electron/releases",
+} as const;
+const TEST_REMOTE_CDN_RELEASE_ROOT = "http://intranet.example.invalid:12345/ssh-remote-assets";
 
 export interface ResolveRemoteCdnOptions {
   env?: ZCodeEnv;
   locale?: string;
   timeZone?: string;
   overrideBaseUrl?: string;
-  /** 构建内置的自有发布源；测试可显式注入，生产从编译期 define 读取。 */
-  bundledBaseUrl?: string;
   version?: string;
   now?: Date;
 }
 
-function normalizeBaseUrl(value: string): string {
-  const url = new URL(value);
-  if (!["http:", "https:"].includes(url.protocol))
-    throw new Error("CDN URL must use http or https");
-  return value.replace(/\/+$/, "");
+function isChineseLocale(locale?: string | null): boolean {
+  return locale?.trim().toLowerCase().startsWith("zh") ?? false;
 }
 
-function readBundledRemoteAssetBaseUrl(): string {
-  // 发布构建注入本仓库该 tag 的 GitHub Release 资产地址；dev/本地构建为空串。
-  return typeof __ZCODIUM_REMOTE_ASSET_CDN_BASE_URL__ === "undefined"
-    ? ""
-    : __ZCODIUM_REMOTE_ASSET_CDN_BASE_URL__.trim();
+function resolveLocalTimeZone(): string | undefined {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export function isUtcPlusEightTimeZone(timeZone?: string | null, now: Date = new Date()): boolean {
+  const normalizedTimeZone = timeZone?.trim();
+  if (!normalizedTimeZone) {
+    return false;
+  }
+
+  const offsetMinutes = resolveTimeZoneOffsetMinutes(normalizedTimeZone, now);
+  return offsetMinutes === 8 * 60;
+}
+
+export function shouldPreferDomesticRemoteCdn(
+  options: Pick<ResolveRemoteCdnOptions, "locale" | "timeZone" | "now">,
+): boolean {
+  const timeZone = options.timeZone ?? resolveLocalTimeZone();
+  return isChineseLocale(options.locale) && isUtcPlusEightTimeZone(timeZone, options.now);
 }
 
 export function resolveRemoteCdnBaseUrls(options: ResolveRemoteCdnOptions = {}): string[] {
-  // 1) 用户显式覆盖：自有源，不受官方服务开关影响。
-  // 放在第一位，避免默认关闭的 marketplace 把自建源一起拦掉
-  //（表现为“连 WSL/SSH 需要先打开插件市场开关”）。
-  const override = options.overrideBaseUrl?.trim();
-  if (override) return [normalizeBaseUrl(override)];
+  const overrideBaseUrl = options.overrideBaseUrl?.trim();
+  if (overrideBaseUrl) {
+    return [normalizeBaseUrl(overrideBaseUrl)];
+  }
 
-  // 2) 发布构建内置的自有源（本仓库 GitHub Release 资产）：同样不是官方平台，
-  //    不受开关影响，安装后的客户端开箱即可连接 WSL/SSH，无需用户配置环境变量。
-  const bundled = options.bundledBaseUrl?.trim() || readBundledRemoteAssetBaseUrl();
-  if (bundled) return [normalizeBaseUrl(bundled)];
+  const orderedReleaseRoots = shouldPreferDomesticRemoteCdn(options)
+    ? [REMOTE_CDN_RELEASE_ROOTS.domestic, REMOTE_CDN_RELEASE_ROOTS.overseas]
+    : [REMOTE_CDN_RELEASE_ROOTS.overseas, REMOTE_CDN_RELEASE_ROOTS.domestic];
+  const version = options.version ?? ZCODE_VERSION;
 
-  // 3) 默认（或构建注入）的官方 CDN 仍由 marketplace 开关把关：审计版不自动连接官方 CDN。
-  if (!isOfficialServiceEnabled("marketplace")) return [];
-  const baseUrl =
-    process.env.ZCODE_CDN_BASE_URL?.trim() ||
-    (typeof __ZCODE_CDN_BASE_URL__ === "undefined" ? "" : __ZCODE_CDN_BASE_URL__) ||
-    DEFAULT_CDN_BASE_URL;
-  return [
-    `${normalizeBaseUrl(baseUrl)}/zcode/electron/releases/${options.version ?? ZCODE_VERSION}`,
-  ];
+  if (options.env === "test") {
+    return [`${TEST_REMOTE_CDN_RELEASE_ROOT}/${version}`];
+  }
+
+  const configuredReleaseRoots =
+    typeof __ZCODE_REMOTE_CDN_RELEASE_ROOTS__ === "undefined"
+      ? []
+      : __ZCODE_REMOTE_CDN_RELEASE_ROOTS__;
+  if (configuredReleaseRoots.length > 0) {
+    // Bugfix：remote runtime 的 manifest/components 下载根不能继续写死旧 CDN。
+    // 构建期按 CI 的 CDN_DOMAIN/OSS_PATH_PREFIX 注入有序列表，切换时只改 CI 变量。
+    return configuredReleaseRoots.map(
+      (releaseRoot) => `${normalizeBaseUrl(releaseRoot)}/${version}`,
+    );
+  }
+
+  return orderedReleaseRoots.map((releaseRoot) => `${releaseRoot}/${version}`);
+}
+
+export function resolvePrimaryRemoteCdnBaseUrl(
+  options: ResolveRemoteCdnOptions = {},
+): string | undefined {
+  return resolveRemoteCdnBaseUrls(options)[0];
+}
+
+function normalizeBaseUrl(baseUrl: string): string {
+  return baseUrl.replace(/\/+$/, "");
+}
+
+function resolveTimeZoneOffsetMinutes(timeZone: string, now: Date): number | null {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
+    const parts = formatter.formatToParts(now);
+    const values = Object.fromEntries(
+      parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]),
+    );
+    const year = Number(values.year);
+    const month = Number(values.month);
+    const day = Number(values.day);
+    const hour = Number(values.hour);
+    const minute = Number(values.minute);
+    const second = Number(values.second);
+    if ([year, month, day, hour, minute, second].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+
+    // 这里把目标时区“格式化后的人类时间”反算成 UTC，得到该时区相对 UTC 的真实偏移。
+    // 不能只按常见亚洲城市白名单判断，否则 UTC+8 但非中国命名的时区会被误判。
+    const targetUtcMs = Date.UTC(year, month - 1, day, hour, minute, second);
+    const currentUtcMs = now.getTime();
+    return Math.round((targetUtcMs - currentUtcMs) / 60_000);
+  } catch {
+    return null;
+  }
 }

@@ -6,17 +6,22 @@
 
 import { z } from "zod";
 import type { ZCodeTaskMigrationSource, ZCodeTaskMode } from "./zcode-task-types-core.js";
-import { zcodeAgentProviderSchema } from "./zcode-agent-policy.js";
+import { legacyZCodeProviderSchema } from "./zcode-agent-policy.js";
 import { zcodePermissionResponseSchema } from "./zcode-protocol-legacy-types.js";
 import { workspaceHookReviewDecisionSchema } from "./zcode-protocol-v4/workspace-hook-review.js";
 import { errorAttributionSchema } from "./zcode-protocol-v4/snapshot.js";
 
 const nonEmptyString = z.string().trim().min(1);
 const zcodeTaskModeRealtimeValues = [
+  "default",
   "yolo",
+  "guarded",
   "plan",
   "edit",
+  "acceptEdits",
   "auto",
+  "dontAsk",
+  "bypassPermissions",
   "autoEdit",
   "build",
 ] as const satisfies readonly ZCodeTaskMode[];
@@ -55,7 +60,8 @@ const taskMetaRealtimeSchema = z.object({
   mode: z.enum(zcodeTaskModeRealtimeValues),
   model: z.string().optional(),
   runtimeEpoch: z.number().int().nonnegative().optional(),
-  provider: zcodeAgentProviderSchema.optional(),
+  // relay payload 可能由旧版本桌面投影；历史 provider 值在此归一为 glm。
+  provider: legacyZCodeProviderSchema.optional(),
   migrationSource: z.enum(zcodeTaskMigrationSourceRealtimeValues).optional(),
   forkedFromTaskId: nonEmptyString.optional(),
   unreadAt: z.number().int().nonnegative().optional(),
