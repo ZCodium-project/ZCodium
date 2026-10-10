@@ -6,6 +6,8 @@ export const ZCODE_AGENT_PROVIDER = "glm" satisfies ZCodeProvider;
 export const ZCODE_AGENT_PROVIDER_LABEL = "ZCode Agent";
 export const ZCODE_COMMAND_AGENT_SOURCE = "zcodeAgent" satisfies CommandAgentSource;
 
+export const zcodeAgentProviderSchema = z.literal(ZCODE_AGENT_PROVIDER);
+
 /**
  * 解析持久化/relay 数据时的 provider 归一 schema：
  * 已移除的第三方 provider 历史值仅作为归一化输入保留，统一收敛为 glm；
