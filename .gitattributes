@@ -14,3 +14,8 @@ third-party/runtime/*.txt -text -whitespace
 docs/knip/docs/LICENSE -text -whitespace
 docs/knip/docs/licenses/** -text -whitespace
 third-party/inventory.json linguist-generated=true
+
+# visualize 插件的 vendor 快照在构建期按 sha256 逐字节校验
+# （packages/desktop/scripts/gen-ui-runtime-assets.mjs）；Windows checkout 的 CRLF
+# 转换会让哈希不匹配导致打包失败，必须按二进制保存。
+apps/zcode-cli/packages/visualize-plugin/skills/visualize/assets/vendor/** -text

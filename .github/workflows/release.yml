@@ -368,6 +368,14 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm typecheck
 
+      # Linux 打包：fpm 产 rpm 需要系统 rpmbuild 与 xz，产 pacman 需要 bsdtar（libarchive-tools）；
+      # GitHub ubuntu runner 未预装，按 docs/desktop-ci-cd.md 的兜底清单现场安装。
+      - name: Install Linux packaging tools
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm xz-utils libarchive-tools fakeroot
+
       - name: Bundle desktop app
         env:
           ZCODE_ENV: production
