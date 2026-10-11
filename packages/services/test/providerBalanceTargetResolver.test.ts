@@ -5,7 +5,7 @@
  * （zhipu-account）与套餐 Key（zhipu-coding-plan-api-key）属于官方链路，必须返回 null。
  */
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import type { IProviderSettingsService } from "../src/model-provider/providerFacadeServices.js";
 import { createProviderBalanceTargetResolver } from "../src/usage-stats/providers/providerBalanceTargetResolver.js";
 

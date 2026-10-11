@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import {
   ORCAROUTER_DEFAULT_API_BASE,
   ORCAROUTER_DEFAULT_AUTH_BASE,

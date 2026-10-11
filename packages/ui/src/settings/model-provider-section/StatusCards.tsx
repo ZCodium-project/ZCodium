@@ -727,7 +727,6 @@ function CodingPlanUsageSummaryCards({
   ]);
   const quotaResetDialog = buildCodingPlanQuotaResetDialogConfig({
     fiveHourEnabled: Boolean(fiveHourLimit),
-    fiveHourQuotaFull,
     resetUi,
     usageItems: cards.map((card) => {
       const percentage = resolveLimitRemainingPercentage(card.limit);
@@ -746,7 +745,6 @@ function CodingPlanUsageSummaryCards({
       };
     }),
     weekEnabled: Boolean(weeklyLimit),
-    weekQuotaFull: weeklyQuotaFull,
   });
 
   return (

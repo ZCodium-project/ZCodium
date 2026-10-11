@@ -51,13 +51,11 @@ export function WorkspaceHelpMenuButton({
   const { url: vulnerabilityReportUrl, loading: vulnerabilityReportLoading } =
     useVulnerabilityReportUrl(open);
   const updateMenu = useDesktopUpdateMenu(isDesktop);
-  const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const openFeatureRequest = useFeedbackStore((state) => state.openFeatureRequest);
   const helpMenuLabel = intl.formatMessage({ id: "workspaceHeader.help.menu" });
   const helpMenuActions = createHelpMenuActionHandlers({
     platform,
     intl,
-    openSubmit: openFeedbackSubmit,
   });
   const handleOpenCommunity = () => {
     void platform.openCommunity();

@@ -58,12 +58,10 @@ export function WindowsCaptionMenuButton({
   const { intl, locale } = useZCodeIntl();
   const newTaskShortcutLabel = useShortcutCommandLabel("newTask");
   const openWorkspaceShortcutLabel = useShortcutCommandLabel("openWorkspace");
-  const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const openFeatureRequest = useFeedbackStore((state) => state.openFeatureRequest);
   const helpMenuActions = createHelpMenuActionHandlers({
     platform,
     intl,
-    openSubmit: openFeedbackSubmit,
   });
   const [updateState, setUpdateState] = useState<UpdateStatePayload | null>(null);
   const [stdioTapDevState, setStdioTapDevState] = useState({

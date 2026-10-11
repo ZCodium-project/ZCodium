@@ -4,7 +4,7 @@ export const REWARDS_PARTITION = "persist:zcode-rewards";
 export const REWARDS_CONTEXT_EVENT = "zcode-rewards-context";
 export const rewardsContextSchema = z.object({
   theme: z.enum(["zai-light", "zai-dark"]),
-  locale: z.enum(["zh-CN", "en-US"]),
+  locale: z.enum(["zh-CN", "en-US", "fa-IR"]),
   auth: z.object({
     status: z.enum(["ready", "anonymous"]),
     provider: z.enum(["zai", "bigmodel"]).nullable(),

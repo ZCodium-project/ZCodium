@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import { homedir } from "node:os";
 
 // 未注入 ZCODE_DATA_BASE_DIR 时保持既有语义：设置文件发现的 dataBaseDir

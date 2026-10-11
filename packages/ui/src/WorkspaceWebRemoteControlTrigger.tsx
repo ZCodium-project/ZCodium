@@ -10,11 +10,15 @@ import { WebRemoteControlDialog } from "@/WebRemoteControlDialog.js";
 export function WorkspaceWebRemoteControlTrigger({
   workspacePath,
   workspaceIdentity,
+  remoteSessionId,
+  initialTaskId,
   compact = false,
   className,
 }: {
   workspacePath: string;
   workspaceIdentity?: string;
+  remoteSessionId?: string;
+  initialTaskId?: string;
   compact?: boolean;
   className?: string;
 }) {
@@ -62,6 +66,8 @@ export function WorkspaceWebRemoteControlTrigger({
         onOpenChange={setWebRemoteControlOpen}
         workspacePath={workspacePath}
         workspaceIdentity={workspaceIdentity}
+        remoteSessionId={remoteSessionId}
+        initialTaskId={initialTaskId}
       />
     </>
   );

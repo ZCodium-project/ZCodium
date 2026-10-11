@@ -23,7 +23,7 @@ export function installRewardsPageBridge() {
     if (
       !next ||
       !["zai-light", "zai-dark"].includes(next.theme) ||
-      !["zh-CN", "en-US"].includes(next.locale) ||
+      !["zh-CN", "en-US", "fa-IR"].includes(next.locale) ||
       !next.auth ||
       !["ready", "anonymous"].includes(next.auth.status) ||
       ![null, "zai", "bigmodel"].includes(next.auth.provider) ||

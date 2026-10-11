@@ -21,10 +21,7 @@ import { useOffPeakEligibility } from "@/hooks/useOffPeakEligibility.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import { logger } from "@/logger.js";
-import {
-  createIdleTimeCodingPlanFunnelContext,
-  resolveCodingPlanEntryPlanStateFromProviderSettings,
-} from "@/lib/codingPlanFunnelTelemetry.js";
+import { resolveCodingPlanEntryPlanStateFromProviderSettings } from "@/lib/codingPlanEntryPlanState.js";
 import {
   appendLocalCustomizeTemplate,
   materializeOffPeakTemplateDraft,
@@ -91,19 +88,9 @@ export function OffPeakNewTaskEntry({ onOpenAutomations }: OffPeakNewTaskEntryPr
                 sharedSettings?.providerFamilyDomain === "bigmodel"
                   ? BUILTIN_MODEL_PROVIDER_IDS.bigmodelIndividualCodingPlan
                   : BUILTIN_MODEL_PROVIDER_IDS.zaiIndividualCodingPlan;
-              const eventText = intl.formatMessage({
-                id: "settings.modelProvider.codingPlan.upgrade",
-              });
-              // 埋点缺失原因：闲时入口此前只传 providerId，购买面板无法建立来源明确的漏斗，
-              // OAuth 前后也没有可延续的归因上下文。点击时冻结一次 context，由全局弹窗跨登录持有。
               codingPlanUpgradeDialog?.openCodingPlanUpgrade({
                 providerId,
                 initialAudience: "personal",
-                funnelContext: createIdleTimeCodingPlanFunnelContext({
-                  providerId,
-                  eventText,
-                  entryPlanState,
-                }),
               });
             },
       dismissible: true,
@@ -124,13 +111,9 @@ export function OffPeakNewTaskEntry({ onOpenAutomations }: OffPeakNewTaskEntryPr
     // Bugfix：首页文案走 i18n、草稿却曾写死英文，导致中文系统点击模板后创建页中英混排。
     // 点击时按当前 locale 生成同源标题与指令；Customize 仍保持空白创建。
     const materialized = materializeOffPeakTemplateDraft(template, locale);
-    const draft: OffPeakCreateDraft = {
-      ...(template.customize ? {} : { title: materialized.title, prompt: materialized.prompt }),
-      telemetrySource: {
-        eventRegion: "app.session",
-        templateId: template.id,
-      },
-    };
+    const draft: OffPeakCreateDraft = template.customize
+      ? {}
+      : { title: materialized.title, prompt: materialized.prompt };
     setPendingCreateDraft(draft);
     onOpenAutomations?.();
   };

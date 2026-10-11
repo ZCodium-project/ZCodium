@@ -307,6 +307,8 @@ interface BotsServiceDeps {
   settingService?: ISettingService;
   modelSelectionService: Pick<IModelSelectionService, "getView">;
   remoteWorkspaceService?: BotRemoteWorkspaceService;
+  /** 由组合根注入的 AstrBot 桥接 provider；未注入时 astrbot 出站为空。 */
+  astrBotProvider?: BotProviderAdapter;
   repo?: BotsRepo;
   // 修复原因：desktop-attached 远端启动阶段不应抢跑 bot 轮询、runtime lock 和模型候选缓存；
   // 这些后台任务属于本地桌面 host，不属于 SSH/Docker 远端首屏连接路径。
@@ -844,6 +846,8 @@ export function createBotsService(
     }),
     discord: null,
     wecom: null,
+    // AstrBot 桥接 provider 由组合根注入；入站经 handleProviderCallback("astrbot", frame)。
+    astrbot: deps.astrBotProvider ?? null,
   };
   let service: IBotsService & {
     disposeAll(): void;

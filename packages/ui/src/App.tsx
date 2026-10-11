@@ -11,6 +11,9 @@ import { useGitRepository } from "@/hooks/useGitRepository.js";
 import { useAppKeyboard } from "@/hooks/useAppKeyboard.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useWorkspaceActiveTaskState } from "@/hooks/useWorkspaceActiveTaskState.js";
+import { useWorkspaceProviderConfigFile } from "@/hooks/useWorkspaceProviderConfigFile.js";
+import type { SavedWorkflowHubTarget } from "@/v4/savedWorkflowHubContext.js";
+import type { SavedWorkflowsOpenTarget } from "@/settings/saved-workflows/SavedWorkflowsSection.js";
 import { useEnsureWorkspaceMcpLoaded } from "@/hooks/useEnsureWorkspaceMcpLoaded.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
 import { isWorkspaceReadOnly, isWorkspaceTab } from "@/store/tabStore.js";
@@ -220,6 +223,7 @@ export function App({
     handleOpenBrowserUrl,
     handleToggleBrowser,
     handleOpenBrowserTab,
+    handleOpenBrowserPermissionSettings,
     handleToggleGit,
     handleOpenGit,
     handleOpenTreemapping,
@@ -377,6 +381,7 @@ export function App({
     activeTaskTitle,
     taskNativeSessionLogFile,
     taskSessionFile,
+    workspaceHeaderProvider,
   } = useWorkspaceActiveTaskState({
     workspaceAbsPath,
     activeTaskId,
@@ -385,6 +390,12 @@ export function App({
     selectedProvider: workspaceShellZCodeState.selectedProvider,
     intl,
   });
+  const providerConfigFile = useWorkspaceProviderConfigFile(
+    workspaceAbsPath,
+    workspaceHeaderProvider,
+    workspaceRemoteSessionId,
+    workspaceIdentity,
+  );
   const workspaceTabs = useMemo(
     () =>
       tabs.filter(isWorkspaceTab).map((tab) => ({
@@ -794,6 +805,12 @@ export function App({
   const testActions = useMemo<TestActions>(
     () => ({
       ...taskListE2EActions,
+      sendBotMessage: (message) => services.botsService.handleInboundMessage(message),
+      submitBotGroupInput: (params) => {
+        const submit = services.zcodeTaskService.submitBotGroupInput;
+        if (!submit) throw new Error("Task material admission unavailable");
+        return submit.call(services.zcodeTaskService, params);
+      },
       getTheme: () => theme,
       setTheme,
       getLocale: () => locale,
@@ -846,6 +863,9 @@ export function App({
     setOpenAutomationId(null);
     setOpenAutomationTab(null);
   }, []);
+  // 中枢深链（「已保存」芯片 → 那个工作流的详情页）：中枢定位后由它回调清空。
+  const [openWorkflow, setOpenWorkflow] = useState<SavedWorkflowsOpenTarget | null>(null);
+  const handleOpenWorkflowConsumed = useCallback(() => setOpenWorkflow(null), []);
   const {
     handleSelectTask,
     handleOpenAutomations,
@@ -865,6 +885,25 @@ export function App({
     onNavigateToAutomations: handleNavigateToAutomationsMain,
     onNavigateToPluginStore: handleNavigateToPluginStoreMain,
   });
+  // 完成卡「已保存」芯片的落点（docs/dynamic-workflow/transcript-and-notifications.md「Saving the
+  // run, and running it again」）：走「自动化」入口的同一条导航（进历史、切主视图），落在「工作流」
+  // 标签，再由深链把中枢定位到那一页。项目档按 workspaceKey 找组，全局档只要名字。
+  const handleOpenSavedWorkflowInHub = useCallback(
+    (target: SavedWorkflowHubTarget) => {
+      setOpenWorkflow(
+        target.scope === "global"
+          ? { scope: "global", name: target.name }
+          : {
+              scope: "project",
+              name: target.name,
+              // 身份 key 规则：identity 优先，本地路径兜底。
+              workspaceKey: target.workspaceIdentity?.trim() || target.workspacePath,
+            },
+      );
+      handleOpenAutomations(undefined, "workflow");
+    },
+    [handleOpenAutomations],
+  );
   const handleOpenPluginStoreForScope = useCallback(
     (_target: PluginStoreOpenTarget = {}) => {
       // Workspace Marketplace 已收敛为全局入口。兼容旧事件中的 Workspace key，但返回
@@ -1119,6 +1158,9 @@ export function App({
         openAutomationId={openAutomationId}
         openAutomationTab={openAutomationTab}
         onWorkspaceMainViewChange={setWorkspaceMainView}
+        openWorkflow={openWorkflow}
+        onOpenWorkflowConsumed={handleOpenWorkflowConsumed}
+        onOpenSavedWorkflowInHub={handleOpenSavedWorkflowInHub}
         onOpenAutomationConsumed={handleOpenAutomationConsumed}
         handleOpenAutomations={handleOpenAutomations}
         handleOpenPluginStore={handleOpenPluginStoreForScope}
@@ -1127,6 +1169,8 @@ export function App({
         onSelectRemoteProject={onSelectRemoteProject}
         onCancelRemoteProject={onCancelRemoteProject}
         onReconnectRemoteWorkspace={onReconnectRemoteWorkspace}
+        providerConfigFile={providerConfigFile}
+        handleOpenBrowserPermissionSettings={handleOpenBrowserPermissionSettings}
         onLogout={onLogout}
         onLogin={onLogin}
         user={user}

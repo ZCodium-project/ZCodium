@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 
 // 本文件必须在 ZCODE_DATA_BASE_DIR 已设置的前提下加载 paths 模块：
 // 模块加载期捕获 env，动态 import 保证捕获顺序。node:test 每个文件独立进程，

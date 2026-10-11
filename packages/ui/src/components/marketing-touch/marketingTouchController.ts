@@ -1,6 +1,6 @@
 import { createStore } from "zustand/vanilla";
 import type { IMarketingTouchService } from "@zcode/services";
-import type { MarketingAction, MarketingDelivery } from "@zcode/shared";
+import type { Locale, MarketingAction, MarketingDelivery } from "@zcode/shared";
 import type { CloudDialogHero } from "@/components/cloud-content-dialog/cloudContentDialogTypes.js";
 import type { PreparedMarketingHero } from "@/components/marketing-touch/marketingResources.js";
 import { logger } from "@/logger.js";
@@ -54,7 +54,7 @@ export function createMarketingTouchController(options: {
     signal: AbortSignal,
     phase: (phase: MarketingTouchState["phase"]) => void,
   ) => Promise<MarketingActionResult>;
-  locale: "zh-CN" | "en-US";
+  locale: Locale;
   canOpen: () => boolean;
   refresh: () => void;
 }) {
@@ -88,7 +88,7 @@ export function createMarketingTouchController(options: {
         scope: value.scope,
         campaignId: value.delivery.campaign_id,
         actionType,
-        locale: options.locale,
+        locale: options.locale === "zh-CN" ? "zh-CN" : "en-US",
       })
       .catch(() =>
         logger.warn("[marketing-touch] action report failed", {

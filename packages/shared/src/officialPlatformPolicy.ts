@@ -123,6 +123,9 @@ export function assertConversationShareRemoved(): void {
 
 export const ZCODIUM_ISSUES_URL = "https://github.com/ZCodium-project/ZCodium/issues";
 
+/** ZCodium 项目站点：审计结论、发布说明与文档入口。 */
+export const ZCODIUM_SITE_URL = "https://zcodium-project.github.io/";
+
 /**
  * 已下线功能的中文名：只用于报错文案。
  * 报错不能直接印英文 key——用户看到 "codingPlan 未开启" 无从判断是什么功能，

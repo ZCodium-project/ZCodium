@@ -281,6 +281,8 @@ export interface SessionPaneProps {
   workspaceIdentity?: string;
   remoteSessionId?: string | null;
   isDesktop?: boolean;
+  /** 手机远控（compact）模式：分享预检等桌面专属链路跳过，交互提交走权威恢复。 */
+  compactForRemoteControl?: boolean;
   provider?: ZCodeProvider;
   onSessionCreated?: (sessionId: string) => void;
   /** deleteSession：删除当前会话后回到 draft（shell 起新草稿）。 */
@@ -425,6 +427,8 @@ interface QueuedComposerRestoreTarget {
   config?: ComposerRestoreRequest["config"];
 }
 
+const MOBILE_PLAN_INTERACTION_RECONCILE_DELAY_MS = 500;
+
 function resolveQueuedComposerRestore(
   snapshot: ConversationSnapshot,
   queueItemId: string,
@@ -472,6 +476,7 @@ export function SessionPane({
   workspaceIdentity,
   remoteSessionId,
   isDesktop = false,
+  compactForRemoteControl = false,
   provider,
   onSessionCreated,
   onSelectionSideChatUnavailable,
@@ -724,7 +729,7 @@ export function SessionPane({
   }, [selectedShareProductTurnIds, sharePreflightCacheKey]);
   const shareHydratedSessionRef = useRef<string | null>(null);
   const sharePreflight = useMemo<ConversationShareSelectionPreflightState>(() => {
-    if (!shareInSelectionStage || !sessionId) {
+    if (!shareInSelectionStage || !sessionId || compactForRemoteControl) {
       return { status: "idle" };
     }
     if (selectedShareProductTurnIds.length === 0) {
@@ -763,6 +768,7 @@ export function SessionPane({
     sharePreflightCacheKey,
     shareInSelectionStage,
     sharePreflightVersion,
+    compactForRemoteControl,
   ]);
 
   useEffect(() => {
@@ -794,7 +800,12 @@ export function SessionPane({
     // 预检结果按 turn 缓存：选择/取消只重新聚合当前选中项，只有首次加入或 turn fingerprint
     // 变化才触发 RPC；发布阶段仍走独立的权威 stat/read/SHA 校验，不能把这里的缓存当成最终事实。
     const requestScopeKey = sharePreflightScopeKey;
-    if (!shareInSelectionStage || !sessionId || selectedShareProductTurnIds.length === 0) {
+    if (
+      !shareInSelectionStage ||
+      !sessionId ||
+      compactForRemoteControl ||
+      selectedShareProductTurnIds.length === 0
+    ) {
       return undefined;
     }
     const missingProductTurnIds = getMissingConversationSharePreflightTurnIds(
@@ -902,6 +913,7 @@ export function SessionPane({
     return () => clearTimeout(timer);
   }, [
     conversationShareService,
+    compactForRemoteControl,
     remoteSessionId,
     selectedShareProductTurnIds,
     selectedShareTurnFingerprints,
@@ -926,6 +938,32 @@ export function SessionPane({
       timers.clear();
     };
   }, [lease, sessionId]);
+  const handleMobilePlanInteractionAccepted = useCallback(
+    (interactionId: string) => {
+      if (!compactForRemoteControl || !lease) return;
+      const timers = mobilePlanInteractionReconcileTimersRef.current;
+      if (timers.has(interactionId)) return;
+      const timer = setTimeout(() => {
+        timers.delete(interactionId);
+        const authoritativeSnapshot = lease.store.getState().snapshot;
+        const stillPending = authoritativeSnapshot?.pendingInteractions.some(
+          (interaction) => interaction.interactionId === interactionId,
+        );
+        if (!stillPending) return;
+        // Bug 根因：手机 Plan 回执 ACK 与 replayable 清场分属两条异步路径；清场帧
+        // 丢失时旧 interaction 会永久驻留。只在 grace 后仍读到权威 pending 时复用
+        // 既有 same-sub recovery，不本地隐藏弹窗，也不影响 desktop continuous。
+        logger.warn("[v4-pane] 手机 Plan ACK 后 pending 未收口，触发权威恢复", {
+          interactionId,
+          sessionId,
+          workspaceKey: workspaceIdentity?.trim() || workspacePath,
+        });
+        lease.store.recoverFromStaleAuthority();
+      }, MOBILE_PLAN_INTERACTION_RECONCILE_DELAY_MS);
+      timers.set(interactionId, timer);
+    },
+    [compactForRemoteControl, lease, sessionId, workspaceIdentity, workspacePath],
+  );
   const pluginReferenceIconsEnabled =
     isSessionPluginCatalogReady(state.status, sessionId, snapshot?.sessionId) &&
     hasPluginReferenceUserRows(snapshot?.rows.window ?? []);
@@ -4130,6 +4168,7 @@ export function SessionPane({
         queueEditActiveForCurrentComposer ||
         quotaBanner.state.blocksSubmit
       }
+      isWebRemoteControl={compactForRemoteControl}
       workspacePath={workspacePath}
       workspaceIdentity={workspaceIdentity}
       remoteSessionId={remoteSessionId ?? undefined}
@@ -4282,8 +4321,12 @@ export function SessionPane({
           workspacePath={workspacePath}
           workspaceIdentity={workspaceIdentity}
           remoteSessionId={remoteSessionId ?? undefined}
+          isWebRemoteControl={compactForRemoteControl}
           provider={provider}
           snapshot={snapshot}
+          onPlanInteractionAccepted={
+            compactForRemoteControl ? handleMobilePlanInteractionAccepted : undefined
+          }
         />
       ) : null}
       {composerNode}

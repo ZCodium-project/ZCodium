@@ -16,7 +16,12 @@ import { createWebAuthService } from "./auth/webAuthService.js";
 import { WEB_ZAI_OAUTH_CONFIG, resolveWebAuthDevReturnTo } from "./auth/webZaiOAuthConfig.js";
 import { parseOAuthState, resolveSafeAppReturnTo } from "./auth/oauthStateCodec.js";
 import { resolveWebCommunityUrl, resolveWebHelpConfig } from "./communityUrl.js";
-import type { IPlatformService, RemoteTarget, ServerRemoteInfo } from "@zcode/shared";
+import type {
+  IPlatformService,
+  RemoteTarget,
+  ServerRemoteInfo,
+  WebRemoteControlStatus,
+} from "@zcode/shared";
 import { WEB_DEFAULT_THEME, resolveWebInitialTheme } from "./webThemeSeed.js";
 
 function resolveWebThemePreference(defaultTheme: Theme = WEB_DEFAULT_THEME): Theme {
@@ -125,6 +130,16 @@ function createWebPlatform(): IPlatformService {
       });
     },
     cancelPendingRemoteConnection: (_requestId?: string) => Promise.resolve(),
+    // Web 端不作为 Web 远程控制的发起端，保留空实现以兼容统一接口。
+    startWebRemoteControl: () =>
+      Promise.reject(new Error("Web remote control can only be started from desktop")),
+    refreshWebRemoteControlPairing: () =>
+      Promise.reject(new Error("Web remote control pairing can only be refreshed from desktop")),
+    stopWebRemoteControl: () => Promise.resolve(),
+    getWebRemoteControlStatus: () =>
+      Promise.resolve<WebRemoteControlStatus>({
+        status: "idle",
+      }),
     disposeRemoteSession: () => Promise.resolve(),
     isDockerAvailable: () => Promise.resolve(false),
     listWSLDistros: () => Promise.resolve([]),

@@ -92,7 +92,7 @@ export function MarketingTouchProvider({
     if (!service || restoring) return null;
     let poller: ReturnType<typeof createMarketingTouchPoller>;
     const controller = createMarketingTouchController({
-      query: () => service.query({ locale }),
+      query: () => service.query({ locale: locale === "zh-CN" ? "zh-CN" : "en-US" }),
       report: (input) => service.report(input),
       locale,
       canOpen: canOpenMarketingPopup,

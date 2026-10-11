@@ -4,15 +4,26 @@ import { cp } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { basename, join, win32 } from "node:path";
 import { homedir } from "node:os";
+import { readExternalEnvVar } from "@zcode/shared";
 import {
   DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE,
   ZCODE_AGENT_RUNTIME,
+  ZCODE_DATA_ROOT_DIR_NAME,
 } from "@zcode/shared";
 
 let _dataBaseDir: string | null = null;
 export const ZCODE_WINDOWS_APP_INSTALL_DIR_ENV = "ZCODE_WINDOWS_APP_INSTALL_DIR";
-const envDataBaseDir = process.env.ZCODE_DATA_BASE_DIR?.trim() || null;
+const envDataBaseDir = readExternalEnvVar(process.env, "ZCODE_DATA_BASE_DIR") ?? null;
 const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
+
+/**
+ * 显式注入的 ZCODE_DATA_BASE_DIR 是 dev test / e2e 的数据目录隔离硬边界：
+ * 一旦生效，设置文件里发现的自定义 dataBaseDir（来自真实 HOME）不得再把
+ * 运行时拉回真实数据目录，否则隔离实例会读写开发者的真实凭据与配置。
+ */
+export function isDataBaseDirEnvOverrideActive(): boolean {
+  return envDataBaseDir !== null;
+}
 
 export interface DataBaseDirTargetValidationOptions {
   platform?: NodeJS.Platform | string;
@@ -30,6 +41,8 @@ export type DataBaseDirTargetValidationResult =
 
 /** Set the base directory for app data (replaces homedir() prefix). */
 export function setDataBaseDir(dir: string | null): void {
+  // 环境变量生效时本函数是 no-op：隔离运行不得被设置文件 bootstrap 或设置页改写目录。
+  if (isDataBaseDirEnvOverrideActive()) return;
   _dataBaseDir = dir?.trim() || null;
 }
 
@@ -42,9 +55,21 @@ export function getDataBaseDir(): string {
   return defaultDataBaseDir;
 }
 
-/** {dataBaseDir}/.zcode */
+/**
+ * 数据根解析重定向（仅供数据根初始化器在 pending 期间设置）：
+ * 归属文件落盘前，所有路径必须指向进程诊断根，保证正式根零写入。
+ */
+let _dataRootOverride: string | null = null;
+
+/** @internal 仅数据根初始化器可调用。 */
+export function setDataRootPathOverride(dir: string | null): void {
+  _dataRootOverride = dir?.trim() || null;
+}
+
+/** {dataBaseDir}/.zcodium —— 与官方 ZCode 客户端的 ~/.zcode 命名空间隔离。 */
 export function getZCodeDataRootDir(): string {
-  return join(getDataBaseDir(), ".zcode");
+  if (_dataRootOverride) return _dataRootOverride;
+  return join(getDataBaseDir(), ZCODE_DATA_ROOT_DIR_NAME);
 }
 
 /** 非项目对话共享的真实工作目录；默认 ~/.zcode/workspace/default。 */
@@ -243,8 +268,8 @@ export function getProviderWorkspaceConfigDir(): string {
  * state must only live at the default homedir location.
  */
 export async function copyDataDirectory(oldBaseDir: string, newBaseDir: string): Promise<void> {
-  const oldDir = join(oldBaseDir, ".zcode", "v2");
-  const newDir = join(newBaseDir, ".zcode", "v2");
+  const oldDir = join(oldBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
+  const newDir = join(newBaseDir, ZCODE_DATA_ROOT_DIR_NAME, "v2");
   await cp(oldDir, newDir, {
     recursive: true,
     force: false,

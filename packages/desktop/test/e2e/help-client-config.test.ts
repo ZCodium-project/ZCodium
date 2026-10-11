@@ -1,5 +1,6 @@
 import { readFile, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
+import type { Locale } from "@zcode/shared";
 import { readSettings, seedSettings, waitForDefaultWorkspaceReady } from "./helpers/desktop-app.js";
 import { writeE2EJsonFileAtomically } from "./helpers/e2e-atomic-json-file.js";
 import {
@@ -11,7 +12,7 @@ import {
 type DesktopBridge = {
   executeDesktopCommand(command: string): Promise<void>;
   canOpenCommunity(locale: "zh-CN" | "en-US"): Promise<boolean>;
-  setApplicationLocale(locale: "zh-CN" | "en-US"): Promise<void>;
+  setApplicationLocale(locale: Locale): Promise<void>;
 };
 
 async function command(command: string) {

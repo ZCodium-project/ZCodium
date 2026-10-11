@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import type { AppSettings } from "../../shared/src/protocol.js";
 import { appSettingsSchema } from "../../shared/src/validationAppSettings.js";
 import { ensureRetiredProviderFamilySettingsPurge } from "../src/lib/providerFamilyDomainMigration.js";

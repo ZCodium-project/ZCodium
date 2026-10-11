@@ -81,6 +81,15 @@ export function getQuotaRemainingPercentage(limit: UsageQuotaLimit | null): numb
   return Math.max(0, Math.min(100, 100 - limit.percentage));
 }
 
+/**
+ * 额度未见消耗（剩余 100%）时视为"满额"：重置没有收益，
+ * 仅用于隐藏重置入口与机会徽标（纯展示，不影响发放与轮询）。
+ */
+export function isCodingPlanQuotaLimitFull(limit: UsageQuotaLimit | null | undefined): boolean {
+  const remainingPercentage = getQuotaRemainingPercentage(limit ?? null);
+  return remainingPercentage !== null && remainingPercentage >= 100;
+}
+
 export function formatQuotaRemainingPercentage(
   locale: string,
   limit: UsageQuotaLimit | null,

@@ -6,7 +6,7 @@
  * 解析纯函数由 providerBalanceParsing.test.ts 覆盖，这里用最小 ApiClient 桩。
  */
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import { ProviderBalanceProvider } from "../src/usage-stats/providers/providerBalanceProvider.js";
 
 type RequestRecord = {

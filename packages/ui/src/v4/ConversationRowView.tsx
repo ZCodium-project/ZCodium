@@ -80,7 +80,7 @@ import {
   readWorkflowRetuneCall,
 } from "@/ToolCallBlocks/renderers/createWorkflowInput.js";
 import { WorkflowRetuneRow } from "@/ToolCallBlocks/renderers/WorkflowRetuneRow.js";
-import { workflowRunSettingsCeiling } from "@/components/workflow-timeline/workflowRunSettings.js";
+import { workflowRunDefaultConcurrency } from "@/components/workflow-timeline/workflowRunSettings.js";
 import { isAmendWorkflowToolCall } from "@/lib/workflowToolNames.js";
 import { ToolCallBlock } from "@/ToolCallBlocks.js";
 import { resolveWorkflowRunOpenToolCallId } from "@/v4/workflowRunCardJoin.js";
@@ -124,6 +124,7 @@ import {
   splitUserInputEpilogue,
 } from "@/v4/ConversationUserInputEpilogue.js";
 import { ConversationHookDetailsAction } from "@/v4/ConversationHookDetailsAction.js";
+import { ConnectedBotGroupDeliveryAction } from "@/v4/BotGroupDeliveryAction.js";
 import { formatModelChangeLabel } from "@/v4/composer/modelTriggerDisplay.js";
 import { formatMessageTimeLabel } from "@/v4/messageTimeLabel.js";
 import { parseConversationShareContext } from "@/lib/conversationShareContext.js";
@@ -1277,7 +1278,9 @@ const UserInputRowView = memo(function UserInputRowView({
       <MessageActions
         className={cn(
           "mt-1",
-          "opacity-0 transition-opacity group-hover/user-row:opacity-100 focus-within:opacity-100",
+          context.compactForRemoteControl
+            ? "opacity-100"
+            : "opacity-0 transition-opacity group-hover/user-row:opacity-100 focus-within:opacity-100",
         )}
       >
         <CopyRowAction
@@ -1300,15 +1303,20 @@ const UserInputRowView = memo(function UserInputRowView({
   );
 });
 
+// memo 组件的数组默认值必须是模块级常量：内联 [] 每次渲染都是新引用，会让 memo 比较失效。
+const EMPTY_SOURCE_COMMAND_IDS: readonly string[] = [];
+
 export const ConversationAssistantTextActions = memo(function ConversationAssistantTextActions({
   rowId,
   entityId,
   text,
   createdAt,
+  compactForRemoteControl = false,
   feedback = null,
   hookInvocations,
   sessionId,
   turnId,
+  sourceCommandIds = EMPTY_SOURCE_COMMAND_IDS,
   onFork,
   onFeedbackChange,
   className,
@@ -1317,10 +1325,12 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   entityId?: string;
   text: string;
   createdAt: number;
+  compactForRemoteControl?: boolean;
   feedback?: AssistantMessageFeedback | null;
   hookInvocations?: readonly HookInvocationRow[];
   sessionId?: string | null;
   turnId?: string;
+  sourceCommandIds?: readonly string[];
   onFork?: (target: ConversationRowTarget) => void;
   onRetry?: (target: ConversationRowTarget) => void;
   onFeedbackChange?: AssistantFeedbackHandler;
@@ -1338,7 +1348,8 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
   });
   const forkLabel = intl.formatMessage({ id: "chat.message.fork" });
   const timeLabel = formatMessageTimeLabel(createdAt, locale, intl);
-  const resolveTooltip = (label: string): string | undefined => label;
+  const resolveTooltip = (label: string): string | undefined =>
+    compactForRemoteControl ? undefined : label;
 
   useEffect(() => {
     setLocalFeedback(feedback);
@@ -1444,6 +1455,9 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
       {timeLabel ? (
         <span className="select-none text-ui-sm text-foreground-subtlest">{timeLabel}</span>
       ) : null}
+      {turnId ? (
+        <ConnectedBotGroupDeliveryAction turnId={turnId} sourceCommandIds={sourceCommandIds} />
+      ) : null}
     </MessageActions>
   );
 });
@@ -1536,6 +1550,7 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
             onOpenFileLink={context.onOpenFileLink}
             autoOpenPptxKey={previewCardsAutoOpenKey}
             onAutoOpenPptx={context.onAutoOpenAssistantPptx}
+            compactForRemoteControl={context.compactForRemoteControl}
           />
         </div>
       ) : null}
@@ -1553,9 +1568,12 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           onFork={onFork}
           onRetry={onRetry}
           onFeedbackChange={onFeedbackChange}
+          compactForRemoteControl={context.compactForRemoteControl}
           className={cn(
             "mt-1",
-            "opacity-0 transition-opacity group-hover/assistant-row:opacity-100 focus-within:opacity-100",
+            context.compactForRemoteControl
+              ? "opacity-100"
+              : "opacity-0 transition-opacity group-hover/assistant-row:opacity-100 focus-within:opacity-100",
           )}
         />
       ) : null}
@@ -1935,7 +1953,7 @@ const ToolCallRowView = memo(function ToolCallRowView({
     // 某条 run 的发起行」，而这一行不是。
     const retuned = context.workflowRunByRunId?.get(retune.runId);
     const ceiling =
-      retuned?.run === undefined ? undefined : workflowRunSettingsCeiling(retuned.run);
+      retuned?.run === undefined ? undefined : workflowRunDefaultConcurrency(retuned.run);
     return (
       <RowShell rowId={row.rowId} className="py-0">
         <WorkflowRetuneRow

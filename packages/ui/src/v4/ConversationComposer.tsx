@@ -99,7 +99,12 @@ import {
   type ChatComposerAttachment,
 } from "@/lib/chatAttachments.js";
 import { resolveChatPlaceholderKey } from "@/lib/chatPlaceholder.js";
-import { resolveChatEnterShortcut } from "@/lib/mobileTextInput.js";
+import {
+  resolveChatEnterShortcut,
+  resolveChatEnterSubmits,
+  shouldAvoidIosInputFocusZoom,
+  useIsMobileTextInputViewport,
+} from "@/lib/mobileTextInput.js";
 import { appendPromptHistoryEntry } from "@/lib/promptHistory.js";
 import {
   persistPromptHistoryEntries,
@@ -381,6 +386,8 @@ interface ConversationComposerProps {
   workspacePath: string;
   workspaceIdentity?: string;
   remoteSessionId?: string;
+  /** 手机 Web 远控链路：Enter 换行、iOS 防聚焦放大与紧凑 placeholder 由此开关切换。 */
+  isWebRemoteControl?: boolean;
   /** SessionPane 从目标 Host 原子读取的选择事实；Composer 不自行解析 Host。 */
   modelSelectionView?: ModelSelectionView | null;
   modelSelectionState?: ModelSelectionState;
@@ -482,6 +489,7 @@ function ConversationComposerImpl({
   workspacePath,
   workspaceIdentity,
   remoteSessionId,
+  isWebRemoteControl = false,
   modelSelectionView = null,
   modelSelectionState = MODEL_SELECTION_LOADING_STATE,
   modelSelectionReload,
@@ -575,9 +583,25 @@ function ConversationComposerImpl({
   const activeShareContext = resolveAttachableShareContext(snapshot?.sharedContextImport);
   const pendingShareContext = activeShareContext?.status === "pending" ? activeShareContext : null;
   const inputApiRef = useRef<LexicalChatInputHandle | null>(null);
+  const isMobileTextInputViewport = useIsMobileTextInputViewport();
   const primaryModifierPressed = usePrimaryFollowupModifier();
   const appleKeyboardPlatform = isAppleKeyboardPlatform();
-  const enterSubmits = true;
+  // Bugfix：M3 删除旧 ChatView 后，M5 只恢复了桌面端的 false 硬编码，已登记的手机远控
+  // 接线没有补回，导致 Enter 误发送。恢复旧语义：手机视口下 Enter 换行并用按钮发送；
+  // 桌面端仍由 resolveChatEnterSubmits 的视口门禁保持 Enter 发送。
+  const enterSubmits = resolveChatEnterSubmits({
+    isMobileTextInputViewport,
+    preferEnterNewline: isWebRemoteControl,
+  });
+  // 修复原因：旧 ChatView 删除后，iOS 防聚焦放大的接线没有迁到 v4 composer，
+  // 手机 Web 远控输入框会重新触发 Safari 的页面缩放。
+  const avoidIosInputFocusZoom = shouldAvoidIosInputFocusZoom({
+    isMobileTextInputViewport,
+    isWebRemoteControl,
+  });
+  // Bugfix：手机远控把完整能力说明放进绝对定位 placeholder 后，三行英文会越过
+  // 40px 编辑区并覆盖工具栏。手机端改用短文案并限制两行；桌面端继续保留完整提示。
+  const compactMobilePlaceholder = isWebRemoteControl && isMobileTextInputViewport;
   const sendShortcut = resolveChatEnterShortcut({ enterSubmits });
   const updateText = useCallback(
     (next: string) => {
@@ -1058,6 +1082,8 @@ function ConversationComposerImpl({
   const mode = snapshot?.inputRouting.mode ?? "startNow";
   const modifiedEnterSubmits = shouldEnableModifiedEnterSubmit({
     inputRoutingMode: mode,
+    isMobileTextInputViewport,
+    isWebRemoteControl,
   });
   const canStop = Boolean(snapshot?.control.canStop);
   const modifiedEnterReversesDelivery = modifiedEnterSubmits && canStop;
@@ -2081,6 +2107,8 @@ function ConversationComposerImpl({
             hasConversationSelectionReferences
           }
           enterSubmits={enterSubmits}
+          avoidIosInputFocusZoom={avoidIosInputFocusZoom}
+          compactPlaceholder={compactMobilePlaceholder}
           onModifiedSubmit={modifiedEnterSubmits ? handleModifiedEditorSubmit : undefined}
           submitLabel={sendTooltipTitle}
           showSlashButton

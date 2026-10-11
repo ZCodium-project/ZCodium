@@ -72,10 +72,12 @@ export function OccupationOnboarding({
   const savingRef = useRef(false);
   const [error, setError] = useState(false);
   const [, setDismissed] = useState(false);
+  const loadDeviceMid = useCallback(() => platform.getDeviceId(), [platform]);
   const [needsOnboarding, markOnboarded] = useOnboardingTrigger({
     onboardingRecord,
     userId,
     hasStoredOccupation: Boolean(settings?.onboardingOccupation),
+    loadDeviceMid,
     update,
   });
   // 审计版：官方引导（欢迎页 + 职业调研问卷）整体移除，包括手动触发入口。

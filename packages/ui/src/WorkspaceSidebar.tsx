@@ -55,6 +55,7 @@ import {
   TID_PROJECT_SECTION,
   TID_SIDEBAR,
   TID_WORKSPACE_LIST,
+  resolveWebRemoteControlWorkspaceKey,
 } from "@zcode/shared";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { Button } from "@/components/ui/button.js";
@@ -231,6 +232,8 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   onCreateConversationTask,
   onOpenFolderFromWorkspaceMenu,
   onOpenRemoteWorkspace,
+  webRemoteControlWorkspaceSwitcher,
+  isWebRemoteControl = false,
   theme,
   onConnectRemote: _onConnectRemote,
   onSelectRemoteProject: _onSelectRemoteProject,
@@ -260,6 +263,8 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   automationsActive = false,
   pluginStoreActive = false,
   onFileTreeOpenChange,
+  onWebRemoteTaskOpen: _onWebRemoteTaskOpen,
+  onWebRemoteTaskSwitchingChange: _onWebRemoteTaskSwitchingChange,
 }: {
   workspacePath: string;
   workspaceRemoteSessionId?: string;
@@ -279,6 +284,8 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   onCreateConversationTask: () => void;
   onOpenFolderFromWorkspaceMenu: () => void;
   onOpenRemoteWorkspace?: () => void;
+  webRemoteControlWorkspaceSwitcher?: import("@/root/types.js").WebRemoteControlWorkspaceSwitcherApi;
+  isWebRemoteControl?: boolean;
   theme: Theme;
   onConnectRemote: (options: RemoteTarget, requestId?: string) => Promise<string>;
   onSelectRemoteProject: (
@@ -312,6 +319,8 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   automationsActive?: boolean;
   pluginStoreActive?: boolean;
   onFileTreeOpenChange?: (open: boolean) => void;
+  onWebRemoteTaskOpen?: (options: { crossWorkspace: boolean }) => void;
+  onWebRemoteTaskSwitchingChange?: (switching: boolean) => void;
 }) {
   const { intl, localePreference, setLocalePreference } = useZCodeIntl();
   const handleTaskRowSelect = useCallback(
@@ -768,6 +777,37 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
       // 当前任务高亮会丢失，也会把后续选择误判成未激活。
       selectWorkspaceZCodeState(state, workspacePath, workspaceIdentity).activeTaskId,
   );
+
+  const isWebRemoteControlSidebar = Boolean(
+    webRemoteControlWorkspaceSwitcher || isWebRemoteControl,
+  );
+
+  useEffect(() => {
+    if (!isWebRemoteControlSidebar || !webRemoteControlWorkspaceSwitcher?.updateMobileViewState) {
+      return;
+    }
+    if (!activeTaskId) {
+      return;
+    }
+
+    const workspaceKey = resolveWebRemoteControlWorkspaceKey({
+      workspacePath,
+      workspaceIdentity,
+    });
+    // Bugfix: 聊天区内 fork/new task 会直接切换本地 activeTaskId，
+    // 但之前只有"点任务列表项"才会上报 mobileViewState，导致远控侧栏继续高亮旧任务。
+    // 这里在 activeTaskId 变化后补一次同步，保证移动端任务选中态与真实会话一致。
+    void webRemoteControlWorkspaceSwitcher
+      .updateMobileViewState(workspaceKey, activeTaskId)
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.warn("[WorkspaceSidebar] 同步远控 mobileViewState 失败", {
+          error: message,
+          workspaceKey,
+          taskId: activeTaskId,
+        });
+      });
+  }, [activeTaskId, webRemoteControlWorkspaceSwitcher, workspaceIdentity, workspacePath]);
 
   useEffect(() => {
     const scrollNode = workspaceScrollRef.current;

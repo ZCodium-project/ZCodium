@@ -818,9 +818,11 @@ export function TaskListItemContextMenuContent({
   const {
     taskSessionFile,
     taskNativeSessionLogFile,
+    providerConfigFile,
     fileManagerLabel,
     handleCopyText,
     handleOpenTaskPathInFileManager,
+    handleOpenProviderConfig,
   } = useTaskListItemContextActions({
     workspacePath,
     remoteSessionId,
@@ -882,6 +884,7 @@ export function TaskListItemContextMenuContent({
       taskSessionFile={taskSessionFile}
       activeSessionId={task.taskId}
       taskNativeSessionLogFile={taskNativeSessionLogFile}
+      providerConfigFile={providerConfigFile}
       disableTaskActions={workspaceActionsDisabled}
       disabledReason={workspaceActionsDisabledReason}
       onTogglePinTask={() => {
@@ -937,6 +940,9 @@ export function TaskListItemContextMenuContent({
           workspaceKey: task.workspaceIdentity?.trim() || workspacePath,
           title: taskTitle,
         });
+      }}
+      onOpenProviderConfig={() => {
+        void handleOpenProviderConfig();
       }}
     />
   );

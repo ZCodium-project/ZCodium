@@ -34,8 +34,8 @@ export const appSettingsOccupationEnum = appSettingsOccupationSchema;
 
 const nonEmptyStringSchema = z.string().trim().min(1);
 
-export const localeSchema = z.enum(["zh-CN", "en-US"]);
-export const localePreferenceSchema = z.enum(["system", "zh-CN", "en-US"]);
+export const localeSchema = z.enum(["zh-CN", "en-US", "fa-IR"]);
+export const localePreferenceSchema = z.enum(["system", "zh-CN", "en-US", "fa-IR"]);
 const zcodeInteractionBehaviorSchema = z.enum(["queue", "guide"]);
 // launch.md「The user's choice」：读文件时未知取值（降级后读到新版本写的值）按「跟随」处理，
 // 不能让一个偏好字段把整份设置读坏。
@@ -460,6 +460,15 @@ function migrateLegacyWorkspaceSession(value: unknown): unknown {
   return migrated;
 }
 
+/** 官方平台服务开关；缺省全部关闭。
+ * 对话分享已永久下线；account / feedback / codingPlan / officialMcp / offPeak 随去智谱化移除，
+ * 不再登记字段——存量用户已存的这些键会在写盘时被 zod strip，属于预期的 BREAKING 行为。
+ */
+export const officialServiceSwitchesSchema = z.object({
+  marketplace: z.boolean().optional(),
+  clientConfig: z.boolean().optional(),
+});
+
 const appSettingsObjectSchema = z.object({
   recentProjects: z.array(z.string()).default([]),
   locale: localeSchema.default("zh-CN"),
@@ -507,6 +516,9 @@ const appSettingsObjectSchema = z.object({
   providerFamilyDomain: providerFamilyDomainSchema.optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().default(false),
+  // 去智谱化后 providerFamilyDomain 只剩 zai/bigmodel 两个已下线取值，存量值没有合法语义。
+  // 独立于 providerFamilyDomainMigrated：老用户恰恰已经迁移过，靠那个守卫会跳过清理。
+  retiredProviderFamilySettingsPurged: z.boolean().default(false),
   nativeSearchEnhancementsEnabled: z.boolean().default(true),
   onboardingOccupation: appSettingsOccupationSchema.nullish(),
   proactiveSuggestionsEnabled: z.boolean().optional(),
@@ -523,6 +535,9 @@ const appSettingsObjectSchema = z.object({
   webRemoteControlExternalRelayDevice: webRemoteControlExternalRelayDeviceSchema.optional(),
   webRemoteControlLastEnabledContext: webRemoteControlLastEnabledContextSchema.optional(),
   zcodeEndpointOrigin: zcodeEndpointOriginSchema.optional(),
+  // 官方服务开关必须登记在存储 schema 里：只进 patch schema 会在写盘时被 zod strip，
+  // 开关看起来能切但永远读不回来，UI 表现为点击后立刻回弹。
+  officialServices: officialServiceSwitchesSchema.optional(),
 });
 
 export const appSettingsSchema = z.preprocess(
@@ -544,6 +559,7 @@ export const appSettingsSchema = z.preprocess(
 );
 
 export const appSettingsPatchSchema = z.object({
+  officialServices: officialServiceSwitchesSchema.optional(),
   recentProjects: z.array(z.string()).optional(),
   locale: localeSchema.optional(),
   shortcutBindings: z.record(z.string(), z.array(z.string())).optional(),
@@ -583,6 +599,7 @@ export const appSettingsPatchSchema = z.object({
   providerFamilyDomain: z.union([providerFamilyDomainSchema, z.literal("")]).optional(),
   providerFamilyDomainUpdatedAt: z.number().int().nonnegative().optional(),
   providerFamilyDomainMigrated: z.boolean().optional(),
+  retiredProviderFamilySettingsPurged: z.boolean().optional(),
   nativeSearchEnhancementsEnabled: z.boolean().optional(),
   onboardingOccupation: z
     .enum([

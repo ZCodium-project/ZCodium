@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import { ORCAROUTER_PROVIDER_TEMPLATE_ID } from "@zcode/shared";
 import type { ICredentialService } from "../src/credential/credential.js";
 import { createOrcaCatalogService } from "../src/orcarouter/catalog.js";

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import { resolveProviderBalanceProvider } from "../src/usage-stats/providers/providerBalanceSpecs.js";
 
 test("deepseek: 主机识别与多币种余额解析", () => {

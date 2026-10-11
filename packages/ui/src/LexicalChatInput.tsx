@@ -16,6 +16,7 @@
  */
 import { $getPromptMarkdown } from "@/mentions/promptSerialization.js";
 import { PromptClipboardPlugin } from "@/mentions/PromptClipboardPlugin.js";
+import { resolveMobileInputTextSizeClassName } from "@/lib/mobileTextInput.js";
 import {
   resolveComposerKeyAction,
   shouldBareEnterFallThroughToNewline,
@@ -1313,6 +1314,7 @@ interface LexicalChatInputProps {
   inputTestId?: string;
   editorApiRef?: React.MutableRefObject<LexicalChatInputHandle | null>;
   promptHistory?: readonly string[];
+  avoidIosInputFocusZoom?: boolean;
   compactPlaceholder?: boolean;
   onWhiteboardMentionSelected?: (boardId: string) => void | Promise<void>;
   onPaste?: (event: ChatComposerPasteEvent) => void;
@@ -1345,6 +1347,7 @@ export function LexicalChatInput({
   inputTestId,
   editorApiRef,
   promptHistory = [],
+  avoidIosInputFocusZoom = false,
   compactPlaceholder = false,
   onWhiteboardMentionSelected,
   onPaste,
@@ -1427,7 +1430,11 @@ export function LexicalChatInput({
         "aria-placeholder": placeholder,
         placeholder: (
           <div
-            className={`pointer-events-none absolute start-0 top-0 ${compactPlaceholder ? "line-clamp-2" : ""} text-ui-base leading-5 text-foreground-subtlest`}
+            className={`pointer-events-none absolute start-0 top-0 ${compactPlaceholder ? "line-clamp-2" : ""} ${resolveMobileInputTextSizeClassName(
+              {
+                avoidIosInputFocusZoom,
+              },
+            )} text-foreground-subtlest`}
           >
             {placeholder}
           </div>
@@ -1440,8 +1447,10 @@ export function LexicalChatInput({
   const contentEditable = (
     <ContentEditable
       // mention node 使用固定行高的 inline-flex chip，普通正文如果继承浏览器 normal line-height，
-      // 在 token 后继续输入文字时会按不同 line box 计算基线；这里显式收口正文行高。
-      className="min-h-10 max-h-40 overflow-y-auto text-ui-base leading-5 text-foreground outline-none"
+      // 在 token 后继续输入文字时会按不同 line box 计算基线；这里显式收口正文行高，并允许手机远控使用 16px 防止 iOS 聚焦放大。
+      className={`min-h-10 max-h-40 overflow-y-auto ${resolveMobileInputTextSizeClassName({
+        avoidIosInputFocusZoom,
+      })} text-foreground outline-none`}
       data-testid={inputTestId}
       onFocus={onFocus}
       {...contentEditableProps}

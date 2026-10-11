@@ -37,6 +37,7 @@ import {
   IWindowControllerService,
   IConversationShareService,
   ICredentialService,
+  IOnboardingRecordService,
   IZCodeAgentService,
   IZCodeTaskService,
   IZCodeSessionService,
@@ -1533,6 +1534,8 @@ function formatRemoteTargetForLog(target: RemoteTarget): string {
     }
     case "docker":
       return `docker:${target.container}`;
+    case "server":
+      return `server:${target.name?.trim() || target.url}`;
   }
 }
 
@@ -1615,6 +1618,7 @@ async function createWindowRemoteConnectionHandle(params: {
 }): Promise<WindowRemoteConnectionHandle<ServiceCollection, HostRemoteConnectionCapabilities>> {
   if (!activeServices) throw new Error("Local Host services are not initialized.");
   const clientConfigService = activeServices.get(IClientConfigService);
+  const localOnboardingRecordService = activeServices.get(IOnboardingRecordService);
   if (params.signal.aborted) {
     throw new Error("远程连接已取消");
   }
@@ -1660,6 +1664,7 @@ async function createWindowRemoteConnectionHandle(params: {
   );
   const services = createRemoteWorkspaceServiceCollection({
     clientConfigService,
+    localOnboardingRecordService,
     connectionServices: backendConnection.services,
     sourceServices: activeServices ?? undefined,
     parentPort,
@@ -2915,7 +2920,7 @@ parentPort.on("message", async (e: Electron.MessageEvent) => {
               hostApiNetworkTransport,
               authorizeLocalMediaPreviewPath,
               runtimeProcessEnvPatch: msg.runtimeProcessEnvPatch,
-              agentRuntimeContext: {
+              agentTelemetry: {
                 getDeviceMid: () => msg.deviceMid,
                 runtimeSurface: "desktop_local_host",
               },

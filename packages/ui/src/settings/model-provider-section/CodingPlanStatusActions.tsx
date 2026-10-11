@@ -1,6 +1,7 @@
 import { CodingPlanEntryButton } from "@/settings/CodingPlanEntryButton.js";
 import type { CodingPlanBillingDiscountConfig } from "@zcode/shared";
 import { ArrowLeftIcon, Loader2Icon, RocketIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import {
@@ -22,6 +23,7 @@ export function CodingPlanStatusActions({
   disconnectLoading,
   onLogin,
   onDisconnect,
+  extraActions,
 }: {
   providerName: string;
   isDisconnected: boolean;
@@ -34,6 +36,8 @@ export function CodingPlanStatusActions({
   disconnectLoading?: boolean;
   onLogin?: (options?: CodingPlanLoginOptions) => void;
   onDisconnect?: () => void;
+  /** 审计定制：浏览器授权登录等附加动作，与登录/断开按钮并排渲染。 */
+  extraActions?: ReactNode;
 }) {
   const { intl } = useZCodeIntl();
 
@@ -59,6 +63,7 @@ export function CodingPlanStatusActions({
           })}
         </Button>
       ) : null}
+      {extraActions ?? null}
     </div>
   );
 }

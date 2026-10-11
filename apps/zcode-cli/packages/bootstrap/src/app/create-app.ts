@@ -98,7 +98,11 @@ import { resolveBuiltInNodeReplMcpServers } from "./built-in-node-repl.js";
 import { resolveZCodeCustomCommandPrompt } from "../custom-command-prompt.js";
 import { resolveZCodeBuiltinPromptCommand } from "../builtin-prompt-command.js";
 import { collectDisabledPaths } from "../skill-command-overrides.js";
-import { loadPluginAgentProfiles, loadZCodeAgentProfiles } from "../subagents.js";
+import {
+  loadPluginAgentTemplates,
+  resolvePluginAgentProfiles,
+  loadZCodeAgentProfiles,
+} from "../subagents.js";
 import { createRuntimeAiSdkModelExecutionConfig } from "../model-config.js";
 import { ApiProviderModelRuntime } from "./provider-registry-model-runtime.js";
 import {
@@ -223,12 +227,19 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
     });
     // 随 CLI 内置的技能包（dynamic-workflows 等）：不属于任何插件，用户无法停用或卸载。
     const bundledSkillRoots = await resolveBundledSkillRoots({ cliStorageRoot, logger });
-    const pluginSubagentProfiles = loadPluginAgentProfiles({
+    const pluginTemplates = loadPluginAgentTemplates({
       logger,
       plugins: pluginOutcome.plugins,
-      reservedProfileNames: zcodeSubagentProfiles.map((profile) => profile.name),
-      modelSelectionOverrides: zcodeSubagentProfileOutcome.pluginAgentModelSelectionOverrides,
-    }).profiles;
+    });
+    const pluginSubagentProfiles = resolvePluginAgentProfiles(
+      {
+        logger,
+        plugins: pluginOutcome.plugins,
+        reservedProfileNames: zcodeSubagentProfiles.map((profile) => profile.name),
+        modelSelectionOverrides: zcodeSubagentProfileOutcome.pluginAgentModelSelectionOverrides,
+      },
+      pluginTemplates,
+    ).profiles;
     const pluginRuntimeFeatures = resolvePluginRuntimeFeatures(pluginOutcome);
     const builtInMcpServers = resolveBuiltInNodeReplMcpServers({
       pluginOutcome,
@@ -566,6 +577,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
       mcpPort,
       modelFactory,
       permissionService,
+      pluginSkillRoots: pluginOutcome.skillRoots,
       prepareUserExecutionBoundary,
       getRuntime,
       runtimeConfig,
@@ -636,6 +648,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
                   // 不各自冻结一份。
                   modelFactory,
                   permissionService,
+                  pluginSkillRoots: pluginOutcome.skillRoots,
                   runtime: getRuntime(),
                   runtimeConfig,
                   sessionId,
@@ -1145,12 +1158,16 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
               artifactId: string;
               afterSequence?: number;
               limit: number;
+              maxBytes: number;
+              fields?: readonly string[];
             }) =>
               dynamicWorkflowRunPort.listArtifactItems!(input.runId, input.artifactId, {
                 ...(input.afterSequence === undefined
                   ? {}
                   : { afterSequence: input.afterSequence }),
                 limit: input.limit,
+                maxBytes: input.maxBytes,
+                ...(input.fields === undefined ? {} : { fields: input.fields }),
               }),
             readDynamicWorkflowRunArtifact: async (input: {
               runId: string;

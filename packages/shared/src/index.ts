@@ -82,6 +82,7 @@ export {
 } from "./env.js";
 export * from "./errors.js";
 export * from "./validation.js";
+export * from "./sessionCreateTelemetry.js";
 export * from "./api.js";
 export * from "./zcode-protocol/index.js";
 export * from "./account-provider-state.js";
