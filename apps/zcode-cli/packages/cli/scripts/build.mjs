@@ -222,6 +222,9 @@ export const resolveBuildAliases = ({
     rootDirectory,
     "../../packages/shared/src/request-security-edition/index.ts",
   ),
+  // 内联 Gen UI：services 的 gen-ui 适配器经此子入口引用 shared，通用 alias 会把
+  // 子入口拼到 index.ts 后面（"@zcode/shared/gen-ui" → "index.ts/gen-ui"）导致构建失败。
+  "@zcode/shared/gen-ui": resolve(rootDirectory, "../../packages/shared/src/gen-ui/index.ts"),
   "@zcode/shared": resolve(rootDirectory, "../../packages/shared/src/index.ts"),
   "@zcode/core": resolve(cliDirectory, "../core/dist/index.js"),
 });
