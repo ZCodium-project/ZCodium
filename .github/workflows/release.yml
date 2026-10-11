@@ -246,6 +246,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build project references
+        # v3.15.1 再基线后 monorepo 明显变大：macOS runner 默认 Node heap 上限
+        # 跑全量 tsc -b 会 OOM（FATAL ERROR: heap out of memory，exit 134）。
+        # 显式提高上限，避免依赖 runner 默认值。
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm typecheck
 
       - name: Build ZCode CLI distribution
@@ -356,6 +361,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build project references
+        # v3.15.1 再基线后 monorepo 明显变大：macOS runner 默认 Node heap 上限
+        # 跑全量 tsc -b 会 OOM（FATAL ERROR: heap out of memory，exit 134）。
+        # 显式提高上限，避免依赖 runner 默认值。
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm typecheck
 
       - name: Bundle desktop app
