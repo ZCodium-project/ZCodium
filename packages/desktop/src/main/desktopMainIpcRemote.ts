@@ -12,6 +12,10 @@ import {
 } from "@zcode/shared";
 import { dispatchTaskNotification } from "./desktopNotifications.js";
 import {
+  registerWebRemoteControlIpcHandlers,
+  type WebRemoteControlIpcManager,
+} from "./desktopWebRemoteControlIpc.js";
+import {
   clearOAuthRoutesForWindow,
   deliverPendingDeepLink,
   parseOAuthStateRegistration,
@@ -159,6 +163,7 @@ export function registerRemoteIpcHandlers(options: {
   listAvailableWSLDistros: () => Promise<unknown[]>;
   listAvailableDockerContainers: () => Promise<unknown[]>;
   listSSHConfigAliases: () => Promise<unknown[]>;
+  webRemoteControlManager: WebRemoteControlIpcManager;
 }) {
   ipcMain.on(InternalChannels.ScopedServicePortReady, (event, rawPayload: unknown) => {
     if (!rawPayload || typeof rawPayload !== "object") return;
@@ -169,6 +174,11 @@ export function registerRemoteIpcHandlers(options: {
     if (!sessionId || !attachmentId) return;
     options.confirmRendererAttachmentReady(event.sender.id, { sessionId, attachmentId });
   });
+  // 审计版不接入官方遥测；远程控制 IPC 链路仍完整注册。
+  registerWebRemoteControlIpcHandlers({
+    webRemoteControlManager: options.webRemoteControlManager,
+  });
+
   ipcMain.on(PlatformChannels.OAuthRegisterState, (event, payload: unknown) => {
     const registration = parseOAuthStateRegistration(payload);
     if (!registration) {

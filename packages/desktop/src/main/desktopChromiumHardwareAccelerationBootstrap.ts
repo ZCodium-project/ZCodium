@@ -9,7 +9,7 @@ interface ChromiumHardwareAccelerationApp {
 export function resolveChromiumHardwareAccelerationSettingsFile(
   homePath: string = homedir(),
 ): string {
-  return join(homePath, ".zcode", "v2", "setting.json");
+  return join(homePath, ".zcodium", "v2", "setting.json");
 }
 
 export function extractBootstrapChromiumHardwareAccelerationEnabled(rawValue: unknown): boolean {

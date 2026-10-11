@@ -240,6 +240,8 @@ export default defineConfig(({ mode }) => {
           index: resolve(__dirname, "src/renderer/index.html"),
           "resource-manager": resolve(__dirname, "src/renderer/resource-manager.html"),
           "cua-permission-panel": resolve(__dirname, "src/renderer/cua-permission-panel.html"),
+          // 数据根决策窗口：pending 状态下先于主窗口打开，独立轻量页面。
+          "data-root-decision": resolve(__dirname, "src/renderer/data-root-decision.html"),
           // 插件 UI 沙箱的受信 shell，经 zcode-sandbox:// 提供
           "plugin-sandbox": resolve(__dirname, "src/renderer/plugin-sandbox.html"),
         },
