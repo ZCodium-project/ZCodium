@@ -9,7 +9,15 @@
     {
       // 测试文件天然会堆叠大量场景与断言，继续复用生产代码的行数上限会造成误报，
       // 因此只对 test/spec 文件关闭 max-lines，避免放宽业务代码约束。
-      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      // *.test.pending.* 是把"待适配的上游测试"隔离出 vitest 收集范围后的命名，仍属测试文件。
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/*.test.pending.ts",
+        "**/*.test.pending.tsx"
+      ],
       "rules": {
         "max-lines": "off"
       }

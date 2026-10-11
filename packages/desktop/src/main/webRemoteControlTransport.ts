@@ -20,10 +20,6 @@ import {
   type WebRemoteControlRelayOutgoingMessage,
 } from "@zcode/shared";
 import type { WebRemoteControlRelayAuthProvider } from "./webRemoteControlRelayAuthProvider.js";
-import {
-  noteWebRemoteRelayConnectAttempt,
-  noteWebRemoteRelayReconnect,
-} from "./desktopNetworkTelemetry.js";
 
 export type WebRemoteControlDeviceTransportState =
   | "idle"
@@ -336,10 +332,6 @@ export class WebRemoteControlDeviceTransport {
       this.options.logger.warn("[web-remote-control] external relay device socket error", {
         message: error.message,
       });
-      noteWebRemoteRelayConnectAttempt(Date.now() - this.connectStartedAt, false, {
-        error,
-        attempt: this.connectAttempt,
-      });
       this.options.onError(error);
     });
 
@@ -354,12 +346,6 @@ export class WebRemoteControlDeviceTransport {
       }
       if (!this.manuallyClosed && !this.terminalClose) {
         this.options.logger.warn("[web-remote-control] external relay device disconnected");
-        if (this.state !== "paired") {
-          noteWebRemoteRelayConnectAttempt(Date.now() - this.connectStartedAt, false, {
-            attempt: this.connectAttempt,
-          });
-        }
-        noteWebRemoteRelayReconnect();
         this.scheduleReconnect();
       }
     });
@@ -723,11 +709,6 @@ export class WebRemoteControlDeviceTransport {
     }
     const previousState = this.state;
     this.state = state;
-    if (state === "paired" && previousState !== "paired" && this.connectStartedAt > 0) {
-      noteWebRemoteRelayConnectAttempt(Date.now() - this.connectStartedAt, true, {
-        attempt: this.connectAttempt,
-      });
-    }
     this.options.onStateChange(state);
     if (
       state === "connecting" ||
