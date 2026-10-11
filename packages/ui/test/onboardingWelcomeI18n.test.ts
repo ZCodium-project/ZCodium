@@ -17,7 +17,7 @@ describe("onboarding welcome i18n", () => {
   });
 
   it("uses the complete English welcome title without changing Chinese", () => {
-    expect(enUS["onboarding.welcome.title"]).toBe("Welcome to ZCode");
-    expect(zhCN["onboarding.welcome.title"]).toBe("欢迎使用 ZCode");
+    expect(enUS["onboarding.welcome.title"]).toBe("Welcome to ZCodium");
+    expect(zhCN["onboarding.welcome.title"]).toBe("欢迎使用 ZCodium");
   });
 });

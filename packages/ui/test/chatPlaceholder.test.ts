@@ -24,8 +24,8 @@ describe("resolveChatPlaceholderKey", () => {
         compactNewTask: true,
       }),
     ).toBe("chat.placeholder.newTaskMobile");
-    expect(enUS["chat.placeholder.newTaskMobile"]).toBe("Ask ZCode anything…");
-    expect(zhCN["chat.placeholder.newTaskMobile"]).toBe("向 ZCode 提问…");
+    expect(enUS["chat.placeholder.newTaskMobile"]).toBe("Ask ZCodium anything…");
+    expect(zhCN["chat.placeholder.newTaskMobile"]).toBe("向 ZCodium 提问…");
   });
 
   it("returns newTask while first turn is processing", () => {

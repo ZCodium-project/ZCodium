@@ -4,7 +4,7 @@ import en from "@/i18n/locales/en-US.js";
 
 const expected = {
   contextWindow:
-    "模型一次可处理的上下文容量，单位为 Token。ZCode 会据此管理上下文。\n请勿超过模型的实际上限。",
+    "模型一次可处理的上下文容量，单位为 Token。ZCodium 会据此管理上下文。\n请勿超过模型的实际上限。",
   maxOutputTokens: "单次模型请求允许生成的最大 Token 数。\n请勿超过模型的实际上限。",
   inputModalities:
     "设置模型能够接收的内容类型：\n\n- **文本**：接收文本内容，为必选项。\n- **图片**：接收图片内容。\n- **视频**：接收视频内容。\n- **PDF**：直接接收 PDF 文档。",
@@ -18,7 +18,7 @@ const expected = {
   advanced:
     "**MFJS 工具 Schema**：启用 Moonshot Flavored JSON Schema（Moonshot 的 JSON Schema 格式）兼容处理，常用于 Moonshot 的 Kimi 模型接口。仅在模型接口要求该格式时开启。",
   followRecommendedConfig:
-    "根据模型 ID、Base URL 和 API 格式，为您智能匹配推荐配置。ZCode 会持续更新推荐配置，并自动同步给您。\n如果手动修改某项配置，该项将转为手动管理，不再跟随推荐更新；其他配置仍由智能配置管理。",
+    "根据模型 ID、Base URL 和 API 格式，为您智能匹配推荐配置。ZCodium 会持续更新推荐配置，并自动同步给您。\n如果手动修改某项配置，该项将转为手动管理，不再跟随推荐更新；其他配置仍由智能配置管理。",
 };
 describe("Todo125 定稿文案", () => {
   it.each(Object.entries(expected))("%s 中文逐字保持，英文对应且不加入口链接", (field, copy) => {

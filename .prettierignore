@@ -7,3 +7,8 @@ apps/zcode-cli/
 # oxfmt 解析会报错；只排除这两个文件，其余 graphs fixture 仍参与格式检查。
 apps/zcode-cli/packages/dynamic-workflow/tests/graphs/control-flow-for-await.ts
 apps/zcode-cli/packages/dynamic-workflow/tests/graphs/async-promise-for-await-of.ts
+
+# docs/electron 是随上游同步带入的 Electron 官方文档副本，其 fiddles 示例 HTML
+# 故意包含无效标签（例如重复的 </body>），oxfmt 解析会报 SyntaxError；
+# 这些文件不参与本仓格式检查。
+docs/electron/

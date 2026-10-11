@@ -1,9 +1,4 @@
-import {
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 import { createUuid } from "@zcode/shared";
@@ -32,9 +27,7 @@ export interface EnsureDesktopDeviceMidSyncOptions {
  * 任何 fs / JSON 异常都不抛：写盘失败仍返回内存中生成的 UUID，下次启动再尝试落盘，
  * 保证窗口创建那一刻 deviceMid 一定有值。
  */
-export function ensureDesktopDeviceMidSync(
-  options?: EnsureDesktopDeviceMidSyncOptions,
-): string {
+export function ensureDesktopDeviceMidSync(options?: EnsureDesktopDeviceMidSyncOptions): string {
   const createId = options?.createId ?? createUuid;
   try {
     const configDir = options?.configDir ?? getAppConfigDir();
@@ -59,18 +52,13 @@ function readTelemetryStateSync(stateFile: string): Record<string, unknown> {
   try {
     const raw = readFileSync(stateFile, "utf-8");
     const parsed = JSON.parse(raw) as unknown;
-    return typeof parsed === "object" && parsed
-      ? (parsed as Record<string, unknown>)
-      : {};
+    return typeof parsed === "object" && parsed ? (parsed as Record<string, unknown>) : {};
   } catch {
     return {};
   }
 }
 
-function writeTelemetryStateSync(
-  stateFile: string,
-  state: Record<string, unknown>,
-): void {
+function writeTelemetryStateSync(stateFile: string, state: Record<string, unknown>): void {
   const dir = dirname(stateFile);
   mkdirSync(dir, { recursive: true });
   const tempFile = `${stateFile}.${process.pid}.tmp`;

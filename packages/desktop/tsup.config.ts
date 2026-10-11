@@ -21,7 +21,6 @@ const buildTimeConfigDefines = createBuildTimeConfigDefines(
 
 const buildMetadata = getBuildMetadata();
 
-
 // 手动加载 .env 文件，tsup 不像 Vite 会自动读取 .env.*；这些文件只提供链接常量。
 function loadEnvFiles(): Record<string, string> {
   const vars: Record<string, string> = {};
@@ -93,7 +92,6 @@ export function resolveBuildRemoteCdnReleaseRoots(runtimeEnv: Record<string, str
     return `https://${domain}/${pathPrefix}`.replace(/\/+$/, "");
   });
 }
-
 
 export function resolveDesktopTsupBundleSecurityOptions(
   runtimeEnv: Record<string, string | undefined> = process.env,
