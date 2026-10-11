@@ -485,7 +485,7 @@ describe("desktopRuntimeEnv buildHostProcessEnv", () => {
     expect(env.ZCODE_BUILD_COMMIT_ID).toBe("commit-test");
   });
 
-  it("只把 Agent OTLP 配置定向注入 host，并剔除外部身份字段", async () => {
+  it("不向 host 注入 Agent OTLP/遥测配置（审计剥离上报链路）", async () => {
     const { buildHostProcessEnv } = await import("../src/main/desktopRuntimeEnv.js");
 
     const env = buildHostProcessEnv({
@@ -498,36 +498,14 @@ describe("desktopRuntimeEnv buildHostProcessEnv", () => {
       ZCODE_TELEMETRY_RUNTIME_SURFACE: "standalone-cli",
     });
 
-    expect(env).toMatchObject({
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "https://arms.example.com/v1/traces",
-      OTEL_EXPORTER_OTLP_TRACES_HEADERS: "Authorization=secret",
-    });
+    expect(env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT).toBeUndefined();
+    expect(env.OTEL_EXPORTER_OTLP_TRACES_HEADERS).toBeUndefined();
     expect(env.ZCODE_TELEMETRY_USER_ID).toBeUndefined();
     expect(env.ZCODE_TELEMETRY_USER_SUBJECT_ID).toBeUndefined();
     expect(env.ZCODE_TELEMETRY_IDENTITY_STATE).toBeUndefined();
     expect(env.ZCODE_TELEMETRY_DEVICE_MID).toBeUndefined();
     expect(env.ZCODE_TELEMETRY_RUNTIME_SURFACE).toBeUndefined();
     expect(env.ZCODE_TOOL_ENV_PASSTHROUGH_JSON).toBeUndefined();
-  });
-
-  it("正式安装包默认配置只接收 OTLP 连接字段，不接受构建期身份字段", async () => {
-    const { resolvePackagedAgentTelemetryEnv } = await import("../src/main/desktopRuntimeEnv.js");
-
-    expect(
-      resolvePackagedAgentTelemetryEnv({
-        OTEL_EXPORTER_OTLP_ENDPOINT: "https://arms.example.com/otlp",
-        OTEL_EXPORTER_OTLP_HEADERS: "x-arms-license-key=write-only",
-        OTEL_SERVICE_NAME: "zcode-cli-agent",
-        ZCODE_TELEMETRY_RUNTIME_DISTRIBUTION: "packaged",
-        ZCODE_TELEMETRY_USER_SUBJECT_ID: "spoofed-user",
-        ZCODE_TELEMETRY_DEVICE_MID: "spoofed-device",
-      }),
-    ).toEqual({
-      OTEL_EXPORTER_OTLP_ENDPOINT: "https://arms.example.com/otlp",
-      OTEL_EXPORTER_OTLP_HEADERS: "x-arms-license-key=write-only",
-      OTEL_SERVICE_NAME: "zcode-cli-agent",
-      ZCODE_TELEMETRY_RUNTIME_DISTRIBUTION: "packaged",
-    });
   });
 
   it("Windows 打包态会从 resourcesPath 推导安装目录供数据目录保护使用", async () => {
