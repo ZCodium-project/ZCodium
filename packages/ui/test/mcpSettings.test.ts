@@ -14,8 +14,8 @@ describe("MCP Settings Shared", () => {
   describe("SOURCE_META", () => {
     it("应包含 zcodeagentmcp 的元数据", () => {
       expect(SOURCE_META.zcodeagentmcp).toBeDefined();
-      expect(SOURCE_META.zcodeagentmcp.label).toBe("ZCode Agent");
-      expect(SOURCE_META.zcodeagentmcp.section).toBe("ZCode Agent");
+      expect(SOURCE_META.zcodeagentmcp.label).toBe("ZCodium Agent");
+      expect(SOURCE_META.zcodeagentmcp.section).toBe("ZCodium Agent");
       expect(SOURCE_META.zcodeagentmcp.badgeClass).toContain("cyan");
     });
   });
@@ -359,12 +359,7 @@ describe("MCP Settings Shared", () => {
 
   describe("FormState 类型", () => {
     it("应支持所有传输类型", () => {
-      const validTypes: FormState["type"][] = [
-        "stdio",
-        "http",
-        "sse",
-        "streamableHttp",
-      ];
+      const validTypes: FormState["type"][] = ["stdio", "http", "sse", "streamableHttp"];
 
       expect(validTypes).toHaveLength(4);
       expect(validTypes).toContain("streamableHttp");

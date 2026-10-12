@@ -65,7 +65,7 @@ object RemoteControlRecentLinksStore {
 fun RemoteControlRecentLink.displayTitle(): String {
     val uri = Uri.parse(url)
     val name = uri.getQueryParameter("name")?.takeIf { it.isNotBlank() }
-    return name ?: uri.host.orEmpty().ifBlank { "ZCode Remote" }
+    return name ?: uri.host.orEmpty().ifBlank { "ZCodium Remote" }
 }
 
 fun RemoteControlRecentLink.displaySubtitle(context: Context): String {

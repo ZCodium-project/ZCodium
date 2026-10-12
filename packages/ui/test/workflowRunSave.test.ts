@@ -288,10 +288,10 @@ describe("词条", () => {
     expect(keysOf(enUS as Record<string, string>)).toEqual(zh);
     // 设计里定下的那两句逐字。
     expect((zhCN as Record<string, string>)["chat.toolCall.workflow.saveRun.lead"]).toBe(
-      "让 ZCode 帮我提炼保存",
+      "让 ZCodium 帮我提炼保存",
     );
     expect((zhCN as Record<string, string>)["chat.toolCall.workflow.saveRun.lead.hint"]).toBe(
-      "ZCode 会帮你提炼出可复用的工作流，再交你确认。",
+      "ZCodium 会帮你提炼出可复用的工作流，再交你确认。",
     );
   });
 });

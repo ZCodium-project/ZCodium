@@ -889,8 +889,8 @@ const zhCN: Record<string, string> = {
   "welcome.login": "登录",
   "welcome.loggingIn": "登录中...",
   "welcome.loginFailed": "登录失败",
-  "login.title": "欢迎来到 ZCode",
-  "login.description": "连接账号，开始使用 ZCode",
+  "login.title": "欢迎来到 ZCodium",
+  "login.description": "连接账号，开始使用 ZCodium",
   "login.oauth.activeProviderHint": "当前已登录提供方：{provider}。新登录会替换当前登录身份。",
   "login.oauth.loadingProviders": "正在加载登录提供方...",
   "login.oauth.noProviders": "当前没有可用的登录提供方，请稍后重试。",
@@ -1903,7 +1903,7 @@ const zhCN: Record<string, string> = {
   "webRemoteControl.taskStatus.running": "运行中",
   "webRemoteControl.taskStatus.completed": "已完成",
   "webRemoteControl.taskStatus.error": "错误",
-  "webRemoteControl.mobileHome.title": "ZCode 远程控制",
+  "webRemoteControl.mobileHome.title": "ZCodium 远程控制",
   "webRemoteControl.mobileHome.connected": "已连接到当前桌面窗口",
   "webRemoteControl.mobileHome.notice":
     "本次连接可以查看当前设备上已打开的项目、任务和会话；二维码失效后需要回到桌面端重新连接。",
@@ -1947,7 +1947,7 @@ const zhCN: Record<string, string> = {
   "remote.kind.wsl": "WSL",
   "remote.kind.docker": "Docker",
   "remote.kind.ssh.wizardDescription": "远程主机",
-  "remote.kind.server.wizardDescription": "已运行的 ZCode 服务",
+  "remote.kind.server.wizardDescription": "已运行的 ZCodium 服务",
   "remote.kind.wsl.wizardDescription": "Windows Linux 子系统",
   "remote.kind.docker.wizardDescription": "本地容器",
   "remote.connect": "连接",
@@ -1973,7 +1973,7 @@ const zhCN: Record<string, string> = {
   "remote.log.dockerTarget": "目标 Docker 容器：{container}",
   "remote.log.requestingSession": "正在请求宿主进程创建远程 session...",
   "remote.log.sessionReady": "远程 session 已创建完成，接下来可以选择目录。",
-  "server.description": "连接已经运行的 ZCode server。",
+  "server.description": "连接已经运行的 ZCodium server。",
   "server.url": "Server URL",
   "server.urlPlaceholder": "例如 https://studio.example.com:3030",
   "server.name": "显示名称",
@@ -2797,7 +2797,7 @@ const zhCN: Record<string, string> = {
   "settings.mcp.failure.unexpected_disconnect": "MCP 连接已意外断开。",
   "settings.mcp.failure.oauth_authorization_failed": "MCP 授权未完成或已超时，请重新授权。",
   "settings.mcp.failure.official_origin_untrusted": "MCP 服务器地址未通过安全校验，连接已阻止。",
-  "settings.mcp.failure.not_authenticated": "当前未登录，请先登录 ZCode。",
+  "settings.mcp.failure.not_authenticated": "当前未登录，请先登录 ZCodium。",
   "settings.mcp.failure.coding_plan_required":
     "当前账号没有 Coding Plan，请先购买或配置 Coding Plan。",
   "settings.mcp.failure.server_not_found": "找不到该 MCP 服务器，请检查插件或服务器配置。",
@@ -2987,7 +2987,7 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.startPlan.balance.used": "已用 {value}",
   "settings.modelProvider.startPlan.highlight.trial.label": "体验周期",
   "settings.modelProvider.startPlan.highlight.trial.value": "5 个自然日",
-  "settings.modelProvider.startPlan.highlight.trial.description": "登录 ZCode 3.x 后开始计时。",
+  "settings.modelProvider.startPlan.highlight.trial.description": "登录 ZCodium 3.x 后开始计时。",
   "settings.modelProvider.startPlan.highlight.quota.label": "每日额度",
   "settings.modelProvider.startPlan.highlight.quota.value": "3M tokens/日",
   "settings.modelProvider.startPlan.highlight.quota.description":
@@ -3125,7 +3125,7 @@ const zhCN: Record<string, string> = {
   "settings.modelProvider.codingPlan.purchase.done": "完成",
   "settings.modelProvider.codingPlan.purchase.teamMemberNoticeTitle": "团队套餐需要分配成员",
   "settings.modelProvider.codingPlan.purchase.teamMemberNoticeDescription":
-    "请先在 BigModel 团队套餐管理页添加自己或其他成员，完成后即可在 ZCode 使用团队额度。",
+    "请先在 BigModel 团队套餐管理页添加自己或其他成员，完成后即可在 ZCodium 使用团队额度。",
   "settings.modelProvider.codingPlan.purchase.manageTeamPlan": "管理团队套餐",
   "settings.modelProvider.codingPlan.manage": "管理",
   "settings.modelProvider.planCard.codingPlan": "编程套餐",
@@ -3589,7 +3589,7 @@ const zhCN: Record<string, string> = {
   "settings.usage.sourceProvider": "来源：{provider}",
   "settings.usage.billingBanner.title": "{provider} 编程套餐",
   "settings.usage.billingBanner.description":
-    "连接 {provider} 账号后查询编程套餐权益，购买或配置后回到 ZCode 即可继续编码。",
+    "连接 {provider} 账号后查询编程套餐权益，购买或配置后回到 ZCodium 即可继续编码。",
   "settings.usage.billingBanner.compactDescription": "连接 {provider} 账号后即可同步用量。",
   "settings.usage.billingBanner.buy": "购买编程套餐",
   "settings.usage.billingBanner.apiKeys": "API 密钥",
@@ -3854,7 +3854,7 @@ const zhCN: Record<string, string> = {
   "settings.skills.removeFailed": "移除技能失败。",
   "settings.skills.delete.title": "删除技能",
   "settings.skills.delete.description": "确定删除「{name}」？将从磁盘移除该技能目录，且无法撤销。",
-  "settings.skills.agent.glm": "ZCode Agent",
+  "settings.skills.agent.glm": "ZCodium Agent",
   "settings.skills.agent.unknown": "未知来源",
   "settings.skills.create.open": "新建技能",
   "settings.skills.create.taskCreateFailed":
@@ -4455,7 +4455,7 @@ const zhCN: Record<string, string> = {
   "settings.hooks.customJson": "自定义字段 JSON",
   "settings.hooks.customJsonObjectError": "自定义字段必须是 JSON object。",
   "settings.hooks.customJsonParseError": "自定义字段 JSON 解析失败。",
-  "settings.plugins.zcodeOnly": "仅支持 ZCode Agent",
+  "settings.plugins.zcodeOnly": "仅支持 ZCodium Agent",
   "settingsSync.dialog.title": "导入设置",
   "settingsSync.dialog.description": "仅导入缺失项；已存在配置会自动跳过。",
   "settingsSync.action.skip": "暂不导入",
@@ -5559,7 +5559,7 @@ const zhCN: Record<string, string> = {
   // 「配置」弹层（docs/dynamic-workflow/presentation.md「The settings popover」）：改子代理模型与最大并发数，
   // 应用即一次 GUI 修订（新 run 接着跑，旧 run 停下，已完成的步骤作缓存带过去）。
   // 完成卡与 run 侧板上的「保存 / 再次运行」（docs/dynamic-workflow/transcript-and-notifications.md
-  // 「Saving the run, and running it again」）。两条路：交给 ZCode 提炼，或按原样直接写下去。
+  // 「Saving the run, and running it again」）。两条路：交给 ZCodium 提炼，或按原样直接写下去。
   "chat.toolCall.workflow.saveRun.action": "保存",
   "chat.toolCall.workflow.saveRun.runAgain": "再次运行",
   "chat.toolCall.workflow.saveRun.starting": "启动中…",
@@ -5568,9 +5568,9 @@ const zhCN: Record<string, string> = {
   "chat.toolCall.workflow.saveRun.announce.project": "已保存到项目",
   "chat.toolCall.workflow.saveRun.announce.global": "已保存为全局工作流",
   "chat.toolCall.workflow.saveRun.title": "保存工作流",
-  "chat.toolCall.workflow.saveRun.lead": "让 ZCode 帮我提炼保存",
-  "chat.toolCall.workflow.saveRun.lead.hint": "ZCode 会帮你提炼出可复用的工作流，再交你确认。",
-  "chat.toolCall.workflow.saveRun.lead.sending": "已交给 ZCode…",
+  "chat.toolCall.workflow.saveRun.lead": "让 ZCodium 帮我提炼保存",
+  "chat.toolCall.workflow.saveRun.lead.hint": "ZCodium 会帮你提炼出可复用的工作流，再交你确认。",
+  "chat.toolCall.workflow.saveRun.lead.sending": "已交给 ZCodium…",
   "chat.toolCall.workflow.saveRun.lead.unsupported": "当前 agent 不支持直接保存。",
   "chat.toolCall.workflow.saveRun.or": "或按原样直接保存",
   "chat.toolCall.workflow.saveRun.name": "名称",
@@ -6159,7 +6159,7 @@ const zhCN: Record<string, string> = {
   "planTool.guidance.enterMode": "已开启 Plan Mode",
   "chat.permission.switchMode.placeholder": "实施计划",
 
-  // ZCode Agent
+  // ZCodium Agent
   "zcode.unavailable": "AI 代理不可用",
   "zcode.initFailed": "启动 AI 代理失败",
   "zcode.error.TASK_OWNED_BY_OTHER_HOST": "该任务正在另一个已连接视图中运行。",
@@ -6967,7 +6967,7 @@ const zhCN: Record<string, string> = {
   "cuaPermission.tools.agentUpdateRequired":
     "当前 Agent 版本过旧，无法安全检查工具就绪状态。请更新或重启 Agent 后重新检查。",
   "cuaPermission.tools.untrustedRuntime":
-    "检测到电脑控制工具，但它们并非来自已校验的 ZCode 官方插件。请检查插件安装后重新验证。",
+    "检测到电脑控制工具，但它们并非来自已校验的 ZCodium 插件。请检查插件安装后重新验证。",
   "cuaPermission.perm.accessibility": "辅助功能 (Accessibility)",
   "cuaPermission.perm.accessibility.purpose": "读取/驱动 UI 元素 + 合成键鼠输入",
   "cuaPermission.perm.screenRecording": "屏幕录制 (Screen Recording)",
