@@ -155,6 +155,14 @@ export function LoginPanel({ active, onComplete }: LoginPanelProps) {
   }, [active, refreshProviders]);
 
   useEffect(() => {
+    // 审计版没有账号体系：官方 provider 列表恒为空（oauthService.getProviders 短路返回 []）。
+    // 首次启动直接进入 API Key 配置，不再展示渠道列表与「没有可用的登录提供方」提示。
+    if (!loadingProviders && providers.length === 0 && loginMode === "providers") {
+      setLoginMode("apiKey");
+    }
+  }, [loadingProviders, loginMode, providers.length]);
+
+  useEffect(() => {
     if (
       !active ||
       !loginEntryRequest?.providerId ||
@@ -303,19 +311,6 @@ export function LoginPanel({ active, onComplete }: LoginPanelProps) {
               </div>
             ) : null}
 
-            {!loadingProviders && providers.length === 0 ? (
-              <Alert
-                variant="warning"
-                className="flex items-center justify-center gap-2 text-center"
-                data-testid={TID_OAUTH_ERROR}
-              >
-                <TriangleAlertIcon className="size-4" />
-                <AlertDescription className="text-center">
-                  {intl.formatMessage({ id: "login.oauth.noProviders" })}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-
             {!loadingProviders ? (
               <div className="space-y-2">
                 {visibleProviders.map((provider) => (
@@ -359,7 +354,16 @@ export function LoginPanel({ active, onComplete }: LoginPanelProps) {
 
         {status === "idle" && loginMode === "apiKey" ? (
           <LoginApiKeyForm
-            onCancel={() => setLoginMode("providers")}
+            onCancel={() => {
+              if (providers.length > 0) {
+                setLoginMode("providers");
+                return;
+              }
+              // 无渠道列表可返回时（审计版恒为空），「取消」与「暂时跳过」同义：
+              // 结束登录入口，稍后可在设置里配置。
+              resetApiKeyForm();
+              return onComplete("skip");
+            }}
             onSaved={() => {
               resetApiKeyForm();
               return onComplete("apiKey");
