@@ -137,15 +137,15 @@ fact 只从当前进程的 live ingest 产生：
 
 ## 事件触发矩阵
 
-| 事件 | foreground | 切走后的 background | initial/recovery |
-| --- | --- | --- | --- |
-| `send_btn` | 本地桌面 command 被 UI 接纳时一次 | queued promotion 不重报 | 不报 |
-| `message_completion` | 报 | 已有本地 seed 的轮次继续报 | 不报 |
-| `agent_step` | 报 | 已有本地 seed 的轮次继续报 | 不报 |
-| `plan_request` | 报 | 报 | 不报 |
-| `context_compaction` | terminal 到达时可见才报 | 不报 | 不报 |
-| 六项 UI ARMS | 报 | 不报 | 不报 |
-| `chat_error_banner` | banner 实际可见才报 | 不报 | 恢复后首次真实可见可报 |
+| 事件                 | foreground                        | 切走后的 background        | initial/recovery       |
+| -------------------- | --------------------------------- | -------------------------- | ---------------------- |
+| `send_btn`           | 本地桌面 command 被 UI 接纳时一次 | queued promotion 不重报    | 不报                   |
+| `message_completion` | 报                                | 已有本地 seed 的轮次继续报 | 不报                   |
+| `agent_step`         | 报                                | 已有本地 seed 的轮次继续报 | 不报                   |
+| `plan_request`       | 报                                | 报                         | 不报                   |
+| `context_compaction` | terminal 到达时可见才报           | 不报                       | 不报                   |
+| 六项 UI ARMS         | 报                                | 不报                       | 不报                   |
+| `chat_error_banner`  | banner 实际可见才报               | 不报                       | 恢复后首次真实可见可报 |
 
 `send_btn` 的发送时间来自 UI 原始动作。已有 session 的 direct/queued command 在本地接纳后上报；
 draft 首发等待 create ACK 得到 sessionId 后上报，但沿用原始 input/send 时间。相同 commandId 的重试、
@@ -246,7 +246,10 @@ V4 提供 `setAssistantFeedback` CAS command：
 
 ```ts
 {
-  target: { kind: "assistantEntity"; entityId: string };
+  target: {
+    kind: "assistantEntity";
+    entityId: string;
+  }
   feedback: "like" | "dislike" | null;
 }
 ```
@@ -258,7 +261,9 @@ CLI 更新 assistant row 并持久化。UI 乐观更新、command 失败时回�
   eventType: "ck";
   eventRegion: "chat";
   elementName: "assistant_message_feedback";
-  eventExtraDetail: { reaction: "like" | "dislike" | "none" };
+  eventExtraDetail: {
+    reaction: "like" | "dislike" | "none";
+  }
 }
 ```
 

@@ -139,8 +139,7 @@ type MentionTextPart =
   | { type: "session"; label: string }
   | { type: "plugin"; label: string; pluginId?: string };
 
-const PLUGIN_STABLE_ID_PATTERN =
-  /^[A-Za-z0-9][A-Za-z0-9._-]*@[A-Za-z0-9][A-Za-z0-9._-]*$/;
+const PLUGIN_STABLE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*@[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 function parsePluginStableId(destination: string): string | undefined {
   if (!destination.startsWith("plugin://")) return undefined;
@@ -166,9 +165,7 @@ export function formatSkillMentionDisplayLabel(label: string): string {
   if (words.length === 0) {
     return label;
   }
-  return words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+  return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
 }
 
 function isDirectoryMentionDestination(destination: string): boolean {

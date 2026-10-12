@@ -10,10 +10,7 @@ import {
 } from "@/v4/ConversationUserInputContent.js";
 import { PluginReferenceIconProvider } from "@/v4/pluginReferenceIconContext.js";
 
-function pluginContent(
-  text: string,
-  iconByPluginId: ReadonlyMap<string, string>,
-) {
+function pluginContent(text: string, iconByPluginId: ReadonlyMap<string, string>) {
   return createElement(
     PluginReferenceIconProvider,
     { value: { sessionId: "session-a", iconByPluginId } },
@@ -100,9 +97,7 @@ describe("V4 user input mention rendering", () => {
     const html = renderToStaticMarkup(
       pluginContent(
         "[@skill-creator](plugin://skill-creator@official)",
-        icon
-          ? new Map([["skill-creator@official", icon]])
-          : new Map<string, string>(),
+        icon ? new Map([["skill-creator@official", icon]]) : new Map<string, string>(),
       ),
     );
 
@@ -114,12 +109,7 @@ describe("V4 user input mention rendering", () => {
     const view = render(
       pluginContent(
         "[@skill-creator](plugin://skill-creator@official)",
-        new Map([
-          [
-            "skill-creator@official",
-            "https://plugins.example.test/missing.png",
-          ],
-        ]),
+        new Map([["skill-creator@official", "https://plugins.example.test/missing.png"]]),
       ),
     );
     const image = view.container.querySelector<HTMLImageElement>(
@@ -129,9 +119,7 @@ describe("V4 user input mention rendering", () => {
 
     fireEvent.error(image as HTMLImageElement);
 
-    expect(
-      view.container.querySelector("img[data-plugin-mention-icon='true']"),
-    ).toBeNull();
+    expect(view.container.querySelector("img[data-plugin-mention-icon='true']")).toBeNull();
     expect(view.container.querySelector(".lucide-cable")).not.toBeNull();
   });
 

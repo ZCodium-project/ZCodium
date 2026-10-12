@@ -95,15 +95,15 @@ installer-completed (日志可查，完成页直接启动 `$INSTDIR\\ZCode.exe`)
 
 ## 接受用例
 
-| Case | 场景 | 必须观察到 |
-| --- | --- | --- |
-| WIN-INSTALL-OWNERSHIP-001 | 更新前存在 `notes.txt`/自定义目录 | 更新后文件仍在，应用文件完成替换 |
-| WIN-INSTALL-OWNERSHIP-002 | 旧版本无 manifest | 非本轮保证；允许旧卸载器沿用原生行为，后续只在有明确收益时增加迁移支持 |
-| WIN-INSTALL-DIAG-001 | managed cleanup 遇到锁定/权限/磁盘错误 | cleanup 日志有阶段、分类和数字 PID；外层返回非零并显示清理失败 |
-| WIN-INSTALL-DIAG-003 | 旧版本无 manifest 或解压阶段失败 | 非本轮细粒度诊断保证；保留原生安装器结果，后续按真实问题逐步收敛 |
-| WIN-INSTALL-DIAG-002 | 静默 `/S` 更新 | 无 UI 但有阶段日志，日志 PID 为数字且无原始命令行 |
-| WIN-INSTALL-SHORTCUT-001 | 正确/失效/被删除的快捷方式 | 正确项保留参数，失效项修复，删除项不重建 |
-| WIN-INSTALL-AUMID-001 | 生产与 Preview 打包运行 | 主进程 AUMID 与 NSIS `appId` 相等，可被 Shell 正确索引/固定 |
+| Case                      | 场景                                   | 必须观察到                                                             |
+| ------------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
+| WIN-INSTALL-OWNERSHIP-001 | 更新前存在 `notes.txt`/自定义目录      | 更新后文件仍在，应用文件完成替换                                       |
+| WIN-INSTALL-OWNERSHIP-002 | 旧版本无 manifest                      | 非本轮保证；允许旧卸载器沿用原生行为，后续只在有明确收益时增加迁移支持 |
+| WIN-INSTALL-DIAG-001      | managed cleanup 遇到锁定/权限/磁盘错误 | cleanup 日志有阶段、分类和数字 PID；外层返回非零并显示清理失败         |
+| WIN-INSTALL-DIAG-003      | 旧版本无 manifest 或解压阶段失败       | 非本轮细粒度诊断保证；保留原生安装器结果，后续按真实问题逐步收敛       |
+| WIN-INSTALL-DIAG-002      | 静默 `/S` 更新                         | 无 UI 但有阶段日志，日志 PID 为数字且无原始命令行                      |
+| WIN-INSTALL-SHORTCUT-001  | 正确/失效/被删除的快捷方式             | 正确项保留参数，失效项修复，删除项不重建                               |
+| WIN-INSTALL-AUMID-001     | 生产与 Preview 打包运行                | 主进程 AUMID 与 NSIS `appId` 相等，可被 Shell 正确索引/固定            |
 
 ## 本轮实现边界
 

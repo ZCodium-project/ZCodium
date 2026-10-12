@@ -51,19 +51,19 @@ tool reaches error/denied without command
 
 ## Pruning decisions
 
-| Decision ID | Pruned combinations                    | Guard/invariant                                                                    | Representative coverage                      |
-| ----------- | -------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------- |
-| USR-P01     | Bash/execute/shell 等工具名全排列      | `resolveToolCallIdentity` 已将它们收敛为 Shell family                              | family 代表用例 + identity 既有测试          |
-| USR-P02     | theme/locale/OS/workspace 类型         | guard 是无文案、无布局、无平台依赖的纯 row 派生                                    | focused renderer unit test                   |
-| USR-P03     | continuous/replayable 物理网络全排列   | 本变更不修改 transport；最终 row 的 renderer 合同相同                              | renderer unit + 既有 STIP03 profile 收口测试 |
-| USR-P04     | permission UI 行为                     | permission/elicitation 有独立 blocker surface；本变更只决定 conversation work item | 既有 permission tests                        |
+| Decision ID | Pruned combinations                  | Guard/invariant                                                                    | Representative coverage                      |
+| ----------- | ------------------------------------ | ---------------------------------------------------------------------------------- | -------------------------------------------- |
+| USR-P01     | Bash/execute/shell 等工具名全排列    | `resolveToolCallIdentity` 已将它们收敛为 Shell family                              | family 代表用例 + identity 既有测试          |
+| USR-P02     | theme/locale/OS/workspace 类型       | guard 是无文案、无布局、无平台依赖的纯 row 派生                                    | focused renderer unit test                   |
+| USR-P03     | continuous/replayable 物理网络全排列 | 本变更不修改 transport；最终 row 的 renderer 合同相同                              | renderer unit + 既有 STIP03 profile 收口测试 |
+| USR-P04     | permission UI 行为                   | permission/elicitation 有独立 blocker surface；本变更只决定 conversation work item | 既有 permission tests                        |
 
 ## Accepted cases and evidence
 
-| Case ID | Setup                                                                       | Action                                                       | Assertions                                                                      | Evidence layers                          | E2E status              |
-| ------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------- | ---------------------------------------- | ----------------------- |
+| Case ID | Setup                                                                       | Action                                                       | Assertions                                                                                | Evidence layers                          | E2E status              |
+| ------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- | ---------------------------------------- | ----------------------- |
 | STIP04  | v4 running turn 收到 Shell `tool_input_start`，input/inputText 尚无 command | renderer 构建 work items；随后分别补 readonly 与普通 command | 首帧无 Bash/Shell；readonly 更新后只出现 Explore；普通 command 更新后只出现 Execute group | UI row derivation + runtime log ordering | partial（focused unit） |
-| STIP05  | Shell row 无 command 且状态为 error/denied                                  | renderer 构建 work items                                     | 错误 row 可见，错误正文继续由 tool error surface 展示                           | UI adapter + tool error rendering        | partial（focused unit） |
+| STIP05  | Shell row 无 command 且状态为 error/denied                                  | renderer 构建 work items                                     | 错误 row 可见，错误正文继续由 tool error surface 展示                                     | UI adapter + tool error rendering        | partial（focused unit） |
 
 ## E2E handoff
 

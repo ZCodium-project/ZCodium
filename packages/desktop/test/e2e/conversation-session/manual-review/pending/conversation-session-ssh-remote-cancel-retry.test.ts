@@ -106,19 +106,15 @@ async function clickSSHDialogBackButton(): Promise<void> {
   await browser.waitUntil(
     async () => {
       const result = await browser.execute((dialogTestId) => {
-        const dialog = document.querySelector<HTMLElement>(
-          `[data-testid="${dialogTestId}"]`,
-        );
+        const dialog = document.querySelector<HTMLElement>(`[data-testid="${dialogTestId}"]`);
         if (!dialog?.getClientRects().length) {
           return { clicked: false, labels: [] as string[] };
         }
-        const buttons = Array.from(
-          dialog.querySelectorAll<HTMLButtonElement>("button"),
-        ).filter((button) => button.getClientRects().length > 0 && !button.disabled);
-        const labels = buttons.map((button) => button.innerText.trim());
-        const back = buttons.find((button) =>
-          ["Back", "返回"].includes(button.innerText.trim()),
+        const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).filter(
+          (button) => button.getClientRects().length > 0 && !button.disabled,
         );
+        const labels = buttons.map((button) => button.innerText.trim());
+        const back = buttons.find((button) => ["Back", "返回"].includes(button.innerText.trim()));
         back?.click();
         return { clicked: Boolean(back), labels };
       }, TID_SSH_DIALOG);

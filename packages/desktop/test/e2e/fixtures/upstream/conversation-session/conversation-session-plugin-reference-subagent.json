@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_PLUGIN_REFERENCE_SUBAGENT"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_PLUGIN_REFERENCE_SUBAGENT"]
       },
       "response": {
         "statusCode": 200,

@@ -92,39 +92,72 @@ describe("Side Pane Tab responsive interactions", () => {
       { timeout: 5000, timeoutMsg: "独立面板未形成上下对齐的 4px 间距" },
     );
     const panels = await readIndependentPanelMetrics();
-    if (process.platform === "win32" || process.platform === "linux") expect(await browser.execute(() => {
-      const controls = document.querySelector('[data-workspace-side-frame] [data-testid="desktop-window-controls"]')!;
-      const frame = controls.closest('[data-workspace-side-frame]')!;
-      return frame.getBoundingClientRect().right - controls.getBoundingClientRect().right - parseFloat(getComputedStyle(frame).borderRightWidth);
-    })).toBeCloseTo(8, 0);
+    if (process.platform === "win32" || process.platform === "linux")
+      expect(
+        await browser.execute(() => {
+          const controls = document.querySelector(
+            '[data-workspace-side-frame] [data-testid="desktop-window-controls"]',
+          )!;
+          const frame = controls.closest("[data-workspace-side-frame]")!;
+          return (
+            frame.getBoundingClientRect().right -
+            controls.getBoundingClientRect().right -
+            parseFloat(getComputedStyle(frame).borderRightWidth)
+          );
+        }),
+      ).toBeCloseTo(8, 0);
     if (process.platform === "win32" || process.platform === "linux") {
       expect(await header.$('[data-testid="desktop-window-controls"]').isExisting()).toBe(false);
-      expect(await $('[data-workspace-side-frame] [data-testid="desktop-window-controls"]').isDisplayed()).toBe(true);
-      expect(await browser.execute(() => {
-        const controls = document.querySelector('[data-workspace-side-frame] [data-testid="desktop-window-controls"]')!;
-        const toggle = controls.previousElementSibling!;
-        return controls.getBoundingClientRect().left - toggle.getBoundingClientRect().right;
-      })).toBeCloseTo(2, 0);
+      expect(
+        await $(
+          '[data-workspace-side-frame] [data-testid="desktop-window-controls"]',
+        ).isDisplayed(),
+      ).toBe(true);
+      expect(
+        await browser.execute(() => {
+          const controls = document.querySelector(
+            '[data-workspace-side-frame] [data-testid="desktop-window-controls"]',
+          )!;
+          const toggle = controls.previousElementSibling!;
+          return controls.getBoundingClientRect().left - toggle.getBoundingClientRect().right;
+        }),
+      ).toBeCloseTo(2, 0);
     }
     if (process.platform === "win32" || process.platform === "linux") {
-      expect(await browser.execute(() => {
-        const logo = document.querySelector('img[alt="ZCode"]')!;
-        return logo.closest("button")!.getBoundingClientRect().left;
-      })).toBe(13);
+      expect(
+        await browser.execute(() => {
+          const logo = document.querySelector('img[alt="ZCode"]')!;
+          return logo.closest("button")!.getBoundingClientRect().left;
+        }),
+      ).toBe(13);
     }
     if (process.platform === "win32" || process.platform === "linux") {
-      expect(await browser.execute(() => {
-        const left = document.querySelector('[data-testid="desktop-top-nav-back"]')!.getBoundingClientRect();
-        const right = document.querySelector('[data-testid="workspace-header"]')!.getBoundingClientRect();
-        return Math.abs(left.top + left.height / 2 - right.top - right.height / 2);
-      })).toBeLessThanOrEqual(1);
+      expect(
+        await browser.execute(() => {
+          const left = document
+            .querySelector('[data-testid="desktop-top-nav-back"]')!
+            .getBoundingClientRect();
+          const right = document
+            .querySelector('[data-testid="workspace-header"]')!
+            .getBoundingClientRect();
+          return Math.abs(left.top + left.height / 2 - right.top - right.height / 2);
+        }),
+      ).toBeLessThanOrEqual(1);
     }
-    expect(await browser.execute(() => {
-      const header = document.querySelector('[data-testid="workspace-header"]')!;
-      const content = Array.from(header.children).find(element => element.classList.contains("p-2"))!;
-      return getComputedStyle(content).paddingRight;
-    })).toBe("8px");
-    if ((process.platform === "win32" || process.platform === "linux") || process.platform === "darwin") {
+    expect(
+      await browser.execute(() => {
+        const header = document.querySelector('[data-testid="workspace-header"]')!;
+        const content = Array.from(header.children).find((element) =>
+          element.classList.contains("p-2"),
+        )!;
+        return getComputedStyle(content).paddingRight;
+      }),
+    ).toBe("8px");
+    if (
+      process.platform === "win32" ||
+      process.platform === "linux" ||
+      process.platform === "darwin"
+    ) {
       const inset = await browser.execute(() => {
         const content = document.querySelector("#content")!;
         const frame = document.querySelector('[data-workspace-conversation-frame="true"]')!;
@@ -136,36 +169,55 @@ describe("Side Pane Tab responsive interactions", () => {
         };
       });
       expect(inset).toEqual({ right: "4px", bottom: "4px", top: 4 });
-      expect(await browser.execute(() => {
-        const sidebar = document.querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]');
-        const handle = document.querySelector<HTMLElement>('[data-testid="resizable-handle"]');
-        if (!sidebar || !handle) return null;
-        const sidebarRect = sidebar.getBoundingClientRect();
-        const handleRect = handle.getBoundingClientRect();
-        return handleRect.left + handleRect.width / 2 - sidebarRect.right;
-      })).toBe(2);
+      expect(
+        await browser.execute(() => {
+          const sidebar = document.querySelector<HTMLElement>(
+            '[data-workspace-sidebar-panel="true"]',
+          );
+          const handle = document.querySelector<HTMLElement>('[data-testid="resizable-handle"]');
+          if (!sidebar || !handle) return null;
+          const sidebarRect = sidebar.getBoundingClientRect();
+          const handleRect = handle.getBoundingClientRect();
+          return handleRect.left + handleRect.width / 2 - sidebarRect.right;
+        }),
+      ).toBe(2);
 
       await movePointerAwayFromResizeHandles();
       expect(await readResizeHandleStyle('[data-testid="resizable-handle"]')).toEqual({
         hasExtendedTertiaryLine: true,
-      indicatorOpacity: "0",
+        indicatorOpacity: "0",
         handleHeight: "full",
         handleWidth: 4,
 
         marginLeft: "0px",
         marginRight: "0px",
       });
-      const sidebarWidthBeforeDrag = await browser.execute(() =>
-        document.querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!.getBoundingClientRect().width,
+      const sidebarWidthBeforeDrag = await browser.execute(
+        () =>
+          document
+            .querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!
+            .getBoundingClientRect().width,
       );
       await hoverResizeHandle('[data-testid="resizable-handle"]');
       await assertResizeHandleVisible('[data-testid="resizable-handle"]');
       await dragResizeHandle('[data-testid="resizable-handle"]', 24, 0);
-      await browser.waitUntil(async () => Math.abs(
-        await browser.execute(() => document.querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!.getBoundingClientRect().width) - sidebarWidthBeforeDrag,
-      ) > 10, { timeout: 5000, timeoutMsg: "Sidebar resize handle 没有改变侧栏宽度" });
-      const sidebarWidthAfterDrag = await browser.execute(() =>
-        document.querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!.getBoundingClientRect().width,
+      await browser.waitUntil(
+        async () =>
+          Math.abs(
+            (await browser.execute(
+              () =>
+                document
+                  .querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!
+                  .getBoundingClientRect().width,
+            )) - sidebarWidthBeforeDrag,
+          ) > 10,
+        { timeout: 5000, timeoutMsg: "Sidebar resize handle 没有改变侧栏宽度" },
+      );
+      const sidebarWidthAfterDrag = await browser.execute(
+        () =>
+          document
+            .querySelector<HTMLElement>('[data-workspace-sidebar-panel="true"]')!
+            .getBoundingClientRect().width,
       );
       expectedRestoredWidth -= sidebarWidthAfterDrag - sidebarWidthBeforeDrag;
     }
@@ -179,19 +231,22 @@ describe("Side Pane Tab responsive interactions", () => {
     expect(panels?.leftRadius).toBe(`${expectedPanelRadiusPx}px`);
     expect(panels?.rightRadius).toBe(`${expectedPanelRadiusPx}px`);
     await movePointerAwayFromResizeHandles();
-    expect(await readResizeHandleStyle('[data-workspace-side-pane-resize-handle="true"]')).toMatchObject({
+    expect(
+      await readResizeHandleStyle('[data-workspace-side-pane-resize-handle="true"]'),
+    ).toMatchObject({
       hasExtendedTertiaryLine: true,
       indicatorOpacity: "0",
       handleWidth: 4,
-
     });
     await hoverResizeHandle('[data-workspace-side-pane-resize-handle="true"]');
     await assertResizeHandleVisible('[data-workspace-side-pane-resize-handle="true"]');
     if (process.platform === "win32" || process.platform === "linux") {
-      expect(await browser.execute(() => {
-        const style = getComputedStyle(document.querySelector('[data-workspace-side-frame]')!);
-        return [style.borderTopRightRadius, style.borderBottomRightRadius];
-      })).toEqual(process.platform === "win32" ? ["5px", "5px"] : ["12px", "12px"]);
+      expect(
+        await browser.execute(() => {
+          const style = getComputedStyle(document.querySelector("[data-workspace-side-frame]")!);
+          return [style.borderTopRightRadius, style.borderBottomRightRadius];
+        }),
+      ).toEqual(process.platform === "win32" ? ["5px", "5px"] : ["12px", "12px"]);
     }
     const drag = await browser.execute(() => {
       const frame = document
@@ -203,11 +258,7 @@ describe("Side Pane Tab responsive interactions", () => {
         width: frame.width,
       };
     });
-    await dragResizeHandle(
-      '[data-workspace-side-pane-resize-handle="true"]',
-      -45,
-      0,
-    );
+    await dragResizeHandle('[data-workspace-side-pane-resize-handle="true"]', -45, 0);
     await browser.waitUntil(
       async () => {
         const width = await browser.execute(
@@ -229,30 +280,47 @@ describe("Side Pane Tab responsive interactions", () => {
           const terminal = document.querySelector<HTMLElement>("#terminal");
           const frame = document.querySelector('[data-workspace-conversation-frame="true"]');
           return Boolean(
-            terminal && frame && !frame.contains(terminal) &&
-              terminal.closest('#conversation-column') === frame.closest('#conversation-column') &&
-              terminal.getBoundingClientRect().height > 20 &&
-              Math.abs(terminal.getBoundingClientRect().top - frame.getBoundingClientRect().bottom - 4) < 1,
+            terminal &&
+            frame &&
+            !frame.contains(terminal) &&
+            terminal.closest("#conversation-column") === frame.closest("#conversation-column") &&
+            terminal.getBoundingClientRect().height > 20 &&
+            Math.abs(
+              terminal.getBoundingClientRect().top - frame.getBoundingClientRect().bottom - 4,
+            ) < 1,
           );
         }),
       { timeout: 10000, timeoutMsg: "终端没有以 4px 间距在会话下方独立展开" },
     );
     await movePointerAwayFromResizeHandles();
-    expect(await readResizeHandleStyle('[data-workspace-terminal-resize-handle="true"]')).toMatchObject({
+    expect(
+      await readResizeHandleStyle('[data-workspace-terminal-resize-handle="true"]'),
+    ).toMatchObject({
       hasExtendedTertiaryLine: true,
       indicatorOpacity: "0",
       handleHeight: 4,
-
     });
-    const conversationHeightBeforeDrag = await browser.execute(() =>
-      document.querySelector<HTMLElement>('[data-workspace-conversation-frame="true"]')!.getBoundingClientRect().height,
+    const conversationHeightBeforeDrag = await browser.execute(
+      () =>
+        document
+          .querySelector<HTMLElement>('[data-workspace-conversation-frame="true"]')!
+          .getBoundingClientRect().height,
     );
     await hoverResizeHandle('[data-workspace-terminal-resize-handle="true"]');
     await assertResizeHandleVisible('[data-workspace-terminal-resize-handle="true"]');
     await dragResizeHandle('[data-workspace-terminal-resize-handle="true"]', 0, -24);
-    await browser.waitUntil(async () => Math.abs(
-      await browser.execute(() => document.querySelector<HTMLElement>('[data-workspace-conversation-frame="true"]')!.getBoundingClientRect().height) - conversationHeightBeforeDrag,
-    ) > 10, { timeout: 5000, timeoutMsg: "Terminal resize handle 没有改变会话高度" });
+    await browser.waitUntil(
+      async () =>
+        Math.abs(
+          (await browser.execute(
+            () =>
+              document
+                .querySelector<HTMLElement>('[data-workspace-conversation-frame="true"]')!
+                .getBoundingClientRect().height,
+          )) - conversationHeightBeforeDrag,
+        ) > 10,
+      { timeout: 5000, timeoutMsg: "Terminal resize handle 没有改变会话高度" },
+    );
     for (const theme of ["zai-light", "zai-dark"]) {
       await browser.execute((value) => {
         const actions = (
@@ -280,7 +348,11 @@ describe("Side Pane Tab responsive interactions", () => {
         const left = document.querySelector('[data-workspace-conversation-frame="true"]')!;
         const right = document.querySelector('[data-workspace-side-frame="true"]')!;
         const terminal = document.querySelector('[data-workspace-terminal-frame="true"]')!;
-        return [getComputedStyle(left).backgroundColor, getComputedStyle(right).backgroundColor, getComputedStyle(terminal).backgroundColor];
+        return [
+          getComputedStyle(left).backgroundColor,
+          getComputedStyle(right).backgroundColor,
+          getComputedStyle(terminal).backgroundColor,
+        ];
       });
       expect(colors[0]).toBe(colors[1]);
       expect(colors[0]).toBe(colors[2]);
@@ -333,7 +405,9 @@ describe("Side Pane Tab responsive interactions", () => {
   it("SPT-E2E-001 keeps one tab at 156px and the add button beside it", async () => {
     if (process.platform === "win32" || process.platform === "linux") {
       // 本组用例强制 tab viewport 为 360px；自绘窗控按 CSS 像素预留后，需要足够宽的真实窗口容纳测试夹具。
-      await browser.electron.execute((electron) => { electron.BrowserWindow.getAllWindows()[0]!.setSize(2200, 1400); });
+      await browser.electron.execute((electron) => {
+        electron.BrowserWindow.getAllWindows()[0]!.setSize(2200, 1400);
+      });
       await browser.waitUntil(async () => browser.execute(() => window.innerWidth > 1400));
     }
     await ensureTerminalTabCount(1);
@@ -357,11 +431,13 @@ describe("Side Pane Tab responsive interactions", () => {
     expect(regions.controls.length).toBeGreaterThan(2);
     expect(regions.controls.every((region) => region === "no-drag")).toBe(true);
     const close = await $(`[data-workspace-side-frame] [data-testid="${TID_SIDE_PANE_TOGGLE}"]`);
-    expect(await browser.execute(() => {
-      const header = document.querySelector('[data-workspace-side-frame] [role="tablist"]')!;
-      const first = header.querySelector("button")!;
-      return first.getBoundingClientRect().left - header.getBoundingClientRect().left;
-    })).toBeCloseTo(8, 0);
+    expect(
+      await browser.execute(() => {
+        const header = document.querySelector('[data-workspace-side-frame] [role="tablist"]')!;
+        const first = header.querySelector("button")!;
+        return first.getBoundingClientRect().left - header.getBoundingClientRect().left;
+      }),
+    ).toBeCloseTo(8, 0);
     await close.waitForClickable({ timeout: 5000 });
     await close.click();
     const reopen = await $(
@@ -555,53 +631,112 @@ describe("Side Pane Tab responsive interactions", () => {
     );
   });
   it("SPT-E2E-007 routes custom desktop minimize and close controls", async function () {
-    if (process.platform !== "win32" && process.platform !== "linux") { this.skip(); return; }
+    if (process.platform !== "win32" && process.platform !== "linux") {
+      this.skip();
+      return;
+    }
     if (process.platform === "win32" || process.platform === "linux") {
       const maximize = await $('[data-testid="window-control-maximize"]');
-      const normalBounds = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows()[0]!.getBounds());
+      const normalBounds = await browser.electron.execute((electron) =>
+        electron.BrowserWindow.getAllWindows()[0]!.getBounds(),
+      );
       expect(await maximize.getSize("height")).toBe(28);
       await maximize.click();
-      await browser.waitUntil(async () => (await maximize.getAttribute("data-maximized")) === "true");
+      await browser.waitUntil(
+        async () => (await maximize.getAttribute("data-maximized")) === "true",
+      );
       expect(await maximize.$("svg.lucide-window-restore").isExisting()).toBe(true);
       try {
-        await browser.waitUntil(async () => browser.execute(() => {
-          const style = getComputedStyle(document.querySelector('[data-workspace-side-frame]')!);
-          return [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomLeftRadius, style.borderBottomRightRadius].every(value => value === "5px") &&
-            [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].every(value => value === "1px");
-        }), { timeout: 5000, timeoutMsg: "最大化后的 Side Pane 必须保持四角 5px 和完整边框" });
+        await browser.waitUntil(
+          async () =>
+            browser.execute(() => {
+              const style = getComputedStyle(
+                document.querySelector("[data-workspace-side-frame]")!,
+              );
+              return (
+                [
+                  style.borderTopLeftRadius,
+                  style.borderTopRightRadius,
+                  style.borderBottomLeftRadius,
+                  style.borderBottomRightRadius,
+                ].every((value) => value === "5px") &&
+                [
+                  style.borderTopWidth,
+                  style.borderRightWidth,
+                  style.borderBottomWidth,
+                  style.borderLeftWidth,
+                ].every((value) => value === "1px")
+              );
+            }),
+          { timeout: 5000, timeoutMsg: "最大化后的 Side Pane 必须保持四角 5px 和完整边框" },
+        );
       } finally {
         await maximize.click();
-        await browser.waitUntil(async () => (await maximize.getAttribute("data-maximized")) === "false");
+        await browser.waitUntil(
+          async () => (await maximize.getAttribute("data-maximized")) === "false",
+        );
         await browser.waitUntil(async () => {
-          const bounds = await browser.electron.execute((electron) => electron.BrowserWindow.getAllWindows()[0]!.getBounds());
-          return bounds.width === normalBounds.width && bounds.height === normalBounds.height && Math.abs((await readIndependentPanelMetrics())!.gap - 4) < 1;
+          const bounds = await browser.electron.execute((electron) =>
+            electron.BrowserWindow.getAllWindows()[0]!.getBounds(),
+          );
+          return (
+            bounds.width === normalBounds.width &&
+            bounds.height === normalBounds.height &&
+            Math.abs((await readIndependentPanelMetrics())!.gap - 4) < 1
+          );
         });
       }
     }
 
     await browser.electron.execute((electron) => {
-      const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & { testMinimized?: boolean };
+      const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & {
+        testMinimized?: boolean;
+      };
       win.testMinimized = false;
-      win.once("minimize", () => { win.testMinimized = true; });
+      win.once("minimize", () => {
+        win.testMinimized = true;
+      });
     });
     await $('[data-testid="window-control-minimize"]').click();
     try {
       // WDIO 获取窗口上下文可能重新激活窗口，使用真实 minimize 事件作为成功证据。
-      await browser.waitUntil(async () => browser.electron.execute((electron) => (electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & { testMinimized?: boolean }).testMinimized === true));
+      await browser.waitUntil(async () =>
+        browser.electron.execute(
+          (electron) =>
+            (
+              electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & {
+                testMinimized?: boolean;
+              }
+            ).testMinimized === true,
+        ),
+      );
     } finally {
-      await browser.electron.execute((electron) => { const win = electron.BrowserWindow.getAllWindows()[0]!; win.restore(); win.show(); });
+      await browser.electron.execute((electron) => {
+        const win = electron.BrowserWindow.getAllWindows()[0]!;
+        win.restore();
+        win.show();
+      });
     }
     // 验证真实 close 事件，但阻止测试窗口退出，避免销毁 WDIO 会话。
     await browser.electron.execute((electron) => {
-      const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & { testCloseReceived?: boolean };
+      const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & {
+        testCloseReceived?: boolean;
+      };
       win.testCloseReceived = false;
-      win.once("close", event => { event.preventDefault(); win.testCloseReceived = true; });
+      win.once("close", (event) => {
+        event.preventDefault();
+        win.testCloseReceived = true;
+      });
     });
     await $('[data-testid="window-control-close"]').click();
-    expect(await browser.electron.execute((electron) => {
-      const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & { testCloseReceived?: boolean };
-      return win.testCloseReceived;
-    })).toBe(true);
+    expect(
+      await browser.electron.execute((electron) => {
+        const win = electron.BrowserWindow.getAllWindows()[0]! as Electron.BrowserWindow & {
+          testCloseReceived?: boolean;
+        };
+        return win.testCloseReceived;
+      }),
+    ).toBe(true);
   });
 });
 
@@ -618,7 +753,14 @@ async function readResizeHandleRect(selector: string): Promise<ResizeHandleRect>
 }
 
 async function movePointerAwayFromResizeHandles(): Promise<void> {
-  await browser.performActions([{ type: "pointer", id: "resize-pointer", parameters: { pointerType: "mouse" }, actions: [{ type: "pointerMove", duration: 0, x: 20, y: 20 }] }]);
+  await browser.performActions([
+    {
+      type: "pointer",
+      id: "resize-pointer",
+      parameters: { pointerType: "mouse" },
+      actions: [{ type: "pointerMove", duration: 0, x: 20, y: 20 }],
+    },
+  ]);
   await browser.releaseActions();
 }
 
@@ -628,15 +770,29 @@ async function hoverResizeHandle(selector: string): Promise<void> {
 
 async function dragResizeHandle(selector: string, deltaX: number, deltaY: number): Promise<void> {
   const rect = await readResizeHandleRect(selector);
-  await browser.performActions([{ type: "pointer", id: "resize-pointer", parameters: { pointerType: "mouse" }, actions: [
-    { type: "pointerMove", duration: 0, x: rect.x, y: rect.y },
-    { type: "pointerDown", button: 0 },
-    { type: "pointerMove", duration: 250, x: rect.x + deltaX, y: rect.y + deltaY },
-  ] }]);
+  await browser.performActions([
+    {
+      type: "pointer",
+      id: "resize-pointer",
+      parameters: { pointerType: "mouse" },
+      actions: [
+        { type: "pointerMove", duration: 0, x: rect.x, y: rect.y },
+        { type: "pointerDown", button: 0 },
+        { type: "pointerMove", duration: 250, x: rect.x + deltaX, y: rect.y + deltaY },
+      ],
+    },
+  ]);
   try {
     await assertResizeHandleVisible(selector);
   } finally {
-    await browser.performActions([{ type: "pointer", id: "resize-pointer", parameters: { pointerType: "mouse" }, actions: [{ type: "pointerUp", button: 0 }] }]);
+    await browser.performActions([
+      {
+        type: "pointer",
+        id: "resize-pointer",
+        parameters: { pointerType: "mouse" },
+        actions: [{ type: "pointerUp", button: 0 }],
+      },
+    ]);
     await browser.releaseActions();
   }
 }
@@ -649,14 +805,28 @@ async function readResizeHandleStyle(selector: string) {
     const indicatorStyle = getComputedStyle(handle, "::after");
     const reference = document.createElement("div");
     // 测试节点不参与 Tailwind 扫描，直接按主题 token 计算期望色，避免缺失 utility 造成误报。
-    reference.style.backgroundColor = "color-mix(in oklab, var(--color-foreground-subtlest) 50%, transparent)";
+    reference.style.backgroundColor =
+      "color-mix(in oklab, var(--color-foreground-subtlest) 50%, transparent)";
     document.body.append(reference);
     const tertiaryColor = getComputedStyle(reference).backgroundColor;
     reference.remove();
     const vertical = handleRect.height > handleRect.width;
-    const expectedInset = Number.parseFloat(handleStyle.getPropertyValue(targetSelector === '[data-testid="resizable-handle"]' ? "--workspace-resize-handle-inset" : "--workspace-panel-radius"));
+    const expectedInset = Number.parseFloat(
+      handleStyle.getPropertyValue(
+        targetSelector === '[data-testid="resizable-handle"]'
+          ? "--workspace-resize-handle-inset"
+          : "--workspace-panel-radius",
+      ),
+    );
     return {
-      hasExtendedTertiaryLine: indicatorStyle.content !== "none" && indicatorStyle.maskImage === "none" && Math.abs(Number.parseFloat(vertical ? indicatorStyle.height : indicatorStyle.width) - ((vertical ? handleRect.height : handleRect.width) - 2 * expectedInset)) < 1 && indicatorStyle.backgroundColor === tertiaryColor,
+      hasExtendedTertiaryLine:
+        indicatorStyle.content !== "none" &&
+        indicatorStyle.maskImage === "none" &&
+        Math.abs(
+          Number.parseFloat(vertical ? indicatorStyle.height : indicatorStyle.width) -
+            ((vertical ? handleRect.height : handleRect.width) - 2 * expectedInset),
+        ) < 1 &&
+        indicatorStyle.backgroundColor === tertiaryColor,
       indicatorOpacity: indicatorStyle.opacity,
       handleHeight: vertical ? "full" : handleRect.height,
       handleWidth: handleRect.width,
@@ -668,7 +838,10 @@ async function readResizeHandleStyle(selector: string) {
 }
 
 async function assertResizeHandleVisible(selector: string): Promise<void> {
-  await browser.waitUntil(async () => Number((await readResizeHandleStyle(selector)).indicatorOpacity) > 0.99, { timeout: 1000 });
+  await browser.waitUntil(
+    async () => Number((await readResizeHandleStyle(selector)).indicatorOpacity) > 0.99,
+    { timeout: 1000 },
+  );
   expect((await readResizeHandleStyle(selector)).hasExtendedTertiaryLine).toBe(true);
 }
 

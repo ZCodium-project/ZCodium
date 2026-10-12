@@ -4,7 +4,7 @@ sidebar:
   order: 3
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 Issues reported by Knip may contain false positives, but also tons of useful
 information. Getting the most out of Knip may require some configuration.
@@ -93,7 +93,7 @@ If Knip still reports false positives, you may need to strategically add an
 Dynamic import specifiers aren't resolved, such as:
 
 ```ts
-const entry = await import(path.join(baseDir, 'entry.ts'));
+const entry = await import(path.join(baseDir, "entry.ts"));
 ```
 
 **Solution**: add `entry.ts` to `entry` patterns.
@@ -204,13 +204,13 @@ it's better to be explicit and list other workspaces as dependencies in
 **Solution**: migrate from relative paths...
 
 ```ts
-import { something } from '../../common/file.ts';
+import { something } from "../../common/file.ts";
 ```
 
 ...to dependency-based imports...
 
 ```ts
-import { something } from '@org/common';
+import { something } from "@org/common";
 ```
 
 An additional benefit is that Knip will report unused and unlisted dependencies
@@ -317,11 +317,11 @@ logic may evaluate differently during analysis.
 For example, this Playwright configuration conditionally adds a reporter:
 
 ```ts title="playwright.config.ts"
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
-const reporters: any[] = [['list']];
+const reporters: any[] = [["list"]];
 if (process.env.REPORT_PORTAL_ENABLED) {
-  reporters.push(['@reportportal/agent-js-playwright', config]);
+  reporters.push(["@reportportal/agent-js-playwright", config]);
 }
 
 export default defineConfig({
@@ -479,8 +479,8 @@ such as for `.svg` files. Bundlers like Webpack may support this, but Knip does
 not. Here's an example:
 
 ```ts title="App.vue"
-import Component from './Component'; // → Should resolve to ./Component.vue
-import ArrowIcon from '../icons/Arrow'; // → Does NOT resolve to ../icons/Arrow.svg
+import Component from "./Component"; // → Should resolve to ./Component.vue
+import ArrowIcon from "../icons/Arrow"; // → Does NOT resolve to ../icons/Arrow.svg
 ```
 
 The first import is resolved properly, because `.vue` is a known extension if
@@ -567,6 +567,7 @@ non-standard consumption of your exports? Here's an example:
       resolveComponent: components => components.Orange,
     });
     ```
+
   </TabItem>
 
   <TabItem label="components.js">
@@ -589,10 +590,10 @@ To exclude false positives from the report, there are a few options:
 - [Ignore exports used in file][47] for exports used internally.
 - Individual exports can be [tagged using JSDoc syntax][48].
 - Have the export in an entry file:
-
   - Add the file to the `entry` file patterns array in the configuration.
   - Move the export(s) to an entry file.
   - Add the file to the `exports` field of `package.json`
+
 - Re-export the unused export(s) from an entry file.
 
 ### Missing unused exports?

@@ -88,7 +88,13 @@ describe("E2E spec scheduling resolution", () => {
           exclude: [],
           requestedSpecs: ["./test/e2e/conversation-session/*.test.ts"],
           envSpec: "./test/e2e/conversation-session/*.test.ts",
-          argv: ["run", "wdio.conf.ts", "--", "--spec", "./test/e2e/conversation-session/*.test.ts"],
+          argv: [
+            "run",
+            "wdio.conf.ts",
+            "--",
+            "--spec",
+            "./test/e2e/conversation-session/*.test.ts",
+          ],
         }),
       ).toThrow(/Desktop E2E has no scheduled spec files after applying excludes/);
     });

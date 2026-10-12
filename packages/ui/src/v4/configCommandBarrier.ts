@@ -9,9 +9,7 @@ export interface LatestConfigCommandScheduler<T> {
   /**
    * 合并尚未开始的同类配置命令；被新意图替代的调用以 superseded 收敛。
    */
-  schedule(
-    command: () => Promise<T>,
-  ): Promise<T | typeof CONFIG_COMMAND_SUPERSEDED>;
+  schedule(command: () => Promise<T>): Promise<T | typeof CONFIG_COMMAND_SUPERSEDED>;
   /**
    * 封住当前等待槽。发送命令入队前调用，保证封住的配置一定排在发送之前，
    * 后续配置则创建新槽并排在发送之后。
@@ -66,34 +64,32 @@ export function createLatestConfigCommandScheduler<T>(
 
   return {
     schedule(command) {
-      return new Promise<T | typeof CONFIG_COMMAND_SUPERSEDED>(
-        (resolve, reject) => {
-          if (replaceableSlot) {
-            replaceableSlot.waiter.resolve(CONFIG_COMMAND_SUPERSEDED);
-            replaceableSlot.command = command;
-            replaceableSlot.waiter = { reject, resolve };
-            return;
-          }
+      return new Promise<T | typeof CONFIG_COMMAND_SUPERSEDED>((resolve, reject) => {
+        if (replaceableSlot) {
+          replaceableSlot.waiter.resolve(CONFIG_COMMAND_SUPERSEDED);
+          replaceableSlot.command = command;
+          replaceableSlot.waiter = { reject, resolve };
+          return;
+        }
 
-          const slot: Slot = {
-            command,
-            waiter: { reject, resolve },
-          };
-          replaceableSlot = slot;
-          void barrier.enqueue(async () => {
-            if (replaceableSlot === slot) {
-              replaceableSlot = null;
-            }
-            const scheduledCommand = slot.command;
-            const scheduledWaiter = slot.waiter;
-            try {
-              scheduledWaiter.resolve(await scheduledCommand());
-            } catch (error) {
-              scheduledWaiter.reject(error);
-            }
-          });
-        },
-      );
+        const slot: Slot = {
+          command,
+          waiter: { reject, resolve },
+        };
+        replaceableSlot = slot;
+        void barrier.enqueue(async () => {
+          if (replaceableSlot === slot) {
+            replaceableSlot = null;
+          }
+          const scheduledCommand = slot.command;
+          const scheduledWaiter = slot.waiter;
+          try {
+            scheduledWaiter.resolve(await scheduledCommand());
+          } catch (error) {
+            scheduledWaiter.reject(error);
+          }
+        });
+      });
     },
     seal() {
       replaceableSlot = null;

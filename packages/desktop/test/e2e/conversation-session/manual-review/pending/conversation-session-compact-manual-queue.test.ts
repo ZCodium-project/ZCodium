@@ -42,9 +42,7 @@ describe("会话区手动 Compact 与 Held Queue E2E", () => {
       30000,
     );
 
-    const prepPromptTwo = buildReadonlyToolPrompt(
-      `E2E_COMPACT_PREP_TWO_${runId}`,
-    );
+    const prepPromptTwo = buildReadonlyToolPrompt(`E2E_COMPACT_PREP_TWO_${runId}`);
     await sendPrompt(prepPromptTwo);
     await waitForUpstreamNetworkCapture(`E2E_COMPACT_PREP_TWO_${runId}`);
     await waitForChatState(
@@ -62,16 +60,11 @@ describe("会话区手动 Compact 与 Held Queue E2E", () => {
     );
     const taskId = readySnapshot.taskId;
     if (!taskId) {
-      throw new Error(
-        `manual compact held queue 缺少 taskId: ${JSON.stringify(readySnapshot)}`,
-      );
+      throw new Error(`manual compact held queue 缺少 taskId: ${JSON.stringify(readySnapshot)}`);
     }
 
     const queuedPrompt = `E2E_COMPACT_QUEUE_HELD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    const injectedQueue = await injectRendererHeldQueuePromptForE2E(
-      taskId,
-      queuedPrompt,
-    );
+    const injectedQueue = await injectRendererHeldQueuePromptForE2E(taskId, queuedPrompt);
     await waitForQueueContaining(`E2E_COMPACT_QUEUE_HELD_${runId}`);
     const heldQueue = await waitForQueueCount(1);
     const heldQueueItemId = heldQueue[0]?.id;
@@ -100,9 +93,7 @@ describe("会话区手动 Compact 与 Held Queue E2E", () => {
     expect(await getQueueItems()).toHaveLength(1);
     expect((await getQueueItems())[0]?.id).toBe(heldQueueItemId);
 
-    const compactRecord = await waitForUpstreamNetworkCapture(
-      COMPACT_REQUEST_SENTINEL,
-    );
+    const compactRecord = await waitForUpstreamNetworkCapture(COMPACT_REQUEST_SENTINEL);
     assertUpstreamRequestCapture(compactRecord, {
       expectedText: COMPACT_REQUEST_SENTINEL,
       model: UPSTREAM_MODEL,
@@ -116,35 +107,26 @@ describe("会话区手动 Compact 与 Held Queue E2E", () => {
     expect(completedMarker.operationId).toBeTruthy();
     const finalQueue = await waitForQueueCount(1);
     expect(finalQueue[0]?.id).toBe(heldQueueItemId);
-    expect(
-      await countUpstreamRequestsContaining(`E2E_COMPACT_QUEUE_HELD_${runId}`),
-    ).toBe(queuedRequestsBefore);
+    expect(await countUpstreamRequestsContaining(`E2E_COMPACT_QUEUE_HELD_${runId}`)).toBe(
+      queuedRequestsBefore,
+    );
 
     const appendPrompt = `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     const appendRequestsBefore = await countUpstreamRequestsContaining(
       `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`,
     );
     await sendPrompt(appendPrompt);
-    await waitForComposerText(
-      "",
-      "completed held queue 下发送普通文本后输入框没有清空",
-    );
-    await waitForQueueContaining(
-      `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`,
-    );
+    await waitForComposerText("", "completed held queue 下发送普通文本后输入框没有清空");
+    await waitForQueueContaining(`E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`);
     const appendedQueue = await waitForQueueCount(2);
     expect(appendedQueue[0]?.id).toBe(heldQueueItemId);
-    expect(appendedQueue[1]?.content).toContain(
-      `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`,
-    );
+    expect(appendedQueue[1]?.content).toContain(`E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`);
     await expectNoUpstreamRequestForTextWithin(
       `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`,
       800,
     );
     expect(
-      await countUpstreamRequestsContaining(
-        `E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`,
-      ),
+      await countUpstreamRequestsContaining(`E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS_${runId}`),
     ).toBe(appendRequestsBefore);
   });
 });
@@ -197,9 +179,8 @@ async function injectRendererHeldQueuePromptForE2E(
         };
       };
 
-      const storeApi = (
-        window as Window & { __zcodeSessionStoreE2E?: RendererStore }
-      ).__zcodeSessionStoreE2E;
+      const storeApi = (window as Window & { __zcodeSessionStoreE2E?: RendererStore })
+        .__zcodeSessionStoreE2E;
       const state = storeApi?.getState?.();
       if (!state?.enqueueTaskQueuedPrompt || !state.setTaskStopRequested) {
         return { ok: false, reason: "store-api-missing" };
@@ -209,9 +190,7 @@ async function injectRendererHeldQueuePromptForE2E(
         ([, workspace]) =>
           workspace.activeTaskId === taskIdArg ||
           Boolean(workspace.optimisticTaskListByTaskId?.[taskIdArg]) ||
-          Boolean(
-            workspace.taskListCache?.some((task) => task.taskId === taskIdArg),
-          ),
+          Boolean(workspace.taskListCache?.some((task) => task.taskId === taskIdArg)),
       );
       if (!workspaceEntry) {
         return { ok: false, reason: "task-workspace-not-found" };
@@ -239,12 +218,7 @@ async function injectRendererHeldQueuePromptForE2E(
         },
         workspaceIdentity,
       );
-      state.setTaskStopRequested(
-        workspacePath,
-        taskIdArg,
-        true,
-        workspaceIdentity,
-      );
+      state.setTaskStopRequested(workspacePath, taskIdArg, true, workspaceIdentity);
 
       return {
         ok: true,
@@ -258,9 +232,7 @@ async function injectRendererHeldQueuePromptForE2E(
   )) as RendererHeldQueueInjectionResult;
 
   if (!result.ok || !result.promptId) {
-    throw new Error(
-      `manual compact held queue 注入失败: ${result.reason ?? "unknown"}`,
-    );
+    throw new Error(`manual compact held queue 注入失败: ${result.reason ?? "unknown"}`);
   }
   return result as RendererHeldQueueInjectionResult & { promptId: string };
 }

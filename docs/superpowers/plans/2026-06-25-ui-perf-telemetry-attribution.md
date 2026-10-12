@@ -17,6 +17,7 @@
 ### Task 1: Document Scope and Performance Guardrails
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-06-16-ui-perf-arms-telemetry-design.md`
 - Create: `docs/superpowers/plans/2026-06-25-ui-perf-telemetry-attribution.md`
 
@@ -31,6 +32,7 @@ Save this file under `docs/superpowers/plans/`.
 ### Task 2: Add Failing Tests for UI Perf Payloads
 
 **Files:**
+
 - Modify: `packages/ui/test/uiPerfArmsTelemetry.test.ts`
 
 - [x] **Step 1: Add tests before production code**
@@ -72,6 +74,7 @@ Expected: fail because `reportUiTurnBreakdown` and `chunkType` support do not ex
 ### Task 3: Implement UI Perf Payload Enhancements
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/uiPerfArmsTelemetry.ts`
 - Modify: `packages/ui/src/hooks/taskStreamEventHandlers.ts`
 - Modify: `packages/ui/src/hooks/useZCodeChat.ts`
@@ -79,6 +82,7 @@ Expected: fail because `reportUiTurnBreakdown` and `chunkType` support do not ex
 - [x] **Step 1: Add `UI_PERF_EVENT_TURN_BREAKDOWN` and `reportUiTurnBreakdown`**
 
 Implementation must:
+
 - Emit one event per prompt completion.
 - Reuse the existing async `emit()` helper.
 - Round numeric values.
@@ -99,6 +103,7 @@ Parse existing `completionTelemetry.eventExtraDetail` values in `useZCodeChat.ts
 ### Task 4: Add Failing Tests for Plan Network Status Mirroring
 
 **Files:**
+
 - Modify: `packages/ui/test/planUsageArmsTelemetry.test.ts` or create if missing.
 - Modify: `packages/ui/src/lib/planUsageArmsTelemetry.ts`
 
@@ -119,6 +124,7 @@ Expected: fail because only `model_request_started` is currently mirrored.
 ### Task 5: Implement Plan Network Status Mirroring
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/planUsageArmsTelemetry.ts`
 
 - [x] **Step 1: Rename the helper internally or extend it in place**
@@ -132,6 +138,7 @@ Include `duration_ms`, `status_code`, `delay_ms`, `idle_ms`, `timeout_ms`, `retr
 ### Task 6: Verification and Commit
 
 **Files:**
+
 - All modified files.
 
 - [x] **Step 1: Run targeted tests**

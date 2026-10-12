@@ -49,24 +49,24 @@ Template work is not “style by vibes”. Use these to anchor the visual system
 
 Use this table first. Only read deeper references after you have the nearest alignment family.
 
-| If the template looks like... | Start here |
-| --- | --- |
-| school / thesis / dissertation template | `AcademicThesis` family + institutional structure preservation |
-| 公文 / Chinese government / strong CJK official template | `ChineseGovernment` + `cjk_typography.md` |
-| corporate / branded business template | `ModernCorporate` / `ExecutiveBrief` |
-| reference sample with no structural authority | nearest family by visual intent, then treat as `reference_style_only` |
+| If the template looks like...                            | Start here                                                            |
+| -------------------------------------------------------- | --------------------------------------------------------------------- |
+| school / thesis / dissertation template                  | `AcademicThesis` family + institutional structure preservation        |
+| 公文 / Chinese government / strong CJK official template | `ChineseGovernment` + `cjk_typography.md`                             |
+| corporate / branded business template                    | `ModernCorporate` / `ExecutiveBrief`                                  |
+| reference sample with no structural authority            | nearest family by visual intent, then treat as `reference_style_only` |
 
 ## Style family / recipe alignment
 
 After template mode is chosen, align the template target to a recipe family instead of inventing raw
 values from scratch:
 
-| Situation | Alignment rule |
-| --- | --- |
+| Situation                                | Alignment rule                                                                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | school / thesis / institutional template | preserve the template’s structural zones, then align heading / body / spacing expectations to the nearest academic or institutional recipe family |
-| 公文 / government / strong CJK template | `ChineseGovernment` + `cjk_typography.md` is the baseline; template XML can override only where the template explicitly proves it |
-| corporate / branded template | align to `ModernCorporate` / `ExecutiveBrief` / closest recipe, then preserve template-specific colors / sections / headers |
-| reference-style-only template | treat the template as style intent, map it to the nearest recipe family, then generate through `D` or `S` |
+| 公文 / government / strong CJK template  | `ChineseGovernment` + `cjk_typography.md` is the baseline; template XML can override only where the template explicitly proves it                 |
+| corporate / branded template             | align to `ModernCorporate` / `ExecutiveBrief` / closest recipe, then preserve template-specific colors / sections / headers                       |
+| reference-style-only template            | treat the template as style intent, map it to the nearest recipe family, then generate through `D` or `S`                                         |
 
 Once alignment is chosen, preserve template-proven structure first and use recipe values for the parts
 the template does not specify clearly.
@@ -74,18 +74,22 @@ the template does not specify clearly.
 ## Template modes
 
 ### `reference_style_only`
+
 Source is text-native, but the final formal DOCX still must be produced through `D` after
 normalization into a document plan / structured config. Treat the template as style intent, not as a
 pandoc route.
 
 ### `overlay_styles`
+
 Source is DOCX and the template mainly supplies style system, not structural zones.
 
 ### `base_replace`
+
 Template is the skeleton. Output starts from the template and replaces example content with source
 content.
 
 ### `institutional_multi_section`
+
 Template controls cover / TOC / abstract / body / page numbers / titlePg / per-section
 headers/footers. This is the strictest mode.
 
@@ -104,12 +108,14 @@ verification is unfinished.
 ## Backend decision
 
 ### Default to D when
+
 - source is text-native but has been normalized into a document plan / structured config and the
   template mainly supplies style intent
 - source is DOCX and template carries institutional or multi-section structure
 - source is DOCX and even “style overlay” still needs in-place preservation
 
 ### Escalate to S when
+
 - the template transfer is structurally beyond D
 
 Backend choice happens after template mode + recipe alignment, not before them.
@@ -130,6 +136,7 @@ specific structural transfer requirement rules it out.
 ## Deep references
 
 Reuse the bundled template knowledge under:
+
 - `<skill_dir>/references/scenario_c_apply_template.md`
 - `<skill_dir>/references/typography_guide.md`
 - `<skill_dir>/references/design_principles.md`

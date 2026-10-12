@@ -27,14 +27,15 @@ If you have a browser installation on a location that cannot be auto-detected by
 
 ```ts
 {
-    capabilities: [
-        {
-            browserName: 'chrome', // or 'firefox' or 'chromium'
-            'goog:chromeOptions': { // or 'moz:firefoxOptions' or 'wdio:chromedriverOptions'
-                binary: '/path/to/chrome'
-            },
-        }
-    ]
+  capabilities: [
+    {
+      browserName: "chrome", // or 'firefox' or 'chromium'
+      "goog:chromeOptions": {
+        // or 'moz:firefoxOptions' or 'wdio:chromedriverOptions'
+        binary: "/path/to/chrome",
+      },
+    },
+  ];
 }
 ```
 
@@ -44,14 +45,15 @@ WebdriverIO will always do this, unless driver [binary](capabilities#binary) is 
 
 ```ts
 {
-    capabilities: [
-        {
-            browserName: 'chrome', // or 'firefox', 'msedge', 'safari', 'chromium'
-            'wdio:chromedriverOptions': { // or 'wdio:geckodriverOptions', 'wdio:edgedriverOptions'
-                binary: '/path/to/chromedriver' // or 'geckodriver', 'msedgedriver'
-            }
-        }
-    ]
+  capabilities: [
+    {
+      browserName: "chrome", // or 'firefox', 'msedge', 'safari', 'chromium'
+      "wdio:chromedriverOptions": {
+        // or 'wdio:geckodriverOptions', 'wdio:edgedriverOptions'
+        binary: "/path/to/chromedriver", // or 'geckodriver', 'msedgedriver'
+      },
+    },
+  ];
 }
 ```
 
@@ -104,14 +106,14 @@ chromedriver --port=4444 --verbose
 To automate Firefox download the latest version of `geckodriver` for your environment and unpack it in your project directory:
 
 <Tabs
-  defaultValue="npm"
-  values={[
-    {label: 'NPM', value: 'npm'},
-    {label: 'Curl', value: 'curl'},
-    {label: 'Brew', value: 'brew'},
-    {label: 'Windows (64 bit / Chocolatey)', value: 'chocolatey'},
-    {label: 'Windows (64 bit / Powershell) DevTools', value: 'powershell'},
-  ]
+defaultValue="npm"
+values={[
+{label: 'NPM', value: 'npm'},
+{label: 'Curl', value: 'curl'},
+{label: 'Brew', value: 'brew'},
+{label: 'Windows (64 bit / Chocolatey)', value: 'chocolatey'},
+{label: 'Windows (64 bit / Powershell) DevTools', value: 'powershell'},
+]
 }>
 <TabItem value="npm">
 

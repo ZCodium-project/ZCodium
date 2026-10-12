@@ -12,7 +12,7 @@
 
 Provider Registry 的静态事实由三层相同形态的 Provider Config Overlay 组成：
 
-~~~text
+```text
 Official Provider Config
         +
 Personal Provider Config
@@ -30,7 +30,7 @@ Provider Registry
         | ModelSelection
         v
 Model
-~~~
+```
 
 三层分别负责：
 
@@ -42,19 +42,19 @@ Official 和 Personal 持久化。Account Access 是内存中的运行时 Overla
 
 Provider 配置和模型配置是两套互补数据：
 
-~~~text
+```text
 Provider Config
 └─ 如何连接、如何取得访问资格、包含哪些 modelId
 
 Model Config Rules
 └─ modelId 对应的 Properties、Option Specs 和协议行为
-~~~
+```
 
 ## 2. Provider Config Schema 草案
 
 本轮将 Provider 的“访问资格”与“请求协议”拆成两个正交维度。它们在同一个 ProviderConfig 中聚合，但各自使用带判别字段的 Schema。
 
-~~~ts
+```ts
 type ProviderConfigMap = ConfigOverlayMap<ProviderId, ProviderConfig>;
 
 class ProviderConfig extends ConfigOverlay {
@@ -65,7 +65,7 @@ class ProviderConfig extends ConfigOverlay {
   models?: readonly ModelId[] | null;
   enabled?: boolean | null;
 }
-~~~
+```
 
 外层 ProviderConfigMap 的 key 是 providerId，因此 value 中不重复保存 providerId。所有字段保持 optional，使同一类型既能表达一层稀疏 Overlay，也能表达覆盖完成后的结果。字段缺失表示本层沿用前层值；null 表示本层明确清除该字段。
 
@@ -73,10 +73,8 @@ class ProviderConfig extends ConfigOverlay {
 
 Access 描述“本次调用资格从哪里取得”。
 
-~~~ts
-type ProviderAccessConfig =
-  | ApiKeyAccessConfig
-  | ZhipuAccountAccessConfig;
+```ts
+type ProviderAccessConfig = ApiKeyAccessConfig | ZhipuAccountAccessConfig;
 
 class ApiKeyAccessConfig extends ConfigOverlay {
   readonly type = "api-key";
@@ -88,8 +86,7 @@ class ZhipuAccountAccessConfig extends ConfigOverlay {
   readonly type = "zhipu-account";
   accessId?: string | null;
 }
-
-~~~
+```
 
 当前正式范围是 api-key 与 zhipu-account。未来其他厂商 OAuth 等访问方式在出现具体需求后扩展新的 Access 分支。
 
@@ -101,18 +98,15 @@ Zhipu Account 的 accessId 标识一条确定的账号连接，而不只标识 P
 
 API 描述“请求发往哪里，并遵循哪一种公开协议”。
 
-~~~ts
-type ProviderApiType =
-  | "anthropic-messages"
-  | "openai-responses"
-  | "openai-chat-completions";
+```ts
+type ProviderApiType = "anthropic-messages" | "openai-responses" | "openai-chat-completions";
 
 class ProviderApiConfig extends ConfigOverlay {
   type?: ProviderApiType | null;
   baseURL?: string | null;
   headers?: Record<string, string> | null;
 }
-~~~
+```
 
 对外 Config 使用 `api.type`。Adapter 类型是执行实现细节，由 Model 构造链根据 API 配置选择，不进入用户配置。
 
@@ -122,7 +116,7 @@ class ProviderApiConfig extends ConfigOverlay {
 
 每层 Overlay 可以稀疏。覆盖完成后，Registry 只接收能够形成完整连接的 Provider：
 
-~~~text
+```text
 所有 Provider
 ├─ access.type
 ├─ api.type
@@ -134,7 +128,7 @@ api-key access
 
 zhipu-account access
 └─ accessId
-~~~
+```
 
 完整性由 Config Class 递归检查。设置 Facade 使用同一份检查结果展示待补字段；Registry 过滤未完成配置，不再单独复制一套判断。
 
@@ -142,7 +136,7 @@ zhipu-account access
 
 模型配置是一组有序规则。每条规则包含匹配条件和一个稀疏 ModelConfig。后面的命中规则继续覆盖前面的结果。
 
-~~~ts
+```ts
 interface ModelConfigRule {
   providerMatch?: string;
   modelMatch: string;
@@ -155,13 +149,13 @@ class ModelConfig extends ConfigOverlay {
   optionSpecs?: ModelOptionSpecsConfig | null;
   apiAdapter?: ModelApiAdapterConfig | null;
 }
-~~~
+```
 
 providerMatch、modelMatch 和 apiMatch 使用相同的模式匹配语义。规则按顺序执行，后面的命中项继续 Overlay 前面的结果。
 
 一份模型的通用字段和协议字段分别由不同规则贡献：
 
-~~~text
+```text
 modelMatch = GLM-5.3
 └─ Properties + Option Specs
 
@@ -170,13 +164,13 @@ modelMatch = GLM-5.3, apiMatch = anthropic-messages
 
 modelMatch = GLM-5.3, apiMatch = openai-chat-completions
 └─ OpenAI Chat reasoning mapping + preserved thinking replay
-~~~
+```
 
 ### 3.1 Properties
 
 当前公共 Properties 至少包括：
 
-~~~ts
+```ts
 class ModelPropertiesConfig extends ConfigOverlay {
   contextWindow?: number | null;
   supportsImages?: boolean | null;
@@ -187,7 +181,7 @@ class ModelPropertiesConfig extends ConfigOverlay {
   supportsNativeWebSearch?: boolean | null;
   supportsMidConversationSystem?: boolean | null;
 }
-~~~
+```
 
 supportsNativeWebSearch 可以受到 Provider Endpoint 能力影响，因此通用模型规则可给出保守值，Builtin Provider 的精确规则再贡献最终值。supportsMidConversationSystem 对当前三个 GLM 模型按 true 记录。
 
@@ -195,7 +189,7 @@ supportsNativeWebSearch 可以受到 Provider Endpoint 能力影响，因此通�
 
 Option Specs 声明用户可选择的通用选项及缺省值。Options 保存某个 Model 实例实际绑定的选择。
 
-~~~ts
+```ts
 class ModelOptionSpecsConfig extends ConfigOverlay {
   reasoningLevel?: EnumOptionSpec | null;
   maxOutputTokens?: LimitOptionSpec | null;
@@ -205,7 +199,7 @@ interface ModelOptions {
   reasoningLevel?: string;
   maxOutputTokens?: number;
 }
-~~~
+```
 
 reasoningLevel 是用户选项。Provider 方言字段、preserveThinking 和 reasoningContentField 都不属于 ModelOptions。
 
@@ -213,7 +207,7 @@ reasoningLevel 是用户选项。Provider 方言字段、preserveThinking 和 re
 
 API Adapter Config 保存当前模型在某种公开 API 下的固定适配行为。
 
-~~~ts
+```ts
 class ModelApiAdapterConfig extends ConfigOverlay {
   reasoningMapping?: ReasoningMapping | null;
   preserveThinking?: boolean | null;
@@ -222,11 +216,11 @@ class ModelApiAdapterConfig extends ConfigOverlay {
 
 type ReasoningMapping = Record<string, ReasoningParameters>;
 type ReasoningParameters = Record<string, unknown>;
-~~~
+```
 
 reasoningMapping 把通用 reasoningLevel 映射为该协议所需的参数。preserveThinking 和 reasoningContentField 只在确有该语义的协议中出现。
 
-~~~text
+```text
 Model.options.reasoningLevel
         |
         v
@@ -237,7 +231,7 @@ ModelApiAdapterConfig.reasoningMapping
         |
         v
 Adapter 生成最终请求
-~~~
+```
 
 OpenAI Chat Compatible 的方言最复杂，因此 reasoningMapping 和 reasoning replay 主要在这一协议下发挥作用。Anthropic Messages 与 OpenAI Responses 应优先遵循各自公开协议的固定语义。
 
@@ -249,7 +243,7 @@ OpenAI Chat Compatible 的方言最复杂，因此 reasoningMapping 和 reasonin
 
 Official 可以提供一个尚未连接的厂商入口，Personal 补入 API Key；用户也可以完全在 Personal 中创建 Provider。
 
-~~~json
+```json
 {
   "builtin:zai": {
     "label": "Z.AI",
@@ -265,11 +259,11 @@ Official 可以提供一个尚未连接的厂商入口，Personal 补入 API Key
     "enabled": true
   }
 }
-~~~
+```
 
 Personal Overlay：
 
-~~~json
+```json
 {
   "builtin:zai": {
     "access": {
@@ -278,7 +272,7 @@ Personal Overlay：
     }
   }
 }
-~~~
+```
 
 BigModel API Key Provider 使用同样结构，当前 Anthropic Endpoint 为 https://open.bigmodel.cn/api/anthropic。
 
@@ -286,7 +280,7 @@ BigModel API Key Provider 使用同样结构，当前 Anthropic Endpoint 为 htt
 
 Start Plan 的 Official Config 保存静态连接：
 
-~~~json
+```json
 {
   "builtin:zai-start-plan": {
     "label": "Z.AI Start Plan",
@@ -301,11 +295,11 @@ Start Plan 的 Official Config 保存静态连接：
     "enabled": true
   }
 }
-~~~
+```
 
 Account Access 根据登录和套餐结果生成同形 Overlay：
 
-~~~json
+```json
 {
   "builtin:zai-start-plan": {
     "access": {
@@ -315,7 +309,7 @@ Account Access 根据登录和套餐结果生成同形 Overlay：
     "models": ["GLM-5.2", "GLM-5-Turbo"]
   }
 }
-~~~
+```
 
 这里的 models 是当前账号获准使用的子集。请求时使用的 ZCode JWT 和一次性安全校验 Header 由请求鉴权服务取得。
 
@@ -325,7 +319,7 @@ BigModel Start Plan 使用 providerId builtin:bigmodel-start-plan。它当前与
 
 Coding Plan 继续使用 zhipu-account access：
 
-~~~json
+```json
 {
   "builtin:zai-coding-plan": {
     "label": "Z.AI Coding Plan",
@@ -352,7 +346,7 @@ Coding Plan 继续使用 zhipu-account access：
     "enabled": true
   }
 }
-~~~
+```
 
 Account Access 决定当前 Family 中真正发布的 Coding Plan Provider，并补入 accessId 和模型子集。请求鉴权服务再用 accessId 获取当前有效的 Runtime API Key。
 
@@ -360,13 +354,13 @@ Account Access 决定当前 Family 中真正发布的 Coding Plan Provider，并
 
 Team Plan 当前可以复用 Coding Plan providerId。Account Access 使用不同 accessId 固定组织、项目和连接身份：
 
-~~~text
+```text
 personal coding plan
 └─ zhipu-account:<account-id>:coding-plan:builtin:zai-coding-plan
 
 team plan
 └─ zhipu-account:<account-id>:team-plan:builtin:zai-coding-plan:<product>:<org>:<project>
-~~~
+```
 
 Provider Config 和 Model Config 不复制 Team Secret。请求鉴权服务根据 accessId 获取对应 Project Runtime Key。未来若产品决定同时发布 Personal 与 Team 两个可选连接，ModelSelection 是否需要携带连接身份将成为独立设计；M2 先保持每个 Provider Family 只发布当前生效连接。
 
@@ -374,7 +368,7 @@ Provider Config 和 Model Config 不复制 Team Secret。请求鉴权服务根�
 
 闲时任务等 execution-scoped 场景可以在 Submission 中附加一份临时 Provider Config。它不写入 Official、Personal 或常驻 Registry：
 
-~~~text
+```text
 Submission
 ├─ ModelSelection
 └─ Additional Provider Config
@@ -384,7 +378,7 @@ Submission
         |
         v
 Model
-~~~
+```
 
 临时 Provider 使用相同 ProviderConfig、Model Config 和 Model 构造链。任务结束后，临时解析范围自然释放，不需要修改或恢复 Session 的持久模型选择。
 
@@ -392,17 +386,17 @@ Model
 
 以下属性是本轮暂定的 GLM 公共事实：
 
-| 模型 | Context | Max Output | Image/PDF/Video | Tool Call | Structured Output | MCS |
-| --- | ---: | ---: | --- | --- | --- | --- |
-| GLM-5.3 | 1,000,000 | 128,000 | false / false / false | true | true | true |
-| GLM-5.2 | 1,000,000 | 131,072 | false / false / false | true | true | true |
-| GLM-5-Turbo | 204,800 | 131,072 | false / false / false | true | true | true |
+| 模型        |   Context | Max Output | Image/PDF/Video       | Tool Call | Structured Output | MCS  |
+| ----------- | --------: | ---------: | --------------------- | --------- | ----------------- | ---- |
+| GLM-5.3     | 1,000,000 |    128,000 | false / false / false | true      | true              | true |
+| GLM-5.2     | 1,000,000 |    131,072 | false / false / false | true      | true              | true |
+| GLM-5-Turbo |   204,800 |    131,072 | false / false / false | true      | true              | true |
 
 这些数值记录当前代码和讨论中的观察值。正式 Official Config 发布前，还需以线上 Provider 配置与实际模型服务为准核对大小写、Context 和 Output 数值。
 
 可以先用通用规则表达 Properties 和 Option Specs：
 
-~~~json
+```json
 [
   {
     "modelMatch": "GLM-5\\.3",
@@ -486,7 +480,7 @@ Model
     }
   }
 ]
-~~~
+```
 
 Z.AI、BigModel 和 zcode-plan 的 Builtin 精确规则可以把 supportsNativeWebSearch 覆盖为 true。这个字段表达最终 Provider + Model 组合的可执行性质。
 
@@ -496,7 +490,7 @@ Z.AI、BigModel 和 zcode-plan 的 Builtin 精确规则可以把 supportsNativeW
 
 GLM-5.3 使用 Anthropic 标准 adaptive thinking + effort，不发送 budget：
 
-~~~json
+```json
 {
   "modelMatch": "GLM-5\\.3",
   "apiMatch": "anthropic-messages",
@@ -519,13 +513,13 @@ GLM-5.3 使用 Anthropic 标准 adaptive thinking + effort，不发送 budget：
     }
   }
 }
-~~~
+```
 
 ### 6.2 GLM-5.2
 
 GLM-5.2 的 nothink 显式关闭 Thinking；其他档位使用 adaptive + effort：
 
-~~~json
+```json
 {
   "modelMatch": "GLM-5\\.2",
   "apiMatch": "anthropic-messages",
@@ -547,13 +541,13 @@ GLM-5.2 的 nothink 显式关闭 Thinking；其他档位使用 adaptive + effort
     }
   }
 }
-~~~
+```
 
 ### 6.3 GLM-5-Turbo
 
 Turbo 暂时保留当前 fixed-budget 兼容行为。1024 来自现有 Anthropic fixed thinking 的最小预算兼容，不代表新的通用策略：
 
-~~~json
+```json
 {
   "modelMatch": "GLM-5-Turbo",
   "apiMatch": "anthropic-messages",
@@ -573,7 +567,7 @@ Turbo 暂时保留当前 fixed-budget 兼容行为。1024 来自现有 Anthropic
     }
   }
 }
-~~~
+```
 
 本轮不把 Turbo 自动改成 adaptive + effort，也不把 1024 推广给 5.2 或 5.3。
 
@@ -583,7 +577,7 @@ OpenAI Chat Compatible 允许厂商扩展请求与响应字段。GLM 的 thinkin
 
 GLM-5.3 的示意规则：
 
-~~~json
+```json
 {
   "modelMatch": "GLM-5\\.3",
   "apiMatch": "openai-chat-completions",
@@ -608,13 +602,13 @@ GLM-5.3 的示意规则：
     }
   }
 }
-~~~
+```
 
 GLM-5.2 同样使用固定的 replay 配置，nothink 档位将 thinking.type 设为 disabled。Turbo 继续保持现有 enable/disable 方言，正式参数表还需要结合线上行为再核对。
 
 preserveThinking 是固定协议配置。它不出现在 Composer，也不由 Binding 任意修改：
 
-~~~text
+```text
 preserveThinking = true
         |
         +---- 请求写入 clear_thinking = false
@@ -622,7 +616,7 @@ preserveThinking = true
         +---- 响应读取 reasoning_content
         |
         +---- Tool Loop 后续请求原样回放 reasoning_content
-~~~
+```
 
 只有配置 clear_thinking=false 而没有完整回放，会导致后续 Tool Call 请求缺少模型要求的推理上下文。当前旧实现只为部分 DeepSeek/MiMo 模型按名称启用 reasoning_content 兼容；目标实现应由 Model API Adapter Config 驱动，退出模型名称硬编码。
 
@@ -636,7 +630,7 @@ OpenAI Responses 协议应遵循官方 reasoning item 与 effort 语义。GLM-5.
 
 三类 Account Provider 的动态材料不同：
 
-~~~text
+```text
 Start Plan
 ├─ accessId 固定当前账号的 Start Plan 连接
 ├─ Request Auth 取得 ZCode JWT
@@ -649,7 +643,7 @@ Personal Coding Plan
 Team Plan
 ├─ accessId 固定账号 / organization / project
 └─ Request Auth 取得当前 Project Runtime API Key
-~~~
+```
 
 Registry 只保存 Effective Provider Config 和最终模型配置。Model 保存创建时选中的 providerId、modelId、accessId、API 与 Options。每次请求可以取得更新后的同一连接凭据；凭据刷新不会修改 Model 身份。Request Auth 还要核对凭据所属账号与 accessId 一致，不能把旧 Model 与切换后的新账号凭据组合。
 

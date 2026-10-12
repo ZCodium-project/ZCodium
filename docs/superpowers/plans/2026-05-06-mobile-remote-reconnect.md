@@ -13,6 +13,7 @@
 ### Task 1: Shared Protocol And Validation
 
 **Files:**
+
 - Modify: `packages/shared/src/web-remote-control.ts`
 - Modify: `packages/shared/src/validation.ts`
 - Modify: `packages/shared/src/platform.ts`
@@ -28,6 +29,7 @@
 ### Task 2: Desktop Renderer Reconnect Bridge
 
 **Files:**
+
 - Modify: `packages/desktop/src/preload/index.ts`
 - Modify: `packages/desktop/src/renderer/src/main.tsx`
 - Modify: `packages/ui/src/root/useRemoteWorkspaceHistory.ts`
@@ -43,6 +45,7 @@
 ### Task 3: Desktop Main Relay Routing
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/webRemoteControlManager.ts`
 - Modify: `packages/desktop/src/main/desktopMainIpcPlatform.ts`
 - Modify: `packages/desktop/src/main/index.ts`
@@ -57,6 +60,7 @@
 ### Task 4: Mobile Task Home UI And Switcher
 
 **Files:**
+
 - Modify: `packages/web/src/main.tsx`
 - Modify: `packages/ui/src/root/types.ts`
 - Modify: `packages/ui/src/WebRemoteControlMobileTaskHome.tsx`
@@ -72,6 +76,7 @@
 ### Task 5: Verification
 
 **Files:**
+
 - Modify docs only if behavior needs a short implementation note under `docs/web-remote-control/`.
 
 - [ ] Run `pnpm typecheck`.

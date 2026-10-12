@@ -78,7 +78,10 @@ function readString(record: Record<string, unknown> | null | undefined, key: str
 }
 
 function readRegistrationAppName(response: FeishuAppRegistrationPollResponse): string | undefined {
-  const app = typeof response.app === "object" && response.app !== null ? response.app as Record<string, unknown> : null;
+  const app =
+    typeof response.app === "object" && response.app !== null
+      ? (response.app as Record<string, unknown>)
+      : null;
   return (
     response.app_name?.trim() ||
     response.client_name?.trim() ||

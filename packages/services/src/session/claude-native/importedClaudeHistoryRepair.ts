@@ -92,11 +92,7 @@ function readLegacyImportedClaudeHistory(
   target: ImportedClaudeHistoryRepairTarget,
 ): ImportedClaudeHistoryRepairResult | null {
   const snapshotPath = [
-    getLegacyTaskSessionSnapshotPath(
-      target.workspacePath,
-      target.taskId,
-      target.workspaceIdentity,
-    ),
+    getLegacyTaskSessionSnapshotPath(target.workspacePath, target.taskId, target.workspaceIdentity),
     getLegacyDeletedTaskSessionSnapshotPath(
       target.workspacePath,
       target.taskId,
@@ -169,7 +165,8 @@ export async function resolveImportedClaudeHistoryForRepair(
   const nativeHistory = await readNativeImportedClaudeHistory(target);
   if (
     nativeHistory &&
-    countAssistantMessages(nativeHistory.messages) >= countAssistantMessages(legacyHistory?.messages ?? [])
+    countAssistantMessages(nativeHistory.messages) >=
+      countAssistantMessages(legacyHistory?.messages ?? [])
   ) {
     // 旧版本可能已经把 user-only 的 legacy 备份写坏了。
     // 这时 legacy 不能再作为权威来源，需要按 taskId 反查原 Claude jsonl 重建 assistant。

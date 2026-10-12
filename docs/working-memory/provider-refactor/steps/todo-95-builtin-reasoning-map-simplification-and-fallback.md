@@ -2,17 +2,16 @@
 
 > 2026-09-12 后续裁决：[Todo138](./todo-138-reasoning-level-ui-and-api-defaults.md) 将 Model 通用档位改为 disabled/enabled，三种 API 通用 map 增加 enabled → high；取代本文原先“不新增 enabled → high”的限制。专用 map、个人覆盖及规则层级仍按原语义。本文其余内容保留为当时实施记录。
 
-
 > 状态：A/B/C 已完成并关闭，2026-09-09 更新。关闭档位统一及旧 Selection 最佳努力映射已实现；未上线 Personal 配置不做兼容。排版回归也已由 Todo98 修复。所有残余欠测及人工晋级只在 [Todo102](todo-102-verification-debt-closeout.md) 跟进。历史证据见 [执行记录](../research/todo94-97-execution-and-review.md)。
 > 总原则：**美化已有模型的专有 Reasoning Map，强化兜底 Reasoning Map。已有专用规则仅做等价美化，不借机更改模型行为。** 关闭档位名称整理及历史选择兼容是单列的变更，不混入“美化”。
 
 ## 1. 三条工作线与边界
 
-| 工作线 | 允许改变 | 必须保持 |
-| --- | --- | --- |
-| A：专用 Map 美化 | 表达式结构、重复分支、条件位置 | 每个合法输入对应的最终请求字段、值、缺省/删除语义、模式和预算 |
-| B：兜底 Map 增强 | 按 API Schema 提供可用的通用推理字段映射 | 专用规则覆盖能力、Personal 覆盖、模型选择校验与输出上限权威 |
-| C：关闭档位整理 | 非 API 原生的关闭名称尽量统一为 `disabled`，兼容受影响的旧选择 | 旧选择的关闭语义、用户自定义档位/Map、各业务保存边界 |
+| 工作线           | 允许改变                                                       | 必须保持                                                      |
+| ---------------- | -------------------------------------------------------------- | ------------------------------------------------------------- |
+| A：专用 Map 美化 | 表达式结构、重复分支、条件位置                                 | 每个合法输入对应的最终请求字段、值、缺省/删除语义、模式和预算 |
+| B：兜底 Map 增强 | 按 API Schema 提供可用的通用推理字段映射                       | 专用规则覆盖能力、Personal 覆盖、模型选择校验与输出上限权威   |
+| C：关闭档位整理  | 非 API 原生的关闭名称尽量统一为 `disabled`，兼容受影响的旧选择 | 旧选择的关闭语义、用户自定义档位/Map、各业务保存边界          |
 
 - 不调整专用规则的模型匹配范围、前后缀规则、站点范围、优先级或其他模型能力。不得把专用 Map 全部替换成通用混合 Map。
 - 不改模型 ID、不新增 Provider 特判执行路径，不扩展表达式语言来追求更短代码。
@@ -171,16 +170,16 @@ reasoningLevel == "disabled"
 
 本项为配置/请求语义与有限选择兼容，不是 UI 重新设计。边界梳理使用现有功能图的 model-capabilities、model-selection 节点；当前环境无可用 codegraph，已以配置和已知种子文件定向阅读替代，未声称完成全调用图审计。
 
-| 优先级 / 入口 | 公共边界及应查内容 | 提交 / 保存边界 |
-| --- | --- | --- |
-| 必查：Built-in / Resolver | `zcode-builtin.json`、`packages/provider/src/resolver.ts`；规则层级、来源与专用覆盖 | Personal 配置不因加载改写 |
-| 必查：编译与请求 | `packages/model-option-map/src/`、Agent `model-option-map-fetch.ts`；编译、Merge Patch、与输出 Map 的冲突 | 最终 Model 构建校验与请求仍为权威 |
-| 必查：共享选择解析 | `packages/provider/src/effective-model-selection.ts`、Registry 校验 | 临时 effective 与持久意图区分 |
-| 必查：添加/编辑模型 | 共用模型草稿、`useModelSelectionView`；只加档位可继承兜底，显式 Map/固定配置保持 | 用户保存时写 Personal；不改变智能配置开关语义 |
-| 必查：Composer / 会话 | 共享 View 与草稿；旧档位解析、新选择合法性 | 原发送成功/显式选择保存边界，不修改运行中 Model |
-| 应查：定时任务 / Bot / Wiki | 复用解析的入口、显示与执行是否一致 | 各自显式保存与执行冻结边界，不批量刷记录 |
-| 条件必查：Subagent / Off-Peak | 是否绕过 Host 解析、原身份与执行锁定 | 按第 4 节限制，不改 Markdown/Ticket |
-| 不变性：桌面/Web、Local/Remote | 使用目标 Host 配置，无本地替代或发送前强制同步 | workspaceIdentity 隔离；continuous/replayable 不改变 |
+| 优先级 / 入口                  | 公共边界及应查内容                                                                                        | 提交 / 保存边界                                      |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 必查：Built-in / Resolver      | `zcode-builtin.json`、`packages/provider/src/resolver.ts`；规则层级、来源与专用覆盖                       | Personal 配置不因加载改写                            |
+| 必查：编译与请求               | `packages/model-option-map/src/`、Agent `model-option-map-fetch.ts`；编译、Merge Patch、与输出 Map 的冲突 | 最终 Model 构建校验与请求仍为权威                    |
+| 必查：共享选择解析             | `packages/provider/src/effective-model-selection.ts`、Registry 校验                                       | 临时 effective 与持久意图区分                        |
+| 必查：添加/编辑模型            | 共用模型草稿、`useModelSelectionView`；只加档位可继承兜底，显式 Map/固定配置保持                          | 用户保存时写 Personal；不改变智能配置开关语义        |
+| 必查：Composer / 会话          | 共享 View 与草稿；旧档位解析、新选择合法性                                                                | 原发送成功/显式选择保存边界，不修改运行中 Model      |
+| 应查：定时任务 / Bot / Wiki    | 复用解析的入口、显示与执行是否一致                                                                        | 各自显式保存与执行冻结边界，不批量刷记录             |
+| 条件必查：Subagent / Off-Peak  | 是否绕过 Host 解析、原身份与执行锁定                                                                      | 按第 4 节限制，不改 Markdown/Ticket                  |
+| 不变性：桌面/Web、Local/Remote | 使用目标 Host 配置，无本地替代或发送前强制同步                                                            | workspaceIdentity 隔离；continuous/replayable 不改变 |
 
 ## 6. 执行顺序与验收
 
@@ -195,15 +194,15 @@ reasoningLevel == "disabled"
 
 ## 7. 执行记录表
 
-| 项目 | 状态 | 证据 / 后续必须补齐 |
-| --- | --- | --- |
-| 讨论结论与三条工作线 | 已实施 | 本 Todo |
-| 全部专用规则清单及等价基线 | A 完成 | `reasoning-map-before-todo95.json` 19 种表达式、逐条规则索引/范围；每个合法档位比较最终 Merge Patch 请求，包含已存在字段/预算 |
-| 三种 API 兜底映射 | B 完成 | 未知模型仅改 values、Personal Map 覆盖、非法档位拒绝；Pro 真实 Model 请求验证 Chat high |
-| 关闭档位改名与 Personal 组合 | C 完成 | 25 条规则改名；原值合法优先、具体规则覆盖、未知值拒绝与只读原意图由真实 Built-in Facade 测试验证；不兼容未上线配置 |
-| 各消费方兼容（含 Subagent 边界） | C 完成 | Host/Worker 共用 Node Facade；Composer/任务实跑、Wiki/Bot/UI 33 条回归、显式 Subagent 9 条回归；冻结的执行、继承和 Ticket 不增加重解析 |
-| 类型/Lint/单测/Pro E2E | A/B/C 已验证 | C：Provider / provider-node / Option Map 352 条通过；全仓 typecheck、lint 通过。Pro `desktop-e2e-20260909-121842-573`：R95C-01、SR87-01、SR87-06 共 3/3 通过；pending 不自动晋级 |
-| 二次审阅与收口 | A/B/C 完成 | C 仅改 revision、25 处 values、10 处 Map 关闭字面值及公共解析；专用请求等价，兜底的临时旧名称错配按关闭语义纠正。未加预算 override、发送前同步、请求层别名或静默替换 |
+| 项目                             | 状态         | 证据 / 后续必须补齐                                                                                                                                                              |
+| -------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 讨论结论与三条工作线             | 已实施       | 本 Todo                                                                                                                                                                          |
+| 全部专用规则清单及等价基线       | A 完成       | `reasoning-map-before-todo95.json` 19 种表达式、逐条规则索引/范围；每个合法档位比较最终 Merge Patch 请求，包含已存在字段/预算                                                    |
+| 三种 API 兜底映射                | B 完成       | 未知模型仅改 values、Personal Map 覆盖、非法档位拒绝；Pro 真实 Model 请求验证 Chat high                                                                                          |
+| 关闭档位改名与 Personal 组合     | C 完成       | 25 条规则改名；原值合法优先、具体规则覆盖、未知值拒绝与只读原意图由真实 Built-in Facade 测试验证；不兼容未上线配置                                                               |
+| 各消费方兼容（含 Subagent 边界） | C 完成       | Host/Worker 共用 Node Facade；Composer/任务实跑、Wiki/Bot/UI 33 条回归、显式 Subagent 9 条回归；冻结的执行、继承和 Ticket 不增加重解析                                           |
+| 类型/Lint/单测/Pro E2E           | A/B/C 已验证 | C：Provider / provider-node / Option Map 352 条通过；全仓 typecheck、lint 通过。Pro `desktop-e2e-20260909-121842-573`：R95C-01、SR87-01、SR87-06 共 3/3 通过；pending 不自动晋级 |
+| 二次审阅与收口                   | A/B/C 完成   | C 仅改 revision、25 处 values、10 处 Map 关闭字面值及公共解析；专用请求等价，兜底的临时旧名称错配按关闭语义纠正。未加预算 override、发送前同步、请求层别名或静默替换             |
 
 ### C 实跑与测试前置纠正
 

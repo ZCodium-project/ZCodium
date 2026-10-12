@@ -18,9 +18,7 @@ export interface SidebarTaskGroupToggleRawState {
 export function resolveSidebarTaskGroupToggleMessageId(
   areAllExpanded: boolean,
 ): SidebarTaskGroupToggleMessageId {
-  return areAllExpanded
-    ? "workspaceSidebar.collapseAllGroups"
-    : "workspaceSidebar.expandAllGroups";
+  return areAllExpanded ? "workspaceSidebar.collapseAllGroups" : "workspaceSidebar.expandAllGroups";
 }
 
 export function resolveSidebarTaskGroupTogglePresentation(params: {
@@ -38,8 +36,6 @@ export function resolveSidebarTaskGroupTogglePresentation(params: {
   return {
     canToggle: params.current.canToggle,
     areAllExpanded: params.current.areAllExpanded,
-    messageId: resolveSidebarTaskGroupToggleMessageId(
-      params.current.areAllExpanded,
-    ),
+    messageId: resolveSidebarTaskGroupToggleMessageId(params.current.areAllExpanded),
   };
 }

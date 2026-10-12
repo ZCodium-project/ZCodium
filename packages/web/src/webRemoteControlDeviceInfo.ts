@@ -68,12 +68,8 @@ export function collectWebRemoteControlMobileDeviceInfo({
     platform: "web",
     version: readNonEmptyString(appVersion) ?? "web",
     name: "mobile-browser",
-    ...(readNonEmptyString(navigatorLike?.userAgent)
-      ? { userAgent: navigatorLike.userAgent }
-      : {}),
-    ...(readNonEmptyString(navigatorLike?.language)
-      ? { language: navigatorLike.language }
-      : {}),
+    ...(readNonEmptyString(navigatorLike?.userAgent) ? { userAgent: navigatorLike.userAgent } : {}),
+    ...(readNonEmptyString(navigatorLike?.language) ? { language: navigatorLike.language } : {}),
     ...(navigatorLike?.languages?.length
       ? { languages: navigatorLike.languages.filter((language) => language.trim()) }
       : {}),

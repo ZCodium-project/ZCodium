@@ -29,10 +29,9 @@
 - 2026-09-07 补齐验收：Workspace suite 7/7 通过，运行 ID `desktop-e2e-20260907065558567-p30371-3b85b0c85fbbae83`；Settings suite 5/5 通过，运行 ID `desktop-e2e-20260907065702167-p33040-7fa462d329a4436b`。47 项相关单测通过。
 - 开关按钮迁移：SPT-E2E-000 检查空态展开后 WorkspaceHeader 不再显示开关、Side Header 可收起；SPT-E2E-001 覆盖有标签时在 Side Header 收起、从 WorkspaceHeader 再展开并保留标签。
 - 迁移验证：`desktop-e2e-20260904085939961-p43497-9ecade9b51e2c858`，macOS Electron 7/7；相关单测 33/33、typecheck、E2E typecheck、lint 通过（41 个已有警告）。已检查深色空态截图；Windows/Linux 与手机端未单独执行视觉 E2E。
-依据 `docs/design/workspace-independent-panels.md`，SPT-E2E-000 增加面板上下对齐、4px 间距、Header 归属、xl 圆角与关闭恢复宽度断言。现有 tab 展开/关闭、缩放、拖动用例继续覆盖持久挂载行为；手机分支和 Windows/Linux 控制区由针对性单测覆盖。
+  依据 `docs/design/workspace-independent-panels.md`，SPT-E2E-000 增加面板上下对齐、4px 间距、Header 归属、xl 圆角与关闭恢复宽度断言。现有 tab 展开/关闭、缩放、拖动用例继续覆盖持久挂载行为；手机分支和 Windows/Linux 控制区由针对性单测覆盖。
 
 最终验收：`desktop-e2e-20260904084050358-p6937-68e000533efda13e`，7/7 通过。SPT-E2E-000 同时覆盖真实拖动、底部终端、双主题截图；截图文件为该 artifact 目录下 `independent-panels-zai-light.png` / `independent-panels-zai-dark.png`。其他平台独立视觉验证待补，详见布局 spec。
-
 
 ## 通用 / 编程界面模式 M1
 

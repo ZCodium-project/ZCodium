@@ -15,13 +15,13 @@ For comprehensive selector documentation including all WebdriverIO selector stra
 
 For browser automation, the MCP server supports all standard WebdriverIO selectors. The most commonly used include:
 
-| Selector | Example | Description |
-|----------|---------|-------------|
-| CSS | `#login-button`, `.submit-btn` | Standard CSS selectors |
-| XPath | `//button[@id='submit']` | XPath expressions |
-| Text | `button=Submit`, `a*=Click` | WebdriverIO text selectors |
-| ARIA | `aria/Submit Button` | Accessibility name selectors |
-| Test ID | `[data-testid="submit"]` | Recommended for testing |
+| Selector | Example                        | Description                  |
+| -------- | ------------------------------ | ---------------------------- |
+| CSS      | `#login-button`, `.submit-btn` | Standard CSS selectors       |
+| XPath    | `//button[@id='submit']`       | XPath expressions            |
+| Text     | `button=Submit`, `a*=Click`    | WebdriverIO text selectors   |
+| ARIA     | `aria/Submit Button`           | Accessibility name selectors |
+| Test ID  | `[data-testid="submit"]`       | Recommended for testing      |
 
 For detailed examples and best practices, see the [Selectors](/docs/selectors) documentation.
 
@@ -47,11 +47,12 @@ Accessibility IDs are the **most reliable cross-platform selector**. They work o
 
 :::tip Best Practice
 Always prefer accessibility IDs when available. They provide:
+
 - Cross-platform compatibility (iOS + Android)
 - Stability across UI changes
 - Better test maintainability
 - Improved accessibility of your app
-:::
+  :::
 
 ### Android Selectors
 
@@ -146,17 +147,17 @@ iOS Predicate Strings are fast and powerful for iOS automation.
 
 **Predicate Operators:**
 
-| Operator | Description |
-|----------|-------------|
-| `==` | Equals |
-| `!=` | Not equals |
-| `CONTAINS` | Contains substring |
-| `BEGINSWITH` | Starts with |
-| `ENDSWITH` | Ends with |
-| `LIKE` | Wildcard match |
-| `MATCHES` | Regex match |
-| `AND` | Logical AND |
-| `OR` | Logical OR |
+| Operator     | Description        |
+| ------------ | ------------------ |
+| `==`         | Equals             |
+| `!=`         | Not equals         |
+| `CONTAINS`   | Contains substring |
+| `BEGINSWITH` | Starts with        |
+| `ENDSWITH`   | Ends with          |
+| `LIKE`       | Wildcard match     |
+| `MATCHES`    | Regex match        |
+| `AND`        | Logical AND        |
+| `OR`         | Logical OR         |
 
 #### Class Chain
 
@@ -218,11 +219,13 @@ When writing tests that need to work on both iOS and Android, use this priority 
 When accessibility IDs aren't available, use platform-specific selectors:
 
 **Android:**
+
 ```
 android=new UiSelector().text("Login")
 ```
 
 **iOS:**
+
 ```
 -ios predicate string:label == "Login"
 ```
@@ -232,11 +235,13 @@ android=new UiSelector().text("Login")
 XPath works on both platforms but with different element types:
 
 **Android:**
+
 ```
 //android.widget.Button[@text='Login']
 ```
 
 **iOS:**
+
 ```
 //XCUIElementTypeButton[@label='Login']
 ```
@@ -247,37 +252,37 @@ XPath works on both platforms but with different element types:
 
 ### Android Element Types
 
-| Type | Description |
-|------|-------------|
-| `android.widget.Button` | Button |
-| `android.widget.EditText` | Text input |
-| `android.widget.TextView` | Text label |
-| `android.widget.ImageView` | Image |
-| `android.widget.ImageButton` | Image button |
-| `android.widget.CheckBox` | Checkbox |
-| `android.widget.RadioButton` | Radio button |
-| `android.widget.Switch` | Toggle switch |
-| `android.widget.Spinner` | Dropdown |
-| `android.widget.ListView` | List view |
-| `android.widget.RecyclerView` | Recycler view |
-| `android.widget.ScrollView` | Scroll container |
+| Type                          | Description      |
+| ----------------------------- | ---------------- |
+| `android.widget.Button`       | Button           |
+| `android.widget.EditText`     | Text input       |
+| `android.widget.TextView`     | Text label       |
+| `android.widget.ImageView`    | Image            |
+| `android.widget.ImageButton`  | Image button     |
+| `android.widget.CheckBox`     | Checkbox         |
+| `android.widget.RadioButton`  | Radio button     |
+| `android.widget.Switch`       | Toggle switch    |
+| `android.widget.Spinner`      | Dropdown         |
+| `android.widget.ListView`     | List view        |
+| `android.widget.RecyclerView` | Recycler view    |
+| `android.widget.ScrollView`   | Scroll container |
 
 ### iOS Element Types
 
-| Type | Description |
-|------|-------------|
-| `XCUIElementTypeButton` | Button |
-| `XCUIElementTypeTextField` | Text input |
-| `XCUIElementTypeSecureTextField` | Password input |
-| `XCUIElementTypeStaticText` | Text label |
-| `XCUIElementTypeImage` | Image |
-| `XCUIElementTypeSwitch` | Toggle switch |
-| `XCUIElementTypeSlider` | Slider |
-| `XCUIElementTypePicker` | Picker wheel |
-| `XCUIElementTypeTable` | Table view |
-| `XCUIElementTypeCell` | Table cell |
-| `XCUIElementTypeCollectionView` | Collection view |
-| `XCUIElementTypeScrollView` | Scroll view |
+| Type                             | Description     |
+| -------------------------------- | --------------- |
+| `XCUIElementTypeButton`          | Button          |
+| `XCUIElementTypeTextField`       | Text input      |
+| `XCUIElementTypeSecureTextField` | Password input  |
+| `XCUIElementTypeStaticText`      | Text label      |
+| `XCUIElementTypeImage`           | Image           |
+| `XCUIElementTypeSwitch`          | Toggle switch   |
+| `XCUIElementTypeSlider`          | Slider          |
+| `XCUIElementTypePicker`          | Picker wheel    |
+| `XCUIElementTypeTable`           | Table view      |
+| `XCUIElementTypeCell`            | Table cell      |
+| `XCUIElementTypeCollectionView`  | Collection view |
+| `XCUIElementTypeScrollView`      | Scroll view     |
 
 ---
 
@@ -367,6 +372,7 @@ Get visible elements with includeContainers enabled
 ```
 
 The tool returns a paginated response:
+
 ```json
 {
   "total": 42,

@@ -20,25 +20,25 @@ Rules for Chinese, Japanese, and Korean text in DOCX documents.
 
 ### Recommended CJK Fonts
 
-| Language | Serif (正文) | Sans (标题) | Notes |
-|----------|-------------|-------------|-------|
-| **Simplified Chinese** | 宋体 (SimSun) | 微软雅黑 (Microsoft YaHei) | YaHei for screen, SimSun for print |
-| **Simplified Chinese** | 仿宋 (FangSong) | 黑体 (SimHei) | Government documents |
-| **Traditional Chinese** | 新細明體 (PMingLiU) | 微軟正黑體 (Microsoft JhengHei) | Taiwan standard |
-| **Japanese** | MS 明朝 (MS Mincho) | MS ゴシック (MS Gothic) | Classic pairing |
-| **Japanese** | 游明朝 (Yu Mincho) | 游ゴシック (Yu Gothic) | Modern, Windows 10+ |
-| **Korean** | 바탕 (Batang) | 맑은 고딕 (Malgun Gothic) | Standard pairing |
+| Language                | Serif (正文)        | Sans (标题)                     | Notes                              |
+| ----------------------- | ------------------- | ------------------------------- | ---------------------------------- |
+| **Simplified Chinese**  | 宋体 (SimSun)       | 微软雅黑 (Microsoft YaHei)      | YaHei for screen, SimSun for print |
+| **Simplified Chinese**  | 仿宋 (FangSong)     | 黑体 (SimHei)                   | Government documents               |
+| **Traditional Chinese** | 新細明體 (PMingLiU) | 微軟正黑體 (Microsoft JhengHei) | Taiwan standard                    |
+| **Japanese**            | MS 明朝 (MS Mincho) | MS ゴシック (MS Gothic)         | Classic pairing                    |
+| **Japanese**            | 游明朝 (Yu Mincho)  | 游ゴシック (Yu Gothic)          | Modern, Windows 10+                |
+| **Korean**              | 바탕 (Batang)       | 맑은 고딕 (Malgun Gothic)       | Standard pairing                   |
 
 ### Government Document Fonts (公文)
 
-| Element | Font | Size |
-|---------|------|------|
-| 标题 (title) | 小标宋 (FZXiaoBiaoSong-B05S) | 二号 (22pt) |
-| 一级标题 | 黑体 (SimHei) | 三号 (16pt) |
-| 二级标题 | 楷体_GB2312 (KaiTi_GB2312) | 三号 (16pt) |
-| 三级标题 | 仿宋_GB2312 加粗 | 三号 (16pt) |
-| 正文 (body) | 仿宋_GB2312 (FangSong_GB2312) | 三号 (16pt) |
-| 附注/页码 | 宋体 (SimSun) | 四号 (14pt) |
+| Element      | Font                           | Size        |
+| ------------ | ------------------------------ | ----------- |
+| 标题 (title) | 小标宋 (FZXiaoBiaoSong-B05S)   | 二号 (22pt) |
+| 一级标题     | 黑体 (SimHei)                  | 三号 (16pt) |
+| 二级标题     | 楷体\_GB2312 (KaiTi_GB2312)    | 三号 (16pt) |
+| 三级标题     | 仿宋\_GB2312 加粗              | 三号 (16pt) |
+| 正文 (body)  | 仿宋\_GB2312 (FangSong_GB2312) | 三号 (16pt) |
+| 附注/页码    | 宋体 (SimSun)                  | 四号 (14pt) |
 
 ---
 
@@ -46,21 +46,21 @@ Rules for Chinese, Japanese, and Korean text in DOCX documents.
 
 CJK uses named sizes. Map to points and `w:sz` half-point values:
 
-| 字号 | Points | `w:sz` | Common Use |
-|------|--------|--------|------------|
-| 初号 | 42pt | 84 | Display title |
-| 小初 | 36pt | 72 | Large title |
-| 一号 | 26pt | 52 | Chapter heading |
-| 小一 | 24pt | 48 | Major heading |
-| 二号 | 22pt | 44 | Document title (公文) |
-| 小二 | 18pt | 36 | Western H1 equivalent |
-| 三号 | 16pt | 32 | CJK heading / 公文 body |
-| 小三 | 15pt | 30 | Sub-heading |
-| 四号 | 14pt | 28 | CJK subheading |
-| 小四 | 12pt | 24 | Standard body (CJK) |
-| 五号 | 10.5pt | 21 | Compact CJK body |
-| 小五 | 9pt | 18 | Footnotes |
-| 六号 | 7.5pt | 15 | Fine print |
+| 字号 | Points | `w:sz` | Common Use              |
+| ---- | ------ | ------ | ----------------------- |
+| 初号 | 42pt   | 84     | Display title           |
+| 小初 | 36pt   | 72     | Large title             |
+| 一号 | 26pt   | 52     | Chapter heading         |
+| 小一 | 24pt   | 48     | Major heading           |
+| 二号 | 22pt   | 44     | Document title (公文)   |
+| 小二 | 18pt   | 36     | Western H1 equivalent   |
+| 三号 | 16pt   | 32     | CJK heading / 公文 body |
+| 小三 | 15pt   | 30     | Sub-heading             |
+| 四号 | 14pt   | 28     | CJK subheading          |
+| 小四 | 12pt   | 24     | Standard body (CJK)     |
+| 五号 | 10.5pt | 21     | Compact CJK body        |
+| 小五 | 9pt    | 18     | Footnotes               |
+| 六号 | 7.5pt  | 15     | Fine print              |
 
 ---
 
@@ -111,14 +111,14 @@ OpenXML uses four font slots to handle multilingual text:
 
 CJK text uses full-width punctuation:
 
-| Type | CJK | Latin |
-|------|-----|-------|
-| Period | 。(U+3002) | . |
-| Comma | ，(U+FF0C) 、(U+3001) | , |
-| Colon | ：(U+FF1A) | : |
-| Semicolon | ；(U+FF1B) | ; |
-| Quotes | 「」『』 or ""'' | "" '' |
-| Parentheses | （）(U+FF08/09) | () |
+| Type        | CJK                   | Latin |
+| ----------- | --------------------- | ----- |
+| Period      | 。(U+3002)            | .     |
+| Comma       | ，(U+FF0C) 、(U+3001) | ,     |
+| Colon       | ：(U+FF1A)            | :     |
+| Semicolon   | ；(U+FF1B)            | ;     |
+| Quotes      | 「」『』 or ""''      | "" '' |
+| Parentheses | （）(U+FF08/09)       | ()    |
 
 In mixed text, use the punctuation style of the **surrounding language context**.
 
@@ -136,6 +136,7 @@ In mixed text, use the punctuation style of the **surrounding language context**
 ### Kinsoku Rules (禁則処理)
 
 Prevents certain characters from appearing at the start or end of a line:
+
 - **Cannot start a line**: `）」』】〉》。、，！？；：` and closing brackets
 - **Cannot end a line**: `（「『【〈《` and opening brackets
 
@@ -161,9 +162,9 @@ Chinese body text conventionally uses a 2-character first-line indent:
 
 Preferred over `w:firstLine` with fixed DXA because `firstLineChars` scales with font size.
 
-| Indent | Value |
-|--------|-------|
-| 1 character | `w:firstLineChars="100"` |
+| Indent       | Value                    |
+| ------------ | ------------------------ |
+| 1 character  | `w:firstLineChars="100"` |
 | 2 characters | `w:firstLineChars="200"` |
 | 3 characters | `w:firstLineChars="300"` |
 
@@ -194,16 +195,16 @@ Chinese government document standard (党政机关公文格式). These are **str
 
 ### Page Setup
 
-| Parameter | Value | OpenXML |
-|-----------|-------|---------|
-| Page size | A4 (210×297mm) | Width=11906, Height=16838 |
-| Top margin | 37mm | 2098 DXA |
-| Bottom margin | 35mm | 1984 DXA |
-| Left margin | 28mm | 1588 DXA |
-| Right margin | 26mm | 1474 DXA |
-| Characters/line | 28 | |
-| Lines/page | 22 | |
-| Line spacing | Fixed 28pt | `line="560"` lineRule="exact" |
+| Parameter       | Value          | OpenXML                       |
+| --------------- | -------------- | ----------------------------- |
+| Page size       | A4 (210×297mm) | Width=11906, Height=16838     |
+| Top margin      | 37mm           | 2098 DXA                      |
+| Bottom margin   | 35mm           | 1984 DXA                      |
+| Left margin     | 28mm           | 1588 DXA                      |
+| Right margin    | 26mm           | 1474 DXA                      |
+| Characters/line | 28             |                               |
+| Lines/page      | 22             |                               |
+| Line spacing    | Fixed 28pt     | `line="560"` lineRule="exact" |
 
 ### Document Structure
 
@@ -246,12 +247,12 @@ Chinese government document standard (党政机关公文格式). These are **str
 
 ### Colors
 
-| Element | Color | Requirement |
-|---------|-------|-------------|
-| All body text | Black #000000 | Mandatory |
-| 红头 (agency name) | Red #FF0000 | Mandatory |
-| 红线 (separator) | Red #FF0000 | Mandatory |
-| 公章 (official seal) | Red | Mandatory |
+| Element              | Color         | Requirement |
+| -------------------- | ------------- | ----------- |
+| All body text        | Black #000000 | Mandatory   |
+| 红头 (agency name)   | Red #FF0000   | Mandatory   |
+| 红线 (separator)     | Red #FF0000   | Mandatory   |
+| 公章 (official seal) | Red           | Mandatory   |
 
 ### Page Numbers
 

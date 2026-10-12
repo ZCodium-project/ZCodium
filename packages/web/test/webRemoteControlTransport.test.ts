@@ -517,7 +517,11 @@ describe("WebRemoteControlTerminalTransport", () => {
 
     transport.start();
     await waitUntil(() => heartbeatCount >= 2, 5_000, "second pair status heartbeat");
-    await waitUntil(() => states.at(-1) === "paired", 5_000, "paired again after waiting heartbeat");
+    await waitUntil(
+      () => states.at(-1) === "paired",
+      5_000,
+      "paired again after waiting heartbeat",
+    );
 
     expect(failures).toEqual([]);
     expect(states).toContain("waiting");

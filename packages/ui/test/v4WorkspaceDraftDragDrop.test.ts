@@ -32,8 +32,7 @@ vi.mock("@/v4/WorkbenchPane.js", async () => {
 vi.mock("@/v4/WorkbenchSplitDivider.js", async () => {
   const React = await import("react");
   return {
-    WorkbenchSplitDivider: () =>
-      React.createElement("div", { "data-testid": "mock-divider" }),
+    WorkbenchSplitDivider: () => React.createElement("div", { "data-testid": "mock-divider" }),
   };
 });
 

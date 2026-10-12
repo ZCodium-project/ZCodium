@@ -22,8 +22,6 @@ describe("desktopDataBaseDirBootstrap", () => {
   it("应拼出默认 bootstrap setting 路径", () => {
     const result = resolveBootstrapSettingsFile("/Users/tester");
     // Windows 下 path.join 使用反斜杠，统一为正斜杠后再比较
-    expect(result.replace(/\\/g, "/")).toBe(
-      "/Users/tester/.zcodium/v2/setting.json",
-    );
+    expect(result.replace(/\\/g, "/")).toBe("/Users/tester/.zcodium/v2/setting.json");
   });
 });

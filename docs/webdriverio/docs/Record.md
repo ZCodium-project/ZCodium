@@ -25,7 +25,6 @@ Next step, click on _"Replay"_ to check if the recording was successful and does
 
 The _"Export as a WebdriverIO Test Script"_ option only available if you install the [WebdriverIO Chrome Recorder](https://chrome.google.com/webstore/detail/webdriverio-chrome-record/pllimkccefnbmghgcikpjkmmcadeddfn) extension.
 
-
 ![Chrome DevTools Recorder](/img/recorder/export.gif)
 
 That's it!

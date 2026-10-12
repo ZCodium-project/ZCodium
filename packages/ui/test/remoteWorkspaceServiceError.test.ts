@@ -23,17 +23,11 @@ describe("remoteWorkspaceServiceError", () => {
         message: REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE,
       }),
     ).toBe(true);
-    expect(
-      isRemoteWorkspaceDisconnectedError(
-        REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE,
-      ),
-    ).toBe(true);
+    expect(isRemoteWorkspaceDisconnectedError(REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE)).toBe(true);
   });
 
   it("不吞掉普通 RPC 和业务错误", () => {
-    expect(isRemoteWorkspaceDisconnectedError(new Error("RPC channel closed"))).toBe(
-      false,
-    );
+    expect(isRemoteWorkspaceDisconnectedError(new Error("RPC channel closed"))).toBe(false);
     expect(
       isRemoteWorkspaceDisconnectedError({
         code: "EACCES",

@@ -161,12 +161,7 @@ export async function waitForHookTrustStoreRecords(
 }
 
 function isMissingFileError(error: unknown): boolean {
-  return Boolean(
-    error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT",
-  );
+  return Boolean(error && typeof error === "object" && "code" in error && error.code === "ENOENT");
 }
 
 // recorder 只做一件事：向 evidence JSONL 追加一条执行记录，供 e2e 断言

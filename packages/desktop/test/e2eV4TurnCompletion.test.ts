@@ -25,8 +25,6 @@ describe("desktop e2e v4 turn completion", () => {
 
     expect(isV4TurnCompleted(completed, "I55_A_SEED_DONE")).toBe(true);
     expect(isV4TurnCompleted({ ...completed, canStop: true }, "I55_A_SEED_DONE")).toBe(false);
-    expect(isV4TurnCompleted({ ...completed, sessionId: "draft" }, "I55_A_SEED_DONE")).toBe(
-      false,
-    );
+    expect(isV4TurnCompleted({ ...completed, sessionId: "draft" }, "I55_A_SEED_DONE")).toBe(false);
   });
 });

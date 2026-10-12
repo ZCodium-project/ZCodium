@@ -35,22 +35,30 @@ describe("taskListRefreshPolicy", () => {
   it("跨端 task membership 事件有 taskMeta 时由增量缓存更新承接", () => {
     const taskMeta = createTaskMeta();
 
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_archived"),
-      taskMeta,
-    })).toBe(false);
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_unarchived"),
-      taskMeta,
-    })).toBe(false);
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_pinned"),
-      taskMeta,
-    })).toBe(false);
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_unpinned"),
-      taskMeta,
-    })).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_archived"),
+        taskMeta,
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_unarchived"),
+        taskMeta,
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_pinned"),
+        taskMeta,
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_unpinned"),
+        taskMeta,
+      }),
+    ).toBe(false);
     expect(isTaskListMembershipWorkspaceEvent(createEvent("task_archived"))).toBe(true);
     expect(isTaskListMembershipWorkspaceEvent(createEvent("task_meta_changed"))).toBe(false);
   });
@@ -63,25 +71,33 @@ describe("taskListRefreshPolicy", () => {
   it("跨设备创建、消息和状态事件缺少 taskMeta 时仍允许静默刷新任务列表状态", () => {
     expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("task_created"))).toBe(true);
     expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("user_message_saved"))).toBe(true);
-    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("assistant_message_saved"))).toBe(true);
+    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("assistant_message_saved"))).toBe(
+      true,
+    );
     expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("task_status_changed"))).toBe(true);
   });
 
   it("跨设备消息和状态事件带 taskMeta 时由增量缓存更新承接", () => {
     const taskMeta = createTaskMeta({ status: "running" });
 
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("user_message_saved"),
-      taskMeta,
-    })).toBe(false);
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("assistant_message_saved"),
-      taskMeta: createTaskMeta({ status: "completed" }),
-    })).toBe(false);
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_status_changed"),
-      taskMeta: createTaskMeta({ status: "error" }),
-    })).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("user_message_saved"),
+        taskMeta,
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("assistant_message_saved"),
+        taskMeta: createTaskMeta({ status: "completed" }),
+      }),
+    ).toBe(false);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_status_changed"),
+        taskMeta: createTaskMeta({ status: "error" }),
+      }),
+    ).toBe(false);
   });
 
   it("带 taskMeta 的 task_meta_changed 事件也由增量缓存更新承接", () => {
@@ -107,36 +123,38 @@ describe("taskListRefreshPolicy", () => {
   });
 
   it("删除事件保留刷新兜底，避免隐藏项删除后 total 长期错误", () => {
-    expect(shouldRefreshTaskListForWorkspaceEvent({
-      ...createEvent("task_deleted"),
-      taskId: "task-1",
-    })).toBe(true);
+    expect(
+      shouldRefreshTaskListForWorkspaceEvent({
+        ...createEvent("task_deleted"),
+        taskId: "task-1",
+      }),
+    ).toBe(true);
     expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("task_deleted"))).toBe(true);
   });
 
   it("缺少明确缓存链路的事件仍允许刷新", () => {
     expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("stream_mirror_gap"))).toBe(true);
-    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("stream_mirror_owner_lost"))).toBe(true);
+    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("stream_mirror_owner_lost"))).toBe(
+      true,
+    );
   });
 
   // M5 ③：unread（setTaskUnread → task_meta_changed）与 pin/archive 同为 tasks-index 组织态，
   // task_created/deleted 还会改变正向/负向行集合；均按 membershipVersion 重拉，session detail 另行更新。
   it("归属重拉信号涵盖 created、membership、deleted 与 task_meta_changed", () => {
-    expect(
-      shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_created")),
-    ).toBe(true);
-    expect(
-      shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_pinned")),
-    ).toBe(true);
-    expect(
-      shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_archived")),
-    ).toBe(true);
-    expect(
-      shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_meta_changed")),
-    ).toBe(true);
-    expect(
-      shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_deleted")),
-    ).toBe(true);
+    expect(shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_created"))).toBe(
+      true,
+    );
+    expect(shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_pinned"))).toBe(true);
+    expect(shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_archived"))).toBe(
+      true,
+    );
+    expect(shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_meta_changed"))).toBe(
+      true,
+    );
+    expect(shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("task_deleted"))).toBe(
+      true,
+    );
     expect(
       shouldRefetchTaskListMembershipForWorkspaceEvent(createEvent("user_message_saved")),
     ).toBe(false);
@@ -158,9 +176,7 @@ describe("taskListRefreshPolicy", () => {
     expect(shouldRefreshTaskListForWorkspaceEvent(event)).toBe(false);
     expect(shouldRefetchTaskListMembershipForWorkspaceEvent(event)).toBe(false);
     // 无 meta 时（异常路径）也不得升级成整表刷新。
-    expect(
-      shouldRefreshTaskListForWorkspaceEvent(createEvent("task_model_changed")),
-    ).toBe(false);
+    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("task_model_changed"))).toBe(false);
   });
 
   it("task_title_changed（首发/自动标题/重命名）只做增量 meta 回写，不整刷不重拉", () => {
@@ -172,9 +188,7 @@ describe("taskListRefreshPolicy", () => {
     expect(shouldApplyTaskMetaFromWorkspaceEvent(event)).toBe(true);
     expect(shouldRefreshTaskListForWorkspaceEvent(event)).toBe(false);
     expect(shouldRefetchTaskListMembershipForWorkspaceEvent(event)).toBe(false);
-    expect(
-      shouldRefreshTaskListForWorkspaceEvent(createEvent("task_title_changed")),
-    ).toBe(false);
+    expect(shouldRefreshTaskListForWorkspaceEvent(createEvent("task_title_changed"))).toBe(false);
   });
 
   it("task_status_changed（收口/回源/打开任务）带 meta 增量回写，且不重拉归属", () => {

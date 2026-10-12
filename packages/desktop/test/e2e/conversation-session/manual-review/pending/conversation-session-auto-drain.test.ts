@@ -27,10 +27,7 @@ describe("会话区 Auto Drain E2E", () => {
     const runId = Date.now();
     const runningPrompt = `E2E_AUTO_DRAIN_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(runningPrompt);
-    await waitForComposerText(
-      "",
-      "首轮 auto-drain prompt 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "首轮 auto-drain prompt 发送后输入框没有清空");
     await waitForUserMessageContaining(runningPrompt);
     await waitForChatState(
       (snapshot) => snapshot.state === "streaming",
@@ -40,10 +37,7 @@ describe("会话区 Auto Drain E2E", () => {
 
     const queuedPrompt = `E2E_AUTO_DRAIN_QUEUED_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(queuedPrompt);
-    await waitForComposerText(
-      "",
-      "running 中 queued prompt 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "running 中 queued prompt 发送后输入框没有清空");
     await waitForQueueContaining(`E2E_AUTO_DRAIN_QUEUED_${runId}`);
     const queuedItems = await waitForQueueCount(1);
     expect(queuedItems[0]?.kind).toBe("text");
@@ -63,9 +57,7 @@ describe("会话区 Auto Drain E2E", () => {
     expect(await getQueueItems()).toHaveLength(0);
     const assistantMessages = await getMessages("assistant");
     expect(
-      assistantMessages.filter((message) =>
-        message.text.includes(E2E_REPLY_TOKEN),
-      ),
+      assistantMessages.filter((message) => message.text.includes(E2E_REPLY_TOKEN)),
     ).toHaveLength(2);
   });
 });

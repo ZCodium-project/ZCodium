@@ -112,7 +112,7 @@ describe("windowsChromeAppBoundKey", () => {
     expect(source).toContain("VerifyProcessImagePathHandle(brokerProcess, GetSelfPath())");
     expect(source).toContain("VerifyPipeClient(pipe.SafePipeHandle, GetSelfPath(), brokerPid)");
     expect(buildSource).toContain('targetArch === "arm64" && !process.env.ZCODE_CSC_PATH');
-    expect(buildSource).toContain('`/platform:${targetArch}`');
+    expect(buildSource).toContain("`/platform:${targetArch}`");
   });
 
   it("服务端命名管道以异步模式创建以支持有界等待", async () => {
@@ -384,8 +384,7 @@ describe("windowsChromeAppBoundKey", () => {
         processArch: "x64",
         resourcesPath: tempRoot,
         runHelper,
-        trustedPowerShellPath:
-          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        trustedPowerShellPath: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
         userDataDir: fixture.userDataDir,
         verifySignature,
       }),
@@ -418,8 +417,7 @@ describe("windowsChromeAppBoundKey", () => {
         processArch: "x64",
         resourcesPath: tempRoot,
         runHelper,
-        trustedPowerShellPath:
-          "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        trustedPowerShellPath: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
         userDataDir: fixture.userDataDir,
         verifySignature: vi.fn(async () => true),
       }),

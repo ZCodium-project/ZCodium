@@ -1,9 +1,6 @@
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  clearAppData,
-  getE2EAppDataPaths,
-} from "../../../helpers/desktop-app.js";
+import { clearAppData, getE2EAppDataPaths } from "../../../helpers/desktop-app.js";
 import {
   getPluginList,
   getPluginReferenceCatalog,
@@ -24,8 +21,7 @@ describe("WPL-013 builtin Workspace disable E2E", () => {
   it("disables the builtin only in Workspace A while preserving Host user state", async function () {
     this.timeout(120_000);
 
-    const { homeDir, storageRoot, workspace: workspaceA } =
-      getE2EAppDataPaths();
+    const { homeDir, storageRoot, workspace: workspaceA } = getE2EAppDataPaths();
     const workspaceB = join(homeDir, "WorkspaceB");
     const workspaceAConfigPath = join(workspaceA, ".zcode", "config.json");
     const workspaceBConfigPath = join(workspaceB, ".zcode", "config.json");
@@ -33,10 +29,7 @@ describe("WPL-013 builtin Workspace disable E2E", () => {
     const installedPluginsPath = pluginStoragePath("installed_plugins.json");
     const dataPath = join(pluginDataPath(BUILTIN_ID), "state.json");
 
-    const workspaceAConfigBefore = await readFile(
-      workspaceAConfigPath,
-      "utf8",
-    );
+    const workspaceAConfigBefore = await readFile(workspaceAConfigPath, "utf8");
     const userConfigBefore = await readFile(userConfigPath, "utf8");
     const installedPluginsBefore = await readOptionalFile(installedPluginsPath);
     const pluginDataBefore = await readFile(dataPath, "utf8");
@@ -70,21 +63,17 @@ describe("WPL-013 builtin Workspace disable E2E", () => {
     });
     expect(catalogA.authority).toBe("workspace");
     expect(catalogB.authority).toBe("workspace");
-    expect(
-      catalogA.plugins.find((plugin) => plugin.pluginId === BUILTIN_ID),
-    ).toMatchObject({ enabled: false });
-    expect(
-      catalogB.plugins.find((plugin) => plugin.pluginId === BUILTIN_ID),
-    ).toMatchObject({ enabled: true });
+    expect(catalogA.plugins.find((plugin) => plugin.pluginId === BUILTIN_ID)).toMatchObject({
+      enabled: false,
+    });
+    expect(catalogB.plugins.find((plugin) => plugin.pluginId === BUILTIN_ID)).toMatchObject({
+      enabled: true,
+    });
 
-    expect(await readFile(workspaceAConfigPath, "utf8")).toBe(
-      workspaceAConfigBefore,
-    );
+    expect(await readFile(workspaceAConfigPath, "utf8")).toBe(workspaceAConfigBefore);
     expect(await pathExists(workspaceBConfigPath)).toBe(false);
     expect(await readFile(userConfigPath, "utf8")).toBe(userConfigBefore);
-    expect(await readOptionalFile(installedPluginsPath)).toBe(
-      installedPluginsBefore,
-    );
+    expect(await readOptionalFile(installedPluginsPath)).toBe(installedPluginsBefore);
     expect(await readFile(dataPath, "utf8")).toBe(pluginDataBefore);
     expect(pluginPathExists(pluginA.rootPath)).toBe(true);
   });
@@ -94,11 +83,7 @@ async function readOptionalFile(path: string): Promise<string | null> {
   try {
     return await readFile(path, "utf8");
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return null;
     }
     throw error;

@@ -12,12 +12,15 @@ To setup WebdriverIO within your Vue.js project, follow the [instructions](/docs
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    runner: ['browser', {
-        preset: 'vue'
-    }],
-    // ...
-}
+  // ...
+  runner: [
+    "browser",
+    {
+      preset: "vue",
+    },
+  ],
+  // ...
+};
 ```
 
 :::info
@@ -67,66 +70,65 @@ export default {
 
 In your test render the component into the DOM and run assertions on it. We recommend to either use [`@vue/test-utils`](https://test-utils.vuejs.org/) or [`@testing-library/vue`](https://testing-library.com/docs/vue-testing-library/intro/) to attach the component to the test page. To interact with the component use WebdriverIO commands as they behave more close to actual user interactions, e.g.:
 
-
 <Tabs
-  defaultValue="utils"
-  values={[
-    {label: '@vue/test-utils', value: 'utils'},
-    {label: '@testing-library/vue', value: 'testinglib'}
- ]
+defaultValue="utils"
+values={[
+{label: '@vue/test-utils', value: 'utils'},
+{label: '@testing-library/vue', value: 'testinglib'}
+]
 }>
 <TabItem value="utils">
 
 ```ts title="vue.test.js"
-import { $, expect } from '@wdio/globals'
-import { mount } from '@vue/test-utils'
-import Component from './components/Component.vue'
+import { $, expect } from "@wdio/globals";
+import { mount } from "@vue/test-utils";
+import Component from "./components/Component.vue";
 
-describe('Vue Component Testing', () => {
-    it('increments value on click', async () => {
-        // The render method returns a collection of utilities to query your component.
-        const wrapper = mount(Component, { attachTo: document.body })
-        expect(wrapper.text()).toContain('Times clicked: 0')
+describe("Vue Component Testing", () => {
+  it("increments value on click", async () => {
+    // The render method returns a collection of utilities to query your component.
+    const wrapper = mount(Component, { attachTo: document.body });
+    expect(wrapper.text()).toContain("Times clicked: 0");
 
-        const button = await $('aria/increment')
+    const button = await $("aria/increment");
 
-        // Dispatch a native click event to our button element.
-        await button.click()
-        await button.click()
+    // Dispatch a native click event to our button element.
+    await button.click();
+    await button.click();
 
-        expect(wrapper.text()).toContain('Times clicked: 2')
-        await expect($('p=Times clicked: 2')).toExist() // same assertion with WebdriverIO
-    })
-})
+    expect(wrapper.text()).toContain("Times clicked: 2");
+    await expect($("p=Times clicked: 2")).toExist(); // same assertion with WebdriverIO
+  });
+});
 ```
 
 </TabItem>
 <TabItem value="testinglib">
 
 ```ts title="vue.test.js"
-import { $, expect } from '@wdio/globals'
-import { render } from '@testing-library/vue'
-import Component from './components/Component.vue'
+import { $, expect } from "@wdio/globals";
+import { render } from "@testing-library/vue";
+import Component from "./components/Component.vue";
 
-describe('Vue Component Testing', () => {
-    it('increments value on click', async () => {
-        // The render method returns a collection of utilities to query your component.
-        const { getByText } = render(Component)
+describe("Vue Component Testing", () => {
+  it("increments value on click", async () => {
+    // The render method returns a collection of utilities to query your component.
+    const { getByText } = render(Component);
 
-        // getByText returns the first matching node for the provided text, and
-        // throws an error if no elements match or if more than one match is found.
-        getByText('Times clicked: 0')
+    // getByText returns the first matching node for the provided text, and
+    // throws an error if no elements match or if more than one match is found.
+    getByText("Times clicked: 0");
 
-        const button = await $(getByText('increment'))
+    const button = await $(getByText("increment"));
 
-        // Dispatch a native click event to our button element.
-        await button.click()
-        await button.click()
+    // Dispatch a native click event to our button element.
+    await button.click();
+    await button.click();
 
-        getByText('Times clicked: 2') // assert with Testing Library
-        await expect($('p=Times clicked: 2')).toExist() // assert with WebdriverIO
-    })
-})
+    getByText("Times clicked: 2"); // assert with Testing Library
+    await expect($("p=Times clicked: 2")).toExist(); // assert with WebdriverIO
+  });
+});
 ```
 
 </TabItem>
@@ -152,16 +154,16 @@ const posts = await res.json()
 We recommend to use [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) and a little suspense wrapper to get the component rendered. Unfortunately [`@testing-library/vue`](https://github.com/testing-library/vue-testing-library/issues/230) has no support for this yet. Create a `helper.ts` file with the following content:
 
 ```ts
-import { mount, type VueWrapper as VueWrapperImport } from '@vue/test-utils'
-import { Suspense } from 'vue'
+import { mount, type VueWrapper as VueWrapperImport } from "@vue/test-utils";
+import { Suspense } from "vue";
 
-export type VueWrapper = VueWrapperImport<any>
-const scheduler = typeof setImmediate === 'function' ? setImmediate : setTimeout
+export type VueWrapper = VueWrapperImport<any>;
+const scheduler = typeof setImmediate === "function" ? setImmediate : setTimeout;
 
 export function flushPromises(): Promise<void> {
   return new Promise((resolve) => {
-    scheduler(resolve, 0)
-  })
+    scheduler(resolve, 0);
+  });
 }
 
 export function wrapInSuspense(
@@ -171,54 +173,58 @@ export function wrapInSuspense(
   return defineComponent({
     render() {
       return h(
-        'div',
-        { id: 'root' },
+        "div",
+        { id: "root" },
         h(Suspense, null, {
           default() {
-            return h(component, props)
+            return h(component, props);
           },
-          fallback: h('div', 'fallback'),
+          fallback: h("div", "fallback"),
         }),
-      )
+      );
     },
-  })
+  });
 }
 
-export function renderAsyncComponent(vueComponent: ReturnType<typeof defineComponent>, props: object): VueWrapper{
-    const component = wrapInSuspense(vueComponent, { props })
-    return mount(component, { attachTo: document.body })
+export function renderAsyncComponent(
+  vueComponent: ReturnType<typeof defineComponent>,
+  props: object,
+): VueWrapper {
+  const component = wrapInSuspense(vueComponent, { props });
+  return mount(component, { attachTo: document.body });
 }
 ```
 
 Then import and test the component as following:
 
 ```ts
-import { $, expect } from '@wdio/globals'
+import { $, expect } from "@wdio/globals";
 
-import { renderAsyncComponent, flushPromises, type VueWrapper } from './helpers.js'
-import AsyncComponent from '/components/SomeAsyncComponent.vue'
+import { renderAsyncComponent, flushPromises, type VueWrapper } from "./helpers.js";
+import AsyncComponent from "/components/SomeAsyncComponent.vue";
 
-describe('Testing Async Components', () => {
-    let wrapper: VueWrapper
+describe("Testing Async Components", () => {
+  let wrapper: VueWrapper;
 
-    it('should display component correctly', async () => {
-        const props = {}
-        wrapper = renderAsyncComponent(AsyncComponent, { props })
-        await flushPromises()
-        await expect($('...')).toBePresent()
-    })
+  it("should display component correctly", async () => {
+    const props = {};
+    wrapper = renderAsyncComponent(AsyncComponent, { props });
+    await flushPromises();
+    await expect($("...")).toBePresent();
+  });
 
-    afterEach(() => {
-        wrapper.unmount()
-    })
-})
+  afterEach(() => {
+    wrapper.unmount();
+  });
+});
 ```
 
 ## Testing Vue Components in Nuxt
 
 If you are using the web framework [Nuxt](https://nuxt.com/), WebdriverIO will automatically enable the [auto-import](https://nuxt.com/docs/guide/concepts/auto-imports) feature and makes testing your Vue components and Nuxt pages easy. However any [Nuxt modules](https://nuxt.com/modules) that you might define in your config and requires context to the Nuxt application can not be supported.
 
-__Reasons for that are:__
+**Reasons for that are:**
+
 - WebdriverIO can't initiate a Nuxt application soley in a browser environment
 - Having component tests depend too much on the Nuxt environment creates complexity and we recommend to run these tests as e2e tests
 
@@ -262,7 +268,7 @@ export default defineNuxtConfig({
 and you create an instance of Supabase somewhere in your composables, e.g.:
 
 ```ts
-const superbase = useSupabaseClient()
+const superbase = useSupabaseClient();
 ```
 
 the test will fail due to:
@@ -274,6 +280,6 @@ ReferenceError: useSupabaseClient is not defined
 Here, we recommend to either mock out the whole module that uses the `useSupabaseClient` function or create a global variable that mocks this function, e.g.:
 
 ```ts
-import { fn } from '@wdio/browser-runner'
-globalThis.useSupabaseClient = fn().mockReturnValue({})
+import { fn } from "@wdio/browser-runner";
+globalThis.useSupabaseClient = fn().mockReturnValue({});
 ```

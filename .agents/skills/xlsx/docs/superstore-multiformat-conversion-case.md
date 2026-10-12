@@ -22,6 +22,7 @@ Source file from the successful run:
 User intent:
 
 > 完成以下Excel数据格式转换（使用Superstore数据集）：
+>
 > 1. Excel → CSV：UTF-8编码，日期统一YYYY-MM-DD格式
 > 2. Excel → JSON：标准JSON数组，数据类型正确
 > 3. Excel → PDF：横向打印，表头每页重复
@@ -84,14 +85,14 @@ If a column is missing or renamed, build the map from source cell types and colu
 
 There is no natural-language translation in this case. The “translation” layer is type and format normalization:
 
-| Source concept | Output rule |
-|---|---|
-| Excel date cells | CSV/JSON: ISO `YYYY-MM-DD`; reverse XLSX: numeric Excel date serial with `yyyy-mm-dd` number format |
-| Integer IDs / counts | CSV: decimal text; JSON: JSON number; reverse XLSX: numeric cell |
-| Money / measures (`Sales`, `Profit`, `Discount`) | CSV: decimal text; JSON: JSON number; reverse XLSX: numeric cell with number/percent style |
-| Text identifiers (`Order ID`, `Product ID`, customer names) | Keep exact string; do not trim meaningful punctuation |
-| Unicode / CJK if present | write CSV/JSON/HTML with UTF-8 and `ensure_ascii=False` |
-| Empty cells | CSV empty string, JSON `null`, reverse XLSX empty cell |
+| Source concept                                              | Output rule                                                                                         |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Excel date cells                                            | CSV/JSON: ISO `YYYY-MM-DD`; reverse XLSX: numeric Excel date serial with `yyyy-mm-dd` number format |
+| Integer IDs / counts                                        | CSV: decimal text; JSON: JSON number; reverse XLSX: numeric cell                                    |
+| Money / measures (`Sales`, `Profit`, `Discount`)            | CSV: decimal text; JSON: JSON number; reverse XLSX: numeric cell with number/percent style          |
+| Text identifiers (`Order ID`, `Product ID`, customer names) | Keep exact string; do not trim meaningful punctuation                                               |
+| Unicode / CJK if present                                    | write CSV/JSON/HTML with UTF-8 and `ensure_ascii=False`                                             |
+| Empty cells                                                 | CSV empty string, JSON `null`, reverse XLSX empty cell                                              |
 
 JSON serialization rule:
 
@@ -222,26 +223,65 @@ Required CSS pattern:
 
 ```html
 <style>
-@page { size: A4 landscape; margin: 7mm 5mm; }
-* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-html, body { margin: 0; padding: 0; font-family: Arial, "PingFang SC", sans-serif; color: #111827; }
-body { font-size: 4.6pt; line-height: 1.10; }
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-thead { display: table-header-group; }
-tfoot { display: table-footer-group; }
-tr { page-break-inside: avoid; break-inside: avoid; }
-th, td {
-  border: 0.20pt solid #c7d2e5;
-  padding: 0.8pt 1.0pt;
-  vertical-align: top;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: normal;
-  hyphens: auto;
-}
-th { background: #1f4e78; color: #ffffff; font-weight: 700; text-align: left; }
-tbody tr:nth-child(even) td { background: #f7f9fc; }
-td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  @page {
+    size: A4 landscape;
+    margin: 7mm 5mm;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, "PingFang SC", sans-serif;
+    color: #111827;
+  }
+  body {
+    font-size: 4.6pt;
+    line-height: 1.1;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
+  }
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  th,
+  td {
+    border: 0.2pt solid #c7d2e5;
+    padding: 0.8pt 1pt;
+    vertical-align: top;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: auto;
+  }
+  th {
+    background: #1f4e78;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+  }
+  tbody tr:nth-child(even) td {
+    background: #f7f9fc;
+  }
+  td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
 </style>
 ```
 
@@ -267,7 +307,7 @@ bash "$PDF_SKILL/scripts/make.sh" render \
 Expected success line:
 
 ```json
-{"status":"ok","out":".../superstore_orders_landscape.pdf","format":"A4","landscape":true}
+{ "status": "ok", "out": ".../superstore_orders_landscape.pdf", "format": "A4", "landscape": true }
 ```
 
 ## Asset and layout preservation strategy
@@ -386,18 +426,18 @@ PY
 
 ## Common pitfalls and recovery steps
 
-| Pitfall | Symptom | Recovery |
-|---|---|---|
-| Using `pandas.to_json` directly after `read_excel` | dates become epoch milliseconds or unexpected strings | Build records explicitly; dates → ISO strings, numbers → int/float |
-| Using `default=str` for JSON without type review | numeric-looking values may hide type errors | Print `type(records[0][...]).__name__` for representative fields |
-| `text-overflow: ellipsis` in PDF HTML | `pdftotext` shows `…`, acceptance says truncation | Remove ellipsis CSS; allow wrapping with `overflow-wrap:anywhere` |
-| LibreOffice XLSX→PDF ignores fit/repeated headers | page size/orientation or header repetition wrong | Use HTML→PDF route with `@page A4 landscape` and `thead` repeat |
-| Rows split across pages | product names / addresses split awkwardly | Add `tr { page-break-inside: avoid; break-inside: avoid; }`; reduce font slightly if needed |
-| PDF too wide / columns missing | some headers absent in `pdftotext` or visual preview | Use `table-layout: fixed`, explicit `<colgroup>`, A4 landscape, narrow numeric columns |
-| Reverse XLSX dates read as integers | no date style or wrong style index | Add custom `numFmt` `yyyy-mm-dd`, apply it to date cells, verify with openpyxl |
-| `ws.max_row` is `None` in streaming verification | missing `<dimension>` in generated sheet XML | Insert `<dimension ref="A1:U9995"/>` before `<sheetViews>` |
-| Accidental openpyxl full read/write for CSV→XLSX | violates skill standard even if file opens | Generate direct OOXML package with `zipfile` and worksheet XML |
-| Using CSS counters / emoji | violates PDF generation standard | Use literal text labels and plain headings only |
+| Pitfall                                            | Symptom                                               | Recovery                                                                                    |
+| -------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Using `pandas.to_json` directly after `read_excel` | dates become epoch milliseconds or unexpected strings | Build records explicitly; dates → ISO strings, numbers → int/float                          |
+| Using `default=str` for JSON without type review   | numeric-looking values may hide type errors           | Print `type(records[0][...]).__name__` for representative fields                            |
+| `text-overflow: ellipsis` in PDF HTML              | `pdftotext` shows `…`, acceptance says truncation     | Remove ellipsis CSS; allow wrapping with `overflow-wrap:anywhere`                           |
+| LibreOffice XLSX→PDF ignores fit/repeated headers  | page size/orientation or header repetition wrong      | Use HTML→PDF route with `@page A4 landscape` and `thead` repeat                             |
+| Rows split across pages                            | product names / addresses split awkwardly             | Add `tr { page-break-inside: avoid; break-inside: avoid; }`; reduce font slightly if needed |
+| PDF too wide / columns missing                     | some headers absent in `pdftotext` or visual preview  | Use `table-layout: fixed`, explicit `<colgroup>`, A4 landscape, narrow numeric columns      |
+| Reverse XLSX dates read as integers                | no date style or wrong style index                    | Add custom `numFmt` `yyyy-mm-dd`, apply it to date cells, verify with openpyxl              |
+| `ws.max_row` is `None` in streaming verification   | missing `<dimension>` in generated sheet XML          | Insert `<dimension ref="A1:U9995"/>` before `<sheetViews>`                                  |
+| Accidental openpyxl full read/write for CSV→XLSX   | violates skill standard even if file opens            | Generate direct OOXML package with `zipfile` and worksheet XML                              |
+| Using CSS counters / emoji                         | violates PDF generation standard                      | Use literal text labels and plain headings only                                             |
 
 ## Final reusable workflow checklist
 

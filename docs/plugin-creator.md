@@ -60,17 +60,17 @@ Skill 按 scaffold -> optional components -> validate -> install/update 流程�
 
 ## 验收与影响
 
-| Case | 状态/动作 | 断言 |
-| --- | --- | --- |
-| PLM-LC-018 | 中英文管理列表及搜索 | 完整 ID 关联 listing，名称/简介/反馈一致，原名与中文可搜，无翻译保留原文 |
-| PLM-LC-019 | 两处添加菜单/创建 | 两个菜单项；真实 skill chip 和尾空格；未发送；remount 恢复同一草稿 |
-| PLM-LC-020 | 添加来源成功/失败/取消 | 一次导航消费；成功个人分段；失败输入保留；取消无写入 |
-| creator-boundary | 重复点击、切换 identity/attachment、禁用/缺失 | 仅当前目标提交一次，错误无预填/启用副作用 |
-| creator-assets | Node/SEA/Desktop/remote | manifest、skill、scripts、references 齐全且可发现 |
-| creator-scaffold | 最小、skill、MCP、hook、市场、更新 | ZCode 校验通过；非法输入、越界、重复/覆盖、TODO 被拒绝 |
-| creator-dev-market | 创建/更新 dev listing、同名工作区与写入竞争 | 稳定 ID、无关数据与源码保留；来源冲突、重复、越界、锁占用拒绝；独占临时文件失败不删除已有文件 |
-| creator-dev-workflow | 实际 CLI 创建、登记、安装、版本更新 | available/installed ID 与版本一致；安装目录与源码分离；内容更新生效且保留显式禁用 |
-| creator-manual-handoff | 无 CLI/Node、首次添加、已有插件更新、取消/失败 | 给出真实目录与界面步骤；无自动登记安装；不编造安装引用；未完成状态明确 |
+| Case                   | 状态/动作                                      | 断言                                                                                          |
+| ---------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| PLM-LC-018             | 中英文管理列表及搜索                           | 完整 ID 关联 listing，名称/简介/反馈一致，原名与中文可搜，无翻译保留原文                      |
+| PLM-LC-019             | 两处添加菜单/创建                              | 两个菜单项；真实 skill chip 和尾空格；未发送；remount 恢复同一草稿                            |
+| PLM-LC-020             | 添加来源成功/失败/取消                         | 一次导航消费；成功个人分段；失败输入保留；取消无写入                                          |
+| creator-boundary       | 重复点击、切换 identity/attachment、禁用/缺失  | 仅当前目标提交一次，错误无预填/启用副作用                                                     |
+| creator-assets         | Node/SEA/Desktop/remote                        | manifest、skill、scripts、references 齐全且可发现                                             |
+| creator-scaffold       | 最小、skill、MCP、hook、市场、更新             | ZCode 校验通过；非法输入、越界、重复/覆盖、TODO 被拒绝                                        |
+| creator-dev-market     | 创建/更新 dev listing、同名工作区与写入竞争    | 稳定 ID、无关数据与源码保留；来源冲突、重复、越界、锁占用拒绝；独占临时文件失败不删除已有文件 |
+| creator-dev-workflow   | 实际 CLI 创建、登记、安装、版本更新            | available/installed ID 与版本一致；安装目录与源码分离；内容更新生效且保留显式禁用             |
+| creator-manual-handoff | 无 CLI/Node、首次添加、已有插件更新、取消/失败 | 给出真实目录与界面步骤；无自动登记安装；不编造安装引用；未完成状态明确                        |
 
 UI/草稿 owner：管理和商店组件负责展示/入口，Root 负责新任务，Composer draft store 负责预填事实；Skill/Plugin 内容以目标 host discovery 为准。共享菜单、prefill builder 和两处搜索是 must-inspect，runtime 是 invariant-only。Codegraph 已用于旧工作区定位；实现工作区未建索引，按已定位文件读当前源码。架构门禁的 ui/zcode-cli 当前非 managed，门禁通过不能替代语义检查。
 

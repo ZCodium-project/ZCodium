@@ -1,8 +1,6 @@
 import type { UIRendererCoverageSummary } from "./e2e-ui-coverage.js";
 
-export function renderUICoverageMarkdownSection(
-  coverage: UIRendererCoverageSummary,
-) {
+export function renderUICoverageMarkdownSection(coverage: UIRendererCoverageSummary) {
   const sourceFiles = coverage.sourceFiles ?? [];
   const lines = [
     "## Coverage",

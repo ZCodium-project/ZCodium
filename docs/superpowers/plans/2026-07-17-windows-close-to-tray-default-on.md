@@ -20,11 +20,13 @@
 ### Task 1: Shared settings migration
 
 **Files:**
+
 - Modify: `packages/shared/test/validation.test.ts`
 - Modify: `packages/shared/src/validationAppSettings.ts`
 - Modify: `packages/shared/src/protocol.ts`
 
 **Interfaces:**
+
 - Produces: `AppSettings.closeToTrayOnWindowsMigrationInitialized?: boolean`
 - Produces: parsed defaults `{ closeToTrayOnWindows: true, closeToTrayOnWindowsMigrationInitialized: true }`
 
@@ -61,10 +63,12 @@ Expected: PASS.
 ### Task 2: Persist migration through the settings queue
 
 **Files:**
+
 - Modify: `packages/services/test/settingService.test.ts`
 - Modify: `packages/services/src/setting/settingService.ts`
 
 **Interfaces:**
+
 - Consumes: the shared schema migration from Task 1.
 - Produces: first `get()` of a legacy file atomically persists `closeToTrayOnWindows: true` and `closeToTrayOnWindowsMigrationInitialized: true`.
 
@@ -91,11 +95,13 @@ Expected: PASS.
 ### Task 3: Align consumers and verify the feature
 
 **Files:**
+
 - Modify: `packages/ui/src/SettingsPage.tsx`
 - Modify: `packages/desktop/src/main/index.ts`
 - Verify: `docs/windows-tray.md`
 
 **Interfaces:**
+
 - Consumes: effective `AppSettings.closeToTrayOnWindows` from the setting service.
 - Produces: UI toggle and main close handler both fall back to enabled if settings cannot provide a value.
 
@@ -124,4 +130,3 @@ Stage the implementation, tests, spec, and plan, then amend with:
 ```bash
 git commit --amend -m "feat(desktop): enable Windows close to tray by default"
 ```
-

@@ -85,7 +85,11 @@ describe("会话区 .zcodeignore 工作区搜索忽略规则 E2E", () => {
     originalGitignore = await readFile(gitignorePath, "utf-8").catch(() => null);
     const baseGitignore = originalGitignore ?? "";
     if (!/^obj\/$/m.test(baseGitignore)) {
-      await writeFile(gitignorePath, `${baseGitignore}${baseGitignore.endsWith("\n") || !baseGitignore ? "" : "\n"}obj/\n`, "utf-8");
+      await writeFile(
+        gitignorePath,
+        `${baseGitignore}${baseGitignore.endsWith("\n") || !baseGitignore ? "" : "\n"}obj/\n`,
+        "utf-8",
+      );
     }
     const objDir = join(DEFAULT_WORKSPACE, "obj");
     const srcDir = join(DEFAULT_WORKSPACE, "src");

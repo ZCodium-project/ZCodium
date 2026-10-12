@@ -40,10 +40,7 @@ describe("groupedTaskExpansionPreference", () => {
     expect(storage.getItem(GROUPED_TASK_COLLAPSED_GROUPS_STORAGE_KEY)).toBe(
       JSON.stringify({ "group-a": true, "group-b": true }),
     );
-    expect([...readGroupedTaskCollapsedGroupIds(storage)].sort()).toEqual([
-      "group-a",
-      "group-b",
-    ]);
+    expect([...readGroupedTaskCollapsedGroupIds(storage)].sort()).toEqual(["group-a", "group-b"]);
   });
 
   it("ignores malformed or expanded entries when restoring collapsed grouped task ids", () => {

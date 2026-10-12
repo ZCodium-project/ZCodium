@@ -118,6 +118,7 @@ never evaluates them.
 > `pack.py`). On failure you lose the only signal that explains why
 > and have to rerun blind. If output is too noisy, redirect to a log
 > file and grep on demand:
+>
 > ```bash
 > python scripts/recalc.py file.xlsx 60 2>/tmp/recalc.log
 > # If JSON shows status != "success" or exit != 0, then:
@@ -139,7 +140,6 @@ never evaluates them.
 > styles, charts, templates, and final `.xlsx` assembly. If the output is a
 > static raw-data dump, `DataFrame.to_excel`/`xlsxwriter` is acceptable; if it
 > contains derived values, write full raw rows and Excel-native `=` formulas.
-
 
 > **10. Non-standard XLSX packages: trust recalc raw-XML fallback.**
 > Workbooks with heavy merged cells, charts/drawings, or vendor-generated XML
@@ -361,7 +361,7 @@ in [`docs/recalc-guide.md`](docs/recalc-guide.md) §8.
 ## 5. Conventions for Excel Outputs
 
 **Formula-first as the unifying rule.** All four sub-sections below
-exist to enforce one principle: a delivered workbook is a *live model*
+exist to enforce one principle: a delivered workbook is a _live model_
 the user can adjust by editing inputs and watching every dependent
 cell recompute. The colour code (§5.2 — black for formulas, blue for
 hardcoded inputs) makes it obvious at a glance whether a number is
@@ -381,13 +381,13 @@ must pass `scripts/recalc.py` with `total_errors == 0` before delivery.
 
 ### 5.2 Color coding
 
-| Color | Hex | RGB | Meaning | Anti-pattern |
-|---|---|---|---|---|
-| Black | `000000` | `0,0,0` | Every formula and computed result | Setting `=A1+B1` to blue makes it look like a manual input |
-| Blue | `0000FF` | `0,0,255` | Hard-coded inputs and scenario assumptions | Setting `=Sheet2!A1` to blue hides the cross-sheet link |
-| Green | `008000` | `0,128,0` | Same-workbook cross-sheet links | Coloring a cross-file link green hides the external dependency |
-| Red | `FF0000` | `255,0,0` | Cross-file external links | Coloring same-sheet `=A1` red implies a fake external dependency |
-| Yellow (fill) | `FFFF00` | `255,255,0` background | Critical assumptions awaiting review | Coloring every cell yellow drowns out the cells that need review |
+| Color         | Hex      | RGB                    | Meaning                                    | Anti-pattern                                                     |
+| ------------- | -------- | ---------------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| Black         | `000000` | `0,0,0`                | Every formula and computed result          | Setting `=A1+B1` to blue makes it look like a manual input       |
+| Blue          | `0000FF` | `0,0,255`              | Hard-coded inputs and scenario assumptions | Setting `=Sheet2!A1` to blue hides the cross-sheet link          |
+| Green         | `008000` | `0,128,0`              | Same-workbook cross-sheet links            | Coloring a cross-file link green hides the external dependency   |
+| Red           | `FF0000` | `255,0,0`              | Cross-file external links                  | Coloring same-sheet `=A1` red implies a fake external dependency |
+| Yellow (fill) | `FFFF00` | `255,255,0` background | Critical assumptions awaiting review       | Coloring every cell yellow drowns out the cells that need review |
 
 Black-first ordering matches the reviewer's scan order — see
 [`docs/conventions-guide.md`](docs/conventions-guide.md) §1 for the
@@ -396,15 +396,15 @@ both `openpyxl` and `xlsxwriter` accept either form.
 
 ### 5.3 Number formatting
 
-| Type | Format | Rationale |
-|---|---|---|
-| Year | text (`"FY2025"`) | Numeric `2025` gets thousands-separated to `2,025` |
-| Currency | `$#,##0` or `¥#,##0` with the unit (`mm` / `bn` / `k`) in the header | The unit lives once per column, not per cell |
-| Zero | `"$#,##0;($#,##0);-"` | Em-dash separates "zero by intent" from "missing value" |
-| Percentage | `0.0%` | One decimal is enough for a scan; two is false precision |
-| Multiple | `0.0x` | Used for valuation multiples (EV/EBITDA, P/S, P/E) |
-| Negative | `(123)` (parentheses) | Accounting convention; minus signs blend into table grids |
-| Hardcode | `Source: …` annotation in the next column or as a cell comment | Reviewer can audit every input back to its source |
+| Type       | Format                                                               | Rationale                                                 |
+| ---------- | -------------------------------------------------------------------- | --------------------------------------------------------- |
+| Year       | text (`"FY2025"`)                                                    | Numeric `2025` gets thousands-separated to `2,025`        |
+| Currency   | `$#,##0` or `¥#,##0` with the unit (`mm` / `bn` / `k`) in the header | The unit lives once per column, not per cell              |
+| Zero       | `"$#,##0;($#,##0);-"`                                                | Em-dash separates "zero by intent" from "missing value"   |
+| Percentage | `0.0%`                                                               | One decimal is enough for a scan; two is false precision  |
+| Multiple   | `0.0x`                                                               | Used for valuation multiples (EV/EBITDA, P/S, P/E)        |
+| Negative   | `(123)` (parentheses)                                                | Accounting convention; minus signs blend into table grids |
+| Hardcode   | `Source: …` annotation in the next column or as a cell comment       | Reviewer can audit every input back to its source         |
 
 Sample headers: `ARR (¥mm)` / `Tokens (bn)` / `MAU (mm)` /
 `Token unit price 1.2x`. Full hardcode-source grammar and five worked
@@ -421,50 +421,50 @@ Checklist in [`docs/conventions-guide.md`](docs/conventions-guide.md) §5.
 
 ## 6. Reference Index
 
-| File | Purpose |
-|---|---|
-| [`docs/pitfalls-index.md`](docs/pitfalls-index.md) | **Read first when the task matches a known case.** 8 evaluation cases keyed by task signature → past failure → recommended trace |
-| [`docs/superstore-multiformat-conversion-case.md`](docs/superstore-multiformat-conversion-case.md) | X8 progressive case: Superstore Excel → CSV/JSON/HTML→PDF + XML-template CSV→XLSX reverse validation |
-| [`docs/create-edit-guide.md`](docs/create-edit-guide.md) | openpyxl create / edit / chart recipes plus merged-cell and shared-strings gotchas |
-| [`docs/recalc-guide.md`](docs/recalc-guide.md) | `recalc.py` reference — macro path, JSON schema, AF_UNIX shim, timeouts, alternatives |
-| [`docs/conventions-guide.md`](docs/conventions-guide.md) | Color coding, number formats, formula construction, hardcode source documentation |
-| [`docs/raw-xml-escape-hatch.md`](docs/raw-xml-escape-hatch.md) | Surgical XML escape hatch via `scripts/office/{pack,unpack}.py` for the few files openpyxl can't safely round-trip (VBA, pivot caches, slicers, connections, externalLinks) |
-| [`docs/advanced-reference.md`](docs/advanced-reference.md) | polars / duckdb / xlcalculator / pyexcel / extract-text / large-file / CI workflows |
-| `scripts/recalc.py` | LibreOffice-driven recalculation entry point — mandatory final step |
-| `scripts/office/soffice.py` | Sandbox-friendly LibreOffice runner with AF_UNIX shim |
-| `scripts/office/{pack,unpack,validate}.py` | DOCX / PPTX / XLSX zip helpers + XSD validate (cross-format; schemas live under `office/schemas/`) |
+| File                                                                                               | Purpose                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`docs/pitfalls-index.md`](docs/pitfalls-index.md)                                                 | **Read first when the task matches a known case.** 8 evaluation cases keyed by task signature → past failure → recommended trace                                            |
+| [`docs/superstore-multiformat-conversion-case.md`](docs/superstore-multiformat-conversion-case.md) | X8 progressive case: Superstore Excel → CSV/JSON/HTML→PDF + XML-template CSV→XLSX reverse validation                                                                        |
+| [`docs/create-edit-guide.md`](docs/create-edit-guide.md)                                           | openpyxl create / edit / chart recipes plus merged-cell and shared-strings gotchas                                                                                          |
+| [`docs/recalc-guide.md`](docs/recalc-guide.md)                                                     | `recalc.py` reference — macro path, JSON schema, AF_UNIX shim, timeouts, alternatives                                                                                       |
+| [`docs/conventions-guide.md`](docs/conventions-guide.md)                                           | Color coding, number formats, formula construction, hardcode source documentation                                                                                           |
+| [`docs/raw-xml-escape-hatch.md`](docs/raw-xml-escape-hatch.md)                                     | Surgical XML escape hatch via `scripts/office/{pack,unpack}.py` for the few files openpyxl can't safely round-trip (VBA, pivot caches, slicers, connections, externalLinks) |
+| [`docs/advanced-reference.md`](docs/advanced-reference.md)                                         | polars / duckdb / xlcalculator / pyexcel / extract-text / large-file / CI workflows                                                                                         |
+| `scripts/recalc.py`                                                                                | LibreOffice-driven recalculation entry point — mandatory final step                                                                                                         |
+| `scripts/office/soffice.py`                                                                        | Sandbox-friendly LibreOffice runner with AF_UNIX shim                                                                                                                       |
+| `scripts/office/{pack,unpack,validate}.py`                                                         | DOCX / PPTX / XLSX zip helpers + XSD validate (cross-format; schemas live under `office/schemas/`)                                                                          |
 
 ---
 
 ## 7. Troubleshooting
 
-| Symptom | Likely cause | First thing to try |
-|---|---|---|
-| Recalc returns `#REF!` after row insertion | Old formulas point at the row that just shifted | Search the workbook for `#REF!`; replace with the new coordinate; rerun `recalc.py` |
-| Recalc returns `#DIV/0!` | Denominator evaluates to zero or empty | Wrap with `IFERROR(num/denom, 0)` or `IF(denom=0, "", num/denom)` |
-| Recalc returns `#N/A` | `VLOOKUP` / `MATCH` key not found in the lookup column | Check key whitespace, case, and type (`123` vs `"123"`); confirm the lookup column is contiguous |
-| `recalc.py` exits with `soffice timed out` | LibreOffice hung on a heavy workbook | Raise the second positional arg (`python scripts/recalc.py file.xlsx 180`); if it persists, see `docs/recalc-guide.md` §5 |
-| `recalc.py` errors with `Address already in use` / AF_UNIX denied | Sandbox blocks AF_UNIX (macOS App Sandbox / Linux seccomp) | Auto-handled by `office.soffice` shim; ensure `gcc` is on `PATH` so the shim can compile (see `docs/recalc-guide.md` §6) |
-| `iter_rows()` returns `None` for cells that visibly have a value | Cells live inside a merged region; only the anchor carries the value | `unmerge_cells()` first, broadcast the anchor value, then re-merge if layout matters (see `docs/create-edit-guide.md` §9) |
-| `save()` deletes every formula in the workbook | The file was opened with `data_only=True` | Reload with `load_workbook(path)` (default `data_only=False`); `data_only=True` is read-only safe only |
+| Symptom                                                                          | Likely cause                                                                                         | First thing to try                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Recalc returns `#REF!` after row insertion                                       | Old formulas point at the row that just shifted                                                      | Search the workbook for `#REF!`; replace with the new coordinate; rerun `recalc.py`                                                                                                                                                                                                                                                                                                                        |
+| Recalc returns `#DIV/0!`                                                         | Denominator evaluates to zero or empty                                                               | Wrap with `IFERROR(num/denom, 0)` or `IF(denom=0, "", num/denom)`                                                                                                                                                                                                                                                                                                                                          |
+| Recalc returns `#N/A`                                                            | `VLOOKUP` / `MATCH` key not found in the lookup column                                               | Check key whitespace, case, and type (`123` vs `"123"`); confirm the lookup column is contiguous                                                                                                                                                                                                                                                                                                           |
+| `recalc.py` exits with `soffice timed out`                                       | LibreOffice hung on a heavy workbook                                                                 | Raise the second positional arg (`python scripts/recalc.py file.xlsx 180`); if it persists, see `docs/recalc-guide.md` §5                                                                                                                                                                                                                                                                                  |
+| `recalc.py` errors with `Address already in use` / AF_UNIX denied                | Sandbox blocks AF_UNIX (macOS App Sandbox / Linux seccomp)                                           | Auto-handled by `office.soffice` shim; ensure `gcc` is on `PATH` so the shim can compile (see `docs/recalc-guide.md` §6)                                                                                                                                                                                                                                                                                   |
+| `iter_rows()` returns `None` for cells that visibly have a value                 | Cells live inside a merged region; only the anchor carries the value                                 | `unmerge_cells()` first, broadcast the anchor value, then re-merge if layout matters (see `docs/create-edit-guide.md` §9)                                                                                                                                                                                                                                                                                  |
+| `save()` deletes every formula in the workbook                                   | The file was opened with `data_only=True`                                                            | Reload with `load_workbook(path)` (default `data_only=False`); `data_only=True` is read-only safe only                                                                                                                                                                                                                                                                                                     |
 | `load_workbook` raises `TypeError: expected <class 'int'>` after `recalc.py` ran | LibreOffice rewrote the workbook's `<mergeCell>` XML in a form openpyxl's default parser cannot read | The file itself is intact and openable in Excel — `recalc.py` already returned `status: success` via its raw-XML fallback (see `docs/recalc-guide.md` §9). For programmatic readback, retry with `load_workbook(path, read_only=True, data_only=True)` (streaming reader skips the merged-cell parser); when you also need formula strings, drop to the raw-XML pattern in `docs/create-edit-guide.md` §11 |
-| Polars `write_excel` output has no formulas, no charts, no styles | Expected — polars does not write formulas / charts / styles | Use openpyxl on the write side (see `docs/advanced-reference.md` §6) |
-| `load_workbook` strips VBA / pivot tables / slicers / connections | openpyxl can't round-trip these binary or strongly-coupled artefacts | Drop to `scripts/office/unpack.py` + manual XML edit + `scripts/office/pack.py`; see `docs/raw-xml-escape-hatch.md` §1 for the full no-go table |
+| Polars `write_excel` output has no formulas, no charts, no styles                | Expected — polars does not write formulas / charts / styles                                          | Use openpyxl on the write side (see `docs/advanced-reference.md` §6)                                                                                                                                                                                                                                                                                                                                       |
+| `load_workbook` strips VBA / pivot tables / slicers / connections                | openpyxl can't round-trip these binary or strongly-coupled artefacts                                 | Drop to `scripts/office/unpack.py` + manual XML edit + `scripts/office/pack.py`; see `docs/raw-xml-escape-hatch.md` §1 for the full no-go table                                                                                                                                                                                                                                                            |
 
 ---
 
 ## 8. Environment
 
-| Dependency | Purpose | Install |
-|---|---|---|
-| Python 3.9+ | All `.py` scripts | system |
-| `openpyxl` | Read / write `.xlsx` with formulas, styles, named ranges | `pip install openpyxl` |
-| `pandas` | Tabular read / write (default for §3.1) | `pip install pandas openpyxl` |
-| `polars` (optional) | Fast read for large files (§3.4) | `pip install polars` |
-| `xlsxwriter` (optional) | Write-only throughput (§3.3) | `pip install xlsxwriter` |
-| `pyexcel` (optional) | Format-agnostic conversion (§3.5) | `pip install pyexcel pyexcel-xlsx` |
-| LibreOffice (`soffice` on PATH) | `recalc.py` headless recalculation | macOS: `brew install --cask libreoffice`; Debian/Ubuntu: `apt install libreoffice` |
-| `coreutils` (macOS) | Provides `gtimeout` for the recalc timeout wrapper | `brew install coreutils` (optional; falls back to `subprocess` kwarg) |
+| Dependency                      | Purpose                                                  | Install                                                                            |
+| ------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Python 3.9+                     | All `.py` scripts                                        | system                                                                             |
+| `openpyxl`                      | Read / write `.xlsx` with formulas, styles, named ranges | `pip install openpyxl`                                                             |
+| `pandas`                        | Tabular read / write (default for §3.1)                  | `pip install pandas openpyxl`                                                      |
+| `polars` (optional)             | Fast read for large files (§3.4)                         | `pip install polars`                                                               |
+| `xlsxwriter` (optional)         | Write-only throughput (§3.3)                             | `pip install xlsxwriter`                                                           |
+| `pyexcel` (optional)            | Format-agnostic conversion (§3.5)                        | `pip install pyexcel pyexcel-xlsx`                                                 |
+| LibreOffice (`soffice` on PATH) | `recalc.py` headless recalculation                       | macOS: `brew install --cask libreoffice`; Debian/Ubuntu: `apt install libreoffice` |
+| `coreutils` (macOS)             | Provides `gtimeout` for the recalc timeout wrapper       | `brew install coreutils` (optional; falls back to `subprocess` kwarg)              |
 
 `scripts/office/soffice.py` auto-activates an `LD_PRELOAD` AF_UNIX shim
 when the host sandbox denies AF_UNIX (macOS App Sandbox, Linux seccomp);
@@ -496,23 +496,23 @@ bash -c "python -c \"from openpyxl import load_workbook; wb=load_workbook('file.
 
 **Key differences on Windows:**
 
-| Unix reference | Windows handling |
-|---|---|
-| `python3` | Use `python` — Git Bash finds it on PATH if installed |
-| `python3 <<EOF ... EOF` | Use `bash -c "python -c '...'"` or write a .py file and run it |
-| `/tmp/` | Git Bash maps `/tmp/` automatically — scripts work as-is |
-| `grep -in ... \| head -20` | Works inside `bash -c "..."` |
-| `brew install --cask libreoffice` | `winget install TheDocumentFoundation.LibreOffice` |
-| `coreutils` (`gtimeout`) | Not needed — `recalc.py` falls back to `subprocess` timeout kwarg |
+| Unix reference                    | Windows handling                                                  |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `python3`                         | Use `python` — Git Bash finds it on PATH if installed             |
+| `python3 <<EOF ... EOF`           | Use `bash -c "python -c '...'"` or write a .py file and run it    |
+| `/tmp/`                           | Git Bash maps `/tmp/` automatically — scripts work as-is          |
+| `grep -in ... \| head -20`        | Works inside `bash -c "..."`                                      |
+| `brew install --cask libreoffice` | `winget install TheDocumentFoundation.LibreOffice`                |
+| `coreutils` (`gtimeout`)          | Not needed — `recalc.py` falls back to `subprocess` timeout kwarg |
 
 **If Git Bash or any tool is missing**, detect before installing anything:
 
-| Tool | Detect | Install (run by the user, not the agent) |
-| --- | --- | --- |
-| Python | `python --version` | `winget install Python.Python.3.12` |
-| Git Bash | `ls "$PROGRAMFILES/Git/bin/bash.exe"` | `winget install Git.Git` |
-| LibreOffice | `ls "$PROGRAMFILES/LibreOffice/program/soffice.exe"` | `winget install TheDocumentFoundation.LibreOffice` |
-| openpyxl | `python -c "import openpyxl; print(openpyxl.__version__)"` | `python -m pip install openpyxl` |
+| Tool        | Detect                                                     | Install (run by the user, not the agent)           |
+| ----------- | ---------------------------------------------------------- | -------------------------------------------------- |
+| Python      | `python --version`                                         | `winget install Python.Python.3.12`                |
+| Git Bash    | `ls "$PROGRAMFILES/Git/bin/bash.exe"`                      | `winget install Git.Git`                           |
+| LibreOffice | `ls "$PROGRAMFILES/LibreOffice/program/soffice.exe"`       | `winget install TheDocumentFoundation.LibreOffice` |
+| openpyxl    | `python -c "import openpyxl; print(openpyxl.__version__)"` | `python -m pip install openpyxl`                   |
 
 This fork deliberately does **not** ship an auto-installer. Upstream delegated the bootstrap to a
 reference inside a different skill in its own host product; that skill is not part of ZCodium, so

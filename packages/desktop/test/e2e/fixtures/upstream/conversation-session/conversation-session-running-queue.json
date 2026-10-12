@@ -16,17 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_SLOW_STREAM",
-          "E2E_RUNNING_QUEUE_FIRST"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_FIRST"
-        ]
+        "bodyIncludes": ["E2E_SLOW_STREAM", "E2E_RUNNING_QUEUE_FIRST"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_FIRST"]
       },
       "response": {
         "statusCode": 200,
@@ -101,16 +93,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_QUEUE_SECOND"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_SECOND"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_QUEUE_SECOND"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_SECOND"]
       },
       "response": {
         "statusCode": 200,
@@ -135,16 +120,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_QUEUE_THIRD"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_THIRD"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_QUEUE_THIRD"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_THIRD"]
       },
       "response": {
         "statusCode": 200,
@@ -169,16 +147,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_QUEUE_FOURTH"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_FOURTH"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_QUEUE_FOURTH"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_FOURTH"]
       },
       "response": {
         "statusCode": 200,
@@ -203,16 +174,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_QUEUE_FIFTH"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_FIFTH"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_QUEUE_FIFTH"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_FIFTH"]
       },
       "response": {
         "statusCode": 200,
@@ -237,16 +201,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_QUEUE_GOAL"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_QUEUE_GOAL"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_QUEUE_GOAL"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_QUEUE_GOAL"]
       },
       "response": {
         "statusCode": 200,

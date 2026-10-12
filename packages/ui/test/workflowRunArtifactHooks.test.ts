@@ -196,7 +196,11 @@ describe("useWorkflowRunArtifacts", () => {
         sessionId: SESSION,
         runId: RUN,
         // 活投影的摘要**没带**旗子（老 CLI）：journal 补上之后仍然领头。
-        live: [summary(), summary({ id: "notes", kind: "markdown" }), summary({ id: "report", kind: "markdown" })],
+        live: [
+          summary(),
+          summary({ id: "notes", kind: "markdown" }),
+          summary({ id: "report", kind: "markdown" }),
+        ],
       }),
     );
     await waitFor(() => expect(hook.result.current.artifacts[0]?.id).toBe("report"));
@@ -250,13 +254,17 @@ describe("useWorkflowRunArtifacts", () => {
     workflowRunArtifacts.mockImplementation(
       () => new Promise<{ artifacts: WorkflowRunArtifact[] }>((r) => (resolve = r)),
     );
-    const cold = renderHook(() => useWorkflowRunArtifacts({ sessionId: SESSION, runId: "dwfrun-c" }));
+    const cold = renderHook(() =>
+      useWorkflowRunArtifacts({ sessionId: SESSION, runId: "dwfrun-c" }),
+    );
     expect(cold.result.current.complete).toBe(false);
     resolve({ artifacts: [journalRecord()] });
     await waitFor(() => expect(cold.result.current.complete).toBe(true));
 
     workflowRunArtifacts.mockRejectedValue(new Error("fault.command.capabilityUnsupported"));
-    const old = renderHook(() => useWorkflowRunArtifacts({ sessionId: SESSION, runId: "dwfrun-o" }));
+    const old = renderHook(() =>
+      useWorkflowRunArtifacts({ sessionId: SESSION, runId: "dwfrun-o" }),
+    );
     await waitFor(() => expect(old.result.current.unavailable).toBe(true));
     expect(old.result.current.complete).toBe(false);
   });

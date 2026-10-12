@@ -521,9 +521,7 @@ export function buildPersistedWorkspaceSessionEntries(
     entries.push({
       kind: "local",
       workspacePath: tab.workspacePath,
-      ...(tab.workspacePurpose
-        ? { workspacePurpose: tab.workspacePurpose }
-        : {}),
+      ...(tab.workspacePurpose ? { workspacePurpose: tab.workspacePurpose } : {}),
     });
     return entries;
   }, []);

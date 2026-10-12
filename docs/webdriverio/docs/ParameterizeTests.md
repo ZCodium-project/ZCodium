@@ -6,32 +6,32 @@ title: Parameterize Tests
 You can simply parameterize tests on a test level, via simple `for` loops e.g.:
 
 ```ts title=example.spec.js
-const people = ['Alice', 'Bob']
-describe('my tests', () => {
-    for (const name of people) {
-        it(`testing with ${name}`, async () => {
-            // ...
-        })
-    }
-})
+const people = ["Alice", "Bob"];
+describe("my tests", () => {
+  for (const name of people) {
+    it(`testing with ${name}`, async () => {
+      // ...
+    });
+  }
+});
 ```
 
 or by extracting tests into dynamic functions, e.g.:
 
 ```js title=dynamic.spec.js
-import { browser } from '@wdio/globals'
+import { browser } from "@wdio/globals";
 
 function testComponent(componentName, options) {
   it(`should test my ${componentName}`, async () => {
-    await browser.url(`/${componentName}`)
-    await expect($('input')).toHaveValue(options.expectedValue)
-  })
+    await browser.url(`/${componentName}`);
+    await expect($("input")).toHaveValue(options.expectedValue);
+  });
 }
 
-describe('page components', () => {
-    testComponent('component-a', { expectedValue: 'some expected value' })
-    testComponent('component-b', { expectedValue: 'some other expected value' })
-})
+describe("page components", () => {
+  testComponent("component-a", { expectedValue: "some expected value" });
+  testComponent("component-b", { expectedValue: "some other expected value" });
+});
 ```
 
 ## Passing Environment Variables
@@ -43,20 +43,20 @@ For example, consider the following test file that needs a username and a passwo
 ```ts title=example.spec.ts
 it(`example test`, async () => {
   // ...
-  await $('#username').setValue(process.env.USERNAME)
-  await $('#password').setValue(process.env.PASSWORD)
-})
+  await $("#username").setValue(process.env.USERNAME);
+  await $("#password").setValue(process.env.PASSWORD);
+});
 ```
 
 You can run this test with your secret username and password set in the command line.
 
 <Tabs
-  defaultValue="bash"
-  values={[
-    {label: 'Bash', value: 'bash'},
-    {label: 'Powershell', value: 'powershell'},
-    {label: 'Batch', value: 'batch'},
-  ]
+defaultValue="bash"
+values={[
+{label: 'Bash', value: 'bash'},
+{label: 'Powershell', value: 'powershell'},
+{label: 'Batch', value: 'batch'},
+]
 }>
 <TabItem value="bash">
 
@@ -90,22 +90,20 @@ Similarly, configuration file can also read environment variables passed through
 ```ts title=wdio.config.js
 export const config = {
   // ...
-  baseURL: process.env.STAGING === '1'
-    ? 'http://staging.example.test/'
-    : 'http://example.test/',
+  baseURL: process.env.STAGING === "1" ? "http://staging.example.test/" : "http://example.test/",
   // ...
-}
+};
 ```
 
 Now, you can run tests against a staging or a production environment:
 
 <Tabs
-  defaultValue="bash"
-  values={[
-    {label: 'Bash', value: 'bash'},
-    {label: 'Powershell', value: 'powershell'},
-    {label: 'Batch', value: 'batch'},
-  ]
+defaultValue="bash"
+values={[
+{label: 'Bash', value: 'bash'},
+{label: 'Powershell', value: 'powershell'},
+{label: 'Batch', value: 'batch'},
+]
 }>
 <TabItem value="bash">
 
@@ -166,20 +164,20 @@ See for example this CSV file, in our example input.csv:
 Based on this we'll generate some tests by using the csv-parse library from NPM:
 
 ```js title=test.spec.ts
-import fs from 'node:fs'
-import path from 'node:path'
-import { parse } from 'csv-parse/sync'
+import fs from "node:fs";
+import path from "node:path";
+import { parse } from "csv-parse/sync";
 
-const records = parse(fs.readFileSync(path.join(__dirname, 'input.csv')), {
+const records = parse(fs.readFileSync(path.join(__dirname, "input.csv")), {
   columns: true,
-  skip_empty_lines: true
-})
+  skip_empty_lines: true,
+});
 
-describe('my test suite', () => {
-    for (const record of records) {
-        it(`foo: ${record.test_case}`, async () => {
-            console.log(record.test_case, record.some_value, record.some_other_value)
-        })
-    }
-})
+describe("my test suite", () => {
+  for (const record of records) {
+    it(`foo: ${record.test_case}`, async () => {
+      console.log(record.test_case, record.some_value, record.some_other_value);
+    });
+  }
+});
 ```

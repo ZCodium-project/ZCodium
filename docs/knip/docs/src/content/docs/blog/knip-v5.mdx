@@ -5,7 +5,7 @@ sidebar:
   order: 5
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 _Published: 2024-02-10_
 
@@ -20,12 +20,12 @@ The first case shows two exports with a namespaced import that references one of
 those exports explicitly:
 
 ```ts title="knip.js"
-export const version = 'v5';
-export const getRocket = () => '🚀';
+export const version = "v5";
+export const getRocket = () => "🚀";
 ```
 
 ```ts title="index.js"
-import * as NS from './knip.js';
+import * as NS from "./knip.js";
 
 console.log(NS.version);
 ```
@@ -42,8 +42,8 @@ The second case is similar, but only the imported namespace itself is
 referenced. None of the individual exports is referenced:
 
 ```ts title="index.js"
-import * as NS from './knip.js';
-import send from 'stats';
+import * as NS from "./knip.js";
+import send from "stats";
 
 send(NS);
 ```
@@ -52,7 +52,7 @@ Are the `version` and `getRocket` exports used? We can't know. The same is true
 for the spread object pattern:
 
 ```ts title="index.js"
-import * as NS from './knip.js';
+import * as NS from "./knip.js";
 
 const Spread = { ...NS };
 ```
@@ -93,7 +93,7 @@ Regardless of whether `nsExports` is enabled or not, it's often good practice to
 replace the namespaced imports with named imports:
 
 ```ts title="index.js"
-import { version, getRocket } from './knip.js';
+import { version, getRocket } from "./knip.js";
 
 send({ version, getRocket });
 ```
@@ -105,9 +105,9 @@ Whenever possible, explicit over implicit is often the better choice.
 Using one of the available JSDoc tags like `@public` or `@internal`:
 
 ```ts title="knip.js"
-export const version = 'v5';
+export const version = "v5";
 /** @public */
-export const getRocket = () => '🚀';
+export const getRocket = () => "🚀";
 ```
 
 Assuming only imported using a namespace (like in the example cases above), this
@@ -119,9 +119,9 @@ explicitly referenced.
 Another solution is to tag individual exports arbitrarily:
 
 ```ts title="knip.js"
-export const version = 'v5';
+export const version = "v5";
 /** @launch */
-export const getRocket = () => '🚀';
+export const getRocket = () => "🚀";
 ```
 
 And then exclude the tag like so:
@@ -164,17 +164,9 @@ What are you waiting for? Start using Knip v5 today!
     ```
   </TabItem>
 
-  <TabItem label="pnpm">
-    ```shell
-    pnpm add -D knip
-    ```
-  </TabItem>
+<TabItem label="pnpm">```shell pnpm add -D knip ```</TabItem>
 
-  <TabItem label="bun">
-    ```shell
-    bun add -D knip
-    ```
-  </TabItem>
+<TabItem label="bun">```shell bun add -D knip ```</TabItem>
 
   <TabItem label="yarn">
     ```shell

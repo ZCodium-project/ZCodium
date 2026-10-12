@@ -30,9 +30,7 @@ describe("E2E Node coverage normalization", () => {
       "utf-8",
     );
 
-    const runtimeBundleUrl = pathToFileURL(
-      resolve(fixtureRoot, "staged/app/main/index.js"),
-    ).href;
+    const runtimeBundleUrl = pathToFileURL(resolve(fixtureRoot, "staged/app/main/index.js")).href;
     const dependencyUrl = pathToFileURL(
       resolve(fixtureRoot, "node_modules/dependency/index.js"),
     ).href;
@@ -53,12 +51,10 @@ describe("E2E Node coverage normalization", () => {
     expect(payload.result).toEqual([
       expect.objectContaining({ scriptId: "1", url: pathToFileURL(canonicalBundle).href }),
     ]);
-    expect(Object.keys(payload["source-map-cache"])).toEqual([
-      pathToFileURL(canonicalBundle).href,
-    ]);
-    expect(
-      payload["source-map-cache"][pathToFileURL(canonicalBundle).href]?.data?.sources,
-    ).toEqual([pathToFileURL(resolve(sourceMapRoot, "../../../src/main/index.ts")).href]);
+    expect(Object.keys(payload["source-map-cache"])).toEqual([pathToFileURL(canonicalBundle).href]);
+    expect(payload["source-map-cache"][pathToFileURL(canonicalBundle).href]?.data?.sources).toEqual(
+      [pathToFileURL(resolve(sourceMapRoot, "../../../src/main/index.ts")).href],
+    );
     expect(readFileSync(`${canonicalBundle}.map`, "utf-8")).toContain("../../../src/main/index.ts");
 
     normalizeV8CoveragePayload(payload, sourceMapRoot, { includeSourceMapCache: false });
@@ -124,17 +120,20 @@ describe("E2E Node coverage normalization", () => {
       compactedFileCount: 2,
       sourceMapCacheRetained: true,
     });
-    const first = JSON.parse(
-      readFileSync(resolve(rawDir, "coverage-101-1-0.json"), "utf-8"),
-    ) as { result: unknown[]; "source-map-cache"?: object };
-    const second = JSON.parse(
-      readFileSync(resolve(rawDir, "coverage-102-1-0.json"), "utf-8"),
-    ) as { result: unknown[]; "source-map-cache"?: object };
+    const first = JSON.parse(readFileSync(resolve(rawDir, "coverage-101-1-0.json"), "utf-8")) as {
+      result: unknown[];
+      "source-map-cache"?: object;
+    };
+    const second = JSON.parse(readFileSync(resolve(rawDir, "coverage-102-1-0.json"), "utf-8")) as {
+      result: unknown[];
+      "source-map-cache"?: object;
+    };
     expect(first.result).toHaveLength(1);
     expect(second.result).toHaveLength(1);
     expect(
-      [first["source-map-cache"], second["source-map-cache"]]
-        .flatMap((cache) => Object.keys(cache ?? {})),
+      [first["source-map-cache"], second["source-map-cache"]].flatMap((cache) =>
+        Object.keys(cache ?? {}),
+      ),
     ).toHaveLength(2);
     expect(
       readFileSync(resolve(rawDir, ".zcode-compacted-coverage-files-v1.marker"), "utf-8"),
@@ -151,9 +150,9 @@ describe("E2E Node coverage normalization", () => {
       sourceMapCacheRetained: true,
     });
     expect(readFileSync(alreadyCompactedPath, "utf-8")).toBe(alreadyCompactedSentinel);
-    const third = JSON.parse(
-      readFileSync(resolve(rawDir, "coverage-103-1-0.json"), "utf-8"),
-    ) as { "source-map-cache"?: object };
+    const third = JSON.parse(readFileSync(resolve(rawDir, "coverage-103-1-0.json"), "utf-8")) as {
+      "source-map-cache"?: object;
+    };
     expect(third["source-map-cache"]).toBeUndefined();
     expect(compactV8CoverageDirectory({ rawDir, sourceMapRoot }).compactedFileCount).toBe(0);
   });

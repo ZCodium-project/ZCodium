@@ -2791,30 +2791,30 @@ ConfigureDocumentSettings(doc);
 
 ## Quick Reference: Unit Conversions
 
-| Unit | Full Name | Relation |
-|------|-----------|----------|
-| DXA | Twentieths of a point | 1 inch = 1440 DXA; 1 cm = 567 DXA; 1 pt = 20 DXA |
-| Half-point | Half a typographic point | Font size: 24 = 12pt. 1 pt = 2 half-points |
-| Eighth-point | Eighth of a point | Border size: 8 = 1pt. 1 pt = 8 eighth-points |
-| EMU | English Metric Unit | 1 inch = 914400 EMU; 1 cm = 360000 EMU; 1 pt = 12700 EMU |
-| Pct (table width) | Fiftieths of a percent | 5000 = 100%. Multiply percentage by 50 |
+| Unit              | Full Name                | Relation                                                 |
+| ----------------- | ------------------------ | -------------------------------------------------------- |
+| DXA               | Twentieths of a point    | 1 inch = 1440 DXA; 1 cm = 567 DXA; 1 pt = 20 DXA         |
+| Half-point        | Half a typographic point | Font size: 24 = 12pt. 1 pt = 2 half-points               |
+| Eighth-point      | Eighth of a point        | Border size: 8 = 1pt. 1 pt = 8 eighth-points             |
+| EMU               | English Metric Unit      | 1 inch = 914400 EMU; 1 cm = 360000 EMU; 1 pt = 12700 EMU |
+| Pct (table width) | Fiftieths of a percent   | 5000 = 100%. Multiply percentage by 50                   |
 
 ## Quick Reference: Common PageSize Values
 
-| Paper | Width (DXA) | Height (DXA) | Inches | mm |
-|-------|-------------|--------------|--------|-----|
-| Letter | 12240 | 15840 | 8.5 x 11 | 216 x 279 |
-| A4 | 11906 | 16838 | -- | 210 x 297 |
-| Legal | 12240 | 20160 | 8.5 x 14 | 216 x 356 |
-| A3 | 16838 | 23811 | -- | 297 x 420 |
-| B5 | 10318 | 14570 | -- | 182 x 257 |
+| Paper  | Width (DXA) | Height (DXA) | Inches   | mm        |
+| ------ | ----------- | ------------ | -------- | --------- |
+| Letter | 12240       | 15840        | 8.5 x 11 | 216 x 279 |
+| A4     | 11906       | 16838        | --       | 210 x 297 |
+| Legal  | 12240       | 20160        | 8.5 x 14 | 216 x 356 |
+| A3     | 16838       | 23811        | --       | 297 x 420 |
+| B5     | 10318       | 14570        | --       | 182 x 257 |
 
 ## Quick Reference: Common Margin Presets (DXA)
 
-| Preset | Top | Bottom | Left | Right |
-|--------|-----|--------|------|-------|
-| Normal | 1440 | 1440 | 1440 | 1440 |
-| Narrow | 720 | 720 | 720 | 720 |
-| Moderate | 1440 | 1440 | 1080 | 1080 |
-| Wide | 1440 | 1440 | 2880 | 2880 |
-| Chinese 公文 | 2098 | 1984 | 1588 | 1474 |
+| Preset       | Top  | Bottom | Left | Right |
+| ------------ | ---- | ------ | ---- | ----- |
+| Normal       | 1440 | 1440   | 1440 | 1440  |
+| Narrow       | 720  | 720    | 720  | 720   |
+| Moderate     | 1440 | 1440   | 1080 | 1080  |
+| Wide         | 1440 | 1440   | 2880 | 2880  |
+| Chinese 公文 | 2098 | 1984   | 1588 | 1474  |

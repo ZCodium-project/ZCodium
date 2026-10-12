@@ -5,10 +5,7 @@ import {
   waitForConversationToolGroup,
 } from "../../../helpers/conversation-session-tool-groups.js";
 import { ensureToolCrossProductFullAccessMode } from "../../../helpers/conversation-session-tool-cross-product.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../../../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../../../helpers/e2e-runtime-paths.js";
 import {
   E2E_REPLY_TOKEN,
   prepareV4ConversationE2E,
@@ -49,40 +46,25 @@ describe("TGE07 Changes unresolved path and single-file summary", () => {
 
     const unresolved = await waitForConversationToolGroup(
       "ChangesGroup",
-      (group) =>
-        group.status === "in_progress" &&
-        /1 tool|1 个工具/u.test(group.summaryText),
+      (group) => group.status === "in_progress" && /1 tool|1 个工具/u.test(group.summaryText),
       "Changes 在 file_path 到达前没有显示 1 tool",
       60000,
     );
     expect(unresolved.summaryText).not.toMatch(/0 files?|0 个文件/u);
-    const expanded = await toggleLatestConversationToolGroup(
-      "ChangesGroup",
-      true,
-    );
+    const expanded = await toggleLatestConversationToolGroup("ChangesGroup", true);
     expect(expanded.text).toMatch(/Writing|写入/u);
 
     await waitForConversationToolGroup(
       "ChangesGroup",
-      (group) =>
-        group.status === "in_progress" && group.summaryText.includes("App.tsx"),
+      (group) => group.status === "in_progress" && group.summaryText.includes("App.tsx"),
       "file_path 到达后 Changes 没有切换为文件摘要",
       60000,
     );
     await waitForV4AssistantMessageContaining(E2E_REPLY_TOKEN, 120000);
-    await waitForV4Pane(
-      (snapshot) => !snapshot.canStop,
-      "TGE07 工具轮没有结束",
-      120000,
-    );
-    expect(await readFile(WRITE_PATH, "utf8")).toBe(
-      "export const app = true;\n",
-    );
+    await waitForV4Pane((snapshot) => !snapshot.canStop, "TGE07 工具轮没有结束", 120000);
+    expect(await readFile(WRITE_PATH, "utf8")).toBe("export const app = true;\n");
 
-    const collapsed = await toggleLatestConversationToolGroup(
-      "ChangesGroup",
-      false,
-    );
+    const collapsed = await toggleLatestConversationToolGroup("ChangesGroup", false);
     expect(collapsed.summaryText).toContain("App.tsx");
     expect(collapsed.summaryText).not.toMatch(/1 file|1 个文件/u);
   });

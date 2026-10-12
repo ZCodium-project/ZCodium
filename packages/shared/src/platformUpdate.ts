@@ -5,9 +5,7 @@ export interface PostUpdateReleaseNotesPayload {
   title: string;
   markdown: string;
   releaseDate?: string;
-  releaseNotesByLocale?: Partial<
-    Record<Locale, { title: string; markdown: string }>
-  >;
+  releaseNotesByLocale?: Partial<Record<Locale, { title: string; markdown: string }>>;
 }
 
 /**

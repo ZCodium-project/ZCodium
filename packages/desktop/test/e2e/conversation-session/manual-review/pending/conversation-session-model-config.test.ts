@@ -242,9 +242,7 @@ describe("会话区模型配置隔离 E2E", () => {
       model: UPSTREAM_MODEL,
       thoughtLevel: UPSTREAM_THOUGHT_LEVEL,
     });
-    const sessionCrossProviderA = await waitForIdleSession(
-      "跨 provider A 首轮没有完成",
-    );
+    const sessionCrossProviderA = await waitForIdleSession("跨 provider A 首轮没有完成");
 
     await startNewTask();
     await selectUpstreamProviderModelById(UPSTREAM_ALTERNATE_MODEL, {
@@ -267,15 +265,12 @@ describe("会话区模型配置隔离 E2E", () => {
       model: UPSTREAM_ALTERNATE_MODEL,
       thoughtLevel: UPSTREAM_THOUGHT_LEVEL,
     });
-    const sessionCrossProviderB = await waitForIdleSession(
-      "跨 provider B 首轮没有完成",
-    );
+    const sessionCrossProviderB = await waitForIdleSession("跨 provider B 首轮没有完成");
     expect(sessionCrossProviderB).not.toBe(sessionCrossProviderA);
 
     await selectTaskById(sessionCrossProviderA);
     await waitForChatState(
-      (snapshot) =>
-        snapshot.sessionId === sessionCrossProviderA && snapshot.state === "idle",
+      (snapshot) => snapshot.sessionId === sessionCrossProviderA && snapshot.state === "idle",
       "切回跨 provider A 后没有恢复到 A session",
       30000,
     );
@@ -286,8 +281,7 @@ describe("会话区模型配置隔离 E2E", () => {
 
     await selectTaskById(sessionCrossProviderB);
     await waitForChatState(
-      (snapshot) =>
-        snapshot.sessionId === sessionCrossProviderB && snapshot.state === "idle",
+      (snapshot) => snapshot.sessionId === sessionCrossProviderB && snapshot.state === "idle",
       "切回跨 provider B 后没有恢复到 B session",
       30000,
     );
@@ -298,10 +292,7 @@ describe("会话区模型配置隔离 E2E", () => {
   });
 });
 
-async function waitForUpstreamNetworkCaptureWithStoreDebug(
-  expectedText: string,
-  taskId: string,
-) {
+async function waitForUpstreamNetworkCaptureWithStoreDebug(expectedText: string, taskId: string) {
   try {
     return await waitForUpstreamNetworkCapture(expectedText);
   } catch (error) {
@@ -375,10 +366,9 @@ async function expectToolbarConfig(
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   const matchedThoughtLevel = labelCandidates.some((label) => expectedLabels.includes(label));
   if (!matchedThoughtLevel) {
     throw new Error(
@@ -426,9 +416,7 @@ function assertUpstreamConfig(
   assertUpstreamThoughtLevelCapture(record, thoughtLevel);
 }
 
-function readCaptureModel(
-  record: Awaited<ReturnType<typeof waitForUpstreamNetworkCapture>>,
-) {
+function readCaptureModel(record: Awaited<ReturnType<typeof waitForUpstreamNetworkCapture>>) {
   const requestJson = record.requestJson;
   if (
     requestJson &&

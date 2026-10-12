@@ -33,7 +33,7 @@ npx jscodeshift -t ./node_modules/@wdio/codemod/protractor ./conf.ts
 
 :::info
 
- Your config can be named differently, however the principle should be the same: start migration the config first.
+Your config can be named differently, however the principle should be the same: start migration the config first.
 
 :::
 
@@ -52,6 +52,7 @@ npx wdio config
 ```
 
 This will walk you through a couple of questions. For this migration scenario you:
+
 - pick the default choices
 - we recommend not to auto-generate example files
 - pick a different folder for WebdriverIO files

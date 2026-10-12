@@ -48,21 +48,12 @@ export function formatOffPeakRemainingWait(
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   if (hours > 0 && minutes > 0) {
-    return intl.formatMessage(
-      { id: "offPeak.create.remaining.hoursMinutes" },
-      { hours, minutes },
-    );
+    return intl.formatMessage({ id: "offPeak.create.remaining.hoursMinutes" }, { hours, minutes });
   }
   if (hours > 0) {
-    return intl.formatMessage(
-      { id: "offPeak.create.remaining.hours" },
-      { hours },
-    );
+    return intl.formatMessage({ id: "offPeak.create.remaining.hours" }, { hours });
   }
-  return intl.formatMessage(
-    { id: "offPeak.create.remaining.minutes" },
-    { minutes },
-  );
+  return intl.formatMessage({ id: "offPeak.create.remaining.minutes" }, { minutes });
 }
 
 export type OffPeakStatusIconKind =
@@ -99,12 +90,7 @@ export function resolveLocalizedOffPeakCreateTitle({
   previousDefaultTitle: string;
   titleTouched: boolean;
 }): string {
-  if (
-    isEditing ||
-    hasInitialTitle ||
-    titleTouched ||
-    currentTitle !== previousDefaultTitle
-  ) {
+  if (isEditing || hasInitialTitle || titleTouched || currentTitle !== previousDefaultTitle) {
     return currentTitle;
   }
   return nextDefaultTitle;

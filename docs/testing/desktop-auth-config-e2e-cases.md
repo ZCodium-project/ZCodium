@@ -4,10 +4,10 @@
 
 本节是整合验收范围，不覆盖或改写下文历史运行记录。
 
-| Case | 来源与操作 | 验收与限制 |
-| --- | --- | --- |
-| AUTH-05 | d17cb6a800；正式 oauth-login-failure-cancel.test.ts，通过 preload 回调投递无效 state | 真实 Host 拒绝回调后 UI 仅展示失败块；取消后回到渠道列表，登录入口不关闭。保留上游正式用例身份，不是本轮擅自晋级 |
-| AUTH-06 | a172e9c398 / 71a195b6be / f26d4e75fb；pending access-token-401-auto-logout.test.ts | case-local HTTP 暂停真实 Host userinfo，再返回 401；清理当前 OAuth、保留 Bot 凭据、只展示一次过期提示；确认发出既有 RelaunchApp。IPC 截断实际重启，不冒充真实重启已验证 |
+| Case    | 来源与操作                                                                           | 验收与限制                                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AUTH-05 | d17cb6a800；正式 oauth-login-failure-cancel.test.ts，通过 preload 回调投递无效 state | 真实 Host 拒绝回调后 UI 仅展示失败块；取消后回到渠道列表，登录入口不关闭。保留上游正式用例身份，不是本轮擅自晋级                                                        |
+| AUTH-06 | a172e9c398 / 71a195b6be / f26d4e75fb；pending access-token-401-auto-logout.test.ts   | case-local HTTP 暂停真实 Host userinfo，再返回 401；清理当前 OAuth、保留 Bot 凭据、只展示一次过期提示；确认发出既有 RelaunchApp。IPC 截断实际重启，不冒充真实重启已验证 |
 
 两条用例都不产生模型请求，manifest 明确 providerRequestPolicy=none。AUTH-06 的
 业务 token/JWT 是值不同的合成凭据，其它控制面 HTTP 200，避免原 JWT 失效路径掩盖
@@ -105,16 +105,16 @@ desktop local 使用隔离 HOME 冷启动；CLI session DB 预置一条 interact
 
 ### 验证条目
 
-| 编号      | 验证项                                          | 有效性说明                                                                                                                                                          |
-| --------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AUTH-02-A | 未配置时登录/provider 入口可用                  | `waitForTestIdByDom(TID_LOGIN_USE_API_KEY_BUTTON)`                                                                                                                  |
-| AUTH-02-B | 跳过后草稿首页展示缺模型 banner                 | `TID_CHAT_ERROR_BANNER` 回显“当前没有可用模型”                                                                                                                      |
-| AUTH-02-C | 未配置时点击发送被 UI admission 拒绝            | composer 原文保留；没有 `createSession` pending 记录或 unknown/discarded 恢复横幅                                                                                   |
-| AUTH-02-D | 未配置时历史可见且可读                          | 预置 interactive CLI session 的侧栏 row、用户正文与助手正文均可见，证明真实 sessions-index/conversation topic 已工作                                                |
-| AUTH-02-E | 未配置时没有 deferred draft/retry               | service/UI focused tests 断言 `provider_not_ready` 保持 idle 且投影 banner                                                                                          |
+| 编号      | 验证项                                          | 有效性说明                                                                                                                                                        |
+| --------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AUTH-02-A | 未配置时登录/provider 入口可用                  | `waitForTestIdByDom(TID_LOGIN_USE_API_KEY_BUTTON)`                                                                                                                |
+| AUTH-02-B | 跳过后草稿首页展示缺模型 banner                 | `TID_CHAT_ERROR_BANNER` 回显“当前没有可用模型”                                                                                                                    |
+| AUTH-02-C | 未配置时点击发送被 UI admission 拒绝            | composer 原文保留；没有 `createSession` pending 记录或 unknown/discarded 恢复横幅                                                                                 |
+| AUTH-02-D | 未配置时历史可见且可读                          | 预置 interactive CLI session 的侧栏 row、用户正文与助手正文均可见，证明真实 sessions-index/conversation topic 已工作                                              |
+| AUTH-02-E | 未配置时没有 deferred draft/retry               | service/UI focused tests 断言 `provider_not_ready` 保持 idle 且投影 banner                                                                                        |
 | AUTH-02-F | 未配置时目标 workspace 只读 Agent 数为 1        | 资源管理器快照按 `ZCodeProject` workspace tag 断言为 1；系统 conversation sibling 不计入，只允许 sessions-index/history 读取，不产生 session create/model command |
-| AUTH-02-G | 保存 provider 后仍复用目标 workspace 唯一 Agent | 资源管理器对同一 workspace 的 Agent 行数保持 1，稳定窗口后二次断言仍为 1，read→write 不重复启动                                                                      |
-| AUTH-02-H | 草稿模型水合且缺模型 banner 清除                | 模型 trigger 回显首个未禁用模型，`TID_CHAT_ERROR_BANNER` 不再存在                                                                                                   |
+| AUTH-02-G | 保存 provider 后仍复用目标 workspace 唯一 Agent | 资源管理器对同一 workspace 的 Agent 行数保持 1，稳定窗口后二次断言仍为 1，read→write 不重复启动                                                                   |
+| AUTH-02-H | 草稿模型水合且缺模型 banner 清除                | 模型 trigger 回显首个未禁用模型，`TID_CHAT_ERROR_BANNER` 不再存在                                                                                                 |
 
 ### Fixture 合同
 
@@ -205,6 +205,7 @@ Welcome 展示 Z.ai + BigModel 登录入口
 当前只完成自动运行，尚未记录人工视觉验收，因此继续保留在 `manual-review/pending`，不执行转正或 Docker 准入。
 
 <!-- 固定 staging 的 JWT 场景原编号 AUTH-05，与上方登录取消编号冲突；此处命名为 AUTH-JWT-401，历史证据不算本轮通过。 -->
+
 ## AUTH-JWT-401: 运行中 ZCode JWT 401 退出并重启
 
 ### Case 定义
@@ -251,8 +252,8 @@ Renderer 显示“登录已过期”
 
 ### 验证条目
 
-| 编号      | 验证项                         | 有效性说明                                            |
-| --------- | ------------------------------ | ----------------------------------------------------- |
+| 编号           | 验证项                         | 有效性说明                                            |
+| -------------- | ------------------------------ | ----------------------------------------------------- |
 | AUTH-JWT-401-A | 运行中 401 能显示登录过期提示  | 证明请求出口观察和 Host 广播链路实际工作              |
 | AUTH-JWT-401-B | 确认前 OAuth/JWT 凭据已清理    | 证明提示框不会阻塞认证事实清理                        |
 | AUTH-JWT-401-C | 确认后调用 `RelaunchApp`       | 证明提示动作复用现有重启流程                          |
@@ -354,6 +355,7 @@ desktop local 使用隔离 HOME 冷启动：OAuth 凭据为空，当前 Environm
 该 case 已从 `manual-review/pending` 移入正式路径。它不发送模型请求，不依赖 provider replay，也不属于 conversation Docker preset；正式准入以 case manifest 的 `providerRequestPolicy: "none"`、本地正式路径运行和默认 desktop E2E 收集为边界。
 
 <!-- 以下 AUTH-06 场景与运行记录来自固定 staging，运行编号不是 Todo103 本轮结果。 -->
+
 ## AUTH-06: 用户资料 access token HTTP/业务 401 复用退出提示
 
 - 候选 spec：`packages/desktop/test/e2e/manual-review/pending/access-token-401-auto-logout.test.ts`。
@@ -469,7 +471,7 @@ Todo103 本轮运行证据记录在 staging-integration ledger。
 ## PAT-KEY-UPGRADE：有效登录态与坏旧 Key 共存
 
 候选用例：`packages/desktop/test/e2e/manual-review/pending/account-key-usage-scene.test.ts`。
-复用该文件 Z.AI 恢复用例：在隔离 HOME 的 credentials.json 中保存有效合成 OAuth 与账号资料，同时将同账号 account-provider:*:api-key 写为损坏密文；重启 Electron，要求直接恢复工作区，Host 创建 usageScene=1 的专用 Key 并签发 Token，不调用 Copy，原坏旧记录保持不变。BigModel 用例覆盖无旧 Key 的创建/换证路径。
+复用该文件 Z.AI 恢复用例：在隔离 HOME 的 credentials.json 中保存有效合成 OAuth 与账号资料，同时将同账号 account-provider:\*:api-key 写为损坏密文；重启 Electron，要求直接恢复工作区，Host 创建 usageScene=1 的专用 Key 并签发 Token，不调用 Copy，原坏旧记录保持不变。BigModel 用例覆盖无旧 Key 的创建/换证路径。
 此用例不触发模型推理；HTTP 为既有本地 Coding Plan mock，不代表真实后端联调。手机/远程链路由 Provisioning 与鉴权服务测试覆盖，本轮不宣称设备级远程 E2E。保持 pending，不自动转正。
 
 本轮自动复测：2026-09-23，2 cases passed；artifact：`packages/desktop/.e2e-artifacts/desktop-e2e-20260923070315610-p85476-12717808333f5136/summary.md`。未进行人工确认或转正；手机、真实后端及混版本远端不在本 case 范围。

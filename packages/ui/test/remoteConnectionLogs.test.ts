@@ -144,23 +144,14 @@ describe("remote connection log merge", () => {
   });
 
   it("filters remote connection logs by active request id", () => {
+    expect(shouldAcceptRemoteConnectionRuntimeLog({ requestId: "request-1" }, "request-1")).toBe(
+      true,
+    );
     expect(
-      shouldAcceptRemoteConnectionRuntimeLog(
-        { requestId: "request-1" },
-        "request-1",
-      ),
-    ).toBe(true);
-    expect(
-      shouldAcceptRemoteConnectionRuntimeLog(
-        { requestId: "background-request" },
-        "request-1",
-      ),
+      shouldAcceptRemoteConnectionRuntimeLog({ requestId: "background-request" }, "request-1"),
     ).toBe(false);
-    expect(
-      shouldAcceptRemoteConnectionRuntimeLog(
-        { requestId: "background-request" },
-        null,
-      ),
-    ).toBe(true);
+    expect(shouldAcceptRemoteConnectionRuntimeLog({ requestId: "background-request" }, null)).toBe(
+      true,
+    );
   });
 });

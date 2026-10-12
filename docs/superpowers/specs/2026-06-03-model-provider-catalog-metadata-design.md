@@ -49,9 +49,7 @@
 新增 app 侧 catalog source 抽象，不把中国 LLM catalog 伪装成 `models.dev` 原始 schema。
 
 ```ts
-type ModelProviderCatalogSourceId =
-  | "models-dev"
-  | "china-llm-zcode-dev";
+type ModelProviderCatalogSourceId = "models-dev" | "china-llm-zcode-dev";
 
 interface ModelProviderCatalogSource {
   id: ModelProviderCatalogSourceId;

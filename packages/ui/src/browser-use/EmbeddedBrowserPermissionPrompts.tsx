@@ -148,9 +148,7 @@ export function EmbeddedBrowserPermissionPrompts({
   const selectorPrompts = useMemo(
     () =>
       prompts.filter(
-        (
-          prompt,
-        ): prompt is Exclude<EmbeddedBrowserPermissionPromptEvent, { kind: "permission" }> =>
+        (prompt): prompt is Exclude<EmbeddedBrowserPermissionPromptEvent, { kind: "permission" }> =>
           prompt.kind !== "permission" &&
           (prompt.guestWebContentsId === undefined ||
             prompt.guestWebContentsId === guestWebContentsId),
@@ -267,82 +265,80 @@ export function EmbeddedBrowserPermissionPrompts({
               </DialogDescription>
             </DialogHeader>
             <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
-              {prompt.kind === "screen-share" ? (
-                (["screen", "window"] as const).map((group) => {
-                  const screens = prompt.screens.filter((screen) => screen.kind === group);
-                  if (screens.length === 0) return null;
-                  return (
-                    <div key={group}>
-                      <p className="px-2 pb-1 pt-2 text-ui-xs text-foreground-subtlest">
-                        {formatMessage({
-                          id:
-                            group === "screen"
-                              ? "browser.permission.screenGroup.screen"
-                              : "browser.permission.screenGroup.window",
-                        })}
-                      </p>
-                      {screens.map((screen) => (
-                        <button
-                          type="button"
-                          key={screen.sourceId}
-                          className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-menu-hover data-[selected=true]:bg-selected"
-                          data-selected={selection[prompt.requestId] === screen.sourceId}
-                          onClick={() =>
-                            setSelection((current) => ({
-                              ...current,
-                              [prompt.requestId]: screen.sourceId,
-                            }))
-                          }
-                        >
-                          {screen.thumbnailDataUrl ? (
-                            <img
-                              src={screen.thumbnailDataUrl}
-                              alt=""
-                              className="h-[45px] w-20 rounded-sm border border-border object-cover"
-                            />
-                          ) : null}
-                          <span className="min-w-0 flex-1 truncate text-ui-sm text-foreground">
-                            {screen.name}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  );
-                })
-              ) : (
-                prompt.devices.map((device) => (
-                  <button
-                    type="button"
-                    key={device.deviceId}
-                    className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-menu-hover data-[selected=true]:bg-selected"
-                    data-selected={selection[prompt.requestId] === device.deviceId}
-                    onClick={() =>
-                      setSelection((current) => ({
-                        ...current,
-                        [prompt.requestId]: device.deviceId,
-                      }))
-                    }
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-ui-sm text-foreground">
-                        {device.name ?? device.deviceId}
-                      </span>
-                      {device.vendorId !== undefined || device.serialNumber ? (
-                        <span className="block truncate font-mono text-ui-xs text-foreground-subtlest">
-                          {[
-                            device.vendorId !== undefined && device.productId !== undefined
-                              ? `${device.vendorId.toString(16).padStart(4, "0")}:${device.productId.toString(16).padStart(4, "0")}`
-                              : undefined,
-                            device.serialNumber,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
+              {prompt.kind === "screen-share"
+                ? (["screen", "window"] as const).map((group) => {
+                    const screens = prompt.screens.filter((screen) => screen.kind === group);
+                    if (screens.length === 0) return null;
+                    return (
+                      <div key={group}>
+                        <p className="px-2 pb-1 pt-2 text-ui-xs text-foreground-subtlest">
+                          {formatMessage({
+                            id:
+                              group === "screen"
+                                ? "browser.permission.screenGroup.screen"
+                                : "browser.permission.screenGroup.window",
+                          })}
+                        </p>
+                        {screens.map((screen) => (
+                          <button
+                            type="button"
+                            key={screen.sourceId}
+                            className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-menu-hover data-[selected=true]:bg-selected"
+                            data-selected={selection[prompt.requestId] === screen.sourceId}
+                            onClick={() =>
+                              setSelection((current) => ({
+                                ...current,
+                                [prompt.requestId]: screen.sourceId,
+                              }))
+                            }
+                          >
+                            {screen.thumbnailDataUrl ? (
+                              <img
+                                src={screen.thumbnailDataUrl}
+                                alt=""
+                                className="h-[45px] w-20 rounded-sm border border-border object-cover"
+                              />
+                            ) : null}
+                            <span className="min-w-0 flex-1 truncate text-ui-sm text-foreground">
+                              {screen.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })
+                : prompt.devices.map((device) => (
+                    <button
+                      type="button"
+                      key={device.deviceId}
+                      className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-menu-hover data-[selected=true]:bg-selected"
+                      data-selected={selection[prompt.requestId] === device.deviceId}
+                      onClick={() =>
+                        setSelection((current) => ({
+                          ...current,
+                          [prompt.requestId]: device.deviceId,
+                        }))
+                      }
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-ui-sm text-foreground">
+                          {device.name ?? device.deviceId}
                         </span>
-                      ) : null}
-                    </span>
-                  </button>
-                ))
-              )}
+                        {device.vendorId !== undefined || device.serialNumber ? (
+                          <span className="block truncate font-mono text-ui-xs text-foreground-subtlest">
+                            {[
+                              device.vendorId !== undefined && device.productId !== undefined
+                                ? `${device.vendorId.toString(16).padStart(4, "0")}:${device.productId.toString(16).padStart(4, "0")}`
+                                : undefined,
+                              device.serialNumber,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  ))}
             </div>
             <DialogFooter>
               <Button

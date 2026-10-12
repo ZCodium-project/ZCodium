@@ -922,7 +922,11 @@ describe("WorkspaceShellLayout Web remote control mobile layout", () => {
   });
 
   it("removes the legacy Linux floating chrome", async () => {
-    const html = await renderWorkspaceShell({ isDesktop: true, isMacDesktop: false, isWindowsDesktop: false });
+    const html = await renderWorkspaceShell({
+      isDesktop: true,
+      isMacDesktop: false,
+      isWindowsDesktop: false,
+    });
     expect(html).not.toContain('data-testid="linux-window-controls"');
     expect(html).not.toContain("w-[120px]");
     expect(html).toContain("rounded-xl");
@@ -942,6 +946,10 @@ it.each([
 it("places the workspace header inside the independent conversation frame", async () => {
   const html = await renderWorkspaceShell({ isDesktop: true, isMacDesktop: true });
   expect(html).toContain('data-workspace-conversation-frame="true"');
-  expect(html.indexOf('data-panel-id="conversation-column"')).toBeLessThan(html.indexOf('data-testid="workspace-header"'));
-  expect(html.indexOf('data-workspace-conversation-frame="true"')).toBeLessThan(html.indexOf('data-testid="workspace-header"'));
+  expect(html.indexOf('data-panel-id="conversation-column"')).toBeLessThan(
+    html.indexOf('data-testid="workspace-header"'),
+  );
+  expect(html.indexOf('data-workspace-conversation-frame="true"')).toBeLessThan(
+    html.indexOf('data-testid="workspace-header"'),
+  );
 });

@@ -10,8 +10,7 @@ function resolvePnpmCliPath(env) {
   const npmExecPath = env.npm_execpath;
   if (
     npmExecPath &&
-    (npmExecPath.toLowerCase().includes("\\pnpm\\") ||
-      npmExecPath.toLowerCase().includes("/pnpm/"))
+    (npmExecPath.toLowerCase().includes("\\pnpm\\") || npmExecPath.toLowerCase().includes("/pnpm/"))
   ) {
     return npmExecPath;
   }
@@ -139,9 +138,7 @@ const result = spawnPnpm(vitestArgs, {
 });
 
 if (result.error) {
-  console.error(
-    `[lint-staged vitest] failed to spawn pnpm: ${result.error.message}`,
-  );
+  console.error(`[lint-staged vitest] failed to spawn pnpm: ${result.error.message}`);
 }
 
 process.exitCode = result.status ?? 1;

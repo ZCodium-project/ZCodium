@@ -31,14 +31,14 @@ timeout / abort / disconnect / deactivate
 
 权威来源必须保持区分：
 
-| 状态 / 事实 | 权威来源 | 非权威的相似状态 |
-| --- | --- | --- |
-| runtime 是否已激活 | `context.sessions` + activation 结果 | `readyFlights` 是否存在、客户端 RPC 是否已返回 |
-| cold V4 是否可放行 query/command | gateway `readyFlights`（调用开始时的快照） | `context.sessions.has(sessionId)` |
-| command FIFO / 幂等 | CLI `CommandInbox` + durable command facts | renderer optimistic overlay、RPC ACK 到达时间 |
-| projection 水位 | publisher 的 `seq/revision/logEpoch` | ACK epoch、网络连接时间 |
-| 历史正文 | transcript / event store 的成功读取结果 | `loadPersistedEvents` 失败后构造的空数组 |
-| desktop / mobile 恢复语义 | trusted `clientMode` / `deliveryKind` | RPC 是否从 remote 返回、UI 猜测 profile |
+| 状态 / 事实                      | 权威来源                                   | 非权威的相似状态                               |
+| -------------------------------- | ------------------------------------------ | ---------------------------------------------- |
+| runtime 是否已激活               | `context.sessions` + activation 结果       | `readyFlights` 是否存在、客户端 RPC 是否已返回 |
+| cold V4 是否可放行 query/command | gateway `readyFlights`（调用开始时的快照） | `context.sessions.has(sessionId)`              |
+| command FIFO / 幂等              | CLI `CommandInbox` + durable command facts | renderer optimistic overlay、RPC ACK 到达时间  |
+| projection 水位                  | publisher 的 `seq/revision/logEpoch`       | ACK epoch、网络连接时间                        |
+| 历史正文                         | transcript / event store 的成功读取结果    | `loadPersistedEvents` 失败后构造的空数组       |
+| desktop / mobile 恢复语义        | trusted `clientMode` / `deliveryKind`      | RPC 是否从 remote 返回、UI 猜测 profile        |
 
 ## 2. 已确认问题（动态复现）
 
@@ -82,10 +82,16 @@ await expect(gateway.subscribe(subscribeParams())).rejects.toThrow("persisted re
 
 ```ts
 await Promise.all([
-  requestResult(server, { id: "resume-a", method: zcodeProtocolMethods.sessionResume,
-    params: { workspace, sessionId } }),
-  requestResult(server, { id: "resume-b", method: zcodeProtocolMethods.sessionResume,
-    params: { workspace, sessionId } }),
+  requestResult(server, {
+    id: "resume-a",
+    method: zcodeProtocolMethods.sessionResume,
+    params: { workspace, sessionId },
+  }),
+  requestResult(server, {
+    id: "resume-b",
+    method: zcodeProtocolMethods.sessionResume,
+    params: { workspace, sessionId },
+  }),
 ]);
 expect(createdAppOptions.filter((o) => o.sessionId === sessionId)).toHaveLength(1);
 ```
@@ -167,35 +173,35 @@ usage query 测试，确认是否有明确的 active-client 选择/重试规则�
 
 ## 4. 入口 × 状态 × 事件矩阵
 
-| ID | 入口 | 起始状态 | 并发/超时事件 | 应保持的判定 |
-| --- | --- | --- | --- | --- |
-| C01 | legacy `session/resume` | cold，无 record | 同 session 第二个 resume | 一个 runtime owner；两个请求共享同一 activation 结果 |
-| C02 | legacy `session/resume` | cold | A 设置 model，B 设置不同 model | 不允许两个 app 交错；最终 model 有明确 last-writer/serialization 规则 |
-| C03 | V4 subscribe | cold | activation 完成、hydration 读失败 | 返回 lifecycle/hydration error，不返回空 snapshot |
-| C04 | V4 subscribe | cold | A activation 中，B subscribe（desktop + mobile） | 一个 READY；两个 delivery profile 只在 ready 后分流 |
-| C05 | V4 subscribe | cold | A activation 中 `disposeSession` / deactivate | A 不得在清理后复活 publisher；或明确请求失败并可重试 |
-| C06 | rows/plans | cold | query 与 subscribe 同时开始 | query 只能等待调用开始时已注册的 READY；不得读旧/空索引 |
-| C07 | command/query | cold | command/query 先于 READY map 注册 | 要么按 spec 允许调用时快照，要么补入口级 gate；必须固定契约并测试 microtask 顺序 |
-| C08 | attachment/begin | cold | begin‖subscribe‖command | 验证其“只 activation / 不 hydration”边界，不产生隐式第二个 runtime |
-| C09 | attachment/read | cold | runtime 已入册但 projection 未 hydrate | 必须走 READY + hydration，不能只看 `sessionExists` |
-| C10 | hydration | warm publisher | persisted load 失败 | 不得将失败当空事件；若保留 warm publisher，必须说明 snapshot 是否仍可信 |
-| C11 | hydration | load await 中 | live raw event 到达 | source cursor 与 buffer 合并后不丢事件、不制造永久 gap |
-| C12 | command sendText | warm | `waitForSessionIdle` 5 秒超时后旧 turn 晚结束 | 新命令不能误 admission 或误杀下一代 turn |
-| C13 | command sendQueuedNow/edit | warm | stop / foreground execution id 更换 | 旧 stop 只能 noop，不能 abort 新执行 |
-| C14 | projection commit waiter | raw gap | 25 秒 timeout 后缺失事件迟到 | waiter 失败固化，迟到 event 不得 apply |
-| C15 | physical wire | fragment 在途 | 30 秒 assembly timeout 后 recovery 到达 | fail-closed 只由 exact recovery 解锁，旧 online 片不污染新代际 |
-| C16 | UI conversation store | live | runtime restart / proxy replace / old subscribe ACK 迟到 | generation 丢弃旧 ACK；新订阅沿用正确 clientMode/deliveryKind |
-| C17 | UI restore | resume→read | 第二次 restore 先完成，第一次迟到 | 旧 snapshot 不得覆盖新 generation |
-| C18 | provider/model | cold resume | registry sync 与 resume/command 交错 | provider registry revision 和 session model 不能倒退 |
-| C19 | remote workspace | cold | 相同 path、不同 workspaceIdentity 并发 | session、READY、缓存、owner 不串 workspace |
-| C20 | usage/query | 多 workspace active | 第一个 client dispose / replace | 选择健康 client；不把 stale client 视为 authoritative |
+| ID  | 入口                       | 起始状态            | 并发/超时事件                                            | 应保持的判定                                                                     |
+| --- | -------------------------- | ------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| C01 | legacy `session/resume`    | cold，无 record     | 同 session 第二个 resume                                 | 一个 runtime owner；两个请求共享同一 activation 结果                             |
+| C02 | legacy `session/resume`    | cold                | A 设置 model，B 设置不同 model                           | 不允许两个 app 交错；最终 model 有明确 last-writer/serialization 规则            |
+| C03 | V4 subscribe               | cold                | activation 完成、hydration 读失败                        | 返回 lifecycle/hydration error，不返回空 snapshot                                |
+| C04 | V4 subscribe               | cold                | A activation 中，B subscribe（desktop + mobile）         | 一个 READY；两个 delivery profile 只在 ready 后分流                              |
+| C05 | V4 subscribe               | cold                | A activation 中 `disposeSession` / deactivate            | A 不得在清理后复活 publisher；或明确请求失败并可重试                             |
+| C06 | rows/plans                 | cold                | query 与 subscribe 同时开始                              | query 只能等待调用开始时已注册的 READY；不得读旧/空索引                          |
+| C07 | command/query              | cold                | command/query 先于 READY map 注册                        | 要么按 spec 允许调用时快照，要么补入口级 gate；必须固定契约并测试 microtask 顺序 |
+| C08 | attachment/begin           | cold                | begin‖subscribe‖command                                  | 验证其“只 activation / 不 hydration”边界，不产生隐式第二个 runtime               |
+| C09 | attachment/read            | cold                | runtime 已入册但 projection 未 hydrate                   | 必须走 READY + hydration，不能只看 `sessionExists`                               |
+| C10 | hydration                  | warm publisher      | persisted load 失败                                      | 不得将失败当空事件；若保留 warm publisher，必须说明 snapshot 是否仍可信          |
+| C11 | hydration                  | load await 中       | live raw event 到达                                      | source cursor 与 buffer 合并后不丢事件、不制造永久 gap                           |
+| C12 | command sendText           | warm                | `waitForSessionIdle` 5 秒超时后旧 turn 晚结束            | 新命令不能误 admission 或误杀下一代 turn                                         |
+| C13 | command sendQueuedNow/edit | warm                | stop / foreground execution id 更换                      | 旧 stop 只能 noop，不能 abort 新执行                                             |
+| C14 | projection commit waiter   | raw gap             | 25 秒 timeout 后缺失事件迟到                             | waiter 失败固化，迟到 event 不得 apply                                           |
+| C15 | physical wire              | fragment 在途       | 30 秒 assembly timeout 后 recovery 到达                  | fail-closed 只由 exact recovery 解锁，旧 online 片不污染新代际                   |
+| C16 | UI conversation store      | live                | runtime restart / proxy replace / old subscribe ACK 迟到 | generation 丢弃旧 ACK；新订阅沿用正确 clientMode/deliveryKind                    |
+| C17 | UI restore                 | resume→read         | 第二次 restore 先完成，第一次迟到                        | 旧 snapshot 不得覆盖新 generation                                                |
+| C18 | provider/model             | cold resume         | registry sync 与 resume/command 交错                     | provider registry revision 和 session model 不能倒退                             |
+| C19 | remote workspace           | cold                | 相同 path、不同 workspaceIdentity 并发                   | session、READY、缓存、owner 不串 workspace                                       |
+| C20 | usage/query                | 多 workspace active | 第一个 client dispose / replace                          | 选择健康 client；不把 stale client 视为 authoritative                            |
 
 ## 5. 测试实施顺序
 
 ### Phase A：先固化两个已确认失败
 
 1. 把 R1 探针加入 `v4-gateway.test.ts`，先以 `it.fails` 或隔离审计 fixture 记录现状，避免把
-     “空 projection”误当正常回归。
+   “空 projection”误当正常回归。
 2. 把 R2 探针加入 `v4-cold-resume.test.ts`，断言同 session `createZCodeApp` 次数和最终 registry
    owner；该测试应先失败，再讨论 per-session activation owner 的修复设计。
 
@@ -248,28 +254,28 @@ client  = desktop-continuous | web-remote-replayable
 本轮按“有限 case 矩阵”执行，不声称穷举所有 Promise 微时序。新增探针只在本地临时加入对应
 测试文件，运行后删除；现有测试文件按相关入口全量运行。
 
-| Case | 实际结果 | 证据 / 结论 |
-| --- | --- | --- |
-| C01 | 暴露竞态 | 两个相同 `sessionId` 的 legacy resume 创建 2 个 app。确认 R2。 |
-| C02 | 暴露竞态 | 携不同 `runtimeModel` 的并发 resume 仍创建 2 个 app；模型配置不能替代 activation owner。 |
-| C03 | 暴露语义错误 | cold hydration 读取抛错仍返回成功空 snapshot；确认 R1。 |
-| C04 | 通过 | 桌面 continuous 与手机 replayable 并发 subscribe 只调用一次 activation，首个 snapshot 一致。 |
-| C05 | 暴露竞态 | activation 尚未结束时 `disposeSession`，旧 continuation 仍创建 publisher 并返回 snapshot；确认 R4/C05。 |
-| C06 | 通过 | `rowsRange‖subscribe` 与 READY 中的 command/query 共享既有 gate，未见重复 activation。 |
-| C07 | 通过但需保持契约 | command 先于 READY 注册时返回 `proto.sessionNotFound`；这是当前“调用开始时快照”语义，不是自动等待语义。 |
-| C08 | 通过 | `attachment/begin‖subscribe‖command` 共用一次 activation；begin 不等待 hydration 的边界被固定。 |
-| C09 | 通过 | `attachment/read` 在 detached/cold 情况下等待 host activation + projection hydration。 |
-| C10 | 暴露语义风险 | warm publisher 的持久读取失败被吞掉，仍返回 snapshot，同时记录 `v4.hydrate` 错误；正文未被清空时影响较小，但错误/成功不可区分。 |
-| C11 | 通过 | hydration await 窗口的 live queue/stream 会合并回 projection，seq 保持单调。 |
-| C12 | 通过 | `waitForSessionIdle` 5 秒超时会 fail closed，不重发 queue item；旧锁未释放时不会误发新 turn。 |
-| C13 | 通过 | stop/foreground execution id 更换的 promotion lease 防住 notification 抢入。 |
-| C14 | 通过 | projection commit 25 秒 timeout 后固化 failure，迟到 raw event 不再 apply。 |
-| C15 | 通过 | physical wire 30 秒 assembly timeout 的 recovery/fail-closed 用例通过。 |
-| C16 | 通过 | UI session data layer 在 runtime restart / transport replace 后丢弃旧 generation ACK/frame。 |
-| C17 | 局部通过 | restore helper 在两个 deferred restore 交错时各自返回匹配结果；但它本身无共享 owner，不能证明上层 store/broadcast 没有旧 snapshot 覆盖。 |
-| C18 | 通过 | provider registry → cold subscribe 顺序、模型切换缓存和 stale model 保护用例通过。 |
-| C19 | 部分通过 | UI/服务层 remote `workspaceIdentity` 隔离用例通过；cold-resume 集成里的 remote identity + sendText 仍命中本分支既有失败。 |
-| C20 | 暴露低风险选择问题 | usage 绑定任意第一个 active client；该 client 在请求中被 dispose 时请求失败，不自动切换第二个健康 client。 |
+| Case | 实际结果           | 证据 / 结论                                                                                                                              |
+| ---- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| C01  | 暴露竞态           | 两个相同 `sessionId` 的 legacy resume 创建 2 个 app。确认 R2。                                                                           |
+| C02  | 暴露竞态           | 携不同 `runtimeModel` 的并发 resume 仍创建 2 个 app；模型配置不能替代 activation owner。                                                 |
+| C03  | 暴露语义错误       | cold hydration 读取抛错仍返回成功空 snapshot；确认 R1。                                                                                  |
+| C04  | 通过               | 桌面 continuous 与手机 replayable 并发 subscribe 只调用一次 activation，首个 snapshot 一致。                                             |
+| C05  | 暴露竞态           | activation 尚未结束时 `disposeSession`，旧 continuation 仍创建 publisher 并返回 snapshot；确认 R4/C05。                                  |
+| C06  | 通过               | `rowsRange‖subscribe` 与 READY 中的 command/query 共享既有 gate，未见重复 activation。                                                   |
+| C07  | 通过但需保持契约   | command 先于 READY 注册时返回 `proto.sessionNotFound`；这是当前“调用开始时快照”语义，不是自动等待语义。                                  |
+| C08  | 通过               | `attachment/begin‖subscribe‖command` 共用一次 activation；begin 不等待 hydration 的边界被固定。                                          |
+| C09  | 通过               | `attachment/read` 在 detached/cold 情况下等待 host activation + projection hydration。                                                   |
+| C10  | 暴露语义风险       | warm publisher 的持久读取失败被吞掉，仍返回 snapshot，同时记录 `v4.hydrate` 错误；正文未被清空时影响较小，但错误/成功不可区分。          |
+| C11  | 通过               | hydration await 窗口的 live queue/stream 会合并回 projection，seq 保持单调。                                                             |
+| C12  | 通过               | `waitForSessionIdle` 5 秒超时会 fail closed，不重发 queue item；旧锁未释放时不会误发新 turn。                                            |
+| C13  | 通过               | stop/foreground execution id 更换的 promotion lease 防住 notification 抢入。                                                             |
+| C14  | 通过               | projection commit 25 秒 timeout 后固化 failure，迟到 raw event 不再 apply。                                                              |
+| C15  | 通过               | physical wire 30 秒 assembly timeout 的 recovery/fail-closed 用例通过。                                                                  |
+| C16  | 通过               | UI session data layer 在 runtime restart / transport replace 后丢弃旧 generation ACK/frame。                                             |
+| C17  | 局部通过           | restore helper 在两个 deferred restore 交错时各自返回匹配结果；但它本身无共享 owner，不能证明上层 store/broadcast 没有旧 snapshot 覆盖。 |
+| C18  | 通过               | provider registry → cold subscribe 顺序、模型切换缓存和 stale model 保护用例通过。                                                       |
+| C19  | 部分通过           | UI/服务层 remote `workspaceIdentity` 隔离用例通过；cold-resume 集成里的 remote identity + sendText 仍命中本分支既有失败。                |
+| C20  | 暴露低风险选择问题 | usage 绑定任意第一个 active client；该 client 在请求中被 dispose 时请求失败，不自动切换第二个健康 client。                               |
 
 额外 timeout 检查：`PROTOCOL_V4_LIMITS.conversationQueryTimeoutMs=10_000` 仍无消费点；
 `ZCodeProtocolClient` 的默认请求 watchdog 测试确认实际默认值为 180 秒。因此 R3 是静态确认的
@@ -317,14 +323,14 @@ deactivate / dispose
              └─ 旧 continuation 检查 token 后只能 noop / reject
 ```
 
-| 状态 | 权威位置 | 不应承担的职责 |
-| --- | --- | --- |
-| runtime 是否已激活、record/app owner | `context.sessions` + `SessionResidentPool`，由 `SessionActivationRegistry` 串行化写入 | gateway 的 `readyFlights`、UI pending overlay |
-| activation 并发协调 | protocol server/bootstrap 共享的 `activationFlights`，key 为 `workspaceKey + sessionId` | 仅放在 V4 gateway（legacy `session/resume` 会绕过）|
-| V4 hydration/READY | gateway 的 projection state、`readyFlights`、publisher/raw sequence | 反向决定 runtime 是否存在 |
-| durable history | persisted session/event store | 将读取失败当作空数组 |
-| command admission/idempotency | CLI `CommandInbox` + durable command facts | renderer ACK 或 gateway 自建第二队列 |
-| UI 旧请求过滤 | UI 本地 generation/pending overlay | 作为 session/runtime 的真相来源 |
+| 状态                                 | 权威位置                                                                                | 不应承担的职责                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| runtime 是否已激活、record/app owner | `context.sessions` + `SessionResidentPool`，由 `SessionActivationRegistry` 串行化写入   | gateway 的 `readyFlights`、UI pending overlay       |
+| activation 并发协调                  | protocol server/bootstrap 共享的 `activationFlights`，key 为 `workspaceKey + sessionId` | 仅放在 V4 gateway（legacy `session/resume` 会绕过） |
+| V4 hydration/READY                   | gateway 的 projection state、`readyFlights`、publisher/raw sequence                     | 反向决定 runtime 是否存在                           |
+| durable history                      | persisted session/event store                                                           | 将读取失败当作空数组                                |
+| command admission/idempotency        | CLI `CommandInbox` + durable command facts                                              | renderer ACK 或 gateway 自建第二队列                |
+| UI 旧请求过滤                        | UI 本地 generation/pending overlay                                                      | 作为 session/runtime 的真相来源                     |
 
 `workspaceKey` 必须统一为 `workspaceIdentity?.trim() || workspacePath`；远程 workspace 还要贯穿
 `workspaceIdentity` 与 `remoteSessionId`，不能只用路径或裸 `sessionId` 做 activation key。

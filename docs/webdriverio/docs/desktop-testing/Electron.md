@@ -46,12 +46,19 @@ Then you can use the following configuration:
 ```ts
 // wdio.conf.ts
 export const config: WebdriverIO.Config = {
-    // ...
-    services: [['electron', {
-        appEntryPoint: './path/to/bundled/electron/main.bundle.js',
-        appArgs: [/** ... */],
-    }]]
-}
+  // ...
+  services: [
+    [
+      "electron",
+      {
+        appEntryPoint: "./path/to/bundled/electron/main.bundle.js",
+        appArgs: [
+          /** ... */
+        ],
+      },
+    ],
+  ],
+};
 ```
 
 That's it 🎉

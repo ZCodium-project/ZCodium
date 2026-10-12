@@ -13,6 +13,7 @@
 ### Task 1: Add deterministic provider data
 
 **Files:**
+
 - Create: `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-agent-step-message-scope.json`
 - Create: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-agent-step-message-scope.json`
 
@@ -24,6 +25,7 @@
 ### Task 2: Write the failing E2E
 
 **Files:**
+
 - Create, then promote: `packages/desktop/test/e2e/conversation-session/conversation-session-agent-step-message-scope.test.ts`
 
 - [x] **Step 1:** Prepare conversation E2E, mock Electron `net.fetch`, and make telemetry requests resolve with an HTTP-success-shaped result.
@@ -36,6 +38,7 @@
 ### Task 3: Verify the RED reproduction
 
 **Files:**
+
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 
 - [x] **Step 1:** Run the pending spec with manual review enabled and explicit common + case-local fixture paths.
@@ -47,6 +50,7 @@
 ### Task 4: Promote the reviewed reproduction
 
 **Files:**
+
 - Move: `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-agent-step-message-scope.test.ts` → `packages/desktop/test/e2e/conversation-session/conversation-session-agent-step-message-scope.test.ts`
 - Modify: case manifest、provider fixture、coverage matrix
 

@@ -2,10 +2,7 @@ import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  ZCODE_TOOL_ENV_PASSTHROUGH_ENV_KEY,
-  readZCodeToolEnvPassthroughEnv,
-} from "@zcode/shared";
+import { ZCODE_TOOL_ENV_PASSTHROUGH_ENV_KEY, readZCodeToolEnvPassthroughEnv } from "@zcode/shared";
 import {
   buildLoginShellEnvPatch,
   buildRuntimeProcessEnvPatch,

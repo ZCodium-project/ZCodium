@@ -685,7 +685,7 @@ tab 契约测试以本决策（及 spec.md 同步后的条目）为断言依据�
 ## D48 侧栏闲时分组收敛为 tasks-index 一等行（已定 2026-07-28，取代同日虚拟 id 折叠/renderer 排序机制）
 
 背景：Idle-time 侧栏分组此前是独立组件（OffPeakSidebarGroup），只借用 Scheduled 的
-TASK_GROUP_* 视觉类。两次用户反馈（组内不可拖拽、收起全部不覆盖）暴露"视觉一致、行为
+TASK*GROUP*\* 视觉类。两次用户反馈（组内不可拖拽、收起全部不覆盖）暴露"视觉一致、行为
 双轨"的持续成本；2026-07-28 早间先以虚拟分组 id + localStorage 排序补齐两项行为，随即
 经 grilling 会话定案彻底收敛。核心机制 = 照抄 cron：`offPeakTaskId` 成为 task meta
 持久标记（不复用 cronAutomationId，D45 兄弟实体边界不变），`ensureOffPeakGroupMembership`
@@ -829,7 +829,7 @@ UI 连带：Automations 闲时卡片脚注与编辑页露出**绑定会话标题
   两层：① `OffPeakTaskService.createTask` 在取号前调 `repo.hasActiveBoundTask(workspaceKey, sessionId)`
   精确预检（不再复用展示 list），命中回 `client_validation / session_bound`；② 存储层部分唯一索引
   `idx_off_peak_bound_active ON (workspace_key, session_id) WHERE session_id IS NOT NULL AND status
-  NOT IN 终态`，并发穿过预检的一方 INSERT 被拒，同样映射为 `session_bound`（已取的票随任务作废，服务端
+NOT IN 终态`，并发穿过预检的一方 INSERT 被拒，同样映射为 `session_bound`（已取的票随任务作废，服务端
   按过期回收，不加释放接口）。存量库若已有重复行则建索引失败，跳过索引只剩预检，等人工巡检。host
   `offPeak/create` 处理器不再自带预检；CLI 端口读 top-20 的守卫保留为快速路径。CLI 翻译为稳定文案。
 - **SG-02**：`workspace/updateOffPeakToolPolicy` 同步失败只吞 -32601，其他错误会让客户端就绪 reject。

@@ -135,17 +135,12 @@ describe("会话区 Running Queue 立即引导 E2E", () => {
       [firstMarker, secondMarker],
       "running send-now 非队首点击前没有按 FIFO 呈现两条 text",
     );
-    expect(queuedBeforeSendNow.map((item) => item.kind)).toEqual([
-      "text",
-      "text",
-    ]);
+    expect(queuedBeforeSendNow.map((item) => item.kind)).toEqual(["text", "text"]);
     const remainingQueueItem = queuedBeforeSendNow[0]!;
     const selectedQueueItem = queuedBeforeSendNow[1]!;
 
-    const firstRequestsBefore =
-      await countUpstreamRequestsContaining(firstMarker);
-    const secondRequestsBefore =
-      await countUpstreamRequestsContaining(secondMarker);
+    const firstRequestsBefore = await countUpstreamRequestsContaining(firstMarker);
+    const secondRequestsBefore = await countUpstreamRequestsContaining(secondMarker);
     const sentNowItem = await clickQueueSendNow(selectedQueueItem.id);
     expect(sentNowItem.id).toBe(selectedQueueItem.id);
     expect(sentNowItem.content).toContain(secondMarker);
@@ -172,9 +167,7 @@ describe("会话区 Running Queue 立即引导 E2E", () => {
     // V4 timeline message id 与 runtime command queue id 属于不同身份域；
     // 被点项是否保留以唯一 marker、用户行与剩余 queue item 共同证明。
     await expectNoUpstreamRequestForTextWithin(firstMarker, 900);
-    expect(await countUpstreamRequestsContaining(firstMarker)).toBe(
-      firstRequestsBefore,
-    );
+    expect(await countUpstreamRequestsContaining(firstMarker)).toBe(firstRequestsBefore);
     expect(await countUpstreamRequestsContaining(secondMarker)).toBeGreaterThan(
       secondRequestsBefore,
     );
@@ -235,10 +228,8 @@ describe("会话区 Running Queue 立即引导 E2E", () => {
     );
     const remainingQueueItem = queuedBeforeSendNow[0]!;
     const selectedQueueItem = queuedBeforeSendNow[1]!;
-    const firstRequestsBefore =
-      await countUpstreamRequestsContaining(firstMarker);
-    const secondRequestsBefore =
-      await countUpstreamRequestsContaining(secondMarker);
+    const firstRequestsBefore = await countUpstreamRequestsContaining(firstMarker);
+    const secondRequestsBefore = await countUpstreamRequestsContaining(secondMarker);
 
     await doubleClickQueueSendNow(selectedQueueItem.id);
     await waitForUpstreamRequestContaining(secondMarker, 60000);
@@ -259,9 +250,7 @@ describe("会话区 Running Queue 立即引导 E2E", () => {
     expect(queuedAfterDoubleClick[0]?.id).toBe(remainingQueueItem.id);
     expect(queuedAfterDoubleClick[0]?.content).toContain(firstMarker);
     expect(await countUpstreamRequestsContaining(firstMarker)).toBe(firstRequestsBefore);
-    expect(await countUpstreamRequestsContaining(secondMarker)).toBe(
-      secondRequestsBefore + 1,
-    );
+    expect(await countUpstreamRequestsContaining(secondMarker)).toBe(secondRequestsBefore + 1);
     const selectedUserMessages = (await getV4Messages("user")).filter((message) =>
       message.text.includes(secondMarker),
     );
@@ -297,15 +286,9 @@ async function startSlowRunningTurn(marker: string) {
   );
 }
 
-async function enqueueTextPrompt(
-  marker: string,
-  options: { slow?: boolean } = {},
-) {
+async function enqueueTextPrompt(marker: string, options: { slow?: boolean } = {}) {
   await sendV4Prompt(buildQueuedPrompt(marker, options));
-  await waitForV4ComposerText(
-    "",
-    `running send-now queued text 没有清空: ${marker}`,
-  );
+  await waitForV4ComposerText("", `running send-now queued text 没有清空: ${marker}`);
 }
 
 async function doubleClickQueueSendNow(promptId: string) {
@@ -313,9 +296,7 @@ async function doubleClickQueueSendNow(promptId: string) {
     (buttonTestIds) => {
       const button = buttonTestIds
         .map((buttonTestId) =>
-          document.querySelector<HTMLButtonElement>(
-            `[data-testid="${buttonTestId}"]`,
-          ),
+          document.querySelector<HTMLButtonElement>(`[data-testid="${buttonTestId}"]`),
         )
         .find((candidate) => candidate !== null);
       if (!button || button.disabled) {
@@ -327,10 +308,7 @@ async function doubleClickQueueSendNow(promptId: string) {
       button.click();
       return true;
     },
-    [
-      `${TID_V4_QUEUE_ITEM_SEND_NOW}-${promptId}`,
-      `${TID_CHAT_QUEUE_SEND_NOW_BUTTON}-${promptId}`,
-    ],
+    [`${TID_V4_QUEUE_ITEM_SEND_NOW}-${promptId}`, `${TID_CHAT_QUEUE_SEND_NOW_BUTTON}-${promptId}`],
   );
   expect(clicked).toBe(true);
 }

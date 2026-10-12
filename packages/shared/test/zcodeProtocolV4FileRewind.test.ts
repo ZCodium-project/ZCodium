@@ -10,9 +10,7 @@ import {
 describe("zcode-protocol-v4 file summary queries", () => {
   it("defines fileChanges and fileRewindPreview v4 methods", () => {
     expect(V4_METHODS.conversationFileChanges).toBe("v4/conversation/fileChanges");
-    expect(V4_METHODS.conversationFileRewindPreview).toBe(
-      "v4/conversation/fileRewindPreview",
-    );
+    expect(V4_METHODS.conversationFileRewindPreview).toBe("v4/conversation/fileRewindPreview");
   });
 
   it("validates fileChanges query params and readonly diff result", () => {

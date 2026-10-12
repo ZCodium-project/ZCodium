@@ -19,12 +19,12 @@ merge. The same timeline appears in three places, and all three build it with on
 function,
 `buildWorkflowTimeline(graph, run)` (`packages/ui/src/components/workflow-timeline/timeline-model.ts`):
 
-| Surface | What it draws | Run data |
-|---|---|---|
-| The `CreateWorkflow` and `AmendWorkflow` tool rows in the chat | while the model is still writing: the phase line alone, written out by a pen; after that a one-line summary | none |
-| The confirmation window | the full timeline, static, above the collapsed script | none |
-| The run card under the turn (`WorkflowRunDigest`) | the timeline, live: lamps, pills and ink follow the run | `workflowRuns` |
-| The run side pane | the same model read vertically as a **spine**: one section per phase, pills as rows, questions under their asker, artifacts at the bottom | `workflowRuns` |
+| Surface                                                        | What it draws                                                                                                                             | Run data       |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| The `CreateWorkflow` and `AmendWorkflow` tool rows in the chat | while the model is still writing: the phase line alone, written out by a pen; after that a one-line summary                               | none           |
+| The confirmation window                                        | the full timeline, static, above the collapsed script                                                                                     | none           |
+| The run card under the turn (`WorkflowRunDigest`)              | the timeline, live: lamps, pills and ink follow the run                                                                                   | `workflowRuns` |
+| The run side pane                                              | the same model read vertically as a **spine**: one section per phase, pills as rows, questions under their asker, artifacts at the bottom | `workflowRuns` |
 
 The timeline changes shape during a run in exactly one way: at a **fill**, when the main
 agent writes the body of a hole and a new display payload for the effective script replaces
@@ -51,24 +51,48 @@ v3 protocol; all are `.strict()`.
 
 ```ts
 interface CreateWorkflowCausalityGraph {
-  steps: Step[];               // ≤ 64: ask / world-read sites; the join key for run status
-  lanes: Lane[];               // ≤ 32: actors, plus `workspace` / `unknown`
+  steps: Step[]; // ≤ 64: ask / world-read sites; the join key for run status
+  lanes: Lane[]; // ≤ 32: actors, plus `workspace` / `unknown`
   participants: Participant[]; // ≤ 64: one card per (phase, lane), in hand-off order
-  handoffs: Handoff[];         // ≤ 256: {from, to, back?, types?} between participants
-  phases?: Phase[];            // ≤ 32: {id, name?, line?, column?, alongside?}, first-reach order
-  phaseEdges?: Edge[];         // ≤ 128: {from, to, back?} between phases
-  phaseStreams?: Stream[];     // ≤ 128: {from, to} — phase `from` feeds phase `to` while both run
-  exits?: string[];            // phases after which control flow can complete normally
-  sink?: string[];             // steps whose artifacts reach the return
-  holes?: Hole[];              // ≤ 32: {siteId, name, type, phase?, tail?}, the open holes in source order;
-                               // a phase or step written by a fill carries `fill: <hole id>`;
-                               // a hole's own phase carries the hole enclosing it
+  handoffs: Handoff[]; // ≤ 256: {from, to, back?, types?} between participants
+  phases?: Phase[]; // ≤ 32: {id, name?, line?, column?, alongside?}, first-reach order
+  phaseEdges?: Edge[]; // ≤ 128: {from, to, back?} between phases
+  phaseStreams?: Stream[]; // ≤ 128: {from, to} — phase `from` feeds phase `to` while both run
+  exits?: string[]; // phases after which control flow can complete normally
+  sink?: string[]; // steps whose artifacts reach the return
+  holes?: Hole[]; // ≤ 32: {siteId, name, type, phase?, tail?}, the open holes in source order;
+  // a phase or step written by a fill carries `fill: <hole id>`;
+  // a hole's own phase carries the hole enclosing it
   truncated?: true;
 }
-interface Step { id; kind: "ask" | "world-read"; label; labelPattern?; line?; column?;
-                 lane; lanes?; source?; phase?; repeat?: "stack" | "serial" }
-interface Lane { id; name?; namePattern?: { head?; tail? }; line?; column? }
-interface Participant { id; phase; lane; steps: string[]; member?: { index; of }; many?: true }
+interface Step {
+  id;
+  kind: "ask" | "world-read";
+  label;
+  labelPattern?;
+  line?;
+  column?;
+  lane;
+  lanes?;
+  source?;
+  phase?;
+  repeat?: "stack" | "serial";
+}
+interface Lane {
+  id;
+  name?;
+  namePattern?: { head?; tail? };
+  line?;
+  column?;
+}
+interface Participant {
+  id;
+  phase;
+  lane;
+  steps: string[];
+  member?: { index; of };
+  many?: true;
+}
 ```
 
 Ids are at most 64 characters, names and labels at most 128.
@@ -132,8 +156,7 @@ into a phase that is not alongside — the writer after `await Promise.all([...s
 already the control arrow's business and is not a stream, and two futures with no channel
 between them have no `data` edge and stay two strands. The bounding layer reads
 `causality.phaseEdges` for kind `data`, drops self-loops, edges touching an unlisted phase and
-pairs that are not alongside, dedupes per ordered pair in the analyzer's order, and cuts at
-128. A stream is not a `phaseEdge` and never goes through the reduction (the causality
+pairs that are not alongside, dedupes per ordered pair in the analyzer's order, and cuts at 128. A stream is not a `phaseEdge` and never goes through the reduction (the causality
 quotient arrives reduced); an arrow still means only "runs after". The analyzer does not see
 a feedback channel (a consumer's later `send` into a producer's channel follows the
 producer's read in walk order), so every stream it produces today points from an earlier
@@ -170,7 +193,7 @@ both cut away is omitted rather than sent as `{}`.
 
 **Old payloads.** The schema is strict and has no compatibility shim. A persisted display
 that carries fields the schema no longer knows fails `safeParse`, and the tool row falls
-back to plain text with no graph. That fallback is now the *whole* cost of an unknown field:
+back to plain text with no graph. That fallback is now the _whole_ cost of an unknown field:
 since 2026-09-21 the v4 envelope carries every display payload as
 `.optional().catch(undefined)`, so a payload this side cannot read is dropped and the frame is
 still delivered (`docs/v4-refactor/10-protocol-spec.md` §4.4.5). Before that, a strict display
@@ -198,22 +221,65 @@ Its output:
 
 ```ts
 interface WorkflowTimelineModel {
-  stations: TimelineStation[];   // one per phase, declared order
-  rails: TimelineRail[];         // two stations next to each other on one track
-  arcs: TimelineArc[];           // every other edge
-  bands: TimelineBand[];         // parallel phases, ascending by `from`; empty without `alongside`
-  runningIndex?: number;         // the running station (rightmost if several)
-  live: boolean;                 // a run took part
-  draft?: { agents: number };    // only the pen's model has this
+  stations: TimelineStation[]; // one per phase, declared order
+  rails: TimelineRail[]; // two stations next to each other on one track
+  arcs: TimelineArc[]; // every other edge
+  bands: TimelineBand[]; // parallel phases, ascending by `from`; empty without `alongside`
+  runningIndex?: number; // the running station (rightmost if several)
+  live: boolean; // a run took part
+  draft?: { agents: number }; // only the pen's model has this
 }
-interface TimelineStation { id; naming: { id; name? }; pills; status?; visited; rounds; onLoop; track; fraction?; typing? }
-interface TimelineRail  { from; to; ink; kind?: "fork" | "merge" | "twin" | "stream" } // absent kind = a plain rail on one track
-interface TimelineArc   { from; to; lane; ink; air; stream? }                 // `air` = whose track's air it flies in
-interface TimelineTrack { stations: number[]; entry: TimelineInk; exit: TimelineInk }
-interface TimelineBand  { from; to; pred?; join?; tracks: TimelineTrack[] }   // inclusive range; tracks[0] = the main line
-interface TimelinePill { key; lane: LaneRef; laneClass; runtimeName?; avatarIndex?; status?;
-                         instance?: { siteId; ordinal; sessionId? }; slot?: { siteId; ordinal };
-                         workspace?: { phaseId }; stepIds; asking? }
+interface TimelineStation {
+  id;
+  naming: { id; name? };
+  pills;
+  status?;
+  visited;
+  rounds;
+  onLoop;
+  track;
+  fraction?;
+  typing?;
+}
+interface TimelineRail {
+  from;
+  to;
+  ink;
+  kind?: "fork" | "merge" | "twin" | "stream";
+} // absent kind = a plain rail on one track
+interface TimelineArc {
+  from;
+  to;
+  lane;
+  ink;
+  air;
+  stream?;
+} // `air` = whose track's air it flies in
+interface TimelineTrack {
+  stations: number[];
+  entry: TimelineInk;
+  exit: TimelineInk;
+}
+interface TimelineBand {
+  from;
+  to;
+  pred?;
+  join?;
+  tracks: TimelineTrack[];
+} // inclusive range; tracks[0] = the main line
+interface TimelinePill {
+  key;
+  lane: LaneRef;
+  laneClass;
+  runtimeName?;
+  avatarIndex?;
+  status?;
+  instance?: { siteId; ordinal; sessionId? };
+  slot?: { siteId; ordinal };
+  workspace?: { phaseId };
+  stepIds;
+  asking?;
+}
 type TimelineInk = "faint" | "strong" | "march";
 ```
 
@@ -260,7 +326,7 @@ therefore always takes track 0, the **main line**. A station outside every band 
 `track: 0`.
 
 **Streams take strands out of the band.** With `phaseStreams` (see "The display contract"),
-two members are parallel *for the colouring* only when neither reaches the other along stream
+two members are parallel _for the colouring_ only when neither reaches the other along stream
 edges: a stage and every stage downstream of it are one line of work, however concurrently
 they run, and belong on one track in declared order. A band whose members all land on one
 track is **dissolved**: it is not a band, its stations stand on the main line with no fork,
@@ -424,12 +490,12 @@ the GUI decorates the static picture by site id (analysis.md, "Joining runtime i
 
 `statusOfRunNode` maps a node's lifecycle phase to the four-value `StepRunStatus`:
 
-| Node phase | Status | Why |
-|---|---|---|
-| `executing`, `repairing`, `nudged` | `running` | a model request is out |
-| `settled` with outcome `ok` (cached included) | `done` | |
-| `settled` with outcome `failed` or `cancelled` | `failed` | the journal tells them apart; the four-value picture does not |
-| `queued`, `dispatched`, `waiting` | `pending` | no request is at the provider yet |
+| Node phase                                     | Status    | Why                                                           |
+| ---------------------------------------------- | --------- | ------------------------------------------------------------- |
+| `executing`, `repairing`, `nudged`             | `running` | a model request is out                                        |
+| `settled` with outcome `ok` (cached included)  | `done`    |                                                               |
+| `settled` with outcome `failed` or `cancelled` | `failed`  | the journal tells them apart; the four-value picture does not |
+| `queued`, `dispatched`, `waiting`              | `pending` | no request is at the provider yet                             |
 
 ### Folding statuses
 
@@ -476,11 +542,11 @@ its ordinal was minted (the moment `agent()` or `.ask()` ran, not the moment the
 emitted). The name is the one vocabulary the engine and the analyzer share. `phasesOf(name,
 graph, runHasVocabulary)` (`instance-phases.ts`) says which display phases a stamp belongs to:
 
-| Stamp | Run has any stamp | Belongs to |
-|---|---|---|
-| present | — | the phases whose display name matches (`phaseNameMatches`) |
-| absent | yes | the nameless phase (`unphased` or `workflow`): the analyzer puts pre-marker steps there too |
-| absent | no | every phase (an older CLI, an older run, an unmarked script) |
+| Stamp   | Run has any stamp | Belongs to                                                                                  |
+| ------- | ----------------- | ------------------------------------------------------------------------------------------- |
+| present | —                 | the phases whose display name matches (`phaseNameMatches`)                                  |
+| absent  | yes               | the nameless phase (`unphased` or `workflow`): the analyzer puts pre-marker steps there too |
+| absent  | no                | every phase (an older CLI, an older run, an unmarked script)                                |
 
 Whenever the answer would be empty, it is every phase: better a subagent shown twice than a
 running subagent hidden. `phaseBinder(graph, run)` caches these answers and, when the graph
@@ -497,14 +563,14 @@ sites** with a stamp in this card's phase, plus actors that left no node on thos
 and whose own birth stamp belongs to this phase, sorted by ordinal. On a run with no stamps
 this reduces to "every actor on the lane", the older behaviour.
 
-| Card | Instances | Result |
-|---|---|---|
-| `many` (family of unknown size) | 0 | the card stays, status by step fold |
-| `many` | ≥ 1 | one card per instance, id `${id}@${ordinal}`; hand-offs copied to each |
-| single | 0 | the card stays |
-| single | 1 | the card **binds** the instance: id unchanged, runtime name shown, status by step fold |
-| single | ≥ 2 | split like `many`: runtime multiplicity beats static multiplicity |
-| member `[i]` (literal fan-out) | — | binds the i-th instance by ordinal; none yet → `pending`; instances past `of` get no card |
+| Card                            | Instances | Result                                                                                    |
+| ------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| `many` (family of unknown size) | 0         | the card stays, status by step fold                                                       |
+| `many`                          | ≥ 1       | one card per instance, id `${id}@${ordinal}`; hand-offs copied to each                    |
+| single                          | 0         | the card stays                                                                            |
+| single                          | 1         | the card **binds** the instance: id unchanged, runtime name shown, status by step fold    |
+| single                          | ≥ 2       | split like `many`: runtime multiplicity beats static multiplicity                         |
+| member `[i]` (literal fan-out)  | —         | binds the i-th instance by ordinal; none yet → `pending`; instances past `of` get no card |
 
 A bound or split card's status is folded from that instance's nodes on the card's sites
 alone, and an instance with no node there yet is `pending`. A workspace card has no
@@ -530,18 +596,18 @@ one SVG layer for the arcs. There is no canvas library.
 
 ### Geometry
 
-| Constant | Value | Meaning |
-|---|---|---|
-| `STATION_WIDTH` / `STATION_GAP` / `STATION_PITCH` | 168 / 24 / 192 | five stations fit a 960px column |
-| `MARK_X` | 17 | lamp centre from the station's left edge, over the pills' face column |
-| `RAIL_ROW` | 24 | height of the rail row |
-| `ARC_BASE` / `ARC_LANE` | 26 / 14 | lowest arc lane above the rail's centre; lane spacing |
-| `TERMINAL_PITCH` | 10 | distance between two arc terminals on one lamp |
-| `PILL_HEIGHT` / `PILL_GAP` | 32 / 6 | |
-| `PILL_STAGGER_MS` | 30 | delay between pills landing |
-| `PLATFORM_ROW` | 24 | height of the caption row; only a banded timeline has one |
-| `CAPTION_X` | 12 | a caption's left edge from its station's left edge |
-| `TAIL` / `STUB` | 4 / 6 | the main line's tail before a band with no `pred`, its stub after one with no `join` |
+| Constant                                          | Value          | Meaning                                                                              |
+| ------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `STATION_WIDTH` / `STATION_GAP` / `STATION_PITCH` | 168 / 24 / 192 | five stations fit a 960px column                                                     |
+| `MARK_X`                                          | 17             | lamp centre from the station's left edge, over the pills' face column                |
+| `RAIL_ROW`                                        | 24             | height of the rail row                                                               |
+| `ARC_BASE` / `ARC_LANE`                           | 26 / 14        | lowest arc lane above the rail's centre; lane spacing                                |
+| `TERMINAL_PITCH`                                  | 10             | distance between two arc terminals on one lamp                                       |
+| `PILL_HEIGHT` / `PILL_GAP`                        | 32 / 6         |                                                                                      |
+| `PILL_STAGGER_MS`                                 | 30             | delay between pills landing                                                          |
+| `PLATFORM_ROW`                                    | 24             | height of the caption row; only a banded timeline has one                            |
+| `CAPTION_X`                                       | 12             | a caption's left edge from its station's left edge                                   |
+| `TAIL` / `STUB`                                   | 4 / 6          | the main line's tail before a band with no `pred`, its stub after one with no `join` |
 
 `ARC_BASE` must leave room after the 8px corner radius for a downward run long enough to
 hold the 5.25px arrowhead; at 16 the last segment pointed up by a pixel and the arrowhead
@@ -570,12 +636,12 @@ plus "visited n times" on a loop station.
 
 Lamps use one vocabulary, `STATUS_DOT` (`run-status-presentation.ts`):
 
-| Status | Lamp |
-|---|---|
-| `pending` | hollow ring, 1.5px `foreground-subtlest` border |
+| Status    | Lamp                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------- |
+| `pending` | hollow ring, 1.5px `foreground-subtlest` border                                             |
 | `running` | filled `warning` with a steady 3px warning halo, beating (below); the only glow on the page |
-| `done` | filled `success` |
-| `failed` | filled `destructive` with a 2px destructive ring |
+| `done`    | filled `success`                                                                            |
+| `failed`  | filled `destructive` with a 2px destructive ring                                            |
 
 **The beat.** The running lamp is the one thing on the timeline that moves on a clock, and it
 carries the whole statement "work is happening here". `wf-lamp-running` holds the 3px halo
@@ -753,12 +819,12 @@ hashed onto the same palette. Eyes are white. The pill's hover stroke uses the s
 
 The expression is state (`faceState`):
 
-| Pill status | State | Resting eyes | Motion |
-|---|---|---|---|
-| `pending` / none | waiting | three dots | the dots lift left to right and settle, then pause 1.5–3s |
-| `running` | scanning | two upright pills | blink 2–3 times, glance to the other side, pause 1.5–3.5s; occasionally a focused or confused look |
-| `done` | content | happy arches | hop 2–3 times, one short blink as pills, back to arches; pause 6–10s |
-| `failed` | sad | downcast arches | float 1–2 times; about 40% of the time a burst of 3–5 angry shakes, then back |
+| Pill status      | State    | Resting eyes      | Motion                                                                                             |
+| ---------------- | -------- | ----------------- | -------------------------------------------------------------------------------------------------- |
+| `pending` / none | waiting  | three dots        | the dots lift left to right and settle, then pause 1.5–3s                                          |
+| `running`        | scanning | two upright pills | blink 2–3 times, glance to the other side, pause 1.5–3.5s; occasionally a focused or confused look |
+| `done`           | content  | happy arches      | hop 2–3 times, one short blink as pills, back to arches; pause 6–10s                               |
+| `failed`         | sad      | downcast arches   | float 1–2 times; about 40% of the time a burst of 3–5 angry shakes, then back                      |
 
 Motion runs on the SVG's own timers and attributes (`data-motion`, `--wf-face-x`), never
 through React state, and stops when the tab is hidden, the face leaves the viewport, or
@@ -855,17 +921,17 @@ renders nothing and a ref-keyed effect would never attach its listeners.
 Every animation is declared once on `.wf-motion` and shared by card, confirmation window and
 pane. Only opacity, transform and colour move; layout never does.
 
-| Class | When | Effect | Duration |
-|---|---|---|---|
-| `wf-arrive` | a pill or tile mounts | opacity 0→1, y 4→0; staggered 30ms per pill (8ms, capped at 400ms, in the pane's roll) | 200ms |
-| `wf-mark` | a status mark changes value | scale .6→1 | 180ms |
-| `wf-lamp` / `wf-ink` | a lamp or rail changes state | colour transition | 320ms |
-| `wf-draw` | an arc first appears | dash offset from source to target | 420ms |
-| `wf-lamp-running` | a station is running | the lamp thumps to 1.12× and sends out one ring | 1.6s loop (`--wf-beat`) |
-| `wf-rail-grow`, `wf-land`, `wf-caret` | the pen reveals a draft station | rail grows from the left (160ms), lamp lands (200ms), caret blinks when idle | |
-| `wf-unfold` | a card body or phase section opens | opacity 0→1, y −3→0; closing is immediate | 200ms |
-| `wf-swap` | a kind word or status word changes text | old word out, new word in (keyed on the text) | 200ms |
-| `wf-stream-flow` | a stream is flowing (both ends running) | its three chevrons light in turn, 0.15s apart | 1.2s loop |
+| Class                                 | When                                    | Effect                                                                                 | Duration                |
+| ------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------- |
+| `wf-arrive`                           | a pill or tile mounts                   | opacity 0→1, y 4→0; staggered 30ms per pill (8ms, capped at 400ms, in the pane's roll) | 200ms                   |
+| `wf-mark`                             | a status mark changes value             | scale .6→1                                                                             | 180ms                   |
+| `wf-lamp` / `wf-ink`                  | a lamp or rail changes state            | colour transition                                                                      | 320ms                   |
+| `wf-draw`                             | an arc first appears                    | dash offset from source to target                                                      | 420ms                   |
+| `wf-lamp-running`                     | a station is running                    | the lamp thumps to 1.12× and sends out one ring                                        | 1.6s loop (`--wf-beat`) |
+| `wf-rail-grow`, `wf-land`, `wf-caret` | the pen reveals a draft station         | rail grows from the left (160ms), lamp lands (200ms), caret blinks when idle           |                         |
+| `wf-unfold`                           | a card body or phase section opens      | opacity 0→1, y −3→0; closing is immediate                                              | 200ms                   |
+| `wf-swap`                             | a kind word or status word changes text | old word out, new word in (keyed on the text)                                          | 200ms                   |
+| `wf-stream-flow`                      | a stream is flowing (both ends running) | its three chevrons light in turn, 0.15s apart                                          | 1.2s loop               |
 
 `wf-rail-march`, `wf-lit` and `wf-spine-march` are not in the table: the march edge is ink,
 not motion, and the lamp's beat is the only loop left on the rail.
@@ -1020,14 +1086,14 @@ inputs from the row's `input` (script, name, saved source) and its graph from
 `display.causalityGraph` when that parses and has at least one step. Its shape follows the
 row's v4 status:
 
-| Row state | Kind word | Body |
-|---|---|---|
-| `inputStreaming` | "Writing workflow"; from draft 2 on "Revising workflow" / 「正在修改工作流」 | a `ToolLayout` row that cannot be expanded, with the **draft phase line** below it (not inside it: no fold) |
-| `pendingApproval` | "Awaiting workflow confirmation" | a `ToolLayout` row, collapsed by default, expandable to the script (`CodeBlock`, 320px max) and diagnostics; the running shimmer stays on |
-| compile errors | "Workflow draft" / 「工作流草稿」 | the compiler feedback row (see "Compiler feedback"): detail "draft {n}", a hollow lamp and "{n} to fix · not run", expandable to the script and the feedback card |
-| failed with no display | "Workflow" | a `ToolLayout` row with the tool's status word, the error in its tooltip, expandable to the plain output text |
-| launched, joined to a run | "Workflow" | `WorkflowToolSummary`: "Workflow · {n} agents ↗", one line, click or Enter/Space opens the run pane; plain text when the host cannot open it |
-| compiled, never launched (denied, or a host without execution) | "Workflow" | the static card: header with a hollow "compiled" lamp, the static timeline, and a collapsed script fold; open state remembered per tool id |
+| Row state                                                      | Kind word                                                                    | Body                                                                                                                                                              |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inputStreaming`                                               | "Writing workflow"; from draft 2 on "Revising workflow" / 「正在修改工作流」 | a `ToolLayout` row that cannot be expanded, with the **draft phase line** below it (not inside it: no fold)                                                       |
+| `pendingApproval`                                              | "Awaiting workflow confirmation"                                             | a `ToolLayout` row, collapsed by default, expandable to the script (`CodeBlock`, 320px max) and diagnostics; the running shimmer stays on                         |
+| compile errors                                                 | "Workflow draft" / 「工作流草稿」                                            | the compiler feedback row (see "Compiler feedback"): detail "draft {n}", a hollow lamp and "{n} to fix · not run", expandable to the script and the feedback card |
+| failed with no display                                         | "Workflow"                                                                   | a `ToolLayout` row with the tool's status word, the error in its tooltip, expandable to the plain output text                                                     |
+| launched, joined to a run                                      | "Workflow"                                                                   | `WorkflowToolSummary`: "Workflow · {n} agents ↗", one line, click or Enter/Space opens the run pane; plain text when the host cannot open it                      |
+| compiled, never launched (denied, or a host without execution) | "Workflow"                                                                   | the static card: header with a hollow "compiled" lamp, the static timeline, and a collapsed script fold; open state remembered per tool id                        |
 
 The `AmendWorkflow` tool row is the same renderer with the amend vocabulary, chosen by tool
 name before the family dispatch (`lib/workflowToolNames.ts`, `isAmendWorkflowToolCall`),
@@ -1048,15 +1114,15 @@ One reader decides it for the card and the window
 resolved input's `predecessor.script_inherited`, or a finished input with neither `script`
 nor `path`.
 
-| Row state | Kind word | Body |
-|---|---|---|
-| `inputStreaming` | "Amending workflow" / 「正在调整工作流」; from draft 2 on "Revising amendment" / 「正在修改工作流调整」 | the draft phase line below the row, as for a create |
-| `pendingApproval` | "Awaiting amendment confirmation" / 「等待调整确认」 | as for a create |
-| compile errors | "Amendment draft" / 「工作流调整草稿」 | the compiler feedback row, as for a create |
-| refused (`run_not_found`, `missing_boundaries`, and the retune's three) | "Workflow amendment" / 「工作流调整」 | the refusal text |
-| retuned a live run in place | — | the retune row (below) |
-| launched, joined to a run | "Workflow amended" / 「工作流已调整」 | `WorkflowToolSummary`: "Workflow amended · {n} agents ↗", opening the **new** run's pane |
-| compiled, never launched | "Workflow amendment" | the static card |
+| Row state                                                               | Kind word                                                                                               | Body                                                                                     |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `inputStreaming`                                                        | "Amending workflow" / 「正在调整工作流」; from draft 2 on "Revising amendment" / 「正在修改工作流调整」 | the draft phase line below the row, as for a create                                      |
+| `pendingApproval`                                                       | "Awaiting amendment confirmation" / 「等待调整确认」                                                    | as for a create                                                                          |
+| compile errors                                                          | "Amendment draft" / 「工作流调整草稿」                                                                  | the compiler feedback row, as for a create                                               |
+| refused (`run_not_found`, `missing_boundaries`, and the retune's three) | "Workflow amendment" / 「工作流调整」                                                                   | the refusal text                                                                         |
+| retuned a live run in place                                             | —                                                                                                       | the retune row (below)                                                                   |
+| launched, joined to a run                                               | "Workflow amended" / 「工作流已调整」                                                                   | `WorkflowToolSummary`: "Workflow amended · {n} agents ↗", opening the **new** run's pane |
+| compiled, never launched                                                | "Workflow amendment"                                                                                    | the static card                                                                          |
 
 **The retune row.** An `AmendWorkflow` that only retuned a live run's parallelism
 (`docs/dynamic-workflow/launch.md`, "Changing only the parallelism of a live run") compiled
@@ -1138,14 +1204,14 @@ thing that changes on an old row. The status words stay in the row's subtlest gr
 flagged lines are tinted warning, and below it the feedback card
 (`WorkflowDiagnosticsSection`, shared with the `EvalWorkflowSnippet` card):
 
-| Part | Content |
-|---|---|
-| Frame | `border-border` on `bg-panel`, `rounded-xl`; no destructive border |
-| Header | "Compiler feedback" / 「编译反馈」, and on the right "{n} notes" / 「{n} 条」 ("1 note") |
-| Sentence | "Typecheck did not pass, so nothing ran. The feedback went back to the model to revise and resubmit." / 「类型检查未通过，脚本未运行；反馈已交回模型，由它修改后重新提交。」 For a saved source the sentence names the file instead: "The saved workflow file did not pass typecheck, so nothing ran. The feedback went back to the model to fix the file or save a corrected version." / 「保存的工作流文件未通过类型检查，脚本未运行；反馈已交回模型，由它修改该文件或保存修正后的版本。」 |
-| One line per diagnostic | the `L{line}:C{col}` chip in subtle grey, the message in foreground, the code label in subtlest grey |
-| Code label | `TS{code}` for TypeScript; "rule {code}" / 「规则 {code}」 for the analyzer's own codes 9001–9099 (`apps/zcode-cli/packages/dynamic-workflow/docs/analysis.md`, "Diagnostics"), which are not TypeScript codes |
-| Truncation | "Some diagnostics were omitted." when the payload is truncated, as before |
+| Part                    | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frame                   | `border-border` on `bg-panel`, `rounded-xl`; no destructive border                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Header                  | "Compiler feedback" / 「编译反馈」, and on the right "{n} notes" / 「{n} 条」 ("1 note")                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Sentence                | "Typecheck did not pass, so nothing ran. The feedback went back to the model to revise and resubmit." / 「类型检查未通过，脚本未运行；反馈已交回模型，由它修改后重新提交。」 For a saved source the sentence names the file instead: "The saved workflow file did not pass typecheck, so nothing ran. The feedback went back to the model to fix the file or save a corrected version." / 「保存的工作流文件未通过类型检查，脚本未运行；反馈已交回模型，由它修改该文件或保存修正后的版本。」 |
+| One line per diagnostic | the `L{line}:C{col}` chip in subtle grey, the message in foreground, the code label in subtlest grey                                                                                                                                                                                                                                                                                                                                                                                         |
+| Code label              | `TS{code}` for TypeScript; "rule {code}" / 「规则 {code}」 for the analyzer's own codes 9001–9099 (`apps/zcode-cli/packages/dynamic-workflow/docs/analysis.md`, "Diagnostics"), which are not TypeScript codes                                                                                                                                                                                                                                                                               |
+| Truncation              | "Some diagnostics were omitted." when the payload is truncated, as before                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ### The draft and the pen
 
@@ -1194,10 +1260,10 @@ The two settings are sentences whose values can be changed before approving
 whenever the input carries `adjustable_settings`, whether or not the call set the fields, so a
 user who changes nothing still reads what will happen:
 
-| Line | Parts |
-|---|---|
+| Line  | Parts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Model | "Subagents run on" / 「子代理运行在」, then the model chip: the composer's model list (`ModelConfigSelect`, the Configure popover's groups, with the session model first carrying the "session model" / 「会话模型」 badge), its trigger drawn as a chip, `h-6 rounded-md bg-surface text-ui-sm`, transparent border, chevron `size-3`, the border and the input background appearing on hover. Beside it the thinking-level chip (`ThoughtLevelCycleControl` in the same chip style), only when the chosen model has levels; picking a model sets its default level. A model the input names but the list no longer offers keeps its name and gets the "unavailable" / 「不可用」 badge; Allow then waits for another choice, as the popover's Apply does. When the block says the host cannot choose a model, or the workspace lists no models, the line is the sentence "Subagents stay on the session model · this agent has no model catalog" / 「子代理沿用会话模型 · 当前 agent 没有模型目录」, unless the call names a model (an amend that inherited one): then it is the plain line "Subagents run on {model}", because the window must not say the opposite of what will run |
-| Bound | "At most" / 「最多」, a stepper (`InputGroup` at `h-6`: minus, a `w-[30px]` mono number, plus) from 1 with no upper end, then "subagents at once" / 「个子代理同时运行」, then in subtlest text "· default {n}" / 「· 默认 {n}」, which becomes "· = default" / 「· = 默认」 when the value is the default. With no default known and no value either it starts empty and the tail reads "· no limit of its own" / 「· 不设上限」 |
+| Bound | "At most" / 「最多」, a stepper (`InputGroup` at `h-6`: minus, a `w-[30px]` mono number, plus) from 1 with no upper end, then "subagents at once" / 「个子代理同时运行」, then in subtlest text "· default {n}" / 「· 默认 {n}」, which becomes "· = default" / 「· = 默认」 when the value is the default. With no default known and no value either it starts empty and the tail reads "· no limit of its own" / 「· 不设上限」                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 When the input carries `model_bindings` (the script names models for some of its subagents,
 `docs/dynamic-workflow/authoring.md`, "Choosing a model per subagent"), the window does not
@@ -1251,12 +1317,12 @@ card**, one per run per turn (first source wins). The one source that names a ru
 being such an event is the in-place settings turn, and it is the one exception: a run that was
 retuned already has its card, so the turn is a row alone (see "The settings turn" below).
 
-| Source | Joins by | Name |
-|---|---|---|
-| the launch turn of a direct launch (`unit.workflowLaunch`, `docs/dynamic-workflow/launch.md`) | `runId` from the metadata | the metadata's name |
-| the settings turn of a change made with Configure (the same `unit.workflowLaunch`, with an `amend` block) that started a new run, which is the block carrying `predecessorRunId` | `runId` from the metadata | the metadata's name |
-| a `CreateWorkflow` row | its tool call id (the projection's `run.toolCallId` is the originating row) | the input's `name` |
-| a `ResumeWorkflowRun` row | the `runId` on its display | the fallback name |
+| Source                                                                                                                                                                           | Joins by                                                                    | Name                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------- |
+| the launch turn of a direct launch (`unit.workflowLaunch`, `docs/dynamic-workflow/launch.md`)                                                                                    | `runId` from the metadata                                                   | the metadata's name |
+| the settings turn of a change made with Configure (the same `unit.workflowLaunch`, with an `amend` block) that started a new run, which is the block carrying `predecessorRunId` | `runId` from the metadata                                                   | the metadata's name |
+| a `CreateWorkflow` row                                                                                                                                                           | its tool call id (the projection's `run.toolCallId` is the originating row) | the input's `name`  |
+| a `ResumeWorkflowRun` row                                                                                                                                                        | the `runId` on its display                                                  | the fallback name   |
 
 A `CreateWorkflow` row names no run by itself, so a rejected or uncompilable script has no
 card. The **graph is a property of the run**, found by the run's originating tool call id in
@@ -1310,7 +1376,7 @@ make it far longer than "3 phases · 2 agents working".
 
 Both the right-hand cluster and the detail inside it need `min-width: 0`, and the one on the
 cluster is the load-bearing half. A flex item's automatic minimum size is its min-content size,
-and the detail's `white-space: nowrap` makes its min-content the *whole* string — `overflow:
+and the detail's `white-space: nowrap` makes its min-content the _whole_ string — `overflow:
 hidden` does not shrink that, and neither does the detail's own `min-width: 0`, which only
 frees the detail to be shrunk by its parent. Without `min-width: 0` on the cluster, the
 cluster's floor is therefore "the entire detail plus the controls": it never yields a pixel and
@@ -1383,14 +1449,14 @@ popover (`components/workflow-timeline/WorkflowRunSettingsPopover.tsx`), anchore
 control that opened it and aligned to its end. Its parts, top to bottom, in a `w-72` shell
 (`PopoverContent`, `p-2.5`, 10 px between parts):
 
-| Part | What it is |
-|---|---|
-| Title | "Configure workflow" / 「配置工作流」, `text-ui-base font-medium` |
-| Subagent model | label "Subagent model" / 「子代理模型」; the composer's model list (`ModelConfigSelect`, the same groups the settings page's subagent select reads), with **the session model** as its first item carrying the "session model" / 「会话模型」 badge; the trigger shows the run's model, or the session model with the badge when the run has none. Beside the trigger, the thinking-level control the settings page uses for subagents (`SubagentReasoningField`), only when the chosen model has reasoning levels; picking a model sets its default level. A model the run is on but the list no longer offers is shown by its name with an "unavailable" / 「不可用」 badge; Apply then waits for another choice. When the workspace lists no models the field is the sentence "This agent has no model catalog; subagents stay on the session model." / 「当前 agent 没有可选的模型目录，子代理沿用会话模型。」 |
-| Max concurrency | label "Max concurrency" / 「最大并发数」, the word the run pane's concurrency chip uses, so the chip and the control that sets it read the same (the minus and plus carry "Lower max concurrency" / 「降低最大并发数」 and "Raise max concurrency" / 「提高最大并发数」); a stepper (`InputGroup`: minus, a `w-9` mono number, plus) from 1 with no upper end, starting at the run's own bound or the default parallelism (`run.concurrencyCeiling`) when it has none; to its right in subtle text "default {n}" / 「默认 {n}」, which becomes "= default" / 「= 默认」 when the value is the default. The value at the default means no bound of the run's own. A run state without a default (an older agent) gives no hint |
-| Sentence | one line, `text-ui-sm` subtle, chosen by what applying will actually do, so it says nothing until a field differs from the run: with Apply disabled there is no consequence to describe, and a guess made before the edit is wrong for one of the two fields (the stepper can apply in place, the model never does). The line keeps its one-line height while empty, so the first edit does not push the footer down. When the stepper is the only field that differs and the run is **running**, applying retunes that run in place and the line says so: "Applies to this run right away; no new run is started." / 「立即应用到当前运行，不会新起一次运行。」 A `pending` run keeps its own sentence even for a stepper-only change: its engine may not exist yet, in which case the agent falls back to an ordinary amendment (`docs/dynamic-workflow/launch.md`, "Changing only the parallelism of a live run"), and a promise of "no new run" is one this state cannot keep. Otherwise the line is the run state's: running "Stops this run and starts a new one with these settings; finished steps are kept." / 「将停止当前运行，以新设置另起一次运行，已完成的步骤会保留。」; pending "Starts a new run with these settings; this one has not begun any step yet." / 「将以新设置另起一次运行，当前运行尚未开始任何步骤。」; stopped "Continues as a new run with these settings; finished steps are kept." / 「将以新设置另起一次运行接着跑，已完成的步骤会保留。」; errored "Retries as a new run with these settings; finished steps are kept." / 「将以新设置另起一次运行重试，已完成的步骤会保留。」. The line follows the fields as they are edited, so touching the model select after moving the stepper brings the restart sentence back, and putting both fields back empties it again |
-| Rejection | only after a rejected Apply: the reason's line from `docs/dynamic-workflow/launch.md` ("The command") in the pane's rejection style, `text-ui-xs` warning, with the ACK's message in a bounded mono block when it carries one. It clears when the user changes a field |
-| Footer | **Apply** / 「应用」, right-aligned, `h-7` primary; disabled while neither field differs from the run; while the command is in flight it shows a spinner and "Applying…" / 「应用中…」 and the fields are disabled |
+| Part            | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title           | "Configure workflow" / 「配置工作流」, `text-ui-base font-medium`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Subagent model  | label "Subagent model" / 「子代理模型」; the composer's model list (`ModelConfigSelect`, the same groups the settings page's subagent select reads), with **the session model** as its first item carrying the "session model" / 「会话模型」 badge; the trigger shows the run's model, or the session model with the badge when the run has none. Beside the trigger, the thinking-level control the settings page uses for subagents (`SubagentReasoningField`), only when the chosen model has reasoning levels; picking a model sets its default level. A model the run is on but the list no longer offers is shown by its name with an "unavailable" / 「不可用」 badge; Apply then waits for another choice. When the workspace lists no models the field is the sentence "This agent has no model catalog; subagents stay on the session model." / 「当前 agent 没有可选的模型目录，子代理沿用会话模型。」                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Max concurrency | label "Max concurrency" / 「最大并发数」, the word the run pane's concurrency chip uses, so the chip and the control that sets it read the same (the minus and plus carry "Lower max concurrency" / 「降低最大并发数」 and "Raise max concurrency" / 「提高最大并发数」); a stepper (`InputGroup`: minus, a `w-9` mono number, plus) from 1 with no upper end, starting at the run's own bound or the default parallelism (`run.concurrencyCeiling`) when it has none; to its right in subtle text "default {n}" / 「默认 {n}」, which becomes "= default" / 「= 默认」 when the value is the default. The value at the default means no bound of the run's own. A run state without a default (an older agent) gives no hint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Sentence        | one line, `text-ui-sm` subtle, chosen by what applying will actually do, so it says nothing until a field differs from the run: with Apply disabled there is no consequence to describe, and a guess made before the edit is wrong for one of the two fields (the stepper can apply in place, the model never does). The line keeps its one-line height while empty, so the first edit does not push the footer down. When the stepper is the only field that differs and the run is **running**, applying retunes that run in place and the line says so: "Applies to this run right away; no new run is started." / 「立即应用到当前运行，不会新起一次运行。」 A `pending` run keeps its own sentence even for a stepper-only change: its engine may not exist yet, in which case the agent falls back to an ordinary amendment (`docs/dynamic-workflow/launch.md`, "Changing only the parallelism of a live run"), and a promise of "no new run" is one this state cannot keep. Otherwise the line is the run state's: running "Stops this run and starts a new one with these settings; finished steps are kept." / 「将停止当前运行，以新设置另起一次运行，已完成的步骤会保留。」; pending "Starts a new run with these settings; this one has not begun any step yet." / 「将以新设置另起一次运行，当前运行尚未开始任何步骤。」; stopped "Continues as a new run with these settings; finished steps are kept." / 「将以新设置另起一次运行接着跑，已完成的步骤会保留。」; errored "Retries as a new run with these settings; finished steps are kept." / 「将以新设置另起一次运行重试，已完成的步骤会保留。」. The line follows the fields as they are edited, so touching the model select after moving the stepper brings the restart sentence back, and putting both fields back empties it again |
+| Rejection       | only after a rejected Apply: the reason's line from `docs/dynamic-workflow/launch.md` ("The command") in the pane's rejection style, `text-ui-xs` warning, with the ACK's message in a bounded mono block when it carries one. It clears when the user changes a field                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Footer          | **Apply** / 「应用」, right-aligned, `h-7` primary; disabled while neither field differs from the run; while the command is in flight it shows a spinner and "Applying…" / 「应用中…」 and the fields are disabled                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Opening the popover starts both fields from the run's current settings. Apply sends
 `amendWorkflowRunSettings` with only the fields that differ: the model as its canonical
@@ -1531,7 +1597,7 @@ orphan-questions block — starts at one **text column** shared by the whole spi
 39 + pitch × (T − 1), T being the most tracks any band has; which track a station is on no
 longer moves its text. Without a band T = 1 and nothing moves.
 
-A fork and a merge happen *between* two phases, so each gets a 16px **joint row** of its own
+A fork and a merge happen _between_ two phases, so each gets a 16px **joint row** of its own
 between two sections, never a slice of a section's header. Every band has both: the fork row
 stands just before the band's first section, the merge row just after its last. In a joint
 row the main rail runs straight through, in the ink of the track-0 rail that crosses it (a
@@ -1648,40 +1714,73 @@ every optimistic command). The journal that the events also go to is described i
 `apps/zcode-cli/packages/dynamic-workflow/docs/execution-engine.md`.
 
 ```ts
-interface WorkflowRunsState { revision: number; runs: WorkflowRunState[] }   // ≤ 8 runs
+interface WorkflowRunsState {
+  revision: number;
+  runs: WorkflowRunState[];
+} // ≤ 8 runs
 interface WorkflowRunState {
-  runId; toolCallId?; status: "pending" | "running" | "completed" | "errored" | "stopped";
-  stopReason?: "user" | "model" | "provider" | "interrupted";   // stopped only
+  runId;
+  toolCallId?;
+  status: "pending" | "running" | "completed" | "errored" | "stopped";
+  stopReason?: "user" | "model" | "provider" | "interrupted"; // stopped only
   usage: { spentTokens; nodesUsed; nodesUnlisted?; nodesUnlistedSettled? };
-  error?; resumable?: true; resultPreview?;
-  actors: { siteId; ordinal; name?; sessionId?; status: "waiting" | "running" | "completed"; phaseName?;
-            model? }[];                                         // canonical, when its persona names a model
-  nodes:  { siteId; ordinal; kind?; phase; outcome?; cached?; actorSiteId?; actorOrdinal?; phaseName?;
-            instructionsHead?;                                  // the ask's assignment, first 240 chars
-            turn?; toolCalls?; lastTool?: { name; target? } }[]; // how far into the ask it is, from node-progress
-  reports?; pendingQuestions?; concurrency?; subagentModel?; artifacts?;
-  phases?: { name; rounds }[]; currentPhase?; phaseNames?: string[];   // declared order, from run-launched
-  phaseAlongside?: number[][];                                         // aligned with phaseNames, indexes into it
-  unlistedByPhase?: { phaseName?; actors; actorsSettled?; actorsFailed?; settled }[];  // the bound's cost per phase
-  truncated?: true; lastEventSequence: number;
+  error?;
+  resumable?: true;
+  resultPreview?;
+  actors: {
+    siteId;
+    ordinal;
+    name?;
+    sessionId?;
+    status: "waiting" | "running" | "completed";
+    phaseName?;
+    model?;
+  }[]; // canonical, when its persona names a model
+  nodes: {
+    siteId;
+    ordinal;
+    kind?;
+    phase;
+    outcome?;
+    cached?;
+    actorSiteId?;
+    actorOrdinal?;
+    phaseName?;
+    instructionsHead?; // the ask's assignment, first 240 chars
+    turn?;
+    toolCalls?;
+    lastTool?: { name; target? };
+  }[]; // how far into the ask it is, from node-progress
+  reports?;
+  pendingQuestions?;
+  concurrency?;
+  subagentModel?;
+  artifacts?;
+  phases?: { name; rounds }[];
+  currentPhase?;
+  phaseNames?: string[]; // declared order, from run-launched
+  phaseAlongside?: number[][]; // aligned with phaseNames, indexes into it
+  unlistedByPhase?: { phaseName?; actors; actorsSettled?; actorsFailed?; settled }[]; // the bound's cost per phase
+  truncated?: true;
+  lastEventSequence: number;
 }
 ```
 
-| Bound (`WORKFLOW_RUNS_LIMITS`) | Value |
-|---|---|
-| runs kept | 8, oldest evicted |
-| actors, nodes | 1024 each; a finished group, a settled loose node, or (for a dispatch) an idle group evicted to seat a newcomer |
-| entries across the key | 6144 (nodes + actors, summed over the runs), oldest terminal run evicted |
-| unlisted-by-phase buckets | 33 (one per phase plus the unphased one) |
-| reports / preview chars | 64 / 2048 |
-| pending questions / question chars | 32 / 2048 |
-| artifacts | 32 |
-| phases / phase name chars | 32 / 128 |
-| actor name chars | 128 |
-| subagent model chars | 256 |
-| error chars | 2048 |
-| instructions head chars | 240 |
-| last tool name / target chars | 64 / 120 |
+| Bound (`WORKFLOW_RUNS_LIMITS`)     | Value                                                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| runs kept                          | 8, oldest evicted                                                                                               |
+| actors, nodes                      | 1024 each; a finished group, a settled loose node, or (for a dispatch) an idle group evicted to seat a newcomer |
+| entries across the key             | 6144 (nodes + actors, summed over the runs), oldest terminal run evicted                                        |
+| unlisted-by-phase buckets          | 33 (one per phase plus the unphased one)                                                                        |
+| reports / preview chars            | 64 / 2048                                                                                                       |
+| pending questions / question chars | 32 / 2048                                                                                                       |
+| artifacts                          | 32                                                                                                              |
+| phases / phase name chars          | 32 / 128                                                                                                        |
+| actor name chars                   | 128                                                                                                             |
+| subagent model chars               | 256                                                                                                             |
+| error chars                        | 2048                                                                                                            |
+| instructions head chars            | 240                                                                                                             |
+| last tool name / target chars      | 64 / 120                                                                                                        |
 
 The last four node fields answer "what is this subagent doing right now, and is it moving",
 which the phase alone cannot: an ask sits in `executing` for minutes at a time.
@@ -1703,22 +1802,22 @@ An envelope with no run id or no event type is rejected. An unknown run is seede
 `pending` with empty collections; `lastEventSequence` only ever rises. An event that changes
 nothing (byte-equal state) returns `null`, so a replayed event does not bump the revision.
 
-| Event | Effect |
-|---|---|
-| `run-started` | status `running`, usage reset, and `error`, `resultPreview`, `pendingQuestions`, `resumable`, `stopReason`, `unlistedByPhase` of a previous life cleared. A run that is `truncated` additionally starts the life with **empty `actors` and `nodes`**: the new life re-emits every instance, and only an empty table lets each one be listed or counted exactly once — keeping a table that already lost entries would count a group evicted during the replayed prefix twice, once as unlisted and once as re-created. A run that never overflowed keeps its tables, so the ordinary resume still shows its history from the first event. `subagentModel` is read from the payload, trimmed, and kept only when non-empty and within its bound; an over-long value is dropped whole rather than cut, since a shortened model id is a false one. A payload without the key falls back to the value already on the run, like `resumedFrom`: a resume's second `run-started`, or an older CLI that does not send it, must not blank the model out of a run whose model has not changed |
-| `run-launched` | `phaseNames` = the declared phase names in script order (cut to 32 × 128); absent when the script declared none. `phaseAlongside` rides with it and only with it: cut to the accepted names' length, each entry filtered to integers in range and never its own index, deduplicated, dropped when nothing survives. The only fields this event touches; it fires once per run life, so a resume keeps the table |
-| `actor-created` | upsert by `(siteId, ordinal)`: name cut to 128, `sessionId` from the envelope's `actorSessionId`, birth `phaseName` cut to 128 (cut, not ellipsized: it is a join key), `model` from the payload's `model` (the canonical string the host resolved the persona's model name to; dropped whole past 256, like `subagentModel`). The `sessionId` is then kept pointing at the session that holds the subagent's transcript by the node events below |
-| `node-queued` … `node-settled` | upsert by `(siteId, ordinal)`, and in a `truncated` run a new key only from a birth event or from a dispatch that carries the instance's birth facts, on an event that raises the watermark (see below); `kind` only on `queued` and on such a dispatch, else carried forward; actor ref and `phaseName` carried forward when absent; `outcome` and `cached` kept; the first `dispatched` of an instance counts one toward `usage.nodesUsed`. `instructionsHead` arrives on `queued` (cut to 240) and on a dispatch that repeats it, and is carried forward by the later events; `turn`, `toolCalls` and `lastTool` are carried forward the same way, except across the two **birth** events, which clear them. The birth events are `queued` and the cached `settled` the replay hit emits without a `queued`: a re-queued instance is a fresh attempt whose turn counter restarts at 1, and a cached settlement did not execute at all, so inheriting the previous life's "turn 9, 40 tool calls" would paint exactly the picture these readings exist to rule out. A cached `settled` still inherits `instructionsHead`, since the completion cache keys on the input and the instructions are therefore identical by construction; `queued` does not, since it may carry amended ones. An ask's cached `settled` carries its birth facts — `kind`, actor ref, `instructionsHead` — like the `queued` it replaces, so the node is attributed to its subagent even when the table never held the instance (an amended run always starts with none). The same two events move the listed actor's `sessionId`: an ask's cached `settled` sets it to the payload's `sourceSessionId` when present and to the envelope's `actorSessionId` otherwise, and an ask's `node-dispatched` sets it to the envelope's `actorSessionId`. The last such event wins, which is right because a subagent's asks settle in order and divergence from an import is monotone: import hits come first and name the predecessor's session, and from the first live dispatch on the subagent's own session holds everything, the imported prefix included. An event that brings neither id changes nothing, so a journal written before cache hits named their actor keeps the session `actor-created` gave. A dispatch that enters its subagent into the table (activation, below) builds the entry from the repeated birth facts, `model` from the payload's `actorModel` included, so a subagent evicted and brought back keeps its model label. |
-| `node-progress` | updates `turn`, `toolCalls` and `lastTool` on the node that already exists, and nothing else — no phase, no step count, no actor status (a turn resolving is not a lifecycle transition). A field the payload does not carry readably keeps its known value; an instance the table does not hold (evicted at the bound, or progress before its `queued`) is ignored, like any other node event for an unknown instance. Last writer wins rather than a monotone max, so a re-queued ask may count down |
-| `report` | upsert by `(siteId, ordinal)` into `reports` with a serialized preview; touches no node, actor or count |
-| `artifact-published` | upsert by artifact id (a new version replaces its card), carrying `primary` when the record has it; `artifact-failed` is a no-op |
-| `usage-updated` | `usage.spentTokens` = the event's absolute total. The reset on `run-started` is momentary for a run that already cost something: the engine emits this event with the restored (resume) or inherited (amend) total right after `run-started`, before any live turn (`apps/zcode-cli/packages/dynamic-workflow/docs/execution-engine.md`, "Usage accounting") |
-| `escalation-raised` / `-resolved` | upsert or remove by `qid`; the key disappears when empty |
-| `concurrency-changed` | the `concurrency` block (`docs/dynamic-workflow/concurrency.md`) |
-| `run-caps-changed` | the run's own bound inside the same `concurrency` block, by the rule `run-started` uses: `limit` when the new `caps.maxConcurrency` differs from the payload's `concurrencyCeiling` (the default parallelism), cleared when it equals it, and `concurrency` dropped when the shared side has nothing to say either; `concurrencyCeiling` updated when readable; the shared cap, key and cooldown untouched (`docs/dynamic-workflow/concurrency.md`, "Retuning a live run") |
-| `phase-entered` | upsert `phases` by name with `rounds = max(rounds, ordinal)` (monotone, so a resumed prefix is a no-op); `currentPhase` always set, even when the phase table is full |
-| `run-settled` | status for `completed` / `errored` / `stopped`; `stopReason` only when stopped; `error` cut to 2048; `resumable` only when the payload says so; pending questions and cooldown cleared |
-| anything else (`log`, `compaction`) | raises the watermark only |
+| Event                               | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `run-started`                       | status `running`, usage reset, and `error`, `resultPreview`, `pendingQuestions`, `resumable`, `stopReason`, `unlistedByPhase` of a previous life cleared. A run that is `truncated` additionally starts the life with **empty `actors` and `nodes`**: the new life re-emits every instance, and only an empty table lets each one be listed or counted exactly once — keeping a table that already lost entries would count a group evicted during the replayed prefix twice, once as unlisted and once as re-created. A run that never overflowed keeps its tables, so the ordinary resume still shows its history from the first event. `subagentModel` is read from the payload, trimmed, and kept only when non-empty and within its bound; an over-long value is dropped whole rather than cut, since a shortened model id is a false one. A payload without the key falls back to the value already on the run, like `resumedFrom`: a resume's second `run-started`, or an older CLI that does not send it, must not blank the model out of a run whose model has not changed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `run-launched`                      | `phaseNames` = the declared phase names in script order (cut to 32 × 128); absent when the script declared none. `phaseAlongside` rides with it and only with it: cut to the accepted names' length, each entry filtered to integers in range and never its own index, deduplicated, dropped when nothing survives. The only fields this event touches; it fires once per run life, so a resume keeps the table                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `actor-created`                     | upsert by `(siteId, ordinal)`: name cut to 128, `sessionId` from the envelope's `actorSessionId`, birth `phaseName` cut to 128 (cut, not ellipsized: it is a join key), `model` from the payload's `model` (the canonical string the host resolved the persona's model name to; dropped whole past 256, like `subagentModel`). The `sessionId` is then kept pointing at the session that holds the subagent's transcript by the node events below                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `node-queued` … `node-settled`      | upsert by `(siteId, ordinal)`, and in a `truncated` run a new key only from a birth event or from a dispatch that carries the instance's birth facts, on an event that raises the watermark (see below); `kind` only on `queued` and on such a dispatch, else carried forward; actor ref and `phaseName` carried forward when absent; `outcome` and `cached` kept; the first `dispatched` of an instance counts one toward `usage.nodesUsed`. `instructionsHead` arrives on `queued` (cut to 240) and on a dispatch that repeats it, and is carried forward by the later events; `turn`, `toolCalls` and `lastTool` are carried forward the same way, except across the two **birth** events, which clear them. The birth events are `queued` and the cached `settled` the replay hit emits without a `queued`: a re-queued instance is a fresh attempt whose turn counter restarts at 1, and a cached settlement did not execute at all, so inheriting the previous life's "turn 9, 40 tool calls" would paint exactly the picture these readings exist to rule out. A cached `settled` still inherits `instructionsHead`, since the completion cache keys on the input and the instructions are therefore identical by construction; `queued` does not, since it may carry amended ones. An ask's cached `settled` carries its birth facts — `kind`, actor ref, `instructionsHead` — like the `queued` it replaces, so the node is attributed to its subagent even when the table never held the instance (an amended run always starts with none). The same two events move the listed actor's `sessionId`: an ask's cached `settled` sets it to the payload's `sourceSessionId` when present and to the envelope's `actorSessionId` otherwise, and an ask's `node-dispatched` sets it to the envelope's `actorSessionId`. The last such event wins, which is right because a subagent's asks settle in order and divergence from an import is monotone: import hits come first and name the predecessor's session, and from the first live dispatch on the subagent's own session holds everything, the imported prefix included. An event that brings neither id changes nothing, so a journal written before cache hits named their actor keeps the session `actor-created` gave. A dispatch that enters its subagent into the table (activation, below) builds the entry from the repeated birth facts, `model` from the payload's `actorModel` included, so a subagent evicted and brought back keeps its model label. |
+| `node-progress`                     | updates `turn`, `toolCalls` and `lastTool` on the node that already exists, and nothing else — no phase, no step count, no actor status (a turn resolving is not a lifecycle transition). A field the payload does not carry readably keeps its known value; an instance the table does not hold (evicted at the bound, or progress before its `queued`) is ignored, like any other node event for an unknown instance. Last writer wins rather than a monotone max, so a re-queued ask may count down                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `report`                            | upsert by `(siteId, ordinal)` into `reports` with a serialized preview; touches no node, actor or count                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `artifact-published`                | upsert by artifact id (a new version replaces its card), carrying `primary` when the record has it; `artifact-failed` is a no-op                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `usage-updated`                     | `usage.spentTokens` = the event's absolute total. The reset on `run-started` is momentary for a run that already cost something: the engine emits this event with the restored (resume) or inherited (amend) total right after `run-started`, before any live turn (`apps/zcode-cli/packages/dynamic-workflow/docs/execution-engine.md`, "Usage accounting")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `escalation-raised` / `-resolved`   | upsert or remove by `qid`; the key disappears when empty                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `concurrency-changed`               | the `concurrency` block (`docs/dynamic-workflow/concurrency.md`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `run-caps-changed`                  | the run's own bound inside the same `concurrency` block, by the rule `run-started` uses: `limit` when the new `caps.maxConcurrency` differs from the payload's `concurrencyCeiling` (the default parallelism), cleared when it equals it, and `concurrency` dropped when the shared side has nothing to say either; `concurrencyCeiling` updated when readable; the shared cap, key and cooldown untouched (`docs/dynamic-workflow/concurrency.md`, "Retuning a live run")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `phase-entered`                     | upsert `phases` by name with `rounds = max(rounds, ordinal)` (monotone, so a resumed prefix is a no-op); `currentPhase` always set, even when the phase table is full                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `run-settled`                       | status for `completed` / `errored` / `stopped`; `stopReason` only when stopped; `error` cut to 2048; `resumable` only when the payload says so; pending questions and cooldown cleared                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| anything else (`log`, `compaction`) | raises the watermark only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 At a bound the table makes room before it refuses, because what a reader needs to see is the
 work that is happening now, and at a bound that is exactly what a refusal drops. A **group**
@@ -1732,7 +1831,7 @@ before cache hits named their actor — one whose only asks were cache hits, who
 loose and name nobody. A **loose node** is a listed node with no actor ref (a world-read, or such
 an older cache hit). A group or a loose node is **failed** when any of its node outcomes is
 `failed` or `cancelled`. Table priority runs live > idle > finished > zero-node, and only an event
-that raises the watermark ever evicts — a replayed one never does. Reading "idle" as *all* nodes
+that raises the watermark ever evicts — a replayed one never does. Reading "idle" as _all_ nodes
 queued instead would leave an agent on its second ask in no class at all, and a table full of
 those refuses a dispatch — the very symptom this rule exists to remove.
 
@@ -1767,7 +1866,7 @@ table therefore admits on three occasions:
   engine emits bare right after its own `node-queued` — behaves as it always did.
 
 Every other new key at a full table is refused as before, with `truncated` set (never cleared);
-in particular the cached `node-settled` that is *born* settled never evicts, since it never
+in particular the cached `node-settled` that is _born_ settled never evicts, since it never
 executed and has nothing left to show. An existing key still updates: freezing a live instance
 at `queued` would mislead more than omitting one. Eviction sets `truncated` too — the run's
 tables no longer hold its own facts, which is what that flag says and what `run-started` reads
@@ -1963,7 +2062,7 @@ says which workflow, where it has got to, and how long, in two lines of fixed he
   pending run or without a paired background work.
 - **Line two** is the sidebar run line's vocabulary: the same `WorkflowRunRail` (lamps,
   trace segments, twin segments, the ±2 fold with `+n`), then the **phase words**. A running
-  run's words are its burning phases joined by ` ∥ ` when more than one burns, else its
+  run's words are its burning phases joined by `∥` when more than one burns, else its
   current phase, else the status word. A pending run shows a hollow lamp and the status word.
   A run that declared no phases shows one running lamp and `{done}/{total} steps`, the only
   place steps still appear.

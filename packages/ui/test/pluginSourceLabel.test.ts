@@ -21,15 +21,15 @@ function makeMarketplace(
 
 describe("resolveMarketplaceDisplayName", () => {
   it("maps the official marketplace id to the Claude Code Plugins label", () => {
-    expect(
-      resolveMarketplaceDisplayName("claude-plugins-official", [], CLAUDE_CODE_PLUGINS),
-    ).toBe(CLAUDE_CODE_PLUGINS);
+    expect(resolveMarketplaceDisplayName("claude-plugins-official", [], CLAUDE_CODE_PLUGINS)).toBe(
+      CLAUDE_CODE_PLUGINS,
+    );
   });
 
   it("uses the overview name for known marketplaces", () => {
-    expect(
-      resolveMarketplaceDisplayName("acme", [makeMarketplace()], CLAUDE_CODE_PLUGINS),
-    ).toBe("Acme Marketplace");
+    expect(resolveMarketplaceDisplayName("acme", [makeMarketplace()], CLAUDE_CODE_PLUGINS)).toBe(
+      "Acme Marketplace",
+    );
   });
 
   it("falls back to the raw id for unknown marketplaces", () => {
@@ -56,15 +56,15 @@ describe("resolvePluginSourceLabel", () => {
   });
 
   it("labels inline plugins as built-in", () => {
-    expect(
-      resolvePluginSourceLabel({ ...common, source: "inline", marketplace: "inline" }),
-    ).toBe("Built-in");
+    expect(resolvePluginSourceLabel({ ...common, source: "inline", marketplace: "inline" })).toBe(
+      "Built-in",
+    );
   });
 
   it("labels cache plugins as installed from their marketplace", () => {
-    expect(
-      resolvePluginSourceLabel({ ...common, source: "cache", marketplace: "acme" }),
-    ).toBe("From Acme Marketplace");
+    expect(resolvePluginSourceLabel({ ...common, source: "cache", marketplace: "acme" })).toBe(
+      "From Acme Marketplace",
+    );
   });
 
   it("uses the Claude Code Plugins label for official-marketplace installs", () => {

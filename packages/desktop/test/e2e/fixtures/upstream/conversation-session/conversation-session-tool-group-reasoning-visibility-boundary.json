@@ -6,9 +6,19 @@
     {
       "id": "tge04-execute-a",
       "description": "TGE04 emits reasoning followed by the first Terminal command.",
-      "metadata": { "kind": "main", "source": "synthetic", "timingPolicy": "recorded-stream", "syntheticReason": "真实 provider 是否在每次工具继续前输出 reasoning 不稳定；固定 reasoning row 才能验证显示设置边界。" },
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "recorded-stream",
+        "syntheticReason": "真实 provider 是否在每次工具继续前输出 reasoning 不稳定；固定 reasoning row 才能验证显示设置边界。"
+      },
       "maxMatches": 1,
-      "match": { "method": "POST", "pathIncludes": "/messages", "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY"], "bodyExcludes": ["Generate a concise title", "toolu_tge04_execute_a"] },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY"],
+        "bodyExcludes": ["Generate a concise title", "toolu_tge04_execute_a"]
+      },
       "response": {
         "statusCode": 200,
         "headers": { "content-type": "text/event-stream; charset=utf-8" },
@@ -18,9 +28,19 @@
     {
       "id": "tge04-execute-b",
       "description": "TGE04 emits reasoning followed by the second Terminal command.",
-      "metadata": { "kind": "main", "source": "synthetic", "timingPolicy": "recorded-stream", "syntheticReason": "第二条 reasoning row 用于验证隐藏时合并、显示时拆分。" },
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "recorded-stream",
+        "syntheticReason": "第二条 reasoning row 用于验证隐藏时合并、显示时拆分。"
+      },
       "maxMatches": 1,
-      "match": { "method": "POST", "pathIncludes": "/messages", "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_execute_a"], "bodyExcludes": ["Generate a concise title", "toolu_tge04_execute_b"] },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_execute_a"],
+        "bodyExcludes": ["Generate a concise title", "toolu_tge04_execute_b"]
+      },
       "response": {
         "statusCode": 200,
         "headers": { "content-type": "text/event-stream; charset=utf-8" },
@@ -30,9 +50,19 @@
     {
       "id": "tge04-write",
       "description": "TGE04 emits reasoning followed by Write.",
-      "metadata": { "kind": "main", "source": "synthetic", "timingPolicy": "recorded-stream", "syntheticReason": "固定 reasoning + Write 边界，验证 Changes 的同一可见性合同。" },
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "recorded-stream",
+        "syntheticReason": "固定 reasoning + Write 边界，验证 Changes 的同一可见性合同。"
+      },
       "maxMatches": 1,
-      "match": { "method": "POST", "pathIncludes": "/messages", "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_execute_b"], "bodyExcludes": ["Generate a concise title", "toolu_tge04_write"] },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_execute_b"],
+        "bodyExcludes": ["Generate a concise title", "toolu_tge04_write"]
+      },
       "response": {
         "statusCode": 200,
         "headers": { "content-type": "text/event-stream; charset=utf-8" },
@@ -42,9 +72,19 @@
     {
       "id": "tge04-edit",
       "description": "TGE04 emits reasoning followed by Edit.",
-      "metadata": { "kind": "main", "source": "synthetic", "timingPolicy": "recorded-stream", "syntheticReason": "固定第二条 file-write reasoning row，用于显示设置切换后拆分 Changes。" },
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "recorded-stream",
+        "syntheticReason": "固定第二条 file-write reasoning row，用于显示设置切换后拆分 Changes。"
+      },
       "maxMatches": 1,
-      "match": { "method": "POST", "pathIncludes": "/messages", "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_write"], "bodyExcludes": ["Generate a concise title", "toolu_tge04_edit"] },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_write"],
+        "bodyExcludes": ["Generate a concise title", "toolu_tge04_edit"]
+      },
       "response": {
         "statusCode": 200,
         "headers": { "content-type": "text/event-stream; charset=utf-8" },
@@ -54,9 +94,19 @@
     {
       "id": "tge04-final",
       "description": "TGE04 completes the reasoning boundary turn.",
-      "metadata": { "kind": "main", "source": "synthetic", "timingPolicy": "fast-text", "syntheticReason": "固定终态用于 reload 后按设置重新派生同一历史 rows。" },
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "fast-text",
+        "syntheticReason": "固定终态用于 reload 后按设置重新派生同一历史 rows。"
+      },
       "maxMatches": 1,
-      "match": { "method": "POST", "pathIncludes": "/messages", "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_edit"], "bodyExcludes": ["Generate a concise title"] },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["E2E_TOOL_GROUP_REASONING_VISIBILITY_BOUNDARY", "toolu_tge04_edit"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
       "response": { "statusCode": 200, "text": "upstream-e2e-ok" }
     }
   ]

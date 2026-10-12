@@ -49,10 +49,7 @@ describe("workspaceEditorSelection", () => {
       },
     });
 
-    expect(selection.availableEditors.map((editor) => editor.id)).toEqual([
-      "vscode",
-      "explorer",
-    ]);
+    expect(selection.availableEditors.map((editor) => editor.id)).toEqual(["vscode", "explorer"]);
     expect(selection.selectedEditor?.id).toBe("vscode");
     expect(selection.selectionKind).toBe("fallback");
     expect(shouldPersistWorkspaceEditorSelection(selection.selectionKind)).toBe(false);
@@ -74,10 +71,7 @@ describe("workspaceEditorSelection", () => {
   });
 
   it("只有 WSL 可以复用 Explorer 作为远程文件管理器入口", () => {
-    const editors = [
-      makeEditor("vscode"),
-      makeEditor("explorer", "资源管理器"),
-    ];
+    const editors = [makeEditor("vscode"), makeEditor("explorer", "资源管理器")];
 
     expect(
       resolveWorkspaceFileManagerEditor(editors, {

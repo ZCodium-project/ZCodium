@@ -23,10 +23,12 @@
 ### Task 1: Feedback Screenshot Draft Helper
 
 **Files:**
+
 - Create: `packages/ui/src/feedback/feedbackScreenshotDraft.ts`
 - Test: `packages/ui/test/feedbackScreenshotDraft.test.ts`
 
 **Interfaces:**
+
 - Consumes: `IPlatformService.captureWindowScreenshot?(): Promise<WindowScreenshotResult | null>`
 - Produces: `captureFeedbackScreenshotDraft(platform): Promise<FeedbackAttachmentDraft[]>`
 
@@ -103,10 +105,12 @@ Expected: PASS.
 ### Task 2: Workspace Help Menu Uses Screenshot Draft
 
 **Files:**
+
 - Modify: `packages/ui/src/WorkspaceHelpMenuButton.tsx`
 - Modify: `packages/ui/test/workspaceHeaderActionSection.test.ts`
 
 **Interfaces:**
+
 - Consumes: `captureFeedbackScreenshotDraft(platform)`
 - Produces: help menu issue report draft with `screenshots: FeedbackAttachmentDraft[]`
 
@@ -237,9 +241,11 @@ Expected: PASS.
 ### Task 3: Full Verification And Commit
 
 **Files:**
+
 - Verify all files changed by Tasks 1-2.
 
 **Interfaces:**
+
 - Consumes: implementation from Tasks 1-2.
 - Produces: committed feature implementation.
 

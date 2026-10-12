@@ -32,17 +32,11 @@ interface GoalTimelineExpectation {
 const FIRST_TARGET_TIMELINE_STEPS = [
   {
     label: "iteration-1-incomplete",
-    texts: [
-      "第 1 次迭代 · 目标未完成，任务继续",
-      "Iteration 1 · Goal incomplete, continuing",
-    ],
+    texts: ["第 1 次迭代 · 目标未完成，任务继续", "Iteration 1 · Goal incomplete, continuing"],
   },
   {
     label: "iteration-2-complete",
-    texts: [
-      "第 2 次迭代 · 目标已完成，任务结束",
-      "Iteration 2 · Goal complete, ending task",
-    ],
+    texts: ["第 2 次迭代 · 目标已完成，任务结束", "Iteration 2 · Goal complete, ending task"],
   },
 ] as const satisfies readonly GoalTimelineExpectation[];
 
@@ -98,11 +92,7 @@ describe("会话区 Goal Timeline E2E", () => {
 
     await waitForUpstreamRequest(
       {
-        includes: [
-          GOAL_A_MARKER,
-          FINAL_REPLY,
-          "Verify whether the active session goal",
-        ],
+        includes: [GOAL_A_MARKER, FINAL_REPLY, "Verify whether the active session goal"],
       },
       "goal timeline: 没有捕获到第 2 次 verifier 请求",
       120000,
@@ -113,8 +103,7 @@ describe("会话区 Goal Timeline E2E", () => {
         snapshot.state !== "streaming" &&
         snapshot.queueCount === 0 &&
         snapshot.targetObjective?.includes(GOAL_A_MARKER) === true &&
-        (snapshot.targetStatus === "complete" ||
-          snapshot.targetStatus === "completed"),
+        (snapshot.targetStatus === "complete" || snapshot.targetStatus === "completed"),
       "goal timeline: 第一个目标最终没有回到完成态",
       120000,
     );
@@ -124,19 +113,12 @@ describe("会话区 Goal Timeline E2E", () => {
 
     const secondTargetObjective = `${GOAL_B_MARKER}: 写一篇 10w 字科幻小说。不要调用工具。`;
     await sendPrompt(`/goal ${secondTargetObjective}`);
-    await waitForComposerText(
-      "",
-      "goal timeline: 第二个 /goal 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "goal timeline: 第二个 /goal 发送后输入框没有清空");
     await waitForUserMessageContaining(secondTargetObjective);
     await waitForAssistantMessageContaining(SECOND_TARGET_REPLY);
     await waitForUpstreamRequest(
       {
-        includes: [
-          GOAL_B_MARKER,
-          SECOND_TARGET_REPLY,
-          "Verify whether the active session goal",
-        ],
+        includes: [GOAL_B_MARKER, SECOND_TARGET_REPLY, "Verify whether the active session goal"],
       },
       "goal timeline: 没有捕获到新 target 的第 3 次 verifier 请求",
       120000,
@@ -148,10 +130,7 @@ describe("会话区 Goal Timeline E2E", () => {
     // 之前已经启动下一轮合法自动续跑；本 case 只验证前三个 timeline 的归属和顺序。
     expect(
       await countUpstreamRequests({
-        includes: [
-          GOAL_MARKER_PREFIX,
-          "Verify whether the active session goal",
-        ],
+        includes: [GOAL_MARKER_PREFIX, "Verify whether the active session goal"],
       }),
     ).toBeGreaterThanOrEqual(3);
 
@@ -159,32 +138,14 @@ describe("会话区 Goal Timeline E2E", () => {
       .filter((entry) => entry.kind === "goalTimeline")
       .map((entry) => normalizeEntryText(entry.text));
 
-    expect(
-      resolveGoalTimelineSteps(timelineTexts, EXPECTED_TIMELINE_STEPS),
-    ).toEqual(
+    expect(resolveGoalTimelineSteps(timelineTexts, EXPECTED_TIMELINE_STEPS)).toEqual(
       EXPECTED_TIMELINE_STEPS.map((step) => step.label),
     );
 
-    const firstAssistantIndex = findEntryIndex(
-      entries,
-      "assistant",
-      FIRST_REPLY,
-    );
-    const firstTimelineIndex = findEntryIndex(
-      entries,
-      "goalTimeline",
-      EXPECTED_TIMELINE_STEPS[0],
-    );
-    const finalTimelineIndex = findEntryIndex(
-      entries,
-      "goalTimeline",
-      EXPECTED_TIMELINE_STEPS[1],
-    );
-    const secondTargetUserIndex = findEntryIndex(
-      entries,
-      "user",
-      secondTargetObjective,
-    );
+    const firstAssistantIndex = findEntryIndex(entries, "assistant", FIRST_REPLY);
+    const firstTimelineIndex = findEntryIndex(entries, "goalTimeline", EXPECTED_TIMELINE_STEPS[0]);
+    const finalTimelineIndex = findEntryIndex(entries, "goalTimeline", EXPECTED_TIMELINE_STEPS[1]);
+    const secondTargetUserIndex = findEntryIndex(entries, "user", secondTargetObjective);
     const secondTargetTimelineIndex = findEntryIndexFrom(
       entries,
       "goalTimeline",
@@ -208,11 +169,7 @@ describe("会话区 Goal Timeline E2E", () => {
       secondTargetTimelineIndex < 0
     ) {
       throw new Error(
-        `goal timeline: 缺少预期消息或 timeline: ${JSON.stringify(
-          orderSnapshot,
-          null,
-          2,
-        )}`,
+        `goal timeline: 缺少预期消息或 timeline: ${JSON.stringify(orderSnapshot, null, 2)}`,
       );
     }
     expect(firstAssistantIndex).toBeLessThan(firstTimelineIndex);
@@ -235,16 +192,13 @@ async function stopIfStreaming() {
   // 后续长目标续跑把测试拖成 fixture 完整性用例。
   await clickChatStop();
   await waitForChatState(
-    (latest) =>
-      latest.state !== "streaming" && latest.runtimeStatus !== "streaming",
+    (latest) => latest.state !== "streaming" && latest.runtimeStatus !== "streaming",
     "goal timeline: 收尾 stop 后没有退出 streaming",
     30000,
   );
 }
 
-async function waitForGoalTimelineTexts(
-  expectedSteps: readonly GoalTimelineExpectation[],
-) {
+async function waitForGoalTimelineTexts(expectedSteps: readonly GoalTimelineExpectation[]) {
   let entries: ConversationEntrySnapshot[] = [];
   let timelineTexts: string[] = [];
   let timelineSteps: Array<string | null> = [];
@@ -257,9 +211,7 @@ async function waitForGoalTimelineTexts(
       timelineSteps = resolveGoalTimelineSteps(timelineTexts, expectedSteps);
       // 修复原因：CI 和本地可能使用不同 locale，timeline 文案会在中英文间切换。
       // 这里锁定 verifier 轮次/完成语义，而不是固定某一种语言的展示文案。
-      return expectedSteps.every(
-        (step, index) => timelineSteps[index] === step.label,
-      );
+      return expectedSteps.every((step, index) => timelineSteps[index] === step.label);
     },
     {
       timeout: 30000,
@@ -276,9 +228,7 @@ async function waitForGoalTimelineTexts(
 function getConversationEntrySnapshot(): Promise<ConversationEntrySnapshot[]> {
   return browser.execute(
     (messagesTestId, userPrefix, assistantPrefix, goalVerificationPrefix) => {
-      const root = document.querySelector<HTMLElement>(
-        `[data-testid="${messagesTestId}"]`,
-      );
+      const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
       if (!root) return [];
 
       const candidates = Array.from(
@@ -339,9 +289,7 @@ function normalizeEntryText(text: string) {
 
 function normalizeGoalTimelineText(text: string) {
   const normalized = normalizeEntryText(text);
-  const match = EXPECTED_TIMELINE_STEPS.find((step) =>
-    matchesGoalTimelineText(normalized, step),
-  );
+  const match = EXPECTED_TIMELINE_STEPS.find((step) => matchesGoalTimelineText(normalized, step));
   return match?.label ?? null;
 }
 
@@ -356,10 +304,7 @@ function resolveGoalTimelineSteps(
   );
 }
 
-function matchesGoalTimelineText(
-  text: string,
-  expected: GoalTimelineExpectation,
-) {
+function matchesGoalTimelineText(text: string, expected: GoalTimelineExpectation) {
   const normalized = normalizeEntryText(text);
   return expected.texts.includes(normalized);
 }
@@ -379,10 +324,7 @@ function findEntryIndexFrom(
   fromIndex: number,
 ) {
   return entries.findIndex(
-    (entry, index) =>
-      index >= fromIndex &&
-      entry.kind === kind &&
-      entryMatchesText(entry, text),
+    (entry, index) => index >= fromIndex && entry.kind === kind && entryMatchesText(entry, text),
   );
 }
 

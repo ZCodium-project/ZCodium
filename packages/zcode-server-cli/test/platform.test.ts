@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { join } from "node:path";
-import { createDaemonServiceDescriptor, createServiceDescriptor, serviceDescriptorPath } from "../src/platform/serviceManager.js";
+import {
+  createDaemonServiceDescriptor,
+  createServiceDescriptor,
+  serviceDescriptorPath,
+} from "../src/platform/serviceManager.js";
 import { resolveServerLayout, stablePathId } from "../src/runtime/paths.js";
 
 describe("user service descriptors", () => {
@@ -44,7 +48,11 @@ describe("user service descriptors", () => {
     const second = createDaemonServiceDescriptor({ platform: "linux", layout: secondLayout });
 
     expect(first.name).not.toBe(second.name);
-    expect(serviceDescriptorPath(firstLayout, first)).toBe(join(firstLayout.serviceDir, `${first.name}.service`));
-    expect(serviceDescriptorPath(secondLayout, second)).toBe(join(secondLayout.serviceDir, `${second.name}.service`));
+    expect(serviceDescriptorPath(firstLayout, first)).toBe(
+      join(firstLayout.serviceDir, `${first.name}.service`),
+    );
+    expect(serviceDescriptorPath(secondLayout, second)).toBe(
+      join(secondLayout.serviceDir, `${second.name}.service`),
+    );
   });
 });

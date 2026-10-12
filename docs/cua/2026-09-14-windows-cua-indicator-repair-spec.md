@@ -21,11 +21,11 @@ macOS PiP 行为。zcode-cua producer **零改动**，因此不需要升 pin。
 `mcp__node_repl__js` 的 `input.code` 里提取 SDK 调用名，再拿动作词表
 （tracker 的 `CUA_SDK_ACTIONS`）比对。node_repl 重构后没有任何真实调用形态能命中：
 
-| 模型实际写法（SKILL.md） | 正则结果 |
-| --- | --- |
-| `agent.computerUse.getApp("Notes")` | `getApp`（不在动作集，门面方法是 camelCase） |
-| `app.click(42)` / `app.typeText(…)` / `app.pressKey(…)` | 不匹配（变量名是 `app`） |
-| `agent.computerUse.computer.left_click({…})` | 不匹配（`computer` 后是 `.` 不是 `(`） |
+| 模型实际写法（SKILL.md）                                | 正则结果                                     |
+| ------------------------------------------------------- | -------------------------------------------- |
+| `agent.computerUse.getApp("Notes")`                     | `getApp`（不在动作集，门面方法是 camelCase） |
+| `app.click(42)` / `app.typeText(…)` / `app.pressKey(…)` | 不匹配（变量名是 `app`）                     |
+| `agent.computerUse.computer.left_click({…})`            | 不匹配（`computer` 后是 `.` 不是 `(`）       |
 
 唯一能命中的 `agent.computerUse.left_click(…)` 在 SDK 与文档中都不存在，只存在于
 `bootstrap/tests/computer-use-operation-event.test.ts` 的夹具里——该测试长期为**假绿**。
@@ -79,14 +79,14 @@ start 时已拿不到模型源码，所以"是否 CUA"只能在排期时判定�
 
 显示只有一个入口，关闭有六条，任意一条成立即收场：
 
-| 触发 | 位置 |
-| --- | --- |
+| 触发                             | 位置                                          |
+| -------------------------------- | --------------------------------------------- |
 | `turn-completed` / `turn-failed` | tracker `clearTurn` → reporter `active:false` |
-| `session-closed` | tracker `clearSession` |
-| 新 turn 顶掉旧 turn | tracker `retireTurn` + `clearSession` |
-| workspace 关闭 / runtime 不可用 | `clearWorkspaceKey` / `clearSource` |
-| 应用退出 | `dispose()` 销毁窗口 |
-| 以上全部失约 | `AUTO_HIDE_MS` 兜底计时器 |
+| `session-closed`                 | tracker `clearSession`                        |
+| 新 turn 顶掉旧 turn              | tracker `retireTurn` + `clearSession`         |
+| workspace 关闭 / runtime 不可用  | `clearWorkspaceKey` / `clearSource`           |
+| 应用退出                         | `dispose()` 销毁窗口                          |
+| 以上全部失约                     | `AUTO_HIDE_MS` 兜底计时器                     |
 
 兜底时限从 `10_000` 调到 `30_000`。理由：事实现在按 cell 上报，同一 turn 内后续 cell 会
 刷新计时器，但单个 cell 本身可以跑很久，10 秒会让浮层在操作中途熄灭；30 秒同时保住了
@@ -161,12 +161,12 @@ UI、desktop main、web 与其他包均无引用，因此 `operationAction` 没�
 
 实测数据留档（Windows 11 / Electron 41.0.3），若将来重启该方案可直接复用：
 
-| 验证项 | 结果 |
-| --- | --- |
-| 完整 Electron 模式下 Helper ready / broker RPC / `stop()` 退出 | 集成测试 2 passed，exit 0 |
-| `BrowserWindow` + `setAlwaysOnTop(_, "screen-saver")` + `screen` API | 均可用 |
-| `helperReaper` 的 `--socket <值>` 匹配 | 命令行含该值的进程恰好 1 个，精确认领不受影响 |
-| 硬杀 Helper 后 Chromium 子进程（gpu/utility/renderer） | 3 个全部随父退出，零孤儿 |
+| 验证项                                                               | 结果                                          |
+| -------------------------------------------------------------------- | --------------------------------------------- |
+| 完整 Electron 模式下 Helper ready / broker RPC / `stop()` 退出       | 集成测试 2 passed，exit 0                     |
+| `BrowserWindow` + `setAlwaysOnTop(_, "screen-saver")` + `screen` API | 均可用                                        |
+| `helperReaper` 的 `--socket <值>` 匹配                               | 命令行含该值的进程恰好 1 个，精确认领不受影响 |
+| 硬杀 Helper 后 Chromium 子进程（gpu/utility/renderer）               | 3 个全部随父退出，零孤儿                      |
 
 另需注意：不能用 `isReadOnlyBrokerMethod` 取反当触发判据。该集合服务于**软超时**判定
 （凡有副作用都算动作），非只读一侧混着 lease 仲裁、焦点防抢与 `pip_session_event`——后者

@@ -24,12 +24,14 @@
 ### Task 1: Canonical Remote Asset Directory Modes
 
 **Files:**
+
 - Modify: `packages/server/test/localTarGz.test.ts`
 - Modify: `packages/server/src/remote/localTarGz.ts`
 - Modify: `packages/server/test/remoteDeploy.test.ts`
 - Modify: `packages/server/src/remote/zcodeAgentDeploy.ts`
 
 **Interfaces:**
+
 - Consumes: `createTarGzArchive(archivePath, entries)` and the existing ustar header format.
 - Produces: tar directory headers whose mode field is always `0o755`.
 

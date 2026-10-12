@@ -13,10 +13,7 @@ export interface V4ChatRootBrowserSnapshot {
 type BrowserWorkspaceState = {
   draftRuntime?: { status?: string | null };
   modelSwitchPending?: boolean;
-  taskRuntimeByTaskId?: Record<
-    string,
-    { activeInputId?: string | null; status?: string | null }
-  >;
+  taskRuntimeByTaskId?: Record<string, { activeInputId?: string | null; status?: string | null }>;
 };
 
 export function readV4ChatRootSnapshotInBrowser(
@@ -25,9 +22,7 @@ export function readV4ChatRootSnapshotInBrowser(
   v4StopTestId: string,
 ): V4ChatRootBrowserSnapshot {
   const pane = document.querySelector<HTMLElement>(`[data-testid="${v4PaneTestId}"]`);
-  const canStop = Boolean(
-    pane?.querySelector(`[data-testid="${v4StopTestId}"]`),
-  );
+  const canStop = Boolean(pane?.querySelector(`[data-testid="${v4StopTestId}"]`));
   const paneSessionId = pane?.getAttribute("data-session-id") ?? null;
   const taskId = paneSessionId && paneSessionId !== "draft" ? paneSessionId : null;
   const e2eWindow = window as Window & {
@@ -47,9 +42,7 @@ export function readV4ChatRootSnapshotInBrowser(
   const sessionState = e2eWindow.__zcodeSessionStoreE2E?.getState?.();
   const workspace = workspaceKey ? sessionState?.workspaces?.[workspaceKey] : undefined;
   const taskRuntime = taskId ? workspace?.taskRuntimeByTaskId?.[taskId] : undefined;
-  const runtimeStatus = taskId
-    ? taskRuntime?.status
-    : workspace?.draftRuntime?.status;
+  const runtimeStatus = taskId ? taskRuntime?.status : workspace?.draftRuntime?.status;
   const bridgeError = !pane
     ? "v4-pane-missing"
     : !e2eWindow.__zcodeTabStoreE2E?.getState

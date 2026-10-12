@@ -3023,40 +3023,43 @@ describe("zcodeSessionProjection", () => {
     ]);
   });
 
-  it.each(["plan", "edit"] as const)("maps %s mode updates without replacing historical values", (mode) => {
-    const events = zcodeSessionEventToZCodeStreamEvents({
-      event: {
-        eventId: "evt_mode",
-        sessionId: "sess_1",
-        seq: 4,
-        timestamp: 4,
-        traceId: "trace_mode",
-        type: "session.updated",
-        payload: {
-          mode,
-          previousMode: "build",
-          source: "tool",
+  it.each(["plan", "edit"] as const)(
+    "maps %s mode updates without replacing historical values",
+    (mode) => {
+      const events = zcodeSessionEventToZCodeStreamEvents({
+        event: {
+          eventId: "evt_mode",
+          sessionId: "sess_1",
+          seq: 4,
+          timestamp: 4,
+          traceId: "trace_mode",
+          type: "session.updated",
+          payload: {
+            mode,
+            previousMode: "build",
+            source: "tool",
+          },
         },
-      },
-      taskId: "sess_1",
-    });
-
-    expect(events).toHaveLength(1);
-    expect(events[0]).toEqual(
-      expect.objectContaining({
-        type: "mode_update",
         taskId: "sess_1",
-        traceId: "trace_mode",
-        currentModeId: mode,
-        availableModes: expect.arrayContaining([
-          expect.objectContaining({ id: "build" }),
-          expect.objectContaining({ id: "guarded" }),
-          expect.objectContaining({ id: "plan" }),
-          expect.objectContaining({ id: "yolo" }),
-        ]),
-      }),
-    );
-  });
+      });
+
+      expect(events).toHaveLength(1);
+      expect(events[0]).toEqual(
+        expect.objectContaining({
+          type: "mode_update",
+          taskId: "sess_1",
+          traceId: "trace_mode",
+          currentModeId: mode,
+          availableModes: expect.arrayContaining([
+            expect.objectContaining({ id: "build" }),
+            expect.objectContaining({ id: "guarded" }),
+            expect.objectContaining({ id: "plan" }),
+            expect.objectContaining({ id: "yolo" }),
+          ]),
+        }),
+      );
+    },
+  );
 
   it("maps main turn model usage with context window to legacy usage_update events", () => {
     expect(

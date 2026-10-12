@@ -55,12 +55,14 @@ RENDERER (UI)
 ## 4. 核心链路（P0 headless）
 
 模型在 REPL 里执行：
+
 ```js
 nodeRepl.write(await agent.browsers.documentation());
 const tab = await agent.browsers.open("https://example.com");
 const shot = await tab.screenshot();
 await nodeRepl.emitImage({ base64: shot.image.base64, mimeType: shot.image.mimeType });
 ```
+
 链路：`js` 工具 → NodeReplSession.run → `agent.browsers.open` → BrowserCommand{navigate} → BrowserControlPort → requestClient → host router → parentPort → main BrowserGuestManager(loadURL) → 回；再 screenshot 同样一趟到 guest CDP `Page.captureScreenshot`。
 
 ## 5. 契约同源（防漂移）

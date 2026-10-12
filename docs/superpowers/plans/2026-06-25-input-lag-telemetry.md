@@ -23,10 +23,12 @@
 ### Task 1: telemetry 层 — 常量、纯函数判定、上报函数
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/uiPerfArmsTelemetry.ts`(在文件末尾、stream stall 段之后追加)
 - Test: `packages/ui/test/uiPerfArmsTelemetry.test.ts`(新增一个 `describe("input lag", ...)`)
 
 **Interfaces:**
+
 - Consumes: 现有 `emit(payload: ArmsCustomEventPayload)`、`UI_PERF_ARMS_GROUP`、`armsReporter`(模块级,已由 `setUiPerfArmsReporter` 注入)。
 - Produces:
   - `INPUT_LAG_REPORT_THRESHOLD_MS: number`(= 500)
@@ -183,10 +185,7 @@ export function shouldReportInputLag(args: {
   if (args.isProgrammatic || args.isComposing) {
     return false;
   }
-  return (
-    args.lagMs > INPUT_LAG_REPORT_THRESHOLD_MS &&
-    args.lagMs <= INPUT_LAG_SANITY_MAX_MS
-  );
+  return args.lagMs > INPUT_LAG_REPORT_THRESHOLD_MS && args.lagMs <= INPUT_LAG_SANITY_MAX_MS;
 }
 
 export function recordInputLag(params: {
@@ -237,9 +236,11 @@ git commit -m "feat(ui): perf_ui_input_lag 埋点 telemetry 层(判定纯函数+
 ### Task 2: 组件接线 — 给程序化 update 打 tag,在 TextContentPlugin 计时上报
 
 **Files:**
+
 - Modify: `packages/ui/src/LexicalChatInput.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 1 的 `recordInputLag`;Lexical `editor.isComposing()`、update listener 回调的 `tags: Set<string>`、`editor.update(fn, { tag })`。
 - Produces: 模块级常量 `PROGRAMMATIC_UPDATE_TAG = "zcode-programmatic"`(仅本文件内用,无外部消费方)。
 
@@ -269,39 +270,45 @@ const PROGRAMMATIC_UPDATE_TAG = "zcode-programmatic";
 
 ```ts
 function replaceEditorText(editor: LexicalEditor, text: string) {
-  editor.update(() => {
-    const root = $getRoot();
-    root.clear();
+  editor.update(
+    () => {
+      const root = $getRoot();
+      root.clear();
 
-    // Lexical getTextContent() 用 \n\n 分隔段落，对称处理防止换行翻倍
-    for (const line of text.split("\n\n")) {
-      const paragraph = $createParagraphNode();
-      if (line) {
-        paragraph.append($createTextNode(line));
+      // Lexical getTextContent() 用 \n\n 分隔段落，对称处理防止换行翻倍
+      for (const line of text.split("\n\n")) {
+        const paragraph = $createParagraphNode();
+        if (line) {
+          paragraph.append($createTextNode(line));
+        }
+        root.append(paragraph);
       }
-      root.append(paragraph);
-    }
 
-    root.getLastChild()?.selectEnd();
-  }, { tag: PROGRAMMATIC_UPDATE_TAG });
+      root.getLastChild()?.selectEnd();
+    },
+    { tag: PROGRAMMATIC_UPDATE_TAG },
+  );
 }
 ```
 
 注意:`LeadingChineseSlashAliasPlugin` 里约 696 行那个 `editor.update`(把顿号归一成 `/`)**也是程序化插入**,同样补 tag:
 
 ```ts
-      editor.update(() => {
-        if (!isCollapsedSelectionAtEditorStart()) {
-          return;
-        }
+editor.update(
+  () => {
+    if (!isCollapsedSelectionAtEditorStart()) {
+      return;
+    }
 
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return;
-        }
+    const selection = $getSelection();
+    if (!$isRangeSelection(selection)) {
+      return;
+    }
 
-        selection.insertText(STANDARD_SLASH_TRIGGER);
-      }, { tag: PROGRAMMATIC_UPDATE_TAG });
+    selection.insertText(STANDARD_SLASH_TRIGGER);
+  },
+  { tag: PROGRAMMATIC_UPDATE_TAG },
+);
 ```
 
 - [ ] **Step 3: 在 TextContentPlugin 内计时并上报**
@@ -370,7 +377,7 @@ function TextContentPlugin({
 `LexicalChatInput` 组件已有 `taskId` prop(约 804 行 `taskId: string | null`)。在 JSX 里(约 945 行)把它传给插件:
 
 ```tsx
-          <TextContentPlugin onChange={onChange} taskId={taskId} />
+<TextContentPlugin onChange={onChange} taskId={taskId} />
 ```
 
 - [ ] **Step 5: 类型检查**
@@ -400,6 +407,7 @@ git commit -m "feat(ui): 输入框卡顿接线 perf_ui_input_lag(打程序化 ta
 ## Self-Review
 
 **Spec coverage:**
+
 - 事件 `perf_ui_input_lag` + `ui_perf` 组 → Task 1 Step 3。
 - 测量点在 `TextContentPlugin` 包住 getEditorMarkdown+onChange → Task 2 Step 3。
 - 阈值 500 / 哨兵 5000 → Task 1 常量。

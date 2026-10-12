@@ -1,13 +1,7 @@
 /** @vitest-environment jsdom */
 
 import { createElement } from "react";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MarkdownImage } from "@/components/ai-elements/markdown-image.js";
 import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
@@ -122,13 +116,9 @@ describe("MarkdownImage loading state", () => {
     };
     renderMarkdownImage("./broken.png", "/workspace");
 
-    const image = await waitFor(() =>
-      screen.getByRole("img", { name: "示例图" }),
-    );
+    const image = await waitFor(() => screen.getByRole("img", { name: "示例图" }));
     fireEvent.error(image);
 
-    expect(
-      screen.getByRole("img", { name: "暂时无法显示这张图片。" }),
-    ).not.toBeNull();
+    expect(screen.getByRole("img", { name: "暂时无法显示这张图片。" })).not.toBeNull();
   });
 });

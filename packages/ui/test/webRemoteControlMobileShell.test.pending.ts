@@ -30,8 +30,9 @@ vi.mock("@/logger.js", () => ({
 }));
 
 vi.mock("@/store/StoreProvider.js", () => ({
-  useZCodeStore: (selector: (state: { theme: string; setTheme: (theme: string) => void }) => unknown) =>
-    selector({ theme: "dark", setTheme: vi.fn() }),
+  useZCodeStore: (
+    selector: (state: { theme: string; setTheme: (theme: string) => void }) => unknown,
+  ) => selector({ theme: "dark", setTheme: vi.fn() }),
 }));
 
 vi.mock("@/components/ui/resizable.js", () => ({
@@ -84,10 +85,7 @@ function renderMobileShell(initialNavigationIntent?: "chat") {
   );
 }
 
-function renderMobileShellWithSidePane(
-  isSidePaneOpen: boolean,
-  chatOverlay?: ReactNode,
-) {
+function renderMobileShellWithSidePane(isSidePaneOpen: boolean, chatOverlay?: ReactNode) {
   return renderToStaticMarkup(
     createElement(WebRemoteControlMobileShell, {
       activeTaskId: "task-1",
@@ -324,9 +322,7 @@ describe("WebRemoteControlMobileShell", () => {
         createElement("input", { placeholder: "Search file changes..." }),
       ),
     );
-    const inertSurfaceContent = html.match(
-      /<main[^>]*inert=""[^>]*>([\s\S]*?)<\/main>/,
-    )?.[1];
+    const inertSurfaceContent = html.match(/<main[^>]*inert=""[^>]*>([\s\S]*?)<\/main>/)?.[1];
 
     expect(html).toContain('data-mobile-chat-overlay="true"');
     expect(html).toContain("pointer-events-none absolute inset-0 z-40");

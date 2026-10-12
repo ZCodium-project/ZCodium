@@ -40,14 +40,16 @@ npm install undici --save-dev
 Add the following require statement to the top of your config file.
 
 ```js title="wdio.conf.js"
-import { setGlobalDispatcher, ProxyAgent } from 'undici';
+import { setGlobalDispatcher, ProxyAgent } from "undici";
 
-const dispatcher = new ProxyAgent({ uri: new URL(process.env.https_proxy || 'http://my.corp.proxy.com:9090').toString() });
+const dispatcher = new ProxyAgent({
+  uri: new URL(process.env.https_proxy || "http://my.corp.proxy.com:9090").toString(),
+});
 setGlobalDispatcher(dispatcher);
 
 export const config = {
-    // ...
-}
+  // ...
+};
 ```
 
 Additional information about configuring the proxy can be located [here](https://github.com/nodejs/undici/blob/main/docs/docs/api/ProxyAgent.md).
@@ -75,21 +77,23 @@ The `proxy` parameters can be applied via the standard capabilities the followin
 
 ```js title="wdio.conf.js"
 export const config = {
-    // ...
-    capabilities: [{
-        browserName: 'chrome',
-        // ...
-        proxy: {
-            proxyType: "manual",
-            httpProxy: "corporate.proxy:8080",
-            socksUsername: "codeceptjs",
-            socksPassword: "secret",
-            noProxy: "127.0.0.1,localhost"
-        },
-        // ...
-    }],
-    // ...
-}
+  // ...
+  capabilities: [
+    {
+      browserName: "chrome",
+      // ...
+      proxy: {
+        proxyType: "manual",
+        httpProxy: "corporate.proxy:8080",
+        socksUsername: "codeceptjs",
+        socksPassword: "secret",
+        noProxy: "127.0.0.1,localhost",
+      },
+      // ...
+    },
+  ],
+  // ...
+};
 ```
 
 For more information, see the [WebDriver specification](https://w3c.github.io/webdriver/#proxy).

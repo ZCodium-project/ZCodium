@@ -183,6 +183,7 @@ This marks the comment (and all its replies) as resolved. The comment remains vi
 ## Minimum Viable Comment
 
 At minimum, a working comment requires:
+
 1. `comments.xml` with the `w:comment` element
 2. `document.xml` with range markers and reference
 3. Relationship in `document.xml.rels`

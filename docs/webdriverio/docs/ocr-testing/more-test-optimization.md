@@ -12,19 +12,19 @@ heavy processing.
 import { browser } from "@wdio/globals";
 
 describe("Search", () => {
-    it("be able to search for a value", async () => {
-        await browser.url("https://webbrowser.io");
-        await browser.ocrClickOnText({
-            text: "Search",
-        });
-        await browser.ocrSetValue({
-            text: "docs",
-            value: "specfileretries",
-        });
-        await browser.ocrWaitForTextDisplayed({
-            text: "specFileRetries",
-        });
+  it("be able to search for a value", async () => {
+    await browser.url("https://webbrowser.io");
+    await browser.ocrClickOnText({
+      text: "Search",
     });
+    await browser.ocrSetValue({
+      text: "docs",
+      value: "specfileretries",
+    });
+    await browser.ocrWaitForTextDisplayed({
+      text: "specFileRetries",
+    });
+  });
 });
 ```
 
@@ -70,22 +70,22 @@ If you would then change the script to this:
 import { browser } from "@wdio/globals";
 
 describe("Search", () => {
-    it("be able to search for a value", async () => {
-        await browser.url("https://webdriver.io");
-        await driver.ocrClickOnText({
-            haystack: $(".DocSearch"),
-            text: "Search",
-        });
-        await driver.ocrSetValue({
-            haystack: $(".DocSearch-Form"),
-            text: "docs",
-            value: "specfileretries",
-        });
-        await driver.ocrWaitForTextDisplayed({
-            haystack: $(".DocSearch-Dropdown"),
-            text: "specFileRetries",
-        });
+  it("be able to search for a value", async () => {
+    await browser.url("https://webdriver.io");
+    await driver.ocrClickOnText({
+      haystack: $(".DocSearch"),
+      text: "Search",
     });
+    await driver.ocrSetValue({
+      haystack: $(".DocSearch-Form"),
+      text: "docs",
+      value: "specfileretries",
+    });
+    await driver.ocrWaitForTextDisplayed({
+      haystack: $(".DocSearch-Dropdown"),
+      text: "specFileRetries",
+    });
+  });
 });
 ```
 

@@ -12,20 +12,20 @@
 
 ## 2. 决策
 
-| 决策 | R1 结论 |
-| --- | --- |
-| Host 聚合边界 | Host 持有 workspace/task membership、在线/运行/等待事实和列表写路由；Renderer 只持有展示偏好 |
-| 进程边界 | 每窗口唯一 Local Host；UI、手机和 Bot 不再创建独立 Remote Host |
-| 端口拓扑 | 同一 Local Host 同时暴露 base port 和多个 remote-scoped port |
-| 连接入口 | 保留 `IPlatformService -> Main`；Main 只做请求、状态事件和 MessagePort 薄转发 |
-| Remote Host 合并 | 合并 UI、手机、Bot 创建的全部 Desktop Remote Host |
-| 投影持久化 | `ControllerProjection` 仅驻内存并可从 source 重建，不增加数据库 |
-| 远端协议 | 不修改现有 SSH/WSL/Docker/Server 的 zcode-server service channel |
-| 列表写路由 | 跨 workspace 列表操作由 Controller 路由；进入 workspace/conversation 后继续使用 scoped facade |
-| Realtime Host 身份 | 每窗口一个 `hostId`，内部按 `workspaceKey + taskId` 路由 |
-| `remoteSessionId` | 由 Local Host 分配和管理；Main 只保存异步请求关联信息 |
-| 断连列表 | 保留最后可信 task 投影并标记离线；禁止写和本地回落；重连后原子替换 |
-| 上线与回滚 | Desktop 版本灰度；回滚旧 Desktop 版本，不做数据库或远端协议迁移 |
+| 决策               | R1 结论                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| Host 聚合边界      | Host 持有 workspace/task membership、在线/运行/等待事实和列表写路由；Renderer 只持有展示偏好  |
+| 进程边界           | 每窗口唯一 Local Host；UI、手机和 Bot 不再创建独立 Remote Host                                |
+| 端口拓扑           | 同一 Local Host 同时暴露 base port 和多个 remote-scoped port                                  |
+| 连接入口           | 保留 `IPlatformService -> Main`；Main 只做请求、状态事件和 MessagePort 薄转发                 |
+| Remote Host 合并   | 合并 UI、手机、Bot 创建的全部 Desktop Remote Host                                             |
+| 投影持久化         | `ControllerProjection` 仅驻内存并可从 source 重建，不增加数据库                               |
+| 远端协议           | 不修改现有 SSH/WSL/Docker/Server 的 zcode-server service channel                              |
+| 列表写路由         | 跨 workspace 列表操作由 Controller 路由；进入 workspace/conversation 后继续使用 scoped facade |
+| Realtime Host 身份 | 每窗口一个 `hostId`，内部按 `workspaceKey + taskId` 路由                                      |
+| `remoteSessionId`  | 由 Local Host 分配和管理；Main 只保存异步请求关联信息                                         |
+| 断连列表           | 保留最后可信 task 投影并标记离线；禁止写和本地回落；重连后原子替换                            |
+| 上线与回滚         | Desktop 版本灰度；回滚旧 Desktop 版本，不做数据库或远端协议迁移                               |
 
 既有不变量：
 

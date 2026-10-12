@@ -261,9 +261,7 @@ async function shouldSkipDevelopmentZCodeAgentDeploy(params: {
     return false;
   }
 
-  params.loggers.log(
-    `[zcode-agent-deploy] ${ZCODE_AGENT_PROVIDER}: 开发态 zcode.cjs 未变化，跳过`,
-  );
+  params.loggers.log(`[zcode-agent-deploy] ${ZCODE_AGENT_PROVIDER}: 开发态 zcode.cjs 未变化，跳过`);
   return true;
 }
 

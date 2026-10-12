@@ -1,5 +1,14 @@
 /* eslint-disable max-lines -- APC01-APC12 共用真实 Host stat、Browser/Preview Pane 与 cold-resume fixture。 */
-import { copyFile, mkdir, readFile, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  realpath,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { basename, join } from "node:path";
@@ -352,12 +361,16 @@ async function assertLocalHtmlExternalOpen() {
   try {
     const expectedTitle = basename(SOURCE_HTML_RELATIVE_PATH);
     const rows = await browser.$$('[data-zcode-stream-animate="true"]');
-    const row = (await rows.map(async (candidate) => ({
-      candidate,
-      text: await candidate.getText(),
-    }))).find(({ text }) => text.includes(expectedTitle))?.candidate;
+    const row = (
+      await rows.map(async (candidate) => ({
+        candidate,
+        text: await candidate.getText(),
+      }))
+    ).find(({ text }) => text.includes(expectedTitle))?.candidate;
     expect(row).toBeDefined();
-    const trigger = await row?.$('button[aria-label="Choose app"], button[aria-label="选择打开方式"]');
+    const trigger = await row?.$(
+      'button[aria-label="Choose app"], button[aria-label="选择打开方式"]',
+    );
     expect(trigger).toBeDefined();
     await trigger?.click();
 
@@ -365,10 +378,12 @@ async function assertLocalHtmlExternalOpen() {
       async () => {
         const labels = new Set(["Open in browser", "在浏览器中打开"]);
         const items = await browser.$$('[role="menuitem"]');
-        const item = (await items.map(async (candidate) => ({
-          candidate,
-          text: await candidate.getText(),
-        }))).find(({ text }) => labels.has(text.trim()))?.candidate;
+        const item = (
+          await items.map(async (candidate) => ({
+            candidate,
+            text: await candidate.getText(),
+          }))
+        ).find(({ text }) => labels.has(text.trim()))?.candidate;
         if (!item) return false;
         await item.click();
         return true;

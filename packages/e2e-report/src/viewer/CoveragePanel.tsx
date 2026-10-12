@@ -2,11 +2,7 @@ import type { ReactNode } from "react";
 import type { UIRendererCoverageSummary } from "../shared/types.js";
 import { formatNumber } from "./format.js";
 
-export function CoveragePanel({
-  coverage,
-}: {
-  coverage?: UIRendererCoverageSummary;
-}) {
+export function CoveragePanel({ coverage }: { coverage?: UIRendererCoverageSummary }) {
   if (!coverage) {
     return (
       <Panel title="Coverage" meta="disabled" wide>
@@ -18,8 +14,7 @@ export function CoveragePanel({
   const sourceFiles = coverage.sourceFiles ?? [];
   const sourceFileRows = [...sourceFiles].sort(
     (left, right) =>
-      left.lines.pct - right.lines.pct ||
-      left.relativePath.localeCompare(right.relativePath),
+      left.lines.pct - right.lines.pct || left.relativePath.localeCompare(right.relativePath),
   );
   const lineMetric = coverage.totals.lines;
   const meta = lineMetric
@@ -135,12 +130,7 @@ function CoverageMetric({
   );
 }
 
-function Panel(props: {
-  children: ReactNode;
-  meta?: string;
-  title: string;
-  wide?: boolean;
-}) {
+function Panel(props: { children: ReactNode; meta?: string; title: string; wide?: boolean }) {
   return (
     <section className={props.wide ? "panel wide" : "panel"}>
       <div className="panelHeader">

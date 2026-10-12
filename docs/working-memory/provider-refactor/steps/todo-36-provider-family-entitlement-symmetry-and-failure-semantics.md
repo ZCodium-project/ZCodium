@@ -211,7 +211,7 @@ Provider DTO 或状态权威。
 `StatusCards.tsx` 当前使用：
 
 ```ts
-providerName.toLowerCase() === "bigmodel" ? "bigmodel" : "zai"
+providerName.toLowerCase() === "bigmodel" ? "bigmodel" : "zai";
 ```
 
 这会把任何不是精确 `BigModel` 的展示名称都解释为 Z.AI，并让本地化或文案调整改变业务行为。由该结果控制的图标、
@@ -348,23 +348,23 @@ Account 连接和主动退出位于图外：Account Source 决定 Provider 是�
 
 以下矩阵对 Z.AI 与 BigModel 使用同一组参数化断言：
 
-| 连接 | Access 条件 | 查询目标 | 额外上下文 |
-| --- | --- | --- | --- |
-| Start | Start Account Access 存在 | `startPlanProviderId` | 无 Team scope |
-| Individual | Individual Access 存在 | `individualCodingPlanProviderId` | Personal |
-| Team | 已选有效 Team connection | `teamCodingPlanProviderId` | product/org/project |
+| 连接       | Access 条件               | 查询目标                         | 额外上下文          |
+| ---------- | ------------------------- | -------------------------------- | ------------------- |
+| Start      | Start Account Access 存在 | `startPlanProviderId`            | 无 Team scope       |
+| Individual | Individual Access 存在    | `individualCodingPlanProviderId` | Personal            |
+| Team       | 已选有效 Team connection  | `teamCodingPlanProviderId`       | product/org/project |
 
 ### 6.2 失败状态
 
-| Entitlement 结果 | 已有选择 | 是否保留 | UI 状态 |
-| --- | --- | --- | --- |
-| active | 任意匹配连接 | 是 | purchased |
-| no_plan | 对应连接 | 否，可自动回退 | notPurchased |
-| unavailable | 对应连接 | 是 | unavailable |
+| Entitlement 结果  | 已有选择               | 是否保留               | UI 状态                  |
+| ----------------- | ---------------------- | ---------------------- | ------------------------ |
+| active            | 任意匹配连接           | 是                     | purchased                |
+| no_plan           | 对应连接               | 否，可自动回退         | notPurchased             |
+| unavailable       | 对应连接               | 是                     | unavailable              |
 | not_authenticated | 由 Account Source 决定 | Entitlement 不单独裁决 | disconnected/unavailable |
-| not_configured | 由 Account Source 决定 | Entitlement 不单独裁决 | disconnected/unavailable |
-| 请求抛错 / null | 对应连接 | 是 | unavailable/checking |
-| 不完整未知快照 | 对应连接 | 是 | unavailable |
+| not_configured    | 由 Account Source 决定 | Entitlement 不单独裁决 | disconnected/unavailable |
+| 请求抛错 / null   | 对应连接               | 是                     | unavailable/checking     |
+| 不完整未知快照    | 对应连接               | 是                     | unavailable              |
 
 ### 6.3 回归
 

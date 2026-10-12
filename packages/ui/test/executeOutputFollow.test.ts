@@ -89,5 +89,4 @@ describe("foreground Bash output following", () => {
     expect(reopened.queryByTestId("bash-output-resume")).toBeNull();
     expect(reopened.getByTestId("bash-output-scroll").scrollTop).toBe(500);
   });
-
 });

@@ -103,9 +103,7 @@ describe("会话区 Goal Session/Model E2E", () => {
     await selectUpstreamThoughtLevelValue(UPSTREAM_THOUGHT_LEVEL);
     await expectToolbarConfig(UPSTREAM_MODEL, UPSTREAM_THOUGHT_LEVEL);
 
-    const seedPrompt = buildReadonlyToolPrompt(
-      `E2E_GOAL_SESSION_SEED_${runId}`,
-    );
+    const seedPrompt = buildReadonlyToolPrompt(`E2E_GOAL_SESSION_SEED_${runId}`);
     await sendPrompt(seedPrompt);
     await waitForUpstreamRequestContaining(`E2E_GOAL_SESSION_SEED_${runId}`);
     await waitForAssistantMessageContaining(E2E_REPLY_TOKEN);
@@ -188,10 +186,9 @@ async function expectToolbarConfig(model: string, thoughtLevel: string) {
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   const matchedThoughtLevel = labelCandidates.some((label) => expectedLabels.includes(label));
   if (!matchedThoughtLevel) {
     throw new Error(

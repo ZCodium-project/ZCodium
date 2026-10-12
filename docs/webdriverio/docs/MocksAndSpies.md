@@ -17,16 +17,16 @@ Before you can modify any responses you have define a mock first. This mock is d
 
 ```js
 // mock all resources ending with "/users/list"
-const userListMock = await browser.mock('**/users/list')
+const userListMock = await browser.mock("**/users/list");
 
 // or you can specify the mock by filtering resources by headers or
 // status code, only mock successful requests to json resources
-const strictMock = await browser.mock('**', {
-    // mock all json responses
-    requestHeaders: { 'Content-Type': 'application/json' },
-    // that were successful
-    statusCode: 200
-})
+const strictMock = await browser.mock("**", {
+  // mock all json responses
+  requestHeaders: { "Content-Type": "application/json" },
+  // that were successful
+  statusCode: 200,
+});
 ```
 
 ## Specifying custom responses
@@ -38,27 +38,35 @@ Once you have defined a mock you can define custom responses for it. Those custo
 In order to mock API requests where you expect a JSON response all you need to do is to call `respond` on the mock object with an arbitrary object you want to return, e.g.:
 
 ```js
-const mock = await browser.mock('https://todo-backend-express-knex.herokuapp.com/')
+const mock = await browser.mock("https://todo-backend-express-knex.herokuapp.com/");
 
-mock.respond([{
-    title: 'Injected (non) completed Todo',
-    order: null,
-    completed: false
-}, {
-    title: 'Injected completed Todo',
-    order: null,
-    completed: true
-}], {
-    headers: {
-        'Access-Control-Allow-Origin': '*'
+mock.respond(
+  [
+    {
+      title: "Injected (non) completed Todo",
+      order: null,
+      completed: false,
     },
-    fetchResponse: false
-})
+    {
+      title: "Injected completed Todo",
+      order: null,
+      completed: true,
+    },
+  ],
+  {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+    fetchResponse: false,
+  },
+);
 
-await browser.url('https://todobackend.com/client/index.html?https://todo-backend-express-knex.herokuapp.com/')
+await browser.url(
+  "https://todobackend.com/client/index.html?https://todo-backend-express-knex.herokuapp.com/",
+);
 
-await $('#todo-list li').waitForExist()
-console.log(await $$('#todo-list li').map(el => el.getText()))
+await $("#todo-list li").waitForExist();
+console.log(await $$("#todo-list li").map((el) => el.getText()));
 // outputs: "[ 'Injected (non) completed Todo', 'Injected completed Todo' ]"
 ```
 
@@ -86,8 +94,8 @@ It is recommend to store custom responses in fixture files so you can just requi
 
 ```js
 // requires Node.js v16.14.0 or higher to support JSON import assertions
-import responseFixture from './__fixtures__/apiResponse.json' assert { type: 'json' }
-mock.respond(responseFixture)
+import responseFixture from "./__fixtures__/apiResponse.json" assert { type: "json" };
+mock.respond(responseFixture);
 ```
 
 ### Mocking text resources
@@ -95,11 +103,11 @@ mock.respond(responseFixture)
 If you like to modify text resources like JavaScript, CSS files or other text based resources you can just pass in a file path and WebdriverIO will replaces the original resource with it, e.g.:
 
 ```js
-const scriptMock = await browser.mock('**/script.min.js')
-scriptMock.respond('./tests/fixtures/script.js')
+const scriptMock = await browser.mock("**/script.min.js");
+scriptMock.respond("./tests/fixtures/script.js");
 
 // or respond with your custom JS
-scriptMock.respond('alert("I am a mocked resource")')
+scriptMock.respond('alert("I am a mocked resource")');
 ```
 
 ### Redirect web resources
@@ -107,10 +115,10 @@ scriptMock.respond('alert("I am a mocked resource")')
 You can also just replace a web resource with another web resource if your desired response is already hosted on the web. This works with individual page resources as well as with a webpage itself, e.g.:
 
 ```js
-const pageMock = await browser.mock('https://google.com/')
-await pageMock.respond('https://webdriver.io')
-await browser.url('https://google.com')
-console.log(await browser.getTitle()) // returns "WebdriverIO · Next-gen browser and mobile automation test framework for Node.js"
+const pageMock = await browser.mock("https://google.com/");
+await pageMock.respond("https://webdriver.io");
+await browser.url("https://google.com");
+console.log(await browser.getTitle()); // returns "WebdriverIO · Next-gen browser and mobile automation test framework for Node.js"
 ```
 
 ### Dynamic responses
@@ -118,19 +126,21 @@ console.log(await browser.getTitle()) // returns "WebdriverIO · Next-gen browse
 If your mock response depends on the original resource response you can also dynamically modify the resource by passing in a function receives the original response as parameter and sets the mock based on the return value, e.g.:
 
 ```js
-const mock = await browser.mock('https://todo-backend-express-knex.herokuapp.com/', {
-    method: 'get'
-})
+const mock = await browser.mock("https://todo-backend-express-knex.herokuapp.com/", {
+  method: "get",
+});
 
 mock.respond((req) => {
-    // replace todo content with their list number
-    return req.body.map((item, i) => ({ ...item, title: i }))
-})
+  // replace todo content with their list number
+  return req.body.map((item, i) => ({ ...item, title: i }));
+});
 
-await browser.url('https://todobackend.com/client/index.html?https://todo-backend-express-knex.herokuapp.com/')
+await browser.url(
+  "https://todobackend.com/client/index.html?https://todo-backend-express-knex.herokuapp.com/",
+);
 
-await $('#todo-list li').waitForExist()
-console.log(await $$('#todo-list li label').map((el) => el.getText()))
+await $("#todo-list li").waitForExist();
+console.log(await $$("#todo-list li label").map((el) => el.getText()));
 // returns
 // [
 //   '0',  '1',  '2',  '19', '20',
@@ -163,8 +173,8 @@ Instead of returning a custom response you can also just abort the request with 
 This is very useful if you want to block 3rd party script from your page that have a negative influence on your functional test. You can abort a mock by just calling `abort` or `abortOnce`, e.g.:
 
 ```js
-const mock = await browser.mock('https://www.google-analytics.com/**')
-mock.abort('Failed')
+const mock = await browser.mock("https://www.google-analytics.com/**");
+mock.abort("Failed");
 ```
 
 ## Spies
@@ -172,20 +182,20 @@ mock.abort('Failed')
 Every mock is automatically a spy that counts the amount of requests the browser made to that resource. If you don't apply a custom response or abort reason to the mock it continues with the default response you would normally receive. This allows you to check how many times the browser made the request, e.g. to a certain API endpoint.
 
 ```js
-const mock = await browser.mock('**/user', { method: 'post' })
-console.log(mock.calls.length) // returns 0
+const mock = await browser.mock("**/user", { method: "post" });
+console.log(mock.calls.length); // returns 0
 
 // register user
-await $('#username').setValue('randomUser')
-await $('password').setValue('password123')
-await $('password_repeat').setValue('password123')
-await $('button[type="submit"]').click()
+await $("#username").setValue("randomUser");
+await $("password").setValue("password123");
+await $("password_repeat").setValue("password123");
+await $('button[type="submit"]').click();
 
 // check if API request was made
-expect(mock.calls.length).toBe(1)
+expect(mock.calls.length).toBe(1);
 
 // assert response
-expect(mock.calls[0].body).toEqual({ success: true })
+expect(mock.calls[0].body).toEqual({ success: true });
 ```
 
 If you need to wait until a matching request has responded, use `mock.waitForResponse(options)`. See the API reference: [waitForResponse](/docs/api/mock/waitForResponse).

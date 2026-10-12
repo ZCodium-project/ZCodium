@@ -1,19 +1,21 @@
-import { h } from 'hastscript';
-import type { Node, Parent } from 'unist';
-import { type Visitor, visit } from 'unist-util-visit';
+import { h } from "hastscript";
+import type { Node, Parent } from "unist";
+import { type Visitor, visit } from "unist-util-visit";
 
 interface DirectiveNode extends Node {
-  type: 'textDirective' | 'leafDirective' | 'containerDirective';
+  type: "textDirective" | "leafDirective" | "containerDirective";
   name: string;
   attributes: Record<string, any>;
   data: Record<string, any>;
 }
 
 const isDirectiveNode = (node: Node): node is DirectiveNode =>
-  node.type === 'textDirective' || node.type === 'leafDirective' || node.type === 'containerDirective';
+  node.type === "textDirective" ||
+  node.type === "leafDirective" ||
+  node.type === "containerDirective";
 
 export const transformDirectives = () => (tree: Parent) => {
-  const visitor: Visitor<Node> = node => {
+  const visitor: Visitor<Node> = (node) => {
     if (isDirectiveNode(node)) {
       const hast = h(node.name, node.attributes);
       // oxlint-disable-next-line no-cond-assign

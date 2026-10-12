@@ -22,9 +22,7 @@ export function WebLoginPage({ onLogin }: WebLoginPageProps) {
             <h1 className="text-ui-lg font-medium text-foreground">{copy.loginTitle}</h1>
           </div>
         </div>
-        <p className="mb-5 text-ui-xs leading-6 text-foreground-subtle">
-          {copy.loginDescription}
-        </p>
+        <p className="mb-5 text-ui-xs leading-6 text-foreground-subtle">{copy.loginDescription}</p>
         <Button
           type="button"
           size="lg"

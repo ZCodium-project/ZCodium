@@ -24,23 +24,18 @@ const fsMockState = vi.hoisted(() => ({
 }));
 
 vi.mock("node:fs/promises", async () => {
-  const actual =
-    await vi.importActual<typeof import("node:fs/promises")>(
-      "node:fs/promises",
-    );
+  const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
   return {
     ...actual,
-    mkdir: vi.fn(
-      async (...args: Parameters<typeof actual.mkdir>) => {
-        const gate = fsMockState.lockMkdirGate;
-        if (gate && String(args[0]).endsWith(".lock")) {
-          fsMockState.lockMkdirEntered?.();
-          fsMockState.lockMkdirEntered = null;
-          await gate;
-        }
-        return actual.mkdir(...args);
-      },
-    ),
+    mkdir: vi.fn(async (...args: Parameters<typeof actual.mkdir>) => {
+      const gate = fsMockState.lockMkdirGate;
+      if (gate && String(args[0]).endsWith(".lock")) {
+        fsMockState.lockMkdirEntered?.();
+        fsMockState.lockMkdirEntered = null;
+        await gate;
+      }
+      return actual.mkdir(...args);
+    }),
     rename: vi.fn(
       async (
         oldPath: Parameters<typeof actual.rename>[0],
@@ -57,9 +52,7 @@ vi.mock("node:fs/promises", async () => {
         );
         try {
           if (fsMockState.renameDelayMs > 0) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, fsMockState.renameDelayMs),
-            );
+            await new Promise((resolve) => setTimeout(resolve, fsMockState.renameDelayMs));
           }
           await actual.rename(oldPath, newPath);
         } finally {
@@ -68,10 +61,7 @@ vi.mock("node:fs/promises", async () => {
       },
     ),
     rm: vi.fn(
-      async (
-        path: Parameters<typeof actual.rm>[0],
-        options?: Parameters<typeof actual.rm>[1],
-      ) => {
+      async (path: Parameters<typeof actual.rm>[0], options?: Parameters<typeof actual.rm>[1]) => {
         if (String(path).includes(".lock") && fsMockState.lockRemoveFailure) {
           throw fsMockState.lockRemoveFailure;
         }
@@ -150,10 +140,7 @@ describe("atomicWriteText", () => {
 
   it("retries transient Windows rename locks and keeps the atomic temp file clean", async () => {
     const filePath = join(tempDir, "session.json");
-    fsMockState.renameFailures.push(
-      createFsError("EPERM"),
-      createFsError("EBUSY"),
-    );
+    fsMockState.renameFailures.push(createFsError("EPERM"), createFsError("EBUSY"));
 
     await atomicWriteText(filePath, "saved\n", {
       renameRetryDelaysMs: [1, 1],
@@ -161,9 +148,7 @@ describe("atomicWriteText", () => {
 
     expect(readFileSync(filePath, "utf-8")).toBe("saved\n");
     expect(vi.mocked(rename)).toHaveBeenCalledTimes(3);
-    expect(
-      readdirSync(tempDir).filter((name) => name.endsWith(".tmp")),
-    ).toEqual([]);
+    expect(readdirSync(tempDir).filter((name) => name.endsWith(".tmp"))).toEqual([]);
   });
 
   it("does not retry non-transient rename failures and removes the temp file", async () => {
@@ -177,9 +162,7 @@ describe("atomicWriteText", () => {
     ).rejects.toMatchObject({ code: "ENOENT" });
 
     expect(vi.mocked(rename)).toHaveBeenCalledTimes(1);
-    expect(
-      readdirSync(tempDir).filter((name) => name.endsWith(".tmp")),
-    ).toEqual([]);
+    expect(readdirSync(tempDir).filter((name) => name.endsWith(".tmp"))).toEqual([]);
   });
 
   it("fails immediately on injected fs faults before atomic rename", async () => {
@@ -207,9 +190,7 @@ describe("atomicWriteText", () => {
 
     expect(vi.mocked(rename)).toHaveBeenCalledTimes(0);
     expect(existsSync(filePath)).toBe(false);
-    expect(
-      readdirSync(tempDir).filter((name) => name.endsWith(".tmp")),
-    ).toEqual([]);
+    expect(readdirSync(tempDir).filter((name) => name.endsWith(".tmp"))).toEqual([]);
     expect(injector.getHits()).toMatchObject([
       {
         code: "EACCES",
@@ -236,12 +217,8 @@ describe("atomicWriteText", () => {
 
     expect(["first\n", "second\n"]).toContain(readFileSync(filePath, "utf-8"));
     expect(fsMockState.maxActiveRenames).toBe(1);
-    expect(
-      readdirSync(tempDir).filter((name) => name.endsWith(".tmp")),
-    ).toEqual([]);
-    expect(
-      readdirSync(tempDir).filter((name) => name.endsWith(".lock")),
-    ).toEqual([]);
+    expect(readdirSync(tempDir).filter((name) => name.endsWith(".tmp"))).toEqual([]);
+    expect(readdirSync(tempDir).filter((name) => name.endsWith(".lock"))).toEqual([]);
   });
 
   it("reclaims a fresh lock when its owner process has already exited", async () => {
@@ -375,16 +352,9 @@ describe("atomicWriteText", () => {
   it.each(["0", "-1", "1.5", "1e999"])(
     "reclaims a stale lock with invalid pid %s as ownerless",
     async (rawPid) => {
-      const filePath = join(
-        tempDir,
-        `config-${rawPid.replace(/\W/g, "_")}.json`,
-      );
+      const filePath = join(tempDir, `config-${rawPid.replace(/\W/g, "_")}.json`);
       const createdAt = Date.now();
-      writeFileSync(
-        `${filePath}.lock`,
-        `{"pid":${rawPid},"createdAt":${createdAt}}\n`,
-        "utf-8",
-      );
+      writeFileSync(`${filePath}.lock`, `{"pid":${rawPid},"createdAt":${createdAt}}\n`, "utf-8");
 
       await atomicWriteText(filePath, "saved\n", {
         lockRetryDelaysMs: [1],
@@ -406,11 +376,7 @@ describe("atomicWriteText", () => {
     async (label, rawCreatedAt) => {
       const filePath = join(tempDir, `config-created-at-${label}.json`);
       const lockFile = `${filePath}.lock`;
-      writeFileSync(
-        lockFile,
-        `{"pid":0,"createdAt":${rawCreatedAt}}\n`,
-        "utf-8",
-      );
+      writeFileSync(lockFile, `{"pid":0,"createdAt":${rawCreatedAt}}\n`, "utf-8");
       const oldTime = new Date(Date.now() - 60_000);
       utimesSync(lockFile, oldTime, oldTime);
 
@@ -489,9 +455,7 @@ describe("atomicWriteText", () => {
     await expect(writePromise).rejects.toMatchObject({
       code: "ZCODE_FILE_LOCK_TIMEOUT",
     });
-    expect(readFileSync(freshOwnerFile, "utf-8")).toContain(
-      '"token":"fresh-owner"',
-    );
+    expect(readFileSync(freshOwnerFile, "utf-8")).toContain('"token":"fresh-owner"');
     expect(existsSync(filePath)).toBe(false);
   });
 

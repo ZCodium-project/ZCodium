@@ -24,13 +24,13 @@ message.parts[] includes { type: "timeline", ... }
 
 ## 设计原则
 
-| 原则 | 说明 |
-| --- | --- |
-| timeline 是 part | compact、fork、goal verification、model change 都写成 `part.type="timeline"`。 |
-| JSON 不是兜底袋子 | timeline 字段仍在 `part.data` JSON 里，但由 TypeScript 类型和 Zod protocol schema 约束。 |
-| role 和产品语义分离 | `message.role` 只表示 provider role；真实用户、model-only reminder、command、timeline 由显式字段声明。 |
-| 顺序显式 | message 和 part 的渲染顺序不能依赖 id 字典序。 |
-| 老数据可读 | 新版本必须能从 legacy compaction part、fork text metadata、goal session_entry、renderer-only model_change 语义中恢复。 |
+| 原则                | 说明                                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| timeline 是 part    | compact、fork、goal verification、model change 都写成 `part.type="timeline"`。                                         |
+| JSON 不是兜底袋子   | timeline 字段仍在 `part.data` JSON 里，但由 TypeScript 类型和 Zod protocol schema 约束。                               |
+| role 和产品语义分离 | `message.role` 只表示 provider role；真实用户、model-only reminder、command、timeline 由显式字段声明。                 |
+| 顺序显式            | message 和 part 的渲染顺序不能依赖 id 字典序。                                                                         |
+| 老数据可读          | 新版本必须能从 legacy compaction part、fork text metadata、goal session_entry、renderer-only model_change 语义中恢复。 |
 
 ## 数据库结构
 
@@ -112,18 +112,18 @@ interface MessageSemantics {
 
 核心映射：
 
-| 数据 | origin | kind | uiVisibility | providerVisibility |
-| --- | --- | --- | --- | --- |
-| 用户普通输入 | real_user | user_prompt | visible | visible |
-| `/goal xxx` 可见命令 | real_user | slash_command | visible | visible |
-| `/compact` 操作 | real_user | slash_command | hidden | hidden |
-| goal continuation | agent_runtime | system_reminder | hidden | visible |
-| background task notification | agent_runtime | background_notification | hidden | visible |
-| subagent notification | agent_runtime | subagent_notification | hidden | visible |
-| todo reminder | agent_runtime | todo_reminder | hidden | visible |
-| timeline carrier | system | timeline_event | visible | hidden |
-| compact summary context | agent_runtime | compact_summary | hidden | visible |
-| assistant 正文 | agent_runtime | assistant_response | visible | visible |
+| 数据                         | origin        | kind                    | uiVisibility | providerVisibility |
+| ---------------------------- | ------------- | ----------------------- | ------------ | ------------------ |
+| 用户普通输入                 | real_user     | user_prompt             | visible      | visible            |
+| `/goal xxx` 可见命令         | real_user     | slash_command           | visible      | visible            |
+| `/compact` 操作              | real_user     | slash_command           | hidden       | hidden             |
+| goal continuation            | agent_runtime | system_reminder         | hidden       | visible            |
+| background task notification | agent_runtime | background_notification | hidden       | visible            |
+| subagent notification        | agent_runtime | subagent_notification   | hidden       | visible            |
+| todo reminder                | agent_runtime | todo_reminder           | hidden       | visible            |
+| timeline carrier             | system        | timeline_event          | visible      | hidden             |
+| compact summary context      | agent_runtime | compact_summary         | hidden       | visible            |
+| assistant 正文               | agent_runtime | assistant_response      | visible      | visible            |
 
 ## Timeline Part
 
@@ -141,11 +141,7 @@ interface TimelinePartBase {
   sessionID: SessionId;
   messageID: MessageId;
   type: "timeline";
-  timelineType:
-    | "context_compaction"
-    | "goal_verification"
-    | "session_fork"
-    | "model_change";
+  timelineType: "context_compaction" | "goal_verification" | "session_fork" | "model_change";
   display: "separator" | "worklog";
   status?: string;
   anchorMessageId?: MessageId;
@@ -229,13 +225,13 @@ interface ModelChangeTimelinePart extends TimelinePartBase {
 
 所有 timeline 都必须挂在一个 message 上。
 
-| 场景 | message | part |
-| --- | --- | --- |
-| manual compact | synthetic assistant carrier | `timeline/context_compaction` |
-| auto compact | 当前或 synthetic assistant carrier，按现有 worklog 语义 | `timeline/context_compaction` |
-| fork notice | fork child 中 synthetic user 或 assistant carrier，兼容期保留旧 fork notice | `timeline/session_fork` |
-| goal verifier | synthetic assistant carrier，锚定被验证的 assistant | `timeline/goal_verification` |
-| model change | 下一次 accepted user input 之前插入 synthetic assistant carrier | `timeline/model_change` |
+| 场景           | message                                                                     | part                          |
+| -------------- | --------------------------------------------------------------------------- | ----------------------------- |
+| manual compact | synthetic assistant carrier                                                 | `timeline/context_compaction` |
+| auto compact   | 当前或 synthetic assistant carrier，按现有 worklog 语义                     | `timeline/context_compaction` |
+| fork notice    | fork child 中 synthetic user 或 assistant carrier，兼容期保留旧 fork notice | `timeline/session_fork`       |
+| goal verifier  | synthetic assistant carrier，锚定被验证的 assistant                         | `timeline/goal_verification`  |
+| model change   | 下一次 accepted user input 之前插入 synthetic assistant carrier             | `timeline/model_change`       |
 
 更新规则：
 
@@ -312,16 +308,16 @@ legacy compaction/session_entry/text metadata fallback 先保留，直到 UI 完
 
 ## 代码落点
 
-| 层 | 文件 |
-| --- | --- |
-| migration | `apps/zcode-cli/packages/adapters/src/storage/session-store/migrations.ts` |
-| rows/repositories | `apps/zcode-cli/packages/adapters/src/storage/session-store/rows.ts`、`repositories/messages.ts` |
-| contracts | `apps/zcode-cli/packages/contracts/src/interfaces/session-store.port.ts` |
-| runtime writes | `apps/zcode-cli/packages/core/src/runtime/methods/message-persistence.ts`、`compact-persistence.ts`、`session-fork.ts`、`events.ts`、model set path |
-| protocol | `packages/shared/src/zcode-protocol/index.ts`、`apps/zcode-cli/packages/bootstrap/src/zcode-protocol/message-mapper.ts` |
-| shared read compatibility | `packages/shared/src/zcode-session-visible-content.ts`、`packages/shared/src/zcodePersistedMessageMerge.ts` |
-| V4 transcript hydration | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/transcript-hydration.ts`、`product-projection.ts` |
-| UI projection | `packages/ui/src/v4/conversationProjectionStore.ts`、`packages/ui/src/v4/sessionDataLayer.ts` |
+| 层                        | 文件                                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| migration                 | `apps/zcode-cli/packages/adapters/src/storage/session-store/migrations.ts`                                                                          |
+| rows/repositories         | `apps/zcode-cli/packages/adapters/src/storage/session-store/rows.ts`、`repositories/messages.ts`                                                    |
+| contracts                 | `apps/zcode-cli/packages/contracts/src/interfaces/session-store.port.ts`                                                                            |
+| runtime writes            | `apps/zcode-cli/packages/core/src/runtime/methods/message-persistence.ts`、`compact-persistence.ts`、`session-fork.ts`、`events.ts`、model set path |
+| protocol                  | `packages/shared/src/zcode-protocol/index.ts`、`apps/zcode-cli/packages/bootstrap/src/zcode-protocol/message-mapper.ts`                             |
+| shared read compatibility | `packages/shared/src/zcode-session-visible-content.ts`、`packages/shared/src/zcodePersistedMessageMerge.ts`                                         |
+| V4 transcript hydration   | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/transcript-hydration.ts`、`product-projection.ts`                                          |
+| UI projection             | `packages/ui/src/v4/conversationProjectionStore.ts`、`packages/ui/src/v4/sessionDataLayer.ts`                                                       |
 
 ## CLI / 数据层实施轨迹
 

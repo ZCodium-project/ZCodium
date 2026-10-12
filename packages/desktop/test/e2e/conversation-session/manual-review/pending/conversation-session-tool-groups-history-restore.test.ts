@@ -10,10 +10,7 @@ import {
   type ConversationToolGroupSnapshot,
 } from "../../../helpers/conversation-session-tool-groups.js";
 import { ensureToolCrossProductFullAccessMode } from "../../../helpers/conversation-session-tool-cross-product.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../../../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../../../helpers/e2e-runtime-paths.js";
 import {
   E2E_REPLY_TOKEN,
   getV4PaneSnapshot,
@@ -53,13 +50,15 @@ describe("TGE05 desktop tool groups history restore", () => {
     this.timeout(240000);
     await prepareFixture();
     await ensureToolCrossProductFullAccessMode();
-    await sendV4Prompt([
-      `${CASE_MARKER}: Follow these tool steps in order.`,
-      `1. Read ${READ_PATH}.`,
-      `2. Bash exactly: node -e "console.log('TGE05_EXEC')"`,
-      `3. Write ${WRITE_PATH} with exactly "export const restored = true;\\n".`,
-      `4. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    ].join(" "));
+    await sendV4Prompt(
+      [
+        `${CASE_MARKER}: Follow these tool steps in order.`,
+        `1. Read ${READ_PATH}.`,
+        `2. Bash exactly: node -e "console.log('TGE05_EXEC')"`,
+        `3. Write ${WRITE_PATH} with exactly "export const restored = true;\\n".`,
+        `4. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
+      ].join(" "),
+    );
     await waitForV4AssistantMessageContaining(E2E_REPLY_TOKEN, 150000);
     await waitForV4Pane((snapshot) => !snapshot.canStop, "TGE05 工具轮没有结束", 150000);
     await expandAssistantHistoriesWithContent();
@@ -84,10 +83,13 @@ async function prepareFixture() {
 
 async function waitForThreeCompletedGroups() {
   let latest: ConversationToolGroupSnapshot[] = [];
-  await browser.waitUntil(async () => {
-    latest = await listConversationToolGroups();
-    return latest.length === 3 && latest.every((group) => group.status === "completed");
-  }, { timeout: 60000, timeoutMsg: `TGE05 没有得到三个完成分组: ${JSON.stringify(latest)}` });
+  await browser.waitUntil(
+    async () => {
+      latest = await listConversationToolGroups();
+      return latest.length === 3 && latest.every((group) => group.status === "completed");
+    },
+    { timeout: 60000, timeoutMsg: `TGE05 没有得到三个完成分组: ${JSON.stringify(latest)}` },
+  );
   return latest;
 }
 
@@ -132,16 +134,24 @@ async function waitForRestoredSessionStable(sessionId: string, failureMessage: s
 }
 
 async function waitForRendererAfterReloadSession() {
-  await browser.waitUntil(async () => {
-    try {
-      const puppeteer = await browser.getPuppeteer();
-      const rendererTarget = puppeteer.targets().filter((target) => target.url().includes("/renderer/index.html")).at(-1);
-      const targetId = rendererTarget ? (rendererTarget as unknown as { _targetId?: string })._targetId : null;
-      if (!targetId) return false;
-      await browser.switchToWindow(targetId);
-      return true;
-    } catch {
-      return false;
-    }
-  }, { timeout: 30000, interval: 250, timeoutMsg: "TGE05 reload 后没有 renderer target" });
+  await browser.waitUntil(
+    async () => {
+      try {
+        const puppeteer = await browser.getPuppeteer();
+        const rendererTarget = puppeteer
+          .targets()
+          .filter((target) => target.url().includes("/renderer/index.html"))
+          .at(-1);
+        const targetId = rendererTarget
+          ? (rendererTarget as unknown as { _targetId?: string })._targetId
+          : null;
+        if (!targetId) return false;
+        await browser.switchToWindow(targetId);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { timeout: 30000, interval: 250, timeoutMsg: "TGE05 reload 后没有 renderer target" },
+  );
 }

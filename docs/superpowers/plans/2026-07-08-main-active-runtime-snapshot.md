@@ -107,6 +107,7 @@
 **Purpose:** 在改实现前确认当前 `isMainActive` 的消费面和缺失面，写出本轮必须失败的测试。
 
 **Files:**
+
 - Inspect: `packages/ui/src/store/zcodeSessionStoreTaskSlice.ts`
 - Inspect: `packages/ui/src/hooks/taskSnapshotRuntimeStateSync.ts`
 - Inspect: `packages/ui/src/hooks/taskStreamEventSnapshotSync.ts`
@@ -126,6 +127,7 @@ rg -n "isMainActive|setTaskMainActive|mainActive|activeTurnId|activeTurnKind" \
 ```
 
 Expected:
+
 - `isMainActive` appears only in store, explicit main-active writers, send/queue/drain/display consumers, and tests.
 - No existing `mainActive` protocol field yet.
 
@@ -159,6 +161,7 @@ Expected: PASS before this plan starts changing snapshot behavior.
 **Purpose:** 让 snapshot 自身携带 main 是否 active 的事实，避免 UI 从 `activeTurnId` 临时猜测。
 
 **Files:**
+
 - Modify: `packages/shared/src/zcode-protocol/index.ts`
 - Modify: `packages/shared/src/zcode-task-types.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/session-mapper.ts`
@@ -175,7 +178,7 @@ export interface ZCodeSessionRuntimeSnapshot {
 
 ```ts
 // packages/shared/src/zcode-protocol/index.ts
-mainActive: z.boolean().optional()
+mainActive: z.boolean().optional();
 ```
 
 **Implementation Notes:**
@@ -237,12 +240,14 @@ it("marks runtime mainActive false when no session active turn exists", async ()
 - [ ] Implement schema/type changes.
 
 Change:
+
 - `packages/shared/src/zcode-protocol/index.ts`
 - `packages/shared/src/zcode-task-types.ts`
 
 - [ ] Implement mapper change.
 
 Change:
+
 - `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/session-mapper.ts`
 
 Add `mainActive` to the runtime snapshot object generated from active turn state.
@@ -255,6 +260,7 @@ pnpm typecheck
 ```
 
 Expected:
+
 - New protocol tests pass.
 - Typecheck passes.
 
@@ -272,6 +278,7 @@ Expected:
 **Purpose:** 让 restore / reconnect 使用 snapshot 中的 `mainActive`，并且只在 accepted snapshot path 应用，避免 stale snapshot 回滚状态。
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/taskSnapshotRuntimeStateSync.ts`
 - Modify: `packages/ui/src/hooks/taskStreamEventSnapshotSync.ts`
 - Test: `packages/ui/test/taskSnapshotRuntimeStateSync.test.ts` or create it if missing
@@ -395,6 +402,7 @@ Expected: PASS.
 **Purpose:** 确保切后台后 monitor 像更新其他 runtime 状态一样维护 `isMainActive`，而 background-only event 不污染 main active。
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/taskStreamEventHandlers.ts`
 - Modify: `packages/ui/src/lib/zcodeTaskRuntimeMonitor.ts`
 - Test: `packages/ui/test/zcodeTaskRuntimeMonitorQueueDrain.test.ts`
@@ -424,6 +432,7 @@ rg -n "setTaskMainActive" packages/ui/src/hooks packages/ui/src/lib
 ```
 
 Expected:
+
 - Writers correspond to main turn start/chunk paths or queued prompt drain/direct send.
 - No background-only update path writes `true`.
 
@@ -468,6 +477,7 @@ Existing target:
 `packages/ui/test/zcodeTaskRuntimeMonitorQueueDrain.test.ts`
 
 Expected assertion:
+
 - runtime status can be `streaming`
 - activeInputId can be set to a background id
 - `isMainActive` remains false
@@ -497,6 +507,7 @@ Expected: PASS.
 **Purpose:** 补齐本轮真正缺口：restore/reconnect 时 `isMainActive` 和 runtime snapshot 保持一致。
 
 **Files:**
+
 - Test: `packages/ui/test/taskSnapshotRuntimeStateSync.test.ts`
 - Test: `packages/ui/test/useZCodeChatSendPromptQueuePolicy.test.ts`
 - Optional Test: `packages/ui/test/taskStreamEventSnapshotSync.test.ts` if existing helpers make stale snapshot behavior easy to isolate
@@ -528,6 +539,7 @@ Test structure:
 - [ ] Add stale-snapshot regression if feasible.
 
 Test intent:
+
 - Current store has a new main active run.
 - A stale terminal snapshot for an older run is processed.
 - Existing stale guard prevents runtime terminal application.
@@ -561,6 +573,7 @@ Expected: PASS.
 **Purpose:** 验证用户可见行为没有回归，特别是 background-only 不再造成 fake loading，同时 foreground 仍保持原 loading。
 
 **Files:**
+
 - Modify if needed: `packages/desktop/test/e2e/conversation-session/conversation-session-background.test.ts`
 - Modify if needed: `docs/conversation-session-case-catalog.md`
 - Modify if needed: `docs/testing/conversation-session-background-e2e-coverage-matrix.md`
@@ -574,6 +587,7 @@ Expected: PASS.
 - [ ] Confirm or add E2E: background subagent child tool update does not show main loading.
 
 Expected:
+
 - Background Agent control row is visible.
 - Renderer store may receive child tool update.
 - `chat-view` remains idle for main.
@@ -582,12 +596,14 @@ Expected:
 - [ ] Confirm or add E2E: foreground subagent child tool update still shows main loading.
 
 Expected:
+
 - Foreground Agent child tool update keeps main streaming.
 - Bottom `chat-loading` appears.
 
 - [ ] Confirm or add E2E: background running does not queue normal user prompt.
 
 Expected:
+
 - Main is idle.
 - Background task is still running.
 - User sends ordinary text.
@@ -604,6 +620,7 @@ Expected:
 ```
 
 Expected:
+
 - Targeted E2E passes.
 
 **Phase 5 Exit Criteria**
@@ -672,6 +689,7 @@ rg -n "mainActive|isMainActive|setTaskMainActive|activeTurnId|activeInputId" \
 ```
 
 Expected:
+
 - `mainActive` appears in protocol type/schema, mapper, UI snapshot sync, store, tests.
 - `activeTurnId` is not written into `activeInputId`.
 - `isMainActive` is consumed only by main loading, normal send queue decision, queued prompt drain, and tests.

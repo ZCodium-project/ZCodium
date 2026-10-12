@@ -1,13 +1,7 @@
 import type { FeedbackTicketEvent, FeedbackTicketStatus } from "@zcode/shared";
-import {
-  FEEDBACK_STATUS_MESSAGE_IDS,
-  formatFeedbackStatusLabel,
-} from "@/feedback/feedbackMeta.js";
+import { FEEDBACK_STATUS_MESSAGE_IDS, formatFeedbackStatusLabel } from "@/feedback/feedbackMeta.js";
 
-type MessageFormatter = (
-  descriptor: { id: string },
-  values?: Record<string, string>,
-) => string;
+type MessageFormatter = (descriptor: { id: string }, values?: Record<string, string>) => string;
 
 export function getUserFacingEventSummary(
   event: FeedbackTicketEvent,
@@ -31,10 +25,7 @@ export function getUserFacingEventSummary(
   return event.summary;
 }
 
-function formatKnownSystemEventSummary(
-  summary: string,
-  formatMessage?: MessageFormatter,
-) {
+function formatKnownSystemEventSummary(summary: string, formatMessage?: MessageFormatter) {
   const directMessageId = getKnownSystemSummaryMessageId(summary);
   if (directMessageId) {
     return formatOptionalMessage(formatMessage, directMessageId, summary);
@@ -55,12 +46,9 @@ function formatKnownSystemEventSummary(
   const agentSubmitted = summary.match(/^(.+) 通过 Agent 提交反馈$/);
   if (agentSubmitted) {
     const name = agentSubmitted[1] ?? "";
-    return formatOptionalMessage(
-      formatMessage,
-      "feedback.timeline.event.agentSubmitted",
-      summary,
-      { name },
-    );
+    return formatOptionalMessage(formatMessage, "feedback.timeline.event.agentSubmitted", summary, {
+      name,
+    });
   }
 
   const progressWithStatus = summary.match(/^进度更新（状态→(.+)）：(.+)$/);
@@ -86,12 +74,10 @@ function formatKnownSystemEventSummary(
     const status = toKnownFeedbackStatus(markedStatus[1]);
     const message = markedStatus[2] ?? "";
     if (!status) return summary;
-    return formatOptionalMessage(
-      formatMessage,
-      "feedback.timeline.event.markedStatus",
-      summary,
-      { status: formatStatusLabel(status, formatMessage), message },
-    );
+    return formatOptionalMessage(formatMessage, "feedback.timeline.event.markedStatus", summary, {
+      status: formatStatusLabel(status, formatMessage),
+      message,
+    });
   }
 
   return null;
@@ -117,10 +103,7 @@ function getKnownSystemSummaryMessageId(summary: string) {
   }
 }
 
-function formatProgressWithMessage(
-  message: string,
-  formatMessage?: MessageFormatter,
-) {
+function formatProgressWithMessage(message: string, formatMessage?: MessageFormatter) {
   return formatOptionalMessage(
     formatMessage,
     "feedback.timeline.event.progressUpdatedWithMessage",
@@ -134,10 +117,7 @@ function toKnownFeedbackStatus(value: string | undefined): FeedbackTicketStatus 
   return value in FEEDBACK_STATUS_MESSAGE_IDS ? (value as FeedbackTicketStatus) : null;
 }
 
-function formatStatusLabel(
-  status: FeedbackTicketStatus,
-  formatMessage?: MessageFormatter,
-) {
+function formatStatusLabel(status: FeedbackTicketStatus, formatMessage?: MessageFormatter) {
   if (!formatMessage) return status;
   return formatFeedbackStatusLabel(status, formatMessage);
 }

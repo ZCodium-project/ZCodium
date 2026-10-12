@@ -283,7 +283,6 @@ describe("toolDisplay helpers", () => {
     expect(displayModel.showKind).toBe(false);
   });
 
-
   it("renders plan results from tool output and hides generic payload blocks", () => {
     const displayModel = buildToolDisplayModel(
       {

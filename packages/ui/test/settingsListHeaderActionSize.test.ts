@@ -19,17 +19,14 @@ const delegatingSections = [
 
 describe("settings list header actions", () => {
   it("纯图标按钮统一使用 outline，共享头部动作用 icon-md", async () => {
-    for (const [fileName, expectedCount] of Object.entries(
-      selfRenderedIconFiles,
-    )) {
+    for (const [fileName, expectedCount] of Object.entries(selfRenderedIconFiles)) {
       const source = await readFile(
         new URL(`../src/settings/${fileName}`, import.meta.url),
         "utf8",
       );
-      expect(
-        source.match(/variant="outline"\s+size="icon-lg"/g),
-        fileName,
-      ).toHaveLength(expectedCount);
+      expect(source.match(/variant="outline"\s+size="icon-lg"/g), fileName).toHaveLength(
+        expectedCount,
+      );
     }
 
     const shared = await readFile(
@@ -39,17 +36,11 @@ describe("settings list header actions", () => {
     expect(shared.match(/variant="outline"\s+size="icon-md"/g)).toHaveLength(2);
   });
 
-  it.each(delegatingSections)(
-    "%s 头部图标按钮由共享组件渲染",
-    async (fileName) => {
-      const source = await readFile(
-        new URL(`../src/settings/${fileName}`, import.meta.url),
-        "utf8",
-      );
-      expect(source).toContain("<SettingsResourceHeaderActions");
-      expect(source).not.toMatch(/size="icon-lg"/);
-    },
-  );
+  it.each(delegatingSections)("%s 头部图标按钮由共享组件渲染", async (fileName) => {
+    const source = await readFile(new URL(`../src/settings/${fileName}`, import.meta.url), "utf8");
+    expect(source).toContain("<SettingsResourceHeaderActions");
+    expect(source).not.toMatch(/size="icon-lg"/);
+  });
 
   it("插件列表右上角操作按钮使用统一的 8px 间距", async () => {
     const source = await readFile(

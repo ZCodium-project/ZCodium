@@ -5,10 +5,7 @@ import {
   resolveDockerContainerSelectionAfterRefresh,
 } from "@/lib/remoteConnectionDockerOptions.js";
 
-type DockerPlatform = Pick<
-  IPlatformService,
-  "isDockerAvailable" | "listDockerContainers"
->;
+type DockerPlatform = Pick<IPlatformService, "isDockerAvailable" | "listDockerContainers">;
 
 const containers: DockerContainerInfo[] = [
   {

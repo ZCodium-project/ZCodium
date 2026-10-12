@@ -105,9 +105,7 @@ Expected: FAIL with adapter `Model request failed.`；cause 为 `AI_APICallError
 在 RED 已确认后，为目标接口增加以下断言：
 
 ```ts
-expect(
-  normalizeOpenAIResponsesJson(missingFieldsBody),
-).toMatchObject({
+expect(normalizeOpenAIResponsesJson(missingFieldsBody)).toMatchObject({
   output: [
     {
       id: expect.stringMatching(
@@ -128,9 +126,7 @@ fetch 包装器还必须证明：合法 JSON、SSE、非 2xx、无效 JSON 返�
 ```ts
 type ProviderFetch = typeof globalThis.fetch;
 
-export function createOpenAIResponsesJsonCompatFetch(
-  baseFetch: ProviderFetch,
-): ProviderFetch {
+export function createOpenAIResponsesJsonCompatFetch(baseFetch: ProviderFetch): ProviderFetch {
   return async (input, init) => {
     const response = await baseFetch(input, init);
     if (!response.ok || isEventStream(response)) return response;

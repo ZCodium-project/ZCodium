@@ -11,19 +11,19 @@ describe("conversation share RFC 8785 integrity", () => {
   it("canonicalizes the RFC 8785 primitive sample", () => {
     const value = {
       numbers: [333_333_333.3333333, 1e30, 4.5, 2e-3, 1e-27],
-      string: "€$\u000f\nA'B\"\\\"/",
+      string: '€$\u000f\nA\'B"\\"/',
       literals: [null, true, false],
     };
 
     expect(canonicalizeConversationShareJson(value)).toBe(
-      "{\"literals\":[null,true,false],\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27],\"string\":\"€$\\u000f\\nA'B\\\"\\\\\\\"/\"}",
+      '{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\\u000f\\nA\'B\\"\\\\\\"/"}',
     );
   });
 
   it("sorts object keys recursively without reordering arrays", () => {
-    expect(
-      canonicalizeConversationShareJson({ z: { b: 1, a: 2 }, a: [3, { d: 4, c: 5 }] }),
-    ).toBe('{"a":[3,{"c":5,"d":4}],"z":{"a":2,"b":1}}');
+    expect(canonicalizeConversationShareJson({ z: { b: 1, a: 2 }, a: [3, { d: 4, c: 5 }] })).toBe(
+      '{"a":[3,{"c":5,"d":4}],"z":{"a":2,"b":1}}',
+    );
   });
 
   it("uses ECMAScript JSON number serialization", () => {

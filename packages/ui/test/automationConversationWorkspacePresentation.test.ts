@@ -11,8 +11,6 @@ describe("AutomationEditView 无项目会话展示契约", () => {
     expect(source).toContain("workspacePurpose: option.workspacePurpose");
     expect(source).toContain("allowConversationWorkspaceSelection");
     expect(source).toContain("allowConversationWorkspaceDetach={false}");
-    expect(source).toContain(
-      "onSelectConversationWorkspace={handleSelectConversationWorkspace}",
-    );
+    expect(source).toContain("onSelectConversationWorkspace={handleSelectConversationWorkspace}");
   });
 });

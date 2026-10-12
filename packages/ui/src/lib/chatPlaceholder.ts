@@ -21,9 +21,7 @@ export function resolveChatPlaceholderKey(options: {
     return compactNewTask ? "chat.placeholder.newTaskMobile" : "chat.placeholder.newTask";
   }
 
-  return isTaskProcessing
-    ? "chat.placeholder.followUpQueue"
-    : "chat.placeholder.followUpAsk";
+  return isTaskProcessing ? "chat.placeholder.followUpQueue" : "chat.placeholder.followUpAsk";
 }
 
 export function shouldDeferChatPlaceholder(options: {

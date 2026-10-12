@@ -40,6 +40,7 @@ inventing any formatting values.
 ## Required inputs
 
 At least one of:
+
 - Markdown / LaTeX / HTML / RST source (must be normalized into a document plan / structured config before write)
 - structured config (JSON sections / headings / tables / images / page setup)
 - business brief that can be turned into a document plan
@@ -49,23 +50,23 @@ At least one of:
 
 Use this table first. Only read deeper references after you have a first-match family.
 
-| If the user asks for... | Start here |
-| --- | --- |
-| report / proposal / executive brief / polished business document | `ModernCorporate` or `ExecutiveBrief` |
-| thesis / paper / journal-like / academic deliverable | `AcademicThesis` or the nearest citation-style recipe |
-| 公文 / Chinese official / strong CJK formal output | `ChineseGovernment` + `cjk_typography.md` |
-| branded but not institutionally templated document | nearest business recipe, then refine with `design_principles.md` |
+| If the user asks for...                                          | Start here                                                       |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| report / proposal / executive brief / polished business document | `ModernCorporate` or `ExecutiveBrief`                            |
+| thesis / paper / journal-like / academic deliverable             | `AcademicThesis` or the nearest citation-style recipe            |
+| 公文 / Chinese official / strong CJK formal output               | `ChineseGovernment` + `cjk_typography.md`                        |
+| branded but not institutionally templated document               | nearest business recipe, then refine with `design_principles.md` |
 
 ## Style family / recipe selection
 
 Choose the nearest recipe family before backend arbitration:
 
-| User intent | Recipe family / source |
-| --- | --- |
-| business report / proposal / executive brief | `AestheticRecipeSamples` -> `ModernCorporate`, `ExecutiveBrief`, `MinimalModern`; spacing / page defaults from `typography_guide.md` |
-| academic paper / thesis / journal-like output | `AcademicThesis`, `APA`, `MLA`, `Chicago`, `Springer`, `Nature`; hierarchy and spacing from `design_principles.md` |
-| 公文 / Chinese institutional document / strong CJK output | `ChineseGovernment` + `cjk_typography.md` |
-| brand / house style without a structural template | nearest recipe family first, then refine with `design_principles.md` / `typography_guide.md` |
+| User intent                                               | Recipe family / source                                                                                                               |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| business report / proposal / executive brief              | `AestheticRecipeSamples` -> `ModernCorporate`, `ExecutiveBrief`, `MinimalModern`; spacing / page defaults from `typography_guide.md` |
+| academic paper / thesis / journal-like output             | `AcademicThesis`, `APA`, `MLA`, `Chicago`, `Springer`, `Nature`; hierarchy and spacing from `design_principles.md`                   |
+| 公文 / Chinese institutional document / strong CJK output | `ChineseGovernment` + `cjk_typography.md`                                                                                            |
+| brand / house style without a structural template         | nearest recipe family first, then refine with `design_principles.md` / `typography_guide.md`                                         |
 
 If the user gives exact institutional formatting through a template DOCX, reconsider whether the real
 route is `APPLY_TEMPLATE`.
@@ -82,12 +83,15 @@ font size, spacing, or page geometry from memory.
 ## Sub-modes
 
 ### CREATE-D
+
 Source is structured config (or normalized text-native input) and fits builtin dotnet CLI creation.
 
 ### CREATE-S
+
 Output needs custom OpenXML structure beyond the CLI surface.
 
 ### CREATE-H
+
 Source is only a business brief. First produce a document plan, then pick D or S.
 
 `CREATE-H` still must choose a recipe family before backend.
@@ -95,11 +99,13 @@ Source is only a business brief. First produce a document plan, then pick D or S
 ## Backend decision
 
 ### Default to D when
+
 - source is structured config
 - source started as Markdown / LaTeX / HTML / RST but has been normalized into a document plan or structured config
 - output is an institutional or section-aware DOCX that the CLI surface already supports
 
 ### Escalate to S when
+
 - the output structure is beyond the builtin dotnet CLI surface
 
 Backend choice happens after recipe choice, not before it.

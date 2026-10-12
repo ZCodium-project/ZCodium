@@ -9,10 +9,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_PLUGIN_MCP_PING_INSTALLED_ENABLED"],
         "bodyIncludes": ["E2E_PLUGIN_MCP_PING_INSTALLED_ENABLED"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "replay": {
         "consumeOnce": true
@@ -38,10 +35,7 @@
           "E2E_PLUGIN_MCP_PING_INSTALLED_ENABLED",
           "toolu_e2e_plugin_mcp_ping_installed_enabled"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

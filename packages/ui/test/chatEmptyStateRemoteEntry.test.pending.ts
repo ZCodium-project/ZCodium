@@ -3,13 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/ui/button.js", () => ({
-  Button: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-    [key: string]: unknown;
-  }) => createElement("button", props, children),
+  Button: ({ children, ...props }: { children: ReactNode; [key: string]: unknown }) =>
+    createElement("button", props, children),
 }));
 
 vi.mock("@/components/ui/dropdown-menu.js", () => ({
@@ -28,13 +23,8 @@ vi.mock("@/components/ui/dropdown-menu.js", () => ({
   }) => createElement("div", props, children),
   DropdownMenuSubContent: ({ children }: { children: ReactNode }) =>
     createElement("div", null, children),
-  DropdownMenuItem: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-    [key: string]: unknown;
-  }) => createElement("div", props, children),
+  DropdownMenuItem: ({ children, ...props }: { children: ReactNode; [key: string]: unknown }) =>
+    createElement("div", props, children),
   DropdownMenuCheckboxItem: ({
     children,
     ...props
@@ -77,27 +67,20 @@ vi.mock("@/SSHDialog.js", () => ({
   SSHDialog: () => createElement("div", { "data-testid": "ssh-dialog" }),
 }));
 
-async function renderMenu(
-  showRemoteConnectionEntry: boolean,
-  allowRemoteWorkspace = true,
-) {
+async function renderMenu(showRemoteConnectionEntry: boolean, allowRemoteWorkspace = true) {
   vi.resetModules();
   vi.doMock("@/hooks/useRemoteConnectionEntryVisibility.js", () => ({
     useRemoteConnectionEntryVisibility: () => showRemoteConnectionEntry,
   }));
   vi.doMock("@zcode/shared", async () => {
-    const actual = await vi.importActual<typeof import("@zcode/shared")>(
-      "@zcode/shared"
-    );
+    const actual = await vi.importActual<typeof import("@zcode/shared")>("@zcode/shared");
     return {
       ...actual,
     };
   });
 
   const { ChatEmptyWorkspacePreviewMenu } = await import("../src/ChatEmptyState.js");
-  const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<
-    Record<string, unknown>
-  >;
+  const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<Record<string, unknown>>;
   return renderToStaticMarkup(
     createElement(Menu, {
       workspacePath: "/Users/tester/project",
@@ -151,9 +134,7 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("工作区搜索最多保留前 5 条且保持原顺序", async () => {
-    const {
-      filterVisibleWorkspaceMenuTabs,
-    } = await import("../src/ChatEmptyState.js");
+    const { filterVisibleWorkspaceMenuTabs } = await import("../src/ChatEmptyState.js");
     const tabs = [
       "/workspace/alpha",
       "/workspace/beta",
@@ -184,9 +165,7 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("工作区搜索匹配名称、路径和远程目标信息", async () => {
-    const {
-      filterVisibleWorkspaceMenuTabs,
-    } = await import("../src/ChatEmptyState.js");
+    const { filterVisibleWorkspaceMenuTabs } = await import("../src/ChatEmptyState.js");
     const tabs = [
       {
         workspacePath: "/repo/alpha",
@@ -235,10 +214,8 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("工作区搜索没有匹配项时保留新增工作区入口", async () => {
-    const {
-      filterVisibleWorkspaceMenuTabs,
-      ChatEmptyWorkspacePreviewMenu,
-    } = await import("../src/ChatEmptyState.js");
+    const { filterVisibleWorkspaceMenuTabs, ChatEmptyWorkspacePreviewMenu } =
+      await import("../src/ChatEmptyState.js");
     const tabs = [
       {
         workspacePath: "/repo/alpha",
@@ -254,9 +231,7 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
       }),
     ).toEqual([]);
 
-    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<
-      Record<string, unknown>
-    >;
+    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<Record<string, unknown>>;
     const html = renderToStaticMarkup(
       createElement(Menu, {
         workspacePath: "/Users/tester/project",
@@ -284,10 +259,8 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("Start from scratch 默认路径为空名称后缀，非法名称有校验", async () => {
-    const {
-      getScratchWorkspaceLocationHint,
-      getScratchWorkspaceNameErrorKind,
-    } = await import("../src/ChatEmptyState.js");
+    const { getScratchWorkspaceLocationHint, getScratchWorkspaceNameErrorKind } =
+      await import("../src/ChatEmptyState.js");
 
     expect(getScratchWorkspaceLocationHint("")).toBe("~/ZCodeProject/");
     expect(getScratchWorkspaceLocationHint("demo")).toBe("~/ZCodeProject/demo");
@@ -310,11 +283,8 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("对话工作区显示选择项目且不展示关闭按钮", async () => {
-    const { ChatEmptyWorkspacePreviewMenu } =
-      await import("../src/ChatEmptyState.js");
-    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<
-      Record<string, unknown>
-    >;
+    const { ChatEmptyWorkspacePreviewMenu } = await import("../src/ChatEmptyState.js");
+    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<Record<string, unknown>>;
     const html = renderToStaticMarkup(
       createElement(Menu, {
         workspacePath: "/Users/tester/.zcode/workspace/default",
@@ -340,11 +310,8 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("可单独保留不在项目中工作菜单项并关闭项目 chip 的脱离按钮", async () => {
-    const { ChatEmptyWorkspacePreviewMenu } =
-      await import("../src/ChatEmptyState.js");
-    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<
-      Record<string, unknown>
-    >;
+    const { ChatEmptyWorkspacePreviewMenu } = await import("../src/ChatEmptyState.js");
+    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<Record<string, unknown>>;
     const html = renderToStaticMarkup(
       createElement(Menu, {
         workspacePath: "/Users/tester/project",
@@ -380,11 +347,8 @@ describe("ChatEmptyWorkspacePreviewMenu", () => {
   });
 
   it("禁用非项目工作区能力时同时隐藏脱离按钮和菜单项", async () => {
-    const { ChatEmptyWorkspacePreviewMenu } =
-      await import("../src/ChatEmptyState.js");
-    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<
-      Record<string, unknown>
-    >;
+    const { ChatEmptyWorkspacePreviewMenu } = await import("../src/ChatEmptyState.js");
+    const Menu = ChatEmptyWorkspacePreviewMenu as unknown as ComponentType<Record<string, unknown>>;
     const props = {
       workspacePath: "/Users/tester/project",
       workspaceTabs: [

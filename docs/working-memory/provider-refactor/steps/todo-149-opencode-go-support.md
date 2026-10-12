@@ -20,11 +20,11 @@
 
 在“添加供应商”的“其他”分组中与 Zen 相邻，复用现有 OpenCode 深浅主题图标及创建流程：
 
-| Template ID | 名称 | API 类型 | 官方接入表中的主要系列 |
-| --- | --- | --- | --- |
-| `opencode-go-chat` | OpenCode Go (Chat) | `openai-chat-completions` | GLM、Kimi、DeepSeek、MiMo、LongCat、Hy |
-| `opencode-go-messages` | OpenCode Go (Anthropic) | `anthropic-messages` | MiniMax、Qwen |
-| `opencode-go-responses` | OpenCode Go (Responses) | `openai-responses` | GPT、Grok、Muse |
+| Template ID             | 名称                    | API 类型                  | 官方接入表中的主要系列                 |
+| ----------------------- | ----------------------- | ------------------------- | -------------------------------------- |
+| `opencode-go-chat`      | OpenCode Go (Chat)      | `openai-chat-completions` | GLM、Kimi、DeepSeek、MiMo、LongCat、Hy |
+| `opencode-go-messages`  | OpenCode Go (Anthropic) | `anthropic-messages`      | MiniMax、Qwen                          |
+| `opencode-go-responses` | OpenCode Go (Responses) | `openai-responses`        | GPT、Grok、Muse                        |
 
 - 共同 Base URL：`https://opencode.ai/zen/go/v1`；Access 使用 `api-key`。
 - 获取 API Key 仅一个入口：`https://opencode.ai/auth`。
@@ -79,12 +79,12 @@ Go 模板创建 ─────┐
 
 ## 影响面与边界
 
-| 入口 | 共享改动 | 保持原状的状态与提交边界 |
-| --- | --- | --- |
-| 添加供应商、模型设置 | Template 列表、推荐模型配置 | 页面草稿经 Settings Service 保存 Personal；不物化未编辑的推荐字段 |
-| 连接测试 | Registry 解析与正式 Adapter 请求参数 | 既有提示词、预算、流式完成判断；不修改会话模型选择 |
-| 聊天、自动化、Subagent、Wiki 等 | Registry 候选和 Model 请求配置 | 各入口的默认、继承、校验、提交和持久化各自独立 |
-| 远程工作区及手机 | 既有配置交付后的同一执行规则 | 不新增同步链路；桌面 continuous 与手机 replayable 边界不变 |
+| 入口                            | 共享改动                             | 保持原状的状态与提交边界                                          |
+| ------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| 添加供应商、模型设置            | Template 列表、推荐模型配置          | 页面草稿经 Settings Service 保存 Personal；不物化未编辑的推荐字段 |
+| 连接测试                        | Registry 解析与正式 Adapter 请求参数 | 既有提示词、预算、流式完成判断；不修改会话模型选择                |
+| 聊天、自动化、Subagent、Wiki 等 | Registry 候选和 Model 请求配置       | 各入口的默认、继承、校验、提交和持久化各自独立                    |
+| 远程工作区及手机                | 既有配置交付后的同一执行规则         | 不新增同步链路；桌面 continuous 与手机 replayable 边界不变        |
 
 必查：Built-in、规则解析优先级、Settings 创建与连接测试、正式请求体与请求头。
 回归关注：共享模型候选、辅助调用、Zen 和其他供应商不误命中、生产/测试配置一致性。
@@ -117,6 +117,7 @@ Go 模板创建 ─────┐
 技术待核实：各系列 Go 原生映射、能力值、输出预算限制，以及初始默认启用的具体清单。
 这不阻塞先补 GLM 已知问题与模板基础；未知型号不猜配置。
 若必须新增 SDK 适配、扩大通用映射变更或改变用户覆盖语义，先说明具体证据与新增范围，另行裁决。
+
 ### 本次实现裁决
 
 - 按 Go 官方端点表与 models.dev 的 `opencode-go` 元数据交叉确认 25 个型号；LongCat-2.0 的请求开关尚未确认，Muse Contributor 两款涉及额外数据条款，本次不预置。目录中未列明协议的旧别名也不加入。

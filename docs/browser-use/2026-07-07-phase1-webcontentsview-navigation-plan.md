@@ -22,10 +22,12 @@
 ### Task 1: executor 实现 back/forward/reload + 扩展 ControlledView
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/browserView/browserCommandExecutor.ts`
 - Test: `packages/desktop/test/browserCommandExecutor.test.ts`
 
 **Interfaces:**
+
 - Consumes:（无，本任务是起点）
 - Produces:
   - `ControlledViewWebContents` 新增方法：`goBack(): void`、`goForward(): void`、`reload(): void`
@@ -36,7 +38,9 @@
 在 `packages/desktop/test/browserCommandExecutor.test.ts` 的 `makeView` 里给 `webContents` 补三个 stub 方法，并加三条用例。先改 `makeView`：
 
 ```typescript
-function makeView(overrides: Partial<{ cdpSend: (m: string, p?: unknown) => Promise<unknown> }> = {}): ControlledView {
+function makeView(
+  overrides: Partial<{ cdpSend: (m: string, p?: unknown) => Promise<unknown> }> = {},
+): ControlledView {
   return {
     webContents: {
       loadURL: vi.fn(async () => {}),
@@ -58,27 +62,27 @@ function makeView(overrides: Partial<{ cdpSend: (m: string, p?: unknown) => Prom
 在 `describe("executeBrowserCommandOnView", ...)` 内新增：
 
 ```typescript
-  it("back 调 goBack 并返回 state", async () => {
-    const view = makeView();
-    const r = await executeBrowserCommandOnView(view, { method: "back" });
-    expect(view.webContents.goBack).toHaveBeenCalledTimes(1);
-    expect(r.ok).toBe(true);
-    expect(r.state?.url).toBe("https://example.com");
-  });
+it("back 调 goBack 并返回 state", async () => {
+  const view = makeView();
+  const r = await executeBrowserCommandOnView(view, { method: "back" });
+  expect(view.webContents.goBack).toHaveBeenCalledTimes(1);
+  expect(r.ok).toBe(true);
+  expect(r.state?.url).toBe("https://example.com");
+});
 
-  it("forward 调 goForward 并返回 state", async () => {
-    const view = makeView();
-    const r = await executeBrowserCommandOnView(view, { method: "forward" });
-    expect(view.webContents.goForward).toHaveBeenCalledTimes(1);
-    expect(r.ok).toBe(true);
-  });
+it("forward 调 goForward 并返回 state", async () => {
+  const view = makeView();
+  const r = await executeBrowserCommandOnView(view, { method: "forward" });
+  expect(view.webContents.goForward).toHaveBeenCalledTimes(1);
+  expect(r.ok).toBe(true);
+});
 
-  it("reload 调 reload 并返回 state", async () => {
-    const view = makeView();
-    const r = await executeBrowserCommandOnView(view, { method: "reload" });
-    expect(view.webContents.reload).toHaveBeenCalledTimes(1);
-    expect(r.ok).toBe(true);
-  });
+it("reload 调 reload 并返回 state", async () => {
+  const view = makeView();
+  const r = await executeBrowserCommandOnView(view, { method: "reload" });
+  expect(view.webContents.reload).toHaveBeenCalledTimes(1);
+  expect(r.ok).toBe(true);
+});
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
@@ -139,10 +143,12 @@ git commit -m "feat(browser-use): implement back/forward/reload commands in exec
 ### Task 2: browserViewManager.toControlledView 接线真实导航
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/browserView/browserViewManager.ts`
 - Test: `packages/desktop/test/browserViewManagerDisplay.test.ts`（验证 toControlledView 映射，若该测试用 fake WebContentsView）
 
 **Interfaces:**
+
 - Consumes: Task 1 的 `ControlledViewWebContents.goBack/goForward/reload`
 - Produces: `toControlledView` 返回的 `webContents` 现在把 `goBack/goForward/reload` 映射到真实 `wc.navigationHistory.goBack()`/`goForward()` 与 `wc.reload()`
 

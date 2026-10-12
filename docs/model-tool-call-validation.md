@@ -56,11 +56,11 @@ client-executed + name.trim()==="" + id 可闭合
 runtime assistant/tool-result history 始终保存 provider 原始名称。只有协议要求非空的边界使用
 固定占位值 `empty_tool_name`：
 
-| API 格式 | assistant tool call | tool-result wire |
-| --- | --- | --- |
-| `anthropic-messages` | 原始空字符串/空白字符串 | `tool_result` 不携带 name |
-| `openai-chat-completions` | `empty_tool_name` | tool message 不携带 name |
-| `openai-responses` | `empty_tool_name` | `function_call_output` 不携带 name |
+| API 格式                  | assistant tool call     | tool-result wire                   |
+| ------------------------- | ----------------------- | ---------------------------------- |
+| `anthropic-messages`      | 原始空字符串/空白字符串 | `tool_result` 不携带 name          |
+| `openai-chat-completions` | `empty_tool_name`       | tool message 不携带 name           |
+| `openai-responses`        | `empty_tool_name`       | `function_call_output` 不携带 name |
 
 - 显式 `apiFormat` 优先；格式缺失时仅 `providerKind="anthropic"` 保留原始名称，其他 provider
   使用 `empty_tool_name`。不得根据 URL 猜测协议。

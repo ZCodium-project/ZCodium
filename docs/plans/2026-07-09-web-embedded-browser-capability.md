@@ -21,10 +21,12 @@
 ### Task 1: Capability Tests
 
 **Files:**
+
 - Modify: `packages/ui/test/quickPickCommands.test.ts`
 - Modify: `packages/ui/test/animatedSidePanePanelLayout.test.ts`
 
 **Interfaces:**
+
 - Consumes: `createQuickPickCommands(options)`
 - Produces: failing tests for `supportsEmbeddedBrowser`
 
@@ -45,6 +47,7 @@ Expected: at least one assertion/export failure caused by missing capability sup
 ### Task 2: Capability Wiring
 
 **Files:**
+
 - Modify: `packages/ui/src/root/types.ts`
 - Modify: `packages/ui/src/Root.tsx`
 - Modify: `packages/ui/src/app-shell/types.ts`
@@ -52,6 +55,7 @@ Expected: at least one assertion/export failure caused by missing capability sup
 - Modify: `packages/web/src/main.tsx`
 
 **Interfaces:**
+
 - Produces: optional `supportsEmbeddedBrowser?: boolean` prop
 
 - [ ] **Step 1: Add Root/App prop**
@@ -69,12 +73,14 @@ Add `supportsEmbeddedBrowser={false}` to all Web Root render paths.
 ### Task 3: UI And Callback Gating
 
 **Files:**
+
 - Modify: `packages/ui/src/quickpick/quickPickCommands.ts`
 - Modify: `packages/ui/src/hooks/useAppPanels.ts`
 - Modify: `packages/ui/src/app-shell/WorkspaceShellLayout.tsx`
 - Modify: `packages/ui/src/app-shell/AnimatedSidePanePanel.tsx`
 
 **Interfaces:**
+
 - Consumes: `supportsEmbeddedBrowser`
 - Produces: browser entries omitted and tab creation blocked
 
@@ -93,6 +99,7 @@ Add a pure launcher id resolver and use it to omit Browser items when unsupporte
 ### Task 4: Verification And Commit
 
 **Files:**
+
 - No new files beyond previous tasks
 
 - [ ] **Step 1: Run targeted tests**

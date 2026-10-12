@@ -28,14 +28,14 @@ ARMS.
 
 ### 2.1 Event envelope
 
-| Field | Value |
-| --- | --- |
-| `element_name` | `off_peak_task_create_result` |
-| `event_region` | `app.session` for a homepage template; `app.automations` for an Automations template or direct create |
-| `event_type` | `result` |
-| `event_text` | empty string |
-| `event_value` | omitted |
-| `event_extra_detail` | string-valued fields only |
+| Field                | Value                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| `element_name`       | `off_peak_task_create_result`                                                                         |
+| `event_region`       | `app.session` for a homepage template; `app.automations` for an Automations template or direct create |
+| `event_type`         | `result`                                                                                              |
+| `event_text`         | empty string                                                                                          |
+| `event_value`        | omitted                                                                                               |
+| `event_extra_detail` | string-valued fields only                                                                             |
 
 The source, template ID, selected model, and provider identifier are frozen at
 submit time before any asynchronous ticket or persistence work starts. Each
@@ -46,41 +46,41 @@ business result is available.
 
 Common fields:
 
-| Field | Contract |
-| --- | --- |
-| `result` | `success` or `failure` |
-| `template_id` | stable Client Scenes item ID; `item-*` is forwarded unchanged, with no compatibility mapping to legacy unprefixed local IDs; empty string for direct create |
-| `model_name` | model selected by the submitted creation form |
-| `model_provider` | stable Off-Peak model provider ID |
-| `provider_name` | non-sensitive stable provider value; URL-derived values are hostname only |
+| Field            | Contract                                                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `result`         | `success` or `failure`                                                                                                                                      |
+| `template_id`    | stable Client Scenes item ID; `item-*` is forwarded unchanged, with no compatibility mapping to legacy unprefixed local IDs; empty string for direct create |
+| `model_name`     | model selected by the submitted creation form                                                                                                               |
+| `model_provider` | stable Off-Peak model provider ID                                                                                                                           |
+| `provider_name`  | non-sensitive stable provider value; URL-derived values are hostname only                                                                                   |
 
 Success-only fields:
 
-| Field | Contract |
-| --- | --- |
-| `off_peak_task_id` | stable Off-Peak task correlation ID |
-| `ticket_initial_state` | key is always present |
-| `queue_position` | key is always present; empty string when absent |
+| Field                  | Contract                                        |
+| ---------------------- | ----------------------------------------------- |
+| `off_peak_task_id`     | stable Off-Peak task correlation ID             |
+| `ticket_initial_state` | key is always present                           |
+| `queue_position`       | key is always present; empty string when absent |
 
 Failure-only fields:
 
-| Field | Contract |
-| --- | --- |
-| `failure_stage` | stable stage below |
-| `error_category` | stable category below |
-| `error_code` | key is always present; empty string when no stable code exists |
+| Field            | Contract                                                       |
+| ---------------- | -------------------------------------------------------------- |
+| `failure_stage`  | stable stage below                                             |
+| `error_category` | stable category below                                          |
+| `error_code`     | key is always present; empty string when no stable code exists |
 
 Stable failure mapping:
 
-| `failure_stage` | `error_category` | Meaning |
-| --- | --- | --- |
-| `client_validation` | `client_validation` | submitted data failed local validation |
-| `ticket_request` | `eligibility_3101` | server rejected Off-Peak eligibility |
-| `ticket_request` | `quota_3103` | server rejected the daily ticket quota |
-| `ticket_request` | `network` | RPC or network request failed |
-| `ticket_request` | `invalid_response` | response envelope or ticket body was invalid |
-| `local_persist` | `local_persist` | local task/scheduling state could not be persisted |
-| current stage | `unknown` | uncategorized failure |
+| `failure_stage`     | `error_category`    | Meaning                                            |
+| ------------------- | ------------------- | -------------------------------------------------- |
+| `client_validation` | `client_validation` | submitted data failed local validation             |
+| `ticket_request`    | `eligibility_3101`  | server rejected Off-Peak eligibility               |
+| `ticket_request`    | `quota_3103`        | server rejected the daily ticket quota             |
+| `ticket_request`    | `network`           | RPC or network request failed                      |
+| `ticket_request`    | `invalid_response`  | response envelope or ticket body was invalid       |
+| `local_persist`     | `local_persist`     | local task/scheduling state could not be persisted |
+| current stage       | `unknown`           | uncategorized failure                              |
 
 RPC transport, network, and response parsing remain in
 `failure_stage=ticket_request`; `error_category` distinguishes them. Stable

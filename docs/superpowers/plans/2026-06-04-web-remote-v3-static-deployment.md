@@ -13,6 +13,7 @@
 ### Task 1: Web Remote Route Base Helper
 
 **Files:**
+
 - Modify: `packages/shared/src/web-remote-control.ts`
 - Test: `packages/shared/test/webRemoteControl.test.ts`
 - Modify: `packages/web/src/main.tsx`
@@ -112,7 +113,10 @@ Replace `isWebRemoteControlRoute()` with:
 
 ```ts
 function isWebRemoteControlRoute(): boolean {
-  return window.location.pathname === resolveWebRemoteControlRoutePathFromBaseUrl(import.meta.env.BASE_URL);
+  return (
+    window.location.pathname ===
+    resolveWebRemoteControlRoutePathFromBaseUrl(import.meta.env.BASE_URL)
+  );
 }
 ```
 
@@ -202,6 +206,7 @@ git commit -m "fix(web-remote): resolve remote route from build base"
 ### Task 2: Root v3 Build Script
 
 **Files:**
+
 - Modify: `package.json`
 - Test: `packages/desktop/test/root-build-scripts.test.ts`
 
@@ -260,6 +265,7 @@ git commit -m "build(web-remote): add v3 static build script"
 ### Task 3: v3 Static Image And Smoke Test
 
 **Files:**
+
 - Create: `Dockerfile.web-remote-control-v3`
 - Create: `nginx.web-remote-control-v3.conf`
 - Create: `scripts/test-web-remote-control-v3-docker-build.sh`
@@ -527,6 +533,7 @@ git commit -m "build(web-remote): add v3 static image smoke test"
 ### Task 4: v3 Publish Script
 
 **Files:**
+
 - Create: `scripts/docker-build-and-push-web-remote-control-v3.sh`
 
 - [ ] **Step 1: Create the v3 publish script from the v2 script**
@@ -606,6 +613,7 @@ git commit -m "build(web-remote): add v3 image publish script"
 ### Task 5: Desktop QR URL Defaults
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/index.ts`
 - Test: `packages/desktop/test/webRemoteControlManagerExternalRelay.test.ts`
 - Test: `packages/desktop/test/root-build-scripts.test.ts`
@@ -694,6 +702,7 @@ git commit -m "feat(web-remote): point desktop QR URL to v3"
 ### Task 6: Architecture Docs And Full Verification
 
 **Files:**
+
 - Modify: `docs/web-remote-control/web-remote-control-architecture.md`
 
 - [ ] **Step 1: Update static deployment docs**

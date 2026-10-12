@@ -62,6 +62,7 @@
 ## Phase 0: 预检与边界确认
 
 **Files:**
+
 - Read: `docs/superpowers/plans/2026-07-06-subagent-permission-delegation.md`
 - Read: 历史差异审计文档（已删除）
 - Read: `docs/cli-background-subagent-wake-plan.md`
@@ -96,6 +97,7 @@
 **Goal:** 在 contracts/shared protocol/task stream 类型中增加可选 `origin` 字段，表达 subagent 来源；所有旧 permission/user-input request 不传该字段时行为完全不变。
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/interfaces/permission.port.ts`
 - Modify: `packages/shared/src/zcode-protocol/index.ts`
 - Modify: `packages/shared/src/zcode-task-types.ts`
@@ -170,9 +172,7 @@ export const zcodeInteractionRequestOriginSchema = z.discriminatedUnion("kind", 
     })
     .strict(),
 ]);
-export type ZCodeInteractionRequestOrigin = z.infer<
-  typeof zcodeInteractionRequestOriginSchema
->;
+export type ZCodeInteractionRequestOrigin = z.infer<typeof zcodeInteractionRequestOriginSchema>;
 ```
 
 - [ ] 给以下 schema 增加 `origin: zcodeInteractionRequestOriginSchema.optional()`：
@@ -216,6 +216,7 @@ Expected:
 **Goal:** child runtime 仍用 child session 做事件和工具执行，但经 `PermissionBrokerPort` 发出的普通 permission、AskUserQuestion、ExitPlanMode approval 都向 parent permission broker 发起 parent-routed blocking request，并带上 child origin。
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/runtime/helpers/subagent-interaction-broker.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
 - Test: `apps/zcode-cli/packages/core/tests/subagent-interaction-broker.test.ts`
@@ -411,6 +412,7 @@ PASS packages/core/tests/subagent-tool-events.test.ts
 **Goal:** core delegate 生成的 `origin` 能穿过 bootstrap protocol broker 到 service；普通权限走 `interaction/requestPermission`，AskUserQuestion/ExitPlanMode 走 `interaction/requestUserInput`，三条路径都保留 parent-routed session 和 child origin。
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/interaction-broker.ts`
 - Test: existing bootstrap protocol tests；必要时新增 `apps/zcode-cli/packages/bootstrap/tests/interaction-broker.test.ts`
 
@@ -518,6 +520,7 @@ PASS packages/bootstrap/tests/subagents.test.ts
 **Goal:** service 继续按 parent session/task 记录 pending permission 和 pending user input，同时把 `origin` 投影到 task stream 和 snapshot，支持 UI 与 remote 恢复。
 
 **Files:**
+
 - Modify: `packages/services/src/zcode-agent/zcodeAgentService.ts`
 - Modify: `packages/services/src/zcode-agent/zcodeTaskServiceAdapter.ts`
 - Test: `packages/services/test/zcodeAgentService.test.ts`
@@ -669,6 +672,7 @@ PASS packages/services/test/zcodeAgentService.test.ts
 **Goal:** 现有 permission dialog 和 elicitation dialog 都能处理带 `origin` 的 request；不需要 UI 订阅 child session。可选显示 subagent 来源，但第一阶段以不破坏现有弹窗/问答体验为主。
 
 **Files:**
+
 - Read before UI edit: `DESIGN.md`
 - Modify if needed: `packages/ui/src/...`
 - Test: `packages/ui/test/permissionRequest.test.ts`
@@ -723,6 +727,7 @@ PASS packages/ui/test/permissionDialog.test.ts
 **Goal:** 按项目规则，conversation 相关交互 bug 先补 catalog/matrix，再写具体 E2E pending case。
 
 **Files:**
+
 - Modify: `docs/conversation-session-case-catalog.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 - Create: `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-subagent-blocking-interaction-delegate.test.ts`
@@ -733,11 +738,11 @@ PASS packages/ui/test/permissionDialog.test.ts
 
 建议 case：
 
-| ID | 前置状态 | 用户/系统事件 | 规则命中 | 期望结果 | Review |
-| --- | --- | --- | --- | --- | --- |
-| L01 | `build/变更前确认`，parent task 调用 `Agent`，child 需要执行 Bash | child 发起 Bash permission request | subagentPermissionDelegatesToParent | parent task 出现权限确认；approve 后 child Bash 执行并回填 Agent 结果；deny 后 child 收到 permission denied；stop 清理 pending | accepted |
-| L02 | parent task 调用 `Agent`，child 调用 `AskUserQuestion` | child 发起 user input request | subagentAskUserQuestionDelegatesToParent | parent task 出现 elicitation dialog；accept 后答案回填 child tool input，child 继续；cancel/decline 后 child 得到拒绝；stop 清理 pending | accepted |
-| L03 | parent task 调用 `Agent`，child 在 plan mode 中调用 `ExitPlanMode` | child 发起 plan approval request | subagentExitPlanModeDelegatesToParent | parent task 出现 plan approval elicitation；approve 后 child 退出计划模式；反馈/拒绝后以 `plan_approval_feedback` 返回 child；stop 清理 pending | accepted |
+| ID  | 前置状态                                                                | 用户/系统事件                               | 规则命中                                       | 期望结果                                                                                                                                                | Review   |
+| --- | ----------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| L01 | `build/变更前确认`，parent task 调用 `Agent`，child 需要执行 Bash       | child 发起 Bash permission request          | subagentPermissionDelegatesToParent            | parent task 出现权限确认；approve 后 child Bash 执行并回填 Agent 结果；deny 后 child 收到 permission denied；stop 清理 pending                          | accepted |
+| L02 | parent task 调用 `Agent`，child 调用 `AskUserQuestion`                  | child 发起 user input request               | subagentAskUserQuestionDelegatesToParent       | parent task 出现 elicitation dialog；accept 后答案回填 child tool input，child 继续；cancel/decline 后 child 得到拒绝；stop 清理 pending                | accepted |
+| L03 | parent task 调用 `Agent`，child 在 plan mode 中调用 `ExitPlanMode`      | child 发起 plan approval request            | subagentExitPlanModeDelegatesToParent          | parent task 出现 plan approval elicitation；approve 后 child 退出计划模式；反馈/拒绝后以 `plan_approval_feedback` 返回 child；stop 清理 pending         | accepted |
 | L04 | child model request 触发 provider runtime headers（含官方版本安全校验） | child 发起 provider runtime headers request | subagentProviderHeadersAlreadyDelegateToParent | 继续复用现有 parent-routed provider runtime headers wrapper；不出现 child session 独立 UI 订阅；回包只影响本次 child model request，不误切 parent model | accepted |
 
 - [ ] 在 `docs/testing/conversation-session-e2e-coverage-matrix.md` 的测试缩写表增加 `SBI`。
@@ -772,6 +777,7 @@ PASS packages/ui/test/permissionDialog.test.ts
 **Goal:** 用 focused tests 和真实事故形态证明卡死消失。
 
 **Files/Artifacts:**
+
 - Existing ticket artifacts under `/tmp/ZCT-2073779059361222656/`
 - Core/service/UI tests from previous phases
 - Optional local runtime repro script or manual desktop run
@@ -961,41 +967,41 @@ child AgentRuntime
 
 ### Impact Brief
 
-| Field | Value |
-| --- | --- |
-| Developer intent | 恢复 subagent 内权限和 `AskUserQuestion` 在 main task 展示、响应并继续 child |
-| Capability | Subagents + conversation blocking interactions |
-| Change layer | validation + recovery |
-| Operating mode | planning |
-| Primary seeds | `createSubagentInteractionBroker`、`mirrorSubagentToolEvent`、`ProductProjection.onPermissionRequested`、`V4InteractionDialogs` |
-| Out of scope | 不新增 child task/UI 订阅；不改变权限判定；不把 replayable 恢复语义扩散到 desktop continuous |
+| Field            | Value                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Developer intent | 恢复 subagent 内权限和 `AskUserQuestion` 在 main task 展示、响应并继续 child                                                    |
+| Capability       | Subagents + conversation blocking interactions                                                                                  |
+| Change layer     | validation + recovery                                                                                                           |
+| Operating mode   | planning                                                                                                                        |
+| Primary seeds    | `createSubagentInteractionBroker`、`mirrorSubagentToolEvent`、`ProductProjection.onPermissionRequested`、`V4InteractionDialogs` |
+| Out of scope     | 不新增 child task/UI 订阅；不改变权限判定；不把 replayable 恢复语义扩散到 desktop continuous                                    |
 
 #### UI Surface Matrix
 
-| User scenario | UI entry | Shared implementation | Display owner | Validation/gating | Commit action | Authority | Mode boundary | Isolation |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| child `AskUserQuestion` | main task elicitation dialog | `V4InteractionDialogs` → `ElicitationDialog` | parent `ProductProjection.pendingInteractions` | child permission service 判定为 `ask` | `resolveInteraction(requestId)` | parent conversation projection + child broker promise | desktop continuous；mobile 仅沿既有 replayable snapshot/gap | child event store/model-io 保持 child session |
-| child 普通 permission | main task permission dialog | `V4InteractionDialogs` → `PermissionDialog` | parent `ProductProjection.pendingInteractions` | child permission ruleset | `resolveInteraction(requestId)` | 同上 | 同上 | 同上 |
-| child `ExitPlanMode` | main task plan approval dialog | 与 user-input interaction 共用 | parent projection | plan mode + child tool policy | `resolveInteraction(requestId)` | 同上 | 本轮只做同一投影链路回归，不新增独立 E2E 组合 | 同上 |
+| User scenario           | UI entry                       | Shared implementation                        | Display owner                                  | Validation/gating                     | Commit action                   | Authority                                             | Mode boundary                                               | Isolation                                     |
+| ----------------------- | ------------------------------ | -------------------------------------------- | ---------------------------------------------- | ------------------------------------- | ------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------- |
+| child `AskUserQuestion` | main task elicitation dialog   | `V4InteractionDialogs` → `ElicitationDialog` | parent `ProductProjection.pendingInteractions` | child permission service 判定为 `ask` | `resolveInteraction(requestId)` | parent conversation projection + child broker promise | desktop continuous；mobile 仅沿既有 replayable snapshot/gap | child event store/model-io 保持 child session |
+| child 普通 permission   | main task permission dialog    | `V4InteractionDialogs` → `PermissionDialog`  | parent `ProductProjection.pendingInteractions` | child permission ruleset              | `resolveInteraction(requestId)` | 同上                                                  | 同上                                                        | 同上                                          |
+| child `ExitPlanMode`    | main task plan approval dialog | 与 user-input interaction 共用               | parent projection                              | plan mode + child tool policy         | `resolveInteraction(requestId)` | 同上                                                  | 本轮只做同一投影链路回归，不新增独立 E2E 组合               | 同上                                          |
 
 #### Shared And Divergent Behavior
 
-| Concern | Shared | Deliberately different | Why |
-| --- | --- | --- | --- |
+| Concern          | Shared                                                                 | Deliberately different                                                             | Why                                                             |
+| ---------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Request identity | `requestId` 在 child、parent mirror 和 interaction registry 间保持不变 | parent projection 使用镜像后的 tool row id；child executor 保留 child tool call id | UI 能锚定 parent tool row，同时 response 仍释放原 child promise |
-| Persistence | raw child interaction events 继续写 child session | parent interaction event 只走 live mirror，不重复写 parent event store | 防止污染 parent transcript，同时让 V4 live projection 可见 |
-| Delivery | parent projection 同时服务 desktop 与 replayable snapshot | desktop 不拼接 mobile 恢复消息 | 保持现有 clientMode/deliveryKind 边界 |
+| Persistence      | raw child interaction events 继续写 child session                      | parent interaction event 只走 live mirror，不重复写 parent event store             | 防止污染 parent transcript，同时让 V4 live projection 可见      |
+| Delivery         | parent projection 同时服务 desktop 与 replayable snapshot              | desktop 不拼接 mobile 恢复消息                                                     | 保持现有 clientMode/deliveryKind 边界                           |
 
 #### Ranked Relationships
 
-| Rank | From | Edge | To | Evidence |
-| --- | --- | --- | --- | --- |
-| must-inspect | child runtime event sink | live mirror | parent `ProductProjection` | `runtime/methods/subagent.ts`、`subagent/tool-event-mirror.ts` |
-| must-inspect | parent `PermissionRequested` | creates | `pendingInteractions` | `zcode-protocol-v4/product-projection.ts` |
-| must-inspect | `pendingInteractions` | renders | `V4InteractionDialogs` | `packages/ui/src/v4/V4InteractionDialogs.tsx` |
-| should-inspect | parent `PermissionResolved/Denied` | settles | pending interaction/tool row | `ProductProjection.settlePermission()` |
-| invariant-only | raw child event | persists to | child session only | runtime event store + detached child topic |
-| conditional | parent conversation projection | recovers via | web remote replayable | 既有 conversation topic snapshot/gap；本轮不改 main/relay/owner |
+| Rank           | From                               | Edge         | To                           | Evidence                                                        |
+| -------------- | ---------------------------------- | ------------ | ---------------------------- | --------------------------------------------------------------- |
+| must-inspect   | child runtime event sink           | live mirror  | parent `ProductProjection`   | `runtime/methods/subagent.ts`、`subagent/tool-event-mirror.ts`  |
+| must-inspect   | parent `PermissionRequested`       | creates      | `pendingInteractions`        | `zcode-protocol-v4/product-projection.ts`                       |
+| must-inspect   | `pendingInteractions`              | renders      | `V4InteractionDialogs`       | `packages/ui/src/v4/V4InteractionDialogs.tsx`                   |
+| should-inspect | parent `PermissionResolved/Denied` | settles      | pending interaction/tool row | `ProductProjection.settlePermission()`                          |
+| invariant-only | raw child event                    | persists to  | child session only           | runtime event store + detached child topic                      |
+| conditional    | parent conversation projection     | recovers via | web remote replayable        | 既有 conversation topic snapshot/gap；本轮不改 main/relay/owner |
 
 #### Must-Preserve Invariants
 
@@ -1028,14 +1034,14 @@ createDefaultSubagentPort
 
 ### 用例剪枝与实现交接
 
-| Candidate | Status | Reason |
-| --- | --- | --- |
-| T01 child `AskUserQuestion` parent projection | bug-candidate → accepted | 已有产品语义与真实失败日志；必须修 |
-| T02 child Bash permission parent projection | accepted | 与 T01 共用同一 permission event mirror，只保留代表单测 |
-| child `ExitPlanMode` | accepted, representative-only | 共用 `PermissionRequested`/user-input broker；不新增状态排列 |
-| concurrent/background child | pruned | event mirror 按 agent/tool/request identity 工作；并发与后台不改变本次根因 |
-| mobile reconnect | ignored for implementation E2E | 不修改 replay/snapshot schema；保留现有 parent canonical projection 不变量 |
-| workspace/remote identity | pruned by invariant | 本次不改 workspace key、remoteSessionId 或 attachment |
+| Candidate                                     | Status                         | Reason                                                                     |
+| --------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| T01 child `AskUserQuestion` parent projection | bug-candidate → accepted       | 已有产品语义与真实失败日志；必须修                                         |
+| T02 child Bash permission parent projection   | accepted                       | 与 T01 共用同一 permission event mirror，只保留代表单测                    |
+| child `ExitPlanMode`                          | accepted, representative-only  | 共用 `PermissionRequested`/user-input broker；不新增状态排列               |
+| concurrent/background child                   | pruned                         | event mirror 按 agent/tool/request identity 工作；并发与后台不改变本次根因 |
+| mobile reconnect                              | ignored for implementation E2E | 不修改 replay/snapshot schema；保留现有 parent canonical projection 不变量 |
+| workspace/remote identity                     | pruned by invariant            | 本次不改 workspace key、remoteSessionId 或 attachment                      |
 
 本轮不新建 conversation E2E case：T01/T02 和 `SD` 已存在。先补 core 的 parent interaction
 event mirror 回归测试，并把 coverage matrix 从错误的 `covered` 修正为 `partial`；`SD` 仍在

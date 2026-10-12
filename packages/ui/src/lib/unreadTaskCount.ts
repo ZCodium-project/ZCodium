@@ -16,9 +16,7 @@ export function countWorkspaceUnreadTasks(workspace: WorkspaceUnreadState): numb
   return Object.keys(workspace.taskUnreadByTaskId ?? {}).length;
 }
 
-export function countAllUnreadTasks(
-  workspaces: Record<string, WorkspaceUnreadState>,
-): number {
+export function countAllUnreadTasks(workspaces: Record<string, WorkspaceUnreadState>): number {
   const countedTaskKeys = new Set<string>();
   const visitedWorkspaceStates = new WeakSet<object>();
 

@@ -67,12 +67,12 @@ ConversationTopicPublisher.rehydrate
               desktop-continuous / web-remote-replayable subscribe
 ```
 
-| Concept                | Why it matters                                                                                                | Source                            |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| candidate publisher    | 外层已经隔离旧权威状态，逐事件 clone 是重复事务                                                               | `conversation-topic-publisher.ts` |
-| action materialization | 当前每个 event 都扫描全部 rows，且 assistant 分支包含嵌套 `find/some`                                         | `product-projection.ts`           |
-| immutable delta apply  | replay 期间每次 append/upsert 都复制增长中的 row array                                                        | shared `apply.ts`                 |
-| wire tail              | initial snapshot 只下发最后 60 rows；完整历史仍由 CLI 为 range/targets 保留                                   | protocol limits / projection docs |
+| Concept                | Why it matters                                                                               | Source                            |
+| ---------------------- | -------------------------------------------------------------------------------------------- | --------------------------------- |
+| candidate publisher    | 外层已经隔离旧权威状态，逐事件 clone 是重复事务                                              | `conversation-topic-publisher.ts` |
+| action materialization | 当前每个 event 都扫描全部 rows，且 assistant 分支包含嵌套 `find/some`                        | `product-projection.ts`           |
+| immutable delta apply  | replay 期间每次 append/upsert 都复制增长中的 row array                                       | shared `apply.ts`                 |
+| wire tail              | initial snapshot 只下发最后 60 rows；完整历史仍由 CLI 为 range/targets 保留                  | protocol limits / projection docs |
 | recovery boundary      | batch 延迟派生 actions；rehydrate 后旧中间 base 必须 snapshot，当前水位后的新事件仍可 resume | publisher retention contract      |
 
 ## State Owners
@@ -120,14 +120,14 @@ ConversationTopicPublisher.rehydrate
 
 ## Accepted Cases
 
-| Case ID  | Setup                                                        | Action                 | Assertions                                                                                          | Evidence layers                                         | E2E status             |
-| -------- | ------------------------------------------------------------ | ---------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------- |
-| PERF03-A | 生成 2000 轮、4000 messages、混合工具状态的持久 session      | 冷进程首次 subscribe   | initial snapshot 到达；CLI 不再 180s timeout；tool/user/assistant tail 可见；耗时和 RSS 留 artifact | CLI log + process CPU/RSS + protocol ACK/frame + UI/CDP | manual performance run |
-| PERF03-B | synthetic small/mid/large event logs                         | strict 与 batch replay | 最终 snapshot、message target、row action、seq/revision 完全相同；增长倍率不呈平方级                | focused unit/perf test                                  | covered                |
-| PERF03-C | 正常 history 与超大 history                                  | batch hydrate          | 正常 history fast path；bound 不可证明时 strict fallback；16 MiB 行为与旧实现一致                   | publisher unit                                          | covered                |
-| PERF03-D | 已有 projection/subscription reservation，candidate 中途抛错 | rehydrate              | 旧 projection/log/reservation 不被修改                                                              | publisher unit                                          | covered/extend         |
-| PERF03-E | provider compact active tail 为 939 messages / 3523 parts，UI active branch 至少 10621 messages，另有 1805 个 workspace checkpoint | cold merge 后首次 rehydrate + subscribe | 同时校验 provider tail 与 UI full active branch 规模；完整 initial snapshot 到达；记录分段耗时与首帧结构 | opt-in CLI perf spec + production fixture | fixed；production verified |
-| PERF03-H | PERF03-E production fixture | V4 cold activation → initial frame | 正常路径只完整读取一次 parent messages；并发订阅共享同一 operation materialization；compact 修补路径刷新一次 | bootstrap/core focused tests + production A/B | fixed；production verified |
+| Case ID  | Setup                                                                                                                              | Action                                  | Assertions                                                                                                   | Evidence layers                                         | E2E status                 |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | -------------------------- |
+| PERF03-A | 生成 2000 轮、4000 messages、混合工具状态的持久 session                                                                            | 冷进程首次 subscribe                    | initial snapshot 到达；CLI 不再 180s timeout；tool/user/assistant tail 可见；耗时和 RSS 留 artifact          | CLI log + process CPU/RSS + protocol ACK/frame + UI/CDP | manual performance run     |
+| PERF03-B | synthetic small/mid/large event logs                                                                                               | strict 与 batch replay                  | 最终 snapshot、message target、row action、seq/revision 完全相同；增长倍率不呈平方级                         | focused unit/perf test                                  | covered                    |
+| PERF03-C | 正常 history 与超大 history                                                                                                        | batch hydrate                           | 正常 history fast path；bound 不可证明时 strict fallback；16 MiB 行为与旧实现一致                            | publisher unit                                          | covered                    |
+| PERF03-D | 已有 projection/subscription reservation，candidate 中途抛错                                                                       | rehydrate                               | 旧 projection/log/reservation 不被修改                                                                       | publisher unit                                          | covered/extend             |
+| PERF03-E | provider compact active tail 为 939 messages / 3523 parts，UI active branch 至少 10621 messages，另有 1805 个 workspace checkpoint | cold merge 后首次 rehydrate + subscribe | 同时校验 provider tail 与 UI full active branch 规模；完整 initial snapshot 到达；记录分段耗时与首帧结构     | opt-in CLI perf spec + production fixture               | fixed；production verified |
+| PERF03-H | PERF03-E production fixture                                                                                                        | V4 cold activation → initial frame      | 正常路径只完整读取一次 parent messages；并发订阅共享同一 operation materialization；compact 修补路径刷新一次 | bootstrap/core focused tests + production A/B           | fixed；production verified |
 
 ## Matrix Backfill
 
@@ -269,11 +269,11 @@ rewind、重复 child 与 ghost child 组合下逐事件及最终 snapshot deep-
 fixture `sess_perf_large_20260811150224_4929c823`；每组先预热一次，再各启动 5 个 fresh
 `app-server --stdio` 进程。随后强制重建 15/15 CLI production tasks，再运行完全相同的 runner。
 
-| Production boundary | 修改前 samples / median | 最终 samples / median | 中位数变化 |
-| --- | --- | --- | ---: |
-| process → provider-registry ready | 464.6 / 442.7 / 442.7 / 438.2 / 473.3 / **442.7ms** | 441.6 / 453.4 / 445.2 / 442.0 / 457.4 / **445.2ms** | +2.5ms；启动噪声 |
-| ready → complete initial frame | 1889.7 / 1950.2 / 1922.2 / 1927.9 / 1879.8 / **1922.2ms** | 1443.6 / 1497.7 / 1418.7 / 1463.2 / 1455.7 / **1455.7ms** | **-466.5ms（-24.3%）** |
-| process → complete initial frame | 2354.2 / 2392.9 / 2364.9 / 2366.0 / 2353.1 / **2364.9ms** | 1885.2 / 1951.1 / 1863.9 / 1905.1 / 1913.0 / **1905.1ms** | **-459.8ms（-19.4%）** |
+| Production boundary               | 修改前 samples / median                                   | 最终 samples / median                                     |             中位数变化 |
+| --------------------------------- | --------------------------------------------------------- | --------------------------------------------------------- | ---------------------: |
+| process → provider-registry ready | 464.6 / 442.7 / 442.7 / 438.2 / 473.3 / **442.7ms**       | 441.6 / 453.4 / 445.2 / 442.0 / 457.4 / **445.2ms**       |       +2.5ms；启动噪声 |
+| ready → complete initial frame    | 1889.7 / 1950.2 / 1922.2 / 1927.9 / 1879.8 / **1922.2ms** | 1443.6 / 1497.7 / 1418.7 / 1463.2 / 1455.7 / **1455.7ms** | **-466.5ms（-24.3%）** |
+| process → complete initial frame  | 2354.2 / 2392.9 / 2364.9 / 2366.0 / 2353.1 / **2364.9ms** | 1885.2 / 1951.1 / 1863.9 / 1905.1 / 1913.0 / **1905.1ms** | **-459.8ms（-19.4%）** |
 
 只切换 exact `Buffer.byteLength` 与无复制 prospective overlay 后，`ready → frame` 中位数先降到
 1662.5ms（-259.7ms）；在 profile 证明全表扫描仍为热点后，再复用已有 subagent/row 索引，最终
@@ -284,11 +284,11 @@ SHA-256 均为 `5c8290e8489b2951be8cfc2fc03556f806a691200f4f3697ab5a0663b4b1e11d
 临时 production 打点对同一 74164-event replay 的热点拆分如下；数字包含打点开销，只用于同机
 方向判断：
 
-| Implementation | subagent materialization（2180 次） | exact wire-delta byte count（72357 次） | publisher rehydrate |
-| --- | ---: | ---: | ---: |
-| 修改前记录 | 324.1ms | 354.5ms | 1014.0ms |
-| exact Buffer + no-copy overlay | 255.7ms | 226.4ms | 781.3ms |
-| 再加 indexed subagent enumeration | **68.2ms** | **225.3ms** | **589.5ms** |
+| Implementation                    | subagent materialization（2180 次） | exact wire-delta byte count（72357 次） | publisher rehydrate |
+| --------------------------------- | ----------------------------------: | --------------------------------------: | ------------------: |
+| 修改前记录                        |                             324.1ms |                                 354.5ms |            1014.0ms |
+| exact Buffer + no-copy overlay    |                             255.7ms |                                 226.4ms |             781.3ms |
+| 再加 indexed subagent enumeration |                          **68.2ms** |                             **225.3ms** |         **589.5ms** |
 
 索引层已经去掉普通 conversation rows 的扫描；剩余约 68ms 是完整 subagent 派生态计算，不再为
 低于 50ms 的旧“全表扫描”阈值继续新增缓存。byte count 仍精确且仍是当前约 225ms 热点，本轮
@@ -326,9 +326,9 @@ V4；仅 interrupted compact 修补路径允许刷新到第二次读取。
 同一 production fixture、Node 24.14.0、文件缓存预热后，每次启动全新 `app-server --stdio`，5 次
 结果如下：
 
-| 实现 | 5 次 subscribe → initial frame | 中位数 | 变化 |
-| --- | --- | ---: | ---: |
-| 优化前：父 messages 完整物化 5 次 | 4131.1 / 4121.8 / 3849.3 / 3818.9 / 3991.9ms | **3991.9ms** | - |
+| 实现                                           | 5 次 subscribe → initial frame               |       中位数 |                              变化 |
+| ---------------------------------------------- | -------------------------------------------- | -----------: | --------------------------------: |
+| 优化前：父 messages 完整物化 5 次              | 4131.1 / 4121.8 / 3849.3 / 3818.9 / 3991.9ms | **3991.9ms** |                                 - |
 | 优化后：正常路径单次 operation materialization | 2874.4 / 2714.3 / 2517.5 / 2681.6 / 2531.7ms | **2681.6ms** | **-1310.3ms（-32.8%，约 1.49x）** |
 
 前后共 10 次结果均保持 158038-byte physical frame、29950 total rows、60-row wire window、
@@ -354,11 +354,11 @@ pre-fix baseline，本次没有重新构建旧实现，因此不能把二者写�
 
 另按当前 production 的实际 preflight 顺序——等待 provider registry ACK 后再 subscribe——测得：
 
-| Production boundary | 5 samples (ms) | Median |
-| --- | --- | ---: |
-| process → provider-registry ready | 450.4 / 538.9 / 442.5 / 441.4 / 453.0 | **450.4ms** |
-| ready → complete initial frame | 2006.4 / 2063.9 / 1785.4 / 1781.1 / 1775.3 | **1785.4ms** |
-| process → complete initial frame | 2456.8 / 2602.8 / 2227.9 / 2222.6 / 2228.3 | **2228.3ms** |
+| Production boundary               | 5 samples (ms)                             |       Median |
+| --------------------------------- | ------------------------------------------ | -----------: |
+| process → provider-registry ready | 450.4 / 538.9 / 442.5 / 441.4 / 453.0      |  **450.4ms** |
+| ready → complete initial frame    | 2006.4 / 2063.9 / 1785.4 / 1781.1 / 1775.3 | **1785.4ms** |
+| process → complete initial frame  | 2456.8 / 2602.8 / 2227.9 / 2222.6 / 2228.3 | **2228.3ms** |
 
 两种口径均保持 29950 total rows、60-row wire window、`toSeq=74164`、0 running subagents，
 stderr 为空。最新完整 physical NDJSON notification 为 158037 bytes，历史 A/B 记录为 158038
@@ -370,10 +370,10 @@ bytes；旧 physical frame artifact 未保留，无法定位这一字节差异�
 2026-08-11 在 Apple M4、10 logical CPU、16 GiB RAM、macOS 15.3.1 上测量。focused spec
 `compacted-full-history-cold-hydration.perf.test.ts` 每次启动独立 Vitest 进程，5 次结果如下：
 
-| Metric | Samples (ms) | Median |
-| --- | --- | ---: |
-| cold merge | 119.8 / 135.1 / 130.5 / 120.3 / 121.6 | 121.6 ms |
-| publisher rehydrate | 10067.3 / 12876.1 / 10061.3 / 9997.1 / 10392.3 | 10067.3 ms |
+| Metric                | Samples (ms)                                    |     Median |
+| --------------------- | ----------------------------------------------- | ---------: |
+| cold merge            | 119.8 / 135.1 / 130.5 / 120.3 / 121.6           |   121.6 ms |
+| publisher rehydrate   | 10067.3 / 12876.1 / 10061.3 / 9997.1 / 10392.3  | 10067.3 ms |
 | merge → initial frame | 10189.4 / 13013.9 / 10195.5 / 10119.8 / 10516.2 | 10195.5 ms |
 
 focused 用例固定 10623 persisted messages / 35811 parts、939 active messages / 3523 parts、
@@ -384,11 +384,11 @@ hash 均为 `2ff4f3816dc88f2f050f1ec52c1772fa137f35192f3bd5ec6a55c42afdf8c881`�
 中位数 10.92s；其中 rehydrate 中位数 10.79s。仅在 cold batch hydration 对 subagent
 派生输入做 dirty-check 后，最终代码于 2026-08-12 按每次独立 Vitest 进程复跑 5 次：
 
-| Metric | Samples (ms) | Median | 相对紧邻修复前中位数 |
-| --- | --- | ---: | ---: |
-| cold merge | 117.9 / 135.2 / 119.9 / 119.3 / 120.9 | 119.9 ms | 不属于修复区间 |
-| publisher rehydrate | 756.8 / 775.5 / 767.4 / 767.6 / 762.0 | 767.4 ms | -92.9%（约 14.1x） |
-| merge → initial frame | 876.9 / 913.0 / 889.5 / 889.2 / 885.2 | 889.2 ms | -91.9%（约 12.3x） |
+| Metric                | Samples (ms)                          |   Median | 相对紧邻修复前中位数 |
+| --------------------- | ------------------------------------- | -------: | -------------------: |
+| cold merge            | 117.9 / 135.2 / 119.9 / 119.3 / 120.9 | 119.9 ms |       不属于修复区间 |
+| publisher rehydrate   | 756.8 / 775.5 / 767.4 / 767.6 / 762.0 | 767.4 ms |   -92.9%（约 14.1x） |
+| merge → initial frame | 876.9 / 913.0 / 889.5 / 889.2 / 885.2 | 889.2 ms |   -91.9%（约 12.3x） |
 
 五次输出继续保持 77372 merged events、30500 rows、25016-byte initial frame 与相同 hash；
 说明收益来自跳过无关事件的重复 subagent 全行物化，不是裁剪事件、行或 wire snapshot。
@@ -397,9 +397,9 @@ hash 均为 `2ff4f3816dc88f2f050f1ec52c1772fa137f35192f3bd5ec6a55c42afdf8c881`�
 倒序、命中即停”，在同一工作区修改前后各跑 5 个独立 Vitest 进程。当前 shell 使用
 Node 25.6.0，仓库声明 Node 24.14.0，因此以下只作为同机增量诊断：
 
-| Metric | 修改前 samples (ms) / median | 修改后 samples (ms) / median | 中位数变化 |
-| --- | --- | --- | ---: |
-| publisher rehydrate | 777.0 / 767.7 / 773.2 / 809.6 / 783.5 / **777.0** | 643.8 / 641.4 / 652.9 / 642.2 / 644.6 / **643.8** | -17.1%（-133.2ms） |
+| Metric                | 修改前 samples (ms) / median                      | 修改后 samples (ms) / median                      |         中位数变化 |
+| --------------------- | ------------------------------------------------- | ------------------------------------------------- | -----------------: |
+| publisher rehydrate   | 777.0 / 767.7 / 773.2 / 809.6 / 783.5 / **777.0** | 643.8 / 641.4 / 652.9 / 642.2 / 644.6 / **643.8** | -17.1%（-133.2ms） |
 | merge → initial frame | 902.1 / 889.5 / 895.5 / 926.8 / 902.5 / **902.1** | 809.7 / 770.4 / 774.0 / 786.5 / 762.6 / **774.0** | -14.2%（-128.1ms） |
 
 两组均保持 77372 events、30500 rows、25016-byte initial frame 和相同 SHA-256；该 slice
@@ -408,9 +408,9 @@ Node 25.6.0，仓库声明 Node 24.14.0，因此以下只作为同机增量诊�
 继续将 `closeOpenToolRows()` 的全 rows 扫描替换为由 tool row delta 维护的 foreground-open
 派生索引后，同样按 5 个独立进程复跑：
 
-| Metric | 修改前 samples (ms) / median | 修改后 samples (ms) / median | 中位数变化 |
-| --- | --- | --- | ---: |
-| publisher rehydrate | 643.8 / 641.4 / 652.9 / 642.2 / 644.6 / **643.8** | 352.6 / 354.6 / 351.8 / 355.5 / 358.0 / **354.6** | -44.9%（-289.2ms） |
+| Metric                | 修改前 samples (ms) / median                      | 修改后 samples (ms) / median                      |         中位数变化 |
+| --------------------- | ------------------------------------------------- | ------------------------------------------------- | -----------------: |
+| publisher rehydrate   | 643.8 / 641.4 / 652.9 / 642.2 / 644.6 / **643.8** | 352.6 / 354.6 / 351.8 / 355.5 / 358.0 / **354.6** | -44.9%（-289.2ms） |
 | merge → initial frame | 809.7 / 770.4 / 774.0 / 786.5 / 762.6 / **774.0** | 470.4 / 479.3 / 471.6 / 481.3 / 482.4 / **479.3** | -38.1%（-294.7ms） |
 
 五次仍保持 77372 events、30500 rows、25016-byte initial frame 和相同 SHA-256；迟到
@@ -421,10 +421,10 @@ reopen、rewind、atomic reject/adopt、cold batch/strict 等价由独立状态�
 继续移除 cold batch payload proof 的固定 32-event 精确测量，并为 no-delta、tail membership
 与接近限额的保守估值增加按需路径后，使用仓库声明的 Node 24.14.0 按 5 个独立 Vitest 进程复跑：
 
-| Metric | Samples (ms) | Median |
-| --- | --- | ---: |
-| cold merge | 112.4 / 115.4 / 129.6 / 117.5 / 115.7 | 115.7 ms |
-| publisher rehydrate | 257.9 / 257.3 / 261.7 / 257.8 / 256.1 | **257.8 ms** |
+| Metric                | Samples (ms)                          |       Median |
+| --------------------- | ------------------------------------- | -----------: |
+| cold merge            | 112.4 / 115.4 / 129.6 / 117.5 / 115.7 |     115.7 ms |
+| publisher rehydrate   | 257.9 / 257.3 / 261.7 / 257.8 / 256.1 | **257.8 ms** |
 | merge → initial frame | 374.8 / 375.0 / 393.7 / 377.6 / 374.1 | **375.0 ms** |
 
 相对上一段 Node 25 记录的 354.6 / 479.3ms，中位数方向性下降 96.8 / 104.3ms；因 Node 版本
@@ -445,17 +445,17 @@ initial frame 和相同 SHA-256。
 **2531.8ms**。本轮机器存在明显调度噪声，所以下表同时保留五次样本和中位数；各行是日志/协议
 边界，不应直接相加成单次虚构 timeline：
 
-| Production stage | 5 samples (ms) | Median | 说明 |
-| --- | --- | ---: | --- |
-| process → provider-registry ready | 455.7 / 427.8 / 463.4 / 454.4 / 488.7 | **455.7** | fresh process 与协议/registry preflight |
-| subscribe → runtime preferences request | 309.6 / 590.9 / 306.3 / 322.1 / 307.9 | **309.6** | 首次完整 message/part 物化和 settings 推导发生在该请求前 |
-| runtime preferences response → app startup start | 2 / 20 / 2 / 2 / 2 | **2** | host 应答后立即构造 app |
-| app startup | 116 / 567 / 141 / 125 / 123 | **125** | config/plugins/adapters/runtime 构造；一轮受调度抖动影响 |
-| app completed → user-execution preferences request | 56 / 107 / 59 / 72 / 58 | **59** | model/settings reconcile 后进入 resume shell boundary |
-| user-execution preferences response → `session.resumed` | 187 / 291 / 157 / 178 / 157 | **178** | context 初始化并复用已物化 active tail，恢复 939 messages / 3523 parts |
-| `session.resumed` → three-source merge completed | 197 / 322 / 181 / 198 / 257 | **198** | durable transcript/event 合成与 cold merge；日志点在 merge 后 |
-| merge completed → subscribe ACK | 995.7 / 1088.4 / 1040.3 / 1961.6 / 1125.4 | **1088.4** | 复合区间：rehydrate、subagent/usage seed、snapshot/ACK 编码；不是纯 rehydrate |
-| ACK → complete initial frame | 13.0 / 15.1 / 13.1 / 17.2 / 13.6 | **13.6** | physical NDJSON frame 出站 |
+| Production stage                                        | 5 samples (ms)                            |     Median | 说明                                                                          |
+| ------------------------------------------------------- | ----------------------------------------- | ---------: | ----------------------------------------------------------------------------- |
+| process → provider-registry ready                       | 455.7 / 427.8 / 463.4 / 454.4 / 488.7     |  **455.7** | fresh process 与协议/registry preflight                                       |
+| subscribe → runtime preferences request                 | 309.6 / 590.9 / 306.3 / 322.1 / 307.9     |  **309.6** | 首次完整 message/part 物化和 settings 推导发生在该请求前                      |
+| runtime preferences response → app startup start        | 2 / 20 / 2 / 2 / 2                        |      **2** | host 应答后立即构造 app                                                       |
+| app startup                                             | 116 / 567 / 141 / 125 / 123               |    **125** | config/plugins/adapters/runtime 构造；一轮受调度抖动影响                      |
+| app completed → user-execution preferences request      | 56 / 107 / 59 / 72 / 58                   |     **59** | model/settings reconcile 后进入 resume shell boundary                         |
+| user-execution preferences response → `session.resumed` | 187 / 291 / 157 / 178 / 157               |    **178** | context 初始化并复用已物化 active tail，恢复 939 messages / 3523 parts        |
+| `session.resumed` → three-source merge completed        | 197 / 322 / 181 / 198 / 257               |    **198** | durable transcript/event 合成与 cold merge；日志点在 merge 后                 |
+| merge completed → subscribe ACK                         | 995.7 / 1088.4 / 1040.3 / 1961.6 / 1125.4 | **1088.4** | 复合区间：rehydrate、subagent/usage seed、snapshot/ACK 编码；不是纯 rehydrate |
+| ACK → complete initial frame                            | 13.0 / 15.1 / 13.1 / 17.2 / 13.6          |   **13.6** | physical NDJSON frame 出站                                                    |
 
 五次首帧均为 157746 bytes、29950 total rows、60-row wire window、`toSeq=74164`、0 running
 subagents；随机 `logEpoch/subscriptionId` 仍使信封 hash 每进程不同。单次 SQLite
@@ -486,12 +486,12 @@ activation、真实 SQLite 读取、transcript/event 合成及协议进程启动
 
 fixture `sess_perf_large_20260714130421_2dee7a7b` 含 2000 turns、4000 messages、13339 parts、4000 tool parts 和 60 todos。基线 artifact 位于 `packages/desktop/.e2e-artifacts/large-task-2000-turns-20260714/`。
 
-| Implementation checkpoint                    | `subscribeConversationV4` | Observation                                                                                   |
-| -------------------------------------------- | -------------------------: | --------------------------------------------------------------------------------------------- |
-| 原实现                                       |           > 180023.4 ms     | 180 s timeout；持久化 resume/read 仅 737 ms，CLI 单核满载，renderer 尚未收到 conversation body |
-| 只移除 action 嵌套扫描，payload proof 回退严格路径 |              67913.4 ms | 证明主要剩余成本仍是逐事件 immutable snapshot apply/serialization                             |
-| 每事件精确测量 60-row wire tail              |              12571.5 ms | 已消除全历史 snapshot 序列化，但测量频率仍过高                                                |
-| 固定 32-event 窗口测量 bounded wire tail     |               1817.2 ms | persistence resume 约 624 ms；CDP 首屏已收到正文，viewport 中存在 21 个虚拟化 row              |
+| Implementation checkpoint                          | `subscribeConversationV4` | Observation                                                                                    |
+| -------------------------------------------------- | ------------------------: | ---------------------------------------------------------------------------------------------- |
+| 原实现                                             |             > 180023.4 ms | 180 s timeout；持久化 resume/read 仅 737 ms，CLI 单核满载，renderer 尚未收到 conversation body |
+| 只移除 action 嵌套扫描，payload proof 回退严格路径 |                67913.4 ms | 证明主要剩余成本仍是逐事件 immutable snapshot apply/serialization                              |
+| 每事件精确测量 60-row wire tail                    |                12571.5 ms | 已消除全历史 snapshot 序列化，但测量频率仍过高                                                 |
+| 固定 32-event 窗口测量 bounded wire tail           |                 1817.2 ms | persistence resume 约 624 ms；CDP 首屏已收到正文，viewport 中存在 21 个虚拟化 row              |
 
 相对 180 秒 timeout 下界，最终同 fixture 至少快约 99 倍；其中 V4 subscribe 阶段不再掩盖约 0.6-0.7 秒的持久化读取成本。
 
@@ -499,7 +499,7 @@ fixture `sess_perf_large_20260714130421_2dee7a7b` 含 2000 turns、4000 messages
 
 每 turn 合成 user、assistant text、tool input、tool scheduled、tool result 和 terminal 共 8 个事件；先 warm-up，再各运行 3 次取中位数。
 
-| Turns | Events | Median   | Samples (ms)          | Growth ratio |
+| Turns | Events |   Median | Samples (ms)          | Growth ratio |
 | ----: | -----: | -------: | --------------------- | -----------: |
 |   500 |   4001 |  37.4 ms | 39.5 / 37.4 / 35.8    |            - |
 |  1000 |   8001 |  68.2 ms | 70.7 / 68.2 / 66.7    |        1.82x |
@@ -513,10 +513,10 @@ turn/event 翻倍时耗时约翻倍，未再呈现原先的平方增长趋势。
 6,671 parts、2,000 tool parts、334 reasoning、200 patch 与 60 todos。每次测量启动全新 production
 `app-server`；改动前 HEAD 与当前源码分别独立构建，文件缓存预热后各取三次。
 
-| 实现 | 三次 cold subscribe → initial frame | 中位数 | frame bytes |
-| --- | --- | ---: | ---: |
-| 改动前 full legacy snapshot × 2 | 3352.1 / 3169.5 / 3070.2 ms | 3169.5 ms | 143,690 |
-| activation-only + usage 窄投影 | 2704.8 / 2701.5 / 2607.6 ms | 2701.5 ms | 143,690 |
+| 实现                            | 三次 cold subscribe → initial frame |    中位数 | frame bytes |
+| ------------------------------- | ----------------------------------- | --------: | ----------: |
+| 改动前 full legacy snapshot × 2 | 3352.1 / 3169.5 / 3070.2 ms         | 3169.5 ms |     143,690 |
+| activation-only + usage 窄投影  | 2704.8 / 2701.5 / 2607.6 ms         | 2701.5 ms |     143,690 |
 
 中位数下降 468.0 ms（14.8%），且首帧字节完全一致。该结果只证明去掉重复 legacy projection 的
 本机收益；剩余约 2.7s 仍包含 Agent runtime activation、持久 transcript 读取/合成、V4 projection

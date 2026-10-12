@@ -180,9 +180,7 @@ async function assertSelectedSecondaryConfig() {
     thoughtLabel.text,
     thoughtLabel.title,
   ].map((value) => value.replace(/\s+/g, " ").trim().toLowerCase());
-  if (
-    !currentThoughtCandidates.some((candidate) => acceptedThoughtValues.includes(candidate))
-  ) {
+  if (!currentThoughtCandidates.some((candidate) => acceptedThoughtValues.includes(candidate))) {
     throw new Error(
       `草稿当前思考深度不是 secondary 配置: ${JSON.stringify({
         acceptedThoughtValues,

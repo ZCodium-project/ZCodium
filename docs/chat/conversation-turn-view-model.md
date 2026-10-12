@@ -162,12 +162,12 @@ interface TimelineRenderRow {
 }
 ```
 
-| Timeline | placement | foldPolicy | 说明 |
-| --- | --- | --- | --- |
-| context compact | `inside_turn_worklog` | `worklog` 或 running 时可见 | assistant worklog，不切 turn |
-| goal verification | `after_turn` | `never` | 被验证 turn 的 post-turn 裁判事件 |
-| session fork | `session_lineage` | `never` | conversation lineage event，不属于 assistant worklog |
-| model change | `session_lineage` 或 `after_turn` | `never` | 取决于是否锚定某个 turn；新数据必须显式 placement |
+| Timeline          | placement                         | foldPolicy                  | 说明                                                 |
+| ----------------- | --------------------------------- | --------------------------- | ---------------------------------------------------- |
+| context compact   | `inside_turn_worklog`             | `worklog` 或 running 时可见 | assistant worklog，不切 turn                         |
+| goal verification | `after_turn`                      | `never`                     | 被验证 turn 的 post-turn 裁判事件                    |
+| session fork      | `session_lineage`                 | `never`                     | conversation lineage event，不属于 assistant worklog |
+| model change      | `session_lineage` 或 `after_turn` | `never`                     | 取决于是否锚定某个 turn；新数据必须显式 placement    |
 
 ### Compact
 

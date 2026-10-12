@@ -68,7 +68,7 @@ Let's say we have this module in a monorepo that imports `helper` from another
 workspace in the same monorepo:
 
 ```ts title="index.js"
-import { helper } from '@org/shared';
+import { helper } from "@org/shared";
 ```
 
 The target workspace `@org/shared` has this `package.json`:

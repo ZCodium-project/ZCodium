@@ -6,7 +6,7 @@ title: Getting Started
 Welcome to the WebdriverIO documentation. It will help you to get started fast. If you run into problems, you can find help and answers on our [Discord Support Server](https://discord.webdriver.io) or you can hit us on [𝕏](https://x.com/webdriverio).
 
 :::info
-These are the docs for the latest version (__>=9.x__) of WebdriverIO. If you are still using an older version, please visit the [old documentation websites](/versions)!
+These are the docs for the latest version (**>=9.x**) of WebdriverIO. If you are still using an older version, please visit the [old documentation websites](/versions)!
 :::
 
 <LiteYouTubeEmbed
@@ -27,13 +27,13 @@ To add a full WebdriverIO setup to an existing or new project using the [Webdriv
 If you're in the root directory of an existing project, run:
 
 <Tabs
-  defaultValue="npm"
-  values={[
-    {label: 'NPM', value: 'npm'},
-    {label: 'Yarn', value: 'yarn'},
-    {label: 'pnpm', value: 'pnpm'},
-    {label: 'bun', value: 'bun'},
-  ]
+defaultValue="npm"
+values={[
+{label: 'NPM', value: 'npm'},
+{label: 'Yarn', value: 'yarn'},
+{label: 'pnpm', value: 'pnpm'},
+{label: 'bun', value: 'bun'},
+]
 }>
 <TabItem value="npm">
 
@@ -96,13 +96,13 @@ This single command downloads the WebdriverIO CLI tool and runs a configuration 
 The wizard will prompt a set questions that guides you through the setup. You can pass a `--yes` parameter to pick a default set up which will use Mocha with Chrome using the [Page Object](https://martinfowler.com/bliki/PageObject.html) pattern.
 
 <Tabs
-  defaultValue="npm"
-  values={[
-    {label: 'NPM', value: 'npm'},
-    {label: 'Yarn', value: 'yarn'},
-    {label: 'pnpm', value: 'pnpm'},
-    {label: 'bun', value: 'bun'},
-  ]
+defaultValue="npm"
+values={[
+{label: 'NPM', value: 'npm'},
+{label: 'Yarn', value: 'yarn'},
+{label: 'pnpm', value: 'pnpm'},
+{label: 'bun', value: 'bun'},
+]
 }>
 <TabItem value="npm">
 
@@ -174,7 +174,7 @@ If you would like to use WebdriverIO as an automation engine in [Standalone Mode
 https://github.com/webdriverio/example-recipes/blob/fc362f2f8dd823d294b9bb5f92bd5991339d4591/getting-started/run-in-script.js#L2-L19
 ```
 
-__Note:__ all WebdriverIO commands are asynchronous and need to be properly handled using [`async/await`](https://javascript.info/async-await).
+**Note:** all WebdriverIO commands are asynchronous and need to be properly handled using [`async/await`](https://javascript.info/async-await).
 
 ## Record tests
 

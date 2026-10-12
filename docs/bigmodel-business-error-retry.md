@@ -25,15 +25,15 @@ BigModel / Z.AI 兼容接口会把一部分可恢复失败包装成业务错误�
 
 ## 会重试的 BigModel 业务码
 
-| 业务码 | 语义 | ZCode 分类 | retry reason |
-| --- | --- | --- | --- |
-| `1120` | 临时账号访问异常，文档建议稍后重试 | `model_request_failed` | `server_error` |
-| `1230` | API 调用流程异常 | `model_request_failed` | `server_error` |
-| `1234` | 网络错误 | `model_request_failed` | `network_error` |
-| `1302` | 并发过高 | `model_rate_limited` | `rate_limited` |
-| `1303` | 调用频率过高 | `model_rate_limited` | `rate_limited` |
-| `1305` | 平台流量限制或过载 | `model_rate_limited` | `rate_limited` |
-| `1312` | 模型访问负载过高 | `model_request_failed` | `provider_overloaded` |
+| 业务码 | 语义                               | ZCode 分类             | retry reason          |
+| ------ | ---------------------------------- | ---------------------- | --------------------- |
+| `1120` | 临时账号访问异常，文档建议稍后重试 | `model_request_failed` | `server_error`        |
+| `1230` | API 调用流程异常                   | `model_request_failed` | `server_error`        |
+| `1234` | 网络错误                           | `model_request_failed` | `network_error`       |
+| `1302` | 并发过高                           | `model_rate_limited`   | `rate_limited`        |
+| `1303` | 调用频率过高                       | `model_rate_limited`   | `rate_limited`        |
+| `1305` | 平台流量限制或过载                 | `model_rate_limited`   | `rate_limited`        |
+| `1312` | 模型访问负载过高                   | `model_request_failed` | `provider_overloaded` |
 
 这些错误只在还没有向上游产出已提交模型事件时自动重试。流式请求如果已经产出 `text_delta`、`tool_call` 或 `finish`，仍然不会自动重放，避免重复文本或重复工具调用。
 
@@ -51,15 +51,15 @@ BigModel / Z.AI 兼容接口会把一部分可恢复失败包装成业务错误�
 
 ## 不重试的 BigModel 业务码
 
-| 业务码 | 原因 |
-| --- | --- |
+| 业务码 | 原因                                                       |
+| ------ | ---------------------------------------------------------- |
 | `1113` | provider 明确返回的终止型业务错误，自动 retry 不会改变结果 |
-| `1304` | 日调用限制，短时间 retry 不会改变结果 |
-| `1308` | 使用量上限，需要等重置时间 |
-| `1309` | Coding Plan 到期 |
-| `1310` | 周/月额度上限，需要等重置时间 |
-| `1311` | 套餐没有模型权限 |
-| `1313` | fair usage restriction，继续 retry 容易放大异常流量 |
+| `1304` | 日调用限制，短时间 retry 不会改变结果                      |
+| `1308` | 使用量上限，需要等重置时间                                 |
+| `1309` | Coding Plan 到期                                           |
+| `1310` | 周/月额度上限，需要等重置时间                              |
+| `1311` | 套餐没有模型权限                                           |
+| `1313` | fair usage restriction，继续 retry 容易放大异常流量        |
 
 这类错误即使由 HTTP 429 携带，也保持非重试。原因是它们不是瞬时并发或平台负载问题，自动 retry 会浪费预算，也可能加重 provider 侧的限流。
 

@@ -44,6 +44,7 @@ main: desktopHostProcess child.on("message") case BrowserExecuteRequest
 ## 3. Leg B：host router + host↔main bridge
 
 ### host router（`packages/services/src/zcode-agent/zcodeAgentService.ts` onRequest）
+
 - 在末尾 `respondError(-32601)` 前加 case `request.method === zcodeProtocolMethods.interactionBrowserExecute`：
   - `zcodeBrowserExecuteParamsSchema.safeParse(request.params)`，失败 `respondError(-32602)`。
   - 调 `browserControlMainBridge.execute({sessionId, command})`（注入的可选依赖）。
@@ -53,6 +54,7 @@ main: desktopHostProcess child.on("message") case BrowserExecuteRequest
 - `browserControlMainBridge` 作为 `createZCodeAgentService` 的可选依赖注入（`ZCodeAgentServiceDeps` 加字段），desktop host 装配时传入。
 
 ### host↔main bridge（`packages/desktop/src/host/browserControlMainBridge.ts` 新，或并入 host/index.ts）
+
 - 仿 `createFullFeedbackLogArchiveViaMain`：`pendingBrowserExecute = Map<requestId,{resolve,reject,timer}>`；`execute(payload)` → `parentPort.postMessage({type:HostResponseTypes.BrowserExecuteRequest, requestId, payload})` + 超时（默认 30s，navigate/screenshot 可长）。
 - `requestId` 是 pending Promise 的 correlation key。Map 已存在同 ID 时必须立即返回
   `duplicate_request_id`，不得覆盖；该规则不按 session/scope 放宽，因为结果回包只携带裸 requestId。
@@ -75,5 +77,6 @@ main: desktopHostProcess child.on("message") case BrowserExecuteRequest
   requestId 都立即失败且不影响原 entry。
 
 ## 6. 边界
+
 - browser/execute 不改变 desktop-continuous / web-remote-replayable 语义：它是 agent→app 的一次性 RPC，不进 stream/snapshot。远控无 main 时 backend_unavailable。
 - 单一真相：params/result 用 T3 的 shared zod schema 校验（host router 侧）。

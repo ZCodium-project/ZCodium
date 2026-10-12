@@ -16,10 +16,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_PLUGIN_APPEND_ONLY_U1"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_PLUGIN_APPEND_ONLY_U1"]
       },
       "response": {
         "statusCode": 200,
@@ -102,10 +99,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_PLUGIN_APPEND_ONLY_PARKING"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_PLUGIN_APPEND_ONLY_PARKING"]
       },
       "response": {
         "statusCode": 200,
@@ -154,10 +148,7 @@
           "E2E_PLUGIN_APPEND_ONLY_U3_HOT",
           "<plugin_reference>"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "E2E_PLUGIN_APPEND_ONLY_U4_COLD"
-        ]
+        "bodyExcludes": ["Generate a concise title", "E2E_PLUGIN_APPEND_ONLY_U4_COLD"]
       },
       "response": {
         "statusCode": 200,

@@ -198,17 +198,14 @@ async function trySwitchToSecondaryModelDuringToolProbe() {
 function isExpectedToolProbeModelSwitchError(message: string) {
   return (
     message.includes(UPSTREAM_SECONDARY_MODEL) &&
-    (message.includes("聊天工具栏没有出现") ||
-      message.includes("上游 模型没有切换到"))
+    (message.includes("聊天工具栏没有出现") || message.includes("上游 模型没有切换到"))
   );
 }
 
 async function confirmModelSwitchCompressionDialogIfPresent(modelId: string) {
   // Bugfix: edit/fork 用例不验证压缩弹窗本身，但历史 task 切到较小目标模型时
   // 会被 context guard 暂停；E2E 必须确认压缩，否则后续模型继承断言不会进入真实路径。
-  const hasDialog = await waitForModelSwitchCompressionDialog(250).catch(
-    () => false,
-  );
+  const hasDialog = await waitForModelSwitchCompressionDialog(250).catch(() => false);
   if (!hasDialog) {
     return false;
   }
@@ -227,11 +224,8 @@ async function confirmModelSwitchCompressionDialog() {
   await waitForModelSwitchCompressionDialog(15000);
 
   const clicked = await browser.execute(() => {
-    const dialog =
-      document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
-    const buttons = Array.from(
-      dialog.querySelectorAll<HTMLButtonElement>("button"),
-    );
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
+    const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
     const confirmButton = buttons.find((button) => {
       const text = button.innerText.replace(/\s+/g, " ").trim();
       return (
@@ -297,12 +291,13 @@ async function expectToolbarConfig(model: string, thoughtLevel: string) {
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   const matchedThoughtLevel = labelCandidates.some((label) =>
-    expectedLabels.some((expectedLabel) => label === expectedLabel || label.includes(expectedLabel)),
+    expectedLabels.some(
+      (expectedLabel) => label === expectedLabel || label.includes(expectedLabel),
+    ),
   );
   if (!matchedThoughtLevel) {
     throw new Error(
@@ -370,10 +365,7 @@ async function readUpstreamCaptureArtifact(): Promise<E2ENetworkCaptureArtifact 
   }
 }
 
-function findLastUpstreamRecord(
-  artifact: E2ENetworkCaptureArtifact | null,
-  includes: string[],
-) {
+function findLastUpstreamRecord(artifact: E2ENetworkCaptureArtifact | null, includes: string[]) {
   const records = artifact?.records ?? [];
   for (let index = records.length - 1; index >= 0; index -= 1) {
     const record = records[index]!;
@@ -384,10 +376,7 @@ function findLastUpstreamRecord(
   return null;
 }
 
-function matchesUpstreamRecord(
-  record: E2ENetworkCaptureRecord,
-  includes: string[],
-) {
+function matchesUpstreamRecord(record: E2ENetworkCaptureRecord, includes: string[]) {
   return (
     record.status === "complete" &&
     record.statusCode !== undefined &&
@@ -398,9 +387,7 @@ function matchesUpstreamRecord(
   );
 }
 
-function summarizeUpstreamCaptureArtifact(
-  artifact: E2ENetworkCaptureArtifact | null,
-) {
+function summarizeUpstreamCaptureArtifact(artifact: E2ENetworkCaptureArtifact | null) {
   return {
     configured: Boolean(process.env.E2E_PROVIDER_CAPTURE_PATH),
     recordCount: artifact?.records.length ?? 0,

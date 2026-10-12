@@ -13,6 +13,7 @@
 ### Task 1: Chat Error Banner Visibility
 
 **Files:**
+
 - Modify: `packages/ui/test/chatErrorBanner.test.ts`
 - Modify: `packages/ui/src/ChatErrorBanner.tsx`
 

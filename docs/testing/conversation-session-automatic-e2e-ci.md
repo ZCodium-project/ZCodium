@@ -62,10 +62,10 @@ Windows job 使用 GitLab `parallel` 生成四个独立 job。四个 job 不再�
 同一份运行时样本按旧 native 连续切片和新 LPT 重新计算后的分布如下。耗时列是 profile
 估算值，不冒充 Windows CI 的新实跑墙钟；它用于证明分配算法不再把重型 spec 固定压在首桶。
 
-| 分配方式         | Shard case 数        | Shard 估算耗时                  | 最大/最小耗时比 |
-| ---------------- | -------------------- | ------------------------------- | ---------------: |
-| WDIO native slice | `88 / 45 / 39 / 28`  | `633s / 316s / 270s / 293s`     |             2.35 |
-| historical LPT    | `52 / 55 / 41 / 52`  | `375s / 381s / 375s / 380s`     |             1.02 |
+| 分配方式          | Shard case 数       | Shard 估算耗时              | 最大/最小耗时比 |
+| ----------------- | ------------------- | --------------------------- | --------------: |
+| WDIO native slice | `88 / 45 / 39 / 28` | `633s / 316s / 270s / 293s` |            2.35 |
+| historical LPT    | `52 / 55 / 41 / 52` | `375s / 381s / 375s / 380s` |            1.02 |
 
 ```text
 formal glob -> expand -> historical duration profile -> LPT bucket 1..4

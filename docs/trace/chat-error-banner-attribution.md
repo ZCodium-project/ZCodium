@@ -71,7 +71,7 @@ Builtin 终态额度码 `1304` / `1308` / `1310` / `1313` 等在 adapter 中仍�
 
 - `errorPhase` 复用 `prepare | configuration | connect | response | stream | parse | validation | unhandled`；
 - `exceptionKind` 只允许 `api_call | provider_business | transport | validation | protocol | type_error |
-  generic`，禁止透传任意 exception name；
+generic`，禁止透传任意 exception name；
 - 普通 stream 在 iterator 创建前失败为 `prepare`，创建后失败为 `stream`；generate 继续区分
   `prepare/response`，retry sleep 为 `connect`；
 - `failure_reason=unknown` 可以保留，但新事件必须能按 phase/exceptionKind 分桶，并通过既有

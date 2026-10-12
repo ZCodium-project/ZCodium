@@ -168,8 +168,14 @@ function splitWorkspaceFileSearchIgnoreSections(
   }
   return {
     gitignoreSection: lines.slice(0, syncIndex).join("\n"),
-    defaultsSection: lines.slice(syncIndex + 1, defaultsIndex).join("\n").trim(),
-    customSection: lines.slice(defaultsIndex + 1).join("\n").replace(/^\n+/, ""),
+    defaultsSection: lines
+      .slice(syncIndex + 1, defaultsIndex)
+      .join("\n")
+      .trim(),
+    customSection: lines
+      .slice(defaultsIndex + 1)
+      .join("\n")
+      .replace(/^\n+/, ""),
   };
 }
 
@@ -306,11 +312,7 @@ export async function loadWorkspaceFileSearchIgnoreRules(
         source: "fallback-gitignore",
       };
     }
-    logger?.warn(
-      undefined,
-      `[workspace-file-ignore] ${reason}，降级为内置默认忽略规则`,
-      error,
-    );
+    logger?.warn(undefined, `[workspace-file-ignore] ${reason}，降级为内置默认忽略规则`, error);
     const template = buildWorkspaceFileSearchIgnoreTemplate(null);
     return {
       matcher: buildIgnoreMatcher(template),
@@ -328,9 +330,9 @@ export async function loadWorkspaceFileSearchIgnoreRules(
     return { matcher: buildIgnoreMatcher(existing), source: "file" };
   }
 
-  const gitignoreContent = await readOptionalFile(
-    resolve(rootPath, GITIGNORE_FILE_NAME),
-  ).catch(() => null);
+  const gitignoreContent = await readOptionalFile(resolve(rootPath, GITIGNORE_FILE_NAME)).catch(
+    () => null,
+  );
   const initialContent = buildWorkspaceFileSearchIgnoreTemplate(gitignoreContent);
   // 管理入口已临时隐藏，但自动创建逻辑仍会往用户项目写文件，因此先注释停用。
   // 保留原创建和日志逻辑，后续恢复入口时可重新启用；当前只在内存中使用规则。
@@ -389,9 +391,9 @@ export async function readWorkspaceFileSearchIgnore(
   if (existing !== null) {
     return { content: existing, source: "file" };
   }
-  const gitignoreContent = await readOptionalFile(
-    resolve(rootPath, GITIGNORE_FILE_NAME),
-  ).catch(() => null);
+  const gitignoreContent = await readOptionalFile(resolve(rootPath, GITIGNORE_FILE_NAME)).catch(
+    () => null,
+  );
   return {
     content: buildWorkspaceFileSearchIgnoreTemplate(gitignoreContent),
     source: "template",
@@ -411,9 +413,9 @@ export async function transformWorkspaceFileSearchIgnore(
 ): Promise<{ content: string }> {
   const ignorePath = resolve(rootPath, WORKSPACE_FILE_SEARCH_IGNORE_FILE_NAME);
   const existing = await readOptionalFile(ignorePath).catch(() => null);
-  const gitignoreContent = await readOptionalFile(
-    resolve(rootPath, GITIGNORE_FILE_NAME),
-  ).catch(() => null);
+  const gitignoreContent = await readOptionalFile(resolve(rootPath, GITIGNORE_FILE_NAME)).catch(
+    () => null,
+  );
   const currentContent = existing ?? buildWorkspaceFileSearchIgnoreTemplate(gitignoreContent);
   const content =
     transform === "sync-gitignore"

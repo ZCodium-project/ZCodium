@@ -66,14 +66,12 @@ describe("O17/CHL09 未注册工具终态冷快照", () => {
       async () => {
         const rows = await getV4TimelineScrollState();
         return (
-          rows.totalRowCount > SNAPSHOT_TAIL_ROW_COUNT &&
-          rows.windowRowCount === rows.totalRowCount
+          rows.totalRowCount > SNAPSHOT_TAIL_ROW_COUNT && rows.windowRowCount === rows.totalRowCount
         );
       },
       {
         timeout: 15000,
-        timeoutMsg:
-          "refresh 后同一 turn 的 60-row cold tail 没有自动补齐，仍需要手动或反向滚动",
+        timeoutMsg: "refresh 后同一 turn 的 60-row cold tail 没有自动补齐，仍需要手动或反向滚动",
       },
     );
     expect(

@@ -9,9 +9,7 @@ import { inspectConversationSessionFormalAdmission as inspect } from "../lib/con
 const temporaryRoots = [];
 
 after(async () => {
-  await Promise.all(
-    temporaryRoots.map((root) => rm(root, { force: true, recursive: true })),
-  );
+  await Promise.all(temporaryRoots.map((root) => rm(root, { force: true, recursive: true })));
 });
 
 async function makeRoot() {
@@ -59,10 +57,7 @@ async function addFormalCase(
     version: 1,
     caseName,
     spec,
-    providerFixtures: [
-      "./test/e2e/fixtures/upstream/common.json",
-      caseFixturePath,
-    ],
+    providerFixtures: ["./test/e2e/fixtures/upstream/common.json", caseFixturePath],
     fileFixtures: [],
     requests: [defaultRequest],
   };
@@ -71,11 +66,7 @@ async function addFormalCase(
     `packages/desktop/test/e2e/conversation-session/${caseName}.test.ts`,
     specSource,
   );
-  await writeJson(
-    root,
-    "packages/desktop/test/e2e/fixtures/upstream/common.json",
-    commonFixture,
-  );
+  await writeJson(root, "packages/desktop/test/e2e/fixtures/upstream/common.json", commonFixture);
   await writeJson(
     root,
     `packages/desktop/test/e2e/fixtures/upstream/conversation-session/${caseName}.json`,
@@ -90,10 +81,9 @@ async function addFormalCase(
 }
 
 function codes(result, caseName) {
-  return (
-    result.formal.rejected.find((item) => item.caseName === caseName)
-      ?.reasons ?? []
-  ).map((reason) => reason.code);
+  return (result.formal.rejected.find((item) => item.caseName === caseName)?.reasons ?? []).map(
+    (reason) => reason.code,
+  );
 }
 
 test("uses the TypeScript AST for documented imports and template-expression calls", async () => {
@@ -110,11 +100,7 @@ test("uses the TypeScript AST for documented imports and template-expression cal
 
   const result = await inspect(root);
 
-  assert.ok(
-    result.formal.admitted.some(
-      (item) => item.caseName === "documented-import",
-    ),
-  );
+  assert.ok(result.formal.admitted.some((item) => item.caseName === "documented-import"));
   assert.ok(codes(result, "template-call").includes("LEGACY_PREPARE_CALL"));
 });
 
@@ -128,10 +114,7 @@ test("rejects absolute or traversal provider and static file fixture paths", asy
     "packages/desktop/test/e2e/fixtures/cases/conversation-session/unsafe-provider.json",
     {
       ...providerValues.defaultManifest,
-      providerFixtures: [
-        ...providerValues.defaultManifest.providerFixtures,
-        absoluteProvider,
-      ],
+      providerFixtures: [...providerValues.defaultManifest.providerFixtures, absoluteProvider],
     },
   );
 
@@ -149,9 +132,7 @@ test("rejects absolute or traversal provider and static file fixture paths", asy
 
   const result = await inspect(root);
 
-  assert.ok(
-    codes(result, "unsafe-provider").includes("UNSAFE_PROVIDER_FIXTURE_PATH"),
-  );
+  assert.ok(codes(result, "unsafe-provider").includes("UNSAFE_PROVIDER_FIXTURE_PATH"));
   assert.ok(codes(result, "unsafe-file").includes("UNSAFE_FILE_FIXTURE_PATH"));
 });
 
@@ -184,15 +165,8 @@ test("only exempts complete runtime file descriptors with an allowed source", as
 
   const result = await inspect(root);
 
-  for (const caseName of [
-    "descriptor-missing-source",
-    "descriptor-invalid-source",
-  ]) {
-    assert.ok(
-      codes(result, caseName).includes(
-        "INVALID_RUNTIME_FILE_FIXTURE_DESCRIPTOR",
-      ),
-    );
+  for (const caseName of ["descriptor-missing-source", "descriptor-invalid-source"]) {
+    assert.ok(codes(result, caseName).includes("INVALID_RUNTIME_FILE_FIXTURE_DESCRIPTOR"));
   }
 });
 
@@ -202,10 +176,7 @@ test("rejects incomplete provider fixture entry shapes", async () => {
     ["empty-id", { ...providerEntry(request("valid")), id: "" }],
     ["missing-match", providerEntry(request("missing-match-request"))],
     ["missing-response", providerEntry(request("missing-response-request"))],
-    [
-      "invalid-metadata",
-      { ...providerEntry(request("invalid-metadata-request")), metadata: [] },
-    ],
+    ["invalid-metadata", { ...providerEntry(request("invalid-metadata-request")), metadata: [] }],
   ];
   delete shapes[1][1].match;
   delete shapes[2][1].response;
@@ -229,9 +200,7 @@ test("rejects incomplete provider fixture entry shapes", async () => {
   const result = await inspect(root);
 
   for (const [caseName] of shapes) {
-    assert.ok(
-      codes(result, caseName).includes("INVALID_PROVIDER_FIXTURE_SHAPE"),
-    );
+    assert.ok(codes(result, caseName).includes("INVALID_PROVIDER_FIXTURE_SHAPE"));
   }
 });
 
@@ -259,8 +228,7 @@ test("only allows explicit common requests from canonical common.json", async ()
   );
   const thirdPartyRequest = request("third-party-common", { kind: "common" });
   const thirdParty = await addFormalCase(root, "third-party-common");
-  const thirdPartyPath =
-    "./test/e2e/fixtures/upstream/conversation-session/other-case.json";
+  const thirdPartyPath = "./test/e2e/fixtures/upstream/conversation-session/other-case.json";
   await writeJson(
     root,
     "packages/desktop/test/e2e/fixtures/upstream/conversation-session/other-case.json",
@@ -271,10 +239,7 @@ test("only allows explicit common requests from canonical common.json", async ()
     "packages/desktop/test/e2e/fixtures/cases/conversation-session/third-party-common.json",
     {
       ...thirdParty.defaultManifest,
-      providerFixtures: [
-        ...thirdParty.defaultManifest.providerFixtures,
-        thirdPartyPath,
-      ],
+      providerFixtures: [...thirdParty.defaultManifest.providerFixtures, thirdPartyPath],
       requests: [thirdPartyRequest, thirdParty.defaultRequest],
     },
   );
@@ -287,33 +252,15 @@ test("only allows explicit common requests from canonical common.json", async ()
       requests: [duplicate.defaultRequest, duplicate.defaultRequest],
     },
   );
-  await writeJson(
-    root,
-    "packages/desktop/test/e2e/fixtures/upstream/common.json",
-    {
-      version: 1,
-      fixtures: [providerEntry(commonRequest), providerEntry(wrongKindRequest)],
-    },
-  );
+  await writeJson(root, "packages/desktop/test/e2e/fixtures/upstream/common.json", {
+    version: 1,
+    fixtures: [providerEntry(commonRequest), providerEntry(wrongKindRequest)],
+  });
 
   const result = await inspect(root);
 
-  assert.ok(
-    result.formal.admitted.some(
-      (item) => item.caseName === "canonical-common-valid",
-    ),
-  );
-  assert.ok(
-    codes(result, "canonical-common-wrong-kind").includes(
-      "UNAUTHORIZED_COMMON_REQUEST",
-    ),
-  );
-  assert.ok(
-    codes(result, "third-party-common").includes("UNAUTHORIZED_COMMON_REQUEST"),
-  );
-  assert.ok(
-    codes(result, "duplicate-manifest-request").includes(
-      "DUPLICATE_MANIFEST_REQUEST_ID",
-    ),
-  );
+  assert.ok(result.formal.admitted.some((item) => item.caseName === "canonical-common-valid"));
+  assert.ok(codes(result, "canonical-common-wrong-kind").includes("UNAUTHORIZED_COMMON_REQUEST"));
+  assert.ok(codes(result, "third-party-common").includes("UNAUTHORIZED_COMMON_REQUEST"));
+  assert.ok(codes(result, "duplicate-manifest-request").includes("DUPLICATE_MANIFEST_REQUEST_ID"));
 });

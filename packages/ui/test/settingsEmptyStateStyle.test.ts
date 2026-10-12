@@ -30,9 +30,7 @@ describe("settings empty state style", () => {
   });
 
   it("keeps the automations empty state aligned with the Figma card surface", () => {
-    const source = readSource(
-      "packages/ui/src/settings/AutomationsSection.tsx",
-    );
+    const source = readSource("packages/ui/src/settings/AutomationsSection.tsx");
 
     expect(source).toContain("border-card-border bg-background");
     expect(source).not.toContain(
@@ -41,9 +39,7 @@ describe("settings empty state style", () => {
   });
 
   it("keeps the shared usage empty state transparent", () => {
-    const source = readSource(
-      "packages/ui/src/settings/usage-stats/usageStatsUiParts.tsx",
-    );
+    const source = readSource("packages/ui/src/settings/usage-stats/usageStatsUiParts.tsx");
 
     expect(source).toContain(
       'className="rounded-xl border border-dashed border-border px-4 py-10 text-center"',

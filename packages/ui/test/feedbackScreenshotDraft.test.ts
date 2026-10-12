@@ -15,9 +15,7 @@ describe("captureFeedbackScreenshotDraft", () => {
       captureWindowScreenshot: vi.fn(async () => screenshot),
     } as Pick<IPlatformService, "captureWindowScreenshot">;
 
-    await expect(captureFeedbackScreenshotDraft(platform)).resolves.toEqual([
-      screenshot,
-    ]);
+    await expect(captureFeedbackScreenshotDraft(platform)).resolves.toEqual([screenshot]);
     expect(platform.captureWindowScreenshot).toHaveBeenCalledTimes(1);
   });
 

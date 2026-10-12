@@ -30,17 +30,13 @@ optionSpecs.<optionName>.map
 当前写法：
 
 ```ts
-value == "high"
-  ? { "reasoning_effort": "high" }
-  : { "reasoning_effort": "max" }
+value == "high" ? { reasoning_effort: "high" } : { reasoning_effort: "max" };
 ```
 
 目标写法：
 
 ```ts
-reasoningLevel == "high"
-  ? { "reasoning_effort": "high" }
-  : { "reasoning_effort": "max" }
+reasoningLevel == "high" ? { reasoning_effort: "high" } : { reasoning_effort: "max" };
 ```
 
 具体对应关系：
@@ -70,21 +66,21 @@ Built-in Map 的字符串内容应优先保证设置页文本框中的可读性�
 ```ts
 reasoningLevel == "low"
   ? {
-      "thinking": {
-        "type": "adaptive"
+      thinking: {
+        type: "adaptive",
       },
-      "output_config": {
-        "effort": "low"
-      }
+      output_config: {
+        effort: "low",
+      },
     }
   : {
-      "thinking": {
-        "type": "adaptive"
+      thinking: {
+        type: "adaptive",
       },
-      "output_config": {
-        "effort": "max"
-      }
-    }
+      output_config: {
+        effort: "max",
+      },
+    };
 ```
 
 简单表达式可以保持单行：

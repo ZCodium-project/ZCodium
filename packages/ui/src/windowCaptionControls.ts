@@ -17,8 +17,7 @@ export function createWindowsCaptionControlsStyle(
     // 自绘按钮随页面缩放；WCO 关闭后的几何仍可能返回整个窗口宽度，不能再用于计算安全区。
     "--windows-caption-controls-right-inset": `${WINDOWS_CAPTION_CONTROLS_DEFAULT_RIGHT_INSET_PX}px`,
     // 设置页旧 caption 菜单仍复用三等分宽度；紧凑窗控本身使用固定 28px。
-    "--windows-caption-control-width":
-      "calc(var(--windows-caption-controls-right-inset) / 3)",
+    "--windows-caption-control-width": "calc(var(--windows-caption-controls-right-inset) / 3)",
   };
 }
 

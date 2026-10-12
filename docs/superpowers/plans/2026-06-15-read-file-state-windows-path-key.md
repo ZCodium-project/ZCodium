@@ -32,6 +32,7 @@
 ### 任务 1：增加失败的 path-key 单测
 
 **文件：**
+
 - 新增：`apps/zcode-cli/packages/core/tests/read-file-state.test.ts`
 
 - [ ] **步骤 1：为内部路径身份写失败单测**
@@ -120,6 +121,7 @@ pnpm --filter @zcode/core exec vitest run tests/read-file-state.test.ts
 ### 任务 2：实现共享 read-state key helper
 
 **文件：**
+
 - 新增：`apps/zcode-cli/packages/core/src/tool/read-file-state.ts`
 
 - [ ] **步骤 1：新增共享 helper 模块**
@@ -264,6 +266,7 @@ pnpm --filter @zcode/core exec vitest run tests/read-file-state.test.ts
 ### 任务 3：让 Read 使用共享 key
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/src/tool/handlers/read.ts`
 
 - [ ] **步骤 1：导入共享 key helper**
@@ -313,6 +316,7 @@ pnpm --filter @zcode/core exec vitest run tests/read-file-state.test.ts tests/fi
 ### 任务 4：增加 Write 回归覆盖
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/tests/write-tool-contract.test.ts`
 
 - [ ] **步骤 1：导入共享 key helper**
@@ -384,6 +388,7 @@ pnpm --filter @zcode/core exec vitest run tests/write-tool-contract.test.ts -t "
 ### 任务 5：让 Write 使用共享 lookup
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/src/tool/handlers/write.ts`
 
 - [ ] **步骤 1：导入共享 helper**
@@ -391,10 +396,7 @@ pnpm --filter @zcode/core exec vitest run tests/write-tool-contract.test.ts -t "
 增加：
 
 ```ts
-import {
-  createReadFileStateKey,
-  findStrictFullReadFileState,
-} from "../read-file-state.js";
+import { createReadFileStateKey, findStrictFullReadFileState } from "../read-file-state.js";
 ```
 
 - [ ] **步骤 2：替换本地 lookup**
@@ -485,6 +487,7 @@ pnpm --filter @zcode/core exec vitest run tests/write-tool-contract.test.ts test
 ### 任务 6：增加 Edit 回归覆盖
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/tests/edit-tool-contract.test.ts`
 
 - [ ] **步骤 1：导入共享 key helper**
@@ -558,6 +561,7 @@ pnpm --filter @zcode/core exec vitest run tests/edit-tool-contract.test.ts -t "n
 ### 任务 7：让 Edit 使用共享 lookup
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/src/tool/handlers/edit.ts`
 
 - [ ] **步骤 1：导入共享 helper**
@@ -565,10 +569,7 @@ pnpm --filter @zcode/core exec vitest run tests/edit-tool-contract.test.ts -t "n
 增加：
 
 ```ts
-import {
-  createReadFileStateKey,
-  findEditableReadFileState,
-} from "../read-file-state.js";
+import { createReadFileStateKey, findEditableReadFileState } from "../read-file-state.js";
 ```
 
 - [ ] **步骤 2：替换本地 lookup 调用**
@@ -658,6 +659,7 @@ pnpm --filter @zcode/core exec vitest run tests/edit-tool-contract.test.ts tests
 ### 任务 8：校准 file-tool-port direct-handler 测试
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/core/tests/file-tool-port.test.ts`
 
 - [ ] **步骤 1：给 direct-handler Write existing-file 用例补显式 read-state**
@@ -706,6 +708,7 @@ Write/Edit 的 provider-visible result 继续保留原始 tool input path；不�
 ### 任务 9：最终验证
 
 **文件：**
+
 - 只验证被修改的 core package。
 
 - [ ] **步骤 1：运行聚焦文件工具测试**

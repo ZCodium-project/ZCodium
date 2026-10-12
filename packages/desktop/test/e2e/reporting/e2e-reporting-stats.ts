@@ -15,10 +15,7 @@ export function numericStats(values: number[]): NumericStats {
   }
 
   const sorted = [...finiteValues].sort((left, right) => left - right);
-  const p95Index = Math.min(
-    sorted.length - 1,
-    Math.ceil(sorted.length * 0.95) - 1,
-  );
+  const p95Index = Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1);
   const total = finiteValues.reduce((sum, value) => sum + value, 0);
   return {
     mean: round(total / finiteValues.length),

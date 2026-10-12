@@ -198,9 +198,10 @@ describe("Host API proxy routing", () => {
       { createDispatcher, fetchWithDispatcher: async () => new Response("proxied") },
     );
 
-    const fetchPromise = transport
-      .fetch("https://api.example.com/race")
-      .then(() => undefined, (error: unknown) => error);
+    const fetchPromise = transport.fetch("https://api.example.com/race").then(
+      () => undefined,
+      (error: unknown) => error,
+    );
     await factoryStarted;
     resolveDispatcher(dispatcher);
     await vi.waitFor(() => expect(dispatcher.close).toHaveBeenCalledOnce());
@@ -212,7 +213,9 @@ describe("Host API proxy routing", () => {
     await expect(disposeFinished).resolves.toBe(false);
     resolveClose();
     await disposeAndWaitPromise;
-    await expect(fetchPromise).resolves.toMatchObject({ message: expect.stringContaining("disposed") });
+    await expect(fetchPromise).resolves.toMatchObject({
+      message: expect.stringContaining("disposed"),
+    });
   });
 
   it("同步释放 best-effort 销毁 dispatcher，并拒绝释放后的新请求", async () => {

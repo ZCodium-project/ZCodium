@@ -41,24 +41,24 @@ Command form scope
 
 ## Impact brief
 
-| Field | Decision |
-| --- | --- |
-| Change layers | Presentation, option source, draft default, commit effect, persistence |
-| UI surface | `CommandsSection` and `CommandForm` |
-| Shared UI | `PluginScopeMenu` |
-| Draft owner | Command form scope key |
-| Commit sink | The selected Workspace Host's `commandsService` |
-| Persistence | User or Workspace command directory; no format migration |
-| Mode boundary | Local and remote Workspace tabs share scope semantics, but resolve different Host services |
-| Out of scope | Command discovery order, slash-command runtime behavior, plugin command management, cross-window Workspace selection |
+| Field         | Decision                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Change layers | Presentation, option source, draft default, commit effect, persistence                                               |
+| UI surface    | `CommandsSection` and `CommandForm`                                                                                  |
+| Shared UI     | `PluginScopeMenu`                                                                                                    |
+| Draft owner   | Command form scope key                                                                                               |
+| Commit sink   | The selected Workspace Host's `commandsService`                                                                      |
+| Persistence   | User or Workspace command directory; no format migration                                                             |
+| Mode boundary | Local and remote Workspace tabs share scope semantics, but resolve different Host services                           |
+| Out of scope  | Command discovery order, slash-command runtime behavior, plugin command management, cross-window Workspace selection |
 
 ## Accepted cases
 
-| Case | Setup | Action | Assertions |
-| --- | --- | --- | --- |
-| CMD-SCOPE-01 | Two open local Workspaces | Create and select Workspace B | B is shown by name; save writes B's path through the resolved target service; A's list is not polluted |
-| CMD-SCOPE-02 | Two remote Workspaces with the same path and different identities | Open the scope menu | Both identities remain distinct scope keys and route to their own remote sessions |
-| CMD-SCOPE-03 | New editor with a selected Workspace | Close the selected tab | Scope falls back to User without writing |
-| CMD-SCOPE-04 | Existing Workspace Command | Open edit form | Actual owner is displayed, Scope is disabled, and save cannot migrate storage |
-| CMD-SCOPE-05 | Existing Workspace Command owner closes | Close the owner tab | Editor exits and performs no write |
-| CMD-SCOPE-06 | User scope | Save a new Command | Save omits project `workspacePath` and refreshes the current list |
+| Case         | Setup                                                             | Action                        | Assertions                                                                                             |
+| ------------ | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| CMD-SCOPE-01 | Two open local Workspaces                                         | Create and select Workspace B | B is shown by name; save writes B's path through the resolved target service; A's list is not polluted |
+| CMD-SCOPE-02 | Two remote Workspaces with the same path and different identities | Open the scope menu           | Both identities remain distinct scope keys and route to their own remote sessions                      |
+| CMD-SCOPE-03 | New editor with a selected Workspace                              | Close the selected tab        | Scope falls back to User without writing                                                               |
+| CMD-SCOPE-04 | Existing Workspace Command                                        | Open edit form                | Actual owner is displayed, Scope is disabled, and save cannot migrate storage                          |
+| CMD-SCOPE-05 | Existing Workspace Command owner closes                           | Close the owner tab           | Editor exits and performs no write                                                                     |
+| CMD-SCOPE-06 | User scope                                                        | Save a new Command            | Save omits project `workspacePath` and refreshes the current list                                      |

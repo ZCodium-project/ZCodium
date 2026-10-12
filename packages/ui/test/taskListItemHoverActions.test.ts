@@ -58,8 +58,7 @@ vi.mock("lucide-react", () => {
 });
 
 vi.mock("@/components/ui/badge.js", () => ({
-  Badge: ({ children }: { children?: ReactNode }) =>
-    createElement("span", null, children),
+  Badge: ({ children }: { children?: ReactNode }) => createElement("span", null, children),
 }));
 
 vi.mock("@/components/ui/button.js", () => ({
@@ -128,9 +127,8 @@ vi.mock("@/hooks/usePlatform.js", () => ({
 }));
 
 vi.mock("@/feedback/feedbackStore.js", () => ({
-  useFeedbackStore: (
-    selector: (state: { openSubmit: () => void }) => unknown,
-  ) => selector({ openSubmit: vi.fn() }),
+  useFeedbackStore: (selector: (state: { openSubmit: () => void }) => unknown) =>
+    selector({ openSubmit: vi.fn() }),
 }));
 
 vi.mock("@/store/modelTrajectoryStore.js", () => ({
@@ -146,9 +144,9 @@ vi.mock("@/components/ui/toast.js", () => ({
 }));
 
 vi.mock("@/store/zcodeSessionStore.js", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/store/zcodeSessionStore.js")
-  >("@/store/zcodeSessionStore.js");
+  const actual = await vi.importActual<typeof import("@/store/zcodeSessionStore.js")>(
+    "@/store/zcodeSessionStore.js",
+  );
   return {
     ...actual,
     getTaskRuntimeState: () => "idle",
@@ -156,9 +154,7 @@ vi.mock("@/store/zcodeSessionStore.js", async () => {
     hasTaskPendingHumanInterventionRequest: () => false,
     hasTaskPendingPermissionRequest: () => false,
     selectWorkspaceZCodeState: () => ({}),
-    useZCodeSessionStore: (
-      selector: (state: Record<string, unknown>) => unknown,
-    ) => selector({}),
+    useZCodeSessionStore: (selector: (state: Record<string, unknown>) => unknown) => selector({}),
   };
 });
 
@@ -208,9 +204,7 @@ function createMinimalElement(ownerDocument: Document, tagName = "div") {
     getAttribute: (name: string) => element.__attrs.get(name) ?? null,
     insertBefore: (child: TestElement, beforeChild?: TestElement | null) => {
       child.parentNode = element as unknown as TestElement;
-      const beforeIndex = beforeChild
-        ? element.childNodes.indexOf(beforeChild)
-        : -1;
+      const beforeIndex = beforeChild ? element.childNodes.indexOf(beforeChild) : -1;
       if (beforeIndex >= 0) {
         element.childNodes.splice(beforeIndex, 0, child);
       } else {
@@ -227,10 +221,7 @@ function createMinimalElement(ownerDocument: Document, tagName = "div") {
       if (!attributeMatch) {
         return null;
       }
-      return findByAttribute(
-        element as unknown as TestElement,
-        attributeMatch[1],
-      );
+      return findByAttribute(element as unknown as TestElement, attributeMatch[1]);
     },
     removeAttribute: (name: string) => {
       element.__attrs.delete(name);
@@ -268,11 +259,7 @@ function findByAttribute(node: TestElement, attributeName: string) {
   return null;
 }
 
-function findByAttributeValue(
-  node: TestElement,
-  attributeName: string,
-  attributeValue: string,
-) {
+function findByAttributeValue(node: TestElement, attributeName: string, attributeValue: string) {
   if (node.__attrs?.get(attributeName) === attributeValue) {
     return node;
   }
@@ -336,8 +323,7 @@ describe("TaskListItem hover action rendering", () => {
     triggerChildren.length = 0;
     delete (globalThis as { document?: unknown }).document;
     delete (globalThis as { window?: unknown }).window;
-    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-      .IS_REACT_ACT_ENVIRONMENT;
+    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
   });
 
   it("keeps idle rows free of per-row context menu and hover-only archive tooltip", async () => {
@@ -406,9 +392,7 @@ describe("TaskListItem hover action rendering", () => {
     expect(metadata?.__attrs.get("class")).not.toContain("hidden");
     const unreadIndicator = findByAttribute(container, "data-unread-indicator");
     expect(unreadIndicator).not.toBeNull();
-    expect(unreadIndicator?.parentNode?.__attrs.get("class")).not.toContain(
-      "hidden",
-    );
+    expect(unreadIndicator?.parentNode?.__attrs.get("class")).not.toContain("hidden");
 
     act(() => {
       root.unmount();
@@ -602,9 +586,7 @@ describe("TaskListItem hover action rendering", () => {
       );
     });
 
-    const row = container.querySelector("[data-task-item-key]") as
-      | TestElement
-      | null;
+    const row = container.querySelector("[data-task-item-key]") as TestElement | null;
     expect(row).not.toBeNull();
 
     act(() => {
@@ -616,11 +598,7 @@ describe("TaskListItem hover action rendering", () => {
     });
 
     expect(onCancelArchiveConfirm).not.toHaveBeenCalled();
-    const confirmButton = findByAttributeValue(
-      container,
-      "aria-label",
-      "common.confirm",
-    );
+    const confirmButton = findByAttributeValue(container, "aria-label", "common.confirm");
     expect(confirmButton?.__attrs.get("class")).toContain("flex");
     expect(confirmButton?.__attrs.get("class")).not.toContain("hidden");
 

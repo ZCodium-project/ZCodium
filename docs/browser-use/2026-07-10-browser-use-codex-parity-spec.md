@@ -29,23 +29,23 @@ Playwright 是三类 backend 之上的统一 `Tab.playwright` facade，不是 ba
 
 ## 2. 已确认的边界决策
 
-| 决策               | 结论                                                             | 原因                                                                        |
-| ------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------- | --------------------------------- |
-| backend enum       | `iab                                                             | extension                                                                   | cdp`           | 三类 backend 共用同一 observable contract |
-| Playwright         | Tab API 层                                                       | 避免错误建成第四 backend                                                    |
-| Chrome 资产        | ZCode clean-room 自研                                            | 不依赖任何第三方私有插件或二进制                                            |
-| IAB transport      | 保留 ZCode Protocol adapter                                      | 兼容 local/remote shared-host 架构                                          |
-| browser identity   | descriptor 的 runtime id，不用 type 代替                         | 支持多个 Chrome profile/window/peer                                         |
-| workspace identity | `workspaceIdentity?.trim()                                       |                                                                             | workspacePath` | 遵守隔离语义                      |
-| client mode        | 每次 request 必带                                                | 保持 desktop continuous / web replayable 边界                               |
-| API 支持           | capability/API manifest 动态裁剪                                 | 不暴露必定抛错的假方法                                                      |
-| 低层结果           | protocol 保留结构化 result                                       | facade 才 direct-return/throw                                               |
-| 安全               | command/action-time policy 独立于 js gate                        | 防止一次批准后无限副作用                                                    |
-| 页面观察           | 普通导航/阅读/交互默认使用可见语义 DOM                           | DOM 比图片便宜且能提供稳定定位依据                                          |
-| 模型截图           | 仅在用户明确要求视觉结果、布局/渲染判断或 DOM 无法表示目标时发送 | 禁止“打开页面后顺手截图”和 snapshot+screenshot 双观察                       |
-| 文档装载           | screenshot guidance 为按需 lookup，不进入默认完整 API            | 避免通用提示反复强化 `emitImage(screenshot())`                              |
-| response meta      | 不自动生成客户端预览截图；模型截图仍按视觉分支显式获取           | 产品明确选择：避免普通导航生成大体积截图元数据                              |
-| 实现来源           | clean-room 自研，不复制任何第三方私有源码                        | 合规与可维护性                                                              |
+| 决策               | 结论                                                             | 原因                                                  |
+| ------------------ | ---------------------------------------------------------------- | ----------------------------------------------------- | -------------- | ----------------------------------------- |
+| backend enum       | `iab                                                             | extension                                             | cdp`           | 三类 backend 共用同一 observable contract |
+| Playwright         | Tab API 层                                                       | 避免错误建成第四 backend                              |
+| Chrome 资产        | ZCode clean-room 自研                                            | 不依赖任何第三方私有插件或二进制                      |
+| IAB transport      | 保留 ZCode Protocol adapter                                      | 兼容 local/remote shared-host 架构                    |
+| browser identity   | descriptor 的 runtime id，不用 type 代替                         | 支持多个 Chrome profile/window/peer                   |
+| workspace identity | `workspaceIdentity?.trim()                                       |                                                       | workspacePath` | 遵守隔离语义                              |
+| client mode        | 每次 request 必带                                                | 保持 desktop continuous / web replayable 边界         |
+| API 支持           | capability/API manifest 动态裁剪                                 | 不暴露必定抛错的假方法                                |
+| 低层结果           | protocol 保留结构化 result                                       | facade 才 direct-return/throw                         |
+| 安全               | command/action-time policy 独立于 js gate                        | 防止一次批准后无限副作用                              |
+| 页面观察           | 普通导航/阅读/交互默认使用可见语义 DOM                           | DOM 比图片便宜且能提供稳定定位依据                    |
+| 模型截图           | 仅在用户明确要求视觉结果、布局/渲染判断或 DOM 无法表示目标时发送 | 禁止“打开页面后顺手截图”和 snapshot+screenshot 双观察 |
+| 文档装载           | screenshot guidance 为按需 lookup，不进入默认完整 API            | 避免通用提示反复强化 `emitImage(screenshot())`        |
+| response meta      | 不自动生成客户端预览截图；模型截图仍按视觉分支显式获取           | 产品明确选择：避免普通导航生成大体积截图元数据        |
+| 实现来源           | clean-room 自研，不复制任何第三方私有源码                        | 合规与可维护性                                        |
 
 ## 3. 目标分层
 
@@ -794,14 +794,14 @@ IAB 应支持以下序列：
    `first/last/nth` 掩盖歧义或在没有 snapshot 证据时猜 selector。JS 工具只输出一次错误标题与
    message，stack 只追加 frames，不能把同一错误正文重复两遍。
 10. 每条能够对应到真实 tab 的 browser-use 命令都向 origin renderer 发送带
-   `workspaceKey + sessionId + browserId + browserGeneration + tabId` 的 operation 事件。对应 browser-use 标签在事件到达后 5 秒内用
-   鼠标图标替代 favicon，并在图标外层容器执行 900ms 一次的透明度 + 缩放呼吸动画；不得只给 SVG 套用通用
-   `animate-pulse`，以免 14px 图标仅有缓慢透明度变化而无法被用户感知。同一 tab 的后续操作刷新 5 秒截止时间。截止后恢复
-   已缓存的页面真实 favicon（缺省仍回退地球图标），不得为了状态提示覆盖或清空 favicon。动画必须遵守
-   `prefers-reduced-motion`，且后台 workspace/session 的事件不得误标其它同路径 tab。
-10. 第二个真实用户 turn 如果 IAB 仍可见，provider request 必须带有 bounded ambient context；模型不应先把
+    `workspaceKey + sessionId + browserId + browserGeneration + tabId` 的 operation 事件。对应 browser-use 标签在事件到达后 5 秒内用
+    鼠标图标替代 favicon，并在图标外层容器执行 900ms 一次的透明度 + 缩放呼吸动画；不得只给 SVG 套用通用
+    `animate-pulse`，以免 14px 图标仅有缓慢透明度变化而无法被用户感知。同一 tab 的后续操作刷新 5 秒截止时间。截止后恢复
+    已缓存的页面真实 favicon（缺省仍回退地球图标），不得为了状态提示覆盖或清空 favicon。动画必须遵守
+    `prefers-reduced-motion`，且后台 workspace/session 的事件不得误标其它同路径 tab。
+11. 第二个真实用户 turn 如果 IAB 仍可见，provider request 必须带有 bounded ambient context；模型不应先把
     finalize 后的空 `tabs.list()` 当成 backend 断线，也不应在没有证据时猜详情页 ID。
-11. `ERR_ABORTED` 且最终 document 已提交到等价 redirect/SPA URL 时 `goto()` 返回成功；同错误但仍停旧页时
+12. `ERR_ABORTED` 且最终 document 已提交到等价 redirect/SPA URL 时 `goto()` 返回成功；同错误但仍停旧页时
     返回失败。
 
 日志：

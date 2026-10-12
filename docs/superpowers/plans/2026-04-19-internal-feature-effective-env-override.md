@@ -13,6 +13,7 @@
 ### Task 1: Add shared internal-only runtime override parser
 
 **Files:**
+
 - Create: `packages/shared/src/internalOnlyFeatureRuntimeEnv.ts`
 - Create: `packages/shared/test/internalOnlyFeatureRuntimeEnv.test.ts`
 - Modify: `packages/shared/src/index.ts`
@@ -130,18 +131,12 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
 
 function normalizeEffectiveEnv(value: string | undefined): ZCodeEnv | undefined {
   const normalized = value?.trim().toLowerCase();
-  return normalized === "development" || normalized === "production"
-    ? normalized
-    : undefined;
+  return normalized === "development" || normalized === "production" ? normalized : undefined;
 }
 
-function normalizeNetworkEnv(
-  value: string | undefined,
-): InternalOnlyFeatureNetworkEnv | undefined {
+function normalizeNetworkEnv(value: string | undefined): InternalOnlyFeatureNetworkEnv | undefined {
   const normalized = value?.trim().toLowerCase();
-  return normalized === "auto" ||
-    normalized === "intranet" ||
-    normalized === "internet"
+  return normalized === "auto" || normalized === "intranet" || normalized === "internet"
     ? normalized
     : undefined;
 }
@@ -216,6 +211,7 @@ git commit -m "feat(shared): add internal feature env overrides"
 ### Task 2: Wire the UI internal-only gate to the shared parser
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/useInternalOnlyFeatureVisibility.ts`
 - Modify: `packages/ui/test/remoteConnectionEntryVisibility.test.ts`
 
@@ -316,6 +312,7 @@ git commit -m "feat(ui): honor internal feature env overrides"
 ### Task 3: Wire the service-side ZAPI gate to the shared parser
 
 **Files:**
+
 - Modify: `packages/services/src/node.ts`
 - Modify: `packages/services/test/modelProviderService.test.ts`
 
@@ -333,7 +330,9 @@ it("非内网场景会隐藏 ZAPI 且跳过 ZAPI 模型拉取", async () => {
 
   const list = await service.getAll();
   expect(list.some((item) => item.id === BUILTIN_MODEL_PROVIDER_IDS.zapi)).toBe(false);
-  expect(fetchImpl.mock.calls.map(([input]) => String(input)).some((url) => url.includes("/v1/models"))).toBe(false);
+  expect(
+    fetchImpl.mock.calls.map(([input]) => String(input)).some((url) => url.includes("/v1/models")),
+  ).toBe(false);
 });
 ```
 
@@ -430,6 +429,7 @@ git commit -m "feat(services): honor internal feature env overrides"
 ### Task 4: Run repository verification and update docs if needed
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-04-19-internal-feature-effective-env-override-design.md` (only if implementation diverges from approved design)
 
 - [ ] **Step 1: Run focused unit tests together**

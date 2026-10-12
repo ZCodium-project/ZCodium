@@ -40,6 +40,7 @@ npm install --save-dev @percy/appium-app
 ```
 
 ### Step 5: Update test script
+
 Make sure to import @percy/appium-app in your code.
 
 Below is an example test using the percyScreenshot function. Use this function wherever you have to take a screenshot.
@@ -52,6 +53,7 @@ describe('Appium webdriverio test example', function() {
   });
 });
 ```
+
 We are passing the required arguments.percyScreenshot method.
 
 The screenshot method arguments are:
@@ -59,6 +61,7 @@ The screenshot method arguments are:
 ```sh
 percyScreenshot(driver, name[, options])
 ```
+
 ### Step 6: Run your test script
 
 Run your tests using `percy app:exec`.
@@ -68,8 +71,8 @@ If you are unable to use the percy app:exec command or prefer to run your tests 
 ```sh
 $ percy app:exec -- appium test command
 ```
-This command starts Percy, create a new Percy build, takes snapshots and uploads them to your project, and stops Percy:
 
+This command starts Percy, create a new Percy build, takes snapshots and uploads them to your project, and stops Percy:
 
 ```sh
 [percy] Percy has started!
@@ -81,14 +84,14 @@ This command starts Percy, create a new Percy build, takes snapshots and uploads
 ```
 
 ## Visit the following pages for more details:
+
 - [Integrate your WebdriverIO tests with Percy](https://www.browserstack.com/docs/app-percy/integrate/webdriverio-javascript/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)
 - [Environment variable page](https://www.browserstack.com/docs/app-percy/get-started/set-env-var/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)
 - [Integrate using BrowserStack SDK](https://www.browserstack.com/docs/app-percy/integrate-bstack-sdk/webdriverio/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation) if you are using BrowserStack Automate.
 
-
-| Resource                                                                                                                                                            | Description                       |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| [Official docs](https://www.browserstack.com/docs/app-percy/integrate/webdriverio-javascript/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)             | App Percy's WebdriverIO documentation |
-| [Sample build - Tutorial](https://www.browserstack.com/docs/app-percy/sample-build/webdriverio-javascript/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation) | App Percy's WebdriverIO tutorial      |
-| [Official video](https://youtu.be/a4I_RGFdwvc/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)                                              | Visual Testing with App Percy         |
-| [Blog](https://www.browserstack.com/blog/product-launch-app-percy/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)                    | Meet App Percy: AI-powered automated visual testing platform for native apps    |
+| Resource                                                                                                                                                                           | Description                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Official docs](https://www.browserstack.com/docs/app-percy/integrate/webdriverio-javascript/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)              | App Percy's WebdriverIO documentation                                        |
+| [Sample build - Tutorial](https://www.browserstack.com/docs/app-percy/sample-build/webdriverio-javascript/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation) | App Percy's WebdriverIO tutorial                                             |
+| [Official video](https://youtu.be/a4I_RGFdwvc/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)                                                             | Visual Testing with App Percy                                                |
+| [Blog](https://www.browserstack.com/blog/product-launch-app-percy/?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation)                                         | Meet App Percy: AI-powered automated visual testing platform for native apps |

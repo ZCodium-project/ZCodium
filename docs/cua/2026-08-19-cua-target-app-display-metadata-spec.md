@@ -122,7 +122,11 @@ type CuaTargetAppDisplayMetaV1 = {
 type CuaAppAssociationsV1 = {
   schemaVersion: 1;
   /** 单一目标动作与观察（APP_ASSOCIATION_MODE_BY_TOOL 里声明 "primary" 的工具）。 */
-  primary?: { appKey: string; displayName?: string; icon?: { mimeType: "image/png"; data: string } };
+  primary?: {
+    appKey: string;
+    displayName?: string;
+    icon?: { mimeType: "image/png"; data: string };
+  };
   /** list_apps（声明 "items"）：按结果下标关联，携带最多 128 条。 */
   items?: Array<{ resultIndex: number; application: /* 同 primary */ unknown }>;
 };

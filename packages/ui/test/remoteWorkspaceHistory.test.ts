@@ -193,17 +193,14 @@ describe("remoteWorkspaceHistory helpers", () => {
   });
 
   it("persists and hydrates SSH config alias metadata", () => {
-    const snapshot = createRemoteTargetSnapshot(
-      "remote:ssh:localhost:2223:root:/root",
-      {
-        kind: "ssh",
-        host: "localhost",
-        port: 2223,
-        username: "root",
-        password: "secret",
-        sshConfigAlias: "linux-arm64",
-      },
-    );
+    const snapshot = createRemoteTargetSnapshot("remote:ssh:localhost:2223:root:/root", {
+      kind: "ssh",
+      host: "localhost",
+      port: 2223,
+      username: "root",
+      password: "secret",
+      sshConfigAlias: "linux-arm64",
+    });
 
     expect(snapshot).toMatchObject({
       kind: "ssh",
@@ -267,11 +264,7 @@ describe("remoteWorkspaceHistory helpers", () => {
     ];
 
     expect(
-      findMatchingRemoteWorkspaceSessionEntry(
-        sessions,
-        "/workspace/demo",
-        target,
-      )?.workspacePath,
+      findMatchingRemoteWorkspaceSessionEntry(sessions, "/workspace/demo", target)?.workspacePath,
     ).toBe("/workspace/demo");
   });
 
@@ -354,9 +347,7 @@ describe("remoteWorkspaceHistory helpers", () => {
       distro: "Ubuntu-24.04",
       user: "root",
     });
-    expect(formatRemoteWorkspaceHeaderHostLabel(snapshot)).toBe(
-      "wsl:Ubuntu-24.04:root",
-    );
+    expect(formatRemoteWorkspaceHeaderHostLabel(snapshot)).toBe("wsl:Ubuntu-24.04:root");
   });
 
   it("persists and hydrates server remote target credentials", () => {
@@ -388,12 +379,8 @@ describe("remoteWorkspaceHistory helpers", () => {
         token: "server-secret",
       }),
     ).toEqual(target);
-    expect(formatRemoteWorkspaceTargetSubtitle(snapshot)).toBe(
-      "Server · Studio Server",
-    );
-    expect(formatRemoteWorkspaceHeaderHostLabel(snapshot)).toBe(
-      "studio.example.com",
-    );
+    expect(formatRemoteWorkspaceTargetSubtitle(snapshot)).toBe("Server · Studio Server");
+    expect(formatRemoteWorkspaceHeaderHostLabel(snapshot)).toBe("studio.example.com");
   });
 
   it("keeps the legacy WSL identity when no user is specified", () => {
@@ -542,9 +529,9 @@ describe("remoteWorkspaceHistory helpers", () => {
       localWorkspacePath: string;
     });
 
-    expect(
-      (mutation.entry as { localWorkspacePath?: string }).localWorkspacePath,
-    ).toBe("/Users/alice/project");
+    expect((mutation.entry as { localWorkspacePath?: string }).localWorkspacePath).toBe(
+      "/Users/alice/project",
+    );
   });
 
   it("removes remote workspace history entries and returns their SSH credential keys", () => {

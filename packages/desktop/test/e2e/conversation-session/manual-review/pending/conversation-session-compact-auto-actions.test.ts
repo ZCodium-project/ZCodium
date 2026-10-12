@@ -34,8 +34,7 @@ describe("会话区 Auto Compact Actions E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const seedPrompt =
-      `${ACTION_MARKER}_CONTEXT_SEED_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const seedPrompt = `${ACTION_MARKER}_CONTEXT_SEED_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(seedPrompt);
     await waitForComposerText("", "auto compact actions 第一轮发送后输入框没有清空");
     await waitForUpstreamRequestContaining(`${ACTION_MARKER}_CONTEXT_SEED_${runId}`);
@@ -49,8 +48,7 @@ describe("会话区 Auto Compact Actions E2E", () => {
       COMPACT_REQUEST_SENTINEL,
       ACTION_MARKER,
     ]);
-    const pendingPrompt =
-      `${ACTION_MARKER}_PENDING_TEXT_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const pendingPrompt = `${ACTION_MARKER}_PENDING_TEXT_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(pendingPrompt);
     await waitForComposerText("", "auto compact actions pending 文本发送后输入框没有清空");
     await waitForUserMessageContaining(pendingPrompt);
@@ -80,10 +78,8 @@ describe("会话区 Auto Compact Actions E2E", () => {
 
     await browser.waitUntil(
       async () =>
-        (await countUpstreamRequestsContainingAll([
-          COMPACT_REQUEST_SENTINEL,
-          ACTION_MARKER,
-        ])) === compactRequestsBefore + 1,
+        (await countUpstreamRequestsContainingAll([COMPACT_REQUEST_SENTINEL, ACTION_MARKER])) ===
+        compactRequestsBefore + 1,
       {
         timeout: 30000,
         timeoutMsg: "auto compact actions 没有捕获到自动 compact 请求",
@@ -99,22 +95,17 @@ describe("会话区 Auto Compact Actions E2E", () => {
     ).toBe(compactRequestsBefore + 1);
     await assertVisibleUserMessagesNotContaining("/compact");
 
-    const queuedTextPrompt =
-      `${ACTION_MARKER}_QUEUED_TEXT_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const queuedTextPrompt = `${ACTION_MARKER}_QUEUED_TEXT_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(queuedTextPrompt);
     await waitForComposerText("", "auto compacting 中普通文本发送后输入框没有清空");
-    const queuedText = await waitForQueueItemContaining(
-      `${ACTION_MARKER}_QUEUED_TEXT_${runId}`,
-    );
+    const queuedText = await waitForQueueItemContaining(`${ACTION_MARKER}_QUEUED_TEXT_${runId}`);
     expect(queuedText.kind).toBe("text");
 
     const queuedGoalMarker = `${ACTION_MARKER}_QUEUED_GOAL_${runId}`;
     const queuedGoalPrompt = `/goal ${queuedGoalMarker}`;
     await sendPrompt(queuedGoalPrompt);
     await waitForComposerText("", "auto compacting 中 /goal 发送后输入框没有清空");
-    const queuedGoal = await waitForQueueItemContaining(
-      `${ACTION_MARKER}_QUEUED_GOAL_${runId}`,
-    );
+    const queuedGoal = await waitForQueueItemContaining(`${ACTION_MARKER}_QUEUED_GOAL_${runId}`);
     expect(queuedGoal.kind).toBe("goal");
     expect(
       await countUpstreamRequestsContainingAll([COMPACT_REQUEST_SENTINEL, ACTION_MARKER]),

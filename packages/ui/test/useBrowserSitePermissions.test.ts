@@ -27,10 +27,12 @@ it("读取全量快照并只投影目标站点；无记录时为空对象", asyn
   };
   h.platform.getEmbeddedBrowserSitePermissions.mockResolvedValue(snapshot);
   const { result } = renderHook(() => useBrowserSitePermissions(origin, true));
-  await waitFor(() => expect(result.current.states).toEqual({
-    "clipboard-read": "deny",
-    notifications: "allow",
-  }));
+  await waitFor(() =>
+    expect(result.current.states).toEqual({
+      "clipboard-read": "deny",
+      notifications: "allow",
+    }),
+  );
 });
 
 it("失活不读取，切回重读；切换站点后旧结果不残留", async () => {
@@ -79,12 +81,8 @@ it.each(["set", "reset"] as const)(
     await act(() => result.current.retryWrite());
     // UI 的 block/ask/allow 映射为 main 持久层的 deny/ask/allow。
     expect(writer.mock.calls).toEqual([
-      kind === "set"
-        ? [{ origin, permission: "camera", state: "deny" }]
-        : [{ origin }],
-      kind === "set"
-        ? [{ origin, permission: "camera", state: "deny" }]
-        : [{ origin }],
+      kind === "set" ? [{ origin, permission: "camera", state: "deny" }] : [{ origin }],
+      kind === "set" ? [{ origin, permission: "camera", state: "deny" }] : [{ origin }],
     ]);
     expect(result.current.write.status).toBe("succeeded");
     expect(result.current.error).toBe(false);

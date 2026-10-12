@@ -5,16 +5,16 @@
 用户确认 running 输出过程中 `/compact` 不能丢弃，必须进入队列；随后确认 goal verifier
 过程中的普通消息也必须进入同一 future queue。实现按以下边界收口：
 
-| 边界 | 裁决 | 分类 |
-| --- | --- | --- |
-| running primary/tool/foreground subagent/goal continuation/goal verifier | `/compact` 作为第三种 `kind=compact` 意图追加 CLI FIFO，不打断 active work | accepted |
-| completed + held queue | compact 追加队尾，保持 `autoDrain=false`；不绕过既有 future intent | accepted |
-| active 或 queued compact 已存在 | 后续 compact 显式 `failed(compactOperationLock)` 并 toast，不重复排队 | accepted |
-| queue 操作 | 可删除、重排、立即执行；compact 不可编辑为普通文本 | accepted |
-| auto compact 已刚完成 | queued manual compact 仍执行，允许 runtime 产出 noop；禁止静默消费 | accepted |
-| queued compact 失败/Stop | 后续 queue 保持 held，不越过失败/取消自动消费 | accepted |
-| desktop/mobile | 两端共享 Host/CLI CommandInbox；保留各自 `deliveryKind`，不在 relay/main 建第二队列 | accepted |
-| goal verifier | text/goal/compact 都是 future intent；单次 verifier terminal 不触发 drain，等待 target complete | accepted |
+| 边界                                                                     | 裁决                                                                                            | 分类     |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------- |
+| running primary/tool/foreground subagent/goal continuation/goal verifier | `/compact` 作为第三种 `kind=compact` 意图追加 CLI FIFO，不打断 active work                      | accepted |
+| completed + held queue                                                   | compact 追加队尾，保持 `autoDrain=false`；不绕过既有 future intent                              | accepted |
+| active 或 queued compact 已存在                                          | 后续 compact 显式 `failed(compactOperationLock)` 并 toast，不重复排队                           | accepted |
+| queue 操作                                                               | 可删除、重排、立即执行；compact 不可编辑为普通文本                                              | accepted |
+| auto compact 已刚完成                                                    | queued manual compact 仍执行，允许 runtime 产出 noop；禁止静默消费                              | accepted |
+| queued compact 失败/Stop                                                 | 后续 queue 保持 held，不越过失败/取消自动消费                                                   | accepted |
+| desktop/mobile                                                           | 两端共享 Host/CLI CommandInbox；保留各自 `deliveryKind`，不在 relay/main 建第二队列             | accepted |
+| goal verifier                                                            | text/goal/compact 都是 future intent；单次 verifier terminal 不触发 drain，等待 target complete | accepted |
 
 ```text
 desktop-continuous ─┐
@@ -42,12 +42,12 @@ request 次序以及 goal target terminal 状态。
 
 ## 当前统计
 
-| 指标 | 数量 |
-| --- | ---: |
-| Compact case | 0 |
-| Compact 协议题 | 0 |
-| answered | 0 |
-| unanswered | 0 |
+| 指标           | 数量 |
+| -------------- | ---: |
+| Compact case   |    0 |
+| Compact 协议题 |    0 |
+| answered       |    0 |
+| unanswered     |    0 |
 
 > 统计口径是「审计面上仍待处理的题目」，裁决完成的批次已退役，全部归零。裁决记录：2026-07-05 用户逐项确认（v4 重构 M0 决策清收）；催生本轮裁决的协议影响见 `docs/v4-refactor/10-protocol-spec.md`（compact marker 终态枚举、switchModelConfig CAS）。
 
@@ -55,20 +55,20 @@ request 次序以及 goal target terminal 状态。
 
 > 编号加 ✅ 前缀以避免被审计脚本再次统计为待决协议题。
 
-| 题目 | 产品结论 |
-| --- | --- |
-| ✅ F09.1 | 保持 completed（回到 compact 前原状态）+ failed marker；不 error、不 interrupted |
-| ✅ F09.2 | 保留原 queue 且不自动消费；不改 autoDrain、不清空 |
-| ✅ F09.3 | 全部操作恢复（文本 / `/goal` / fork / edit / 再次 compact），无按钮锁定 |
-| ✅ F09.4 | failed marker 展示失败结果 + retry compact 入口（点击 = 重新发起手动 compact） |
-| ✅ G11.1 | 继续无压缩执行 pendingAction（第 4 个请求是主模型请求；与现状一致） |
-| ✅ G11.2 | 继续 running（进入正常主请求流） |
-| ✅ G11.3 | 保留 retrying 历史与最终 failed marker，不阻塞后续输出 |
-| ✅ G11.4 | circuit breaker 生效（阈值后一段时间跳过）；手动 compact 成功后重置计数 |
+| 题目     | 产品结论                                                                             |
+| -------- | ------------------------------------------------------------------------------------ |
+| ✅ F09.1 | 保持 completed（回到 compact 前原状态）+ failed marker；不 error、不 interrupted     |
+| ✅ F09.2 | 保留原 queue 且不自动消费；不改 autoDrain、不清空                                    |
+| ✅ F09.3 | 全部操作恢复（文本 / `/goal` / fork / edit / 再次 compact），无按钮锁定              |
+| ✅ F09.4 | failed marker 展示失败结果 + retry compact 入口（点击 = 重新发起手动 compact）       |
+| ✅ G11.1 | 继续无压缩执行 pendingAction（第 4 个请求是主模型请求；与现状一致）                  |
+| ✅ G11.2 | 继续 running（进入正常主请求流）                                                     |
+| ✅ G11.3 | 保留 retrying 历史与最终 failed marker，不阻塞后续输出                               |
+| ✅ G11.4 | circuit breaker 生效（阈值后一段时间跳过）；手动 compact 成功后重置计数              |
 | ✅ G12.1 | 保留为当前轮 interrupted user message（时间线可 edit/retry），不复制回 queue、不丢弃 |
-| ✅ G12.2 | completed(interrupted)，与普通 stop 完全一致 |
-| ✅ G12.3 | marker 置 cancelled（v4 枚举复用；等价旧表述 interrupted） |
-| ✅ G12.4 | 显式追加的 queue 全部保留且不自动消费（held queue，autoDrain=false） |
+| ✅ G12.2 | completed(interrupted)，与普通 stop 完全一致                                         |
+| ✅ G12.3 | marker 置 cancelled（v4 枚举复用；等价旧表述 interrupted）                           |
+| ✅ G12.4 | 显式追加的 queue 全部保留且不自动消费（held queue，autoDrain=false）                 |
 
 ## P0 协议题索引
 
@@ -86,14 +86,14 @@ request 次序以及 goal target terminal 状态。
 
 这些是当前代码和已确认产品规则给出的边界，不代表还未确认的产品结论。
 
-| 事实 | 含义 |
-| --- | --- |
-| 手动 compact 不自动重试 | 手动 compact 失败只发生一个逻辑 compact attempt；该 attempt 内可包含 streaming 主腿与 non-stream fallback 腿，不应期待自动第 2 个逻辑 attempt |
-| 自动 compact 最多重试 3 次 | G08/G09/G10 已覆盖第 1、2 个逻辑 attempt 失败后重试，以及第 3 个成功后继续 pendingAction；物理 provider request 数不固定 |
-| compacting 中允许普通文本和 `/goal` 入队 | 已确认 `F04/F05/G05/G06`，所以失败/stop 后 queue 是否保留必须定义 |
-| compacting 中重复 `/compact` 被拒绝 | 已确认 `F06/G07`，失败/stop 用例必须断言不会产生额外逻辑 compact attempt |
-| compacting 中不能 fork | 已确认 `E06/CA`，失败/stop 后何时恢复 fork 能力必须定义 |
-| stop 后 queue 默认保留且不自动消费 | 已确认 `B02-B04/F07`，但 auto compact stop 的 pendingAction 是否算 queue 仍需确认 |
+| 事实                                     | 含义                                                                                                                                          |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 手动 compact 不自动重试                  | 手动 compact 失败只发生一个逻辑 compact attempt；该 attempt 内可包含 streaming 主腿与 non-stream fallback 腿，不应期待自动第 2 个逻辑 attempt |
+| 自动 compact 最多重试 3 次               | G08/G09/G10 已覆盖第 1、2 个逻辑 attempt 失败后重试，以及第 3 个成功后继续 pendingAction；物理 provider request 数不固定                      |
+| compacting 中允许普通文本和 `/goal` 入队 | 已确认 `F04/F05/G05/G06`，所以失败/stop 后 queue 是否保留必须定义                                                                             |
+| compacting 中重复 `/compact` 被拒绝      | 已确认 `F06/G07`，失败/stop 用例必须断言不会产生额外逻辑 compact attempt                                                                      |
+| compacting 中不能 fork                   | 已确认 `E06/CA`，失败/stop 后何时恢复 fork 能力必须定义                                                                                       |
+| stop 后 queue 默认保留且不自动消费       | 已确认 `B02-B04/F07`，但 auto compact stop 的 pendingAction 是否算 queue 仍需确认                                                             |
 
 ## F09：手动 Compact 失败
 
@@ -105,22 +105,22 @@ request 次序以及 goal target terminal 状态。
 
 ### 必须确认
 
-| 决策点 | 选项 | 影响 |
-| --- | --- | --- |
+| 决策点                       | 选项                                                                                                                             | 影响                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | F09.1 最终 task/session 状态 | A. `completed(success)` + failed marker；B. `completed(interrupted)` + failed marker；C. `error/failed` + failed marker；D. 其他 | 决定输入框、toolbar、列表状态、错误 banner 和后续发送行为 |
-| F09.2 queue 处理 | A. 保留原 queue，`autoDrain=false`；B. 清空 queue；C. 保留并允许手动立即发送；D. 其他 | 决定是否复用 held queue 断言 |
-| F09.3 操作恢复 | A. 允许继续发普通文本/`/goal`/fork/edit/再次 compact；B. 只允许 retry compact；C. 进入错误态，仅允许修复/重试；D. 其他 | 决定按钮 disabled 和后续 action case |
-| F09.4 failed marker 交互 | A. 展示 retry compact；B. 只展示失败结果；C. 展示日志/详情入口；D. 其他 | 决定 UI test-id 和点击断言 |
+| F09.2 queue 处理             | A. 保留原 queue，`autoDrain=false`；B. 清空 queue；C. 保留并允许手动立即发送；D. 其他                                            | 决定是否复用 held queue 断言                              |
+| F09.3 操作恢复               | A. 允许继续发普通文本/`/goal`/fork/edit/再次 compact；B. 只允许 retry compact；C. 进入错误态，仅允许修复/重试；D. 其他           | 决定按钮 disabled 和后续 action case                      |
+| F09.4 failed marker 交互     | A. 展示 retry compact；B. 只展示失败结果；C. 展示日志/详情入口；D. 其他                                                          | 决定 UI test-id 和点击断言                                |
 
 ### E2E 断言草案
 
-| 层 | 应采集信号 |
-| --- | --- |
-| UI | compact marker 从 `running` 变 `failed`；输入框/按钮状态符合 F09.1-F09.4 |
-| Network | 只发生 1 个手动 compact 逻辑 attempt；物理请求包含 SSE/HTTP legs 及各自 adapter retry，数量不写死；不会产生主模型请求 |
-| Queue | compact 前已存在的 queue 是否按 F09.2 保留 |
-| Runtime/Log | task runtime 状态、compact failure trace、activeInputId 清理 |
-| Files | session timeline 中保留 compact started 和 failed marker |
+| 层          | 应采集信号                                                                                                            |
+| ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| UI          | compact marker 从 `running` 变 `failed`；输入框/按钮状态符合 F09.1-F09.4                                              |
+| Network     | 只发生 1 个手动 compact 逻辑 attempt；物理请求包含 SSE/HTTP legs 及各自 adapter retry，数量不写死；不会产生主模型请求 |
+| Queue       | compact 前已存在的 queue 是否按 F09.2 保留                                                                            |
+| Runtime/Log | task runtime 状态、compact failure trace、activeInputId 清理                                                          |
+| Files       | session timeline 中保留 compact started 和 failed marker                                                              |
 
 建议 spec：`packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-compact-failure.test.ts`。
 
@@ -134,22 +134,22 @@ request 次序以及 goal target terminal 状态。
 
 ### 必须确认
 
-| 决策点 | 选项 | 影响 |
-| --- | --- | --- |
-| G11.1 pendingAction 处理 | A. 继续无压缩执行；B. 回到 held queue 且不自动消费；C. 丢弃并提示；D. 进入错误态等待用户决定；E. 其他 | 决定第 4 个请求是否应该是主模型请求 |
-| G11.2 task/session 状态 | A. pendingAction 若继续则进入 `running`；B. 若保留 queue 则回到 `completed/interrupted`；C. 进入 `error/failed`；D. 其他 | 决定 toolbar、composer 和列表状态 |
-| G11.3 marker 展示 | A. 保留 failed marker，同时继续原请求；B. failed marker 阻塞后续请求；C. 只展示 retrying 历史，最终不展示 failed；D. 其他 | 决定 timeline UI 断言 |
-| G11.4 后续 auto compact 策略 | A. circuit breaker 生效，后续一段时间跳过 auto compact；B. 下一轮仍可继续尝试；C. 需要用户手动 compact 成功后重置；D. 其他 | 决定跨轮状态和后续 e2e |
+| 决策点                       | 选项                                                                                                                       | 影响                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| G11.1 pendingAction 处理     | A. 继续无压缩执行；B. 回到 held queue 且不自动消费；C. 丢弃并提示；D. 进入错误态等待用户决定；E. 其他                      | 决定第 4 个请求是否应该是主模型请求 |
+| G11.2 task/session 状态      | A. pendingAction 若继续则进入 `running`；B. 若保留 queue 则回到 `completed/interrupted`；C. 进入 `error/failed`；D. 其他   | 决定 toolbar、composer 和列表状态   |
+| G11.3 marker 展示            | A. 保留 failed marker，同时继续原请求；B. failed marker 阻塞后续请求；C. 只展示 retrying 历史，最终不展示 failed；D. 其他  | 决定 timeline UI 断言               |
+| G11.4 后续 auto compact 策略 | A. circuit breaker 生效，后续一段时间跳过 auto compact；B. 下一轮仍可继续尝试；C. 需要用户手动 compact 成功后重置；D. 其他 | 决定跨轮状态和后续 e2e              |
 
 ### E2E 断言草案
 
-| 层 | 应采集信号 |
-| --- | --- |
-| UI | auto compact marker attempt=1/2/3 的 retrying/failed 表达；最终状态符合 G11.2 |
-| Network | 精确 3 个逻辑 compact attempt；物理 SSE/HTTP 请求数不写死；是否有后续主模型请求取决于 G11.1 |
-| Queue | pendingAction 是消失、回到队列，还是被执行 |
-| Runtime/Log | retry count、circuit breaker、activeTurnKind 清理或切换 |
-| Files | timeline marker 和触发 pendingAction 的 user message 是否持久化 |
+| 层          | 应采集信号                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| UI          | auto compact marker attempt=1/2/3 的 retrying/failed 表达；最终状态符合 G11.2               |
+| Network     | 精确 3 个逻辑 compact attempt；物理 SSE/HTTP 请求数不写死；是否有后续主模型请求取决于 G11.1 |
+| Queue       | pendingAction 是消失、回到队列，还是被执行                                                  |
+| Runtime/Log | retry count、circuit breaker、activeTurnKind 清理或切换                                     |
+| Files       | timeline marker 和触发 pendingAction 的 user message 是否持久化                             |
 
 建议 spec：`packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-compact-auto-failure.test.ts`。
 
@@ -163,22 +163,22 @@ request 次序以及 goal target terminal 状态。
 
 ### 必须确认
 
-| 决策点 | 选项 | 影响 |
-| --- | --- | --- |
-| G12.1 pendingAction 处理 | A. 回到 held queue，`autoDrain=false`；B. 保留为当前轮 interrupted user message，不再进入 queue；C. 丢弃并提示；D. 保持待执行但不自动消费；E. 其他 | 决定 stop 后用户能否看到并编辑这条待执行输入 |
-| G12.2 task/session 状态 | A. `completed(interrupted)`；B. `completed(success)` + interrupted marker；C. `error/failed`；D. 其他 | 决定与普通 stop 的一致性 |
-| G12.3 compact marker 状态 | A. `interrupted`；B. `failed`；C. 移除 running marker；D. 其他 | 决定 timeline 展示 |
-| G12.4 compact 期间追加 queue | A. 全部保留且不自动消费；B. 只保留用户显式追加项，不保留原 pendingAction；C. stop 后清空；D. 其他 | 决定 queue count 和顺序断言 |
+| 决策点                       | 选项                                                                                                                                               | 影响                                         |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| G12.1 pendingAction 处理     | A. 回到 held queue，`autoDrain=false`；B. 保留为当前轮 interrupted user message，不再进入 queue；C. 丢弃并提示；D. 保持待执行但不自动消费；E. 其他 | 决定 stop 后用户能否看到并编辑这条待执行输入 |
+| G12.2 task/session 状态      | A. `completed(interrupted)`；B. `completed(success)` + interrupted marker；C. `error/failed`；D. 其他                                              | 决定与普通 stop 的一致性                     |
+| G12.3 compact marker 状态    | A. `interrupted`；B. `failed`；C. 移除 running marker；D. 其他                                                                                     | 决定 timeline 展示                           |
+| G12.4 compact 期间追加 queue | A. 全部保留且不自动消费；B. 只保留用户显式追加项，不保留原 pendingAction；C. stop 后清空；D. 其他                                                  | 决定 queue count 和顺序断言                  |
 
 ### E2E 断言草案
 
-| 层 | 应采集信号 |
-| --- | --- |
-| UI | 点击 stop 后退出 streaming/compacting；marker 状态符合 G12.3；输入框和按钮恢复符合 G12.2 |
-| Network | auto compact 请求被中止；不会发起 pendingAction 的主模型请求 |
-| Queue | 原 pendingAction 和 compact 期间追加项按 G12.1/G12.4 处理 |
-| Runtime/Log | activeInputId 清理；stopRequested 与 autoDrain 状态符合普通 stop 或新定义 |
-| Files | interrupted marker、user message、queue snapshot 是否持久化 |
+| 层          | 应采集信号                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------- |
+| UI          | 点击 stop 后退出 streaming/compacting；marker 状态符合 G12.3；输入框和按钮恢复符合 G12.2 |
+| Network     | auto compact 请求被中止；不会发起 pendingAction 的主模型请求                             |
+| Queue       | 原 pendingAction 和 compact 期间追加项按 G12.1/G12.4 处理                                |
+| Runtime/Log | activeInputId 清理；stopRequested 与 autoDrain 状态符合普通 stop 或新定义                |
+| Files       | interrupted marker、user message、queue snapshot 是否持久化                              |
 
 建议 spec：`packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-compact-auto-stop.test.ts`。
 

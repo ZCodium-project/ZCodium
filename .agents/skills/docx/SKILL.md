@@ -51,9 +51,9 @@ evidence/backend/acceptance waterfall.
 The env gate ships in two equivalent dialects so the skill works on macOS, Linux/WSL, and
 Windows without any cygwin/git-bash hack:
 
-| Platform | Setup | Env check |
-|---|---|---|
-| macOS / Linux / WSL | `bash <skill_dir>/scripts/setup.sh` | `bash <skill_dir>/scripts/env_check.sh --level <lvl>` |
+| Platform                  | Setup                                                                    | Env check                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| macOS / Linux / WSL       | `bash <skill_dir>/scripts/setup.sh`                                      | `bash <skill_dir>/scripts/env_check.sh --level <lvl>`                                     |
 | Windows (PowerShell 5.1+) | `powershell -ExecutionPolicy Bypass -File <skill_dir>\scripts\setup.ps1` | `powershell -ExecutionPolicy Bypass -File <skill_dir>\scripts\env_check.ps1 -Level <lvl>` |
 
 Both dialects accept the same three levels (`read | render | full`, default `full`) and produce
@@ -111,11 +111,11 @@ The levels above assume a machine where the skill may install its own toolchain.
 repo skills must not silently change the host, so `scripts/setup.sh` is report-only unless you
 opt in. Check the level you actually need before promising a deliverable:
 
-| Level | Needs | Without it |
-| --- | --- | --- |
-| `read` | `python3` (+ `pdftoppm` for page images) | — |
-| `render` | read + `soffice` / `pandoc` | no PDF/PNG preview of the result |
-| `full` | render + `dotnet` >= 9 + `zip` | **creation, template application, validation and track-changes editing are unavailable** — say so instead of guessing |
+| Level    | Needs                                    | Without it                                                                                                            |
+| -------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `read`   | `python3` (+ `pdftoppm` for page images) | —                                                                                                                     |
+| `render` | read + `soffice` / `pandoc`              | no PDF/PNG preview of the result                                                                                      |
+| `full`   | render + `dotnet` >= 9 + `zip`           | **creation, template application, validation and track-changes editing are unavailable** — say so instead of guessing |
 
 `.NET` is a global SDK and the upstream installer fetched it with `curl | sh`, so this fork makes it
 opt-in: run `bash scripts/setup.sh --install-dotnet` (writes `~/.dotnet`, no sudo) only after the
@@ -127,16 +127,16 @@ Plan for `read` / `render` and use the `full` gate only where a pre-provisioned 
 
 ### Cross-platform path & temp-dir convention
 
-Examples in `docs/` and `references/` are written for *nix shells. When you execute on Windows,
+Examples in `docs/` and `references/` are written for \*nix shells. When you execute on Windows,
 do these substitutions consistently:
 
-| In the example | Windows substitute |
-|---|---|
-| `<skill_dir>/scripts/foo.sh` | `<skill_dir>\scripts\foo.ps1` (every `.sh` has a `.ps1` peer) |
+| In the example                       | Windows substitute                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| `<skill_dir>/scripts/foo.sh`         | `<skill_dir>\scripts\foo.ps1` (every `.sh` has a `.ps1` peer)            |
 | `python3 <skill_dir>/scripts/foo.py` | `python <skill_dir>\scripts\foo.py` (the `.py` files are cross-platform) |
-| `/tmp/docx-<thing>` | `$env:TEMP\docx-<thing>` |
-| `bash <skill_dir>/scripts/setup.sh` | `powershell -ExecutionPolicy Bypass -File <skill_dir>\scripts\setup.ps1` |
-| `forward slashes in paths` | backslashes; quote any path containing spaces |
+| `/tmp/docx-<thing>`                  | `$env:TEMP\docx-<thing>`                                                 |
+| `bash <skill_dir>/scripts/setup.sh`  | `powershell -ExecutionPolicy Bypass -File <skill_dir>\scripts\setup.ps1` |
+| `forward slashes in paths`           | backslashes; quote any path containing spaces                            |
 
 Never invoke a `.sh` script through git-bash on Windows — `setup.sh` will refuse to install
 anything on `MINGW*/MSYS*/CYGWIN*` and tell you to switch to `powershell.exe` / `pwsh.exe`.
@@ -201,43 +201,43 @@ anything on `MINGW*/MSYS*/CYGWIN*` and tell you to switch to `powershell.exe` / 
 
 ### WRITE / GENERATE a DOCX
 
-| Intent | Guide | What happens next |
-|---|---|---|
-| **CREATE_DOCX** — author a new report / proposal / contract / memo / thesis / 公文 | `docs/task-create.md` | normalize source -> choose recipe family -> choose `D`/`S` -> write -> acceptance |
+| Intent                                                                                       | Guide                         | What happens next                                                                                                                      |
+| -------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **CREATE_DOCX** — author a new report / proposal / contract / memo / thesis / 公文           | `docs/task-create.md`         | normalize source -> choose recipe family -> choose `D`/`S` -> write -> acceptance                                                      |
 | **APPLY_TEMPLATE** — preserve content but move into a template / institutional visual system | `docs/task-apply-template.md` | choose template mode -> align recipe family -> read only the needed structure -> choose `D`/`S` -> write -> strict rendered acceptance |
-| **EDIT_FILL_DOCX** — mutate content in an existing DOCX while keeping it the same document | `docs/task-edit-fill.md` | choose edit mode -> choose `X`/`D`/`S` -> mutate -> acceptance |
+| **EDIT_FILL_DOCX** — mutate content in an existing DOCX while keeping it the same document   | `docs/task-edit-fill.md`      | choose edit mode -> choose `X`/`D`/`S` -> mutate -> acceptance                                                                         |
 
 ### READ / DIAGNOSE / REPAIR a DOCX
 
-| Intent | Guide | Primary truth |
-|---|---|---|
-| **READ_CONTENT** — summarize / quote / retrieve text | `docs/task-read-content.md` | content |
-| **READ_STRUCTURE** — inspect styles / sections / numbering / TOC / comments / revisions | `docs/task-read-structure.md` | structure |
-| **READ_RENDERED** — inspect what the pages actually look like | `docs/task-read-rendered.md` | rendered + structure |
-| **REPAIR_LAYOUT** — fix page-level defects | `docs/task-repair-layout.md` | rendered -> structure -> rendered |
-| **COMPARE_TWO_DOCX** — explain before/after or source/template differences | `docs/task-compare-two-docx.md` | content + structure + rendered |
+| Intent                                                                                  | Guide                           | Primary truth                     |
+| --------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------- |
+| **READ_CONTENT** — summarize / quote / retrieve text                                    | `docs/task-read-content.md`     | content                           |
+| **READ_STRUCTURE** — inspect styles / sections / numbering / TOC / comments / revisions | `docs/task-read-structure.md`   | structure                         |
+| **READ_RENDERED** — inspect what the pages actually look like                           | `docs/task-read-rendered.md`    | rendered + structure              |
+| **REPAIR_LAYOUT** — fix page-level defects                                              | `docs/task-repair-layout.md`    | rendered -> structure -> rendered |
+| **COMPARE_TWO_DOCX** — explain before/after or source/template differences              | `docs/task-compare-two-docx.md` | content + structure + rendered    |
 
 ## Deep docs — only after the route is clear
 
-| File | Use when |
-|---|---|
-| `docs/router.md` | settle route choice |
-| `docs/evidence.md` | the selected route needs truth-source clarification |
-| `docs/backends.md` | the selected route needs backend arbitration |
-| `docs/acceptance.md` | you are ready to validate deliverables |
-| `docs/rendered-delivery.md` | rendered issue report shape is required |
+| File                        | Use when                                            |
+| --------------------------- | --------------------------------------------------- |
+| `docs/router.md`            | settle route choice                                 |
+| `docs/evidence.md`          | the selected route needs truth-source clarification |
+| `docs/backends.md`          | the selected route needs backend arbitration        |
+| `docs/acceptance.md`        | you are ready to validate deliverables              |
+| `docs/rendered-delivery.md` | rendered issue report shape is required             |
 
 ## Generation core references
 
 Use these after `CREATE_DOCX` / `APPLY_TEMPLATE` is selected:
 
-| File | Role |
-|---|---|
-| `references/scenario_a_create.md` | create-from-scratch mechanics |
-| `references/scenario_c_apply_template.md` | template transfer and multi-section rules |
-| `references/typography_guide.md` | font pairings, sizes, spacing, page layout, table rules |
-| `references/design_principles.md` | visual judgment rules when exact specs are missing |
-| `references/cjk_typography.md` | CJK fonts, 字号, mixed-script rules, 公文 defaults |
+| File                                                                   | Role                                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `references/scenario_a_create.md`                                      | create-from-scratch mechanics                                       |
+| `references/scenario_c_apply_template.md`                              | template transfer and multi-section rules                           |
+| `references/typography_guide.md`                                       | font pairings, sizes, spacing, page layout, table rules             |
+| `references/design_principles.md`                                      | visual judgment rules when exact specs are missing                  |
+| `references/cjk_typography.md`                                         | CJK fonts, 字号, mixed-script rules, 公文 defaults                  |
 | `scripts/dotnet/MiniMaxAIDocx.Core/Samples/AestheticRecipeSamples*.cs` | benchmarked recipe families; choose one instead of inventing values |
 
 ## Runtime shorthands

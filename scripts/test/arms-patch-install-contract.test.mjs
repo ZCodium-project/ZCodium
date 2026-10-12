@@ -10,10 +10,7 @@ async function readJson(relativePath) {
 }
 
 function gitBlobHash(content) {
-  return createHash("sha1")
-    .update(`blob ${content.byteLength}\0`)
-    .update(content)
-    .digest("hex");
+  return createHash("sha1").update(`blob ${content.byteLength}\0`).update(content).digest("hex");
 }
 
 function assertCoherentHunkOffsets(patch) {

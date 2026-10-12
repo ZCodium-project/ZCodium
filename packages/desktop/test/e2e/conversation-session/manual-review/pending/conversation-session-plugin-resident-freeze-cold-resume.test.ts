@@ -1,9 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  clearAppData,
-  getE2EAppDataPaths,
-} from "../../../helpers/desktop-app.js";
+import { clearAppData, getE2EAppDataPaths } from "../../../helpers/desktop-app.js";
 import {
   getPluginReferenceCatalog,
   restartPluginLifecycleApp,
@@ -170,7 +167,10 @@ async function waitForSessionPluginReferenceCatalog(
       } catch (error) {
         // cold resume 时 Renderer 会先恢复选中态，CLI App 随后才完成 session/resume；
         // 只把这个明确的暂态当作未就绪，其他协议错误立即暴露。
-        if (error instanceof Error && error.message.includes(`Session is not active: ${sessionId}`)) {
+        if (
+          error instanceof Error &&
+          error.message.includes(`Session is not active: ${sessionId}`)
+        ) {
           return false;
         }
         throw error;

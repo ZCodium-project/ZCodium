@@ -22,9 +22,7 @@ export function buildModelConfigMissingUiError(): ModelConfigMissingUiError {
 }
 
 export function isProviderNotReadyError(error: unknown): boolean {
-  return (
-    normalizeUnknownError(error).code === ZCODE_AGENT_PROVIDER_NOT_READY_CODE
-  );
+  return normalizeUnknownError(error).code === ZCODE_AGENT_PROVIDER_NOT_READY_CODE;
 }
 
 interface WorkspacePrepareErrorContext {
@@ -43,9 +41,7 @@ interface WorkspacePrepareErrorContext {
   displayMessage?: string;
 }
 
-function buildWorkspacePrepareDetail(
-  context: WorkspacePrepareErrorContext,
-): string {
+function buildWorkspacePrepareDetail(context: WorkspacePrepareErrorContext): string {
   return (
     `workspace=${context.workspacePath} ` +
     `provider=${context.provider} ` +
@@ -64,11 +60,7 @@ function stringifyUnknownValue(value: unknown): string {
   if (value === undefined) {
     return "undefined";
   }
-  if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    typeof value === "bigint"
-  ) {
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
     return String(value);
   }
 
@@ -100,16 +92,12 @@ export function getChatErrorMessage(err: unknown): string {
   return stringifyUnknownValue(err);
 }
 
-function buildDisplayErrorInput(
-  err: unknown,
-  displayMessage: string | undefined,
-): unknown {
+function buildDisplayErrorInput(err: unknown, displayMessage: string | undefined): unknown {
   if (!displayMessage) {
     return err;
   }
 
-  const displayError = new Error(displayMessage) as Error &
-    Record<string, unknown>;
+  const displayError = new Error(displayMessage) as Error & Record<string, unknown>;
   if (err instanceof Error) {
     displayError.name = err.name;
     displayError.stack = err.stack;

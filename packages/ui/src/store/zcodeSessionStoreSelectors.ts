@@ -4,10 +4,7 @@
  * 从 zcodeSessionStore.ts 拆分出来，包含 workspace 状态读取/更新辅助函数，
  * 以及所有按 task 粒度的只读访问器和独立选择器。
  */
-import type {
-  ZCodeTaskRuntimeStatus,
-  ZCodeTaskMeta,
-} from "@zcode/shared";
+import type { ZCodeTaskRuntimeStatus, ZCodeTaskMeta } from "@zcode/shared";
 import { mergeTaskWithOptimisticMeta } from "@/lib/zcodeTaskMetaMerge.js";
 import {
   DEFAULT_TASK_UI_STATE,
@@ -108,10 +105,7 @@ function createIdentityWorkspaceStateSeed(
             migratedTaskIds,
           ),
           taskUiByTaskId: copyTaskRecordEntries(baseState.taskUiByTaskId, migratedTaskIds),
-          taskUnreadByTaskId: copyTaskRecordEntries(
-            baseState.taskUnreadByTaskId,
-            migratedTaskIds,
-          ),
+          taskUnreadByTaskId: copyTaskRecordEntries(baseState.taskUnreadByTaskId, migratedTaskIds),
         }
       : {}),
   };
@@ -222,8 +216,10 @@ export function hasTaskPendingPermissionRequest(
   taskId: string,
 ): boolean {
   const taskUiState = getTaskUiState(workspaceState, taskId);
-  return taskUiState.permissionRequest != null ||
-    (taskUiState.pendingPermissionRequests?.length ?? 0) > 0;
+  return (
+    taskUiState.permissionRequest != null ||
+    (taskUiState.pendingPermissionRequests?.length ?? 0) > 0
+  );
 }
 
 export function hasTaskPendingHumanInterventionRequest(
@@ -231,12 +227,12 @@ export function hasTaskPendingHumanInterventionRequest(
   taskId: string,
 ): boolean {
   const taskUiState = getTaskUiState(workspaceState, taskId);
-  return hasTaskPendingPermissionRequest(workspaceState, taskId) ||
+  return (
+    hasTaskPendingPermissionRequest(workspaceState, taskId) ||
     taskUiState.elicitationRequest != null ||
-    (taskUiState.pendingElicitationRequests?.length ?? 0) > 0;
+    (taskUiState.pendingElicitationRequests?.length ?? 0) > 0
+  );
 }
-
-
 
 export function getTaskMeta(
   workspaceState:

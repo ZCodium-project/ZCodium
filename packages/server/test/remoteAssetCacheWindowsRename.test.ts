@@ -35,7 +35,9 @@ async function writeComponentArchive(options: {
       archivePath: entry,
     })),
   );
-  return createHash("sha256").update(await readFile(archivePath)).digest("hex");
+  return createHash("sha256")
+    .update(await readFile(archivePath))
+    .digest("hex");
 }
 
 describe("remote asset cache Windows directory commit", () => {
@@ -93,9 +95,7 @@ describe("remote asset cache Windows directory commit", () => {
           }),
         });
       }
-      const glmSha256 = manifestComponents.find(
-        (component) => component.id === "glm",
-      )?.sha256;
+      const glmSha256 = manifestComponents.find((component) => component.id === "glm")?.sha256;
       if (!glmSha256) {
         throw new Error("missing GLM component SHA");
       }
@@ -152,9 +152,8 @@ describe("remote asset cache Windows directory commit", () => {
         }),
       );
 
-      const { ensureRemoteReleaseDirFromCdn } = await import(
-        "@zcode/server/remote/remoteAssetCache.js"
-      );
+      const { ensureRemoteReleaseDirFromCdn } =
+        await import("@zcode/server/remote/remoteAssetCache.js");
       const releaseDir = await ensureRemoteReleaseDirFromCdn(
         {
           remoteCdnBaseUrl: pathToFileURL(join(rootDir, "cdn")).href,
@@ -166,14 +165,7 @@ describe("remote asset cache Windows directory commit", () => {
       );
 
       expect(releaseDir).toBe(
-        join(
-          remoteCacheDir,
-          "releases",
-          ZCODE_VERSION,
-          platformArch,
-          "glm-content",
-          glmSha256,
-        ),
+        join(remoteCacheDir, "releases", ZCODE_VERSION, platformArch, "glm-content", glmSha256),
       );
       expect(failedRenameTargets).toHaveLength(1);
       await expect(

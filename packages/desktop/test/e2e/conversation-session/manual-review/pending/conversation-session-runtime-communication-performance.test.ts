@@ -43,9 +43,7 @@ describe("通信中性能复现：四分屏 streaming + Agent subagent", () => {
           outputPath: resolveArtifactPath(`${CASE_NAME}.webm`),
         });
     const profiler =
-      process.env.ZCODE_E2E_PROFILE_STREAMING === "1"
-        ? await startRendererCpuProfile()
-        : null;
+      process.env.ZCODE_E2E_PROFILE_STREAMING === "1" ? await startRendererCpuProfile() : null;
 
     try {
       const runId = Date.now();
@@ -55,8 +53,7 @@ describe("通信中性能复现：四分屏 streaming + Agent subagent", () => {
       await browser.pause(9000);
       for (const lane of lanes) {
         const snapshot = await waitForV4Pane(
-          (current) =>
-            current.sessionId === lane.sessionId && current.canStop,
+          (current) => current.sessionId === lane.sessionId && current.canStop,
           `pane ${lane.label} 在 child stream 窗口没有保持 running`,
           45000,
           lane.paneId,
@@ -100,8 +97,7 @@ async function createRunningPerfSessions(runId: number): Promise<PerfLane[]> {
       `E2E_RUNTIME_PERF_${label}_${runId}: trigger Agent subagent runtime communication pressure.`,
     );
     const snapshot = await waitForV4Pane(
-      (current) =>
-        current.sessionId !== "draft" && current.sessionId !== null,
+      (current) => current.sessionId !== "draft" && current.sessionId !== null,
       `session ${label} 没有从 draft 绑定到真实 session`,
       45000,
       V4_MAIN_PANE_ID,
@@ -152,10 +148,7 @@ function resolveArtifactPath(fileName: string) {
   );
 }
 
-async function writeRecordingManifest(input: {
-  frameCount: number;
-  videoPath: string;
-}) {
+async function writeRecordingManifest(input: { frameCount: number; videoPath: string }) {
   const manifestPath = resolveArtifactPath(`${CASE_NAME}.recording.json`);
   await mkdir(dirname(manifestPath), { recursive: true });
   await writeFile(

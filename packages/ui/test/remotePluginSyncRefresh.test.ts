@@ -111,9 +111,7 @@ describe("refreshWorkspacePluginCapabilitiesAfterRemoteSync", () => {
       workspaceIdentity,
     });
     expect(
-      useZCodeSessionStore
-        .getState()
-        .getWorkspaceState(workspacePath, workspaceIdentity)
+      useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
         .slashCommands,
     ).toEqual([
       {

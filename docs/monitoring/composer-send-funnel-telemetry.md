@@ -41,22 +41,22 @@
 
 ### 3.1 通道：只上报 ARMS
 
-| 决策点 | 结论 | 理由 |
-| --- | --- | --- |
-| 走哪条通道 | **只走 ARMS**，不双发 `/event/report` | 本次三个指标里最核心的是**耗时分布**；ARMS 自定义事件的 `value` 是数值型，天然支持 avg/p50/p95/p99 与按 `app_version` / `platform` 下钻，`/event/report` 的 `event_extra_detail` 全是字符串，做分位数要数仓再解析一层 |
-| 生效端 | 仅 Electron 桌面端 | `packages/web/src/main.tsx` 的 `reportArmsCustomEvent` 是空实现，Web 本就收不到；沿用 `setUiPerfArmsReporter(isDesktop ? platform : null)` 的既有门控写法，语义显式 |
-| 与既有 `send_btn` 的关系 | `send_btn` 语义、字段、时机、通道**一律不动** | 数仓已把 `send_btn` 当作 `message_completion` 的配对 seed；两条通道彼此独立，本次改动对 `/event/report` 零影响 |
+| 决策点                   | 结论                                          | 理由                                                                                                                                                                                                                  |
+| ------------------------ | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 走哪条通道               | **只走 ARMS**，不双发 `/event/report`         | 本次三个指标里最核心的是**耗时分布**；ARMS 自定义事件的 `value` 是数值型，天然支持 avg/p50/p95/p99 与按 `app_version` / `platform` 下钻，`/event/report` 的 `event_extra_detail` 全是字符串，做分位数要数仓再解析一层 |
+| 生效端                   | 仅 Electron 桌面端                            | `packages/web/src/main.tsx` 的 `reportArmsCustomEvent` 是空实现，Web 本就收不到；沿用 `setUiPerfArmsReporter(isDesktop ? platform : null)` 的既有门控写法，语义显式                                                   |
+| 与既有 `send_btn` 的关系 | `send_btn` 语义、字段、时机、通道**一律不动** | 数仓已把 `send_btn` 当作 `message_completion` 的配对 seed；两条通道彼此独立，本次改动对 `/event/report` 零影响                                                                                                        |
 
 **双发被否的理由**：同一动作在两条通道各留一份，指标口径会随时间漂移（一条改了另一条忘了），且 `/event/report` 侧已有 `send_btn` 覆盖成功路径，重复计数反而污染既有看板。
 
 ### 3.2 事件语义
 
-| 决策点 | 结论 | 理由 |
-| --- | --- | --- |
-| 「发送成功」取哪个时刻 | **用户消息首次出现在对话历史里**（`snapshot.rows.window` 首次出现 `kind === "userInput"` 且 `sourceCommandId === commandId` 的 row） | 度量的是用户能感知到的「我的话发出去了」；ACK accepted 只代表 Host 收下了命令，此时屏幕上还什么都没有 |
-| ACK 那一段是否单独留 | 留，另开 `ack_cost_ms` | 端到端耗时变慢时要能一眼分清是「上行慢」还是「回流+渲染慢」，两者相减即后半段 |
-| ACK 已 accepted 但 row 迟迟不回流 | 30 s 超时兜底，报 `status=fail` / `reason_code=render_timeout` | 不落定会留下悬空的 `send_click` 污染成功率分母；30 s 远超正常回流耗时，落到这里就是真出问题了 |
-| 失败要不要报 | 要，与成功共用 `send_result`，靠 `status` + `reason_code` 区分 | 成功率是本次埋点的核心指标，只报成功等于只有分子 |
+| 决策点                            | 结论                                                                                                                                 | 理由                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| 「发送成功」取哪个时刻            | **用户消息首次出现在对话历史里**（`snapshot.rows.window` 首次出现 `kind === "userInput"` 且 `sourceCommandId === commandId` 的 row） | 度量的是用户能感知到的「我的话发出去了」；ACK accepted 只代表 Host 收下了命令，此时屏幕上还什么都没有 |
+| ACK 那一段是否单独留              | 留，另开 `ack_cost_ms`                                                                                                               | 端到端耗时变慢时要能一眼分清是「上行慢」还是「回流+渲染慢」，两者相减即后半段                         |
+| ACK 已 accepted 但 row 迟迟不回流 | 30 s 超时兜底，报 `status=fail` / `reason_code=render_timeout`                                                                       | 不落定会留下悬空的 `send_click` 污染成功率分母；30 s 远超正常回流耗时，落到这里就是真出问题了         |
+| 失败要不要报                      | 要，与成功共用 `send_result`，靠 `status` + `reason_code` 区分                                                                       | 成功率是本次埋点的核心指标，只报成功等于只有分子                                                      |
 
 **「ACK accepted 即成功」已被推翻。** 该口径下真机实测只有 66 ~ 142 ms，量的是命令上行到 Host 被受理的往返，与用户看到自己消息的时刻不是一回事——见 §2 「用户消息没有乐观渲染」。原口径保留为 `ack_cost_ms`，不再作为 `send_result` 的落定信号。
 
@@ -105,19 +105,19 @@ supervisor ─► sendFunnelArmsTelemetry.emit()
 
 ### 5.1 `send_input_focus` — 点击输入框
 
-| 字段 | 值 |
-| --- | --- |
-| `name` | `send_input_focus` |
-| `group` | `send_funnel` |
-| `value` | `1`（计数事件） |
+| 字段    | 值                 |
+| ------- | ------------------ |
+| `name`  | `send_input_focus` |
+| `group` | `send_funnel`      |
+| `value` | `1`（计数事件）    |
 
 `properties`：
 
-| 键 | 类型 | 含义 |
-| --- | --- | --- |
-| `focus_time` | number | focus 发生的 renderer 时钟（毫秒） |
-| `composer_scope` | string | `session`（已有会话）/ `draft`（新建草稿） |
-| `talk_id` | string? | 当前 `sessionId`；草稿态缺省不下发 |
+| 键               | 类型    | 含义                                       |
+| ---------------- | ------- | ------------------------------------------ |
+| `focus_time`     | number  | focus 发生的 renderer 时钟（毫秒）         |
+| `composer_scope` | string  | `session`（已有会话）/ `draft`（新建草稿） |
+| `talk_id`        | string? | 当前 `sessionId`；草稿态缺省不下发         |
 
 **只报用户真实聚焦，不报程序性聚焦。** `ConversationComposer` 的自动聚焦（新建任务、切会话、挂载后交还光标、上下文块移除后回焦）统一经 `flushPendingFocus` 调用 `inputApiRef.current.focus()`，会触发同一个 DOM focus 事件；实现时在该处置位标记，`handleEditorFocus` 消费标记后跳过上报。既有的 `recordComposerFocus()` 时间戳写入**不受影响**，两种 focus 都照旧记录，`send_btn` 的 `input_start_time` 口径不变。
 
@@ -125,21 +125,21 @@ supervisor ─► sendFunnelArmsTelemetry.emit()
 
 ### 5.2 `send_click` — 点击发送
 
-| 字段 | 值 |
-| --- | --- |
-| `name` | `send_click` |
-| `group` | `send_funnel` |
+| 字段    | 值              |
+| ------- | --------------- |
+| `name`  | `send_click`    |
+| `group` | `send_funnel`   |
 | `value` | `1`（计数事件） |
 
 `properties`：seed 冻结的模型/模式/套餐字段（与 `send_btn` 同源，即 `buildV4ConversationPromptTelemetryExtraDetail` 的产物）加上：
 
-| 键 | 类型 | 含义 |
-| --- | --- | --- |
-| `send_click_id` | string | 本次发送的关联 ID（uuid），与 `send_result` 配对 |
-| `input_send_time` | number | 冻结的 `sendTime`，与 `send_btn` 同名字段同值 |
-| `send_trigger` | string | `button`（点击发送键）/ `shortcut`（Enter 提交） |
-| `composer_scope` | string | `session` / `draft` |
-| `talk_id` | string? | 当前 `sessionId`；草稿态缺省不下发 |
+| 键                | 类型    | 含义                                             |
+| ----------------- | ------- | ------------------------------------------------ |
+| `send_click_id`   | string  | 本次发送的关联 ID（uuid），与 `send_result` 配对 |
+| `input_send_time` | number  | 冻结的 `sendTime`，与 `send_btn` 同名字段同值    |
+| `send_trigger`    | string  | `button`（点击发送键）/ `shortcut`（Enter 提交） |
+| `composer_scope`  | string  | `session` / `draft`                              |
+| `talk_id`         | string? | 当前 `sessionId`；草稿态缺省不下发               |
 
 **上报时机**：`submit()` 内发送门禁通过、`pendingRef` 置位、冻结 `telemetrySeed` 的那一刻。被门禁挡下的调用（空草稿、`pendingRef` 已占用、附件未就绪）不报——此时发送按钮本就是 disabled，不构成一次有效发送。
 
@@ -149,41 +149,41 @@ supervisor ─► sendFunnelArmsTelemetry.emit()
 
 ### 5.3 `send_result` — 发送结果（成功与失败）
 
-| 字段 | 值 |
-| --- | --- |
-| `name` | `send_result` |
-| `group` | `send_funnel` |
+| 字段    | 值                                                                                              |
+| ------- | ----------------------------------------------------------------------------------------------- |
+| `name`  | `send_result`                                                                                   |
+| `group` | `send_funnel`                                                                                   |
 | `value` | **`send_cost_ms`**：点击发送 → 本次落定的**端到端**耗时 = 落定时刻 − `sendTime`，失败时同样填写 |
 
 把耗时放在 `value` 而不是 `properties`，是本次选择 ARMS 通道的核心原因：ARMS 侧可直接对该事件做 avg / p50 / p95 / p99，并按下列 property 切分。
 
 `properties`：同 `send_click` 的 seed 字段，加上：
 
-| 键 | 类型 | 含义 |
-| --- | --- | --- |
-| `send_click_id` | string | 与 `send_click` 配对的关联 ID |
-| `status` | string | `success` / `fail` |
-| `reason_code` | string? | 成功时缺省不下发；失败时见下表 |
-| `ack_status` | string? | ACK 的原始 status（`accepted` / `duplicate` / `rejected` / `stale` / `failed` / `noop`）；未拿到 ACK 时缺省不下发 |
-| `send_cost_ms` | number | 与 `value` 同值，冗余一份便于在 property 维度直接看数 |
-| `ack_cost_ms` | number? | 点击发送 → 收到 ACK 的耗时 = ACK 时刻 − `sendTime`；未拿到 ACK 的失败路径缺省不下发 |
-| `send_queue_confirmed` | boolean | `true` 表示中途经过队列二次确认弹窗 |
-| `talk_id` | string? | 落定时已知的 `sessionId`；首发未 promote 时缺省不下发 |
-| `message_id` | string? | ACK 对应的 `commandId`；未进入 dispatch 的失败路径缺省不下发 |
+| 键                     | 类型    | 含义                                                                                                              |
+| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `send_click_id`        | string  | 与 `send_click` 配对的关联 ID                                                                                     |
+| `status`               | string  | `success` / `fail`                                                                                                |
+| `reason_code`          | string? | 成功时缺省不下发；失败时见下表                                                                                    |
+| `ack_status`           | string? | ACK 的原始 status（`accepted` / `duplicate` / `rejected` / `stale` / `failed` / `noop`）；未拿到 ACK 时缺省不下发 |
+| `send_cost_ms`         | number  | 与 `value` 同值，冗余一份便于在 property 维度直接看数                                                             |
+| `ack_cost_ms`          | number? | 点击发送 → 收到 ACK 的耗时 = ACK 时刻 − `sendTime`；未拿到 ACK 的失败路径缺省不下发                               |
+| `send_queue_confirmed` | boolean | `true` 表示中途经过队列二次确认弹窗                                                                               |
+| `talk_id`              | string? | 落定时已知的 `sessionId`；首发未 promote 时缺省不下发                                                             |
+| `message_id`           | string? | ACK 对应的 `commandId`；未进入 dispatch 的失败路径缺省不下发                                                      |
 
 **`send_cost_ms` 与 `ack_cost_ms` 的关系**：`send_cost_ms − ack_cost_ms` 即「投影回流 + React 渲染」那一段。端到端变慢时先看这个差值落在哪边，避免把渲染问题误判成网络问题。
 
 `reason_code` 取值：
 
-| 值 | 触发点 |
-| --- | --- |
-| `attachment_not_ready` | `attachmentsApi.prepareForSend()` 返回 `null`，附件预传二次门禁失败 |
-| `blocked` | `onSendText` 返回 `"blocked"`，产品 guard 拒绝 |
-| `rejected` / `stale` / `failed` | ACK 的对应 status |
-| `render_timeout` | ACK 已 `accepted` / `duplicate`，但 30 s 内投影始终没回流出对应的 `userInput` row |
-| `transport_error` | `sendCommand` 抛异常（非 provider 未就绪） |
-| `provider_not_ready` | `sendCommand` 抛 provider 未就绪异常 |
-| `composer_error` | `submit()` catch 到的其余异常 |
+| 值                              | 触发点                                                                            |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| `attachment_not_ready`          | `attachmentsApi.prepareForSend()` 返回 `null`，附件预传二次门禁失败               |
+| `blocked`                       | `onSendText` 返回 `"blocked"`，产品 guard 拒绝                                    |
+| `rejected` / `stale` / `failed` | ACK 的对应 status                                                                 |
+| `render_timeout`                | ACK 已 `accepted` / `duplicate`，但 30 s 内投影始终没回流出对应的 `userInput` row |
+| `transport_error`               | `sendCommand` 抛异常（非 provider 未就绪）                                        |
+| `provider_not_ready`            | `sendCommand` 抛 provider 未就绪异常                                              |
+| `composer_error`                | `submit()` catch 到的其余异常                                                     |
 
 `attachment_not_ready` 与 5.2 「附件未就绪不报 `send_click`」不矛盾：前者是点击时 `hasUnreadyAttachments` 已为真、按钮 disabled，压根没进 `submit()` 主体；后者是点击时附件看起来就绪、`send_click` 已上报，随后 `prepareForSend()` 才失败。后一种若不落定会留下悬空的 `send_click`，污染成功率分母。
 
@@ -197,11 +197,11 @@ supervisor ─► sendFunnelArmsTelemetry.emit()
 
 ACK 为 `accepted` / `duplicate` 时，supervisor 以 `commandId` 为键登记一条待渲染记录，内含 seed、`ackCostMs`、以及一个 30 s 定时器：
 
-| 触发 | 动作 |
-| --- | --- |
-| `snapshot.rows.window` 出现 `kind === "userInput" && sourceCommandId === commandId` | 落定 `status=success`，`send_cost_ms` = 渲染时刻 − `sendTime` |
-| 30 s 定时器先到 | 落定 `status=fail` / `reason_code=render_timeout`，`send_cost_ms` = 30000 |
-| `dispose()` | 清空所有定时器，不补报 |
+| 触发                                                                                | 动作                                                                      |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `snapshot.rows.window` 出现 `kind === "userInput" && sourceCommandId === commandId` | 落定 `status=success`，`send_cost_ms` = 渲染时刻 − `sendTime`             |
+| 30 s 定时器先到                                                                     | 落定 `status=fail` / `reason_code=render_timeout`，`send_cost_ms` = 30000 |
+| `dispose()`                                                                         | 清空所有定时器，不补报                                                    |
 
 两条路径 **first-wins**：任一方落定后立即注销记录并 `clearTimeout`，`settledSendClickIds` 的既有去重再兜一层，保证一次 `send_click` 只有一条 `send_result`。
 
@@ -234,13 +234,13 @@ ARMS 属观测链路，与既有 `uiPerfArmsTelemetry` 同构：`emit()` 内 `tr
 
 ## 8. 实现落点
 
-| 文件 | 改动 |
-| --- | --- |
-| `packages/ui/src/lib/sendFunnelArmsTelemetry.ts` | **新建**。导出 `SEND_FUNNEL_ARMS_GROUP` 与三个事件名常量、`setSendFunnelArmsReporter()` / `clearSendFunnelArmsReporterForTest()`、`reportSendFunnelInputFocus()` / `reportSendFunnelSendClick()` / `reportSendFunnelSendResult()`。结构照抄 `uiPerfArmsTelemetry.ts`。`SendFunnelReasonCode` 增加 `render_timeout`，`reportSendFunnelSendResult()` 增加可选 `ackCostMs` → property `ack_cost_ms` |
-| `packages/ui/src/Root.tsx` | 既有 `useEffect` 内增加 `setSendFunnelArmsReporter(isDesktop ? platform : null)`，cleanup 置 `null`（与 `setUiPerfArmsReporter` 并列） |
-| `packages/ui/src/v4/telemetry/conversationTelemetrySupervisor.ts` | `recordComposerFocusClick()` / `recordSendClick()` / `settleSendResult()` 改为调上述 ARMS helper，**不再 `enqueueReport`**；`resolveSendAckSettlement()` 改为返回 `await-render` / `settle` 两态；新增 `awaitSendRender()`（登记待渲染 + 挂 30 s 定时器）与 `notifyUserInputRendered(commandId)`（渲染信号入口）；`dispose()` 清理全部待渲染定时器 |
-| `packages/ui/src/v4/ConversationComposer.tsx` | 接线不变（方法签名未变） |
-| `packages/ui/src/v4/SessionPane.tsx` | ACK 分支按 `resolveSendAckSettlement()` 的新返回分流：`awaitRender` 调 `awaitSendRender()`，`settle` 调 `settleSendResult()`；新增一个依赖 `snapshot` 的 `useEffect`，遍历 `snapshot.rows.window` 的全部 `userInput` row，把 `sourceCommandId` 交给 `notifyUserInputRendered()` |
+| 文件                                                              | 改动                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `packages/ui/src/lib/sendFunnelArmsTelemetry.ts`                  | **新建**。导出 `SEND_FUNNEL_ARMS_GROUP` 与三个事件名常量、`setSendFunnelArmsReporter()` / `clearSendFunnelArmsReporterForTest()`、`reportSendFunnelInputFocus()` / `reportSendFunnelSendClick()` / `reportSendFunnelSendResult()`。结构照抄 `uiPerfArmsTelemetry.ts`。`SendFunnelReasonCode` 增加 `render_timeout`，`reportSendFunnelSendResult()` 增加可选 `ackCostMs` → property `ack_cost_ms` |
+| `packages/ui/src/Root.tsx`                                        | 既有 `useEffect` 内增加 `setSendFunnelArmsReporter(isDesktop ? platform : null)`，cleanup 置 `null`（与 `setUiPerfArmsReporter` 并列）                                                                                                                                                                                                                                                           |
+| `packages/ui/src/v4/telemetry/conversationTelemetrySupervisor.ts` | `recordComposerFocusClick()` / `recordSendClick()` / `settleSendResult()` 改为调上述 ARMS helper，**不再 `enqueueReport`**；`resolveSendAckSettlement()` 改为返回 `await-render` / `settle` 两态；新增 `awaitSendRender()`（登记待渲染 + 挂 30 s 定时器）与 `notifyUserInputRendered(commandId)`（渲染信号入口）；`dispose()` 清理全部待渲染定时器                                               |
+| `packages/ui/src/v4/ConversationComposer.tsx`                     | 接线不变（方法签名未变）                                                                                                                                                                                                                                                                                                                                                                         |
+| `packages/ui/src/v4/SessionPane.tsx`                              | ACK 分支按 `resolveSendAckSettlement()` 的新返回分流：`awaitRender` 调 `awaitSendRender()`，`settle` 调 `settleSendResult()`；新增一个依赖 `snapshot` 的 `useEffect`，遍历 `snapshot.rows.window` 的全部 `userInput` row，把 `sourceCommandId` 交给 `notifyUserInputRendered()`                                                                                                                  |
 
 `send_click_id` 生成复用 `globalThis.crypto?.randomUUID?.()` + 降级实现（同 `codingPlanFunnelTelemetry.createPurchaseFunnelId`）。
 

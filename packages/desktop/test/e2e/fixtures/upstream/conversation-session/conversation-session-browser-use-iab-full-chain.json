@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_BROWSER_USE_IAB_FULL_CHAIN"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_BROWSER_USE_IAB_FULL_CHAIN"]
       },
       "response": {
         "statusCode": 200,
@@ -42,15 +39,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_BROWSER_USE_IAB_FULL_CHAIN",
-          "E2E_BROWSER_FIXTURE_URL:"
-        ],
+        "lastUserMessageIncludes": ["E2E_BROWSER_USE_IAB_FULL_CHAIN", "E2E_BROWSER_FIXTURE_URL:"],
         "bodyIncludes": ["mcp__node_repl__js"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -122,10 +113,7 @@
           "E2E_BROWSER_USE_IAB_ACTIONABILITY_OK",
           "Submitted ZCode / ZCode"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

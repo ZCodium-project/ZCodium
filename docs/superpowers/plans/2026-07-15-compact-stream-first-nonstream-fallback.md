@@ -295,13 +295,13 @@ N05 的产品缺口不在本次 stream-first 改动范围内，不顺手实现�
 
 ## 稳定验收口径
 
-| 层级      | 必须证明                                                                                                                     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Core      | stream success；空 SSE/orphan/eligible body failure/HTTP 404 setup fallback；其他 setup、post-commit、abort/context/media 不 fallback；隐藏流不落 session |
+| 层级      | 必须证明                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Core      | stream success；空 SSE/orphan/eligible body failure/HTTP 404 setup fallback；其他 setup、post-commit、abort/context/media 不 fallback；隐藏流不落 session                                                                                                                |
 | Adapter   | compact 观察 raw 非 ping event并投影 response-start/block-start-stop/stop-reason；以硬 transport status 区分 setup/body error；setup 保留既有 API retry，inner stream 仅 pre-event stale/watchdog retry 且 cancellation 优先；direct tool 校验先 commit；main eager 不变 |
-| Responses | `stream:true / failure → non-stream / success`，缺字段 JSON 继续兼容                                                         |
-| Desktop   | 正常 stream compact 与 fallback compact 都到 success marker，模型选择/主请求不回归                                           |
-| Static    | core/adapters tests、CLI/root typecheck、root lint、fixture/typecheck:e2e、diff check                                        |
+| Responses | `stream:true / failure → non-stream / success`，缺字段 JSON 继续兼容                                                                                                                                                                                                     |
+| Desktop   | 正常 stream compact 与 fallback compact 都到 success marker，模型选择/主请求不回归                                                                                                                                                                                       |
+| Static    | core/adapters tests、CLI/root typecheck、root lint、fixture/typecheck:e2e、diff check                                                                                                                                                                                    |
 
 完成定义：只实现 compact stream-first → non-stream fallback；没有引入 cache-sharing fork、通用 transport
 策略框架、主请求 fallback、UI/protocol 状态或额外 retry 能力。

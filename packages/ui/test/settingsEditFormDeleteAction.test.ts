@@ -7,7 +7,10 @@ const resourceLists = ["CommandCard.tsx", "HooksList.tsx", "McpServerList.tsx"] 
 describe("settings edit form delete action", () => {
   it("uses the Subagent delete action style in editable forms", async () => {
     for (const fileName of editForms) {
-      const source = await readFile(new URL(`../src/settings/${fileName}`, import.meta.url), "utf8");
+      const source = await readFile(
+        new URL(`../src/settings/${fileName}`, import.meta.url),
+        "utf8",
+      );
       expect(source, fileName).toContain("onDelete");
       expect(source, fileName).toContain('variant="link"');
       expect(source, fileName).toContain('size="lg"');
@@ -18,7 +21,10 @@ describe("settings edit form delete action", () => {
 
   it("removes duplicate delete actions from list rows", async () => {
     for (const fileName of resourceLists) {
-      const source = await readFile(new URL(`../src/settings/${fileName}`, import.meta.url), "utf8");
+      const source = await readFile(
+        new URL(`../src/settings/${fileName}`, import.meta.url),
+        "utf8",
+      );
       expect(source, fileName).not.toContain("<Trash2");
     }
   });

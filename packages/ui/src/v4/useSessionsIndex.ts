@@ -5,10 +5,7 @@ import { useEffect, useMemo, useSyncExternalStore } from "react";
 import type { SessionSummary } from "@zcode/shared/zcode-protocol-v4";
 import { useServices } from "@/hooks/useServices.js";
 import { createAgentSessionsIndexTransport } from "@/v4/agentSessionsIndexTransport.js";
-import {
-  SessionsIndexStore,
-  type SessionsIndexStoreStatus,
-} from "@/v4/sessionsIndexStore.js";
+import { SessionsIndexStore, type SessionsIndexStoreStatus } from "@/v4/sessionsIndexStore.js";
 
 export interface UseSessionsIndexResult {
   sessions: SessionSummary[];

@@ -26,14 +26,12 @@ describe("Settings breadcrumb replaces detail back navigation", () => {
     },
   );
 
-  it.each([
-    "CommandsSection",
-    "SubagentsSection",
-    "McpSettingsSection",
-    "HookForm",
-  ])("uses the xl UI token for the current form title in %s", (name) => {
-    const source = readSource(name);
-    expect(source).toContain("text-ui-xl font-semibold text-foreground");
-    expect(source).not.toContain("text-xl");
-  });
+  it.each(["CommandsSection", "SubagentsSection", "McpSettingsSection", "HookForm"])(
+    "uses the xl UI token for the current form title in %s",
+    (name) => {
+      const source = readSource(name);
+      expect(source).toContain("text-ui-xl font-semibold text-foreground");
+      expect(source).not.toContain("text-xl");
+    },
+  );
 });

@@ -1,17 +1,8 @@
-import {
-  BIGMODEL_PROVIDER_ID,
-  type OAuthProviderMeta,
-  ZAI_PROVIDER_ID,
-} from "@zcode/shared";
+import { BIGMODEL_PROVIDER_ID, type OAuthProviderMeta, ZAI_PROVIDER_ID } from "@zcode/shared";
 import { describe, expect, it } from "vitest";
-import {
-  resolveLoginRetryProvider,
-  resolveVisibleLoginProviders,
-} from "@/WelcomeScreen.js";
+import { resolveLoginRetryProvider, resolveVisibleLoginProviders } from "@/WelcomeScreen.js";
 
-function createProvider(
-  overrides: Partial<OAuthProviderMeta>,
-): OAuthProviderMeta {
+function createProvider(overrides: Partial<OAuthProviderMeta>): OAuthProviderMeta {
   return {
     id: overrides.id ?? "custom-oauth",
     displayName: overrides.displayName ?? "Custom OAuth",

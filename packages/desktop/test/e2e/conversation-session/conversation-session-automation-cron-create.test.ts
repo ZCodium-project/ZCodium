@@ -79,19 +79,14 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
     const cronCreateRequest = {
       lastUserMessageIncludes: [MARKER],
     };
-    await waitForUpstreamRequest(
-      cronCreateRequest,
-      "没有捕获到会话内 CronCreate 的 provider 请求",
-    );
+    await waitForUpstreamRequest(cronCreateRequest, "没有捕获到会话内 CronCreate 的 provider 请求");
     const cronCreateContract = await getUpstreamRequestToolContract(
       cronCreateRequest,
       "CronCreate",
     );
     expect(cronCreateContract).not.toBeNull();
     const serializedCronCreateContract = JSON.stringify(cronCreateContract);
-    expect(serializedCronCreateContract).toContain(
-      "must never ask the run to create",
-    );
+    expect(serializedCronCreateContract).toContain("must never ask the run to create");
     expect(serializedCronCreateContract).toContain(
       "do not ask it to create or schedule another automation",
     );
@@ -100,9 +95,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
     await approveV4Permission();
     const parent = await waitForV4Pane(
       (snapshot) =>
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft" &&
-        !snapshot.canStop,
+        snapshot.sessionId !== null && snapshot.sessionId !== "draft" && !snapshot.canStop,
       "会话内 CronCreate 没有完成",
       90000,
     );
@@ -143,8 +136,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
         timeoutMsg: "CronCreate 卡片没有展示真实的每 31 小时第 49 分频率",
       },
     );
-    const createdAutomation =
-      await waitForAutomationRecordByTitle(AUTOMATION_TITLE);
+    const createdAutomation = await waitForAutomationRecordByTitle(AUTOMATION_TITLE);
     expect(createdAutomation.cronExpr).toBe(COMPATIBLE_CRON);
     expect(createdAutomation.scheduleRule).toMatchObject({
       unit: "hourly",
@@ -188,8 +180,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
       timeoutMsg: "没有跳转到会话创建的定时任务详情",
     });
     await browser.waitUntil(
-      async () =>
-        (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
+      async () => (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
       {
         timeout: 15000,
         timeoutMsg: `任务详情没有回显会话创建的标题：${AUTOMATION_TITLE}`,
@@ -217,8 +208,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
       timeoutMsg: "返回列表后无法重新进入任务详情",
     });
     await browser.waitUntil(
-      async () =>
-        (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
+      async () => (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
       {
         timeout: 15000,
         timeoutMsg: `重新进入详情没有回显标题：${AUTOMATION_TITLE}`,
@@ -231,9 +221,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
       timeout: 10000,
       timeoutMsg: "会话创建任务没有显示调度摘要",
     });
-    const initialSchedule = await readTestIdText(
-      TID_AUTOMATION_SCHEDULE_PREVIEW,
-    );
+    const initialSchedule = await readTestIdText(TID_AUTOMATION_SCHEDULE_PREVIEW);
     expect(initialSchedule).toContain(String(INTERVAL));
     expect(initialSchedule).toContain(String(INTERVAL_MINUTE));
     expect(initialSchedule).not.toContain("下次运行");
@@ -244,9 +232,7 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
       timeout: 10000,
       timeoutMsg: "会话创建的 interval 调度没有复原自定义重复间隔",
     });
-    expect(await readTestIdValue(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)).toBe(
-      String(INTERVAL),
-    );
+    expect(await readTestIdValue(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)).toBe(String(INTERVAL));
     await clickTestIdByDom(TID_AUTOMATION_CUSTOM_CONFIRM, {
       timeoutMsg: "会话创建的 interval 调度无法关闭自定义重复编辑",
     });
@@ -277,16 +263,14 @@ describe("会话内 CronCreate 定时任务卡片与派生轮尾 E2E", () => {
       timeout: 15000,
       timeoutMsg: "重设后没有恢复标准 UI 调度控件",
     });
-    const updatedSchedule = await readTestIdText(
-      TID_AUTOMATION_SCHEDULE_PREVIEW,
-    );
+    const updatedSchedule = await readTestIdText(TID_AUTOMATION_SCHEDULE_PREVIEW);
     expect(updatedSchedule).not.toBe("自定义");
   });
 });
 
 /** Settings header 的 Automations breadcrumb 是任务详情返回列表的真实入口。 */
 async function clickAutomationsBreadcrumbBack(): Promise<void> {
-  const buttons = await browser.$$('nav[aria-label] button');
+  const buttons = await browser.$$("nav[aria-label] button");
   for (const button of buttons) {
     if (/Automations|自动化/u.test(await button.getText())) {
       await button.click();
@@ -301,9 +285,7 @@ interface AutomationRecord {
   scheduleRule: Record<string, unknown>;
 }
 
-async function waitForAutomationRecordByTitle(
-  title: string,
-): Promise<AutomationRecord> {
+async function waitForAutomationRecordByTitle(title: string): Promise<AutomationRecord> {
   let record: AutomationRecord | null = null;
   await browser.waitUntil(
     async () => {
@@ -332,9 +314,7 @@ function readAutomationRecordByTitle(title: string): AutomationRecord | null {
          FROM automations
          WHERE title = ?`,
       )
-      .get(title) as
-      | { cron_expr: string; schedule_rule: string | null }
-      | undefined;
+      .get(title) as { cron_expr: string; schedule_rule: string | null } | undefined;
     if (!row?.schedule_rule) return null;
     return {
       cronExpr: row.cron_expr,
@@ -348,9 +328,9 @@ function readAutomationRecordByTitle(title: string): AutomationRecord | null {
 /** 读取某个 test id 元素的可见文本。 */
 async function readTestIdText(currentTestId: string): Promise<string> {
   return browser.execute((tid) => {
-    const el = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-testid]"),
-    ).find((item) => item.dataset.testid === tid);
+    const el = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+      (item) => item.dataset.testid === tid,
+    );
     return el?.textContent?.trim() ?? "";
   }, currentTestId);
 }
@@ -397,28 +377,20 @@ async function waitForForkTailOrder(): Promise<void> {
 async function readForkTailOrder(): Promise<ForkTailOrderSnapshot> {
   return browser.execute(
     (cardTid, dislikePrefix, forkPrefix) => {
-      const card = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-testid]"),
-      ).find((item) => item.dataset.testid === cardTid);
+      const card = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+        (item) => item.dataset.testid === cardTid,
+      );
       const turn = card?.closest<HTMLElement>("[data-turn-id]");
-      const dislike = turn?.querySelector<HTMLElement>(
-        `[data-testid^="${dislikePrefix}-"]`,
-      );
-      const forkAction = turn?.querySelector<HTMLElement>(
-        `[data-testid^="${forkPrefix}-"]`,
-      );
+      const dislike = turn?.querySelector<HTMLElement>(`[data-testid^="${dislikePrefix}-"]`);
+      const forkAction = turn?.querySelector<HTMLElement>(`[data-testid^="${forkPrefix}-"]`);
       const boundary = turn?.querySelector<HTMLElement>(
         '[data-row-kind="timelineMarker"][data-marker-type="forkNotice"]',
       );
-      const isBefore = (
-        first?: HTMLElement | null,
-        second?: HTMLElement | null,
-      ) =>
+      const isBefore = (first?: HTMLElement | null, second?: HTMLElement | null) =>
         Boolean(
           first &&
           second &&
-          first.compareDocumentPosition(second) &
-            Node.DOCUMENT_POSITION_FOLLOWING,
+          first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING,
         );
       return {
         cardTestId: card?.dataset.testid ?? null,
@@ -440,9 +412,9 @@ async function readForkTailOrder(): Promise<ForkTailOrderSnapshot> {
 /** 读取 input/textarea 的当前值，避免用 textContent 误判受控表单。 */
 async function readTestIdValue(currentTestId: string): Promise<string> {
   return browser.execute((tid) => {
-    const element = document.querySelector<
-      HTMLInputElement | HTMLTextAreaElement
-    >(`[data-testid="${tid}"]`);
+    const element = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+      `[data-testid="${tid}"]`,
+    );
     return element?.value ?? "";
   }, currentTestId);
 }

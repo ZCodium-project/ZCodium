@@ -12,12 +12,15 @@ To setup WebdriverIO within your React project, follow the [instructions](/docs/
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    runner: ['browser', {
-        preset: 'react'
-    }],
-    // ...
-}
+  // ...
+  runner: [
+    "browser",
+    {
+      preset: "react",
+    },
+  ],
+  // ...
+};
 ```
 
 :::info
@@ -43,22 +46,20 @@ npx wdio run ./wdio.conf.js
 Given you have the following React component:
 
 ```tsx title="./components/Component.jsx"
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 function App() {
-    const [theme, setTheme] = useState('light')
+  const [theme, setTheme] = useState("light");
 
-    const toggleTheme = () => {
-        const nextTheme = theme === 'light' ? 'dark' : 'light'
-        setTheme(nextTheme)
-    }
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+  };
 
-    return <button onClick={toggleTheme}>
-        Current theme: {theme}
-    </button>
+  return <button onClick={toggleTheme}>Current theme: {theme}</button>;
 }
 
-export default App
+export default App;
 ```
 
 In your test use the `render` method from `@testing-library/react` to attach the component to the test page. To interact with the component we recommend to use WebdriverIO commands as they behave more close to actual user interactions, e.g.:
@@ -85,4 +86,3 @@ describe('React Component Testing', () => {
 ```
 
 You can find a full example of a WebdriverIO component test suite for React in our [example repository](https://github.com/webdriverio/component-testing-examples/tree/main/react-typescript-vite).
-

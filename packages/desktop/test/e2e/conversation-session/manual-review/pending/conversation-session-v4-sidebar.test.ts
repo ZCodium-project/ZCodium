@@ -18,9 +18,7 @@ import {
 async function sidebarTaskItemText(sessionId: string): Promise<string | null> {
   return browser.execute(
     (itemTestId, id) => {
-      const el = document.querySelector(
-        `[data-testid="${itemTestId}-${id}"]`,
-      );
+      const el = document.querySelector(`[data-testid="${itemTestId}-${id}"]`);
       return el ? (el.textContent ?? "") : null;
     },
     TID_TASK_ITEM,
@@ -46,18 +44,18 @@ describe("v4 M5 ② 门禁：侧栏列表数据源 sessions-index（建→现→
     const sessionId = (await getV4PaneSnapshot()).sessionId as string;
 
     // 1) 建会话 → 侧栏 task 列表出现该会话（sessions-index snapshot/upsert）。
-    await browser.waitUntil(
-      async () => (await sidebarTaskItemText(sessionId)) !== null,
-      { timeout: 30000, timeoutMsg: "侧栏 task 列表没有出现新建会话" },
-    );
+    await browser.waitUntil(async () => (await sidebarTaskItemText(sessionId)) !== null, {
+      timeout: 30000,
+      timeoutMsg: "侧栏 task 列表没有出现新建会话",
+    });
 
     // 2) 重命名 → sessions-index.title 权威 → 侧栏标题跟随更新。
     const customTitle = "E2E_V4_SIDEBAR_RENAMED";
     await renameV4Session(customTitle);
-    await browser.waitUntil(
-      async () => (await getV4SessionTitle()) === customTitle,
-      { timeout: 30000, timeoutMsg: "会话标题没有更新为自定义值" },
-    );
+    await browser.waitUntil(async () => (await getV4SessionTitle()) === customTitle, {
+      timeout: 30000,
+      timeoutMsg: "会话标题没有更新为自定义值",
+    });
     await browser.waitUntil(
       async () => {
         const text = await sidebarTaskItemText(sessionId);
@@ -68,9 +66,9 @@ describe("v4 M5 ② 门禁：侧栏列表数据源 sessions-index（建→现→
 
     // 3) 删除 → session.removed delta → 侧栏消失。
     await clickV4DeleteSession();
-    await browser.waitUntil(
-      async () => (await sidebarTaskItemText(sessionId)) === null,
-      { timeout: 30000, timeoutMsg: "删除后侧栏 task 项没有消失" },
-    );
+    await browser.waitUntil(async () => (await sidebarTaskItemText(sessionId)) === null, {
+      timeout: 30000,
+      timeoutMsg: "删除后侧栏 task 项没有消失",
+    });
   });
 });

@@ -97,13 +97,13 @@ describe("resolveTaskFileTreeTarget", () => {
     });
   });
 
-  it.each([
-    [[]],
-    [[tab({ workspacePath: "/other/repo", label: "Other repository" })]],
-  ])("falls back to the task path when no local tab matches", (tabs) => {
-    expect(resolveTaskFileTreeTargetFromTabs(task(), tabs)).toEqual({
-      workspacePath: "/work/repo",
-      workspaceName: "repo",
-    });
-  });
+  it.each([[[]], [[tab({ workspacePath: "/other/repo", label: "Other repository" })]]])(
+    "falls back to the task path when no local tab matches",
+    (tabs) => {
+      expect(resolveTaskFileTreeTargetFromTabs(task(), tabs)).toEqual({
+        workspacePath: "/work/repo",
+        workspaceName: "repo",
+      });
+    },
+  );
 });

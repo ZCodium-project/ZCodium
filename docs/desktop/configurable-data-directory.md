@@ -29,6 +29,7 @@
 3. 启动 host process 时通过环境变量 `ZCODE_DATA_BASE_DIR` 传递给子进程
 
 路径解析优先级（`getDataBaseDir()`）：
+
 1. `setDataBaseDir()` 设置的值（主进程 bootstrap）
 2. `process.env.ZCODE_DATA_BASE_DIR`（host process 通过环境变量接收）
 3. `os.homedir()`（兜底默认值）
@@ -37,20 +38,22 @@
 
 当用户更改数据目录时，会将旧目录的数据复制到新目录：
 
-| 规则 | 说明 |
-|------|------|
+| 规则                                | 说明                                                                                                                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **setting.json 及其瞬时文件不复制** | `setting.json` 是 bootstrap 指针，`setting.json.lock` 与 `setting.json.*.tmp` 是原子写入中间态，均只存在于默认 homedir 下；复制它们会导致迁移竞态或新旧目录冲突 |
-| **已有文件不覆盖** | `force: false` — 如果目标目录已存在同名文件，保留目标版本。防止还原回旧目录时，新产生的数据被旧副本覆盖 |
-| **新文件正常复制** | 源目录有、目标没有的文件会被复制过去 |
-| **conversation workspace 暂未迁移** | 当前 `copyDataDirectory()` 只复制 `.zcode/v2`；`.zcode/workspace` 的非覆盖复制属于目标语义，待 CDD02/后续实现后再纳入数据目录迁移 |
+| **已有文件不覆盖**                  | `force: false` — 如果目标目录已存在同名文件，保留目标版本。防止还原回旧目录时，新产生的数据被旧副本覆盖                                                         |
+| **新文件正常复制**                  | 源目录有、目标没有的文件会被复制过去                                                                                                                            |
+| **conversation workspace 暂未迁移** | 当前 `copyDataDirectory()` 只复制 `.zcode/v2`；`.zcode/workspace` 的非覆盖复制属于目标语义，待 CDD02/后续实现后再纳入数据目录迁移                               |
 
 ### 场景示例
 
 **正向迁移**（`/Users/a` → `/Users/a/test`）：
+
 - `/Users/a/.zcode/v2/` 下的所有文件（除 setting.json）复制到 `/Users/a/test/.zcode/v2/`
 - 目标目录如果不存在会自动创建
 
 **还原**（`/Users/a/test` → `/Users/a`）：
+
 - `/Users/a/test/.zcode/v2/` 下的文件复制到 `/Users/a/.zcode/v2/`
 - 但 `/Users/a/.zcode/v2/` 里这段时间新产生的文件不会被覆盖
 - `setting.json` 始终不受影响
@@ -61,11 +64,11 @@ Windows 上禁止把数据根目录设置到 ZCode 的安装目录或其子目�
 
 拦截规则：
 
-| 来源 | 示例 |
-|------|------|
-| 当前桌面应用安装目录 | `process.resourcesPath` 的上级目录，例如 `C:\Users\{UserName}\AppData\Local\Programs\ZCode` |
-| Program Files 安装目录 | `%ProgramFiles%\ZCode`、`%ProgramFiles(x86)%\ZCode`、`%ProgramW6432%\ZCode` |
-| 用户 LocalAppData 安装目录 | `%LOCALAPPDATA%\Programs\ZCode` |
+| 来源                       | 示例                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| 当前桌面应用安装目录       | `process.resourcesPath` 的上级目录，例如 `C:\Users\{UserName}\AppData\Local\Programs\ZCode` |
+| Program Files 安装目录     | `%ProgramFiles%\ZCode`、`%ProgramFiles(x86)%\ZCode`、`%ProgramW6432%\ZCode`                 |
+| 用户 LocalAppData 安装目录 | `%LOCALAPPDATA%\Programs\ZCode`                                                             |
 
 `packages/desktop/src/main/desktopRuntimeEnv.ts` 会在 Windows 打包态把当前安装目录通过 `ZCODE_WINDOWS_APP_INSTALL_DIR` 传给 host process。`packages/services/src/paths.ts` 在服务层按 Windows 路径规则做大小写不敏感的“等于或位于其下”判断，`packages/services/src/setting/settingService.ts` 在复制数据前执行该校验。UI 只展示错误提示，不作为唯一安全边界。
 
@@ -134,15 +137,15 @@ new App root
 
 ## 相关代码
 
-| 文件 | 职责 |
-|------|------|
-| `packages/services/src/paths.ts` | `setDataBaseDir` / `getDataBaseDir` / `getAppConfigDir` / `copyDataDirectory` / Windows 安装目录校验 |
-| `packages/services/src/setting/settingService.ts` | `updateDataBaseDir()` — 校验 + 复制 + 持久化 |
-| `packages/services/src/setting/setting.ts` | `ISettingService` 接口定义 |
-| `packages/shared/src/protocol.ts` | `AppSettings.dataBaseDir` 类型 |
-| `packages/shared/src/validation.ts` | zod schema |
-| `packages/desktop/build/installer.nsh` | Windows 安装器在写入文件前阻断安装目录内已有 `.zcode` 的安装 |
-| `packages/desktop/src/main/index.ts` | 主进程 bootstrap 读取 |
-| `packages/desktop/src/main/desktopRuntimeEnv.ts` | `buildHostProcessEnv` 传递环境变量 |
-| `packages/ui/src/settingsPageHelpers.tsx` | UI 输入框 + 保存状态管理 |
-| `packages/ui/src/SettingsPage.tsx` | 页面级状态 + 服务调用 |
+| 文件                                              | 职责                                                                                                 |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `packages/services/src/paths.ts`                  | `setDataBaseDir` / `getDataBaseDir` / `getAppConfigDir` / `copyDataDirectory` / Windows 安装目录校验 |
+| `packages/services/src/setting/settingService.ts` | `updateDataBaseDir()` — 校验 + 复制 + 持久化                                                         |
+| `packages/services/src/setting/setting.ts`        | `ISettingService` 接口定义                                                                           |
+| `packages/shared/src/protocol.ts`                 | `AppSettings.dataBaseDir` 类型                                                                       |
+| `packages/shared/src/validation.ts`               | zod schema                                                                                           |
+| `packages/desktop/build/installer.nsh`            | Windows 安装器在写入文件前阻断安装目录内已有 `.zcode` 的安装                                         |
+| `packages/desktop/src/main/index.ts`              | 主进程 bootstrap 读取                                                                                |
+| `packages/desktop/src/main/desktopRuntimeEnv.ts`  | `buildHostProcessEnv` 传递环境变量                                                                   |
+| `packages/ui/src/settingsPageHelpers.tsx`         | UI 输入框 + 保存状态管理                                                                             |
+| `packages/ui/src/SettingsPage.tsx`                | 页面级状态 + 服务调用                                                                                |

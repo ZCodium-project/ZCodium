@@ -31,10 +31,7 @@ export function TaskListItemContextMenu({
   disabledReason,
 }: {
   intl: {
-    formatMessage: (
-      desc: { id: string },
-      values?: Record<string, string>,
-    ) => string;
+    formatMessage: (desc: { id: string }, values?: Record<string, string>) => string;
   };
   isPinned: boolean;
   fileManagerLabel: string;

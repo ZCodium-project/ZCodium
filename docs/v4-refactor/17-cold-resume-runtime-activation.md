@@ -76,9 +76,9 @@ activation-only primitive。
 | deliveryBoundaryUnchanged     | desktop 保持 continuous；mobile/Web remote 保持 replayable gap/snapshot 恢复                               |
 | restartDiscardUnchanged       | 上一 runtime 未终态 input 仍按 delivery ledger discarded；不得因去掉 legacy snapshot 自动重放              |
 | legacyResumeResponseUnchanged | `session/resume` 仍返回完整、schema 等价的 legacy snapshot                                                 |
-| v4ColdReadySingleOwner         | V4 gateway 只用一个 cold READY promise 串联 activation 与 hydration                                       |
-| hydrationBoundaryUnchanged     | `hydratePublisher` 仍只负责 projection hydration，不接管各入口既有的 runtime activation 前置条件          |
-| registryIsNotV4Readiness       | `context.sessions` 只登记 record；V4 cold operation 完成前不能据此放行 query/command                      |
+| v4ColdReadySingleOwner        | V4 gateway 只用一个 cold READY promise 串联 activation 与 hydration                                        |
+| hydrationBoundaryUnchanged    | `hydratePublisher` 仍只负责 projection hydration，不接管各入口既有的 runtime activation 前置条件           |
+| registryIsNotV4Readiness      | `context.sessions` 只登记 record；V4 cold operation 完成前不能据此放行 query/command                       |
 
 pending permission/elicitation 和当前 runtime queue 不是旧进程可无条件复活的 durable 事实。本次不增加、
 删除或改写它们；新 runtime 的 V4 memory event tail 仍是在线权威。
@@ -202,18 +202,18 @@ incoming query / command
 
 不枚举所有客户端 × 所有会话状态。activation 发生在 delivery profile 分流前，按不变量选择代表样本：
 
-| 代表样本                                | 验证重点                                                                              | 证据层                    |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------- |
-| completed 本地历史 + desktop continuous | 历史 rows/tool/reasoning、续发、幂等、无 legacy snapshot 物化                         | bootstrap 集成            |
-| completed 远端历史                      | workspace identity、provider registry、续发                                           | 既有 V4 cold-resume 集成  |
-| 历史模型/thought/mode                   | session-local 配置与 thought hint 优先级                                              | 既有 I63 / bootstrap 集成 |
-| 模型不可用                              | restoreWarning 读写边界                                                               | 既有 bootstrap 集成       |
-| completed child                         | child cold hydration、只读导航                                                        | SAT09 既有证据            |
-| mobile replayable                       | 与 desktop 首个完整终态等价；gap/resync 语义不变                                      | PV4-06/25 既有协议证据    |
-| legacy `session/resume`                 | 完整 snapshot 和 context usage 保持                                                   | legacy protocol 单测      |
-| 大会话 PERF03                           | activation 不构建 legacy snapshot；正常冷订阅只完整读取一次 parent messages；记录趋势 | 性能 fixture              |
-| 并发 V4 subscribe/query/command          | 共享一个 READY promise；READY 前零查询、零 admission                                   | bootstrap 单元/集成       |
-| READY 失败                              | command/query 不进入 inbox，保留原 lifecycle error；record 入册前失败会释放 READY entry | gateway 单元               |
+| 代表样本                                | 验证重点                                                                                | 证据层                    |
+| --------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------- |
+| completed 本地历史 + desktop continuous | 历史 rows/tool/reasoning、续发、幂等、无 legacy snapshot 物化                           | bootstrap 集成            |
+| completed 远端历史                      | workspace identity、provider registry、续发                                             | 既有 V4 cold-resume 集成  |
+| 历史模型/thought/mode                   | session-local 配置与 thought hint 优先级                                                | 既有 I63 / bootstrap 集成 |
+| 模型不可用                              | restoreWarning 读写边界                                                                 | 既有 bootstrap 集成       |
+| completed child                         | child cold hydration、只读导航                                                          | SAT09 既有证据            |
+| mobile replayable                       | 与 desktop 首个完整终态等价；gap/resync 语义不变                                        | PV4-06/25 既有协议证据    |
+| legacy `session/resume`                 | 完整 snapshot 和 context usage 保持                                                     | legacy protocol 单测      |
+| 大会话 PERF03                           | activation 不构建 legacy snapshot；正常冷订阅只完整读取一次 parent messages；记录趋势   | 性能 fixture              |
+| 并发 V4 subscribe/query/command         | 共享一个 READY promise；READY 前零查询、零 admission                                    | bootstrap 单元/集成       |
+| READY 失败                              | command/query 不进入 inbox，保留原 lifecycle error；record 入册前失败会释放 READY entry | gateway 单元              |
 
 ## 6. 非目标与后续
 

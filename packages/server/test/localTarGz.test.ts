@@ -11,12 +11,9 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gunzip, gzip } from "node:zlib";
-import{ describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { promisify } from "node:util";
-import {
-  createTarGzArchive,
-  extractTarGzArchive,
-} from "@zcode/server/remote/localTarGz.js";
+import { createTarGzArchive, extractTarGzArchive } from "@zcode/server/remote/localTarGz.js";
 
 // Windows 上 symlink 需要管理员权限或开发者模式，跳过相关用例
 const isWindows = process.platform === "win32";
@@ -56,14 +53,12 @@ describe("local tar.gz archive helper", () => {
       await chmod(nestedDir, 0o700);
     }
 
-    await createTarGzArchive(archivePath, [
-      { sourcePath: sourceDir, archivePath: "packages" },
-    ]);
+    await createTarGzArchive(archivePath, [{ sourcePath: sourceDir, archivePath: "packages" }]);
 
     const entries = readTestTarEntries(await gunzipAsync(await readFile(archivePath)));
-    expect(
-      entries.filter((entry) => entry.typeFlag === "5").map((entry) => entry.mode),
-    ).toEqual([0o755, 0o755]);
+    expect(entries.filter((entry) => entry.typeFlag === "5").map((entry) => entry.mode)).toEqual([
+      0o755, 0o755,
+    ]);
   });
 
   it("rejects path traversal entries while extracting", async () => {
@@ -73,37 +68,36 @@ describe("local tar.gz archive helper", () => {
     const extractDir = join(rootDir, "extract");
 
     await writeFile(sourceFile, "evil", "utf8");
-    await createTarGzArchive(archivePath, [
-      { sourcePath: sourceFile, archivePath: "../evil.txt" },
-    ]);
+    await createTarGzArchive(archivePath, [{ sourcePath: sourceFile, archivePath: "../evil.txt" }]);
 
     await expect(extractTarGzArchive(archivePath, extractDir)).rejects.toThrow(
       /unsafe tar entry path/u,
     );
   });
 
-  (isWindows ? it.skip : it)("preserves safe relative symlinks while creatingand extracting archives", async () => {
-    const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
-    const sourceDir = join(rootDir, "source");
-    const archivePath = join(rootDir, "archive.tar.gz");
-    const extractDir = join(rootDir, "extract");
+  (isWindows ? it.skip : it)(
+    "preserves safe relative symlinks while creatingand extracting archives",
+    async () => {
+      const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
+      const sourceDir = join(rootDir, "source");
+      const archivePath = join(rootDir, "archive.tar.gz");
+      const extractDir = join(rootDir, "extract");
 
-    await mkdir(sourceDir, { recursive: true });
-    await writeFile(join(sourceDir, "target.txt"), "target content", "utf8");
-    await symlink("target.txt", join(sourceDir, "link.txt"));
+      await mkdir(sourceDir, { recursive: true });
+      await writeFile(join(sourceDir, "target.txt"), "target content", "utf8");
+      await symlink("target.txt", join(sourceDir, "link.txt"));
 
-    await createTarGzArchive(archivePath, [
-      { sourcePath: sourceDir, archivePath: "package" },
-    ]);
-    await extractTarGzArchive(archivePath, extractDir);
+      await createTarGzArchive(archivePath, [{ sourcePath: sourceDir, archivePath: "package" }]);
+      await extractTarGzArchive(archivePath, extractDir);
 
-    const extractedLinkPath = join(extractDir, "package", "link.txt");
-    await expect(lstat(extractedLinkPath).then((stats) => stats.isSymbolicLink())).resolves.toBe(
-      true,
-    );
-    await expect(readlink(extractedLinkPath)).resolves.toBe("target.txt");
-    await expect(readFile(extractedLinkPath, "utf8")).resolves.toBe("target content");
-  });
+      const extractedLinkPath = join(extractDir, "package", "link.txt");
+      await expect(lstat(extractedLinkPath).then((stats) => stats.isSymbolicLink())).resolves.toBe(
+        true,
+      );
+      await expect(readlink(extractedLinkPath)).resolves.toBe("target.txt");
+      await expect(readFile(extractedLinkPath, "utf8")).resolves.toBe("target content");
+    },
+  );
 
   it("rejects symlink targets that escape the extraction root", async () => {
     const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
@@ -131,37 +125,39 @@ describe("local tar.gz archive helper", () => {
     );
   });
 
-  (isWindows ? it.skip : it)("rejects unsafe local symlink targets while creating archives", async ()=> {
-    const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
-    const sourceDir = join(rootDir, "source");
-    const outsideFile = join(rootDir, "outside.txt");
-    const archivePath = join(rootDir, "unsafe-local-link.tar.gz");
+  (isWindows ? it.skip : it)(
+    "rejects unsafe local symlink targets while creating archives",
+    async () => {
+      const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
+      const sourceDir = join(rootDir, "source");
+      const outsideFile = join(rootDir, "outside.txt");
+      const archivePath = join(rootDir, "unsafe-local-link.tar.gz");
 
-    await mkdir(sourceDir, { recursive: true });
-    await writeFile(outsideFile, "outside", "utf8");
-    await symlink(outsideFile, join(sourceDir, "link.txt"));
+      await mkdir(sourceDir, { recursive: true });
+      await writeFile(outsideFile, "outside", "utf8");
+      await symlink(outsideFile, join(sourceDir, "link.txt"));
 
-    await expect(
-      createTarGzArchive(archivePath, [
-        { sourcePath: sourceDir, archivePath: "package" },
-      ]),
-    ).rejects.toThrow(/unsafe tar symlink target/u);
-  });
+      await expect(
+        createTarGzArchive(archivePath, [{ sourcePath: sourceDir, archivePath: "package" }]),
+      ).rejects.toThrow(/unsafe tar symlink target/u);
+    },
+  );
 
-  (isWindows ? it.skip : it)("rejects local symlink targets that are too long for ustar", async () => {
-    const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
-    const sourceDir = join(rootDir, "source");
-    const archivePath = join(rootDir, "long-link.tar.gz");
+  (isWindows ? it.skip : it)(
+    "rejects local symlink targets that are too long for ustar",
+    async () => {
+      const rootDir = await mkdtemp(join(tmpdir(), "zcode-local-tar-"));
+      const sourceDir = join(rootDir, "source");
+      const archivePath = join(rootDir, "long-link.tar.gz");
 
-    await mkdir(sourceDir, { recursive: true });
-    await symlink("nested/".repeat(16), join(sourceDir, "link.txt"));
+      await mkdir(sourceDir, { recursive: true });
+      await symlink("nested/".repeat(16), join(sourceDir, "link.txt"));
 
-    await expect(
-      createTarGzArchive(archivePath, [
-        { sourcePath: sourceDir, archivePath: "package" },
-      ]),
-    ).rejects.toThrow(/tar symlink target is too long/u);
-  });
+      await expect(
+        createTarGzArchive(archivePath, [{ sourcePath: sourceDir, archivePath: "package" }]),
+      ).rejects.toThrow(/tar symlink target is too long/u);
+    },
+  );
 });
 
 function createTestTarHeader(options: {
@@ -196,28 +192,18 @@ function createTestTarHeader(options: {
   return header;
 }
 
-function writeTestTarString(
-  buffer: Buffer,
-  value: string,
-  offset: number,
-  length: number,
-): void {
+function writeTestTarString(buffer: Buffer, value: string, offset: number, length: number): void {
   buffer.write(value, offset, length, "utf8");
 }
 
-function writeTestTarOctal(
-  buffer: Buffer,
-  value: number,
-  offset: number,
-  length: number,
-): void {
-  const encoded = Math.trunc(value).toString(8).padStart(length - 1, "0");
+function writeTestTarOctal(buffer: Buffer, value: number, offset: number, length: number): void {
+  const encoded = Math.trunc(value)
+    .toString(8)
+    .padStart(length - 1, "0");
   writeTestTarString(buffer, encoded.slice(-(length - 1)), offset, length - 1);
 }
 
-function readTestTarEntries(
-  archive: Buffer,
-): Array<{ mode: number; typeFlag: string }> {
+function readTestTarEntries(archive: Buffer): Array<{ mode: number; typeFlag: string }> {
   const entries: Array<{ mode: number; typeFlag: string }> = [];
   let offset = 0;
   while (offset + 512 <= archive.length) {

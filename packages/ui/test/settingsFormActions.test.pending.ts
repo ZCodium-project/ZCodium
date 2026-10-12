@@ -18,30 +18,26 @@ describe("settings form actions", () => {
     );
   });
 
-  it.each([
-    "McpServerForm.tsx",
-    "CommandForm.tsx",
-    "HookForm.tsx",
-    "SubagentsSection.tsx",
-  ])("统一 %s 的删除、保存、取消布局", (file) => {
-    const source = readSource(`src/settings/${file}`);
-    expect(source).toContain("<SettingsFormActions");
-    expect(source.lastIndexOf('id: "common.cancel"')).toBeGreaterThan(
-      source.lastIndexOf('id: "common.save"'),
-    );
-  });
+  it.each(["McpServerForm.tsx", "CommandForm.tsx", "HookForm.tsx", "SubagentsSection.tsx"])(
+    "统一 %s 的删除、保存、取消布局",
+    (file) => {
+      const source = readSource(`src/settings/${file}`);
+      expect(source).toContain("<SettingsFormActions");
+      expect(source.lastIndexOf('id: "common.cancel"')).toBeGreaterThan(
+        source.lastIndexOf('id: "common.save"'),
+      );
+    },
+  );
 
   // Bugfix 回归：CommandForm 曾因迁移 SettingsFormActions 后又插入一个按钮而渲染两个
   // 完全相同的保存按钮；只断言顺序无法发现重复，必须断言数量。
-  it.each([
-    "McpServerForm.tsx",
-    "CommandForm.tsx",
-    "HookForm.tsx",
-    "SubagentsSection.tsx",
-  ])("%s 只渲染一个保存按钮", (file) => {
-    const source = readSource(`src/settings/${file}`);
-    expect(source.split('id: "common.save"').length - 1).toBe(1);
-  });
+  it.each(["McpServerForm.tsx", "CommandForm.tsx", "HookForm.tsx", "SubagentsSection.tsx"])(
+    "%s 只渲染一个保存按钮",
+    (file) => {
+      const source = readSource(`src/settings/${file}`);
+      expect(source.split('id: "common.save"').length - 1).toBe(1);
+    },
+  );
 
   it("新建和编辑 MCP 都使用保存文案", () => {
     const source = readSource("src/settings/McpServerForm.tsx");
@@ -55,16 +51,14 @@ describe("settings form actions", () => {
     expect(source).toContain("justify-end");
   });
 
-  it.each([
-    "McpServerForm.tsx",
-    "CommandForm.tsx",
-    "HookForm.tsx",
-    "SubagentsSection.tsx",
-  ])("统一 %s 的保存可用状态", (file) => {
-    const source = readSource(`src/settings/${file}`);
-    expect(source).toContain("const canSave =");
-    expect(source).toMatch(/disabled=\{[^}]*!canSave/);
-  });
+  it.each(["McpServerForm.tsx", "CommandForm.tsx", "HookForm.tsx", "SubagentsSection.tsx"])(
+    "统一 %s 的保存可用状态",
+    (file) => {
+      const source = readSource(`src/settings/${file}`);
+      expect(source).toContain("const canSave =");
+      expect(source).toMatch(/disabled=\{[^}]*!canSave/);
+    },
+  );
 
   it("子智能体的保存判定属于编辑表单", () => {
     const source = readSource("src/settings/SubagentsSection.tsx");

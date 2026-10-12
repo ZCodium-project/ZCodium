@@ -22,6 +22,7 @@
 ### Task 1: Shared Server Target Contract
 
 **Files:**
+
 - Modify: `packages/shared/src/remoteTarget.ts`
 - Modify: `packages/shared/src/protocol.ts`
 - Modify: `packages/shared/src/validation.ts`
@@ -30,6 +31,7 @@
 - Test: `packages/shared/test/serverRemoteTarget.test.ts`
 
 **Interfaces:**
+
 - Produces: `ServerConnectOptions`, `ServerRemoteTargetSnapshot`, `buildServerRemoteWorkspaceIdentity(params)`, `parseRemoteWorkspaceIdentity()` support for `server`.
 - Consumes: existing `remoteTargetSchema`, `remoteTargetSchema` users.
 
@@ -54,10 +56,12 @@ Expected: PASS.
 ### Task 2: HTTP Server Bootstrap Info
 
 **Files:**
+
 - Modify: `packages/server/src/http.ts`
 - Test: `packages/server/test/serverInfoHttp.test.ts`
 
 **Interfaces:**
+
 - Produces: `GET /api/server-info` with `{ serverId, version, protocolVersion, authRequired, workspaces }`.
 - Consumes: remote server connector in Task 3.
 
@@ -82,11 +86,13 @@ Expected: PASS.
 ### Task 3: Desktop Host Server Connector
 
 **Files:**
+
 - Create: `packages/desktop/src/host/serverRemoteConnection.ts`
 - Modify: `packages/desktop/src/host/index.ts`
 - Test: `packages/desktop/test/serverRemoteConnection.test.ts`
 
 **Interfaces:**
+
 - Consumes: `RemoteTarget` kind `server`, server `/api/server-info`, server `/ws`.
 - Produces: `connectServerRemote(target, onDidClose)` returning `{ services, dispose, serverInfo }`.
 
@@ -115,11 +121,13 @@ Expected: PASS.
 ### Task 4: Desktop Remote Session Lifecycle
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/desktopRemoteSessions.ts`
 - Modify: `packages/desktop/src/main/desktopHostProcess.ts`
 - Test: `packages/desktop/test/serverRemoteSessionManager.test.ts`
 
 **Interfaces:**
+
 - Consumes: shared `RemoteTarget` kind `server`.
 - Produces: server target labels, target equality, duplicate detection, remote session creation without remote asset deployment assumptions.
 
@@ -144,6 +152,7 @@ Expected: PASS.
 ### Task 5: UI Remote Connection Dialog
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/remoteConnectionWizard.ts`
 - Modify: `packages/ui/src/RemoteConnectionDialogContent.tsx`
 - Modify: `packages/ui/src/RemoteConnectionFields.tsx`
@@ -153,6 +162,7 @@ Expected: PASS.
 - Test: update nearby remote connection rendering tests if snapshots/types require it.
 
 **Interfaces:**
+
 - Produces: `Server` option in remote kind step and `buildRemoteTarget()` output `{ kind: "server", url, token?, workspacePath?, name? }`.
 - Consumes: shared `RemoteTarget` kind `server`.
 
@@ -177,6 +187,7 @@ Expected: PASS.
 ### Task 6: Persistence and Reconnect
 
 **Files:**
+
 - Modify: `packages/shared/src/validationAppSettings.ts`
 - Modify: `packages/ui/src/root/reconnectRemoteWorkspaceHistoryEntry.ts`
 - Modify: `packages/ui/src/root/useRemoteWorkspaceHistory.ts`
@@ -184,6 +195,7 @@ Expected: PASS.
 - Test: `packages/ui/test/useRemoteWorkspaceHistory.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ServerRemoteTargetSnapshot`.
 - Produces: persisted server target history and reconnect using stored target and workspace identity.
 
@@ -208,9 +220,11 @@ Expected: PASS.
 ### Task 7: Full Verification and Commit
 
 **Files:**
+
 - Modify: docs/spec if implementation changed decisions.
 
 **Interfaces:**
+
 - Consumes: all previous tasks.
 - Produces: committed feature branch.
 

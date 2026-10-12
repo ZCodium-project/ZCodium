@@ -47,9 +47,7 @@ describe("PptxElementReferenceChip", () => {
       ),
     );
 
-    fireEvent.pointerEnter(
-      screen.getByRole("button", { name: "1 slide element" }),
-    );
+    fireEvent.pointerEnter(screen.getByRole("button", { name: "1 slide element" }));
     const referenceLabel = await screen.findByText("Quarterly");
     expect(screen.getByText("Make the title more concise")).toBeTruthy();
     const referenceButton = referenceLabel.closest("button");

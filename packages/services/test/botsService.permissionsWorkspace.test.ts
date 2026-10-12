@@ -30,16 +30,26 @@ describe("botsService permissions and workspace", () => {
       legacyTaskService: f.createLegacyTaskService(),
       settingService: f.createSettingService({
         lastWorkspaceSession: [
-          { kind: "remote", workspacePath: "/tmp/workspace", workspaceIdentity: "ssh://host/tmp/workspace" },
+          {
+            kind: "remote",
+            workspacePath: "/tmp/workspace",
+            workspaceIdentity: "ssh://host/tmp/workspace",
+          },
           { kind: "local", workspacePath: "/tmp/other" },
         ],
       }),
       repo: repo as never,
     });
 
-    const replies = await service.handleInboundMessage({ botId: "webhook-1", text: "/workspace", actor });
+    const replies = await service.handleInboundMessage({
+      botId: "webhook-1",
+      text: "/workspace",
+      actor,
+    });
 
-    expect(replies[0]?.selection?.options.map((option) => option.id)).toEqual(["ssh://host/tmp/workspace"]);
+    expect(replies[0]?.selection?.options.map((option) => option.id)).toEqual([
+      "ssh://host/tmp/workspace",
+    ]);
     service.disposeAll();
   });
 
@@ -52,7 +62,11 @@ describe("botsService permissions and workspace", () => {
     });
     await bind(service);
 
-    const replies = await service.handleInboundMessage({ botId: "webhook-1", text: "/workspace 1", actor });
+    const replies = await service.handleInboundMessage({
+      botId: "webhook-1",
+      text: "/workspace 1",
+      actor,
+    });
 
     expect(replies[0]?.text).toContain("工作区: workspace");
     expect(replies[0]?.text).toContain("任务: 草稿");
@@ -83,7 +97,11 @@ describe("botsService permissions and workspace", () => {
       repo: repo as never,
     });
 
-    const replies = await service.handleInboundMessage({ botId: "webhook-1", text: "/model gpt-5.4", actor });
+    const replies = await service.handleInboundMessage({
+      botId: "webhook-1",
+      text: "/model gpt-5.4",
+      actor,
+    });
 
     expect(replies[0]?.text).toContain("未启用");
     expect((await repo.readConfig()).bots[0]?.currentOptions.model).toBeUndefined();

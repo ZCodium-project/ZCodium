@@ -21,9 +21,11 @@
 ### Task 1: Add failing dynamic provider default reasoning tests
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/tests/zcode-protocol.test.ts`
 
 **Interfaces:**
+
 - Consumes: `workspaceUpsertModelProvider` protocol method.
 - Produces: test expectations for `overlay.catalogOverrides[provider/model].reasoning`.
 
@@ -61,9 +63,11 @@ Expected: new tests fail because catalog overrides do not contain reasoning for 
 ### Task 2: Implement zcode-cli default reasoning families
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/workspace-model-catalog.ts`
 
 **Interfaces:**
+
 - Consumes: `ZCodeModelProviderConfig`, `ZCodeModelProviderModel`.
 - Produces: `createDynamicProviderDefaultReasoning(provider, model)`.
 
@@ -72,13 +76,13 @@ Expected: new tests fail because catalog overrides do not contain reasoning for 
 Change:
 
 ```ts
-createDynamicProviderDefaultReasoning(provider.kind, model.modelId)
+createDynamicProviderDefaultReasoning(provider.kind, model.modelId);
 ```
 
 to:
 
 ```ts
-createDynamicProviderDefaultReasoning(provider, model)
+createDynamicProviderDefaultReasoning(provider, model);
 ```
 
 - [ ] **Step 2: Add Qwen default reasoning helper**
@@ -116,9 +120,11 @@ Expected: all `zcode-protocol.test.ts` tests pass.
 ### Task 3: Verify repository constraints and commit
 
 **Files:**
+
 - Existing changed files only.
 
 **Interfaces:**
+
 - Produces: committed working tree.
 
 - [ ] **Step 1: Run required checks**

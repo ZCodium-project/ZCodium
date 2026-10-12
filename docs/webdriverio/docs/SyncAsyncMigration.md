@@ -23,7 +23,7 @@ In many cases, everything that is necessary to do is to make the function in whi
 
 ```ts
 export default (selector: Selector) => {
-    $(selector).clearValue();
+  $(selector).clearValue();
 };
 ```
 
@@ -31,7 +31,7 @@ to:
 
 ```ts
 export default async (selector: Selector) => {
-    await $(selector).clearValue();
+  await $(selector).clearValue();
 };
 ```
 
@@ -54,27 +54,27 @@ There are of course always special cases where you need to pay a bit more attent
 If you have a `forEach` loop, e.g. to iterate over elements, you need to make sure that the iterator callback is handled properly in an async manner, e.g.:
 
 ```js
-const elems = $$('div')
+const elems = $$("div");
 elems.forEach((elem) => {
-    elem.click()
-})
+  elem.click();
+});
 ```
 
 The function we pass into `forEach` is an iterator function. In a synchronous world it would click on all elements before it moves on. If we transform this into asynchronous code, we have to ensure that we wait for every iterator function to finish execution. By adding `async`/`await` these iterator functions will return a promise that we need to resolve. Now, `forEach` is then not ideal to iterate over the elements anymore because it doesn't return the result of the iterator function, the promise we need to wait for. Therefore we need to replace `forEach` with `map` which returns that promise. The `map` as well as all other iterator methods of Arrays like `find`, `every`, `reduce` and more are implemented so that they respect promises within the iterator functions and are therefor simplified for using them in an async context. The above example looks transformed like this:
 
 ```js
-const elems = await $$('div')
+const elems = await $$("div");
 await elems.forEach((elem) => {
-    return elem.click()
-})
+  return elem.click();
+});
 ```
 
 For example in order to fetch all `<h3 />` elements and get their text content, you can run:
 
 ```js
-await browser.url('https://webdriver.io')
+await browser.url("https://webdriver.io");
 
-const h3Texts = await browser.$$('h3').map((img) => img.getText())
+const h3Texts = await browser.$$("h3").map((img) => img.getText());
 console.log(h3Texts);
 /**
  * returns:
@@ -94,9 +94,9 @@ console.log(h3Texts);
 If this looks too complicated you might want to consider using simple for loops, e.g.:
 
 ```js
-const elems = await $$('div')
+const elems = await $$("div");
 for (const elem of elems) {
-    await elem.click()
+  await elem.click();
 }
 ```
 
@@ -105,13 +105,13 @@ for (const elem of elems) {
 If you use the WebdriverIO assertion helper [`expect-webdriverio`](https://webdriver.io/docs/api/expect-webdriverio) make sure to set an `await` in front of every `expect` call, e.g.:
 
 ```ts
-expect($('input')).toHaveAttributeContaining('class', 'form')
+expect($("input")).toHaveAttributeContaining("class", "form");
 ```
 
 needs to be transformed to:
 
 ```ts
-await expect($('input')).toHaveAttributeContaining('class', 'form')
+await expect($("input")).toHaveAttributeContaining("class", "form");
 ```
 
 ### Sync PageObject Methods and Async Tests
@@ -120,19 +120,23 @@ If you have been writing PageObjects in your test suite in a synchronous way, yo
 
 ```js
 class MyPageObject extends Page {
-    /**
-     * define elements
-     */
-    get btnStart () { return $('button=Start') }
-    get loadedPage () { return $('#finish') }
+  /**
+   * define elements
+   */
+  get btnStart() {
+    return $("button=Start");
+  }
+  get loadedPage() {
+    return $("#finish");
+  }
 
-    someMethod () {
-        // sync code
-    }
+  someMethod() {
+    // sync code
+  }
 
-    someMethodAsync () {
-        // async version of MyPageObject.someMethod()
-    }
+  someMethodAsync() {
+    // async version of MyPageObject.someMethod()
+  }
 }
 ```
 
@@ -144,7 +148,7 @@ If you don't like to maintain two different version of a PageObject method you c
 // before:
 // MyPageObject.someMethod()
 // after:
-browser.call(() => MyPageObject.someMethod())
+browser.call(() => MyPageObject.someMethod());
 ```
 
 The `call` command will make sure that the asynchronous `someMethod` is resolved before moving on to the next command.

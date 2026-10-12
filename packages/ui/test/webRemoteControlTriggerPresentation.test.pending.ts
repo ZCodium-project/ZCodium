@@ -35,10 +35,7 @@ describe("getWebRemoteControlTriggerPresentation", () => {
   });
 
   it("uses destructive styling for failed remote control sessions", () => {
-    const presentation = getWebRemoteControlTriggerPresentation(
-      { status: "error" },
-      formatMessage,
-    );
+    const presentation = getWebRemoteControlTriggerPresentation({ status: "error" }, formatMessage);
 
     expect(presentation.iconClassName).toContain("text-destructive");
     expect(presentation.tooltip).toBe("webRemoteControl.triggerStatus.error");

@@ -29,7 +29,10 @@ test("Workflow status 查询状态与展开内容", async () => {
       assert.match(await summary.innerText(), /Checking workflow status/);
       assert.equal(await summary.getAttribute("role"), null);
       await page.getByRole("button", { name: "running", exact: true }).click();
-      assert.match(await summary.innerText(), /Workflow status\s*·\s*Status workflow\s*·\s*1\/3 steps/s);
+      assert.match(
+        await summary.innerText(),
+        /Workflow status\s*·\s*Status workflow\s*·\s*1\/3 steps/s,
+      );
       await summary.click();
       const body = page.getByTestId("workflow-status-body");
       await body.waitFor();

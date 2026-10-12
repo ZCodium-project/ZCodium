@@ -24,11 +24,7 @@ describe("appendWorkspaceToFilesystemMcpServers", () => {
       {
         name: "filesystem",
         command: "npx",
-        args: [
-          "-y",
-          "@modelcontextprotocol/server-filesystem",
-          "/Users/example/Desktop",
-        ],
+        args: ["-y", "@modelcontextprotocol/server-filesystem", "/Users/example/Desktop"],
         env: [],
       },
     ];

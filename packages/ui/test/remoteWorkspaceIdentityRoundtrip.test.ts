@@ -26,9 +26,7 @@ describe("远程 workspace identity 构造↔解析对偶", () => {
       host: "h",
       username: "u",
     });
-    expect(parseRemoteWorkspaceIdentity(sshDefault)?.workspacePath).toBe(
-      "/home/dev",
-    );
+    expect(parseRemoteWorkspaceIdentity(sshDefault)?.workspacePath).toBe("/home/dev");
 
     const wsl = buildRemoteWorkspaceIdentity("/mnt/c/ws", {
       kind: "wsl",
@@ -68,8 +66,6 @@ describe("远程 workspace identity 构造↔解析对偶", () => {
       kind: "docker",
       container: "c1",
     });
-    expect(parseRemoteWorkspaceIdentity(identity)?.workspacePath).toBe(
-      "/srv/app",
-    );
+    expect(parseRemoteWorkspaceIdentity(identity)?.workspacePath).toBe("/srv/app");
   });
 });

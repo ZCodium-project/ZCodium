@@ -55,12 +55,7 @@ describe("Enterprise Coding Plan products", () => {
       "enterprise-lite-continuous-monthly",
       "enterprise-max-monthly",
     ]);
-    expect(products.map((product) => product.productName)).toEqual([
-      "Lite",
-      "Pro",
-      "Lite",
-      "Max",
-    ]);
+    expect(products.map((product) => product.productName)).toEqual(["Lite", "Pro", "Lite", "Max"]);
     expect(products.map((product) => product.priceUnit)).toEqual([
       "month",
       "year",
@@ -78,40 +73,40 @@ describe("Enterprise Coding Plan products", () => {
   it("企业卡片价格字段对齐个人套餐：主价用 payAmount，原价用 originalAmount，不把优惠金额当价格", () => {
     const [monthlyProduct, continuousYearlyProduct, oneTimeYearlyProduct] =
       buildEnterpriseCodingPlanProductList([
-      {
-        productId: "enterprise-pro-monthly",
-        tier: "PRO",
-        subscribeMode: "ONE_TIME",
-        subscribePeriod: "MONTHLY",
-        purchaseMethodName: "按月采购",
-        originalAmount: 720,
-        discountAmount: 72,
-        payAmount: 648,
-        renewAmount: 648,
-      },
-      {
-        productId: "enterprise-pro-continuous-yearly",
-        tier: "PRO",
-        subscribeMode: "CONTINUOUS",
-        subscribePeriod: "YEARLY",
-        purchaseMethodName: "连续包年",
-        originalAmount: 7176,
-        discountAmount: 0,
-        payAmount: 7176,
-        renewAmount: 6458.4,
-      },
-      {
-        productId: "enterprise-pro-yearly",
-        tier: "PRO",
-        subscribeMode: "ONE_TIME",
-        subscribePeriod: "YEARLY",
-        purchaseMethodName: "按年采购",
-        originalAmount: 7176,
-        discountAmount: 0,
-        payAmount: 7176,
-        renewAmount: 6458.4,
-      },
-    ]);
+        {
+          productId: "enterprise-pro-monthly",
+          tier: "PRO",
+          subscribeMode: "ONE_TIME",
+          subscribePeriod: "MONTHLY",
+          purchaseMethodName: "按月采购",
+          originalAmount: 720,
+          discountAmount: 72,
+          payAmount: 648,
+          renewAmount: 648,
+        },
+        {
+          productId: "enterprise-pro-continuous-yearly",
+          tier: "PRO",
+          subscribeMode: "CONTINUOUS",
+          subscribePeriod: "YEARLY",
+          purchaseMethodName: "连续包年",
+          originalAmount: 7176,
+          discountAmount: 0,
+          payAmount: 7176,
+          renewAmount: 6458.4,
+        },
+        {
+          productId: "enterprise-pro-yearly",
+          tier: "PRO",
+          subscribeMode: "ONE_TIME",
+          subscribePeriod: "YEARLY",
+          purchaseMethodName: "按年采购",
+          originalAmount: 7176,
+          discountAmount: 0,
+          payAmount: 7176,
+          renewAmount: 6458.4,
+        },
+      ]);
 
     expect(monthlyProduct).toMatchObject({
       originalAmount: 720,
@@ -196,31 +191,30 @@ describe("Enterprise Coding Plan products", () => {
   });
 
   it("试算未返回汇总优惠时，用 pricing 顶层 discountAmount 按席位和时长折算", () => {
-    const [monthlyOneTimeProduct, yearlyContinuousProduct] =
-      buildEnterpriseCodingPlanProductList([
-        {
-          productId: "enterprise-pro-monthly",
-          tier: "PRO",
-          subscribeMode: "ONE_TIME",
-          subscribePeriod: "MONTHLY",
-          purchaseMethodName: "按月采购",
-          originalAmount: 720,
-          discountAmount: 72,
-          payAmount: 648,
-          renewAmount: 648,
-        },
-        {
-          productId: "enterprise-pro-continuous-yearly",
-          tier: "PRO",
-          subscribeMode: "CONTINUOUS",
-          subscribePeriod: "YEARLY",
-          purchaseMethodName: "连续包年",
-          originalAmount: 7176,
-          discountAmount: 0,
-          payAmount: 7176,
-          renewAmount: 6458.4,
-        },
-      ]);
+    const [monthlyOneTimeProduct, yearlyContinuousProduct] = buildEnterpriseCodingPlanProductList([
+      {
+        productId: "enterprise-pro-monthly",
+        tier: "PRO",
+        subscribeMode: "ONE_TIME",
+        subscribePeriod: "MONTHLY",
+        purchaseMethodName: "按月采购",
+        originalAmount: 720,
+        discountAmount: 72,
+        payAmount: 648,
+        renewAmount: 648,
+      },
+      {
+        productId: "enterprise-pro-continuous-yearly",
+        tier: "PRO",
+        subscribeMode: "CONTINUOUS",
+        subscribePeriod: "YEARLY",
+        purchaseMethodName: "连续包年",
+        originalAmount: 7176,
+        discountAmount: 0,
+        payAmount: 7176,
+        renewAmount: 6458.4,
+      },
+    ]);
 
     expect(
       calculateEnterpriseCodingPlanPricingDiscountAmount({

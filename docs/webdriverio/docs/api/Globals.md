@@ -14,4 +14,4 @@ The following global objects are set if not configured otherwise:
 - `$$`: command to fetch elements (see more in [API docs](/docs/api/browser/$$))
 - `expect`: assertion framework for WebdriverIO (see [API docs](/docs/api/expect-webdriverio))
 
-__Note:__ WebdriverIO has no control of used frameworks (e.g. Mocha or Jasmine) setting global variables when bootstrapping their environment.
+**Note:** WebdriverIO has no control of used frameworks (e.g. Mocha or Jasmine) setting global variables when bootstrapping their environment.

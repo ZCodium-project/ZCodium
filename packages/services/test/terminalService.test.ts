@@ -69,7 +69,6 @@ function createMockPty() {
   };
 }
 
-
 function createTestTerminalService(settings = {}) {
   return createTerminalService({
     settingService: {
@@ -280,7 +279,11 @@ describe("terminalService", () => {
     process.env.SHELL = join(tmpdir(), `zcode-missing-shell-${Date.now()}`);
 
     const service = createTestTerminalService();
-    await service.create({ cols: 80, rows: 24, cwd: join(tmpdir(), `zcode-missing-cwd-${Date.now()}`) });
+    await service.create({
+      cols: 80,
+      rows: 24,
+      cwd: join(tmpdir(), `zcode-missing-cwd-${Date.now()}`),
+    });
 
     expect(spawnMock).toHaveBeenCalledOnce();
     expect(spawnMock).toHaveBeenCalledWith(
@@ -298,8 +301,7 @@ describe("terminalService", () => {
   it("should wrap spawn failures with shell and cwd details", async () => {
     const home = makeTempDir("zcode-terminal-home-");
     process.env.HOME = home;
-    process.env.SHELL =
-      process.platform === "win32" ? "/bin/sh" : "/bin/sh";
+    process.env.SHELL = process.platform === "win32" ? "/bin/sh" : "/bin/sh";
     spawnMock.mockImplementationOnce(() => {
       throw new Error("posix_spawnp failed");
     });
@@ -308,7 +310,9 @@ describe("terminalService", () => {
     const expectedShell = resolveTerminalShell().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     await expect(service.create({ cols: 80, rows: 24, cwd: home })).rejects.toThrow(
-      new RegExp(`Failed to start terminal with shell '${expectedShell}' in '.*': posix_spawnp failed`),
+      new RegExp(
+        `Failed to start terminal with shell '${expectedShell}' in '.*': posix_spawnp failed`,
+      ),
     );
   });
 
@@ -373,9 +377,7 @@ describe("terminalService", () => {
     process.env.SHELL = "/bin/sh";
     const firstPty = createMockPty();
     const secondPty = createMockPty();
-    spawnMock
-      .mockReturnValueOnce(firstPty)
-      .mockReturnValueOnce(secondPty);
+    spawnMock.mockReturnValueOnce(firstPty).mockReturnValueOnce(secondPty);
 
     const service = createTestTerminalService() as ReturnType<typeof createTestTerminalService> & {
       disposeAll: () => void;

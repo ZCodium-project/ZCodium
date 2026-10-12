@@ -96,18 +96,18 @@ execution_ms = max(duration_ms - waiting_ms, 0)
 
 单元测试必须覆盖：
 
-| Case | 场景 | 断言 |
-| --- | --- | --- |
-| PW01 | 单个工具请求并完成一次授权 | tool 与 completion 的 `waiting_ms` 相同；两级 `duration_ms` 均包含等待 |
-| PW02 | 一轮消息内多个工具分别等待授权 | completion 等于各 tool `waiting_ms` 之和 |
-| PW03 | 同一工具连续多次请求授权 | tool 和 completion 均累加全部区间 |
-| PW04 | 权限未响应时用户停止/任务终止 | 开放区间计到终止时间 |
-| PW05 | request/response 重复投递 | 起点不重置，等待不重复累计 |
-| PW06 | 另一客户端响应权限 | stream response 能收口等待 |
-| PW07 | permission 无法匹配活跃工具 | completion 计入等待，其他 tool step 不被污染 |
-| PW08 | reasoning/generation step | `waiting_ms="0"` |
-| PW09 | permission request → response → terminal tool update，缺少前置 tool call | fallback tool step 回填已收口等待，且 `duration_ms >= waiting_ms` |
-| PW10 | permission request → terminal tool update，缺少前置 tool call | 开放等待在 terminal 收口并归入 fallback tool step，且 `duration_ms >= waiting_ms` |
+| Case | 场景                                                                     | 断言                                                                              |
+| ---- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| PW01 | 单个工具请求并完成一次授权                                               | tool 与 completion 的 `waiting_ms` 相同；两级 `duration_ms` 均包含等待            |
+| PW02 | 一轮消息内多个工具分别等待授权                                           | completion 等于各 tool `waiting_ms` 之和                                          |
+| PW03 | 同一工具连续多次请求授权                                                 | tool 和 completion 均累加全部区间                                                 |
+| PW04 | 权限未响应时用户停止/任务终止                                            | 开放区间计到终止时间                                                              |
+| PW05 | request/response 重复投递                                                | 起点不重置，等待不重复累计                                                        |
+| PW06 | 另一客户端响应权限                                                       | stream response 能收口等待                                                        |
+| PW07 | permission 无法匹配活跃工具                                              | completion 计入等待，其他 tool step 不被污染                                      |
+| PW08 | reasoning/generation step                                                | `waiting_ms="0"`                                                                  |
+| PW09 | permission request → response → terminal tool update，缺少前置 tool call | fallback tool step 回填已收口等待，且 `duration_ms >= waiting_ms`                 |
+| PW10 | permission request → terminal tool update，缺少前置 tool call            | 开放等待在 terminal 收口并归入 fallback tool step，且 `duration_ms >= waiting_ms` |
 
 `duration_ms` 的回归断言：
 

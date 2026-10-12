@@ -44,7 +44,5 @@ export function getConversationStatusPanelOffsetClassName(
   layout: "none" | "auto" | "inline",
 ): string | undefined {
   // 状态面板和会话宽布局统一在 1280px 启用，保证面板状态切换不改变响应分水岭。
-  return layout === "none"
-    ? undefined
-    : CONVERSATION_STATUS_PANEL_WIDE_OFFSET_CLASS_NAME;
+  return layout === "none" ? undefined : CONVERSATION_STATUS_PANEL_WIDE_OFFSET_CLASS_NAME;
 }

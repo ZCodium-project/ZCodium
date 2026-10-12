@@ -40,9 +40,7 @@ export interface WorkflowRunRail {
 }
 
 /** 控制流是否到过这一站：running / done / failed 都算。 */
-function isWorkflowRunStationReached(
-  status: SessionWorkflowPhaseSummary["status"],
-): boolean {
+function isWorkflowRunStationReached(status: SessionWorkflowPhaseSummary["status"]): boolean {
   return status !== "pending";
 }
 

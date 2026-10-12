@@ -43,8 +43,7 @@ describe("会话区首发和完成态 E2E", () => {
       90000,
     );
 
-    const secondPrompt =
-      `E2E_SECOND_TURN_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const secondPrompt = `E2E_SECOND_TURN_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(secondPrompt);
     await waitForComposerText("", "第二轮发送后输入框没有清空");
     await waitForUserMessageContaining(secondPrompt);

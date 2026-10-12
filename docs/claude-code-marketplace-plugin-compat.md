@@ -133,16 +133,16 @@ Claude catalog request
 
 V1 必须识别 Claude Marketplace source schema，并按支持级别处理：
 
-| source | V1 行为 |
-| --- | --- |
-| `url` | 支持直接读取 marketplace JSON；保留 headers 但 V1 不发送敏感 header |
-| `github` | 支持 repo/ref/path；公开 GitHub HTTPS 优先下载 Archive，无系统 Git 也可用；默认 path 为 `.claude-plugin/marketplace.json` |
-| `git` | 支持 url/ref/path；可规范化的公开 GitHub HTTPS 优先下载 Archive，其他来源用系统 Git；读取 `.claude-plugin/marketplace.json` 或 path |
-| `file` | 支持指向 marketplace JSON 文件 |
-| `directory` | 支持目录内 `.claude-plugin/marketplace.json` 和根 `marketplace.json` fallback |
-| `settings` | 可解析并规范化为 synthetic marketplace |
-| `npm` | 识别并返回 unsupported diagnostic；不执行 install |
-| `hostPattern` / `pathPattern` | 仅 enterprise policy 场景使用；V1 识别为 unsupported diagnostic |
+| source                        | V1 行为                                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `url`                         | 支持直接读取 marketplace JSON；保留 headers 但 V1 不发送敏感 header                                                                 |
+| `github`                      | 支持 repo/ref/path；公开 GitHub HTTPS 优先下载 Archive，无系统 Git 也可用；默认 path 为 `.claude-plugin/marketplace.json`           |
+| `git`                         | 支持 url/ref/path；可规范化的公开 GitHub HTTPS 优先下载 Archive，其他来源用系统 Git；读取 `.claude-plugin/marketplace.json` 或 path |
+| `file`                        | 支持指向 marketplace JSON 文件                                                                                                      |
+| `directory`                   | 支持目录内 `.claude-plugin/marketplace.json` 和根 `marketplace.json` fallback                                                       |
+| `settings`                    | 可解析并规范化为 synthetic marketplace                                                                                              |
+| `npm`                         | 识别并返回 unsupported diagnostic；不执行 install                                                                                   |
+| `hostPattern` / `pathPattern` | 仅 enterprise policy 场景使用；V1 识别为 unsupported diagnostic                                                                     |
 
 默认 marketplace seed 只在 `known_marketplaces.json` 缺少同名市场时写入。若用户已有
 同名 marketplace 记录，必须保留用户记录，不能覆盖 source、`addedAt` 或
@@ -151,30 +151,30 @@ V1 必须识别 Claude Marketplace source schema，并按支持级别处理：
 
 Plugin entry `source` 的 V1 支持范围：
 
-| plugin source | V1 行为 |
-| --- | --- |
-| `"./relative"` | 支持，从 marketplace root 解析 |
-| `{source:"directory"}` | 支持本地目录 |
+| plugin source                                             | V1 行为                                                                                                                                                                                           |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"./relative"`                                            | 支持，从 marketplace root 解析                                                                                                                                                                    |
+| `{source:"directory"}`                                    | 支持本地目录                                                                                                                                                                                      |
 | `{source:"github"}` / `{source:"git"}` / `{source:"url"}` | 支持 ref/sha；`commit` 作为 `sha` fallback；公开 GitHub HTTPS 优先按 `sha/commit > ref > HEAD` 下载 Archive，无系统 Git也可安装；当 entry 带 `path` 时只安装子目录。其他 URL 保持 legacy Git 语义 |
-| `{source:"url", type:"git"}` | 显式 Git 来源；公开 GitHub HTTPS 仍可由 Archive 物化，私有/SSH/非 GitHub 用系统 Git |
-| `{source:"url", type:"zip"}` | 支持 CDN zip 下载、`sha256` 校验、安全解压，再按现有 cache 目录安装；远端 CDN 必须 HTTPS，本地 fixture 可用 loopback HTTP |
-| `{source:"git-subdir"}` | 支持 ref/sha；`commit` 作为 `sha` fallback；公开 GitHub HTTPS 通过 Archive 安装指定子目录，其他来源用系统 Git |
-| `{source:"npm"}` / `{source:"pip"}` | 识别并返回 unsupported diagnostic；不执行 package manager |
+| `{source:"url", type:"git"}`                              | 显式 Git 来源；公开 GitHub HTTPS 仍可由 Archive 物化，私有/SSH/非 GitHub 用系统 Git                                                                                                               |
+| `{source:"url", type:"zip"}`                              | 支持 CDN zip 下载、`sha256` 校验、安全解压，再按现有 cache 目录安装；远端 CDN 必须 HTTPS，本地 fixture 可用 loopback HTTP                                                                         |
+| `{source:"git-subdir"}`                                   | 支持 ref/sha；`commit` 作为 `sha` fallback；公开 GitHub HTTPS 通过 Archive 安装指定子目录，其他来源用系统 Git                                                                                     |
+| `{source:"npm"}` / `{source:"pip"}`                       | 识别并返回 unsupported diagnostic；不执行 package manager                                                                                                                                         |
 
 ## Manifest 兼容矩阵
 
-| 字段 | V1 行为 |
-| --- | --- |
-| `name` / `version` / `description` / `author` / `license` | 读取并展示 |
-| `skills` | V1b 运行 |
-| `commands` | V1b 支持目录；V1c 支持 object mapping / inline content |
-| `hooks` | V1 解析和诊断；第三方 marketplace 默认不运行，官方/inline 维持现有受信行为 |
-| `mcpServers` | V1b 运行；server key 强制命名空间 |
-| `userConfig` | V1b 支持 defaults 和 required；sensitive 未接 credential 前禁止明文 configure |
-| `dependencies` | V1c install-time resolver；load-time 不再报 unsupported |
-| `agents` | diagnostic-only，不注册到 Agent tool |
-| `lspServers` / `outputStyles` / `channels` / `settings` | diagnostic-only |
-| `npm` / `pip` / `hostPattern` / `pathPattern` source | V1 识别但 unsupported diagnostic |
+| 字段                                                      | V1 行为                                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `name` / `version` / `description` / `author` / `license` | 读取并展示                                                                    |
+| `skills`                                                  | V1b 运行                                                                      |
+| `commands`                                                | V1b 支持目录；V1c 支持 object mapping / inline content                        |
+| `hooks`                                                   | V1 解析和诊断；第三方 marketplace 默认不运行，官方/inline 维持现有受信行为    |
+| `mcpServers`                                              | V1b 运行；server key 强制命名空间                                             |
+| `userConfig`                                              | V1b 支持 defaults 和 required；sensitive 未接 credential 前禁止明文 configure |
+| `dependencies`                                            | V1c install-time resolver；load-time 不再报 unsupported                       |
+| `agents`                                                  | diagnostic-only，不注册到 Agent tool                                          |
+| `lspServers` / `outputStyles` / `channels` / `settings`   | diagnostic-only                                                               |
+| `npm` / `pip` / `hostPattern` / `pathPattern` source      | V1 识别但 unsupported diagnostic                                              |
 
 Manifest 解析必须保留这些字段的原始信息或显式声明为 `unknown`，否则无法对
 diagnostic-only 能力做可见诊断。
@@ -273,13 +273,13 @@ validate 的扫描深度按目标类型区分：
 2026-06-24 选取 `claude-plugins-official` 中 5 个真实插件做临时 storage
 安装与 runtime projection 验证：
 
-| 插件 | 覆盖能力 | 验证结论 |
-| --- | --- | --- |
-| `commit-commands` | commands | 发现 `/commit`、`/commit-push-pr`、`/clean_gone` |
-| `claude-md-management` | commands、skills | 发现 `/revise-claude-md` 和 1 个 skill |
-| `hookify` | commands、skills、hooks | 发现 `/hookify`、`/configure`、`/help`、`/list`，注入 `PreToolUse` / `PostToolUse` / `Stop` / `UserPromptSubmit` hooks；`pretooluse.py` 以真实 JSON stdin 执行成功 |
-| `context7` | MCP stdio | runtime 投影 `plugin:context7:context7`；MCP SDK 连接后 `listTools` 返回 `query-docs`、`resolve-library-id` |
-| `playwright` | MCP stdio | runtime 投影 `plugin:playwright:playwright`；MCP SDK 连接后 `listTools` 返回 23 个 browser tools |
+| 插件                   | 覆盖能力                | 验证结论                                                                                                                                                           |
+| ---------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `commit-commands`      | commands                | 发现 `/commit`、`/commit-push-pr`、`/clean_gone`                                                                                                                   |
+| `claude-md-management` | commands、skills        | 发现 `/revise-claude-md` 和 1 个 skill                                                                                                                             |
+| `hookify`              | commands、skills、hooks | 发现 `/hookify`、`/configure`、`/help`、`/list`，注入 `PreToolUse` / `PostToolUse` / `Stop` / `UserPromptSubmit` hooks；`pretooluse.py` 以真实 JSON stdin 执行成功 |
+| `context7`             | MCP stdio               | runtime 投影 `plugin:context7:context7`；MCP SDK 连接后 `listTools` 返回 `query-docs`、`resolve-library-id`                                                        |
+| `playwright`           | MCP stdio               | runtime 投影 `plugin:playwright:playwright`；MCP SDK 连接后 `listTools` 返回 23 个 browser tools                                                                   |
 
 验证过程中发现并修复：
 

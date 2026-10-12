@@ -34,9 +34,7 @@ describe("sidePaneTabSearch", () => {
     ];
 
     expect(
-      filterAndRankSearchItems(items, normalizeSearchQuery("nimbus")).map(
-        (result) => result.id,
-      ),
+      filterAndRankSearchItems(items, normalizeSearchQuery("nimbus")).map((result) => result.id),
     ).toEqual(["title", "path", "type"]);
   });
 });

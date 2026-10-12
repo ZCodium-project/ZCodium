@@ -84,7 +84,7 @@ Host spawn agent（每次 spawn 都读当前设置）
 
 1. 设置页点击开关后开关保持打开/关闭，`setting.json` 出现 `officialServices` 且与 UI 一致。
 2. 新进程（模拟 Host/Server 重启）只调用 `settingService.get()`，进程策略即恢复磁盘值：已开启服务 `assertOfficialServiceAvailable` 放行、`shouldBlockOfficialPlatformUrl` 不再拦截对应域名；未开启服务仍拒绝。
-2.1 已下线功能恒拒绝：`assertOfficialServiceRemoved` 必抛且文案含“下线”，`shouldBlockOfficialPlatformUrl` 对已下线路径恒为 `true`，`resolveOfficialServiceForUrl` 返回具体已下线 key（含被 `clientConfig` 前缀覆盖的 `client/claim`）。存量用户磁盘上的已下线字段在写盘时被 zod strip。
+   2.1 已下线功能恒拒绝：`assertOfficialServiceRemoved` 必抛且文案含“下线”，`shouldBlockOfficialPlatformUrl` 对已下线路径恒为 `true`，`resolveOfficialServiceForUrl` 返回具体已下线 key（含被 `clientConfig` 前缀覆盖的 `client/claim`）。存量用户磁盘上的已下线字段在写盘时被 zod strip。
 3. `update()` 到落盘出现在同一条写队列内，重复 `get()` 幂等。
 4. main 的 webRequest 策略随设置变更即时刷新：当前会话内 renderer 对官方域名的请求立即放行/拦截，不依赖重启；其它窗口的 Host 通过 `SettingsChanged` 广播重新读取设置。
 5. 真实业务入口：关闭时 `clientConfigService` 在凭证与网络前兜底且 `resolveRemoteCdnBaseUrls` 对默认官方源返回空；打开后分别真的拉取客户端配置并出现 CDN 下载源。`offPeakServerClient` / `FeedbackHttpClient` 能力已下线，关闭与“存量开关仍写着开启”两种状态下都必须在凭证与网络前拒绝，且文案为“已下线”。显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 与构建内置的 `ZCODIUM_REMOTE_ASSET_CDN_BASE_URL` 在开关关闭时仍返回对应自建源、开关打开时保持原值，不被开关改写；显式覆盖优先于内置源。

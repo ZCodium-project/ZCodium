@@ -78,10 +78,10 @@ ZAI Team 的 wire 行为与 Off-Peak 保持一致：不发送 `Bigmodel-Target-T
 
 核心用例：
 
-| ID            | 场景                   | 断言                                                                    |
-| ------------- | ---------------------- | ----------------------------------------------------------------------- |
-| OMCP-CALL-001 | 有有效 Coding Plan     | 连接、发现、GET probe 与 `tools/call` 都注入最新身份并成功              |
-| OMCP-CALL-002 | 未登录或无 auth port   | 按匿名降级请求；服务端返回未认证错误时记录对应 request id |
+| ID            | 场景                   | 断言                                                                  |
+| ------------- | ---------------------- | --------------------------------------------------------------------- |
+| OMCP-CALL-001 | 有有效 Coding Plan     | 连接、发现、GET probe 与 `tools/call` 都注入最新身份并成功            |
+| OMCP-CALL-002 | 未登录或无 auth port   | 按匿名降级请求；服务端返回未认证错误时记录对应 request id             |
 | OMCP-CALL-003 | 已登录但无 Coding Plan | 连接请求携带 ZCode JWT、不带 MaaS JWT；服务端错误可区分登录态与套餐态 |
-| OMCP-CALL-004 | 连接后登录或升级       | 不重连；下一次调用重新解析身份并成功                                    |
-| OMCP-STDIO-01 | 官方 stdio 已登录      | initialize、tools/list 与 tools/call 的 `_meta` 都携带当前身份载荷      |
+| OMCP-CALL-004 | 连接后登录或升级       | 不重连；下一次调用重新解析身份并成功                                  |
+| OMCP-STDIO-01 | 官方 stdio 已登录      | initialize、tools/list 与 tools/call 的 `_meta` 都携带当前身份载荷    |

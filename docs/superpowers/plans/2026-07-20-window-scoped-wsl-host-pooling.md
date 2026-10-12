@@ -25,12 +25,14 @@
 ### Task 1: Define shared WSL Host lifecycle messages
 
 **Files:**
+
 - Modify: `packages/shared/src/channels.ts`
 - Modify: `packages/shared/src/validation.ts`
 - Modify: `packages/desktop/src/main/desktopHostProcess.ts`
 - Test: `packages/shared/test/validation.test.ts`
 
 **Interfaces:**
+
 - Produces: `HostMessageTypes.InitRemoteWslHost` with a WSL target and no initial service port.
 - Produces: `HostMessageTypes.ReleaseRemoteWorkspace` carrying `workspacePath` and optional `workspaceIdentity`.
 - Produces: `HostResponseTypes.WorkspaceRunningTaskCountChanged` carrying workspace context and a non-negative count.
@@ -106,6 +108,7 @@ git commit -m "feat(remote): define shared WSL host lifecycle messages"
 ### Task 2: Implement real workspace runtime release and task activity reporting
 
 **Files:**
+
 - Modify: `packages/services/src/zcode-agent/zcodeTaskServiceAdapter.ts`
 - Modify: `packages/desktop/src/host/index.ts`
 - Modify: `packages/desktop/src/main/desktopHostProcess.ts`
@@ -113,6 +116,7 @@ git commit -m "feat(remote): define shared WSL host lifecycle messages"
 - Test: `packages/desktop/test/desktopHostProcess.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ReleaseRemoteWorkspace` and `WorkspaceRunningTaskCountChanged` from Task 1.
 - Produces: `releaseWorkspacePreparation(params): Promise<void>` delegating to `IZCodeAgentService.disposeWorkspace()`.
 - Produces: optional `onWorkspaceRunningTaskCountChanged(process, event)` callback from `spawnHostProcess` dependencies.
@@ -187,10 +191,12 @@ git commit -m "fix(remote): release inactive workspace runtimes"
 ### Task 3: Add a tested WSL pool state machine
 
 **Files:**
+
 - Create: `packages/desktop/src/main/remoteWslHostPool.ts`
 - Create: `packages/desktop/test/remoteWslHostPool.test.ts`
 
 **Interfaces:**
+
 - Produces: `WSL_HOST_IDLE_TTL_MS = 60_000`.
 - Produces: `buildWslHostPoolKey(windowWebContentsId, target)`.
 - Produces: `createRemoteWslHostPool({ disposeHost, hasRunningWorkspace })` with `get`, `setConnecting`, `markReady`, `retain`, `release`, `handleWorkspaceTaskCount`, `disposeWindow`, and `disposeAll`.
@@ -200,8 +206,9 @@ git commit -m "fix(remote): release inactive workspace runtimes"
 Use fake timers to cover:
 
 ```ts
-expect(buildWslHostPoolKey(7, { kind: "wsl", distro: " Ubuntu ", user: " dev " }))
-  .toBe("7\0wsl:v1:Ubuntu\0dev");
+expect(buildWslHostPoolKey(7, { kind: "wsl", distro: " Ubuntu ", user: " dev " })).toBe(
+  "7\0wsl:v1:Ubuntu\0dev",
+);
 ```
 
 Then assert one entry is reused, last release schedules exactly 60 seconds, retain cancels the timer, a running workspace prevents disposal, transition to zero tasks starts a fresh 60-second TTL, and stale generation timers do nothing.
@@ -232,6 +239,7 @@ git commit -m "feat(remote): add window-scoped WSL host pool"
 ### Task 4: Route WSL logical sessions through the shared Host
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/desktopRemoteSessions.ts`
 - Modify: `packages/desktop/src/host/index.ts`
 - Modify: `packages/desktop/src/host/taskRealtimeBridge.ts`
@@ -240,6 +248,7 @@ git commit -m "feat(remote): add window-scoped WSL host pool"
 - Test: `packages/desktop/test/taskRealtimeBridge.test.ts`
 
 **Interfaces:**
+
 - Consumes: pool from Task 3 and messages from Tasks 1–2.
 - Produces: WSL tracked host kind `{ kind: "shared-wsl"; entry; attachmentId }`.
 - Produces: manager method `handleWorkspaceRunningTaskCountChanged(process, context, count)`.
@@ -298,6 +307,7 @@ git commit -m "feat(remote): share WSL hosts across workspaces"
 ### Task 5: Bound WSL discovery and deployment concurrency
 
 **Files:**
+
 - Modify: `packages/server/src/remote/wsl-detect.ts`
 - Modify: `packages/server/src/remote/deploy.ts`
 - Modify: `packages/server/src/remote/remoteAssetInstaller.ts`
@@ -305,6 +315,7 @@ git commit -m "feat(remote): share WSL hosts across workspaces"
 - Test: `packages/server/test/remoteAssetInstaller.test.ts`
 
 **Interfaces:**
+
 - Produces: 5-second rejected-promise-safe discovery cache with explicit invalidation.
 - Produces: unique staging path per asset installation and install-root lock with version recheck.
 
@@ -352,10 +363,12 @@ git commit -m "perf(remote): deduplicate WSL discovery and deployment"
 ### Task 6: Verify the full lifecycle and record evidence
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-07-20-window-scoped-wsl-host-pooling-design.md`
 - Create: `docs/testing/wsl-host-pooling-runtime-evidence.md`
 
 **Interfaces:**
+
 - Consumes: Tasks 1–5.
 - Produces: automated verification and a real Windows + WSL PID/RSS evidence table.
 

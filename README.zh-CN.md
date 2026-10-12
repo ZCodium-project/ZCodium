@@ -163,10 +163,10 @@ zcode --help        # 或直接运行：node bin/zcode.mjs --help
 
 欢迎加入社区交流、反馈问题：
 
-| Discord | QQ 群 |
-| --- | --- |
+| Discord                                                                          | QQ 群                                                                      |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | <img src="docs/community/discord-qr.png" alt="Discord 邀请二维码" width="220" /> | <img src="docs/community/qq-group-qr.jpg" alt="QQ 群二维码" width="220" /> |
-| https://discord.gg/HeDkhY9nV | 群号：344502652 |
+| https://discord.gg/HeDkhY9nV                                                     | 群号：344502652                                                            |
 
 ## 免责声明
 

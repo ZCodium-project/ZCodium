@@ -64,9 +64,7 @@ async function waitForEmptyHumanTab(): Promise<void> {
           bodyText.includes("Paste or type a URL to open a page.") ||
           bodyText.includes("粘贴或输入 URL 以打开网页。");
         const hasSpinner = Boolean(document.querySelector("svg.lucide-loader-circle.animate-spin"));
-        const hasWebview = Boolean(
-          document.querySelector(`[data-testid="${webviewTestId}"]`),
-        );
+        const hasWebview = Boolean(document.querySelector(`[data-testid="${webviewTestId}"]`));
         return hasEmptyCopy && !hasSpinner && !hasWebview;
       }, TID_BROWSER_WEBVIEW),
     { timeout: 15_000, timeoutMsg: "human 空 tab 没有保持 Globe 空态且无 webview" },

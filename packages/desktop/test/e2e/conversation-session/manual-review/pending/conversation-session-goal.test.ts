@@ -29,8 +29,7 @@ describe("会话区 Goal E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const firstGoalObjective =
-      `E2E_GOAL_SET_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const firstGoalObjective = `E2E_GOAL_SET_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     const firstGoal = `/goal ${firstGoalObjective}`;
     await sendPrompt(firstGoal);
     await waitForComposerText("", "首个 /goal 发送后输入框没有清空");
@@ -83,8 +82,7 @@ describe("会话区 Goal E2E", () => {
       30000,
     );
 
-    const updatedGoalObjective =
-      `E2E_GOAL_UPDATE_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const updatedGoalObjective = `E2E_GOAL_UPDATE_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     const updatedGoal = `/goal ${updatedGoalObjective}`;
     await sendPrompt(updatedGoal);
     await waitForComposerText("", "更新 /goal 发送后输入框没有清空");
@@ -123,8 +121,7 @@ describe("会话区 Goal E2E", () => {
       15000,
     );
 
-    const slowPrompt =
-      `E2E_SLOW_STREAM E2E_GOAL_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const slowPrompt = `E2E_SLOW_STREAM E2E_GOAL_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(slowPrompt);
     await waitForComposerText("", "goal 已设置后普通消息发送没有清空输入框");
     await waitForChatState(
@@ -138,16 +135,11 @@ describe("会话区 Goal E2E", () => {
     await waitForQueueContaining(`E2E_GOAL_RUNNING_QUEUE_${runId}`);
     let queue = await waitForQueueCount(1);
     expect(queue[0]?.kind).toBe("goal");
-    await expectNoUpstreamRequestForTextWithin(
-      `E2E_GOAL_RUNNING_QUEUE_${runId}`,
-      900,
-    );
+    await expectNoUpstreamRequestForTextWithin(`E2E_GOAL_RUNNING_QUEUE_${runId}`, 900);
 
     await clickChatStop();
     await waitForChatState(
-      (snapshot) =>
-        snapshot.state !== "streaming" &&
-        snapshot.queueCount === 1,
+      (snapshot) => snapshot.state !== "streaming" && snapshot.queueCount === 1,
       "stop 后没有保留 running 中追加的 /goal queue",
       30000,
     );
@@ -160,10 +152,7 @@ describe("会话区 Goal E2E", () => {
     await waitForQueueContaining(`E2E_GOAL_HELD_QUEUE_${runId}`);
     queue = await waitForQueueCount(2);
     expect(queue.map((item) => item.kind)).toEqual(["goal", "goal"]);
-    await expectNoUpstreamRequestForTextWithin(
-      `E2E_GOAL_HELD_QUEUE_${runId}`,
-      900,
-    );
+    await expectNoUpstreamRequestForTextWithin(`E2E_GOAL_HELD_QUEUE_${runId}`, 900);
     expect(await countUpstreamRequestsContaining(`E2E_GOAL_HELD_QUEUE_${runId}`)).toBe(
       heldRequestsBefore,
     );

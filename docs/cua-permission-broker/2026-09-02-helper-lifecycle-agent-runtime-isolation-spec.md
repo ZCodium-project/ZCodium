@@ -216,16 +216,16 @@ session runtime 都必须重新读取插件门控；禁用后新开对话不得�
 
 ## 四、边界与状态 owner
 
-| 状态/事实 | 权威 owner | Helper 能否修改 | Agent 能否被影响 |
-| --- | --- | --- | --- |
-| Helper process/readiness | Host + Helper lifecycle | 是 | 只能影响 CUA tool readiness |
-| Broker transport facade | Host | 是 | Agent 连接契约保持不变 |
-| Agent process/runtime | Agent process manager | 否 | 仅 Agent 自身生命周期策略可修改 |
-| Session messages/active turn | Agent runtime/session store | 否 | Helper 不得清空或重建 |
-| Task index metadata | Host task index syncer | 否 | Helper ready 不得触发 Agent dispose |
-| CUA tool retry state | CUA broker client/facade | 是 | 只影响当前 CUA 请求 |
-| Desktop realtime | `desktop-continuous` attachment | 否 | 不插入 Helper 专用 replay 消息 |
-| Mobile remote realtime | `web-remote-replayable` attachment | 否 | 继续走 snapshot/gap 恢复，不创建独立 Helper |
+| 状态/事实                    | 权威 owner                         | Helper 能否修改 | Agent 能否被影响                            |
+| ---------------------------- | ---------------------------------- | --------------- | ------------------------------------------- |
+| Helper process/readiness     | Host + Helper lifecycle            | 是              | 只能影响 CUA tool readiness                 |
+| Broker transport facade      | Host                               | 是              | Agent 连接契约保持不变                      |
+| Agent process/runtime        | Agent process manager              | 否              | 仅 Agent 自身生命周期策略可修改             |
+| Session messages/active turn | Agent runtime/session store        | 否              | Helper 不得清空或重建                       |
+| Task index metadata          | Host task index syncer             | 否              | Helper ready 不得触发 Agent dispose         |
+| CUA tool retry state         | CUA broker client/facade           | 是              | 只影响当前 CUA 请求                         |
+| Desktop realtime             | `desktop-continuous` attachment    | 否              | 不插入 Helper 专用 replay 消息              |
+| Mobile remote realtime       | `web-remote-replayable` attachment | 否              | 继续走 snapshot/gap 恢复，不创建独立 Helper |
 
 Workspace 隔离继续使用 `workspaceIdentity?.trim() || workspacePath`；Helper recovery 不能按裸
 `workspacePath` 把不同 remote workspace 误认为同一 Agent。
@@ -257,22 +257,22 @@ Workspace 隔离继续使用 `workspaceIdentity?.trim() || workspacePath`；Help
 
 ## 六、验证矩阵
 
-| Case | 初始状态 | 事件 | 预期结果 |
-| --- | --- | --- | --- |
-| HLR-01 | Helper cold-start，普通 Agent spawn | Helper 延迟 ready | Agent 立即启动；PID/runtime generation 不变 |
-| HLR-02 | Helper cold-start，预占 tuple 已发布 | Helper ready | Agent 不重启；同一 CUA MCP 连接最终可用 |
-| HLR-03 | Helper cold-start，tuple 暂不可用 | CUA tool request | bounded retry 或 `broker_not_ready`；不回收 Agent |
-| HLR-04 | Agent 有 active CUA turn | Helper health probe 失败 | 不 restart Helper-induced Agent；当前请求按安全 delivery 状态收口 |
-| HLR-05 | Agent 有普通非 CUA turn | Helper recovery | 对话继续；非 CUA MCP、model provider、task index 不受影响 |
-| HLR-06 | Helper 空闲后卡死或进程退出，但没有 CUA 请求 | 等待超过历史 watchdog 周期 | 不发生定时 probe/restart 或退出事件自动 recovery；Agent PID/session 不变，下一次 CUA demand 再按需恢复 |
-| HLR-07 | 多 workspace 并行 | 单一 Helper recovery | 不产生跨 workspace Agent dispose；workspace identity 隔离保持 |
-| HLR-08 | Desktop continuous | Helper ready/recovery | 不注入 replayable 恢复消息，不改变 continuous cursor |
-| HLR-09 | Mobile remote/replayable | Desktop Helper recovery | 手机只通过 shared-host attachment 恢复，不创建第二个 Helper/runtime |
-| HLR-10 | Helper recovery 与 Agent spawn 并发 | generation 交错 | 不下发旧 tuple；也不因代际检查失败而 dispose 已运行 Agent |
-| HLR-11 | Helper token/identity 校验失败 | recovery 完成 | CUA fail-closed；Agent 与普通模块继续运行 |
-| HLR-12 | 用户关闭 workspace / Agent 自身崩溃 | 非 Helper 事件 | 允许既有 Agent dispose/restart 语义；不得归因于 Helper recovery |
-| HLR-13 | Helper 已不可用 | 下一次 CUA resolve/spawn 边界 | 执行一次有界按需 probe/recovery；不启动周期 timer，不回收 Agent |
-| HLR-14 | CUA 插件已运行且存在活动 Agent | 设置页提交禁用 | 只写启动配置；不关闭已有 CUA MCP/Helper，不重启 Agent；已有对话保持原能力，新开对话不注入 CUA MCP；提示已有对话需重启 ZCode 后生效 |
+| Case   | 初始状态                                     | 事件                          | 预期结果                                                                                                                           |
+| ------ | -------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| HLR-01 | Helper cold-start，普通 Agent spawn          | Helper 延迟 ready             | Agent 立即启动；PID/runtime generation 不变                                                                                        |
+| HLR-02 | Helper cold-start，预占 tuple 已发布         | Helper ready                  | Agent 不重启；同一 CUA MCP 连接最终可用                                                                                            |
+| HLR-03 | Helper cold-start，tuple 暂不可用            | CUA tool request              | bounded retry 或 `broker_not_ready`；不回收 Agent                                                                                  |
+| HLR-04 | Agent 有 active CUA turn                     | Helper health probe 失败      | 不 restart Helper-induced Agent；当前请求按安全 delivery 状态收口                                                                  |
+| HLR-05 | Agent 有普通非 CUA turn                      | Helper recovery               | 对话继续；非 CUA MCP、model provider、task index 不受影响                                                                          |
+| HLR-06 | Helper 空闲后卡死或进程退出，但没有 CUA 请求 | 等待超过历史 watchdog 周期    | 不发生定时 probe/restart 或退出事件自动 recovery；Agent PID/session 不变，下一次 CUA demand 再按需恢复                             |
+| HLR-07 | 多 workspace 并行                            | 单一 Helper recovery          | 不产生跨 workspace Agent dispose；workspace identity 隔离保持                                                                      |
+| HLR-08 | Desktop continuous                           | Helper ready/recovery         | 不注入 replayable 恢复消息，不改变 continuous cursor                                                                               |
+| HLR-09 | Mobile remote/replayable                     | Desktop Helper recovery       | 手机只通过 shared-host attachment 恢复，不创建第二个 Helper/runtime                                                                |
+| HLR-10 | Helper recovery 与 Agent spawn 并发          | generation 交错               | 不下发旧 tuple；也不因代际检查失败而 dispose 已运行 Agent                                                                          |
+| HLR-11 | Helper token/identity 校验失败               | recovery 完成                 | CUA fail-closed；Agent 与普通模块继续运行                                                                                          |
+| HLR-12 | 用户关闭 workspace / Agent 自身崩溃          | 非 Helper 事件                | 允许既有 Agent dispose/restart 语义；不得归因于 Helper recovery                                                                    |
+| HLR-13 | Helper 已不可用                              | 下一次 CUA resolve/spawn 边界 | 执行一次有界按需 probe/recovery；不启动周期 timer，不回收 Agent                                                                    |
+| HLR-14 | CUA 插件已运行且存在活动 Agent               | 设置页提交禁用                | 只写启动配置；不关闭已有 CUA MCP/Helper，不重启 Agent；已有对话保持原能力，新开对话不注入 CUA MCP；提示已有对话需重启 ZCode 后生效 |
 
 必须断言：
 

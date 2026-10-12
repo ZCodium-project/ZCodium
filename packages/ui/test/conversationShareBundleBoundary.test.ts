@@ -128,10 +128,7 @@ describe("conversation share public-page bundle boundary", () => {
     });
 
     it("副作用导入（无 from 子句）命中 denylist", () => {
-      const violations = findDeniedValueImports(
-        'import "@/OpenSplitButton.js";\n',
-        sourceDir,
-      );
+      const violations = findDeniedValueImports('import "@/OpenSplitButton.js";\n', sourceDir);
       expect(violations).toEqual([{ specifier: "@/OpenSplitButton.js", kind: "side-effect" }]);
     });
 

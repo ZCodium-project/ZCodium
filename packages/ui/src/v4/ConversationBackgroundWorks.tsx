@@ -17,10 +17,7 @@ export interface ConversationBackgroundWorksProps {
  * M4 后台工作面板：渲染 projection.backgroundWorks + running 项 cancel 入口。
  * memo：works 不变时不随 pane 其他状态重渲染（回调由父层 useCallback 稳定）。
  */
-function ConversationBackgroundWorksImpl({
-  works,
-  onCancel,
-}: ConversationBackgroundWorksProps) {
+function ConversationBackgroundWorksImpl({ works, onCancel }: ConversationBackgroundWorksProps) {
   if (works.length === 0) return null;
   return (
     <div
@@ -57,12 +54,8 @@ const BackgroundWorkRow = memo(function BackgroundWorkRow({
       <span className="min-w-0 flex-1 truncate text-[var(--color-foreground)]">
         {work.kind} · {work.title}
       </span>
-      <span className="shrink-0 text-[var(--color-foreground-subtle)]">
-        {work.status}
-      </span>
-      {work.status === "running" ? (
-        <CancelButton workId={work.workId} onCancel={onCancel} />
-      ) : null}
+      <span className="shrink-0 text-[var(--color-foreground-subtle)]">{work.status}</span>
+      {work.status === "running" ? <CancelButton workId={work.workId} onCancel={onCancel} /> : null}
     </li>
   );
 });
@@ -88,6 +81,4 @@ const CancelButton = memo(function CancelButton({
   );
 });
 
-export const ConversationBackgroundWorks = memo(
-  ConversationBackgroundWorksImpl,
-);
+export const ConversationBackgroundWorks = memo(ConversationBackgroundWorksImpl);

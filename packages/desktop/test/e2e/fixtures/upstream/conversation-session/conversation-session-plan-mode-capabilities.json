@@ -16,18 +16,13 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_MODE_DENY_STOPS_TURN"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_MODE_DENY_STOPS_TURN"],
         "bodyIncludes": [
           "E2E_PLAN_MODE_DENY_STOPS_TURN",
           "E2E_PLAN_MODE_DENY_ENTER_PLAN",
           "E2E_PLAN_MODE_DENY_EXIT_PLAN"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -55,10 +50,7 @@
           "E2E_PLAN_MODE_DENY_EXIT_PLAN",
           "toolu_e2e_plan_mode_deny_enter_plan_mode"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -84,18 +76,13 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_MODE_DENY_NEXT_INPUT"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_MODE_DENY_NEXT_INPUT"],
         "bodyIncludes": [
           "E2E_PLAN_MODE_DENY_NEXT_INPUT",
           "Plan mode is active",
           "MUST NOT make any edits"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -115,18 +102,13 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_MODE_TOOL_BOUNDARY"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_MODE_TOOL_BOUNDARY"],
         "bodyIncludes": [
           "E2E_PLAN_MODE_TOOL_BOUNDARY",
           "E2E_PLAN_MODE_TOOL_BOUNDARY_ENTER",
           "E2E_PLAN_MODE_TOOL_BOUNDARY_MIXED"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -154,10 +136,7 @@
           "E2E_PLAN_MODE_TOOL_BOUNDARY_MIXED",
           "toolu_e2e_plan_mode_boundary_enter_plan_mode"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -200,10 +179,7 @@
           "Plan mode only allows read-only, non-destructive tools",
           "E2E_READONLY_TOOL_FILE_CONTENT"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

@@ -745,9 +745,7 @@ export class BigModelUsageQuotaProvider {
     });
   }
 
-  async getCodingPlanRegularTps(
-    request: CodingPlanRegularTpsRequest,
-  ): Promise<number | undefined> {
+  async getCodingPlanRegularTps(request: CodingPlanRegularTpsRequest): Promise<number | undefined> {
     const startedAt = Date.now();
     let requestUrl: string | undefined;
     let responseHeaders: Record<string, string> = {};
@@ -811,9 +809,7 @@ export class BigModelUsageQuotaProvider {
         EMPTY_MODEL_PERFORMANCE_PAYLOAD,
         { allowMissingData: true },
       );
-      return data.proMaxDecodeSpeed?.findLast(
-        (value) => Number.isFinite(value) && value > 0,
-      );
+      return data.proMaxDecodeSpeed?.findLast((value) => Number.isFinite(value) && value > 0);
     } catch (error) {
       // Bug 原因：Highspeed 仅在 Renderer 记录了 TPS 读取失败文案，Host 层丢失了
       // monitor 的 HTTP status 和 request id，无法与后端日志对账。只输出 ApiError 中的安全诊断头。

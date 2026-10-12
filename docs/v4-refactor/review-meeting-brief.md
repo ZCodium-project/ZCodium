@@ -23,17 +23,17 @@ CLI / agent runtime 是唯一事实源
 
 ## 之前的问题与对应改进
 
-| 之前的问题 | 造成的现象 | v4 对应改进 | 评审验收点 |
-| --- | --- | --- | --- |
-| renderer 内存是 conversation 真相之一，stream 和 snapshot 双写同一份消息数组 | 刷新后漏消息、重复消息、timeline 错位、turn 分组需要补丁修补 | CLI 侧生成 `ConversationProductProjection`，rows、turn、actionAvailability、sessionControl 都是权威投影；客户端收到 snapshot 整体替换，收到 delta 只做连续 apply | UI 不再从 flat messages 自行推导 turn 和按钮状态；同一事件 replay 后 rows 稳定 |
-| action guard 散落在 UI 和 operation 里 | `canStop`、`canFork`、queue 路由、多端按钮状态不一致 | 所有会改变 conversation 的动作统一为 command intent；CLI 按 projection revision 和规则模块裁决，返回 ACK | 任意客户端看到相同 actionAvailability；重复 stop/权限响应幂等收口 |
-| 断线恢复有多条路径，且 base 水位和 UI 状态不同生共死 | 手机 replay gap 后把旧 snapshot 和新 stream 拼成不存在的状态 | 统一 `subscribe(topic, base?)`：base 有效就续传，base 失效就 snapshot；`logEpoch + seq + subscriptionId` 明确代际 | 旧订阅迟到帧静默丢弃；断档只触发 single-flight resubscribe |
-| 高频 delta 直接穿过 relay 和 IPC，客户端侧才合批 | 弱网下帧数暴涨、RTT 放大、手机耗电和掉帧 | 合批前移到 host 通道层，topic 声明 coalesce/resync；帧级只负责 ACK、心跳、重连重放和拥塞信号 | 一轮输出从“每 delta 一帧”收敛为按窗口投递；溢出时走 snapshot 而不是随机丢帧 |
-| desktop continuous 与 mobile replayable 是两条代码路径 | 本地和远控行为不一致，修一端容易破另一端 | 用同一套 topic / snapshot / delta / command 协议，差异只保留为 delivery profile 参数 | 客户端 apply 逻辑不分 profile；desktop 默认 continuous，mobile 默认 replayable，但终态一致 |
-| remote controller 依赖额外 bridge/mirror 语义 | 手机端像一个“旁路客户端”，容易绕过本地 host/runtime 边界 | 远控保持 shared-host attachment：relay 和 desktop main 只透传 `rpc-frame`，手机 attach 到桌面已有 local/remote host | relay/main 不下沉 task、stream、queue、snapshot 业务状态 |
-| queued prompt 和 optimistic UI 由本地内存维持 | 刷新丢队列，ACK 丢了 pending 不收口，重复提交靠启发式去重 | command 带 `commandId`，权威 row/queue item 带 `sourceCommandId`；overlay 只按 commandId 展示，永不进入真实数据 | 发起端也必须从订阅流读到自己的权威结果，overlay 由投影收口 |
-| workspacePath 被用于身份隔离语义 | SSH/WSL/Docker 等远程 workspace 同路径时互相串状态 | 所有身份/隔离 key 使用 `workspaceIdentity?.trim() || workspacePath`，路径执行仍只用 `workspacePath` | 远程 workspace bridge、snapshot、queue、owner command 都带 workspace identity |
-| 当前 bug 缺少可复现的协议级证据 | 修复依赖手工复现和 UI 猜测，回归容易漏 | 建黄金测试和网络混沌装置：snapshot 原子性、profile 终态一致、重复/迟到帧处理、guard 与 projection 同源 | 每类历史 bug 对应一个协议不变量或 reducer case |
+| 之前的问题                                                                   | 造成的现象                                                   | v4 对应改进                                                                                                                                                      | 评审验收点                                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| renderer 内存是 conversation 真相之一，stream 和 snapshot 双写同一份消息数组 | 刷新后漏消息、重复消息、timeline 错位、turn 分组需要补丁修补 | CLI 侧生成 `ConversationProductProjection`，rows、turn、actionAvailability、sessionControl 都是权威投影；客户端收到 snapshot 整体替换，收到 delta 只做连续 apply | UI 不再从 flat messages 自行推导 turn 和按钮状态；同一事件 replay 后 rows 稳定             |
+| action guard 散落在 UI 和 operation 里                                       | `canStop`、`canFork`、queue 路由、多端按钮状态不一致         | 所有会改变 conversation 的动作统一为 command intent；CLI 按 projection revision 和规则模块裁决，返回 ACK                                                         | 任意客户端看到相同 actionAvailability；重复 stop/权限响应幂等收口                          |
+| 断线恢复有多条路径，且 base 水位和 UI 状态不同生共死                         | 手机 replay gap 后把旧 snapshot 和新 stream 拼成不存在的状态 | 统一 `subscribe(topic, base?)`：base 有效就续传，base 失效就 snapshot；`logEpoch + seq + subscriptionId` 明确代际                                                | 旧订阅迟到帧静默丢弃；断档只触发 single-flight resubscribe                                 |
+| 高频 delta 直接穿过 relay 和 IPC，客户端侧才合批                             | 弱网下帧数暴涨、RTT 放大、手机耗电和掉帧                     | 合批前移到 host 通道层，topic 声明 coalesce/resync；帧级只负责 ACK、心跳、重连重放和拥塞信号                                                                     | 一轮输出从“每 delta 一帧”收敛为按窗口投递；溢出时走 snapshot 而不是随机丢帧                |
+| desktop continuous 与 mobile replayable 是两条代码路径                       | 本地和远控行为不一致，修一端容易破另一端                     | 用同一套 topic / snapshot / delta / command 协议，差异只保留为 delivery profile 参数                                                                             | 客户端 apply 逻辑不分 profile；desktop 默认 continuous，mobile 默认 replayable，但终态一致 |
+| remote controller 依赖额外 bridge/mirror 语义                                | 手机端像一个“旁路客户端”，容易绕过本地 host/runtime 边界     | 远控保持 shared-host attachment：relay 和 desktop main 只透传 `rpc-frame`，手机 attach 到桌面已有 local/remote host                                              | relay/main 不下沉 task、stream、queue、snapshot 业务状态                                   |
+| queued prompt 和 optimistic UI 由本地内存维持                                | 刷新丢队列，ACK 丢了 pending 不收口，重复提交靠启发式去重    | command 带 `commandId`，权威 row/queue item 带 `sourceCommandId`；overlay 只按 commandId 展示，永不进入真实数据                                                  | 发起端也必须从订阅流读到自己的权威结果，overlay 由投影收口                                 |
+| workspacePath 被用于身份隔离语义                                             | SSH/WSL/Docker 等远程 workspace 同路径时互相串状态           | 所有身份/隔离 key 使用 `workspaceIdentity?.trim()                                                                                                                |                                                                                            | workspacePath`，路径执行仍只用 `workspacePath` | 远程 workspace bridge、snapshot、queue、owner command 都带 workspace identity |
+| 当前 bug 缺少可复现的协议级证据                                              | 修复依赖手工复现和 UI 猜测，回归容易漏                       | 建黄金测试和网络混沌装置：snapshot 原子性、profile 终态一致、重复/迟到帧处理、guard 与 projection 同源                                                           | 每类历史 bug 对应一个协议不变量或 reducer case                                             |
 
 ## 状态所有权
 
@@ -234,12 +234,12 @@ UI action
 
 建议评审按四段确认：
 
-| 阶段 | 目标 | 主要产物 |
-| --- | --- | --- |
-| Phase 0：协议定稿 | 固定状态所有权、topic 五件套、command ACK、delivery profile 和不变量 | 更新字段规范、case catalog、coverage matrix、golden test list |
-| Phase 1：CLI projection | 把 rows、actionAvailability、sessionControl、queue 等产品事实移到 CLI reducer | reducer、schema、snapshot 原子性测试、sourceCommandId anchor |
-| Phase 2：订阅恢复与传输 | 统一 subscribe/apply，生产化 ACK/重连/背压，远控仍保持 shared-host | topic runtime、coalesce、logEpoch、subscriptionId、chaos test |
-| Phase 3：UI 收敛 | UI 删除本地 reducer 和推导逻辑，只渲染 projection + overlay | v4 chat store、虚拟滚动 rowId anchor、旧链路删除计划 |
+| 阶段                    | 目标                                                                          | 主要产物                                                      |
+| ----------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Phase 0：协议定稿       | 固定状态所有权、topic 五件套、command ACK、delivery profile 和不变量          | 更新字段规范、case catalog、coverage matrix、golden test list |
+| Phase 1：CLI projection | 把 rows、actionAvailability、sessionControl、queue 等产品事实移到 CLI reducer | reducer、schema、snapshot 原子性测试、sourceCommandId anchor  |
+| Phase 2：订阅恢复与传输 | 统一 subscribe/apply，生产化 ACK/重连/背压，远控仍保持 shared-host            | topic runtime、coalesce、logEpoch、subscriptionId、chaos test |
+| Phase 3：UI 收敛        | UI 删除本地 reducer 和推导逻辑，只渲染 projection + overlay                   | v4 chat store、虚拟滚动 rowId anchor、旧链路删除计划          |
 
 ## 评审重点问题
 

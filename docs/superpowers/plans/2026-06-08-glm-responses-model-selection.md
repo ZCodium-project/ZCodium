@@ -13,6 +13,7 @@
 ### Task 1: Add Failing UI Selection Tests
 
 **Files:**
+
 - Modify: `packages/ui/test/chatInputToolbarModelGroups.test.ts`
 
 - [ ] **Step 1: Add the failing regression test**
@@ -20,25 +21,25 @@
 Add this test inside `describe("shouldIncludeModelProviderInSelection", ...)`, after the existing "ZCode Agent 下 custom provider 只配置 openai endpoint 时也展示" case:
 
 ```ts
-  it("ZCode Agent 下 custom provider 只配置 responses endpoint 时也展示", () => {
-    const provider = createModelProviderConfig({
-      id: "provider-glm-custom-responses",
-      endpoints: {
-        baseURL: "https://example.com",
-        paths: { openai: "/responses" },
-      },
-      apiFormat: "openai-responses",
-      defaultKind: "openai",
-      apiKey: "sk-glm-custom",
-      models: ["glm-5"],
-      modelSupportedFormats: {
-        "glm-5": ["responses"],
-      },
-    });
-
-    expect(getProviderModelsForSelection("glm", provider)).toEqual(["glm-5"]);
-    expect(shouldIncludeModelProviderInSelection("glm", provider)).toBe(true);
+it("ZCode Agent 下 custom provider 只配置 responses endpoint 时也展示", () => {
+  const provider = createModelProviderConfig({
+    id: "provider-glm-custom-responses",
+    endpoints: {
+      baseURL: "https://example.com",
+      paths: { openai: "/responses" },
+    },
+    apiFormat: "openai-responses",
+    defaultKind: "openai",
+    apiKey: "sk-glm-custom",
+    models: ["glm-5"],
+    modelSupportedFormats: {
+      "glm-5": ["responses"],
+    },
   });
+
+  expect(getProviderModelsForSelection("glm", provider)).toEqual(["glm-5"]);
+  expect(shouldIncludeModelProviderInSelection("glm", provider)).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Verify RED**
@@ -54,6 +55,7 @@ Expected: FAIL because GLM required formats and endpoint checks do not include `
 ### Task 2: Add Failing Bot Selection Tests
 
 **Files:**
+
 - Modify: `packages/services/test/botsModelSelectionHelpers.test.ts`
 
 - [ ] **Step 1: Add the failing regression test**
@@ -61,24 +63,24 @@ Expected: FAIL because GLM required formats and endpoint checks do not include `
 Add this test after "GLM /model 入口允许只配置 openai endpoint 的供应商":
 
 ```ts
-  it("GLM /model 入口允许只配置 responses endpoint 的供应商", () => {
-    const provider = createModelProviderConfig({
-      endpoints: {
-        baseURL: "https://example.com",
-        paths: { openai: "/responses" },
-      },
-      apiFormat: "openai-responses",
-      defaultKind: "openai",
-      apiKey: "sk-glm",
-      models: ["glm-5"],
-      modelSupportedFormats: {
-        "glm-5": ["responses"],
-      },
-    });
-
-    expect(getProviderModelsForSelection("glm", provider)).toEqual(["glm-5"]);
-    expect(isModelProviderSelectableForZCodeProvider("glm", provider)).toBe(true);
+it("GLM /model 入口允许只配置 responses endpoint 的供应商", () => {
+  const provider = createModelProviderConfig({
+    endpoints: {
+      baseURL: "https://example.com",
+      paths: { openai: "/responses" },
+    },
+    apiFormat: "openai-responses",
+    defaultKind: "openai",
+    apiKey: "sk-glm",
+    models: ["glm-5"],
+    modelSupportedFormats: {
+      "glm-5": ["responses"],
+    },
   });
+
+  expect(getProviderModelsForSelection("glm", provider)).toEqual(["glm-5"]);
+  expect(isModelProviderSelectableForZCodeProvider("glm", provider)).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Verify RED**
@@ -94,6 +96,7 @@ Expected: FAIL because Bot GLM selection does not include `responses`.
 ### Task 3: Update GLM Selection Filters
 
 **Files:**
+
 - Modify: `packages/ui/src/chat-input-toolbar/modelSelection.ts`
 - Modify: `packages/services/src/bots/modelSelectionHelpers.ts`
 
@@ -102,15 +105,15 @@ Expected: FAIL because Bot GLM selection does not include `responses`.
 In `packages/ui/src/chat-input-toolbar/modelSelection.ts`, change the GLM required format return to:
 
 ```ts
-    // Bugfix: GLM runtime supports Anthropic-compatible, OpenAI-compatible, and OpenAI Responses upstreams.
-    // The chat model menu must expose Responses-only providers now that GLM Agent can send that protocol.
-    return ["anthropic", "responses", "openai"];
+// Bugfix: GLM runtime supports Anthropic-compatible, OpenAI-compatible, and OpenAI Responses upstreams.
+// The chat model menu must expose Responses-only providers now that GLM Agent can send that protocol.
+return ["anthropic", "responses", "openai"];
 ```
 
 Also change the GLM provider inclusion endpoint check to:
 
 ```ts
-    return hasEndpointForSupportedFormats(provider, ["anthropic", "responses", "openai"]);
+return hasEndpointForSupportedFormats(provider, ["anthropic", "responses", "openai"]);
 ```
 
 - [ ] **Step 2: Update Bot model selection**
@@ -118,17 +121,19 @@ Also change the GLM provider inclusion endpoint check to:
 In `packages/services/src/bots/modelSelectionHelpers.ts`, change the GLM required format return to:
 
 ```ts
-    // Bugfix: GLM runtime supports Anthropic-compatible, OpenAI-compatible, and OpenAI Responses upstreams.
-    // Bot /model selection must stay aligned with the chat model menu.
-    return ["anthropic", "responses", "openai"];
+// Bugfix: GLM runtime supports Anthropic-compatible, OpenAI-compatible, and OpenAI Responses upstreams.
+// Bot /model selection must stay aligned with the chat model menu.
+return ["anthropic", "responses", "openai"];
 ```
 
 Also change the GLM provider inclusion endpoint check to:
 
 ```ts
-    return hasEndpointForFormat(provider, "anthropic") ||
-      hasEndpointForFormat(provider, "responses") ||
-      hasEndpointForFormat(provider, "openai");
+return (
+  hasEndpointForFormat(provider, "anthropic") ||
+  hasEndpointForFormat(provider, "responses") ||
+  hasEndpointForFormat(provider, "openai")
+);
 ```
 
 - [ ] **Step 3: Verify GREEN**
@@ -144,6 +149,7 @@ Expected: PASS.
 ### Task 4: Document GLM Responses Selection
 
 **Files:**
+
 - Modify: `docs/ui/chat-model-select-menu.md`
 
 - [ ] **Step 1: Add compatibility note**

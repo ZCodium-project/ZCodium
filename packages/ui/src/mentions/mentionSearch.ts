@@ -37,7 +37,9 @@ export interface MentionResultGroup<TItem = MentionItem> {
 export function buildVisibleMentionGroups<TItem>(
   groups: MentionResultGroup<TItem>[],
 ): MentionResultGroup<TItem>[] {
-  return groups.filter((group) => group.loading || group.errorText !== null || group.items.length > 0);
+  return groups.filter(
+    (group) => group.loading || group.errorText !== null || group.items.length > 0,
+  );
 }
 
 // 中文查询只走前缀/子串两级：逐字符子序列匹配对 CJK 过宽（「浏器」会命中「浏览器操作」），

@@ -6,7 +6,7 @@
 
 | 缩写 | Spec                                                                                                                                   |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `SB` | `packages/desktop/test/e2e/conversation-session/conversation-session-built-in-subagent-model-overrides.test.ts`  |
+| `SB` | `packages/desktop/test/e2e/conversation-session/conversation-session-built-in-subagent-model-overrides.test.ts`                        |
 | `SX` | `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-subagent-runtime-catalog-reasoning.test.ts` |
 | `SL` | `packages/desktop/test/e2e/subagent-coding-plan-login-catalog-stale.test.ts`                                                           |
 | `SM` | `packages/desktop/test/e2e/start-plan-manual-claim-experience.test.ts`                                                                 |
@@ -65,7 +65,7 @@
 | BSM-15 | covered | SU、SS、SE、TC | Builtin/custom 尚无 explicit effort 时，Select 仍以 effective 默认档位保持真实选中态；鼠标或键盘再次确认该档位会物化并持久化                                                                                                                                                                                                                                            |
 | BSM-16 | covered | SE             | Settings 覆盖两个 builtin 编辑入口，以及 custom user/workspace 创建与编辑；每次保存均校验最终 scope 路径、完整 frontmatter/正文，重命名后旧文件不存在                                                                                                                                                                                                                   |
 | BSM-17 | covered | SE             | 只选择 reasoning 模型但不操作 effort 控件时，控件展示 catalog 默认档位，但 builtin state 不新增 thought-level key、custom Markdown 不新增 `thoughtLevel`                                                                                                                                                                                                                |
-| BSM-18 | covered | SE             | Custom 保存模型 A 与 effort 后从模型供应商设置删除 A；重新打开编辑页模型触发器显示“选择模型”，下拉菜单不含 A；effort 隐藏、保存禁用，且原 Markdown 保持不变                                                                                                                                                                                                                 |
+| BSM-18 | covered | SE             | Custom 保存模型 A 与 effort 后从模型供应商设置删除 A；重新打开编辑页模型触发器显示“选择模型”，下拉菜单不含 A；effort 隐藏、保存禁用，且原 Markdown 保持不变                                                                                                                                                                                                             |
 | BSM-19 | covered | SU、SL         | BigModel 登录成功后立即进入 Subagent 设置：Coding Plan effort 先由 App metadata 解除 UI 门禁；App/runtime 模型成员分叉同时触发目标 workspace 按需对账，保持 `includeWorkspaceState=false`，再由 `workspace/readState` 最终回填包含 `high` / `max` 的 runtime 目录。SU 与正式 SL 自动通过                                                                                |
 | BSM-20 | covered | SU、SL、SM     | Start、Individual、Team 同属 OAuth mode 时，Subagents 按最新 `modelProviderFamilySelectedKeys` 选择连接。SM 真实领取 Start 后，Builtin 绑定 Start 模型再切回 Individual 时，模型触发器显示“选择模型”且菜单只展示新连接候选；SL 覆盖 Individual 切 Team 且已有模型与 reasoning 继续可用；SU 覆盖 Start → Individual → Team 的分组重建。整个链路不依赖远端 catalog 强刷。 |
 

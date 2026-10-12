@@ -10,13 +10,13 @@ node scripts/audit-conversation-session-case-coverage.mjs --check --answer-templ
 
 ## 当前状态
 
-| 指标 | 当前值 |
-| --- | ---: |
-| Product case 总数 | 221 |
-| 已覆盖 | 125 |
-| 待产品决策 / 自动化 | 36 |
-| 当前模板范围 | 下一批 review：N01, N02, N03 |
-| 当前模板 case | 3 |
+| 指标                |                       当前值 |
+| ------------------- | ---------------------------: |
+| Product case 总数   |                          221 |
+| 已覆盖              |                          125 |
+| 待产品决策 / 自动化 |                           36 |
+| 当前模板范围        | 下一批 review：N01, N02, N03 |
+| 当前模板 case       |                            3 |
 
 ## 填写规则
 
@@ -67,12 +67,12 @@ node scripts/audit-conversation-session-case-coverage.mjs --check --answer-templ
 
 ```text
 N01:
-- N01.1 = 
+- N01.1 =
 
 N02:
-- N02.1 = 
+- N02.1 =
 
 N03:
-- N03.1 = 
+- N03.1 =
 
 ```

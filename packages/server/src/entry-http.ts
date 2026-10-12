@@ -1,4 +1,8 @@
-import { createLocalServices, createTopicResourcePeers, getAppConfigDir } from "@zcode/services/node";
+import {
+  createLocalServices,
+  createTopicResourcePeers,
+  getAppConfigDir,
+} from "@zcode/services/node";
 import {
   materializeBundledZCodeBuiltinProviderConfig,
   readBundledZCodeBuiltinProviderConfig,

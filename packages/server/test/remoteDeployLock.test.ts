@@ -94,14 +94,10 @@ describe("acquireRemoteDeployLock", () => {
     expect(handle.ownerToken).toBe("owner-test");
 
     const stdinChunks: string[] = [];
-    backend.stdin.on("data", (chunk: Buffer) =>
-      stdinChunks.push(chunk.toString()),
-    );
+    backend.stdin.on("data", (chunk: Buffer) => stdinChunks.push(chunk.toString()));
     const releasePromise = handle.release();
     await vi.waitFor(() =>
-      expect(stdinChunks.join("")).toContain(
-        "zcode-deploy-lock-release:owner-test",
-      ),
+      expect(stdinChunks.join("")).toContain("zcode-deploy-lock-release:owner-test"),
     );
     backend.closeEmitter.fire(0);
     await expect(releasePromise).resolves.toBeUndefined();
@@ -168,9 +164,7 @@ describe("acquireRemoteDeployLock", () => {
       expect(releaseSettled).not.toHaveBeenCalled();
       await vi.advanceTimersByTimeAsync(1);
 
-      await expect(releasePromise).rejects.toThrow(
-        /timed out after 20ms.*owner=owner-timeout/u,
-      );
+      await expect(releasePromise).rejects.toThrow(/timed out after 20ms.*owner=owner-timeout/u);
       expect(backend.stdin.destroyed).toBe(true);
       expect(backend.stdout.destroyed).toBe(true);
       expect(backend.stderr.destroyed).toBe(true);

@@ -1,4 +1,4 @@
-import { graphql } from '@octokit/graphql';
+import { graphql } from "@octokit/graphql";
 
 const token = process.env.OPENCOLLECTIVE_TOKEN;
 const RATE_EUR_TO_USD = 1.08;
@@ -79,10 +79,10 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
         }
       }
     `,
-    url: 'https://api.opencollective.com/graphql/v2',
+    url: "https://api.opencollective.com/graphql/v2",
     headers: {
-      'Api-Key': token,
-      Accept: 'application/json',
+      "Api-Key": token,
+      Accept: "application/json",
     },
   });
 
@@ -94,7 +94,7 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
   }
 
   for (const transaction of account.transactions.nodes) {
-    if (recurringOnly && transaction.kind !== 'CONTRIBUTION') continue;
+    if (recurringOnly && transaction.kind !== "CONTRIBUTION") continue;
 
     const month = new Date(transaction.createdAt).toISOString().substring(0, 7);
     const amount = Math.round(transaction.amount.value);
@@ -105,7 +105,7 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
     for (const expense of expenses.nodes) {
       const month = new Date(expense.createdAt).toISOString().substring(0, 7);
       const amount =
-        expense.currency === 'EUR'
+        expense.currency === "EUR"
           ? Math.round((expense.amount / 100) * RATE_EUR_TO_USD)
           : Math.round(expense.amount / 100);
       monthlyTotals.set(month, (monthlyTotals.get(month) || 0) + amount);
@@ -116,7 +116,7 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
 };
 
 export const getOpenCollectiveTotals = async (options: Options) => {
-  if (!token) throw new Error('OPENCOLLECTIVE_TOKEN is not set');
+  if (!token) throw new Error("OPENCOLLECTIVE_TOKEN is not set");
   const monthlyData = await getMonthlyTotals({ ...options, token });
   const startMonth = options.startDate.toISOString().substring(0, 7);
   const endMonth = options.endDate?.toISOString().substring(0, 7);

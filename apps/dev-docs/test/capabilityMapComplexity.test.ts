@@ -9,9 +9,7 @@ import {
 describe("能力群复杂度", () => {
   it("只把跨群有向边计入入度和出度", () => {
     const crossGroupEdgeCount = capabilityEdges.filter(
-      (edge) =>
-        nodeById.get(edge.source)?.groupId !==
-        nodeById.get(edge.target)?.groupId,
+      (edge) => nodeById.get(edge.source)?.groupId !== nodeById.get(edge.target)?.groupId,
     ).length;
     const totalInDegree = [...groupComplexityById.values()].reduce(
       (sum, complexity) => sum + complexity.inDegree,

@@ -12,12 +12,15 @@ To setup WebdriverIO within your Preact project, follow the [instructions](/docs
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    runner: ['browser', {
-        preset: 'preact'
-    }],
-    // ...
-}
+  // ...
+  runner: [
+    "browser",
+    {
+      preset: "preact",
+    },
+  ],
+  // ...
+};
 ```
 
 :::info
@@ -43,25 +46,24 @@ npx wdio run ./wdio.conf.js
 Given you have the following Preact component:
 
 ```tsx title="./components/Component.jsx"
-import { h } from 'preact'
-import { useState } from 'preact/hooks'
+import { h } from "preact";
+import { useState } from "preact/hooks";
 
 interface Props {
-    initialCount: number
+  initialCount: number;
 }
 
 export function Counter({ initialCount }: Props) {
-    const [count, setCount] = useState(initialCount)
-    const increment = () => setCount(count + 1)
+  const [count, setCount] = useState(initialCount);
+  const increment = () => setCount(count + 1);
 
-    return (
-        <div>
-            Current value: {count}
-            <button onClick={increment}>Increment</button>
-        </div>
-    )
+  return (
+    <div>
+      Current value: {count}
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
 }
-
 ```
 
 In your test use the `render` method from `@testing-library/preact` to attach the component to the test page. To interact with the component we recommend to use WebdriverIO commands as they behave more close to actual user interactions, e.g.:

@@ -121,9 +121,7 @@ plain paragraph
         "  * bump package version to 1.10.0\n",
     );
     expect(output).toContain(
-      "  * bump package version to 1.10.0\n" +
-        "\n" +
-        "* **zzz:** keep next commit on its own line",
+      "  * bump package version to 1.10.0\n" + "\n" + "* **zzz:** keep next commit on its own line",
     );
     expect(output).not.toMatch(/[^\n]\* \*\*/);
     expect(output).not.toMatch(/^[ \t]+\* \*\*/m);

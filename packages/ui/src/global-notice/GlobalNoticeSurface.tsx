@@ -32,10 +32,7 @@ export function GlobalNoticeSurface({
 
   if (notice.type === "highspeed-share" && notice.schemaVersion === 1) {
     return (
-      <HighspeedShareNoticeCard
-        notice={notice}
-        onDismiss={() => store?.dismiss(notice.noticeId)}
-      />
+      <HighspeedShareNoticeCard notice={notice} onDismiss={() => store?.dismiss(notice.noticeId)} />
     );
   }
 

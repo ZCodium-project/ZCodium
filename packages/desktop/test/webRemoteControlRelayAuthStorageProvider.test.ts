@@ -69,9 +69,7 @@ describe("createWebRemoteControlRelayAuthStorageProvider", () => {
     expect(operations).toContain(
       `delete:${WEB_REMOTE_CONTROL_EXTERNAL_RELAY_PASS_HASH_CREDENTIAL_KEY}`,
     );
-    expect(patches.some((patch) => "webRemoteControlExternalRelayDevice" in patch)).toBe(
-      true,
-    );
+    expect(patches.some((patch) => "webRemoteControlExternalRelayDevice" in patch)).toBe(true);
   });
 
   it("rotates by deleting old credential before saving new auth", async () => {
@@ -90,7 +88,9 @@ describe("createWebRemoteControlRelayAuthStorageProvider", () => {
       expect.stringContaining("patch:"),
       `save:${WEB_REMOTE_CONTROL_EXTERNAL_RELAY_PASS_HASH_CREDENTIAL_KEY}:new-hash`,
     ]);
-    expect(credentials[WEB_REMOTE_CONTROL_EXTERNAL_RELAY_PASS_HASH_CREDENTIAL_KEY]).toBe("new-hash");
+    expect(credentials[WEB_REMOTE_CONTROL_EXTERNAL_RELAY_PASS_HASH_CREDENTIAL_KEY]).toBe(
+      "new-hash",
+    );
   });
 
   it("redacts passHash in logs", async () => {

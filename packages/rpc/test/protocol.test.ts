@@ -225,11 +225,17 @@ class FakeMessagePort implements MessagePortLike {
   peer?: FakeMessagePort;
   readonly posted: unknown[] = [];
 
-  addEventListener(_type: "message", listener: (event: { data: MessagePortPayload }) => void): void {
+  addEventListener(
+    _type: "message",
+    listener: (event: { data: MessagePortPayload }) => void,
+  ): void {
     this.listeners.add(listener);
   }
 
-  removeEventListener(_type: "message", listener: (event: { data: MessagePortPayload }) => void): void {
+  removeEventListener(
+    _type: "message",
+    listener: (event: { data: MessagePortPayload }) => void,
+  ): void {
     this.listeners.delete(listener);
   }
 

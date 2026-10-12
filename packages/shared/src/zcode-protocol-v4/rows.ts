@@ -8,10 +8,7 @@ import { highspeedMessageMetaSchema } from "../highspeed.js";
 import { executionOutputPreviewSchema } from "../execution-output-preview.js";
 import { timestampSchema } from "./core.js";
 import { conversationInputSourceSchema } from "./input-intent.js";
-import {
-  backgroundResultOriginMetaSchema,
-  workflowLaunchMetaSchema,
-} from "./workflow-row-meta.js";
+import { backgroundResultOriginMetaSchema, workflowLaunchMetaSchema } from "./workflow-row-meta.js";
 import { attachmentRefSchema } from "./attachment-ref.js";
 
 // RowBase。rowId：session 内单调、永不复用、事件日志的确定性纯函数。

@@ -144,21 +144,23 @@ async function assertAssistantSurvivesRendererReload(successPrompt: string) {
     messages: await getV4Messages(),
     store: await getTaskStoreSnapshot(sessionId),
   };
-  await browser.waitUntil(
-    async () => {
-      afterReload = {
-        root: await getV4ConversationState(),
-        messages: await getV4Messages(),
-        store: await getTaskStoreSnapshot(sessionId),
-      };
-      return afterReload.messages.some((message) => message.text.includes(ASSISTANT_TOKEN));
-    },
-    {
-      timeout: 30000,
-      interval: 500,
-      timeoutMsg: "restore repro: reload 后等待 assistant token 超时",
-    },
-  ).catch(() => undefined);
+  await browser
+    .waitUntil(
+      async () => {
+        afterReload = {
+          root: await getV4ConversationState(),
+          messages: await getV4Messages(),
+          store: await getTaskStoreSnapshot(sessionId),
+        };
+        return afterReload.messages.some((message) => message.text.includes(ASSISTANT_TOKEN));
+      },
+      {
+        timeout: 30000,
+        interval: 500,
+        timeoutMsg: "restore repro: reload 后等待 assistant token 超时",
+      },
+    )
+    .catch(() => undefined);
   const visibleText = afterReload.messages.map((message) => message.text).join("\n");
   if (!visibleText.includes(ASSISTANT_TOKEN)) {
     throw new Error(
@@ -234,21 +236,23 @@ async function assertAssistantSurvivesAppSessionReload(successPrompt: string) {
     messages: await getV4Messages(),
     store: await getTaskStoreSnapshot(sessionId),
   };
-  await browser.waitUntil(
-    async () => {
-      afterReload = {
-        root: await getV4ConversationState(),
-        messages: await getV4Messages(),
-        store: await getTaskStoreSnapshot(sessionId),
-      };
-      return afterReload.messages.some((message) => message.text.includes(ASSISTANT_TOKEN));
-    },
-    {
-      timeout: 30000,
-      interval: 500,
-      timeoutMsg: "restore repro: app session 重建后等待 assistant token 超时",
-    },
-  ).catch(() => undefined);
+  await browser
+    .waitUntil(
+      async () => {
+        afterReload = {
+          root: await getV4ConversationState(),
+          messages: await getV4Messages(),
+          store: await getTaskStoreSnapshot(sessionId),
+        };
+        return afterReload.messages.some((message) => message.text.includes(ASSISTANT_TOKEN));
+      },
+      {
+        timeout: 30000,
+        interval: 500,
+        timeoutMsg: "restore repro: app session 重建后等待 assistant token 超时",
+      },
+    )
+    .catch(() => undefined);
   const visibleText = afterReload.messages.map((message) => message.text).join("\n");
   if (!visibleText.includes(ASSISTANT_TOKEN)) {
     throw new Error(

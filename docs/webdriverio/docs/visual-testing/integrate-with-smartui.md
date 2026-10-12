@@ -55,20 +55,20 @@ exports.config = {
 Use `browser.execute('smartui.takeScreenshot')` to capture screenshots:
 
 ```javascript
-describe('WebdriverIO SmartUI Test', () => {
-  it('should capture screenshot for visual testing', async () => {
-    await browser.url('https://webdriver.io');
+describe("WebdriverIO SmartUI Test", () => {
+  it("should capture screenshot for visual testing", async () => {
+    await browser.url("https://webdriver.io");
 
-    await browser.execute('smartui.takeScreenshot', {
-      screenshotName: 'Homepage Screenshot'
+    await browser.execute("smartui.takeScreenshot", {
+      screenshotName: "Homepage Screenshot",
     });
 
-    await browser.execute('smartui.takeScreenshot', {
-      screenshotName: 'Homepage with Options',
+    await browser.execute("smartui.takeScreenshot", {
+      screenshotName: "Homepage with Options",
       ignoreDOM: {
-        id: ['dynamic-element-id'],
-        class: ['ad-banner']
-      }
+        id: ["dynamic-element-id"],
+        class: ["ad-banner"],
+      },
     });
   });
 });
@@ -87,32 +87,32 @@ View results in the [SmartUI Dashboard](https://smartui.lambdatest.com/).
 **Ignore elements**
 
 ```javascript
-await browser.execute('smartui.takeScreenshot', {
-  screenshotName: 'Ignore Dynamic Elements',
+await browser.execute("smartui.takeScreenshot", {
+  screenshotName: "Ignore Dynamic Elements",
   ignoreDOM: {
-    id: ['element-id'],
-    class: ['dynamic-class'],
-    xpath: ['//div[@class="ad"]']
-  }
+    id: ["element-id"],
+    class: ["dynamic-class"],
+    xpath: ['//div[@class="ad"]'],
+  },
 });
 ```
 
 **Select specific areas**
 
 ```javascript
-await browser.execute('smartui.takeScreenshot', {
-  screenshotName: 'Compare Specific Area',
+await browser.execute("smartui.takeScreenshot", {
+  screenshotName: "Compare Specific Area",
   selectDOM: {
-    id: ['main-content']
-  }
+    id: ["main-content"],
+  },
 });
 ```
 
 ## Resources
 
-| Resource                                                                                          | Description                              |
-|---------------------------------------------------------------------------------------------------|------------------------------------------|
-| [Official Documentation](https://www.testmuai.com/support/docs/smart-ui-cypress/)              | SmartUI Documentation                    |
-| [SmartUI Dashboard](https://smartui.lambdatest.com/)                                              | Access your SmartUI projects and builds  |
-| [Advanced Settings](https://www.testmuai.com/support/docs/test-settings-options/)              | Configure comparison sensitivity         |
-| [Build Options](https://www.testmuai.com/support/docs/smart-ui-build-options/)                 | Advanced build configuration             |
+| Resource                                                                          | Description                             |
+| --------------------------------------------------------------------------------- | --------------------------------------- |
+| [Official Documentation](https://www.testmuai.com/support/docs/smart-ui-cypress/) | SmartUI Documentation                   |
+| [SmartUI Dashboard](https://smartui.lambdatest.com/)                              | Access your SmartUI projects and builds |
+| [Advanced Settings](https://www.testmuai.com/support/docs/test-settings-options/) | Configure comparison sensitivity        |
+| [Build Options](https://www.testmuai.com/support/docs/smart-ui-build-options/)    | Advanced build configuration            |

@@ -9,10 +9,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_TOOL_ACTION_GUARD"],
         "bodyIncludes": ["E2E_TOOL_ACTION_GUARD"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -31,10 +28,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_TOOL_FILE_CONTENT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -54,10 +48,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["Read {{e2eRuntimeRoot}}/shared/readonly-tool.txt"],
         "bodyIncludes": ["Read {{e2eRuntimeRoot}}/shared/readonly-tool.txt"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -76,14 +67,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_TURN_STEER_TOOL_TEXT",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_TURN_STEER_TOOL_TEXT", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -104,10 +89,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_FIRST_SEND", "E2E_READONLY_TOOL_FILE_CONTENT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -127,10 +109,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_FORK_SOURCE", "E2E_READONLY_TOOL_FILE_CONTENT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -150,10 +129,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_EDIT_RERUN", "E2E_READONLY_TOOL_FILE_CONTENT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -172,14 +148,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_INITIAL",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_INITIAL", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -198,14 +168,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_PREP_TWO",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_PREP_TWO", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -224,14 +188,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_INTERRUPTED_PREP_TWO",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_INTERRUPTED_PREP_TWO", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -250,14 +208,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_AUTO_COMPACT_CONTEXT_SEED",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_AUTO_COMPACT_CONTEXT_SEED", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -276,14 +228,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_SESSION_SEED",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_GOAL_SESSION_SEED", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -328,10 +274,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_ADJACENT_AUTOCOMPACT_TOOL"],
         "bodyIncludes": ["E2E_ADJACENT_AUTOCOMPACT_TOOL"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -375,10 +318,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_ADJACENT_AUTOCOMPACT_MID_SUMMARY"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -422,10 +362,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_ADJACENT_AUTOCOMPACT_PRE_SUMMARY"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -469,10 +406,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "bodyIncludes": ["E2E_STOP_HELD_QUEUE_FIRST"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -530,10 +464,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_MODEL_CONFIG_AUTO_DRAIN_RUNNING"],
         "bodyIncludes": ["E2E_MODEL_CONFIG_AUTO_DRAIN_RUNNING"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -589,10 +520,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_DRAIN_RUNNING"],
         "bodyIncludes": ["E2E_AUTO_DRAIN_RUNNING"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -648,10 +576,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_COMPACT_DRAIN_RUNNING"],
         "bodyIncludes": ["E2E_AUTO_COMPACT_DRAIN_RUNNING"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -707,10 +632,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_PREWARMING_DELAY"],
         "bodyIncludes": ["E2E_PREWARMING_DELAY"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -763,10 +685,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_HOLD_STREAM"],
         "bodyIncludes": ["E2E_HOLD_STREAM"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -828,10 +747,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_SLOW_STREAM"],
         "bodyIncludes": ["E2E_SLOW_STREAM"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -901,10 +817,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_COMPACT_CONTEXT_SEED"],
         "bodyIncludes": ["E2E_AUTO_COMPACT_CONTEXT_SEED"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -969,10 +882,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_COMPACT_PENDING_TEXT"],
         "bodyIncludes": ["E2E_AUTO_COMPACT_PENDING_TEXT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -992,10 +902,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_ACTIONS_CONTEXT_SEED"],
         "bodyIncludes": ["E2E_AUTO_ACTIONS_CONTEXT_SEED"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1035,10 +942,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_ACTIONS_PENDING_TEXT"],
         "bodyIncludes": ["E2E_AUTO_ACTIONS_PENDING_TEXT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1058,10 +962,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AUTO_ACTIONS_QUEUED_TEXT"],
         "bodyIncludes": ["E2E_AUTO_ACTIONS_QUEUED_TEXT"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1110,10 +1011,7 @@
           "Verify whether the active session goal",
           "upstream-e2e-ok"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1220,10 +1118,7 @@
           "Verify whether the active session goal",
           "人类灭绝之后，机器哭了。"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1274,10 +1169,7 @@
           "Verify whether the active session goal",
           "这需要长篇连载，无法一次交付十万字。"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -1294,10 +1186,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
         "bodyIncludes": ["upstream-e2e-ok"]
       },
       "captured": {

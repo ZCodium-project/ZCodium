@@ -35,7 +35,7 @@ Given that all WebdriverIO versions are tight to each other it is the best to al
 npm i --save-dev @wdio/allure-reporter@7 @wdio/cli@7 @wdio/cucumber-framework@7 @wdio/local-runner@7 @wdio/spec-reporter@7 @wdio/sync@7 wdio-chromedriver-service@7 wdio-timeline-reporter@7 webdriverio@7
 ```
 
-Usually WebdriverIO dependencies are part of the dev dependencies, depending on your project this can vary though. After this your `package.json` and `package-lock.json` should be updated. __Note:__ these are the dependencies used by the [example project](https://github.com/WarleyGabriel/demo-webdriverio-cucumber), yours may differ.
+Usually WebdriverIO dependencies are part of the dev dependencies, depending on your project this can vary though. After this your `package.json` and `package-lock.json` should be updated. **Note:** these are the dependencies used by the [example project](https://github.com/WarleyGabriel/demo-webdriverio-cucumber), yours may differ.
 
 #### Commits:
 

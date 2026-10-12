@@ -1,10 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type {
-  GitRepositorySummary,
-  ZCodeTaskChangeSummary,
-} from "@zcode/shared";
+import type { GitRepositorySummary, ZCodeTaskChangeSummary } from "@zcode/shared";
 import { V4ChatPane } from "@/v4/V4ChatPane.js";
 import { V4_PRIMARY_PANE_ID } from "@/v4/paneLayoutStore.js";
 import type { WorkbenchShellBinding } from "@/v4/WorkbenchPane.js";
@@ -36,9 +33,7 @@ vi.mock("@/v4/V4ConversationContext.js", async () => {
   };
 });
 
-function gitSummary(
-  overrides: Partial<GitRepositorySummary> = {},
-): GitRepositorySummary {
+function gitSummary(overrides: Partial<GitRepositorySummary> = {}): GitRepositorySummary {
   return {
     workspacePath: "/repo",
     repoRoot: "/repo",

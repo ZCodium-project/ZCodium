@@ -8,7 +8,7 @@
 
 | 字段         | 决策                                                                                                                    |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Change       | `browser.tabs.get(id)` 从纯对象绑定改为“绑定 + 激活”；前台 scope 展示目标 tab，后台 scope 只记录激活态              |
+| Change       | `browser.tabs.get(id)` 从纯对象绑定改为“绑定 + 激活”；前台 scope 展示目标 tab，后台 scope 只记录激活态                  |
 | 模型预检     | 每个逻辑 browser 操作批次先单独返回 `tabs.list()` 给模型观察，下一次 JS 调用再按 id/url/title 确认目标并 `tabs.get(id)` |
 | 用户可见结果 | get 成功后目标 browser-use tab 成为当前 side-pane active tab，右侧栏展开                                                |
 | State owner  | main `BrowserGuestManager` 持有 selected tab；renderer side pane 持有前台可见 tab                                       |
@@ -26,15 +26,15 @@
 
 ## Boundary decisions
 
-| 边界              | 必须行为                                                                                         | 禁止行为                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| 边界                  | 必须行为                                                                                                                                    | 禁止行为                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `tabs.list()`         | 返回当前 scope 全量 logical tab（含 suspended）的 id/url/title，并且最多一个 `active`；`active` 的语义是「不带 tabId 的命令会落到哪个 tab」 | 为了 list 恢复全部 guest；多个 tab 同时声明 active；把 `active` 当成「UI 当前是否可见」的代理（可见性走独立的 `browserVisibilitySet/Get`） |
-| 目标匹配（模型侧） | 模型先收到完整 list 结果；优先稳定 id，否则按用户给定/最新 list 中的明确 url/title 匹配          | 多 tab 时盲选 `[0]`、`at(-1)`、在同一未观察 cell 内静默选择，或复用未知指向的全局 tab（本行只约束模型消歧，不适用于下节的系统回退） |
+| 目标匹配（模型侧）    | 模型先收到完整 list 结果；优先稳定 id，否则按用户给定/最新 list 中的明确 url/title 匹配                                                     | 多 tab 时盲选 `[0]`、`at(-1)`、在同一未观察 cell 内静默选择，或复用未知指向的全局 tab（本行只约束模型消歧，不适用于下节的系统回退）        |
 | `tabs.get(id)`        | 校验 logical id 仍存在；若 suspended 则先 single-flight 恢复，再通知 backend 激活，成功后才返回 Tab                                         | 只构造本地对象、不更新 UI；为恢复失败的 tab 静默新建空页                                                                                   |
-| 激活 side effect  | 更新 main selected tab，标记其它同 scope tab inactive；仅当该 scope 正在前台时显示/展开目标 view | 后台对话抢占当前 workspace/session UI；激活失败后仍执行页面动作                       |
-| 后续动作          | 使用本次 get 返回的精确 tabId 执行                                                               | 退化为“当前默认 tab”或跨 scope tab                                                    |
-| `tabs.selected()` | 只读取当前 effective active，不承担用户明确选择的替代品                                           | 把返回值当成模型多 tab 消歧的依据，或据此跳过 list→match→get 预检                      |
-| 系统 effective active | 无显式 selected 时由 main 按固定顺序回退出唯一 active（见下节），使 `tabs.list()` 的 `active` 与不带 tabId 的命令落点一致 | 把该回退当作模型的目标选择依据；在已有显式 selected 时用回退覆盖它                     |
+| 激活 side effect      | 更新 main selected tab，标记其它同 scope tab inactive；仅当该 scope 正在前台时显示/展开目标 view                                            | 后台对话抢占当前 workspace/session UI；激活失败后仍执行页面动作                                                                            |
+| 后续动作              | 使用本次 get 返回的精确 tabId 执行                                                                                                          | 退化为“当前默认 tab”或跨 scope tab                                                                                                         |
+| `tabs.selected()`     | 只读取当前 effective active，不承担用户明确选择的替代品                                                                                     | 把返回值当成模型多 tab 消歧的依据，或据此跳过 list→match→get 预检                                                                          |
+| 系统 effective active | 无显式 selected 时由 main 按固定顺序回退出唯一 active（见下节），使 `tabs.list()` 的 `active` 与不带 tabId 的命令落点一致                   | 把该回退当作模型的目标选择依据；在已有显式 selected 时用回退覆盖它                                                                         |
 
 ### 系统 effective active 回退（不是模型目标选择）
 
@@ -79,36 +79,36 @@ BTA-007 的多 tab 消歧规则不因该回退放宽。回退是「系统必须�
 
 ## Concept map and state owners
 
-| 概念                                     | owner                                                         | 证据                              |
-| ---------------------------------------- | ------------------------------------------------------------- | --------------------------------- |
-| list/get facade 与 Tab binding           | `apps/zcode-cli/packages/core/src/browser-client/facade.ts`   | command trace + core unit test    |
-| command schema                           | `packages/shared` 与 `apps/zcode-cli/packages/contracts` 镜像 | runtime schema parse test         |
+| 概念                                             | owner                                                         | 证据                                     |
+| ------------------------------------------------ | ------------------------------------------------------------- | ---------------------------------------- |
+| list/get facade 与 Tab binding                   | `apps/zcode-cli/packages/core/src/browser-client/facade.ts`   | command trace + core unit test           |
+| command schema                                   | `packages/shared` 与 `apps/zcode-cli/packages/contracts` 镜像 | runtime schema parse test                |
 | selected logical tab、scope、visibility callback | `BrowserGuestManager`                                         | manager unit test + response meta        |
 | suspended/restoring 与 guest residency           | `BrowserTabResidencyCoordinator`（待实现）                    | residency policy/repository/Electron E2E |
-| side-pane active/reveal                  | `applyBrowserUseSidePaneEvent` / `useAppPanels`               | UI state unit test                |
-| 模型操作规则                             | browser-use plugin skill/docs/API semantics                   | documentation assembly test       |
+| side-pane active/reveal                          | `applyBrowserUseSidePaneEvent` / `useAppPanels`               | UI state unit test                       |
+| 模型操作规则                                     | browser-use plugin skill/docs/API semantics                   | documentation assembly test              |
 
 ## Candidate combinations
 
-| Case    | State                              | Event                | Expected effect                                                                    | Classification                   |
-| ------- | ---------------------------------- | -------------------- | ---------------------------------------------------------------------------------- | -------------------------------- |
-| BTA-001 | 当前对话内 A active，B background  | `tabs.get(B)`        | list→activate B；B active/visible，A inactive                                      | accepted；旧实现为 bug-candidate |
-| BTA-002 | 前台 scope 的 side pane collapsed，B 已 selected | `tabs.get(B)` | 仍发 activate/show，重新展开 B                                                     | accepted                         |
-| BTA-003 | 对话 X 在后台，用户正在看对话 Y    | X 执行 `tabs.get(B)`，随后用户切回 X | backend 把 B 设为 X 的 active 并记住偏好；Y 的任务、side pane 和 active tab 均不变；切回 X 后展示 B 并主动展开 | accepted                         |
-| BTA-004 | list 后目标被关闭                  | `tabs.get(id)`       | activate 明确失败，不返回可操作 Tab                                                | accepted                         |
-| BTA-005 | 多 tab                             | 新逻辑操作批次       | 第一条 JS 返回 list；模型观察后第二条 JS 按 id/url/title match→get→action          | accepted                         |
-| BTA-006 | 同一 cell 已 get 目标              | 连续 snapshot/click  | 继续使用精确 tabId，不强制重复 list                                                | pruned；目标未跨异步边界变化     |
-| BTA-007 | 多 tab 无法唯一匹配                | 准备 action          | 先获取更多可见事实或向用户确认，不猜位置                                           | accepted                         |
-| BTA-008 | 目标 logical tab 已 suspended                    | `tabs.get(id)`                       | 恢复同一 stable id 后激活；guest id 可变化；失败时返回 typed error                                             | accepted；遵循 tab residency 策略   |
+| Case    | State                                            | Event                                | Expected effect                                                                                                | Classification                    |
+| ------- | ------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| BTA-001 | 当前对话内 A active，B background                | `tabs.get(B)`                        | list→activate B；B active/visible，A inactive                                                                  | accepted；旧实现为 bug-candidate  |
+| BTA-002 | 前台 scope 的 side pane collapsed，B 已 selected | `tabs.get(B)`                        | 仍发 activate/show，重新展开 B                                                                                 | accepted                          |
+| BTA-003 | 对话 X 在后台，用户正在看对话 Y                  | X 执行 `tabs.get(B)`，随后用户切回 X | backend 把 B 设为 X 的 active 并记住偏好；Y 的任务、side pane 和 active tab 均不变；切回 X 后展示 B 并主动展开 | accepted                          |
+| BTA-004 | list 后目标被关闭                                | `tabs.get(id)`                       | activate 明确失败，不返回可操作 Tab                                                                            | accepted                          |
+| BTA-005 | 多 tab                                           | 新逻辑操作批次                       | 第一条 JS 返回 list；模型观察后第二条 JS 按 id/url/title match→get→action                                      | accepted                          |
+| BTA-006 | 同一 cell 已 get 目标                            | 连续 snapshot/click                  | 继续使用精确 tabId，不强制重复 list                                                                            | pruned；目标未跨异步边界变化      |
+| BTA-007 | 多 tab 无法唯一匹配                              | 准备 action                          | 先获取更多可见事实或向用户确认，不猜位置                                                                       | accepted                          |
+| BTA-008 | 目标 logical tab 已 suspended                    | `tabs.get(id)`                       | 恢复同一 stable id 后激活；guest id 可变化；失败时返回 typed error                                             | accepted；遵循 tab residency 策略 |
 
 ## Accepted assertions and evidence
 
-| Case        | Assertions                                                                                     | Evidence                        |
-| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------- |
-| BTA-001/002 | core command 顺序为 list→activateTab；manager selected/meta 指向 B；visibility callback 收到 B | core + desktop unit tests       |
+| Case        | Assertions                                                                                                                                   | Evidence                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| BTA-001/002 | core command 顺序为 list→activateTab；manager selected/meta 指向 B；visibility callback 收到 B                                               | core + desktop unit tests       |
 | BTA-003     | callback/active map 只作用于完整 browser scope；renderer 记录 X 的 preferred tab 但保持 Y 前台；切回 X 后即使 Y 曾令 pane 收起也恢复并展开 B | desktop manager + UI scope test |
-| BTA-004     | unknown/stale id 返回 structured error，未产生 activate callback                               | core + manager unit tests       |
-| BTA-005/007 | effective documentation 明确包含 preflight 和禁止位置猜测                                      | browser manifest test           |
+| BTA-004     | unknown/stale id 返回 structured error，未产生 activate callback                                                                             | core + manager unit tests       |
+| BTA-005/007 | effective documentation 明确包含 preflight 和禁止位置猜测                                                                                    | browser manifest test           |
 
 ## Coverage and E2E handoff
 

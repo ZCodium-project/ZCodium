@@ -62,7 +62,9 @@ describe("会话区 Bash read-state E2E", () => {
     );
 
     const toolBlocks = await listToolCallBlocks();
-    expect(toolBlocks.filter((block) => block.toolName === "Bash").length).toBeGreaterThanOrEqual(2);
+    expect(toolBlocks.filter((block) => block.toolName === "Bash").length).toBeGreaterThanOrEqual(
+      2,
+    );
     expect(toolBlocks.some((block) => block.toolName === "Edit")).toBe(true);
     expect(await readFile(TARGET_PATH, "utf-8")).toBe(FORMATTED_CONTENT);
     expect(await countUpstreamRequests({ includes: [STALE_HINT] })).toBeGreaterThan(0);

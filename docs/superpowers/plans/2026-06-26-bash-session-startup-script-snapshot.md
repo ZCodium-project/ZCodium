@@ -70,7 +70,7 @@ core Bash handler 负责在 Bash tool request 上附带 session startup descript
 ```ts
 bashStartup: createBashSessionStartupScript({
   sessionId: context.sessionId,
-})
+});
 ```
 
 第一版 startup content 是 no-op header；如果 future embedded prelude flag 打开，adapter 会把 embedded search function content 合并进同一个 `.sh` 文件。
@@ -109,9 +109,11 @@ bashStartup: createBashSessionStartupScript({
 ### Task 1: Add Execution Bash Startup Contract
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/interfaces/execution.port.ts`
 
 **Interfaces:**
+
 - Produces: `ExecutionBashStartupScript`
 - Produces: `ExecutionRequest.bashStartup?: ExecutionBashStartupScript`
 - Consumes: existing `ExecutionRequest`, `ExecutionEmbeddedSearchPrelude`
@@ -167,12 +169,14 @@ Expected: command exits 0.
 ### Task 2: Add Core Bash Startup Descriptor Builder
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/tool/handlers/bash-startup.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/bash.ts`
 - Test: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 - Test: `apps/zcode-cli/packages/core/tests/embedded-search-shell.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SessionId`
 - Produces: `createBashSessionStartupScript(input): ExecutionBashStartupScript`
 - Produces: Bash `ExecutionRequest.bashStartup`
@@ -293,10 +297,12 @@ Expected: all Bash handler tests pass.
 ### Task 3: Materialize `.sh` Startup Script in Adapter
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/adapters/src/exec/bash-startup-script.ts`
 - Test: `apps/zcode-cli/packages/adapters/tests/bash-startup-script.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionBashStartupScript`
 - Consumes: `ExecutionShellDialect | "legacy-shell"`
 - Produces: `materializeBashStartupScript()`
@@ -402,10 +408,7 @@ Create `apps/zcode-cli/packages/adapters/src/exec/bash-startup-script.ts`:
 import { createHash } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type {
-  ExecutionBashStartupScript,
-  ExecutionShellDialect,
-} from "@zcode/contracts";
+import type { ExecutionBashStartupScript, ExecutionShellDialect } from "@zcode/contracts";
 import { windowsPathToGitBashPath } from "@zcode/contracts";
 
 type StartupShellDialect = ExecutionShellDialect | "legacy-shell";
@@ -492,11 +495,13 @@ Expected: all tests pass.
 ### Task 4: Wire Startup Script Into Node Execution Adapter
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/adapters/src/exec/index.ts`
 - Test: `apps/zcode-cli/packages/adapters/tests/exec.test.ts`
 - Test: `apps/zcode-cli/packages/adapters/tests/bash-startup-script.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionRequest.bashStartup`
 - Produces: Bash command whose first line sources the materialized startup script
 
@@ -573,19 +578,19 @@ import {
 In `NodeExecutionAdapter.spawnChild()`, after `resolvedCommand` is computed and before `createCwdCapturePlan(...)`, compute a request with startup applied:
 
 ```ts
-    const requestWithStartup = this.applyBashStartupToExecutionRequest(
-      request,
-      resolvedCommand.cwdDialect,
-    );
+const requestWithStartup = this.applyBashStartupToExecutionRequest(
+  request,
+  resolvedCommand.cwdDialect,
+);
 ```
 
 Then use `requestWithStartup` for cwd capture:
 
 ```ts
-    const capturePlan = createCwdCapturePlan(requestWithStartup, {
-      dialect: resolvedCommand.cwdDialect,
-      platform: this.platform,
-    });
+const capturePlan = createCwdCapturePlan(requestWithStartup, {
+  dialect: resolvedCommand.cwdDialect,
+  platform: this.platform,
+});
 ```
 
 Keep the later `resolveExecutionCommand(capturePlan.command, ...)` flow unchanged.
@@ -644,12 +649,14 @@ Expected: startup-related tests pass.
 ### Task 5: Merge Embedded Prelude Content Into Startup Script Path
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/adapters/src/exec/embedded-search-prelude.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/exec/index.ts`
 - Modify: `apps/zcode-cli/packages/adapters/tests/embedded-search-prelude.test.ts`
 - Modify: `apps/zcode-cli/packages/adapters/tests/bash-startup-script.test.ts`
 
 **Interfaces:**
+
 - Produces: `buildEmbeddedSearchPreludeContent(prelude, options): string | undefined`
 - Preserves: `applyEmbeddedSearchPrelude(command, prelude, options): string`
 
@@ -739,25 +746,25 @@ import { buildEmbeddedSearchPreludeContent } from "./embedded-search-prelude.js"
 Then update `applyBashStartupToExecutionRequest()` to materialize combined content:
 
 ```ts
-    const embeddedPreludeContent = buildEmbeddedSearchPreludeContent(request.bashPrelude, {
-      shellDialect: cwdDialect,
-    });
-    const startup =
-      request.bashStartup || embeddedPreludeContent
-        ? {
-            kind: "session-script" as const,
-            id: request.bashStartup?.id ?? "embedded-search-startup",
-            content: [request.bashStartup?.content, embeddedPreludeContent]
-              .filter((part): part is string => Boolean(part && part.length > 0))
-              .join("\n"),
-          }
-        : undefined;
+const embeddedPreludeContent = buildEmbeddedSearchPreludeContent(request.bashPrelude, {
+  shellDialect: cwdDialect,
+});
+const startup =
+  request.bashStartup || embeddedPreludeContent
+    ? {
+        kind: "session-script" as const,
+        id: request.bashStartup?.id ?? "embedded-search-startup",
+        content: [request.bashStartup?.content, embeddedPreludeContent]
+          .filter((part): part is string => Boolean(part && part.length > 0))
+          .join("\n"),
+      }
+    : undefined;
 
-    const materialized = materializeBashStartupScript(startup, {
-      rootDir,
-      sessionId,
-      shellDialect: cwdDialect,
-    });
+const materialized = materializeBashStartupScript(startup, {
+  rootDir,
+  sessionId,
+  shellDialect: cwdDialect,
+});
 ```
 
 After this is wired, remove the old `applyBashPreludeToExecutionRequest()` call from `spawnChild()` so there is only one Bash startup path.
@@ -787,10 +794,12 @@ Expected: all tests pass.
 ### Task 6: Document Runtime Contract
 
 **Files:**
+
 - Modify: `docs/runtime-tools/bash-effective-shell-snapshot.md`
 - Modify: `docs/superpowers/plans/2026-06-26-bash-session-startup-script-snapshot.md`
 
 **Interfaces:**
+
 - Produces: documented owner boundaries and acceptance criteria.
 
 - [ ] **Step 1: Add `.sh` startup snapshot section**
@@ -839,9 +848,11 @@ Expected: all three phrases are present in docs.
 ### Task 7: Final Verification
 
 **Files:**
+
 - No source edits unless verification exposes a concrete failure.
 
 **Interfaces:**
+
 - Consumes: all previous task outputs.
 - Produces: review-ready working tree.
 

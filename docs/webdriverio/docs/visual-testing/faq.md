@@ -11,8 +11,8 @@ No, you don't need to do this. The `check(Screen/Element/FullPageScreen)` will d
 
 You can update the baseline images through the command line by adding the argument `--update-visual-baseline`. This will
 
--   automatically copy the actual take screenshot and put it in the baseline folder
--   if there are differences it will let the test pass because the baseline has been updated
+- automatically copy the actual take screenshot and put it in the baseline folder
+- if there are differences it will let the test pass because the baseline has been updated
 
 **Usage:**
 
@@ -42,5 +42,5 @@ If you encounter issues with Canvas installation on Windows due to Node-Gyp erro
 
 If you still need to resolve the issues with Version 4, please check:
 
--   the Node Canvas section in the [Getting Started](/docs/visual-testing#system-requirements) guide
--   [this post](https://spin.atomicobject.com/2019/03/27/node-gyp-windows/) for Fixing Node-Gyp Issues on Windows. (Thanks to [IgorSasovets](https://github.com/IgorSasovets))
+- the Node Canvas section in the [Getting Started](/docs/visual-testing#system-requirements) guide
+- [this post](https://spin.atomicobject.com/2019/03/27/node-gyp-windows/) for Fixing Node-Gyp Issues on Windows. (Thanks to [IgorSasovets](https://github.com/IgorSasovets))

@@ -32,7 +32,7 @@ DevTools Performance 面板只能看到最近一小段时间内的 measure/mark�
 开发态长时间运行后，可在 DevTools Console 检查：
 
 ```js
-performance.getEntriesByType("measure").length
+performance.getEntriesByType("measure").length;
 ```
 
 该数量应保持在较低范围，不再随运行时间无界增长。

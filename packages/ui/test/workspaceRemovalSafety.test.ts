@@ -12,7 +12,11 @@ vi.mock("@/logger.js", () => ({
   },
 }));
 
-function createFileEntry(name: string, path: string, type: "file" | "directory" = "file"): FileEntry {
+function createFileEntry(
+  name: string,
+  path: string,
+  type: "file" | "directory" = "file",
+): FileEntry {
   return { name, path, type };
 }
 

@@ -27,6 +27,7 @@
 ### Task 0.1: 锁定误判链路和不可变边界
 
 **Files:**
+
 - Read: `DESIGN.md`
 - Read: `docs/ui/tool-display-rendering.md`
 - Read: `packages/ui/src/lib/exploreToolCall.ts`
@@ -35,6 +36,7 @@
 - Read: `apps/zcode-cli/packages/core/src/tool/handlers/bash-semantics.ts`
 
 **Interfaces:**
+
 - Consumes: 当前 UI 聚合入口 `shouldAggregateToolCall(toolCall)`。
 - Produces: 明确修复边界：只改 shell 展示分类，不改 runtime 执行和权限。
 
@@ -111,12 +113,14 @@ Expected:
 ### Task 1.1: 新增 `@zcode/shared/shell` 子路径和依赖归属
 
 **Files:**
+
 - Modify: `packages/shared/package.json`
 - Modify: `apps/zcode-cli/packages/core/package.json`
 - Modify: `pnpm-lock.yaml`
 - Create: `packages/shared/src/shell/index.ts`
 
 **Interfaces:**
+
 - Produces: `@zcode/shared/shell` 子路径，供 UI 和 core 导入。
 - Produces: shared 拥有 `unbash@4.0.1` 直接依赖。
 - Consumes: core 通过 workspace dependency 使用 shared shell helpers。
@@ -191,12 +195,14 @@ Expected: `pnpm-lock.yaml` 中 `@zcode/shared` 直接依赖 `unbash@4.0.1`，`@z
 ### Task 1.2: 移动 browser-safe Bash parser 和 readonly policy
 
 **Files:**
+
 - Move: `apps/zcode-cli/packages/core/src/tool/handlers/bash-command-parser.ts` -> `packages/shared/src/shell/bash-command-parser.ts`
 - Move: `apps/zcode-cli/packages/core/src/tool/handlers/bash-readonly-policy*.ts` -> `packages/shared/src/shell/`
 - Modify: moved `packages/shared/src/shell/bash-readonly-policy-argv.ts`
 - Test: `packages/shared/test/bashCommandParser.test.ts`
 
 **Interfaces:**
+
 - Produces: `analyzeBashCommand(command: string): BashCommandAnalysis`
 - Produces: `isBashCommandPermissionSafe(analysis: BashCommandAnalysis): boolean`
 - Produces: `evaluateBashReadonlyPolicy(commandPart, options?): boolean | undefined`
@@ -328,10 +334,12 @@ Expected: PASS.
 ### Task 2.1: 新增 Bash display classifier
 
 **Files:**
+
 - Create: `packages/shared/src/shell/bash-display-classifier.ts`
 - Test: `packages/shared/test/bashDisplayClassifier.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `classifyBashCommandForExplore(command: string, options?: BashExploreClassifierOptions): BashExploreClassification`
   - `BashExploreClassification` with `isExplore`, `isSearch`, `isRead`, `isList`, `reason`
@@ -611,12 +619,14 @@ Expected: PASS.
 ### Task 3.1: 更新 core imports 并保持权限语义不变
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/bash-semantics.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/bash-metadata.ts`
 - Modify: any remaining core import found by search
 - Test: `apps/zcode-cli/packages/core/tests/bash-permission.test.ts`
 
 **Interfaces:**
+
 - Consumes from `@zcode/shared/shell`:
   - `analyzeBashCommand`
   - `isBashCommandPermissionSafe`
@@ -692,10 +702,12 @@ Expected: PASS. Existing plan-mode read-only behavior must not regress.
 ### Task 3.2: Keep core search/read classifier behavior stable
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/bash-permission.test.ts`
 - Test: same file
 
 **Interfaces:**
+
 - Verifies `isBashInputReadOnly({ command })` rejects the reported command.
 - Verifies core remains more conservative than UI display when dynamic expansion exists.
 
@@ -726,11 +738,13 @@ Expected: PASS.
 ### Task 4.1: 替换 UI Bash 正则分类
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/exploreToolCall.ts`
 - Test: `packages/ui/test/toolCallBlocks.test.ts`
 - Test: `packages/ui/test/toolCallAggregation.test.ts`
 
 **Interfaces:**
+
 - Consumes: `classifyBashCommandForExplore(command)` from `@zcode/shared/shell`
 - Produces: `isExploreToolCall({ kind, input }): boolean` keeps public signature unchanged。
 
@@ -821,11 +835,13 @@ Add one Chinese comment near `normalizeCommandCandidate`:
 ### Task 4.2: Add UI regression tests
 
 **Files:**
+
 - Modify: `packages/ui/test/toolCallBlocks.test.ts`
 - Modify: `packages/ui/test/toolCallAggregation.test.ts`
 - Modify: `packages/ui/test/chatMessage.test.ts`
 
 **Interfaces:**
+
 - Verifies `isExploreToolCall` and aggregation rule both reject install-with-tail.
 - Verifies read-only shell pipelines still enter Explore.
 - Verifies PowerShell read/write behavior stays unchanged.
@@ -957,9 +973,11 @@ Expected: PASS for the new cases and existing PowerShell read/write cases.
 ### Task 5.1: 更新 UI 工具展示文档
 
 **Files:**
+
 - Modify: `docs/ui/tool-display-rendering.md`
 
 **Interfaces:**
+
 - Produces: 文档明确 Unix shell 用 shared `unbash` AST 分类，PowerShell 继续走命令表分类。
 
 - [ ] **Step 1: Update Explore shell classification paragraph**
@@ -983,9 +1001,11 @@ Expected: 文档同时保留 PowerShell read/write 规则和新的 Unix shell AS
 ### Task 5.2: Final verification
 
 **Files:**
+
 - All changed files.
 
 **Interfaces:**
+
 - Verifies shared, core, and UI all agree on this bug boundary.
 
 - [ ] **Step 1: Run all focused tests**

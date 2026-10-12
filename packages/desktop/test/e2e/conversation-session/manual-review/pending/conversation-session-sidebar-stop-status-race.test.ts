@@ -1,8 +1,5 @@
 import { TID_TASK_ITEM, testId } from "@zcode/shared";
-import {
-  clearAppData,
-  getActiveWorkspacePath,
-} from "../../../helpers/desktop-app.js";
+import { clearAppData, getActiveWorkspacePath } from "../../../helpers/desktop-app.js";
 import { ensureUpstreamProviderForE2E } from "../../../helpers/upstream-provider.js";
 import {
   clickV4Stop,
@@ -39,10 +36,7 @@ interface TaskListTestActions {
   armTaskMembershipRefreshHold(): void;
   releaseTaskMembershipRefreshHold(): void;
   getTaskMembershipRefreshHoldState(): MembershipHoldState;
-  getTaskListRefreshProbe(params: {
-    workspacePath: string;
-    taskId: string;
-  }): TaskListRefreshProbe;
+  getTaskListRefreshProbe(params: { workspacePath: string; taskId: string }): TaskListRefreshProbe;
 }
 
 describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
@@ -61,14 +55,10 @@ describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
 
     await prepareV4ConversationE2E();
     await ensureUpstreamProviderForE2E();
-    await sendV4Prompt(
-      `E2E_SLOW_STREAM ${PROMPT_MARKER}: Reply with exactly "upstream-e2e-ok".`,
-    );
+    await sendV4Prompt(`E2E_SLOW_STREAM ${PROMPT_MARKER}: Reply with exactly "upstream-e2e-ok".`);
     await waitForV4Pane(
       (snapshot) =>
-        snapshot.canStop &&
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft",
+        snapshot.canStop && snapshot.sessionId !== null && snapshot.sessionId !== "draft",
       "TSL18 前置请求没有进入正式 session 的 controlled streaming",
       45_000,
     );
@@ -81,11 +71,7 @@ describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
       );
     }
 
-    await waitForTaskLoadingIndicator(
-      taskId,
-      true,
-      "running task 没有显示侧栏 spinner",
-    );
+    await waitForTaskLoadingIndicator(taskId, true, "running task 没有显示侧栏 spinner");
 
     await armMembershipHold();
     await browser.waitUntil(
@@ -118,8 +104,7 @@ describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
           probe !== null &&
           probe.latestQueryStale === true &&
           typeof probe.latestInvalidationVersion === "number" &&
-          probe.latestInvalidationVersion >
-            (runningInvalidationVersion as number)
+          probe.latestInvalidationVersion > (runningInvalidationVersion as number)
         );
       },
       {
@@ -143,15 +128,10 @@ describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
       },
       {
         timeout: 30_000,
-        timeoutMsg:
-          "旧 membership 回包释放后，task query 没有按 Stop 终态重新收敛",
+        timeoutMsg: "旧 membership 回包释放后，task query 没有按 Stop 终态重新收敛",
       },
     );
-    await waitForTaskLoadingIndicator(
-      taskId,
-      false,
-      "Stop 后侧栏 spinner 仍在显示",
-    );
+    await waitForTaskLoadingIndicator(taskId, false, "Stop 后侧栏 spinner 仍在显示");
     await waitForTwoAnimationFrames();
 
     const indicatorProbe = await getSidebarIndicatorProbe();
@@ -163,8 +143,7 @@ describe("TSL18：Stop 终态拒绝在途旧 membership 回包", () => {
 
 async function armMembershipHold() {
   const armed = await browser.execute(() => {
-    const actions = (window as Window & { __testActions?: TaskListTestActions })
-      .__testActions;
+    const actions = (window as Window & { __testActions?: TaskListTestActions }).__testActions;
     if (!actions) {
       return false;
     }
@@ -176,16 +155,14 @@ async function armMembershipHold() {
 
 async function releaseMembershipHold() {
   await browser.execute(() => {
-    const actions = (window as Window & { __testActions?: TaskListTestActions })
-      .__testActions;
+    const actions = (window as Window & { __testActions?: TaskListTestActions }).__testActions;
     actions?.releaseTaskMembershipRefreshHold();
   });
 }
 
 async function getMembershipHoldState(): Promise<MembershipHoldState | null> {
   return browser.execute(() => {
-    const actions = (window as Window & { __testActions?: TaskListTestActions })
-      .__testActions;
+    const actions = (window as Window & { __testActions?: TaskListTestActions }).__testActions;
     return actions?.getTaskMembershipRefreshHoldState() ?? null;
   });
 }
@@ -196,24 +173,15 @@ async function getTaskListRefreshProbe(
 ): Promise<TaskListRefreshProbe | null> {
   return browser.execute(
     (path, id) => {
-      const actions = (
-        window as Window & { __testActions?: TaskListTestActions }
-      ).__testActions;
-      return (
-        actions?.getTaskListRefreshProbe({ workspacePath: path, taskId: id }) ??
-        null
-      );
+      const actions = (window as Window & { __testActions?: TaskListTestActions }).__testActions;
+      return actions?.getTaskListRefreshProbe({ workspacePath: path, taskId: id }) ?? null;
     },
     workspacePath,
     taskId,
   );
 }
 
-async function waitForTaskLoadingIndicator(
-  taskId: string,
-  expected: boolean,
-  timeoutMsg: string,
-) {
+async function waitForTaskLoadingIndicator(taskId: string, expected: boolean, timeoutMsg: string) {
   await browser.waitUntil(
     () =>
       browser
@@ -247,9 +215,7 @@ async function installSidebarIndicatorProbe(taskId: string) {
         observer: null as unknown as MutationObserver,
       };
       const sample = () => {
-        const row = document.querySelector<HTMLElement>(
-          `[data-testid="${taskItemTestId}"]`,
-        );
+        const row = document.querySelector<HTMLElement>(`[data-testid="${taskItemTestId}"]`);
         const loading = Boolean(row?.querySelector("svg.animate-spin"));
         if (!loading) {
           probe.seenTerminal = true;
@@ -265,9 +231,7 @@ async function installSidebarIndicatorProbe(taskId: string) {
       });
       probeWindow.__zcodeSidebarIndicatorProbe = probe;
       sample();
-      return Boolean(
-        document.querySelector(`[data-testid="${taskItemTestId}"]`),
-      );
+      return Boolean(document.querySelector(`[data-testid="${taskItemTestId}"]`));
     },
     testId(TID_TASK_ITEM, taskId),
   );

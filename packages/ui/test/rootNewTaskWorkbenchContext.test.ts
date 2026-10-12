@@ -122,13 +122,11 @@ function renderRootActions({
     tabs: [],
     activeWorkspacePath,
     activeWorkspaceIdentity,
-    activateTabByPath: vi.fn(
-      (workspacePath: string, options?: { workspaceIdentity?: string }) => {
-        tabState.activeWorkspacePath = workspacePath;
-        tabState.activeWorkspaceIdentity = options?.workspaceIdentity ?? null;
-        return true;
-      },
-    ),
+    activateTabByPath: vi.fn((workspacePath: string, options?: { workspaceIdentity?: string }) => {
+      tabState.activeWorkspacePath = workspacePath;
+      tabState.activeWorkspaceIdentity = options?.workspaceIdentity ?? null;
+      return true;
+    }),
   };
   const addTab = vi.fn((workspacePath: string, options?: { workspaceIdentity?: string }) => {
     tabState.activeWorkspacePath = workspacePath;
@@ -182,9 +180,7 @@ function renderRootActions({
 }
 
 function workspaceState(workspacePath: string, workspaceIdentity?: string) {
-  return useZCodeSessionStore
-    .getState()
-    .getWorkspaceState(workspacePath, workspaceIdentity);
+  return useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity);
 }
 
 describe("root new task workbench context", () => {
@@ -218,12 +214,8 @@ describe("root new task workbench context", () => {
     expect(tabState.activeWorkspacePath).toBe("/workspace-b");
     expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:/workspace-b");
     expect(workspaceState("/workspace-a").activeTaskId).toBe("main-session");
-    expect(
-      workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").activeTaskId,
-    ).toBeNull();
-    expect(
-      workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").draftFocusVersion,
-    ).toBe(1);
+    expect(workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").activeTaskId).toBeNull();
+    expect(workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").draftFocusVersion).toBe(1);
     expect(useWorkbenchGroupStore.getState().activeGroupId).toBeNull();
     expect(countPanes(usePaneLayoutStore.getState())).toBe(1);
   });
@@ -284,9 +276,7 @@ describe("root new task workbench context", () => {
 
     expect(tabState.activeWorkspacePath).toBe("/workspace-a");
     expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:/workspace-a");
-    expect(
-      workspaceState("/workspace-a", "remote:ssh:dev:/workspace-a").activeTaskId,
-    ).toBeNull();
+    expect(workspaceState("/workspace-a", "remote:ssh:dev:/workspace-a").activeTaskId).toBeNull();
   });
 
   it("preserves initial prompt trailing space in the targeted remote identity bucket", () => {

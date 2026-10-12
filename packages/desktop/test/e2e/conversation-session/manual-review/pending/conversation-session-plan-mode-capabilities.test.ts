@@ -39,8 +39,7 @@ const TITLE_REQUEST_SENTINEL = "Generate a concise title";
 const COMPACT_REQUEST_SENTINEL = "CRITICAL: Respond with TEXT ONLY";
 const PLAN_MODE_REMINDER = "Plan mode is active";
 const PLAN_MODE_NO_EDIT_REMINDER = "MUST NOT make any edits";
-const PLAN_MODE_DENIAL_REASON =
-  "Plan mode only allows read-only, non-destructive tools";
+const PLAN_MODE_DENIAL_REASON = "Plan mode only allows read-only, non-destructive tools";
 
 describe("conversation session plan mode capabilities", () => {
   after(async () => {
@@ -78,10 +77,7 @@ describe("conversation session plan mode capabilities", () => {
 
     await waitForUpstreamRequest(
       {
-        includes: [
-          DENY_EXIT_MARKER,
-          "toolu_e2e_plan_mode_deny_enter_plan_mode",
-        ],
+        includes: [DENY_EXIT_MARKER, "toolu_e2e_plan_mode_deny_enter_plan_mode"],
         excludes: [TITLE_REQUEST_SENTINEL, COMPACT_REQUEST_SENTINEL],
       },
       "plan mode deny exit request",
@@ -106,11 +102,7 @@ describe("conversation session plan mode capabilities", () => {
     await waitForComposerText("", "plan mode deny 后续输入发送后输入框没有清空");
     await waitForUpstreamRequest(
       {
-        includes: [
-          DENY_NEXT_MARKER,
-          PLAN_MODE_REMINDER,
-          PLAN_MODE_NO_EDIT_REMINDER,
-        ],
+        includes: [DENY_NEXT_MARKER, PLAN_MODE_REMINDER, PLAN_MODE_NO_EDIT_REMINDER],
         excludes: [TITLE_REQUEST_SENTINEL, COMPACT_REQUEST_SENTINEL],
       },
       "plan mode deny follow-up request should remain in plan mode",
@@ -184,10 +176,7 @@ describe("conversation session plan mode capabilities", () => {
   });
 });
 
-async function waitForElicitationDialogContaining(
-  text: string,
-  timeoutMs: number,
-) {
+async function waitForElicitationDialogContaining(text: string, timeoutMs: number) {
   const expectedTexts = expandElicitationDialogTextAlternatives(text);
   let latestDialogText = "";
   await browser.waitUntil(
@@ -195,17 +184,13 @@ async function waitForElicitationDialogContaining(
       // 修复原因：ExitPlanMode 的批准/忽略选项渲染在 footer，body 只包含计划正文。
       // 旧等待只查 body，会在真实弹窗已出现时继续等到超时。
       latestDialogText = await browser.execute(() => {
-        const body = document.querySelector<HTMLElement>(
-          "[data-elicitation-dialog-body='true']",
-        );
+        const body = document.querySelector<HTMLElement>("[data-elicitation-dialog-body='true']");
         const footer = document.querySelector<HTMLElement>(
           "[data-elicitation-dialog-footer='true']",
         );
         return [body?.innerText, footer?.innerText].filter(Boolean).join("\n");
       });
-      return expectedTexts.some((expectedText) =>
-        latestDialogText.includes(expectedText),
-      );
+      return expectedTexts.some((expectedText) => latestDialogText.includes(expectedText));
     },
     {
       timeout: timeoutMs,
@@ -227,9 +212,7 @@ function expandElicitationDialogTextAlternatives(text: string) {
 }
 
 async function dismissPlanApprovalWithoutFeedback() {
-  const dismissButton = await $(
-    "//button[contains(., 'Dismiss') or contains(., '忽略')]",
-  );
+  const dismissButton = await $("//button[contains(., 'Dismiss') or contains(., '忽略')]");
   await dismissButton.waitForEnabled({ timeout: 30000 });
   await dismissButton.click();
 }

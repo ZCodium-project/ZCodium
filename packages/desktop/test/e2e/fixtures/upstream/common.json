@@ -15,10 +15,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["Read {{e2eRuntimeRoot}}/shared/readonly-tool.txt"],
         "bodyIncludes": ["E2E_", "Read {{e2eRuntimeRoot}}/shared/readonly-tool.txt"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

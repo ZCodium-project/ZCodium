@@ -13,6 +13,7 @@
 ### Task 1: Lock the MR workflow contract
 
 **Files:**
+
 - Modify: `packages/desktop/test/ciNodeVersionConfig.test.ts`
 - Modify: `.gitlab/ci/00-workflow.yml`
 - Verify: `docs/ci-build-platform-selection.md`

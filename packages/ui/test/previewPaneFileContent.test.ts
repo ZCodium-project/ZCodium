@@ -24,9 +24,7 @@ vi.mock("@pierre/diffs/react", () => ({
       {
         class: className,
         "data-code": file?.contents,
-        "data-selected-lines": selectedLines
-          ? `${selectedLines.start}-${selectedLines.end}`
-          : "",
+        "data-selected-lines": selectedLines ? `${selectedLines.start}-${selectedLines.end}` : "",
       },
       lineAnnotations?.map((annotation, index) =>
         createElement("div", { key: index }, renderAnnotation?.(annotation)),

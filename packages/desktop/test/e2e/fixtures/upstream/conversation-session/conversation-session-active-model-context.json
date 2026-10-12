@@ -15,9 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "bodyIncludes": [
-          "Generate a concise title"
-        ]
+        "bodyIncludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -40,12 +38,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_ACTIVE_MODEL_CONTEXT_STEP_0"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_ACTIVE_MODEL_CONTEXT_STEP_0"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -68,12 +62,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_ACTIVE_MODEL_CONTEXT_STEP_1"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_ACTIVE_MODEL_CONTEXT_STEP_1"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -96,12 +86,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_ACTIVE_MODEL_CONTEXT_STEP_2"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_ACTIVE_MODEL_CONTEXT_STEP_2"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -124,12 +110,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_ACTIVE_MODEL_CONTEXT_STEP_3"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_ACTIVE_MODEL_CONTEXT_STEP_3"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,

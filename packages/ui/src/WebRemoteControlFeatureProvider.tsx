@@ -2,9 +2,7 @@ import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 const DEFAULT_WEB_REMOTE_CONTROL_FEATURE_ENABLED = true;
 
-const WebRemoteControlFeatureContext = createContext(
-  DEFAULT_WEB_REMOTE_CONTROL_FEATURE_ENABLED,
-);
+const WebRemoteControlFeatureContext = createContext(DEFAULT_WEB_REMOTE_CONTROL_FEATURE_ENABLED);
 
 export function WebRemoteControlFeatureProvider({
   enabled = DEFAULT_WEB_REMOTE_CONTROL_FEATURE_ENABLED,

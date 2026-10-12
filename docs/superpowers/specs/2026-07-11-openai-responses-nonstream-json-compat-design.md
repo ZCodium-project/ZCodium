@@ -100,8 +100,8 @@ factory，让 factory 组合本身成为协议判据；兼容器不得通过请�
 
 ### 单元与集成测试
 
-- pure normalizer：缺失 message `id` 与 output_text `annotations` 时只补这两个字段，
-  message ID 符合 `msg_<UUIDv4>`；
+- pure normalizer：缺失 message `id` 与 output*text `annotations` 时只补这两个字段，
+  message ID 符合 `msg*<UUIDv4>`；
 - 合法 Responses JSON 返回原始 Response，body 不变；
 - 未知 output item 不被修改；
 - SSE、非 2xx 响应保持原样；

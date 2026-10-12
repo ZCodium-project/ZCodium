@@ -207,10 +207,12 @@ describe("WindowRemoteConnectionRegistry", () => {
 
     pendingDocker.resolve(createHandle("docker-services").handle);
     await dockerConnect;
-    expect(registry.listReadyConnections().map((entry) => entry.services).sort()).toEqual([
-      "docker-services",
-      "ssh-services",
-    ]);
+    expect(
+      registry
+        .listReadyConnections()
+        .map((entry) => entry.services)
+        .sort(),
+    ).toEqual(["docker-services", "ssh-services"]);
 
     await registry.dispose();
     expect(registry.listReadyConnections()).toEqual([]);
@@ -251,8 +253,7 @@ describe("WindowRemoteConnectionRegistry", () => {
     const registry = createWindowRemoteConnectionRegistry({
       connect: (request) => {
         observedRequests.push({
-          password:
-            request.target.kind === "ssh" ? request.target.password : undefined,
+          password: request.target.kind === "ssh" ? request.target.password : undefined,
           signal: request.signal,
         });
         connectionId += 1;

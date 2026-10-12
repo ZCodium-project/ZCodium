@@ -7,8 +7,7 @@ import * as f from "./botsService.fixtures.js";
 import { startFeishuBotWebSocket } from "../src/bots/providers/feishuProvider.js";
 
 vi.mock("../src/bots/providers/feishuProvider.js", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../src/bots/providers/feishuProvider.js")>();
+  const actual = await importOriginal<typeof import("../src/bots/providers/feishuProvider.js")>();
   return {
     ...actual,
     startFeishuBotWebSocket: vi.fn(async () => ({ close: vi.fn() })),

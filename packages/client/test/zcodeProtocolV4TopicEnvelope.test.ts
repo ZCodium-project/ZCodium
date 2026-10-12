@@ -99,9 +99,7 @@ describe("V4 topic physical production envelopes", () => {
       let high = hardMax * 2;
       while (low < high) {
         const middle = Math.floor((low + high) / 2);
-        const measured = actualMax(
-          completeWire(logicalFrame("x".repeat(middle)), logicalFrameId),
-        );
+        const measured = actualMax(completeWire(logicalFrame("x".repeat(middle)), logicalFrameId));
         if (measured > limit) high = middle;
         else low = middle + 1;
       }

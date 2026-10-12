@@ -61,14 +61,14 @@ The second example uses [the Vitest plugin][8]. Here's a minimal example of a
 Vitest configuration file:
 
 ```ts title="vitest.config.ts"
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'istanbul',
+      provider: "istanbul",
     },
-    environment: 'happy-dom',
+    environment: "happy-dom",
   },
 });
 ```
@@ -116,11 +116,11 @@ tools. So you don't need to repeat this in your Knip configuration.
 For example, let's say your Playwright configuration contains the following:
 
 ```ts title="playwright.config.ts"
-import type { PlaywrightTestConfig } from '@playwright/test';
+import type { PlaywrightTestConfig } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
-  testDir: 'integration',
-  testMatch: ['**/*-test.ts'],
+  testDir: "integration",
+  testMatch: ["**/*-test.ts"],
 };
 
 export default config;
@@ -218,17 +218,17 @@ Read more about this in [command-line arguments][5].
 Let's take a look at this example webpack configuration file:
 
 ```js title="webpack.config.js"
-module.exports = env => {
+module.exports = (env) => {
   return {
     entry: {
-      main: './src/app.ts',
-      vendor: './src/vendor.ts',
+      main: "./src/app.ts",
+      vendor: "./src/vendor.ts",
     },
     module: {
       rules: [
         {
           test: /\.(woff|ttf|ico|woff2|jpg|jpeg|png|webp)$/i,
-          use: 'base64-inline-loader',
+          use: "base64-inline-loader",
         },
       ],
     },
@@ -256,17 +256,17 @@ plugin to find additional dependencies.
 Let's take a look at this example Vite configuration file:
 
 ```ts title="vite.config.ts"
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig(async ({ mode, command }) => {
   return {
     plugins: [react()],
     test: {
-      setupFiles: ['./setup-tests.ts'],
-      environment: 'happy-dom',
+      setupFiles: ["./setup-tests.ts"],
+      environment: "happy-dom",
       coverage: {
-        provider: 'c8',
+        provider: "c8",
       },
     },
   };

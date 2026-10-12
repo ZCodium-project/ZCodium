@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  countAllUnreadTasks,
-  countWorkspaceUnreadTasks,
-} from "../src/lib/unreadTaskCount.js";
+import { countAllUnreadTasks, countWorkspaceUnreadTasks } from "../src/lib/unreadTaskCount.js";
 
 describe("unread task count", () => {
   it("按 workspace 统计未读 task 数", () => {

@@ -88,13 +88,7 @@ export function ImagePreviewContent({
   );
 }
 
-export function SvgPreviewContent({
-  title,
-  svgContent,
-}: {
-  title: string;
-  svgContent: string;
-}) {
+export function SvgPreviewContent({ title, svgContent }: { title: string; svgContent: string }) {
   return (
     <ImagePreviewContent
       fitToContainer

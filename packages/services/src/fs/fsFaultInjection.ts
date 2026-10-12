@@ -90,7 +90,9 @@ function normalizePathPattern(pattern: string | undefined): string | undefined {
 
 function assertNonEmptyString(value: unknown, field: string, ruleIndex: number): string {
   if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`Invalid fs fault rule at index ${ruleIndex}: ${field} must be a non-empty string`);
+    throw new Error(
+      `Invalid fs fault rule at index ${ruleIndex}: ${field} must be a non-empty string`,
+    );
   }
   return value.trim();
 }
@@ -100,7 +102,9 @@ function parseOperations(value: unknown, ruleIndex: number): readonly FsFaultOpe
     return ["any"];
   }
   if (!Array.isArray(value) || value.length === 0) {
-    throw new Error(`Invalid fs fault rule at index ${ruleIndex}: operations must be a non-empty array`);
+    throw new Error(
+      `Invalid fs fault rule at index ${ruleIndex}: operations must be a non-empty array`,
+    );
   }
   return value.map((operation) => {
     if (typeof operation !== "string" || !SUPPORTED_OPERATIONS.has(operation as FsFaultOperation)) {
@@ -117,7 +121,9 @@ function parseMaxMatches(value: unknown, ruleIndex: number): number {
     return 1;
   }
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
-    throw new Error(`Invalid fs fault rule at index ${ruleIndex}: maxMatches must be a non-negative integer`);
+    throw new Error(
+      `Invalid fs fault rule at index ${ruleIndex}: maxMatches must be a non-negative integer`,
+    );
   }
   return value;
 }
@@ -138,8 +144,12 @@ function normalizeRule(input: FsFaultRuleConfig, ruleIndex: number): NormalizedF
   const code = assertNonEmptyString(record.code, "code", ruleIndex);
   const operations = new Set(parseOperations(record.operations, ruleIndex));
   const maxMatches = parseMaxMatches(record.maxMatches, ruleIndex);
-  const pathIncludes = normalizePathPattern(parseOptionalString(record.pathIncludes, "pathIncludes", ruleIndex));
-  const pathEndsWith = normalizePathPattern(parseOptionalString(record.pathEndsWith, "pathEndsWith", ruleIndex));
+  const pathIncludes = normalizePathPattern(
+    parseOptionalString(record.pathIncludes, "pathIncludes", ruleIndex),
+  );
+  const pathEndsWith = normalizePathPattern(
+    parseOptionalString(record.pathEndsWith, "pathEndsWith", ruleIndex),
+  );
   const pathRegexRaw = parseOptionalString(record.pathRegex, "pathRegex", ruleIndex);
   const message = parseOptionalString(record.message, "message", ruleIndex);
 

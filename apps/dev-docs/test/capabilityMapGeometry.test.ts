@@ -23,14 +23,8 @@ describe("能力图父子元素间距", () => {
       headerHeight: CAPABILITY_GROUP_HEADER_HEIGHT,
       level: "能力群",
     },
-  ])(
-    "$level 子元素不会覆盖标题区",
-    ({ contentTop, frameBorderWidth, headerHeight }) => {
-      const effectiveClearance =
-        contentTop - frameBorderWidth - headerHeight;
-      expect(effectiveClearance).toBeGreaterThanOrEqual(
-        CAPABILITY_HEADER_CONTENT_GAP,
-      );
-    },
-  );
+  ])("$level 子元素不会覆盖标题区", ({ contentTop, frameBorderWidth, headerHeight }) => {
+    const effectiveClearance = contentTop - frameBorderWidth - headerHeight;
+    expect(effectiveClearance).toBeGreaterThanOrEqual(CAPABILITY_HEADER_CONTENT_GAP);
+  });
 });

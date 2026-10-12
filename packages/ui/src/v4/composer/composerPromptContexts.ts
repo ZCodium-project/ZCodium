@@ -62,18 +62,9 @@ export function serializeComposerPromptContexts(
     text,
     contexts.conversationSelections,
   );
-  const withCodeComments = buildPromptWithCodeComments(
-    withSelections,
-    contexts.codeComments,
-  );
-  const withWebElements = buildPromptWithWebElementContexts(
-    withCodeComments,
-    contexts.webElements,
-  );
-  const withPptx = buildPromptWithPptxElementReferences(
-    withWebElements,
-    contexts.pptxElements,
-  );
+  const withCodeComments = buildPromptWithCodeComments(withSelections, contexts.codeComments);
+  const withWebElements = buildPromptWithWebElementContexts(withCodeComments, contexts.webElements);
+  const withPptx = buildPromptWithPptxElementReferences(withWebElements, contexts.pptxElements);
   return buildPromptWithPluginUiContexts(withPptx, contexts.pluginUiContexts ?? []);
 }
 

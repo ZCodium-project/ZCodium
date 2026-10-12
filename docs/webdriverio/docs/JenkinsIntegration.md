@@ -7,20 +7,23 @@ WebdriverIO offers a tight integration to CI systems like [Jenkins](https://jenk
 
 1. Install the `junit` test reporter: `$ npm install @wdio/junit-reporter --save-dev`)
 1. Update your config to save your XUnit results where Jenkins can find them,
-    (and specify the `junit` reporter):
+   (and specify the `junit` reporter):
 
 ```js
 // wdio.conf.js
 module.exports = {
-    // ...
-    reporters: [
-        'dot',
-        ['junit', {
-            outputDir: './'
-        }]
+  // ...
+  reporters: [
+    "dot",
+    [
+      "junit",
+      {
+        outputDir: "./",
+      },
     ],
-    // ...
-}
+  ],
+  // ...
+};
 ```
 
 It is up to you which framework to choose. The reports will be similar.

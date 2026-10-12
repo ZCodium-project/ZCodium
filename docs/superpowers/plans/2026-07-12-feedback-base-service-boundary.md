@@ -23,9 +23,11 @@
 ### Task 1: Lock the feedback service wiring with a regression test
 
 **Files:**
+
 - Create: `packages/ui/test/feedbackBaseServiceBoundary.test.ts`
 
 **Interfaces:**
+
 - Consumes: `RootProps.services: IServiceAccessor`, `RootWorkspaceContent`, `App`, and `FeedbackHost`.
 - Produces: a source-level boundary guard that fails until the base feedback service is passed independently of workspace-scoped services.
 
@@ -42,17 +44,11 @@ function readSource(path: string): string {
 describe("feedback base service boundary", () => {
   it("keeps feedback on the base service when workspace services are disconnected", () => {
     const rootSource = readSource("packages/ui/src/Root.tsx");
-    const rootWorkspaceContentSource = readSource(
-      "packages/ui/src/root/RootWorkspaceContent.tsx",
-    );
+    const rootWorkspaceContentSource = readSource("packages/ui/src/root/RootWorkspaceContent.tsx");
     const appSource = readSource("packages/ui/src/App.tsx");
 
-    expect(rootSource).toContain(
-      "baseFeedbackService={services.feedbackService}",
-    );
-    expect(rootWorkspaceContentSource).toContain(
-      "baseFeedbackService={baseFeedbackService}",
-    );
+    expect(rootSource).toContain("baseFeedbackService={services.feedbackService}");
+    expect(rootWorkspaceContentSource).toContain("baseFeedbackService={baseFeedbackService}");
     expect(appSource).toContain(
       "<FeedbackHost feedbackService={baseFeedbackService} platform={platform} />",
     );
@@ -72,6 +68,7 @@ Expected: FAIL because `Root` does not yet pass `baseFeedbackService` and `App` 
 ### Task 2: Explicitly inject the base feedback service
 
 **Files:**
+
 - Modify: `packages/ui/src/app-shell/types.ts`
 - Modify: `packages/ui/src/root/RootWorkspaceContent.tsx`
 - Modify: `packages/ui/src/Root.tsx`
@@ -79,6 +76,7 @@ Expected: FAIL because `Root` does not yet pass `baseFeedbackService` and `App` 
 - Test: `packages/ui/test/feedbackBaseServiceBoundary.test.ts`
 
 **Interfaces:**
+
 - Consumes: `IFeedbackService` from `@zcode/services` and `RootProps.services.feedbackService`.
 - Produces: required `AppProps.baseFeedbackService: IFeedbackService`; `WorkspaceShellLayoutProps` excludes that application-level dependency.
 
@@ -94,8 +92,7 @@ export interface AppProps {
   baseFeedbackService: IFeedbackService;
 }
 
-export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackService"> {
-}
+export interface WorkspaceShellLayoutProps extends Omit<AppProps, "baseFeedbackService"> {}
 ```
 
 Insert `baseFeedbackService` immediately after `services`. Replace only the `extends AppProps` clause on `WorkspaceShellLayoutProps`; do not copy or remove its current members.
@@ -144,10 +141,7 @@ Insert the new prop immediately after `workspaceScopedServices`; preserve the re
 Update `App` destructuring and the feedback host in `packages/ui/src/App.tsx`:
 
 ```tsx
-export function App({
-  services,
-  baseFeedbackService,
-}: AppProps) {
+export function App({ services, baseFeedbackService }: AppProps) {
   return (
     <>
       {/* Bugfix: 反馈是应用级能力，必须固定走本机 base host；SSH session 连接中或断开时，
@@ -182,9 +176,11 @@ git commit -m "fix(feedback): keep submissions on base service"
 ### Task 3: Complete repository verification
 
 **Files:**
+
 - Verify only; no production files should change.
 
 **Interfaces:**
+
 - Consumes: the implementation commit from Task 2.
 - Produces: fresh test, typecheck, lint, and diff evidence for handoff.
 

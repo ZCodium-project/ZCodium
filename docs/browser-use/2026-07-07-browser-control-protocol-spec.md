@@ -18,23 +18,31 @@
 ## 3. 协议方法 interaction/browserExecute
 
 `packages/shared/src/zcode-protocol/index.ts`：
+
 - `zcodeProtocolMethods` 加 `interactionBrowserExecute: "interaction/browserExecute"`（归 interaction/，agent→app 反向请求，非 session method）。
 - 新增 schema（成对 + type）：
   ```ts
-  zcodeBrowserExecuteParamsSchema = z.object({
-    requestId: nonEmptyString,       // 关联
-    sessionId: nonEmptyString,       // zcode session
-    turnId: nonEmptyString.optional(),
-    command: zcodeBrowserCommandSchema,   // 复用 browser-use/commands 的判别联合（在 protocol 内重声明或 import）
-  }).strict();
-  zcodeBrowserExecuteResultSchema = z.object({
-    ok: z.boolean(),
-    state: z.unknown().optional(),        // BrowserPageState
-    snapshot: z.unknown().optional(),
-    image: z.object({ base64: z.string(), mimeType: z.literal("image/png") }).strict().optional(),
-    error: z.object({ code: z.string(), message: z.string() }).strict().optional(),
-    elapsedMs: z.number().nonnegative(),
-  }).strict();
+  zcodeBrowserExecuteParamsSchema = z
+    .object({
+      requestId: nonEmptyString, // 关联
+      sessionId: nonEmptyString, // zcode session
+      turnId: nonEmptyString.optional(),
+      command: zcodeBrowserCommandSchema, // 复用 browser-use/commands 的判别联合（在 protocol 内重声明或 import）
+    })
+    .strict();
+  zcodeBrowserExecuteResultSchema = z
+    .object({
+      ok: z.boolean(),
+      state: z.unknown().optional(), // BrowserPageState
+      snapshot: z.unknown().optional(),
+      image: z
+        .object({ base64: z.string(), mimeType: z.literal("image/png") })
+        .strict()
+        .optional(),
+      error: z.object({ code: z.string(), message: z.string() }).strict().optional(),
+      elapsedMs: z.number().nonnegative(),
+    })
+    .strict();
   ```
   注意：protocol 文件历史上 schema 自包含，`zcodeBrowserCommandSchema` 直接在此定义（与 browser-use/commands.ts 同构，用 keep-in-sync 注释 + round-trip 测防漂移）；或从 browser-use/commands import。优先 import 复用。
 - 契约表 `zcodeProtocolSessionMethodContracts` 加 `[interactionBrowserExecute]: { params, result }`。
@@ -57,6 +65,7 @@
 ## 5. Port 注入链（沿 executionPort 同路）
 
 `browserControlPort` 完全仿 `executionPort` 全链透传：
+
 - `ZCodeAppOptions`（`bootstrap/src/app/types.ts`）加 `browserControlPort?: BrowserControlPort`（可选，缺省则 agent.browsers 报 unavailable）。
 - `create-app.ts` 把 `options.browserControlPort` 透传进 agent-runtime deps（仿 220/346/394/437 行 executionPort）。
 - `ToolExecutionContext`（`core/src/tool/types.ts`）加 `browserControlPort?`；`call-runner.ts`/`impl.ts`/`agent-runtime.ts` 组装 context 时透传（仿 executionPort）。

@@ -54,10 +54,7 @@ describe("Hooks settings page", () => {
       sections
         .filter((section) => section.kind === "plugin")
         .flatMap((section) => section.hooks.map((hook) => hook.pluginId)),
-    ).toEqual([
-      "computer-use@zcode-plugins-official",
-      "zcode-cua@custom-marketplace",
-    ]);
+    ).toEqual(["computer-use@zcode-plugins-official", "zcode-cua@custom-marketplace"]);
   });
 
   it("only exposes connected Workspaces to Hooks scope routing", () => {
@@ -170,9 +167,7 @@ describe("Hooks settings page", () => {
       },
     };
 
-    const slowInitialize = useHooksStore
-      .getState()
-      .initialize("/workspace-a", undefined, service);
+    const slowInitialize = useHooksStore.getState().initialize("/workspace-a", undefined, service);
     await useHooksStore.getState().initialize("/workspace-b", undefined, service);
     releaseSlowLoad?.();
     await slowInitialize;
@@ -279,7 +274,10 @@ describe("Hooks settings page", () => {
           null,
           createElement(HooksList, {
             compatibilityHooks: [legacy],
-            editableHooks: [configuredHook(), { ...configuredHook(), id: "configured-2", event: "Stop" }],
+            editableHooks: [
+              configuredHook(),
+              { ...configuredHook(), id: "configured-2", event: "Stop" },
+            ],
             operatingHookId: null,
             pluginHooks: [
               {
@@ -313,9 +311,7 @@ describe("Hooks settings page", () => {
     expect(html).toContain("Stop");
     expect(html).toContain("Installed");
     expect(html).toContain("New");
-    expect(html).toContain(
-      "flex flex-wrap items-center justify-between gap-3",
-    );
+    expect(html).toContain("flex flex-wrap items-center justify-between gap-3");
     expect(html).not.toContain("flex h-7 items-center justify-between");
     expect(html).toContain("Legacy");
     expect(html).toContain("PostToolUse");
@@ -643,7 +639,11 @@ describe("resolveLatestReviewScopeTarget", () => {
     const target = resolveLatestReviewScopeTarget(
       {
         s1: {
-          request: { interactionId: "i-1", createdAt: 1, workspaceIdentity: "ssh://dev/remote/repo" },
+          request: {
+            interactionId: "i-1",
+            createdAt: 1,
+            workspaceIdentity: "ssh://dev/remote/repo",
+          },
           workspacePath: "/remote/repo",
         },
       },
@@ -669,7 +669,11 @@ describe("resolveLatestReviewScopeTarget", () => {
     const target = resolveLatestReviewScopeTarget(
       {
         s1: {
-          request: { interactionId: "i-old", createdAt: 1, workspaceIdentity: "ssh://dev/remote/repo" },
+          request: {
+            interactionId: "i-old",
+            createdAt: 1,
+            workspaceIdentity: "ssh://dev/remote/repo",
+          },
           workspacePath: "/remote/repo",
         },
         s2: {

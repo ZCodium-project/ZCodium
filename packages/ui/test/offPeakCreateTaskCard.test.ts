@@ -7,10 +7,8 @@ import { resolveOffPeakDetailNavigation } from "@/settings/AutomationsSection.js
 import type { ZCodeOffPeakTask } from "@zcode/shared";
 
 const intl = {
-  formatMessage: (
-    { id }: { id: string },
-    values?: Record<string, string | number>,
-  ) => (id === "offPeak.chatCreated.queuedAt" ? `排队第 ${values?.["position"]} 位` : id),
+  formatMessage: ({ id }: { id: string }, values?: Record<string, string | number>) =>
+    id === "offPeak.chatCreated.queuedAt" ? `排队第 ${values?.["position"]} 位` : id,
 };
 
 describe("OffPeakCreateTaskCard output（D49-6 静态轮尾卡）", () => {
@@ -43,9 +41,9 @@ describe("OffPeakCreateTaskCard output（D49-6 静态轮尾卡）", () => {
   });
 
   it("状态行：有位次显示创建时快照，无位次回退排队文案", () => {
-    expect(
-      describeOffPeakCardStatus({ offPeakTaskId: "offpeak-1", queuePosition: 3 }, intl),
-    ).toBe("排队第 3 位");
+    expect(describeOffPeakCardStatus({ offPeakTaskId: "offpeak-1", queuePosition: 3 }, intl)).toBe(
+      "排队第 3 位",
+    );
     expect(describeOffPeakCardStatus({ offPeakTaskId: "offpeak-1" }, intl)).toBe(
       "offPeak.chatCreated.queued",
     );

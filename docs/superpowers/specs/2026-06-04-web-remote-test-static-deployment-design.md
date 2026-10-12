@@ -218,4 +218,3 @@ bash scripts/test-web-remote-control-test-docker-build.sh
 6. `scripts/docker-build-and-push-web-remote-control-test.sh`
 7. `scripts/test-web-remote-control-test-docker-build.sh`
 8. `docs/web-remote-control/web-remote-control-architecture.md`
-

@@ -8,17 +8,11 @@ function readSource(path: string): string {
 describe("feedback base service boundary", () => {
   it("keeps feedback on the base service when workspace services are disconnected", () => {
     const rootSource = readSource("packages/ui/src/Root.tsx");
-    const rootWorkspaceContentSource = readSource(
-      "packages/ui/src/root/RootWorkspaceContent.tsx",
-    );
+    const rootWorkspaceContentSource = readSource("packages/ui/src/root/RootWorkspaceContent.tsx");
     const appSource = readSource("packages/ui/src/App.tsx");
 
-    expect(rootSource).toContain(
-      "baseFeedbackService={services.feedbackService}",
-    );
-    expect(rootWorkspaceContentSource).toContain(
-      "baseFeedbackService={baseFeedbackService}",
-    );
+    expect(rootSource).toContain("baseFeedbackService={services.feedbackService}");
+    expect(rootWorkspaceContentSource).toContain("baseFeedbackService={baseFeedbackService}");
     expect(appSource).toContain(
       "<FeedbackHost feedbackService={baseFeedbackService} platform={platform} />",
     );

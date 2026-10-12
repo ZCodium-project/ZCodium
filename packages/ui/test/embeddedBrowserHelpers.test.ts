@@ -18,12 +18,8 @@ describe("embeddedBrowserHelpers", () => {
   });
 
   it("keeps explicit HTTP and HTTPS URLs unchanged", () => {
-    expect(normalizeBrowserUrl("http://localhost:5173")).toBe(
-      "http://localhost:5173",
-    );
-    expect(normalizeBrowserUrl("https://example.com/docs")).toBe(
-      "https://example.com/docs",
-    );
+    expect(normalizeBrowserUrl("http://localhost:5173")).toBe("http://localhost:5173");
+    expect(normalizeBrowserUrl("https://example.com/docs")).toBe("https://example.com/docs");
   });
 
   it("defaults normal domains to HTTPS", () => {
@@ -31,9 +27,7 @@ describe("embeddedBrowserHelpers", () => {
     expect(normalizeBrowserUrl("example.com/path?q=1#top")).toBe(
       "https://example.com/path?q=1#top",
     );
-    expect(normalizeBrowserUrl("//example.com/path")).toBe(
-      "https://example.com/path",
-    );
+    expect(normalizeBrowserUrl("//example.com/path")).toBe("https://example.com/path");
   });
 
   it("defaults local development hosts to HTTP", () => {
@@ -92,24 +86,20 @@ describe("embeddedBrowserHelpers", () => {
     const localUrl = "http://localhost:5173";
 
     // 回归：公网链接右键「打开」必须进内置浏览器，之前和「在浏览器中打开」等价。
-    expect(
-      resolveMessageLinkOpenTarget({ href: feishuDocUrl, forceInApp: true }),
-    ).toBe("app-browser");
-    expect(
-      resolveMessageLinkOpenTarget({ href: feishuDocUrl, forceExternal: true }),
-    ).toBe("external-browser");
-
-    expect(
-      resolveMessageLinkOpenTarget({ href: localUrl, forceExternal: true }),
-    ).toBe("external-browser");
-    expect(
-      resolveMessageLinkOpenTarget({ href: localUrl, forceInApp: true }),
-    ).toBe("app-browser");
-
-    // 左键单击（无 flag）仍走白名单启发式。
-    expect(resolveMessageLinkOpenTarget({ href: feishuDocUrl })).toBe(
+    expect(resolveMessageLinkOpenTarget({ href: feishuDocUrl, forceInApp: true })).toBe(
+      "app-browser",
+    );
+    expect(resolveMessageLinkOpenTarget({ href: feishuDocUrl, forceExternal: true })).toBe(
       "external-browser",
     );
+
+    expect(resolveMessageLinkOpenTarget({ href: localUrl, forceExternal: true })).toBe(
+      "external-browser",
+    );
+    expect(resolveMessageLinkOpenTarget({ href: localUrl, forceInApp: true })).toBe("app-browser");
+
+    // 左键单击（无 flag）仍走白名单启发式。
+    expect(resolveMessageLinkOpenTarget({ href: feishuDocUrl })).toBe("external-browser");
     expect(resolveMessageLinkOpenTarget({ href: localUrl })).toBe("app-browser");
 
     // 两个 flag 同传时以 forceExternal 为准。
@@ -123,12 +113,8 @@ describe("embeddedBrowserHelpers", () => {
   });
 
   it("uses HTTP for explicit non-HTTPS ports", () => {
-    expect(normalizeBrowserUrl("example.com:80")).toBe(
-      "http://example.com:80",
-    );
-    expect(normalizeBrowserUrl("example.com:8080")).toBe(
-      "http://example.com:8080",
-    );
+    expect(normalizeBrowserUrl("example.com:80")).toBe("http://example.com:80");
+    expect(normalizeBrowserUrl("example.com:8080")).toBe("http://example.com:8080");
     expect(normalizeBrowserUrl("example.com:443")).toBe("https://example.com:443");
   });
 

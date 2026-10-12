@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_RESUME_STALE_SEED"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_RESUME_STALE_SEED"
-        ]
+        "bodyIncludes": ["E2E_GOAL_RESUME_STALE_SEED"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_RESUME_STALE_SEED"]
       },
       "response": {
         "statusCode": 200,
@@ -50,16 +43,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_RESUME_STALE_SEND_NOW"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_RESUME_STALE_SEND_NOW"
-        ]
+        "bodyIncludes": ["E2E_GOAL_RESUME_STALE_SEND_NOW"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_RESUME_STALE_SEND_NOW"]
       },
       "response": {
         "statusCode": 200,
@@ -84,16 +70,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_RESUME_STALE_OBJECTIVE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_RESUME_STALE_OBJECTIVE"
-        ]
+        "bodyIncludes": ["E2E_GOAL_RESUME_STALE_OBJECTIVE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_RESUME_STALE_OBJECTIVE"]
       },
       "response": {
         "statusCode": 200,

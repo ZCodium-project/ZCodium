@@ -20,10 +20,12 @@
 ### Task 1: 锁定非阻塞上传契约
 
 **Files:**
+
 - Modify: `packages/desktop/test/gitlabCiBuildGraph.test.ts:149`
 - Test: `packages/desktop/test/gitlabCiBuildGraph.test.ts`
 
 **Interfaces:**
+
 - Consumes: `.gitlab/ci/20-test.yml` 中两个 conversation-session E2E job 的文本。
 - Produces: 保留上传位置与失败视频配置、禁止 `ZCODE_E2E_REPORT_UPLOAD_REQUIRED` 的静态契约。
 
@@ -47,10 +49,12 @@ Expected: FAIL，指出两个 job 仍包含 `ZCODE_E2E_REPORT_UPLOAD_REQUIRED`�
 ### Task 2: 移除两个平台的强制上传门禁
 
 **Files:**
+
 - Modify: `.gitlab/ci/20-test.yml:189`
 - Test: `packages/desktop/test/gitlabCiBuildGraph.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的静态契约。
 - Produces: 报告上传状态仅用于 warning，job 最终状态只由 `$e2e_status` / `$e2eStatus` 决定。
 

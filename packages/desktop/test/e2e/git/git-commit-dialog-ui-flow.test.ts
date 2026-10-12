@@ -2,11 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import {
-  DEFAULT_WORKSPACE,
-  clearAppData,
-  waitForWorkspaceApp,
-} from "../helpers/desktop-app.js";
+import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "../helpers/desktop-app.js";
 import {
   E2E_REPLY_TOKEN,
   buildReadonlyToolPrompt,
@@ -32,11 +28,7 @@ const TID_GIT_COMMIT_GENERATE_BUTTON = "git-commit-generate-button";
 const TID_GIT_COMMIT_INCLUDE_UNSTAGED = "git-commit-include-unstaged";
 const TID_GIT_COMMIT_MESSAGE_INPUT = "git-commit-message-input";
 const GIT_FIXTURE_FILE = join(".zcode-e2e", "git-commit-dialog", "tracked-file.md");
-const GIT_FIXTURE_STAGED_FILE = join(
-  ".zcode-e2e",
-  "git-commit-dialog",
-  "staged-file.md",
-);
+const GIT_FIXTURE_STAGED_FILE = join(".zcode-e2e", "git-commit-dialog", "staged-file.md");
 const execGit = promisify(execFile);
 
 function testId(base: string, suffix: string): string {
@@ -165,13 +157,8 @@ async function expandSummaryPanelIfCollapsed() {
     await browser.waitUntil(
       async () => {
         latest = (await browser.execute(
-          (
-            panelTestId: string,
-            triggerTestId: string,
-          ): SummaryPanelSnapshot => {
-            const panel = document.querySelector<HTMLElement>(
-              `[data-testid="${panelTestId}"]`,
-            );
+          (panelTestId: string, triggerTestId: string): SummaryPanelSnapshot => {
+            const panel = document.querySelector<HTMLElement>(`[data-testid="${panelTestId}"]`);
             if (!panel) {
               return { exists: false };
             }
@@ -181,15 +168,11 @@ async function expandSummaryPanelIfCollapsed() {
                 `[data-testid="${triggerTestId}"]`,
               );
               const rect = trigger?.getBoundingClientRect();
-              return Boolean(
-                trigger && rect && rect.width > 0 && rect.height > 0,
-              );
+              return Boolean(trigger && rect && rect.width > 0 && rect.height > 0);
             };
 
             if (!getTriggerVisible()) {
-              const expandButton = panel.querySelector<HTMLElement>(
-                'button[aria-label]',
-              );
+              const expandButton = panel.querySelector<HTMLElement>("button[aria-label]");
               expandButton?.click();
             }
 
@@ -212,10 +195,9 @@ async function expandSummaryPanelIfCollapsed() {
       },
     );
   } catch (error) {
-    throw new Error(
-      `Git 提交弹窗 E2E 没有展开摘要面板: ${JSON.stringify(latest)}`,
-      { cause: error },
-    );
+    throw new Error(`Git 提交弹窗 E2E 没有展开摘要面板: ${JSON.stringify(latest)}`, {
+      cause: error,
+    });
   }
 }
 
@@ -227,13 +209,9 @@ async function openCommitDialog() {
       async () => {
         const result = (await browser.execute(
           (panelTestId: string, triggerTestId: string) => {
-            const panel = document.querySelector<HTMLElement>(
-              `[data-testid="${panelTestId}"]`,
-            );
+            const panel = document.querySelector<HTMLElement>(`[data-testid="${panelTestId}"]`);
             const testIdTrigger = Array.from(
-              document.querySelectorAll<HTMLElement>(
-                `[data-testid="${triggerTestId}"]`,
-              ),
+              document.querySelectorAll<HTMLElement>(`[data-testid="${triggerTestId}"]`),
             ).find((element) => {
               const disabled =
                 (element instanceof HTMLButtonElement ||
@@ -249,20 +227,17 @@ async function openCommitDialog() {
             // 保留 test id 优先级，并兼容旧渲染树只暴露文案入口的情形。
             const trigger =
               testIdTrigger ??
-              Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
-                (element) => {
-                  const text = element.innerText.trim();
-                  const label = element.getAttribute("aria-label")?.trim();
-                  return (
-                    !element.disabled &&
-                    [text, label].some(
-                      (value) =>
-                        value?.startsWith("Commit or push") ||
-                        value?.startsWith("提交或推送"),
-                    )
-                  );
-                },
-              );
+              Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find((element) => {
+                const text = element.innerText.trim();
+                const label = element.getAttribute("aria-label")?.trim();
+                return (
+                  !element.disabled &&
+                  [text, label].some(
+                    (value) =>
+                      value?.startsWith("Commit or push") || value?.startsWith("提交或推送"),
+                  )
+                );
+              });
             trigger?.click();
             return {
               buttonCount: panel?.querySelectorAll("button").length,
@@ -284,10 +259,9 @@ async function openCommitDialog() {
       },
     );
   } catch (error) {
-    throw new Error(
-      `Git 提交或推送入口没有出现或不可点击: ${JSON.stringify(latest)}`,
-      { cause: error },
-    );
+    throw new Error(`Git 提交或推送入口没有出现或不可点击: ${JSON.stringify(latest)}`, {
+      cause: error,
+    });
   }
 }
 
@@ -304,10 +278,7 @@ async function waitForCommitDialogReady() {
 
 async function assertDialogOverlayVisible() {
   await browser.waitUntil(
-    () =>
-      browser.execute(() =>
-        Boolean(document.querySelector('[data-slot="dialog-overlay"]')),
-      ),
+    () => browser.execute(() => Boolean(document.querySelector('[data-slot="dialog-overlay"]'))),
     {
       timeout: 10000,
       timeoutMsg: "Git 提交弹窗没有显示 overlay",
@@ -332,9 +303,7 @@ async function assertMessageInputFocused() {
 
 async function assertGenerateButtonIsIconOnly() {
   const snapshot = (await browser.execute((buttonTestId: string) => {
-    const button = document.querySelector<HTMLElement>(
-      `[data-testid="${buttonTestId}"]`,
-    );
+    const button = document.querySelector<HTMLElement>(`[data-testid="${buttonTestId}"]`);
     return {
       exists: Boolean(button),
       hasIcon: Boolean(button?.querySelector("svg")),
@@ -363,13 +332,10 @@ async function toggleIncludeUnstaged() {
   });
   expect(await checkbox.getAttribute("aria-checked")).toBe("true");
   await checkbox.click();
-  await browser.waitUntil(
-    async () => (await checkbox.getAttribute("aria-checked")) === "false",
-    {
-      timeout: 10000,
-      timeoutMsg: "包含未暂存更改 checkbox 点击后没有切到 false",
-    },
-  );
+  await browser.waitUntil(async () => (await checkbox.getAttribute("aria-checked")) === "false", {
+    timeout: 10000,
+    timeoutMsg: "包含未暂存更改 checkbox 点击后没有切到 false",
+  });
 }
 
 async function pressArrowInMessageInput(key: "ArrowDown" | "ArrowUp") {
@@ -380,9 +346,7 @@ async function pressArrowInMessageInput(key: "ArrowDown" | "ArrowUp") {
 
 async function focusActionCommand() {
   await browser.execute((commandTestId: string) => {
-    const command = document.querySelector<HTMLElement>(
-      `[data-testid="${commandTestId}"]`,
-    );
+    const command = document.querySelector<HTMLElement>(`[data-testid="${commandTestId}"]`);
     command?.focus();
   }, TID_GIT_COMMIT_ACTION_COMMAND);
 }
@@ -398,9 +362,7 @@ async function getSelectedActionId() {
   return browser.execute((actionItemBaseTestId: string) => {
     const prefix = `${actionItemBaseTestId}-`;
     const selected = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        `[data-testid^="${prefix}"][data-selected="true"]`,
-      ),
+      document.querySelectorAll<HTMLElement>(`[data-testid^="${prefix}"][data-selected="true"]`),
     )[0];
     return selected?.dataset.testid?.slice(prefix.length) ?? null;
   }, TID_GIT_COMMIT_ACTION_ITEM);
@@ -409,9 +371,7 @@ async function getSelectedActionId() {
 async function assertSelectedActionShowsShortcutOnly(actionId: string) {
   const actionTestId = testId(TID_GIT_COMMIT_ACTION_ITEM, actionId);
   const snapshot = (await browser.execute((currentActionTestId: string) => {
-    const action = document.querySelector<HTMLElement>(
-      `[data-testid="${currentActionTestId}"]`,
-    );
+    const action = document.querySelector<HTMLElement>(`[data-testid="${currentActionTestId}"]`);
     return {
       checked: action?.getAttribute("data-checked") ?? null,
       hasShortcut: Boolean(action?.querySelector('[data-slot="command-shortcut"]')),
@@ -443,9 +403,10 @@ async function waitForBranchOption(branchName: string) {
   await browser.waitUntil(
     () =>
       browser.execute(() =>
-        Array.from(
-          document.querySelectorAll<HTMLElement>('[data-slot="command-item"]'),
-        ).some((item) => item.textContent?.includes("e2e-target"))),
+        Array.from(document.querySelectorAll<HTMLElement>('[data-slot="command-item"]')).some(
+          (item) => item.textContent?.includes("e2e-target"),
+        ),
+      ),
     {
       timeout: 15000,
       timeoutMsg: `分支下拉列表没有展示可切换分支 ${branchName}`,

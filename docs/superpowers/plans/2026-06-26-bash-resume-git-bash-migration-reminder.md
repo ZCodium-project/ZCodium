@@ -49,9 +49,11 @@
 ### Task 1: 用测试锁定 legacy Windows auto Git Bash migration reminder
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/runtime-persistence.test.ts`
 
 **Interfaces:**
+
 - Consumes:
   - `AgentRuntime.resumeFromStore(): Promise<ResumeSessionResult>`
   - `AgentRuntime.executeTurn(input: string): Promise<unknown>`
@@ -66,79 +68,77 @@
 Add this test after `announces legacy cold-resume Bash shell drift when no shell snapshot exists`:
 
 ```ts
-  it("announces Windows Git Bash syntax migration for legacy cold-resume sessions", async () => {
-    const sessionId = createSessionId("runtime-persistence-windows-git-bash-migration");
-    const store = createRecordingSessionStore();
-    const workingDirectory = "/tmp/zcode-runtime-windows-git-bash-migration";
-    const firstRuntime = new AgentRuntime(
-      sessionId,
-      {
-        currentDate: "2026-06-26",
-        envInfo: {
-          cwd: workingDirectory,
-          platform: "win32",
-          shell: "CMD",
-          osVersion: "Windows 11",
-          nodeVersion: "v24.14.0",
+it("announces Windows Git Bash syntax migration for legacy cold-resume sessions", async () => {
+  const sessionId = createSessionId("runtime-persistence-windows-git-bash-migration");
+  const store = createRecordingSessionStore();
+  const workingDirectory = "/tmp/zcode-runtime-windows-git-bash-migration";
+  const firstRuntime = new AgentRuntime(
+    sessionId,
+    {
+      currentDate: "2026-06-26",
+      envInfo: {
+        cwd: workingDirectory,
+        platform: "win32",
+        shell: "CMD",
+        osVersion: "Windows 11",
+        nodeVersion: "v24.14.0",
+      },
+      workingDirectory,
+    },
+    {
+      eventStore: createTestSessionEventStore(),
+      modelAdapter: {
+        async generateText() {
+          return {
+            text: "first answer",
+            finishReason: "stop",
+            usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          };
         },
-        workingDirectory,
-      },
-      {
-        eventStore: createTestSessionEventStore(),
-        modelAdapter: {
-          async generateText() {
-            return {
-              text: "first answer",
-              finishReason: "stop",
-              usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-            };
-          },
-        } as never,
-        sessionStore: store,
-      },
-    );
-    await firstRuntime.executeTurn("persisted prompt");
+      } as never,
+      sessionStore: store,
+    },
+  );
+  await firstRuntime.executeTurn("persisted prompt");
 
-    let resumedMessages: ModelInputMessage[] = [];
-    const resumedRuntime = new AgentRuntime(
-      sessionId,
-      {
-        bashShellSelection: {
-          dialect: "git-bash",
-          display: { name: "Git Bash" },
-          id: "auto:git-bash",
-          label: "Git Bash",
-          path: "C:\\Program Files\\Git\\bin\\bash.exe",
-          source: "auto-detected",
+  let resumedMessages: ModelInputMessage[] = [];
+  const resumedRuntime = new AgentRuntime(
+    sessionId,
+    {
+      bashShellSelection: {
+        dialect: "git-bash",
+        display: { name: "Git Bash" },
+        id: "auto:git-bash",
+        label: "Git Bash",
+        path: "C:\\Program Files\\Git\\bin\\bash.exe",
+        source: "auto-detected",
+      },
+      currentDate: "2026-06-26",
+      workingDirectory,
+    },
+    {
+      eventStore: createTestSessionEventStore(),
+      modelAdapter: {
+        async generateText(request) {
+          resumedMessages = request.messages;
+          return {
+            text: "resumed answer",
+            finishReason: "stop",
+            usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          };
         },
-        currentDate: "2026-06-26",
-        workingDirectory,
-      },
-      {
-        eventStore: createTestSessionEventStore(),
-        modelAdapter: {
-          async generateText(request) {
-            resumedMessages = request.messages;
-            return {
-              text: "resumed answer",
-              finishReason: "stop",
-              usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-            };
-          },
-        } as never,
-        sessionStore: store,
-      },
-    );
+      } as never,
+      sessionStore: store,
+    },
+  );
 
-    await resumedRuntime.resumeFromStore();
-    await resumedRuntime.executeTurn("resumed prompt");
+  await resumedRuntime.resumeFromStore();
+  await resumedRuntime.executeTurn("resumed prompt");
 
-    const providerText = providerMessagesToText(resumedMessages);
-    expect(providerText).toContain("- Shell: CMD");
-    expect(providerText).toContain(
-      "The Bash tool shell is Git Bash.",
-    );
-  });
+  const providerText = providerMessagesToText(resumedMessages);
+  expect(providerText).toContain("- Shell: CMD");
+  expect(providerText).toContain("The Bash tool shell is Git Bash.");
+});
 ```
 
 - [ ] **Step 2: Run the new test and verify it fails**
@@ -156,29 +156,61 @@ Expected: FAIL because provider text does not contain the new Git Bash migration
 Add this test after the migration test:
 
 ```ts
-  it("does not duplicate the Windows Git Bash migration reminder after repeated resume", async () => {
-    const sessionId = createSessionId("runtime-persistence-windows-git-bash-migration-once");
-    const store = createRecordingSessionStore();
-    const workingDirectory = "/tmp/zcode-runtime-windows-git-bash-migration-once";
-    const firstRuntime = new AgentRuntime(
+it("does not duplicate the Windows Git Bash migration reminder after repeated resume", async () => {
+  const sessionId = createSessionId("runtime-persistence-windows-git-bash-migration-once");
+  const store = createRecordingSessionStore();
+  const workingDirectory = "/tmp/zcode-runtime-windows-git-bash-migration-once";
+  const firstRuntime = new AgentRuntime(
+    sessionId,
+    {
+      currentDate: "2026-06-26",
+      envInfo: {
+        cwd: workingDirectory,
+        platform: "win32",
+        shell: "CMD",
+        osVersion: "Windows 11",
+        nodeVersion: "v24.14.0",
+      },
+      workingDirectory,
+    },
+    {
+      eventStore: createTestSessionEventStore(),
+      modelAdapter: {
+        async generateText() {
+          return {
+            text: "first answer",
+            finishReason: "stop",
+            usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          };
+        },
+      } as never,
+      sessionStore: store,
+    },
+  );
+  await firstRuntime.executeTurn("persisted prompt");
+
+  const createResumedRuntime = (capture: (messages: ModelInputMessage[]) => void) =>
+    new AgentRuntime(
       sessionId,
       {
-        currentDate: "2026-06-26",
-        envInfo: {
-          cwd: workingDirectory,
-          platform: "win32",
-          shell: "CMD",
-          osVersion: "Windows 11",
-          nodeVersion: "v24.14.0",
+        bashShellSelection: {
+          dialect: "git-bash",
+          display: { name: "Git Bash" },
+          id: "auto:git-bash",
+          label: "Git Bash",
+          path: "C:\\Program Files\\Git\\bin\\bash.exe",
+          source: "auto-detected",
         },
+        currentDate: "2026-06-26",
         workingDirectory,
       },
       {
         eventStore: createTestSessionEventStore(),
         modelAdapter: {
-          async generateText() {
+          async generateText(request) {
+            capture(request.messages);
             return {
-              text: "first answer",
+              text: "resumed answer",
               finishReason: "stop",
               usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
             };
@@ -187,60 +219,27 @@ Add this test after the migration test:
         sessionStore: store,
       },
     );
-    await firstRuntime.executeTurn("persisted prompt");
 
-    const createResumedRuntime = (capture: (messages: ModelInputMessage[]) => void) =>
-      new AgentRuntime(
-        sessionId,
-        {
-          bashShellSelection: {
-            dialect: "git-bash",
-            display: { name: "Git Bash" },
-            id: "auto:git-bash",
-            label: "Git Bash",
-            path: "C:\\Program Files\\Git\\bin\\bash.exe",
-            source: "auto-detected",
-          },
-          currentDate: "2026-06-26",
-          workingDirectory,
-        },
-        {
-          eventStore: createTestSessionEventStore(),
-          modelAdapter: {
-            async generateText(request) {
-              capture(request.messages);
-              return {
-                text: "resumed answer",
-                finishReason: "stop",
-                usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-              };
-            },
-          } as never,
-          sessionStore: store,
-        },
-      );
-
-    let firstResumeMessages: ModelInputMessage[] = [];
-    const firstResume = createResumedRuntime((messages) => {
-      firstResumeMessages = messages;
-    });
-    await firstResume.resumeFromStore();
-    await firstResume.executeTurn("first resumed prompt");
-
-    let secondResumeMessages: ModelInputMessage[] = [];
-    const secondResume = createResumedRuntime((messages) => {
-      secondResumeMessages = messages;
-    });
-    await secondResume.resumeFromStore();
-    await secondResume.executeTurn("second resumed prompt");
-
-    const firstProviderText = providerMessagesToText(firstResumeMessages);
-    const secondProviderText = providerMessagesToText(secondResumeMessages);
-    const reminder =
-      "The Bash tool shell is Git Bash.";
-    expect(firstProviderText.match(new RegExp(escapeRegExp(reminder), "g")) ?? []).toHaveLength(1);
-    expect(secondProviderText.match(new RegExp(escapeRegExp(reminder), "g")) ?? []).toHaveLength(1);
+  let firstResumeMessages: ModelInputMessage[] = [];
+  const firstResume = createResumedRuntime((messages) => {
+    firstResumeMessages = messages;
   });
+  await firstResume.resumeFromStore();
+  await firstResume.executeTurn("first resumed prompt");
+
+  let secondResumeMessages: ModelInputMessage[] = [];
+  const secondResume = createResumedRuntime((messages) => {
+    secondResumeMessages = messages;
+  });
+  await secondResume.resumeFromStore();
+  await secondResume.executeTurn("second resumed prompt");
+
+  const firstProviderText = providerMessagesToText(firstResumeMessages);
+  const secondProviderText = providerMessagesToText(secondResumeMessages);
+  const reminder = "The Bash tool shell is Git Bash.";
+  expect(firstProviderText.match(new RegExp(escapeRegExp(reminder), "g")) ?? []).toHaveLength(1);
+  expect(secondProviderText.match(new RegExp(escapeRegExp(reminder), "g")) ?? []).toHaveLength(1);
+});
 ```
 
 Also add this helper near `providerMessagesToText()`:
@@ -266,10 +265,12 @@ Expected: FAIL because implementation does not yet insert the migration reminder
 ### Task 2: 重构 shell resume reminder 判定和文案
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/shell-environment.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/session-shell-environment.ts`
 
 **Interfaces:**
+
 - Consumes:
   - `BashShellSnapshotRestore["status"]`
   - `ExecutionShellSelection`
@@ -288,9 +289,7 @@ Change `apps/zcode-cli/packages/core/src/runtime/methods/shell-environment.ts` t
 import type { ExecutionShellSelection } from "../deps.js";
 import type { BashShellSnapshotRestore } from "./bash-shell-snapshot.js";
 
-export type ShellEnvironmentResumeNoticeKind =
-  | "display_change"
-  | "windows_git_bash_auto_migration";
+export type ShellEnvironmentResumeNoticeKind = "display_change" | "windows_git_bash_auto_migration";
 
 export function getShellEnvironmentResumeNoticeKind(options: {
   persistedShell: string | undefined;
@@ -405,10 +404,10 @@ import {
 And:
 
 ```ts
-  announceSessionShellEnvironmentNoticeAfterResume(this, {
-    persistedEnvInfo,
-    restore: shellRestore,
-  });
+announceSessionShellEnvironmentNoticeAfterResume(this, {
+  persistedEnvInfo,
+  restore: shellRestore,
+});
 ```
 
 - [ ] **Step 4: Run the new tests**
@@ -426,10 +425,12 @@ Expected: PASS for the two migration tests.
 ### Task 3: 更新现有 shell drift 测试，保持旧能力但改成中性文案
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/runtime-persistence.test.ts`
 - Modify: `apps/zcode-cli/packages/core/tests/runtime-trace.test.ts`
 
 **Interfaces:**
+
 - Consumes:
   - new `buildShellEnvironmentResumeNotice("display_change", selection)` text:
     `The Bash tool shell is ${selection.display.name}.`
@@ -450,9 +451,7 @@ expect(providerText).toContain(
 to:
 
 ```ts
-expect(providerText).toContain(
-  "The Bash tool shell is CMD.",
-);
+expect(providerText).toContain("The Bash tool shell is CMD.");
 ```
 
 - [ ] **Step 2: Update stale snapshot drift expectation**
@@ -468,9 +467,7 @@ expect(providerText).toContain(
 to:
 
 ```ts
-expect(providerText).toContain(
-  "The Bash tool shell is zsh.",
-);
+expect(providerText).toContain("The Bash tool shell is zsh.");
 ```
 
 - [ ] **Step 3: Update runtime trace negative assertion**
@@ -486,12 +483,8 @@ expect(requestText).not.toContain(
 with:
 
 ```ts
-expect(requestText).not.toContain(
-  "The Bash tool shell is Git Bash.",
-);
-expect(requestText).not.toContain(
-  "The Bash tool shell is Git Bash.",
-);
+expect(requestText).not.toContain("The Bash tool shell is Git Bash.");
+expect(requestText).not.toContain("The Bash tool shell is Git Bash.");
 ```
 
 - [ ] **Step 4: Run focused shell persistence and trace tests**
@@ -516,9 +509,11 @@ Expected: PASS.
 ### Task 4: 更新文档，明确 legacy Windows Git Bash migration 不是 shell hot update
 
 **Files:**
+
 - Modify: `docs/runtime-tools/bash-effective-shell-snapshot.md`
 
 **Interfaces:**
+
 - Consumes:
   - Existing document sections `核心契约`, `Prompt 与缓存`, `非目标`
 - Produces:
@@ -567,9 +562,11 @@ Expected: Diff only documents legacy/no-usable snapshot resume reminder behavior
 ### Task 5: Final verification
 
 **Files:**
+
 - Verify only; no additional modifications expected.
 
 **Interfaces:**
+
 - Consumes:
   - All changes from Tasks 1-4
 - Produces:

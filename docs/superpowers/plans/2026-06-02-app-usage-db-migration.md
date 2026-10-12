@@ -23,15 +23,18 @@
 ## 文件结构图（创建 / 修改）
 
 **Phase 0 — DTO**
+
 - Modify `packages/shared/src/usage-stats.ts` — 删字符估算类型，新增 App Usage zod schema + 类型 + `AppUsageRange`。
 
 **Phase 1 — agent 读层**
+
 - Modify `apps/zcode-cli/packages/contracts/src/interfaces/session-store.port.ts` — 新增 `AppUsageQueryInput` / `AppUsageQueryResult` 等 raw 类型 + `queryAppUsage` 端口方法。
 - Modify `apps/zcode-cli/packages/adapters/src/storage/session-store/repositories/usage.ts` — 新增 `queryAppUsage(db, input)` 的 SQL 聚合。
 - Modify `apps/zcode-cli/packages/adapters/src/storage/session-store/sqlite-session-store.ts` — 代理 `queryAppUsage`。
 - Test `apps/zcode-cli/packages/adapters/tests/usage-query.test.ts` — repo 聚合断言。
 
 **Phase 2 — builder + 协议**
+
 - Create `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/usage-stats-builder.ts` — 纯函数 builder + `tzOffsetMs` 助手。
 - Test `apps/zcode-cli/packages/bootstrap/tests/usage-stats-builder.test.ts`。
 - Modify `packages/shared/src/zcode-protocol/index.ts` — 注册 `usageStats` 方法 + 入参/结果 schema。
@@ -40,12 +43,14 @@
 - Modify `packages/services/src/zcode-agent/zcodeAgentService.ts` (+ 其类型/接口文件) — `getAppUsageStats` 方法。
 
 **Phase 3 — 宿主服务**
+
 - Modify `packages/services/src/usage-stats/usageStatsService.ts` — 重写 `getAppUsageSnapshot` 走协议。
 - Modify `packages/desktop/src/host/remoteWorkspaceServiceCollection.ts` — 注入 `zcodeAgentService`。
 - Delete `packages/services/src/usage-stats/usageStatsAggregator.ts`、`repo/sessionUsageRepo.ts`、`usageStatsSeries.ts`（若存在）。
 - Modify `packages/services/src/usage-stats/usageStats.ts` — `getAppUsageSnapshot` 入参类型改 `AppUsageRequest`（range: AppUsageRange）。
 
 **Phase 4 — UI**
+
 - Modify `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`、`usageStatsUiParts.tsx`、`AppUsageDailyModelBarChart.tsx`、`packages/ui/src/hooks/useUsageStats.ts`、i18n messages 文件。
 
 ---
@@ -55,6 +60,7 @@
 ### Task 0: 新增 App Usage DTO（zod schema + 类型）
 
 **Files:**
+
 - Modify: `packages/shared/src/usage-stats.ts`
 
 - [ ] **Step 1: 在文件顶部确认 zod 可用并新增 schema 段**
@@ -68,6 +74,7 @@ import { z } from "zod";
 - [ ] **Step 2: 删除字符估算相关导出**
 
 删除这些（它们属于旧本地估算管线，迁移后无来源）：
+
 - `export const ESTIMATED_TOKEN_CHAR_DIVISOR = 3;`（第 1 行）
 - `export function estimateTokensFromCharacterCount(...) { ... }`（文件末尾整段）
 - 接口 `UsageStatsDailyModelUsage` / `UsageStatsDailyModelUsageItem`（被新 App Usage 类型取代）
@@ -209,6 +216,7 @@ git commit -m "feat(usage): add app usage db-backed DTO schemas"
 ### Task 1: contracts 增加 raw 查询类型与端口方法
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/interfaces/session-store.port.ts`
 
 - [ ] **Step 1: 在 `UsageStorePort` 之前插入 raw 查询类型**
@@ -318,6 +326,7 @@ git commit -m "feat(contracts): add app usage read port + raw query types"
 ### Task 2: adapters 实现 SQL 聚合 + 代理（先写测试）
 
 **Files:**
+
 - Test: `apps/zcode-cli/packages/adapters/tests/usage-query.test.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/storage/session-store/repositories/usage.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/storage/session-store/sqlite-session-store.ts`
@@ -705,6 +714,7 @@ git commit -m "feat(adapters): aggregate app usage from sqlite usage tables"
 ### Task 3: 纯函数 builder（先写测试）
 
 **Files:**
+
 - Test: `apps/zcode-cli/packages/bootstrap/tests/usage-stats-builder.test.ts`
 - Create: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/usage-stats-builder.ts`
 
@@ -910,7 +920,10 @@ export function buildAppUsageSnapshot(
     toolTotals.toolCallCount > 0 ? toolTotals.toolErrorCount / toolTotals.toolCallCount : 0;
 
   // 按日 token 映射，用于 activeDays / streak / heatmap
-  const dayTokenMap = new Map<number, { totalTokens: number; turnCount: number; toolCallCount: number }>();
+  const dayTokenMap = new Map<
+    number,
+    { totalTokens: number; turnCount: number; toolCallCount: number }
+  >();
   for (const d of result.days) {
     dayTokenMap.set(d.dayIndex, {
       totalTokens: d.totalTokens,
@@ -1057,6 +1070,7 @@ git commit -m "feat(bootstrap): pure app usage snapshot builder"
 ### Task 4: 协议方法 `usage/stats`（schema + handler + dispatch + 宿主 agentService）
 
 **Files:**
+
 - Modify: `packages/shared/src/zcode-protocol/index.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/server-operations.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/server.ts`
@@ -1109,17 +1123,11 @@ import {
   zcodeUsageStatsParamsSchema,
   // ...已有 import
 } from "@zcode/shared";
-import {
-  buildAppUsageSnapshot,
-  resolveTzOffsetMs,
-} from "./usage-stats-builder.js";
+import { buildAppUsageSnapshot, resolveTzOffsetMs } from "./usage-stats-builder.js";
 
 const APP_USAGE_RANGE_DAYS: Record<string, number> = { "7d": 7, "30d": 30 };
 
-export async function getUsageStats(
-  context: ZCodeProtocolAgentServerContext,
-  rawParams: unknown,
-) {
+export async function getUsageStats(context: ZCodeProtocolAgentServerContext, rawParams: unknown) {
   const params = parseParams(zcodeUsageStatsParamsSchema, rawParams ?? {});
   const timeZone = params.timeZone ?? "UTC";
   const until = Date.now();
@@ -1236,6 +1244,7 @@ git commit -m "feat(protocol): add usage/stats method end to end"
 ### Task 5: 重写 `usageStatsService.getAppUsageSnapshot` 走协议 + 删旧管线
 
 **Files:**
+
 - Modify: `packages/services/src/usage-stats/usageStats.ts`
 - Modify: `packages/services/src/usage-stats/usageStatsService.ts`
 - Modify: `packages/desktop/src/host/remoteWorkspaceServiceCollection.ts`
@@ -1266,7 +1275,10 @@ interface UsageStatsServiceDependencies {
 (b) 顶部 import：
 
 ```typescript
-import type { IZCodeAgentService, ZCodeAgentWorkspaceTarget } from "../zcode-agent/zcodeAgentService.js";
+import type {
+  IZCodeAgentService,
+  ZCodeAgentWorkspaceTarget,
+} from "../zcode-agent/zcodeAgentService.js";
 ```
 
 (c) 重写 `getAppUsageSnapshot`（替换第 45-52 行）：
@@ -1336,6 +1348,7 @@ git commit -m "feat(services): app usage reads agent db via protocol; drop local
 ### Task 6: 时间范围改 7d/30d + hook 类型
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/usage-stats/usageStatsUiParts.tsx`
 - Modify: `packages/ui/src/hooks/useUsageStats.ts`
 - Modify: `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`
@@ -1356,6 +1369,7 @@ export const RANGE_OPTIONS: AppUsageRange[] = ["7d", "30d"];
 - [ ] **Step 3: 面板默认值与 tabs 类型**
 
 `AppUsagePanel.tsx`：
+
 - 第 32 行 `useState<UsageStatsRange>("all")` → `useState<AppUsageRange>("30d")`。
 - import（第 17 行）`UsageStatsRange` → `AppUsageRange`。
 - `AppUsageRangeTabs` 的 props 类型 `UsageStatsRange` → `AppUsageRange`（第 209-211 行）。
@@ -1377,6 +1391,7 @@ git commit -m "feat(ui): app usage range 7d/30d"
 ### Task 7: 概要卡片改用真实指标
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`
 
 - [ ] **Step 1: 替换概要卡片网格**
@@ -1384,83 +1399,83 @@ git commit -m "feat(ui): app usage range 7d/30d"
 把第 75-76 行 `favoriteModel` / `peakHour` 取值改为：
 
 ```typescript
-  const summary = snapshot.summary;
-  const favoriteModel = summary.favoriteModel;
+const summary = snapshot.summary;
+const favoriteModel = summary.favoriteModel;
 ```
 
 把第 87-168 行整个 `<div className="grid ...">…</div>` 概要卡网格替换为下列 8 张卡（图标从 lucide-react 取，已在第 1-10 行导入；新增 `Wrench`、`AlertTriangle`、`Timer`、`Database` 到 import）：
 
 ```tsx
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <UsageMetricCard
-          icon={Flame}
-          label={intl.formatMessage({ id: "settings.usage.totalTokens" })}
-          value={formatCompactNumber(locale, summary.totalTokens)}
-          helper={intl.formatMessage(
-            { id: "settings.usage.tokenBreakdown" },
-            {
-              input: formatCompactNumber(locale, summary.inputTokens),
-              output: formatCompactNumber(locale, summary.outputTokens),
-            },
-          )}
-        />
-        <UsageMetricCard
-          icon={Database}
-          label={intl.formatMessage({ id: "settings.usage.cacheHitRate" })}
-          value={formatPercent(locale, summary.cacheHitRate)}
-        />
-        <UsageMetricCard
-          icon={Activity}
-          label={intl.formatMessage({ id: "settings.usage.sessions" })}
-          value={formatCompactNumber(locale, summary.totalSessions)}
-        />
-        <UsageMetricCard
-          icon={MessageSquare}
-          label={intl.formatMessage({ id: "settings.usage.turns" })}
-          value={formatCompactNumber(locale, summary.totalTurns)}
-        />
-        <UsageMetricCard
-          icon={Wrench}
-          label={intl.formatMessage({ id: "settings.usage.toolCalls" })}
-          value={formatCompactNumber(locale, summary.toolCallCount)}
-          helper={intl.formatMessage(
-            { id: "settings.usage.errorRate" },
-            { rate: formatPercent(locale, summary.toolErrorRate) },
-          )}
-        />
-        <UsageMetricCard
-          icon={AlertTriangle}
-          label={intl.formatMessage({ id: "settings.usage.modelErrorRate" })}
-          value={formatPercent(locale, summary.modelErrorRate)}
-        />
-        <UsageMetricCard
-          icon={Timer}
-          label={intl.formatMessage({ id: "settings.usage.avgTtft" })}
-          value={
-            summary.avgTimeToFirstTokenMs == null
-              ? "--"
-              : `${formatCompactNumber(locale, Math.round(summary.avgTimeToFirstTokenMs))}ms`
-          }
-        />
-        <UsageMetricCard
-          icon={Activity}
-          label={intl.formatMessage({ id: "settings.usage.favoriteModel" })}
-          value={
-            favoriteModel
-              ? formatFavoriteModelMetricValue(resolveModelLabel(intl, favoriteModel.modelId))
-              : "--"
-          }
-          valueSize="sm"
-          helper={
-            favoriteModel
-              ? intl.formatMessage(
-                  { id: "settings.usage.favoriteModelShare" },
-                  { share: formatPercent(locale, favoriteModel.share) },
-                )
-              : undefined
-          }
-        />
-      </div>
+<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <UsageMetricCard
+    icon={Flame}
+    label={intl.formatMessage({ id: "settings.usage.totalTokens" })}
+    value={formatCompactNumber(locale, summary.totalTokens)}
+    helper={intl.formatMessage(
+      { id: "settings.usage.tokenBreakdown" },
+      {
+        input: formatCompactNumber(locale, summary.inputTokens),
+        output: formatCompactNumber(locale, summary.outputTokens),
+      },
+    )}
+  />
+  <UsageMetricCard
+    icon={Database}
+    label={intl.formatMessage({ id: "settings.usage.cacheHitRate" })}
+    value={formatPercent(locale, summary.cacheHitRate)}
+  />
+  <UsageMetricCard
+    icon={Activity}
+    label={intl.formatMessage({ id: "settings.usage.sessions" })}
+    value={formatCompactNumber(locale, summary.totalSessions)}
+  />
+  <UsageMetricCard
+    icon={MessageSquare}
+    label={intl.formatMessage({ id: "settings.usage.turns" })}
+    value={formatCompactNumber(locale, summary.totalTurns)}
+  />
+  <UsageMetricCard
+    icon={Wrench}
+    label={intl.formatMessage({ id: "settings.usage.toolCalls" })}
+    value={formatCompactNumber(locale, summary.toolCallCount)}
+    helper={intl.formatMessage(
+      { id: "settings.usage.errorRate" },
+      { rate: formatPercent(locale, summary.toolErrorRate) },
+    )}
+  />
+  <UsageMetricCard
+    icon={AlertTriangle}
+    label={intl.formatMessage({ id: "settings.usage.modelErrorRate" })}
+    value={formatPercent(locale, summary.modelErrorRate)}
+  />
+  <UsageMetricCard
+    icon={Timer}
+    label={intl.formatMessage({ id: "settings.usage.avgTtft" })}
+    value={
+      summary.avgTimeToFirstTokenMs == null
+        ? "--"
+        : `${formatCompactNumber(locale, Math.round(summary.avgTimeToFirstTokenMs))}ms`
+    }
+  />
+  <UsageMetricCard
+    icon={Activity}
+    label={intl.formatMessage({ id: "settings.usage.favoriteModel" })}
+    value={
+      favoriteModel
+        ? formatFavoriteModelMetricValue(resolveModelLabel(intl, favoriteModel.modelId))
+        : "--"
+    }
+    valueSize="sm"
+    helper={
+      favoriteModel
+        ? intl.formatMessage(
+            { id: "settings.usage.favoriteModelShare" },
+            { share: formatPercent(locale, favoriteModel.share) },
+          )
+        : undefined
+    }
+  />
+</div>
 ```
 
 更新第 1-10 行 import：
@@ -1497,12 +1512,14 @@ git commit -m "feat(ui): real-token summary cards for app usage"
 ### Task 8: 热力图改 30 天（字段适配）
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/usage-stats/usageStatsUiParts.tsx`
 - Modify: `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`
 
 - [ ] **Step 1: `UsageHeatmap` props 与单元格字段适配**
 
 `usageStatsUiParts.tsx` 中 `UsageHeatmap` 组件：
+
 - props `weeks` 类型从 `UsageStatsHeatmapWeek[]` 改为 `AppUsageHeatmapWeek[]`（import 自 `@zcode/shared`）。
 - 单元格 tooltip 与配色：用 `cell.totalTokens`（替换原 `totalEstimatedTokens`/`activityScore`），tooltip 文案改用新 i18n：
 
@@ -1541,6 +1558,7 @@ git commit -m "feat(ui): 30-day token heatmap"
 ### Task 9: 趋势图改真实 token + 模型排行字段适配
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/usage-stats/AppUsageDailyModelBarChart.tsx`
 - Modify: `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`
 
@@ -1551,6 +1569,7 @@ git commit -m "feat(ui): 30-day token heatmap"
 - [ ] **Step 2: 模型排行字段适配**
 
 `AppUsagePanel.tsx` 的 `AppUsageModelRanking`（第 235-274 行）：
+
 - `model.inputEstimatedTokens` → `model.inputTokens`
 - `model.outputEstimatedTokens` → `model.outputTokens`
 - `model.share` 不变；`resolveModelLabel(intl, model.modelId)` 不变。
@@ -1572,6 +1591,7 @@ git commit -m "feat(ui): real-token trend and model ranking"
 ### Task 10: 新增「工具使用」区块
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/usage-stats/AppUsagePanel.tsx`
 
 - [ ] **Step 1: 加 `AppUsageToolUsageSection` 组件**
@@ -1637,7 +1657,7 @@ function AppUsageToolUsageSection({ snapshot }: { snapshot: AppUsageSnapshot }) 
 在 `AppUsagePanel` return 内，第 179 行 `<AppUsageModelRanking snapshot={snapshot} />` 之后加：
 
 ```tsx
-      <AppUsageToolUsageSection snapshot={snapshot} />
+<AppUsageToolUsageSection snapshot={snapshot} />
 ```
 
 - [ ] **Step 3: 编译验证**
@@ -1657,6 +1677,7 @@ git commit -m "feat(ui): tool usage section"
 ### Task 11: i18n 文案（增删）
 
 **Files:**
+
 - Modify: UI 的中英文 message 文件（搜索 `settings.usage.totalTokens` 定位，通常 `packages/ui/src/i18n/messages/{zh,en}.*`）
 
 - [ ] **Step 1: 定位 messages 文件**

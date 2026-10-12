@@ -196,9 +196,7 @@ describe("conversation turn navigator helpers", () => {
     expect(items[0]?.assistantPreview).toContain("Assistant paragraph two");
     expect(items[0]?.assistantPreview).not.toContain("private reasoning");
     expect(items[1]?.assistantPreview).toBe(items[0]?.assistantPreview);
-    expect(items.map((item) => item.userPreview).join(" ")).not.toContain(
-      "Assistant paragraph",
-    );
+    expect(items.map((item) => item.userPreview).join(" ")).not.toContain("Assistant paragraph");
     expect(new Set(items.map((item) => item.key)).size).toBe(3);
   });
 

@@ -245,12 +245,8 @@ describe("Reasoning layout", () => {
   });
 
   it("adds a two-sided fade mask only while the streaming summary overflows", () => {
-    expect(
-      isReasoningSummaryOverflowing({ clientWidth: 240, scrollWidth: 240 }),
-    ).toBe(false);
-    expect(
-      isReasoningSummaryOverflowing({ clientWidth: 240, scrollWidth: 420 }),
-    ).toBe(true);
+    expect(isReasoningSummaryOverflowing({ clientWidth: 240, scrollWidth: 240 })).toBe(false);
+    expect(isReasoningSummaryOverflowing({ clientWidth: 240, scrollWidth: 420 })).toBe(true);
     expect(getReasoningSummaryMaskStyle(false)).toBeUndefined();
     expect(getReasoningSummaryMaskStyle(true)).toMatchObject({
       WebkitMaskImage:
@@ -271,12 +267,8 @@ describe("Reasoning layout", () => {
     expect(html).toMatch(
       /class="inline-flex items-center gap-2"><span class="font-medium[^>]*">思考<\/span><span class="font-normal[^>]*">·<\/span><span class="font-normal/,
     );
-    expect(html).toMatch(
-      /class="[^"]*\bfont-medium\b[^"]*">思考<\/span>/,
-    );
-    expect(html).not.toMatch(
-      /class="[^"]*\bfont-semibold\b[^"]*">思考<\/span>/,
-    );
+    expect(html).toMatch(/class="[^"]*\bfont-medium\b[^"]*">思考<\/span>/);
+    expect(html).not.toMatch(/class="[^"]*\bfont-semibold\b[^"]*">思考<\/span>/);
     expect(html).toContain("持续了");
     expect(html).not.toContain("animated-gradient-text");
     expect(html).not.toContain("已经完成的思考。");

@@ -22,9 +22,8 @@ vi.mock("@/hooks/useResolvedRemoteWorkspaceSessionId.js", () => ({
 }));
 
 vi.mock("@/store/remoteWorkspaceSessionStore.js", () => ({
-  useRemoteWorkspaceSessionStore: (
-    selector: (state: { baseServices: null }) => unknown,
-  ) => selector({ baseServices: null }),
+  useRemoteWorkspaceSessionStore: (selector: (state: { baseServices: null }) => unknown) =>
+    selector({ baseServices: null }),
 }));
 
 function createMockZCodeService(tag: string): ILegacyTaskService {
@@ -168,13 +167,9 @@ describe("resolveWorkspaceProviderConfigZCodeService", () => {
     const root: Root = createRoot(installMinimalDom());
 
     function Probe({ tick }: { tick: number }) {
-      const result = useWorkspaceProviderConfigFile(
-        "/workspace",
-        "codex",
-        null,
-        undefined,
-        { enabled: false },
-      );
+      const result = useWorkspaceProviderConfigFile("/workspace", "codex", null, undefined, {
+        enabled: false,
+      });
       observedResults.push(result);
       return createElement("span", null, tick);
     }

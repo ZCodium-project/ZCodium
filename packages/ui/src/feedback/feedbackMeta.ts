@@ -21,10 +21,7 @@ interface TypeMeta {
   iconText: string;
 }
 
-type MessageFormatter = (
-  descriptor: { id: string },
-  values?: Record<string, string>,
-) => string;
+type MessageFormatter = (descriptor: { id: string }, values?: Record<string, string>) => string;
 
 export const FEEDBACK_TYPE_META: TypeMeta[] = [
   {
@@ -113,23 +110,21 @@ export const STATUS_META: Record<FeedbackTicketStatus, StatusMeta> = {
   },
 };
 
-export const SEVERITY_BADGE: Record<
-  FeedbackTicketSeverity,
-  { label: string; className: string }
-> = {
-  "P1-高": {
-    label: "P1",
-    className: "text-rose-600 dark:text-rose-400 border-rose-500/40",
-  },
-  "P2-中": {
-    label: "P2",
-    className: "text-amber-600 dark:text-amber-400 border-amber-500/40",
-  },
-  "P3-低": {
-    label: "P3",
-    className: "text-emerald-600 dark:text-emerald-400 border-emerald-500/40",
-  },
-};
+export const SEVERITY_BADGE: Record<FeedbackTicketSeverity, { label: string; className: string }> =
+  {
+    "P1-高": {
+      label: "P1",
+      className: "text-rose-600 dark:text-rose-400 border-rose-500/40",
+    },
+    "P2-中": {
+      label: "P2",
+      className: "text-amber-600 dark:text-amber-400 border-amber-500/40",
+    },
+    "P3-低": {
+      label: "P3",
+      className: "text-emerald-600 dark:text-emerald-400 border-emerald-500/40",
+    },
+  };
 
 export const FEEDBACK_MODULE_MESSAGE_IDS: Record<FeedbackTicketModule, string> = {
   "Plugin / MCP": "feedback.module.pluginMcp",

@@ -20,13 +20,13 @@ First off, we need a main page object that we call `Page.js`. It will contain ge
 ```js
 // Page.js
 export default class Page {
-    constructor() {
-        this.title = 'My Page'
-    }
+  constructor() {
+    this.title = "My Page";
+  }
 
-    async open (path) {
-        await browser.url(path)
-    }
+  async open(path) {
+    await browser.url(path);
+  }
 }
 ```
 
@@ -42,27 +42,35 @@ The first step is to write all important selectors that are required in our `log
 
 ```js
 // login.page.js
-import Page from './page'
+import Page from "./page";
 
 class LoginPage extends Page {
+  get username() {
+    return $("#username");
+  }
+  get password() {
+    return $("#password");
+  }
+  get submitBtn() {
+    return $('form button[type="submit"]');
+  }
+  get flash() {
+    return $("#flash");
+  }
+  get headerLinks() {
+    return $$("#header a");
+  }
 
-    get username () { return $('#username') }
-    get password () { return $('#password') }
-    get submitBtn () { return $('form button[type="submit"]') }
-    get flash () { return $('#flash') }
-    get headerLinks () { return $$('#header a') }
+  async open() {
+    await super.open("login");
+  }
 
-    async open () {
-        await super.open('login')
-    }
-
-    async submit () {
-        await this.submitBtn.click()
-    }
-
+  async submit() {
+    await this.submitBtn.click();
+  }
 }
 
-export default new LoginPage()
+export default new LoginPage();
 ```
 
 Defining selectors in getter functions might look a little weird, but it’s really useful. These functions are evaluated _when you access the property_, not when you generate the object. With that you always request the element before you do an action on it.
@@ -72,20 +80,20 @@ Defining selectors in getter functions might look a little weird, but it’s rea
 WebdriverIO internally remembers the last result of a command. If you chain an element command with an action command, it finds the element from the previous command and uses the result to execute the action. With that you can remove the selector (first parameter) and the command looks as simple as:
 
 ```js
-await LoginPage.username.setValue('Max Mustermann')
+await LoginPage.username.setValue("Max Mustermann");
 ```
 
 Which is basically the same thing as:
 
 ```js
-let elem = await $('#username')
-await elem.setValue('Max Mustermann')
+let elem = await $("#username");
+await elem.setValue("Max Mustermann");
 ```
 
 or
 
 ```js
-await $('#username').setValue('Max Mustermann')
+await $("#username").setValue("Max Mustermann");
 ```
 
 ## Using Page Objects In Your Tests
@@ -98,27 +106,27 @@ If you use an assertion framework, your tests can be even more expressive:
 
 ```js
 // login.spec.js
-import LoginPage from '../pageobjects/login.page'
+import LoginPage from "../pageobjects/login.page";
 
-describe('login form', () => {
-    it('should deny access with wrong creds', async () => {
-        await LoginPage.open()
-        await LoginPage.username.setValue('foo')
-        await LoginPage.password.setValue('bar')
-        await LoginPage.submit()
+describe("login form", () => {
+  it("should deny access with wrong creds", async () => {
+    await LoginPage.open();
+    await LoginPage.username.setValue("foo");
+    await LoginPage.password.setValue("bar");
+    await LoginPage.submit();
 
-        await expect(LoginPage.flash).toHaveText('Your username is invalid!')
-    })
+    await expect(LoginPage.flash).toHaveText("Your username is invalid!");
+  });
 
-    it('should allow access with correct creds', async () => {
-        await LoginPage.open()
-        await LoginPage.username.setValue('tomsmith')
-        await LoginPage.password.setValue('SuperSecretPassword!')
-        await LoginPage.submit()
+  it("should allow access with correct creds", async () => {
+    await LoginPage.open();
+    await LoginPage.username.setValue("tomsmith");
+    await LoginPage.password.setValue("SuperSecretPassword!");
+    await LoginPage.submit();
 
-        await expect(LoginPage.flash).toHaveText('You logged into a secure area!')
-    })
-})
+    await expect(LoginPage.flash).toHaveText("You logged into a secure area!");
+  });
+});
 ```
 
 From the structural side, it makes sense to separate spec files and page objects into different directories. Additionally you can give each page object the ending: `.page.js`. This makes it more clear that you import a page object.

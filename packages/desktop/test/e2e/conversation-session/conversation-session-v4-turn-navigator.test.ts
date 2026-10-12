@@ -34,8 +34,7 @@ describe("v4 Conversation Turn Navigator", () => {
     this.timeout(240000);
     await mkdir(CASE_RUNTIME_ROOT, { recursive: true });
     await writeFile(TOOL_SECRET_FILE_PATH, `${TOOL_SECRET_CONTENT}\n`, "utf-8");
-    modelProviderReplayServer =
-      await startConversationModelProviderReplayServer(CASE_NAME);
+    modelProviderReplayServer = await startConversationModelProviderReplayServer(CASE_NAME);
   });
 
   after(async () => {
@@ -49,19 +48,14 @@ describe("v4 Conversation Turn Navigator", () => {
   it("TN01-TN03: shows a wide-screen query map, previews user queries, and jumps by bar", async function () {
     this.timeout(260000);
     await prepareV4ConversationE2E();
-    const originalContentSize =
-      await setCurrentElectronRendererContentSize(1280);
+    const originalContentSize = await setCurrentElectronRendererContentSize(1280);
 
     try {
       await sendV4Prompt(
         "E2E_V4_TURN_NAV_1 TN_TOOL_BACKED_PROMPT: read the fixture, then summarize.",
       );
       await waitForV4TimelineContaining("TN_ASSISTANT_1_EXCERPT", 60000);
-      await waitForV4Pane(
-        (snapshot) => !snapshot.canStop,
-        "turn1 没有回到空闲态",
-        45000,
-      );
+      await waitForV4Pane((snapshot) => !snapshot.canStop, "turn1 没有回到空闲态", 45000);
       await waitForV4TurnNavigator(
         (state) => !state.exists || !state.visible || state.itemCount < 2,
         "只有 1 个可导航 turn 时 navigator 不应显示",
@@ -69,11 +63,7 @@ describe("v4 Conversation Turn Navigator", () => {
 
       await sendV4Prompt("E2E_V4_TURN_NAV_2: make the navigator visible.");
       await waitForV4TimelineContaining("TN_ASSISTANT_2_EXCERPT", 60000);
-      await waitForV4Pane(
-        (snapshot) => !snapshot.canStop,
-        "turn2 没有回到空闲态",
-        45000,
-      );
+      await waitForV4Pane((snapshot) => !snapshot.canStop, "turn2 没有回到空闲态", 45000);
       await waitForV4TurnNavigator(
         (state) => state.visible && state.itemCount === 2,
         "2 个可导航 turn 且宽屏时 navigator 没有显示",
@@ -81,18 +71,10 @@ describe("v4 Conversation Turn Navigator", () => {
 
       await sendV4Prompt("E2E_V4_TURN_NAV_3: add a scroll target.");
       await waitForV4TimelineContaining("TN_ASSISTANT_3_EXCERPT", 60000);
-      await waitForV4Pane(
-        (snapshot) => !snapshot.canStop,
-        "turn3 没有回到空闲态",
-        45000,
-      );
+      await waitForV4Pane((snapshot) => !snapshot.canStop, "turn3 没有回到空闲态", 45000);
       await sendV4Prompt("E2E_V4_TURN_NAV_4: finish at the bottom.");
       await waitForV4TimelineContaining("TN_ASSISTANT_4_EXCERPT", 60000);
-      await waitForV4Pane(
-        (snapshot) => !snapshot.canStop,
-        "turn4 没有回到空闲态",
-        45000,
-      );
+      await waitForV4Pane((snapshot) => !snapshot.canStop, "turn4 没有回到空闲态", 45000);
       const navigator = await waitForV4TurnNavigator(
         (state) => state.visible && state.itemCount >= 4,
         "4 个可导航 turn 后 navigator item 数量不足",
@@ -110,14 +92,10 @@ describe("v4 Conversation Turn Navigator", () => {
       for (let index = 1; index < navigator.items.length; index += 1) {
         const previous = navigator.items[index - 1]!;
         const current = navigator.items[index]!;
-        expect(
-          Math.abs(current.top - (previous.top + previous.height)),
-        ).toBeLessThanOrEqual(1);
+        expect(Math.abs(current.top - (previous.top + previous.height))).toBeLessThanOrEqual(1);
       }
       expect(
-        navigator.items.every(
-          (item) => item.visualTone === "idle" && item.visualScale === 1,
-        ),
+        navigator.items.every((item) => item.visualTone === "idle" && item.visualScale === 1),
       ).toBe(true);
 
       await focusV4TurnNavigatorItemByIndex(0);
@@ -130,10 +108,8 @@ describe("v4 Conversation Turn Navigator", () => {
           state.items[1]?.visualColorTone === "muted" &&
           state.items[2]?.visualTone === "mid" &&
           state.items[2]?.visualColorTone === "muted" &&
-          Number(state.items[0]?.visualScale ?? 0) >
-            Number(state.items[1]?.visualScale ?? 0) &&
-          Number(state.items[1]?.visualScale ?? 0) >
-            Number(state.items[2]?.visualScale ?? 0),
+          Number(state.items[0]?.visualScale ?? 0) > Number(state.items[1]?.visualScale ?? 0) &&
+          Number(state.items[1]?.visualScale ?? 0) > Number(state.items[2]?.visualScale ?? 0),
         "hover/focus 后 navigator 没有形成中心到邻近条递减的山峰效果",
         15000,
       );
@@ -171,8 +147,7 @@ describe("v4 Conversation Turn Navigator", () => {
 
       await setCurrentElectronRendererContentSize(1280);
       const restoredPane = await waitForV4TurnNavigator(
-        (state) =>
-          state.visible && state.itemCount === 4 && state.composerLeftGutterPx >= 64,
+        (state) => state.visible && state.itemCount === 4 && state.composerLeftGutterPx >= 64,
         "primary pane 恢复宽度后 navigator 没有恢复",
         15000,
       );

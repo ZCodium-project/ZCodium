@@ -65,9 +65,9 @@ describe("站点权限设置标签页：地址栏入口与逐项修改", () => {
     await clickTestIdByWebDriver("browser-permission-trigger");
     await browser.waitUntil(
       async () =>
-        (await browser.execute(
+        await browser.execute(
           () => !!document.querySelector('[data-testid="browser-permission-popover"]'),
-        )),
+        ),
       { timeout: 10_000, timeoutMsg: "站点信息气泡没有出现" },
     );
     await clickTestIdByWebDriver("browser-permission-open-settings");
@@ -75,9 +75,9 @@ describe("站点权限设置标签页：地址栏入口与逐项修改", () => {
     // 独立设置标签页打开，展示站点 origin 与能力目录
     await browser.waitUntil(
       async () =>
-        (await browser.execute(
+        await browser.execute(
           () => !!document.querySelector('[data-testid="browser-site-permissions"]'),
-        )),
+        ),
       { timeout: 15_000, timeoutMsg: "站点权限设置标签页没有出现" },
     );
     const originText = await browser.execute(
@@ -90,9 +90,9 @@ describe("站点权限设置标签页：地址栏入口与逐项修改", () => {
     await clickTestIdByWebDriver("site-permission-option-allow");
     await browser.waitUntil(
       async () =>
-        (await browser.execute(
+        await browser.execute(
           () => !!document.querySelector('[data-testid="browser-permission-saved"]'),
-        )),
+        ),
       { timeout: 10_000, timeoutMsg: "保存提示没有出现" },
     );
     await browser.waitUntil(
@@ -104,9 +104,9 @@ describe("站点权限设置标签页：地址栏入口与逐项修改", () => {
     await clickTestIdByWebDriver("browser-permission-reset");
     await browser.waitUntil(
       async () =>
-        (await browser.execute(
+        await browser.execute(
           () => !!document.querySelector('[data-testid="browser-permission-reset-done"]'),
-        )),
+        ),
       { timeout: 10_000, timeoutMsg: "重置完成提示没有出现" },
     );
     await browser.waitUntil(
@@ -130,10 +130,13 @@ async function navigateTo(origin: string): Promise<void> {
       }, TID_BROWSER_REFRESH_BUTTON),
     { timeout: 30_000, timeoutMsg: `内置浏览器没有加载完 ${origin}` },
   );
-  await browser.waitUntil(async () => (await runInGuest("document.title")) === "permission-settings-test", {
-    timeout: 15_000,
-    timeoutMsg: "测试页脚本未就绪",
-  });
+  await browser.waitUntil(
+    async () => (await runInGuest("document.title")) === "permission-settings-test",
+    {
+      timeout: 15_000,
+      timeoutMsg: "测试页脚本未就绪",
+    },
+  );
 }
 
 async function readBrowserGuestWebContentsId(): Promise<number> {
@@ -144,7 +147,8 @@ async function readBrowserGuestWebContentsId(): Promise<number> {
       ),
     );
     const visible = webviews.findLast(
-      (element) => element.getBoundingClientRect().width > 0 && element.getBoundingClientRect().height > 0,
+      (element) =>
+        element.getBoundingClientRect().width > 0 && element.getBoundingClientRect().height > 0,
     );
     const webview = visible ?? webviews.at(-1);
     return webview?.getWebContentsId?.() ?? null;

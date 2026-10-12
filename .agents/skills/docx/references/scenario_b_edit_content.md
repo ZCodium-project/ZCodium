@@ -34,12 +34,14 @@ Do NOT use when: the user wants to change the look/style of the entire document 
 ## When to Use API vs Direct XML
 
 ### Use CLI Edit Command When:
+
 - Replacing placeholder text (e.g., `{{fieldName}}` → actual value)
 - Filling table data from JSON
 - Updating document properties (title, author)
 - Simple text insertions or deletions
 
 ### Use Direct XML Manipulation When:
+
 - Text spans multiple runs with different formatting (run-boundary issues)
 - Adding complex structures (nested tables, multi-image layouts)
 - Manipulating Track Changes markup
@@ -58,6 +60,7 @@ dotnet run ... edit input.docx --fill-placeholders data.json --output filled.doc
 ```
 
 Where `data.json`:
+
 ```json
 {
   "companyName": "Acme Corp",
@@ -68,6 +71,7 @@ Where `data.json`:
 ```
 
 Other placeholder formats (`$FIELD$`, `[PLACEHOLDER]`) require text replacement:
+
 ```bash
 dotnet run ... edit input.docx --replace "$DATE$" "March 21, 2026" --output updated.docx
 ```
@@ -108,6 +112,7 @@ When the search text is split across multiple runs (common when Word applies spe
 ```
 
 Strategy:
+
 1. Concatenate text across runs to find the match
 2. Place the replacement text in the **first** run (preserving its `w:rPr`)
 3. Remove the text from subsequent runs (or remove the runs entirely if empty)
@@ -177,11 +182,13 @@ Replace the `w:t` content. Do NOT modify `w:tcPr` (cell properties) or `w:tblPr`
 ## Track Changes Guidance
 
 ### When to Add Revision Marks
+
 - User explicitly requests tracked changes
 - Document already has tracking enabled (`w:trackChanges` in settings)
 - Collaborative review workflow
 
 ### When NOT to Add Revision Marks
+
 - Form filling / placeholder replacement (these are "completing" the document, not "revising" it)
 - Direct edits where the user wants a clean result
 - Batch data filling operations
@@ -191,6 +198,7 @@ Replace the `w:t` content. Do NOT modify `w:tcPr` (cell properties) or `w:tblPr`
 See `references/track_changes_guide.md` for full XML examples.
 
 Quick reference — inserting text with tracking:
+
 ```xml
 <w:ins w:id="1" w:author="MiniMaxAI" w:date="2026-03-21T10:00:00Z">
   <w:r>
@@ -200,6 +208,7 @@ Quick reference — inserting text with tracking:
 ```
 
 Deleting text with tracking:
+
 ```xml
 <w:del w:id="2" w:author="MiniMaxAI" w:date="2026-03-21T10:00:00Z">
   <w:r>
@@ -238,6 +247,7 @@ Deleting text with tracking:
 **Problem**: Replacing text that is inside a `w:ins` or `w:del` element without understanding the revision context creates invalid markup.
 
 **Fix**: If the target text is inside a revision mark, either:
+
 - Replace within the revision context (preserving the `w:ins`/`w:del` wrapper)
 - Or delete the old revision and create a new one
 
@@ -258,6 +268,7 @@ Deleting text with tracking:
 **Problem**: User content contains `&`, `<`, `>`, `"`, `'` — these must be escaped in XML.
 
 **Fix**: Always XML-escape user-provided text before inserting into `w:t` elements:
+
 - `&` → `&amp;`
 - `<` → `&lt;`
 - `>` → `&gt;`
@@ -269,6 +280,7 @@ Deleting text with tracking:
 **Problem**: Leading/trailing spaces in `w:t` are stripped by XML parsers.
 
 **Fix**: Add `xml:space="preserve"` attribute:
+
 ```xml
 <w:t xml:space="preserve"> text with leading space</w:t>
 ```
@@ -288,6 +300,7 @@ dotnet run ... diff original.docx modified.docx --text-only
 ```
 
 Verify:
+
 - Only intended text changed
 - No styles were modified
 - No relationships were added/removed unexpectedly

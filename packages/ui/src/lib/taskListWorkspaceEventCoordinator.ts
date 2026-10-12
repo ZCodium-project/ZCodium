@@ -51,11 +51,7 @@ function buildCoordinatedEventKey(event: ZCodeWorkspaceTaskListChanged): string 
 
   const workspaceKey = buildTaskWorkspaceKey(event.workspacePath, event.workspaceIdentity);
   const metaRevision = event.taskMeta
-    ? [
-        event.taskMeta.updatedAt,
-        event.taskMeta.createdAt,
-        event.taskMeta.status ?? "",
-      ].join(":")
+    ? [event.taskMeta.updatedAt, event.taskMeta.createdAt, event.taskMeta.status ?? ""].join(":")
     : "";
   return [workspaceKey, event.reason, taskId, metaRevision].join("\u0000");
 }
@@ -87,9 +83,7 @@ export function handleTaskListWorkspaceEventCacheSync(
       workspacePath: event.taskMeta.workspacePath,
       workspaceIdentity: event.taskMeta.workspaceIdentity,
       task: event.taskMeta,
-      ...(syncMode === "insert-active"
-        ? { membership: { pinned: false, archived: false } }
-        : {}),
+      ...(syncMode === "insert-active" ? { membership: { pinned: false, archived: false } } : {}),
       // Bugfix: 这类事件只表示 task meta/status 变化，不携带 pinned/archived 变更语义。
       // 手机远控现在常驻 pinned 查询，必须保留任务原本所在列表，否则置顶任务会被误移出 pinned 区。
       preserveListMembership: syncMode === "preserve-membership",

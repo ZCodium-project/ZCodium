@@ -68,9 +68,7 @@ describe("buildWebRemoteControlWorkspaceTargets", () => {
             workspacePath: "/workspace/local",
           }),
         ],
-        reconnectingRemoteWorkspaceKeys: [
-          "remote:ssh:dev:/workspace/reconnecting",
-        ],
+        reconnectingRemoteWorkspaceKeys: ["remote:ssh:dev:/workspace/reconnecting"],
         remoteWorkspaceErrorByWorkspaceKey: {
           "remote:ssh:dev:/workspace/remote": "ssh closed",
         },

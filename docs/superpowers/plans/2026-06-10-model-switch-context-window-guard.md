@@ -48,6 +48,7 @@
 ### Task 1: Add Context Window Resolver
 
 **Files:**
+
 - Create: `packages/ui/src/chat-input-toolbar/modelSwitchContextWindowGuard.ts`
 - Test: `packages/ui/test/modelSwitchContextWindowGuard.test.ts`
 
@@ -64,10 +65,7 @@ import {
 } from "@zcode/shared";
 import { resolveTargetModelContextWindow } from "@/chat-input-toolbar/modelSwitchContextWindowGuard.js";
 
-function createModelOption(
-  value: string,
-  providerId = "builtin:zai",
-): ZCodeConfigOption {
+function createModelOption(value: string, providerId = "builtin:zai"): ZCodeConfigOption {
   return {
     id: "model",
     name: "Model",
@@ -385,6 +383,7 @@ git commit -m "test: add model switch context window resolver"
 ### Task 2: Add Guard Decision Runner
 
 **Files:**
+
 - Modify: `packages/ui/src/chat-input-toolbar/modelSwitchContextWindowGuard.ts`
 - Test: `packages/ui/test/modelSwitchContextWindowGuard.test.ts`
 
@@ -606,6 +605,7 @@ git commit -m "test: add model switch context guard runner"
 ### Task 3: Expose a Promise-Based Compact Callback
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/useChatComposer.ts`
 - Modify: `packages/ui/src/ChatView.tsx`
 - Modify: `packages/ui/src/ChatView/ChatViewComposer.tsx`
@@ -653,11 +653,11 @@ Modify `packages/ui/src/chat-input-toolbar/modelChangeActions.ts` inside `Toolba
 In `packages/ui/src/hooks/useChatComposer.ts`, add beside `handleSendContextCompressionCommand`:
 
 ```ts
-  const handleRequestContextCompressionForModelSwitch = useCallback(async () => {
-    // 修复原因：模型切换 guard 的压缩必须复用现有 `/compact` 控制命令路径，
-    // 才能保留 timeline 横条、desktop continuous 与手机 replayable 路由语义。
-    return sendPrompt("/compact", []);
-  }, [sendPrompt]);
+const handleRequestContextCompressionForModelSwitch = useCallback(async () => {
+  // 修复原因：模型切换 guard 的压缩必须复用现有 `/compact` 控制命令路径，
+  // 才能保留 timeline 横条、desktop continuous 与手机 replayable 路由语义。
+  return sendPrompt("/compact", []);
+}, [sendPrompt]);
 ```
 
 Return it from the hook result near `handleSendContextCompressionCommand`:
@@ -677,9 +677,9 @@ In `packages/ui/src/ChatView.tsx`, destructure the new callback from `useChatVie
 Pass it into `ChatViewComposer`:
 
 ```tsx
-            handleRequestContextCompressionForModelSwitch={
-              handleRequestContextCompressionForModelSwitch
-            }
+handleRequestContextCompressionForModelSwitch = {
+  handleRequestContextCompressionForModelSwitch,
+};
 ```
 
 In `packages/ui/src/ChatView/ChatViewComposer.tsx`, add the prop to destructuring and type:
@@ -689,15 +689,15 @@ In `packages/ui/src/ChatView/ChatViewComposer.tsx`, add the prop to destructurin
 ```
 
 ```ts
-  handleRequestContextCompressionForModelSwitch: () => Promise<boolean>;
+handleRequestContextCompressionForModelSwitch: () => Promise<boolean>;
 ```
 
 Pass it to `ChatInputToolbar`:
 
 ```tsx
-          onRequestContextCompressionForModelSwitch={
-            handleRequestContextCompressionForModelSwitch
-          }
+onRequestContextCompressionForModelSwitch = {
+  handleRequestContextCompressionForModelSwitch,
+};
 ```
 
 In `packages/ui/src/ChatInputToolbar.tsx`, add the prop type:
@@ -735,6 +735,7 @@ git commit -m "feat: expose compact callback for guarded model switch"
 ### Task 4: Add UI Messages and Warning Dialog Styling
 
 **Files:**
+
 - Modify: `packages/ui/src/components/ui/button.tsx`
 - Modify: `packages/ui/src/ConfirmDialog.tsx`
 - Modify: `packages/ui/src/i18n/locales/zh-CN.ts`
@@ -785,14 +786,14 @@ In `packages/ui/src/components/ui/button.tsx`, add this `variant` entry:
 In `packages/ui/src/ConfirmDialog.tsx`, add:
 
 ```ts
-  const confirmVariant =
-    variant === "danger" ? "destructive" : variant === "warning" ? "warning" : "default";
+const confirmVariant =
+  variant === "danger" ? "destructive" : variant === "warning" ? "warning" : "default";
 ```
 
 Replace the confirm button variant:
 
 ```tsx
-            variant={confirmVariant}
+variant = { confirmVariant };
 ```
 
 Replace the keyboard hint color branch with:
@@ -853,6 +854,7 @@ git commit -m "feat(ui): add model switch context guard messages"
 ### Task 5: Wire Guard into Model Selection
 
 **Files:**
+
 - Modify: `packages/ui/src/chat-input-toolbar/useToolbarModelChange.ts`
 
 - [ ] **Step 1: Add failing integration-oriented guard test**
@@ -893,48 +895,25 @@ Expected: PASS already, because Task 2 implemented this contract. This is an int
 In `packages/ui/src/chat-input-toolbar/useToolbarModelChange.ts`, inside the returned callback create this local function before any guard awaits:
 
 ```ts
-      const runExistingModelSelection = () => {
-        if (
-          shouldSwitchNativeModelFromCustomSelection(
-            selectedProvider,
-            option,
-            value,
-            selectedSupplierKey,
-          )
-        ) {
-          handleNativeModelSelection(
-            params,
-            option,
-            value,
-            nextModelLabel,
-            modelChangeNotice,
-          );
-          return;
-        }
-        if (decodeCustomModelValue(value)) {
-          handleCustomProviderSelection(
-            params,
-            option,
-            value,
-            nextModelLabel,
-            modelChangeNotice,
-          );
-          return;
-        }
-        handleLocalOrTaskSelection(
-          params,
-          option,
-          value,
-          nextModelLabel,
-          modelChangeNotice,
-        );
-      };
+const runExistingModelSelection = () => {
+  if (
+    shouldSwitchNativeModelFromCustomSelection(selectedProvider, option, value, selectedSupplierKey)
+  ) {
+    handleNativeModelSelection(params, option, value, nextModelLabel, modelChangeNotice);
+    return;
+  }
+  if (decodeCustomModelValue(value)) {
+    handleCustomProviderSelection(params, option, value, nextModelLabel, modelChangeNotice);
+    return;
+  }
+  handleLocalOrTaskSelection(params, option, value, nextModelLabel, modelChangeNotice);
+};
 ```
 
 Replace the existing duplicated branch calls at the end of the callback with:
 
 ```ts
-      runExistingModelSelection();
+runExistingModelSelection();
 ```
 
 - [ ] **Step 3: Import guard dependencies**
@@ -960,9 +939,9 @@ Remove the existing duplicate `useZCodeSessionStore` import line if needed so th
 Inside `useToolbarModelChange`, before the returned `useCallback`, add:
 
 ```ts
-  const { intl, locale } = useZCodeIntl();
-  const confirmDialog = useConfirmDialog();
-  const numberFormatter = new Intl.NumberFormat(locale);
+const { intl, locale } = useZCodeIntl();
+const confirmDialog = useConfirmDialog();
+const numberFormatter = new Intl.NumberFormat(locale);
 ```
 
 - [ ] **Step 5: Run the guard before existing selection dispatch**
@@ -970,87 +949,83 @@ Inside `useToolbarModelChange`, before the returned `useCallback`, add:
 Inside the returned callback, after `modelChangeNotice` and `runExistingModelSelection` are available, add:
 
 ```ts
-      const targetContext = resolveTargetModelContextWindow({
-        modelProviders,
-        option,
-        selectedProvider,
-        value,
-      });
+const targetContext = resolveTargetModelContextWindow({
+  modelProviders,
+  option,
+  selectedProvider,
+  value,
+});
 
-      if (params.taskId && targetContext) {
-        const workspaceState = useZCodeSessionStore
-          .getState()
-          .getWorkspaceState(params.workspacePath, params.workspaceIdentity);
-        const taskRuntime = getTaskRuntimeState(workspaceState, params.taskId);
-        const currentUsed = taskRuntime.usage?.used;
-        if (
-          typeof currentUsed === "number" &&
-          Number.isFinite(currentUsed) &&
-          currentUsed > 0 &&
-          currentUsed > targetContext.contextWindow
-        ) {
-          void (async () => {
-            const decision = await runModelSwitchContextWindowGuard({
-              confirmCompression: () =>
-                confirmDialog({
-                  title: intl.formatMessage({
-                    id: "chat.modelSwitch.contextWindowGuard.title",
-                  }),
-                  description: intl.formatMessage(
-                    { id: "chat.modelSwitch.contextWindowGuard.description" },
-                    {
-                      modelName: nextModelLabel?.trim() || targetContext.modelId,
-                      target: numberFormatter.format(targetContext.contextWindow),
-                      used: numberFormatter.format(currentUsed),
-                    },
-                  ),
-                  confirmLabel: intl.formatMessage({
-                    id: "chat.modelSwitch.contextWindowGuard.compress",
-                  }),
-                  cancelLabel: intl.formatMessage({ id: "common.cancel" }),
-                  variant: "warning",
-                }),
-              currentUsed,
-              isTaskBusy: isTaskRuntimeBusy(taskRuntime.status),
-              notifyCompressionStillTooLarge: () => {
-                toast(
-                  intl.formatMessage({
-                    id: "chat.modelSwitch.contextWindowGuard.stillTooLarge",
-                  }),
-                );
+if (params.taskId && targetContext) {
+  const workspaceState = useZCodeSessionStore
+    .getState()
+    .getWorkspaceState(params.workspacePath, params.workspaceIdentity);
+  const taskRuntime = getTaskRuntimeState(workspaceState, params.taskId);
+  const currentUsed = taskRuntime.usage?.used;
+  if (
+    typeof currentUsed === "number" &&
+    Number.isFinite(currentUsed) &&
+    currentUsed > 0 &&
+    currentUsed > targetContext.contextWindow
+  ) {
+    void (async () => {
+      const decision = await runModelSwitchContextWindowGuard({
+        confirmCompression: () =>
+          confirmDialog({
+            title: intl.formatMessage({
+              id: "chat.modelSwitch.contextWindowGuard.title",
+            }),
+            description: intl.formatMessage(
+              { id: "chat.modelSwitch.contextWindowGuard.description" },
+              {
+                modelName: nextModelLabel?.trim() || targetContext.modelId,
+                target: numberFormatter.format(targetContext.contextWindow),
+                used: numberFormatter.format(currentUsed),
               },
-              notifyRunningBlocked: () => {
-                toast(
-                  intl.formatMessage({
-                    id: "chat.modelSwitch.contextWindowGuard.runningBlocked",
-                  }),
-                );
-              },
-              readContextUsedAfterCompression: () => {
-                const latestWorkspaceState = useZCodeSessionStore
-                  .getState()
-                  .getWorkspaceState(params.workspacePath, params.workspaceIdentity);
-                const latestUsage = getTaskRuntimeState(
-                  latestWorkspaceState,
-                  params.taskId!,
-                ).usage;
-                return typeof latestUsage?.used === "number" &&
-                  Number.isFinite(latestUsage.used) &&
-                  latestUsage.used > 0
-                  ? latestUsage.used
-                  : null;
-              },
-              runCompression: async () =>
-                params.onRequestContextCompressionForModelSwitch?.() ?? false,
-              targetContextWindow: targetContext.contextWindow,
-            });
-            if (decision === "proceed") {
-              runExistingModelSelection();
-            }
-          })();
-          return;
-        }
+            ),
+            confirmLabel: intl.formatMessage({
+              id: "chat.modelSwitch.contextWindowGuard.compress",
+            }),
+            cancelLabel: intl.formatMessage({ id: "common.cancel" }),
+            variant: "warning",
+          }),
+        currentUsed,
+        isTaskBusy: isTaskRuntimeBusy(taskRuntime.status),
+        notifyCompressionStillTooLarge: () => {
+          toast(
+            intl.formatMessage({
+              id: "chat.modelSwitch.contextWindowGuard.stillTooLarge",
+            }),
+          );
+        },
+        notifyRunningBlocked: () => {
+          toast(
+            intl.formatMessage({
+              id: "chat.modelSwitch.contextWindowGuard.runningBlocked",
+            }),
+          );
+        },
+        readContextUsedAfterCompression: () => {
+          const latestWorkspaceState = useZCodeSessionStore
+            .getState()
+            .getWorkspaceState(params.workspacePath, params.workspaceIdentity);
+          const latestUsage = getTaskRuntimeState(latestWorkspaceState, params.taskId!).usage;
+          return typeof latestUsage?.used === "number" &&
+            Number.isFinite(latestUsage.used) &&
+            latestUsage.used > 0
+            ? latestUsage.used
+            : null;
+        },
+        runCompression: async () => params.onRequestContextCompressionForModelSwitch?.() ?? false,
+        targetContextWindow: targetContext.contextWindow,
+      });
+      if (decision === "proceed") {
+        runExistingModelSelection();
       }
+    })();
+    return;
+  }
+}
 ```
 
 Keep the existing final `runExistingModelSelection();` for non-guarded cases.
@@ -1077,6 +1052,7 @@ git commit -m "feat(ui): guard model switch by context window"
 ### Task 6: Full Verification
 
 **Files:**
+
 - No production files expected unless verification exposes a bug.
 
 - [ ] **Step 1: Run focused UI tests**

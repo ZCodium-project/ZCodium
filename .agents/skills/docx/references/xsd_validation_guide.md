@@ -19,16 +19,16 @@ dotnet run --project docx validate input.docx --xsd assets/xsd/wml-subset.xsd --
 
 The subset schema validates the most common WordprocessingML elements:
 
-| Area | Elements Validated |
-|------|--------------------|
-| Document structure | `w:document`, `w:body`, `w:sectPr` |
-| Paragraphs | `w:p`, `w:pPr`, `w:r`, `w:rPr`, `w:t` |
-| Tables | `w:tbl`, `w:tblPr`, `w:tblGrid`, `w:tr`, `w:tc` |
-| Styles | `w:styles`, `w:style`, `w:docDefaults` |
-| Lists | `w:numbering`, `w:abstractNum`, `w:num` |
-| Headers/Footers | `w:hdr`, `w:ftr` |
-| Track Changes | `w:ins`, `w:del`, `w:rPrChange`, `w:pPrChange` |
-| Comments | `w:comment`, `w:commentRangeStart`, `w:commentRangeEnd` |
+| Area               | Elements Validated                                      |
+| ------------------ | ------------------------------------------------------- |
+| Document structure | `w:document`, `w:body`, `w:sectPr`                      |
+| Paragraphs         | `w:p`, `w:pPr`, `w:r`, `w:rPr`, `w:t`                   |
+| Tables             | `w:tbl`, `w:tblPr`, `w:tblGrid`, `w:tr`, `w:tc`         |
+| Styles             | `w:styles`, `w:style`, `w:docDefaults`                  |
+| Lists              | `w:numbering`, `w:abstractNum`, `w:num`                 |
+| Headers/Footers    | `w:hdr`, `w:ftr`                                        |
+| Track Changes      | `w:ins`, `w:del`, `w:rPrChange`, `w:pPrChange`          |
+| Comments           | `w:comment`, `w:commentRangeStart`, `w:commentRangeEnd` |
 
 ### What It Does NOT Cover
 
@@ -91,14 +91,14 @@ Location: /word/document.xml, line 200
 
 The `business-rules.xsd` schema enforces project-specific constraints beyond standard OpenXML validity:
 
-| Rule | What It Checks |
-|------|---------------|
-| Required styles | `Normal`, `Heading1`-`Heading3`, `TableGrid` must exist in `styles.xml` |
-| Font consistency | `w:docDefaults` fonts match expected values |
-| Margin ranges | Page margins within acceptable range (720-2160 DXA) |
-| Page size | Must be A4 or Letter |
-| Heading hierarchy | No gaps (e.g., H1 → H3 without H2) |
-| Style chain | `w:basedOn` references must resolve to existing styles |
+| Rule              | What It Checks                                                          |
+| ----------------- | ----------------------------------------------------------------------- |
+| Required styles   | `Normal`, `Heading1`-`Heading3`, `TableGrid` must exist in `styles.xml` |
+| Font consistency  | `w:docDefaults` fonts match expected values                             |
+| Margin ranges     | Page margins within acceptable range (720-2160 DXA)                     |
+| Page size         | Must be A4 or Letter                                                    |
+| Heading hierarchy | No gaps (e.g., H1 → H3 without H2)                                      |
+| Style chain       | `w:basedOn` references must resolve to existing styles                  |
 
 ### Extending Business Rules
 

@@ -71,9 +71,10 @@ describe("official mcp auth headers protocol", () => {
       }),
     ).toMatchObject({ ok: true });
     for (const reason of ["official_auth_unavailable", "official_auth_plan_required"]) {
-      expect(
-        zcodeOfficialMcpAuthHeadersResponseSchema.parse({ ok: false, reason }),
-      ).toMatchObject({ ok: false, reason });
+      expect(zcodeOfficialMcpAuthHeadersResponseSchema.parse({ ok: false, reason })).toMatchObject({
+        ok: false,
+        reason,
+      });
     }
   });
 

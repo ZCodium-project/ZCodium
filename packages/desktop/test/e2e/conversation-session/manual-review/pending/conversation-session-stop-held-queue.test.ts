@@ -27,8 +27,7 @@ describe("会话区 Stop 与 Held Queue E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const firstPrompt =
-      `E2E_SLOW_STREAM E2E_STOP_HELD_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const firstPrompt = `E2E_SLOW_STREAM E2E_STOP_HELD_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(firstPrompt);
     await waitForComposerText("", "首轮发送后输入框没有清空");
     await waitForChatState(
@@ -37,20 +36,17 @@ describe("会话区 Stop 与 Held Queue E2E", () => {
       30000,
     );
 
-    const queuedPrompt =
-      `E2E_STOP_HELD_QUEUE_FIRST_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const queuedPrompt = `E2E_STOP_HELD_QUEUE_FIRST_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(queuedPrompt);
     await waitForQueueContaining(`E2E_STOP_HELD_QUEUE_FIRST_${runId}`);
     await waitForQueueCount(1);
 
-    const secondQueuedPrompt =
-      `E2E_STOP_HELD_QUEUE_SECOND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const secondQueuedPrompt = `E2E_STOP_HELD_QUEUE_SECOND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(secondQueuedPrompt);
     await waitForQueueContaining(`E2E_STOP_HELD_QUEUE_SECOND_${runId}`);
     await waitForQueueCount(2);
 
-    const thirdQueuedPrompt =
-      `E2E_STOP_HELD_QUEUE_THIRD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const thirdQueuedPrompt = `E2E_STOP_HELD_QUEUE_THIRD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(thirdQueuedPrompt);
     await waitForQueueContaining(`E2E_STOP_HELD_QUEUE_THIRD_${runId}`);
     await waitForQueueCount(3);
@@ -67,25 +63,19 @@ describe("会话区 Stop 与 Held Queue E2E", () => {
       "stop 后没有退出 streaming 并保留 3 条 queue",
       30000,
     );
-    await expectNoUpstreamRequestForTextWithin(
-      `E2E_STOP_HELD_QUEUE_FIRST_${runId}`,
-      900,
-    );
+    await expectNoUpstreamRequestForTextWithin(`E2E_STOP_HELD_QUEUE_FIRST_${runId}`, 900);
 
-    const appendedPrompt =
-      `E2E_STOP_HELD_QUEUE_APPEND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    const appendedRequestsBefore =
-      await countUpstreamRequestsContaining(`E2E_STOP_HELD_QUEUE_APPEND_${runId}`);
+    const appendedPrompt = `E2E_STOP_HELD_QUEUE_APPEND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const appendedRequestsBefore = await countUpstreamRequestsContaining(
+      `E2E_STOP_HELD_QUEUE_APPEND_${runId}`,
+    );
     await sendPrompt(appendedPrompt);
     await waitForQueueContaining(`E2E_STOP_HELD_QUEUE_APPEND_${runId}`);
     await waitForQueueCount(4);
-    await expectNoUpstreamRequestForTextWithin(
-      `E2E_STOP_HELD_QUEUE_APPEND_${runId}`,
-      900,
+    await expectNoUpstreamRequestForTextWithin(`E2E_STOP_HELD_QUEUE_APPEND_${runId}`, 900);
+    expect(await countUpstreamRequestsContaining(`E2E_STOP_HELD_QUEUE_APPEND_${runId}`)).toBe(
+      appendedRequestsBefore,
     );
-    expect(
-      await countUpstreamRequestsContaining(`E2E_STOP_HELD_QUEUE_APPEND_${runId}`),
-    ).toBe(appendedRequestsBefore);
 
     const sentNowItem = await clickFirstQueueSendNow();
     expect(sentNowItem.content).toContain(`E2E_STOP_HELD_QUEUE_FIRST_${runId}`);

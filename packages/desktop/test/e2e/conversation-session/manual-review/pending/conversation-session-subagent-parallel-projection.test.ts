@@ -1,7 +1,4 @@
-import {
-  TID_CHAT_SUMMARY_PANEL,
-  TID_V4_SUBAGENT_OPEN_SIDE_PANE,
-} from "@zcode/shared";
+import { TID_CHAT_SUMMARY_PANEL, TID_V4_SUBAGENT_OPEN_SIDE_PANE } from "@zcode/shared";
 import { clearAppData } from "../../../helpers/desktop-app.js";
 import { waitForUpstreamRequest } from "../../../helpers/conversation-session-network.js";
 import {
@@ -38,9 +35,7 @@ describe("并行 subagent V4 权威投影 manual review", () => {
     );
     const runningParent = await waitForV4Pane(
       (snapshot) =>
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft" &&
-        snapshot.canStop,
+        snapshot.sessionId !== null && snapshot.sessionId !== "draft" && snapshot.canStop,
       "SAT24 没有进入 running parent session",
       60000,
     );
@@ -97,14 +92,11 @@ async function readParallelSubagentCounts(): Promise<ParallelSubagentCounts> {
   const composerCounts = await getV4ComposerBackgroundWorkCounts();
   const surfaceCounts = await browser.execute(
     (panelTestId, sidePaneActionPrefix) => {
-      const panel = document.querySelector<HTMLElement>(
-        `[data-testid="${panelTestId}"]`,
-      );
+      const panel = document.querySelector<HTMLElement>(`[data-testid="${panelTestId}"]`);
       return {
         statusPanel: Number(panel?.dataset.runningAgentCount ?? "0"),
-        summaryActions: document.querySelectorAll(
-          `[data-testid^="${sidePaneActionPrefix}-"]`,
-        ).length,
+        summaryActions: document.querySelectorAll(`[data-testid^="${sidePaneActionPrefix}-"]`)
+          .length,
       };
     },
     TID_CHAT_SUMMARY_PANEL,

@@ -22,10 +22,12 @@
 ### Task 1: armsUserIdentity 模块 + 单测
 
 **Files:**
+
 - Create: `packages/desktop/src/main/armsUserIdentity.ts`
 - Test: `packages/desktop/test/armsUserIdentity.test.ts`
 
 **Interfaces:**
+
 - Consumes: 无（纯依赖注入）。
 - Produces:
   - `interface ArmsUserIdentitySyncDeps { loadUserId: () => Promise<string>; deviceMid: string; setUser: (user: { id: string }) => void; }`
@@ -156,9 +158,7 @@ export interface ArmsUserIdentitySync {
  * 主进程 ARMS RUM 用户身份同步：登录账号 id 优先，未登录回填 device_mid。
  * 注入式依赖，便于单测；并发 refresh 以「末次解析值」为准，避免慢请求把旧值写回。
  */
-export function createArmsUserIdentitySync(
-  deps: ArmsUserIdentitySyncDeps,
-): ArmsUserIdentitySync {
+export function createArmsUserIdentitySync(deps: ArmsUserIdentitySyncDeps): ArmsUserIdentitySync {
   let lastWrittenId: string | null = null;
   // 并发序号：refresh 解析完成后只有「最新一次」允许写入
   let latestTicket = 0;
@@ -205,9 +205,11 @@ git commit -m "feat(desktop): armsUserIdentity 解析并去重写入 ARMS user.i
 ### Task 2: index.ts 接线（首次 + focus 兜底）
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/index.ts`（import 区；`deviceMid` 定义后构造 sync；`syncAppTelemetryInteractiveState` 内追加 refresh；`await armsInitPromise` 后首次 refresh）
 
 **Interfaces:**
+
 - Consumes: Task 1 的 `createArmsUserIdentitySync`；现有 `createTelemetryUserIdLoader(appTelemetryCredentialService)`、`deviceMid`、`armsRum`（`appARMSBootstrap` 用的是 `@arms/rum-electron` 默认导出）。
 - Produces: 模块级 `armsUserIdentitySync`（供 Task 3 在 IPC 回调旁路调用）。
 
@@ -256,8 +258,8 @@ function syncAppTelemetryInteractiveState(): void {
 在 `await armsInitPromise;`（`index.ts:1221`）之后、`configureDesktopStabilityTelemetry({` 之前新增：
 
 ```typescript
-  // ARMS init 完成后首次写入 user.id（通常未登录 → 落 device_mid）
-  void armsUserIdentitySync.refresh();
+// ARMS init 完成后首次写入 user.id（通常未登录 → 落 device_mid）
+void armsUserIdentitySync.refresh();
 ```
 
 - [ ] **Step 5: typecheck**
@@ -278,10 +280,12 @@ git commit -m "feat(desktop): ARMS init 后与窗口聚焦时同步 user.id"
 ### Task 3: 登录回调即时刷新（IPC 旁路）
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/desktopMainIpcRemote.ts`（`registerRemoteIpcHandlers` options 增加可选回调；`OAuthCallbackHandled` 监听内触发）
 - Modify: `packages/desktop/src/main/index.ts`（调用处传入回调）
 
 **Interfaces:**
+
 - Consumes: Task 2 的 `armsUserIdentitySync.refresh`。
 - Produces: `registerRemoteIpcHandlers` options 新增 `onOAuthCallbackHandledSideEffect?: () => void`。
 
@@ -299,10 +303,10 @@ git commit -m "feat(desktop): ARMS init 后与窗口聚焦时同步 user.id"
 把 `OAuthCallbackHandled` 监听（`desktopMainIpcRemote.ts:157-159`）改为：
 
 ```typescript
-  ipcMain.on(PlatformChannels.OAuthCallbackHandled, (event) => {
-    options.appTelemetryRuntime.onOAuthCallbackHandled({ rendererId: event.sender.id });
-    options.onOAuthCallbackHandledSideEffect?.();
-  });
+ipcMain.on(PlatformChannels.OAuthCallbackHandled, (event) => {
+  options.appTelemetryRuntime.onOAuthCallbackHandled({ rendererId: event.sender.id });
+  options.onOAuthCallbackHandledSideEffect?.();
+});
 ```
 
 - [ ] **Step 3: 调用处传入回调**
@@ -362,6 +366,7 @@ dev 启动后，ARMS 后台对一个已登录会话应能看到 `user.id` = 账�
 ## Self-Review
 
 **1. Spec coverage：**
+
 - 新模块 `armsUserIdentity.ts` + 去重 → Task 1 ✓
 - 三触发点（init 后 / focus 兜底 / 登录 IPC 旁路）→ Task 2（init+focus）、Task 3（IPC）✓
 - 未登录回填 device_mid、异常兜底 → Task 1 测试与实现 ✓

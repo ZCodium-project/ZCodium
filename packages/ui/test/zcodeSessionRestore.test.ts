@@ -19,10 +19,12 @@ const workspace = {
 
 const model = { providerId: "glm", modelId: "glm-4.6" };
 
-function createSnapshot(params: {
-  title?: string;
-  messages?: ZCodeMessageWithParts[];
-} = {}): ZCodeSessionStateSnapshot {
+function createSnapshot(
+  params: {
+    title?: string;
+    messages?: ZCodeMessageWithParts[];
+  } = {},
+): ZCodeSessionStateSnapshot {
   return {
     protocol: {
       name: ZCODE_PROTOCOL_NAME,
@@ -273,10 +275,7 @@ describe("readWebRemoteReplayableSessionConfigOptions", () => {
       deliveryKind: "web-remote-replayable",
       messageLimit: 1,
     });
-    expect(configOptions?.map((option) => option.category)).toEqual([
-      "model",
-      "mode",
-    ]);
+    expect(configOptions?.map((option) => option.category)).toEqual(["model", "mode"]);
   });
 
   it("includes thought level from replayable session settings when enabled", async () => {
@@ -311,10 +310,9 @@ describe("readWebRemoteReplayableSessionConfigOptions", () => {
       "mode",
       "thought_level",
     ]);
-    expect(
-      configOptions?.find((option) => option.category === "thought_level")
-        ?.currentValue,
-    ).toBe("high");
+    expect(configOptions?.find((option) => option.category === "thought_level")?.currentValue).toBe(
+      "high",
+    );
   });
 
   it("returns null for legacy tasks without an active protocol session", async () => {

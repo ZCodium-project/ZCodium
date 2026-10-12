@@ -101,14 +101,10 @@ export const browserViewNavigateRequestSchema = z
     url: z.string().min(1),
   })
   .strict();
-export type BrowserViewNavigateRequest = z.infer<
-  typeof browserViewNavigateRequestSchema
->;
+export type BrowserViewNavigateRequest = z.infer<typeof browserViewNavigateRequestSchema>;
 
 /** 仅带 key 的导航类 IPC 入参（back/forward/reload/openDevTools 共用）。 */
-export const browserViewKeyRequestSchema = z
-  .object({ key: z.string().min(1) })
-  .strict();
+export const browserViewKeyRequestSchema = z.object({ key: z.string().min(1) }).strict();
 export type BrowserViewKeyRequest = z.infer<typeof browserViewKeyRequestSchema>;
 
 /** 地址栏导航 → BrowserCommand 纯映射（与 agent 共用同一命令联合，无第二套语义）。 */
@@ -143,9 +139,7 @@ describe("browserViewNavigateRequestSchema", () => {
   });
 
   it("拒绝空 url", () => {
-    expect(() =>
-      browserViewNavigateRequestSchema.parse({ key: "s", url: "" }),
-    ).toThrow();
+    expect(() => browserViewNavigateRequestSchema.parse({ key: "s", url: "" })).toThrow();
   });
 
   it("拒绝多余字段（strict）", () => {
@@ -200,10 +194,7 @@ describe("toNavigateCommand", () => {
 并确保该文件顶部 `import` 处引入类型（若该文件从 `@zcode/shared` 内部导入，则加）：
 
 ```ts
-import type {
-  BrowserViewNavigateRequest,
-  BrowserViewKeyRequest,
-} from "@zcode/shared";
+import type { BrowserViewNavigateRequest, BrowserViewKeyRequest } from "@zcode/shared";
 ```
 
 ### Step 1.4 — preload：暴露导航 invoke（紧挨 `browserViewSetBounds`）
@@ -264,37 +255,37 @@ import type {
 在 `PlatformChannels.BrowserViewSetVisible` 的 `ipcMain.handle` 之后追加 5 个 handler（复用现有 `BrowserWindow.fromWebContents(event.sender)` 守卫范式）：
 
 ```ts
-  // browser-use Phase 2：human 导航直连 main → execute（back/forward/reload 用 key-only）。
-  ipcMain.handle(PlatformChannels.BrowserViewNavigate, (event, payload: unknown) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win || win.isDestroyed()) return;
-    const { key, url } = browserViewNavigateRequestSchema.parse(payload);
-    return options.browserViewExecute?.(win, key, toNavigateCommand(url));
-  });
-  ipcMain.handle(PlatformChannels.BrowserViewGoBack, (event, payload: unknown) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win || win.isDestroyed()) return;
-    const { key } = browserViewKeyRequestSchema.parse(payload);
-    return options.browserViewExecute?.(win, key, { method: "back" });
-  });
-  ipcMain.handle(PlatformChannels.BrowserViewGoForward, (event, payload: unknown) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win || win.isDestroyed()) return;
-    const { key } = browserViewKeyRequestSchema.parse(payload);
-    return options.browserViewExecute?.(win, key, { method: "forward" });
-  });
-  ipcMain.handle(PlatformChannels.BrowserViewReload, (event, payload: unknown) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win || win.isDestroyed()) return;
-    const { key } = browserViewKeyRequestSchema.parse(payload);
-    return options.browserViewExecute?.(win, key, { method: "reload" });
-  });
-  ipcMain.handle(PlatformChannels.BrowserViewOpenDevTools, (event, payload: unknown) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win || win.isDestroyed()) return;
-    const { key } = browserViewKeyRequestSchema.parse(payload);
-    options.browserViewOpenDevTools?.(win, key);
-  });
+// browser-use Phase 2：human 导航直连 main → execute（back/forward/reload 用 key-only）。
+ipcMain.handle(PlatformChannels.BrowserViewNavigate, (event, payload: unknown) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  const { key, url } = browserViewNavigateRequestSchema.parse(payload);
+  return options.browserViewExecute?.(win, key, toNavigateCommand(url));
+});
+ipcMain.handle(PlatformChannels.BrowserViewGoBack, (event, payload: unknown) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  const { key } = browserViewKeyRequestSchema.parse(payload);
+  return options.browserViewExecute?.(win, key, { method: "back" });
+});
+ipcMain.handle(PlatformChannels.BrowserViewGoForward, (event, payload: unknown) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  const { key } = browserViewKeyRequestSchema.parse(payload);
+  return options.browserViewExecute?.(win, key, { method: "forward" });
+});
+ipcMain.handle(PlatformChannels.BrowserViewReload, (event, payload: unknown) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  const { key } = browserViewKeyRequestSchema.parse(payload);
+  return options.browserViewExecute?.(win, key, { method: "reload" });
+});
+ipcMain.handle(PlatformChannels.BrowserViewOpenDevTools, (event, payload: unknown) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  const { key } = browserViewKeyRequestSchema.parse(payload);
+  options.browserViewOpenDevTools?.(win, key);
+});
 ```
 
 ### Step 1.7 — main：`BrowserViewManager.openDevTools` + `main/index.ts` wiring
@@ -323,13 +314,14 @@ import type {
 ```
 
 **verify（Task 1 整体）**：
+
 - `pnpm --filter @zcode/shared test viewNavigation && pnpm --filter @zcode/shared typecheck`
 - 单独 typecheck 三工程（根 typecheck 不含）：
   - `pnpm --filter @zcode/desktop exec tsc -p src/main/tsconfig.json --noEmit`
   - `pnpm --filter @zcode/desktop exec tsc -p src/preload/tsconfig.json --noEmit`
   - `pnpm --filter @zcode/desktop exec tsc -p src/renderer/tsconfig.json --noEmit`
   - `pnpm --filter @zcode/ui typecheck`
-  （各 tsconfig 路径以仓库实际为准；目的是覆盖 renderer/main/preload。）
+    （各 tsconfig 路径以仓库实际为准；目的是覆盖 renderer/main/preload。）
 
 commit：`feat(browser-use): add human navigation IPC surface for unified browser view (Phase 2 Task 1)`
 
@@ -388,10 +380,7 @@ export function buildBrowserViewStatePayload(
 在 `viewNavigation.test.ts` 追加：
 
 ```ts
-import {
-  browserViewStateSchema,
-  buildBrowserViewStatePayload,
-} from "./viewNavigation.js";
+import { browserViewStateSchema, buildBrowserViewStatePayload } from "./viewNavigation.js";
 
 describe("buildBrowserViewStatePayload", () => {
   const source = {
@@ -451,47 +440,45 @@ interface ManagedView {
 `ensureView` 里创建 `managed` 处初始化新字段：
 
 ```ts
-      managed = {
-        view,
-        attached: false,
-        cdpAttached: false,
-        visible: false,
-        stateWired: false,
-      };
+managed = {
+  view,
+  attached: false,
+  cdpAttached: false,
+  visible: false,
+  stateWired: false,
+};
 ```
 
 在 `ensureView` 的 `if (!managed.cdpAttached) { … }` 之后、`return managed;` 之前追加接线：
 
 ```ts
-    // Phase 2：首次为该 view 挂状态监听 → 每次导航/标题/加载变化推送 BrowserViewState。
-    // 页面 url/title 不可信，仅用于 renderer 展示。
-    if (!managed.stateWired) {
-      const wc = managed.view.webContents;
-      const emit = () => {
-        if (win.isDestroyed()) return;
-        try {
-          const payload = buildBrowserViewStatePayload(key, {
-            getURL: () => wc.getURL(),
-            getTitle: () => wc.getTitle(),
-            canGoBack: () => wc.navigationHistory.canGoBack(),
-            canGoForward: () => wc.navigationHistory.canGoForward(),
-            isLoading: () => wc.isLoading(),
-          });
-          win.webContents.send(PlatformChannels.BrowserViewState, payload);
-          this.log?.(
-            `[browser-use] state key=${key} url=${payload.url} loading=${payload.isLoading}`,
-          );
-        } catch {
-          // webContents 已关闭等——忽略本次推送。
-        }
-      };
-      wc.on("did-navigate", emit);
-      wc.on("did-navigate-in-page", emit);
-      wc.on("page-title-updated", emit);
-      wc.on("did-start-loading", emit);
-      wc.on("did-stop-loading", emit);
-      managed.stateWired = true;
+// Phase 2：首次为该 view 挂状态监听 → 每次导航/标题/加载变化推送 BrowserViewState。
+// 页面 url/title 不可信，仅用于 renderer 展示。
+if (!managed.stateWired) {
+  const wc = managed.view.webContents;
+  const emit = () => {
+    if (win.isDestroyed()) return;
+    try {
+      const payload = buildBrowserViewStatePayload(key, {
+        getURL: () => wc.getURL(),
+        getTitle: () => wc.getTitle(),
+        canGoBack: () => wc.navigationHistory.canGoBack(),
+        canGoForward: () => wc.navigationHistory.canGoForward(),
+        isLoading: () => wc.isLoading(),
+      });
+      win.webContents.send(PlatformChannels.BrowserViewState, payload);
+      this.log?.(`[browser-use] state key=${key} url=${payload.url} loading=${payload.isLoading}`);
+    } catch {
+      // webContents 已关闭等——忽略本次推送。
     }
+  };
+  wc.on("did-navigate", emit);
+  wc.on("did-navigate-in-page", emit);
+  wc.on("page-title-updated", emit);
+  wc.on("did-start-loading", emit);
+  wc.on("did-stop-loading", emit);
+  managed.stateWired = true;
+}
 ```
 
 > 说明：监听里用 `key` 作为 payload 的 `tabId`（Phase 2 语义），与 map key 一致。
@@ -529,6 +516,7 @@ renderer platform impl（`main.tsx`）转发：
 ```
 
 **verify（Task 2 整体）**：
+
 - `pnpm --filter @zcode/shared test viewNavigation`
 - 三工程单独 typecheck（同 Task 1 verify 列表）。
 
@@ -545,6 +533,7 @@ commit：`feat(browser-use): push controlled view state from main to renderer (P
 ### Step 3.0 — 确认复用件签名（实现前先看，不写代码）
 
 打开 `packages/ui/src/browser-use/EmbeddedBrowserPaneParts.tsx` 与 `embeddedBrowserHelpers.ts`，确认三者导出与 props：
+
 - `normalizeBrowserUrl(input: string): string`（纯函数）。
 - `BrowserToolbar` 的实际 props（地址值、onChange/onSubmit、canGoBack/canGoForward/isLoading、back/forward/reload/devtools 回调）。
 - `BrowserEmptyState` 的实际 props。
@@ -560,10 +549,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { BrowserViewState } from "@zcode/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { logger } from "@/logger.js";
-import {
-  BrowserToolbar,
-  BrowserEmptyState,
-} from "./EmbeddedBrowserPaneParts.js";
+import { BrowserToolbar, BrowserEmptyState } from "./EmbeddedBrowserPaneParts.js";
 import { normalizeBrowserUrl } from "./embeddedBrowserHelpers.js";
 import { rectToViewBounds, sameBounds, type ViewBounds } from "./browserViewBounds.js";
 
@@ -789,6 +775,7 @@ describe("UnifiedBrowserView", () => {
 > 测试断言依赖 `BrowserToolbar` 渲染出 `role="textbox"` 地址栏与可辨识的后退 `button`（disabled 反映 `canGoBack`）。若 Step 3.0 发现 prop/可访问名不同，同步微调选择器与传参——测试意图（回车触发 navigate、推送驱动禁用态）不变。
 
 **verify（Task 3 整体）**：
+
 - `pnpm --filter @zcode/ui test UnifiedBrowserView`（红→绿）。
 - `pnpm --filter @zcode/ui typecheck`。
 
@@ -801,12 +788,14 @@ commit：`feat(browser-use): add UnifiedBrowserView component with chrome/state 
 Phase 2 不接线到正式 tab，用**临时入口/开关**挂载 `UnifiedBrowserView` 驱动验证。以下为手动验证清单（本 task 只执行、不改产品代码，验证入口用完即撤或以 dev-only 开关隔离）。
 
 **临时挂载方式（择一）**：
+
 - 在某个 dev-only 面板/路由临时渲染 `<UnifiedBrowserView browserKey="<任一活动 sessionId>" isVisible />`；或
 - 在现有 side-pane 加一个仅 dev 可见的开关，切到 `UnifiedBrowserView`（不改动 `AnimatedSidePanePanel` 的既有 webview 分支，仅并列新增分支）。
 
 **启动**：按 MEMORY「桌面版 dev 启动」（pnpm 10.33.2 + `ELECTRON_MIRROR` 国内镜像）起 desktop dev。
 
 **验证项**：
+
 1. **显示对齐**：挂载后网页像素（WebContentsView）精确覆盖占位 div，随 side-pane 展开/窗口 resize 跟随（bounds 上报生效）；切走/卸载后网页隐藏，页面状态保留。
 2. **地址栏导航**：地址栏输入 `example.com` 回车 → 页面跳转；地址栏文本被 main 回推的 `url` 更新为规范化后的地址（含 scheme）。
 3. **后退/前进**：多页导航后点后退/前进 → 页面切换，且按钮禁用态与 `canGoBack/canGoForward` 一致（无历史时禁用）。
@@ -825,6 +814,7 @@ commit（如有临时入口需保留为 dev-only 开关）：`chore(browser-use)
 ## Self-Review
 
 **Spec 覆盖**：
+
 - 新增 renderer 组件 `UnifiedBrowserView`（chrome + 占位 div，WebContentsView 覆盖）✓（Task 3）
 - human 导航走新增 IPC 直连 main → `browserViewManager.execute(win, key, command)` ✓（Task 1；`toNavigateCommand` + `{method:"back"/"forward"/"reload"}`；OpenDevTools 走独立 `openDevTools` 薄方法，因其不在 `BrowserCommand` 联合内，避免污染 agent 命令面）
 - main 监听 `did-navigate`/`did-navigate-in-page`/`page-title-updated`/`did-start-loading`/`did-stop-loading` → 推 `BrowserViewState` ✓（Task 2）
@@ -834,6 +824,7 @@ commit（如有临时入口需保留为 dev-only 开关）：`chore(browser-use)
 **占位扫描**：全文无 `TBD`/`占位符`/「类似上文」；每个代码步骤给完整可编译代码。**唯一**未经直读确认的签名点已显式标注（Step 3.0：`BrowserToolbar`/`BrowserEmptyState` 的 prop 名），并要求实现前先确认、以实际导出对齐——这是计划级别的正常「确认签名」步骤，不是代码占位。
 
 **类型一致性**：
+
 - `execute(win, key, command: BrowserCommand)` 签名与 `browserViewManager.ts` 现读一致；`{method:"navigate"|"back"|"forward"|"reload"}` 均在 `commands.ts` 的判别联合内 ✓
 - `setBounds`/`setVisible` 与 `browserViewSetBounds`/`browserViewSetVisible` 端到端范式对齐（`BrowserUseViewPane.tsx` + `desktopMainIpcPlatform.ts`）✓
 - handler 复用 `BrowserWindow.fromWebContents(event.sender)` + `win.isDestroyed()` 守卫 ✓

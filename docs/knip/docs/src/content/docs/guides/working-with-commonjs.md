@@ -40,14 +40,14 @@ The following **default import** of the **named exports** above will result in
 all those exports reported as unused, even when referenced like below:
 
 ```js
-const DefaultImport = require('./common.js');
+const DefaultImport = require("./common.js");
 const runtime = [DefaultImport.A, DefaultImport.B];
 ```
 
 Instead, do this:
 
 ```js
-const { A, B } = require('./common.js');
+const { A, B } = require("./common.js");
 const runtime = [A, B];
 ```
 
@@ -55,7 +55,7 @@ Not recommended per se, but the following import syntax also results in the
 named export `A` being used:
 
 ```js
-const runtime = [require('./common.js').A];
+const runtime = [require("./common.js").A];
 ```
 
 Add a non-shorthand property to turn the named object notation into a single

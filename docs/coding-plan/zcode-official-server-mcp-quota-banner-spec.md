@@ -95,7 +95,11 @@ MCP 的 in-band `isError: true` 在 CLI 侧算**成功执行**：`turn-tools.ts:
 tool error 的 text content 下发（`IsError: true`）：
 
 ```json
-{"error_code":"quota_exceeded","message":"daily quota exceeded for bucket search_image (5/5), retry tomorrow or upgrade your coding plan","request_id":"..."}
+{
+  "error_code": "quota_exceeded",
+  "message": "daily quota exceeded for bucket search_image (5/5), retry tomorrow or upgrade your coding plan",
+  "request_id": "..."
+}
 ```
 
 两条产出路径：本地工具 handler 返回 `ToolErrorFor(err, requestID)`（go-sdk 把普通 error 兜成
@@ -103,11 +107,11 @@ tool error 的 text content 下发（`IsError: true`）：
 
 ### 4.2 code
 
-| code | 含义 | 客户端行为 |
-|---|---|---|
-| `quota_exceeded` | 当日桶配额耗尽 / 无可用配额 | 提示"今日额度用完"，可关闭，无动作 |
-| `coding_plan_required` | 无可用 Coding Plan（缺上下文或验签不过） | 提示"需要 Coding Plan"，可关闭，挂升级入口 |
-| `internal_error` | 其它一切失败的兜底掩码 | **不识别、不提示**——详情只在服务端日志，用户无法自助解决 |
+| code                   | 含义                                     | 客户端行为                                               |
+| ---------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| `quota_exceeded`       | 当日桶配额耗尽 / 无可用配额              | 提示"今日额度用完"，可关闭，无动作                       |
+| `coding_plan_required` | 无可用 Coding Plan（缺上下文或验签不过） | 提示"需要 Coding Plan"，可关闭，挂升级入口               |
+| `internal_error`       | 其它一切失败的兜底掩码                   | **不识别、不提示**——详情只在服务端日志，用户无法自助解决 |
 
 ### 4.3 约定
 
@@ -149,12 +153,13 @@ tool error 的 text content 下发（`IsError: true`）：
 服务端文案里带了桶名与 used/limit，但**没有** `next_refresh_at`。因此界面不承诺具体恢复时刻，
 只说"明天恢复"——自然日重置这一点由 `QuotaConfig.NextRefreshAt` 保证，输入框浮层里的 MCP 额度
 那一格另有精确重置日期可看。
+
 ## 6. 客户端实现（`z-code`，已完成 T1）
 
-| 触发源 | 场景 | 信号 | 状态 |
-|---|---|---|---|
-| T1 | 有凭证、请求已发出：配额耗尽 / 套餐失效 | tool error content 的 `error_code` | 已实现 |
-| T2 | 退登换 API Key、未登录：请求不发出 | 本地 `official_auth_plan_required` | 未实现，见 §10.2 |
+| 触发源 | 场景                                    | 信号                               | 状态             |
+| ------ | --------------------------------------- | ---------------------------------- | ---------------- |
+| T1     | 有凭证、请求已发出：配额耗尽 / 套餐失效 | tool error content 的 `error_code` | 已实现           |
+| T2     | 退登换 API Key、未登录：请求不发出      | 本地 `official_auth_plan_required` | 未实现，见 §10.2 |
 
 ### 6.1 契约单一声明处
 
@@ -171,11 +176,11 @@ v4 row schema（校验 code）、UI（按 code 决定文案与动作）。
 
 判据是**结果由谁产出**，而不是"插件是谁"（SG-02 修正）：
 
-| 形态 | 结果产出方 | 能否伪造 `error_code` | 是否置位 |
-| --- | --- | --- | --- |
-| `http` + `auth.type=zcode_official` | ZCode 后端（连接存活即意味着逐请求 origin 校验通过且 fail closed） | 不能——插件只能把请求打到真实 ZCode，响应体不由它写 | ✓ |
-| `stdio` + `auth.type=zcode_official` | 插件进程自己 | **能**，任意字符串 | ✗ |
-| 其它 | 第三方 server | 能 | ✗ |
+| 形态                                 | 结果产出方                                                         | 能否伪造 `error_code`                              | 是否置位 |
+| ------------------------------------ | ------------------------------------------------------------------ | -------------------------------------------------- | -------- |
+| `http` + `auth.type=zcode_official`  | ZCode 后端（连接存活即意味着逐请求 origin 校验通过且 fail closed） | 不能——插件只能把请求打到真实 ZCode，响应体不由它写 | ✓        |
+| `stdio` + `auth.type=zcode_official` | 插件进程自己                                                       | **能**，任意字符串                                 | ✗        |
+| 其它                                 | 第三方 server                                                      | 能                                                 | ✗        |
 
 **刻意不按"插件是否来自官方 marketplace"判定**：那会让非官方安装源（本地自测、
 zcode-plugins-test）的官方插件直接失效，而它也不是真实屏障（详见 `isOfficialMcpOriginTrusted`
@@ -220,14 +225,14 @@ zcode-plugins-test）的官方插件直接失效，而它也不是真实屏障�
 
 ## 7. 展示规格
 
-| 项 | `mcp-quota-exhausted` | `mcp-plan-required` |
-|---|---|---|
-| 文案 | `chat.quota.mcp.quotaExhausted`（点名 server，说明明天恢复） | `chat.quota.mcp.codingPlanRequired`（点名 server，说明需要 Coding Plan） |
-| 动作 | 无（等自然日重置） | 复用 banner 现有 `onUpgrade`（Coding Plan 升级 / 购买对话框） |
-| 可关闭 | 是 | 是 |
-| 阻断输入 | 否 | 否 |
-| 优先级 | 6 | 8，均低于所有模型额度 kind |
-| 去重键 | `kind` + `serverName` + `rowId` | 同左 |
+| 项       | `mcp-quota-exhausted`                                        | `mcp-plan-required`                                                      |
+| -------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| 文案     | `chat.quota.mcp.quotaExhausted`（点名 server，说明明天恢复） | `chat.quota.mcp.codingPlanRequired`（点名 server，说明需要 Coding Plan） |
+| 动作     | 无（等自然日重置）                                           | 复用 banner 现有 `onUpgrade`（Coding Plan 升级 / 购买对话框）            |
+| 可关闭   | 是                                                           | 是                                                                       |
+| 阻断输入 | 否                                                           | 否                                                                       |
+| 优先级   | 6                                                            | 8，均低于所有模型额度 kind                                               |
+| 去重键   | `kind` + `serverName` + `rowId`                              | 同左                                                                     |
 
 两条硬要求：
 

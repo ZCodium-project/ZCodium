@@ -20,7 +20,7 @@
 | 2     | 本地开发如何读取测试数据 | 使用 `ZCODE_ENV=test`                         | 连接 ZCode 测试环境 endpoint             | no               |
 | 3     | provider 如何隔离        | Team 区分 Z.AI/BigModel，当前 Z.AI 无团队套餐 | provider key 严格匹配，不跨品牌回退      | no               |
 | 4     | Start Plan 如何处理      | 补入完整 configs                              | 保持 provider-neutral `startPlanPreview` | no               |
-| 5     | 迁移后个人套餐描述文案   | `description` 恢复迁移前卡片文案              | 仅恢复描述，不回退商品、价格或权益        | no               |
+| 5     | 迁移后个人套餐描述文案   | `description` 恢复迁移前卡片文案              | 仅恢复描述，不回退商品、价格或权益       | no               |
 
 ## Boundary decisions
 

@@ -24,16 +24,16 @@ CLI full projection
 
 ## 变更边界与确认记录
 
-| 决策 | 产品语义 |
-| --- | --- |
-| 导航粒度 | 每条 timeline 可见的 `UserInputRow(origin=realUser)` 独立建项；普通 query 与 accepted steer/guide 等价 |
-| 同一 product turn | 初始 query、guide 1、guide 2 可以共享 `turnId` / `unitIndex`，但必须拥有不同 `rowId`、导航项和落点 |
-| Tooltip | 第一段显示该条 user query；第二段沿用所属 product turn 的 assistant text 摘要或运行中/空结果 fallback；不拼接 tool、reasoning、subagent 或 marker 正文 |
-| Queue 边界 | 仍在 pending queue 的输入没有 timeline row/anchor，不进入导航；消费并投影为可见 real user row 后才进入 |
-| 完整目录 | 2026-07-24 用户确认：目录不能只覆盖当前 tail window；必须补齐当前有效分支的全部 rows，直到 `window[0].rowId === firstRowId` |
-| 虚拟化 | 完整目录只挂载 rail viewport 与 overscan 内的按钮；`data-item-count` 表示全量 query 数，DOM button 数不再等于目录总数 |
-| 多端边界 | desktop continuous 与 web remote replayable 共用既有 `rows/range` 只读 query；不增加跨端 FIFO、snapshot 字段或恢复状态；`conversation < 864px` 时不发请求，宽屏 tail 不足两个 query 时向前探测 |
-| Composer 命中 | rail 位于 sticky composer 的左侧透明留白时仍必须 hover/click；composer dock 透明外壳不得截获事件，实际 composer 内容保持可交互 |
+| 决策              | 产品语义                                                                                                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 导航粒度          | 每条 timeline 可见的 `UserInputRow(origin=realUser)` 独立建项；普通 query 与 accepted steer/guide 等价                                                                                         |
+| 同一 product turn | 初始 query、guide 1、guide 2 可以共享 `turnId` / `unitIndex`，但必须拥有不同 `rowId`、导航项和落点                                                                                             |
+| Tooltip           | 第一段显示该条 user query；第二段沿用所属 product turn 的 assistant text 摘要或运行中/空结果 fallback；不拼接 tool、reasoning、subagent 或 marker 正文                                         |
+| Queue 边界        | 仍在 pending queue 的输入没有 timeline row/anchor，不进入导航；消费并投影为可见 real user row 后才进入                                                                                         |
+| 完整目录          | 2026-07-24 用户确认：目录不能只覆盖当前 tail window；必须补齐当前有效分支的全部 rows，直到 `window[0].rowId === firstRowId`                                                                    |
+| 虚拟化            | 完整目录只挂载 rail viewport 与 overscan 内的按钮；`data-item-count` 表示全量 query 数，DOM button 数不再等于目录总数                                                                          |
+| 多端边界          | desktop continuous 与 web remote replayable 共用既有 `rows/range` 只读 query；不增加跨端 FIFO、snapshot 字段或恢复状态；`conversation < 864px` 时不发请求，宽屏 tail 不足两个 query 时向前探测 |
+| Composer 命中     | rail 位于 sticky composer 的左侧透明留白时仍必须 hover/click；composer dock 透明外壳不得截获事件，实际 composer 内容保持可交互                                                                 |
 
 ## Scope
 
@@ -127,15 +127,15 @@ query + assistant tooltip、目录虚拟化和点击精确跳转。
 
 ## Impact Brief 与剪枝
 
-| 字段 | 结论 |
-| --- | --- |
-| 改动层级 | `presentation + recovery(read-only pagination)` |
-| UI surface | `ConversationTimeline -> ConversationTurnNavigator` |
-| 展示 owner | renderer `ConversationProjectionStore` 与 React virtualizer |
-| 权威 owner | CLI `ProductProjection`；目录不成为新事实源 |
-| commit/effect | 无写 command；只调用现有 `v4/conversation/rowsRange` |
-| 必查下游 | scroll prepend 锚定、conversation find、active query、sticky composer 命中、宽窄 pane gate |
-| 隔离不变量 | 不扩大 wire snapshot；不修改 queue/owner/lease；不混淆 continuous/replayable；窄 pane 零请求；tail 的局部 query 数不作为完整分支计数 |
+| 字段          | 结论                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 改动层级      | `presentation + recovery(read-only pagination)`                                                                                      |
+| UI surface    | `ConversationTimeline -> ConversationTurnNavigator`                                                                                  |
+| 展示 owner    | renderer `ConversationProjectionStore` 与 React virtualizer                                                                          |
+| 权威 owner    | CLI `ProductProjection`；目录不成为新事实源                                                                                          |
+| commit/effect | 无写 command；只调用现有 `v4/conversation/rowsRange`                                                                                 |
+| 必查下游      | scroll prepend 锚定、conversation find、active query、sticky composer 命中、宽窄 pane gate                                           |
+| 隔离不变量    | 不扩大 wire snapshot；不修改 queue/owner/lease；不混淆 continuous/replayable；窄 pane 零请求；tail 的局部 query 数不作为完整分支计数 |
 
 剪枝结论：completed 大会话作为全量与虚拟化代表；running 只增加 epoch/cursor 并发 guard，不与
 model/provider、queue、goal、compact、theme、locale 做笛卡尔积。desktop wide 代表 pointer hit-test；

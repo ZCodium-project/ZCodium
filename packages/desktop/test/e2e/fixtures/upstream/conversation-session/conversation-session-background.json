@@ -146,10 +146,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_AGENT_CHILD_RESULT"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_AGENT_CHILD_RESULT"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -725,10 +722,7 @@
           "toolu_e2e_bg37_explicit_timeout",
           "\"stream\":true"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "Verify whether the active session goal"
-        ]
+        "bodyExcludes": ["Generate a concise title", "Verify whether the active session goal"]
       },
       "response": {
         "statusCode": 200,
@@ -1550,10 +1544,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_GOAL_CHILD_RESULT"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_GOAL_CHILD_RESULT"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -1822,10 +1813,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_SEND_MESSAGE_CHILD_RECEIVED"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_SEND_MESSAGE_CHILD_RECEIVED"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -2194,10 +2182,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_AGENT_CHILD_TOOL_IDLE_DONE"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_AGENT_CHILD_TOOL_IDLE_DONE"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -2308,9 +2293,7 @@
           "Verify whether the active session goal"
         ],
         "lastUserMessageExcludes": ["<task-notification>"],
-        "lastUserMessageIncludes": [
-          "E2E_BACKGROUND_CHILD_TOOL_PARENT_ANCHOR_FOLLOWUP"
-        ]
+        "lastUserMessageIncludes": ["E2E_BACKGROUND_CHILD_TOOL_PARENT_ANCHOR_FOLLOWUP"]
       },
       "response": {
         "statusCode": 200,
@@ -2516,9 +2499,7 @@
           "Verify whether the active session goal"
         ],
         "lastUserMessageExcludes": ["<task-notification>"],
-        "lastUserMessageIncludes": [
-          "E2E_BACKGROUND_CHILD_TOOL_SESSION_SWITCH_CHILD"
-        ]
+        "lastUserMessageIncludes": ["E2E_BACKGROUND_CHILD_TOOL_SESSION_SWITCH_CHILD"]
       },
       "response": {
         "statusCode": 200,
@@ -2693,9 +2674,7 @@
           "Verify whether the active session goal"
         ],
         "lastUserMessageExcludes": ["<task-notification>"],
-        "lastUserMessageIncludes": [
-          "E2E_BACKGROUND_CHILD_TOOL_SWITCH_BACK_RUNNING_CHILD"
-        ]
+        "lastUserMessageIncludes": ["E2E_BACKGROUND_CHILD_TOOL_SWITCH_BACK_RUNNING_CHILD"]
       },
       "response": {
         "statusCode": 200,
@@ -2831,10 +2810,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_BACKGROUND_SEND_NOW_QUEUE",
-          "Async agent launched successfully"
-        ],
+        "bodyIncludes": ["E2E_BACKGROUND_SEND_NOW_QUEUE", "Async agent launched successfully"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -2897,10 +2873,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_HOLD_STREAM",
-          "E2E_BACKGROUND_SEND_NOW_QUEUE_HOLD"
-        ],
+        "bodyIncludes": ["E2E_HOLD_STREAM", "E2E_BACKGROUND_SEND_NOW_QUEUE_HOLD"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -2994,10 +2967,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_SEND_NOW_QUEUE_CHILD_DONE"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_SEND_NOW_QUEUE_CHILD_DONE"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -3395,10 +3365,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_NESTED_BASH_CHILD_DONE"
-        ],
+        "bodyIncludes": ["<task-notification>", "E2E_BACKGROUND_NESTED_BASH_CHILD_DONE"],
         "bodyExcludes": [
           "toolu_e2e_background_nested_child_bash",
           "Generate a concise title",

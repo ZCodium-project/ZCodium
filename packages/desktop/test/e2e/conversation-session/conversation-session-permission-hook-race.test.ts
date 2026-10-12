@@ -5,10 +5,7 @@
 // 并发竞速，先到者胜。spec：apps/zcode-cli/docs/design/v2/permission-responder-race.md。
 import { readFile, mkdir, rm } from "node:fs/promises";
 import { clearAppData } from "../helpers/desktop-app.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../helpers/e2e-runtime-paths.js";
 import {
   installPermissionHookRaceFixture,
   PERMISSION_HOOK_RACE_FINAL_MARKER,
@@ -27,9 +24,7 @@ import {
 } from "../helpers/v4-conversation.js";
 
 const PERMISSION_HOOK_RACE_CASE = "conversation-session-permission-hook-race";
-const PERMISSION_HOOK_RACE_DIR = resolveE2ERuntimePath(
-  PERMISSION_HOOK_RACE_CASE,
-);
+const PERMISSION_HOOK_RACE_DIR = resolveE2ERuntimePath(PERMISSION_HOOK_RACE_CASE);
 const PERMISSION_HOOK_RACE_OUTPUT_PATH = resolveE2EToolPath(
   PERMISSION_HOOK_RACE_CASE,
   "write-output.txt",
@@ -82,11 +77,7 @@ describe("PermissionRequest hook 与审批交互竞速", () => {
     // hook 是败者：只 started 一次、从未产出决定（settled-without-decision
     // 只有睡满 120s 才会出现）。aborted 记录依赖 POSIX 信号，跨平台不作断言。
     const trace = await readPermissionHookRaceTrace();
-    expect(
-      trace.filter((record) => record.phase === "started"),
-    ).toHaveLength(1);
-    expect(
-      trace.some((record) => record.phase === "settled-without-decision"),
-    ).toBe(false);
+    expect(trace.filter((record) => record.phase === "started")).toHaveLength(1);
+    expect(trace.some((record) => record.phase === "settled-without-decision")).toBe(false);
   });
 });

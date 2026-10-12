@@ -59,12 +59,12 @@
 
 新增回归测试验证反馈服务选择不依赖 workspace-scoped services：
 
-| 场景 | workspace services | feedback service | 预期 |
-| --- | --- | --- | --- |
-| 本地 workspace | base services | base feedback | 行为不变 |
-| SSH 已连接 | merged remote services | base feedback | 行为不变 |
-| SSH session 尚未绑定 | disconnected proxy | base feedback | 可提交，不抛断连错误 |
-| SSH 已断开 | disconnected proxy | base feedback | 可提交，不抛断连错误 |
+| 场景                 | workspace services     | feedback service | 预期                 |
+| -------------------- | ---------------------- | ---------------- | -------------------- |
+| 本地 workspace       | base services          | base feedback    | 行为不变             |
+| SSH 已连接           | merged remote services | base feedback    | 行为不变             |
+| SSH session 尚未绑定 | disconnected proxy     | base feedback    | 可提交，不抛断连错误 |
+| SSH 已断开           | disconnected proxy     | base feedback    | 可提交，不抛断连错误 |
 
 测试应直接断言 `FeedbackHost` 接收显式的 base feedback service，并避免仅依赖对象展开恰好保留该字段。现有 feedback submission 测试继续覆盖 `getDeviceSnapshot`、工单创建、附件和日志流程。
 

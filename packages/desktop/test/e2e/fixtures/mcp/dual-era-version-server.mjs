@@ -18,9 +18,7 @@ const { serveStdio, StdioServerTransport } = requireFromBrowserUse(
 const mode = process.env.E2E_MCP_VERSION_MODE;
 const wireLogPath = process.env.E2E_MCP_VERSION_WIRE_LOG;
 if ((mode !== "modern" && mode !== "legacy") || !wireLogPath) {
-  throw new Error(
-    "E2E MCP version fixture requires a valid mode and wire log path",
-  );
+  throw new Error("E2E MCP version fixture requires a valid mode and wire log path");
 }
 
 let writeQueue = Promise.resolve();

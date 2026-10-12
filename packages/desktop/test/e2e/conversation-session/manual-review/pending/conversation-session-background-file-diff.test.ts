@@ -5,10 +5,7 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { TID_PREVIEW_PANE } from "@zcode/shared";
-import {
-  clearAppData,
-  DEFAULT_WORKSPACE,
-} from "../../../helpers/desktop-app.js";
+import { clearAppData, DEFAULT_WORKSPACE } from "../../../helpers/desktop-app.js";
 import {
   findFirstUpstreamRequestIndex,
   getUpstreamRequestRecordCount,
@@ -65,15 +62,11 @@ describe("BG41 background model-only turn 文件 Diff", () => {
     await mkdir(CASE_ROOT, { recursive: true });
     await writeFile(FILE_PATH, INITIAL_CONTENT, "utf8");
 
-    const firstExistingRecordIndex =
-      (await getUpstreamRequestRecordCount()) - 1;
+    const firstExistingRecordIndex = (await getUpstreamRequestRecordCount()) - 1;
     await sendV4Prompt(
       `${REQUEST_MARKER}: launch one background Agent, then update ${RELATIVE_PATH} only after its completion notification.`,
     );
-    await waitForToolCallBlockByToolCallId(
-      "toolu_e2e_background_file_diff_agent",
-      60000,
-    );
+    await waitForToolCallBlockByToolCallId("toolu_e2e_background_file_diff_agent", 60000);
     await waitForUpstreamRequest(
       {
         lastUserMessageIncludes: ["E2E_BACKGROUND_FILE_DIFF_CHILD"],
@@ -85,9 +78,7 @@ describe("BG41 background model-only turn 文件 Diff", () => {
     await waitForV4TimelineContaining(LAUNCH_MARKER, 60000);
     await waitForV4Pane(
       (snapshot) =>
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft" &&
-        !snapshot.canStop,
+        snapshot.sessionId !== null && snapshot.sessionId !== "draft" && !snapshot.canStop,
       "BG41 父 launch turn 没有在 child completion 前回到 idle",
       45000,
     );
@@ -117,19 +108,13 @@ describe("BG41 background model-only turn 文件 Diff", () => {
     );
     await waitForUpstreamRequest(
       {
-        includes: [
-          "toolu_e2e_background_file_diff_read",
-          "before-background-diff",
-        ],
+        includes: ["toolu_e2e_background_file_diff_read", "before-background-diff"],
       },
       "BG41 Read 结果没有进入 notification product turn",
       60000,
       { afterIndex: firstExistingRecordIndex },
     );
-    await waitForToolCallBlockByToolCallId(
-      "toolu_e2e_background_file_diff_edit",
-      60000,
-    );
+    await waitForToolCallBlockByToolCallId("toolu_e2e_background_file_diff_edit", 60000);
     await waitForV4TimelineContaining(FINAL_MARKER, 90000);
     await waitForFileContent(EXPECTED_CONTENT);
     await waitForV4Pane(
@@ -172,8 +157,7 @@ async function stopIfBusy() {
 
 async function waitForFileContent(expected: string) {
   await browser.waitUntil(
-    async () =>
-      (await readFile(FILE_PATH, "utf8").catch(() => "")) === expected,
+    async () => (await readFile(FILE_PATH, "utf8").catch(() => "")) === expected,
     {
       timeout: 60000,
       timeoutMsg: `${FILE_PATH} 没有收敛到期望内容`,
@@ -181,9 +165,7 @@ async function waitForFileContent(expected: string) {
   );
 }
 
-async function waitForFileSummary(
-  expectExpanded: boolean,
-): Promise<FileSummarySnapshot> {
+async function waitForFileSummary(expectExpanded: boolean): Promise<FileSummarySnapshot> {
   let latest: FileSummarySnapshot | null = null;
   await browser.waitUntil(
     async () => {
@@ -192,9 +174,7 @@ async function waitForFileSummary(
         latest &&
         latest.expanded === expectExpanded &&
         (!expectExpanded ||
-          (latest.pathVisible &&
-            latest.reviewEnabled &&
-            !latest.diffUnavailable)),
+          (latest.pathVisible && latest.reviewEnabled && !latest.diffUnavailable)),
       );
     },
     {
@@ -211,25 +191,20 @@ async function waitForFileSummary(
 function readFileSummary(): Promise<FileSummarySnapshot | null> {
   return browser.execute((relativePath) => {
     const expandLabels = new Set(["Expand changed files", "展开已更改文件"]);
-    const collapseLabels = new Set([
-      "Collapse changed files",
-      "收起已更改文件",
-    ]);
+    const collapseLabels = new Set(["Collapse changed files", "收起已更改文件"]);
     const reviewLabels = new Set(["Review", "审查"]);
-    const header = Array.from(
-      document.querySelectorAll<HTMLButtonElement>("button"),
-    ).find((button) => {
-      const label = button.getAttribute("aria-label") ?? "";
-      return expandLabels.has(label) || collapseLabels.has(label);
-    });
+    const header = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => {
+        const label = button.getAttribute("aria-label") ?? "";
+        return expandLabels.has(label) || collapseLabels.has(label);
+      },
+    );
     if (!header) return null;
     const card = header.parentElement?.parentElement;
     const turn = header.closest<HTMLElement>("[data-turn-key]");
     const label = header.getAttribute("aria-label") ?? "";
-    const review = Array.from(
-      card?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-    ).find((button) =>
-      reviewLabels.has(button.getAttribute("aria-label") ?? ""),
+    const review = Array.from(card?.querySelectorAll<HTMLButtonElement>("button") ?? []).find(
+      (button) => reviewLabels.has(button.getAttribute("aria-label") ?? ""),
     );
     const cardText = (card?.innerText ?? "").replace(/\u00a0/g, " ");
     return {
@@ -240,9 +215,8 @@ function readFileSummary(): Promise<FileSummarySnapshot | null> {
       headerText: (header.innerText ?? "").replace(/\u00a0/g, " ").trim(),
       pathVisible: Boolean(
         card &&
-        Array.from(card.querySelectorAll<HTMLElement>("[title]")).some(
-          (element) =>
-            (element.getAttribute("title") ?? "").endsWith(relativePath),
+        Array.from(card.querySelectorAll<HTMLElement>("[title]")).some((element) =>
+          (element.getAttribute("title") ?? "").endsWith(relativePath),
         ),
       ),
       reviewEnabled: Boolean(review && !review.disabled),
@@ -254,9 +228,9 @@ function readFileSummary(): Promise<FileSummarySnapshot | null> {
 async function expandFileSummary() {
   const clicked = await browser.execute(() => {
     const labels = new Set(["Expand changed files", "展开已更改文件"]);
-    const header = Array.from(
-      document.querySelectorAll<HTMLButtonElement>("button"),
-    ).find((button) => labels.has(button.getAttribute("aria-label") ?? ""));
+    const header = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => labels.has(button.getAttribute("aria-label") ?? ""),
+    );
     header?.click();
     return Boolean(header);
   });
@@ -265,21 +239,14 @@ async function expandFileSummary() {
 
 async function clickFileSummaryReview() {
   const clicked = await browser.execute(() => {
-    const collapseLabels = new Set([
-      "Collapse changed files",
-      "收起已更改文件",
-    ]);
+    const collapseLabels = new Set(["Collapse changed files", "收起已更改文件"]);
     const reviewLabels = new Set(["Review", "审查"]);
-    const header = Array.from(
-      document.querySelectorAll<HTMLButtonElement>("button"),
-    ).find((button) =>
-      collapseLabels.has(button.getAttribute("aria-label") ?? ""),
+    const header = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => collapseLabels.has(button.getAttribute("aria-label") ?? ""),
     );
     const card = header?.parentElement?.parentElement;
-    const review = Array.from(
-      card?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-    ).find((button) =>
-      reviewLabels.has(button.getAttribute("aria-label") ?? ""),
+    const review = Array.from(card?.querySelectorAll<HTMLButtonElement>("button") ?? []).find(
+      (button) => reviewLabels.has(button.getAttribute("aria-label") ?? ""),
     );
     if (!review || review.disabled) return false;
     review.click();
@@ -293,15 +260,11 @@ async function waitForPreviewDiff() {
   await browser.waitUntil(
     async () => {
       latest = await browser.execute((previewPaneTestId) => {
-        const preview = document.querySelector<HTMLElement>(
-          `[data-testid="${previewPaneTestId}"]`,
-        );
+        const preview = document.querySelector<HTMLElement>(`[data-testid="${previewPaneTestId}"]`);
         if (!preview) return "";
         const fragments: string[] = [preview.innerText ?? ""];
         const visit = (root: ParentNode) => {
-          for (const element of Array.from(
-            root.querySelectorAll<HTMLElement>("*"),
-          )) {
+          for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
             if (!element.shadowRoot) continue;
             fragments.push(element.shadowRoot.textContent ?? "");
             visit(element.shadowRoot);

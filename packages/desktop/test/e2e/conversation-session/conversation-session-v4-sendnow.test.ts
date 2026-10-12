@@ -2,9 +2,7 @@
 // 证据层 L3：running turn 期间入队一项 → 点「立即发送」→ sendQueuedNow 命令 →
 // v4-bridge：读原文 → 从 queue 移除 → stop 当前 turn → 以原文重发（stop barrier）→
 // 该项以新 turn 消费，回复出现。证明 stop-barrier + 立即消费全链路。
-import {
-  clearAppData,
-} from "../helpers/desktop-app.js";
+import { clearAppData } from "../helpers/desktop-app.js";
 import {
   clickV4QueueItemSendNow,
   getV4QueueItems,

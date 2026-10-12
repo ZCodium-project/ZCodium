@@ -8,9 +8,7 @@ const contentA = [
   "+const newValue = Needle;",
 ].join("\n");
 
-const contentB = [
-  " const value = needle;",
-].join("\n");
+const contentB = [" const value = needle;"].join("\n");
 
 describe("fileChangeFindSearch", () => {
   it("collects matches across diff contents in file order", () => {
@@ -50,7 +48,11 @@ describe("fileChangeFindSearch", () => {
   });
 
   it("returns an empty state before a diff is available", () => {
-    const state = getFileChangeFindState([{ path: "/workspace/src/App.tsx", content: null }], "needle", 0);
+    const state = getFileChangeFindState(
+      [{ path: "/workspace/src/App.tsx", content: null }],
+      "needle",
+      0,
+    );
 
     expect(state.total).toBe(0);
     expect(state.currentIndex).toBe(-1);

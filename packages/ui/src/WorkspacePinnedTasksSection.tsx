@@ -249,12 +249,7 @@ export function WorkspacePinnedTasksSection({
     if (!item) {
       return;
     }
-    onSelectTaskRef.current(
-      item.workspacePath,
-      item.taskId,
-      item.workspaceIdentity,
-      item.unreadAt,
-    );
+    onSelectTaskRef.current(item.workspacePath, item.taskId, item.workspaceIdentity, item.unreadAt);
   }, []);
   const archivePinnedItemInline = useCallback(
     (event: ReactMouseEvent, itemKey: string) => {

@@ -19,14 +19,14 @@
 
 完整 JSON Schema 位于 [`release-candidate.v1.schema.json`](./release-candidate.v1.schema.json)。关键字段：
 
-| 字段 | 语义 |
-| --- | --- |
-| `candidateId` | 平台生成的不可变候选身份，格式 `cand_...` |
-| `source` | repository、完整 commit、SemVer version、可选 ref |
-| `state` | 平台状态机当前状态 |
-| `platforms` | 每个 OS/arch 的 artifact 和基础更新元数据 |
-| `provenance` | builder、镜像、工具版本和 signer |
-| `createdAt` / `expiresAt` | 候选保留周期 |
+| 字段                      | 语义                                              |
+| ------------------------- | ------------------------------------------------- |
+| `candidateId`             | 平台生成的不可变候选身份，格式 `cand_...`         |
+| `source`                  | repository、完整 commit、SemVer version、可选 ref |
+| `state`                   | 平台状态机当前状态                                |
+| `platforms`               | 每个 OS/arch 的 artifact 和基础更新元数据         |
+| `provenance`              | builder、镜像、工具版本和 signer                  |
+| `createdAt` / `expiresAt` | 候选保留周期                                      |
 
 候选制品的事实来源是对象存储中的 `objectKey` 和 digest，不是 runner 路径、GitLab artifact URL 或工作区共享目录。
 
@@ -81,15 +81,15 @@ created -> building -> ready -> approval_pending -> approved -> publishing -> pu
 
 状态迁移约束：
 
-| 当前状态 | 允许迁移 | 触发者 |
-| --- | --- | --- |
-| `created` | `building`, `cancelled` | platform scheduler |
-| `building` | `ready`, `build_failed`, `cancelled` | build worker callback |
-| `ready` | `approval_pending`, `cancelled` | platform |
-| `approval_pending` | `approved`, `rejected` | approval API |
-| `approved` | `publishing`, `cancelled` | platform |
-| `publishing` | `published`, `publish_failed_retryable` | publisher |
-| `publish_failed_retryable` | `publishing`, `cancelled` | retry API |
+| 当前状态                   | 允许迁移                                | 触发者                |
+| -------------------------- | --------------------------------------- | --------------------- |
+| `created`                  | `building`, `cancelled`                 | platform scheduler    |
+| `building`                 | `ready`, `build_failed`, `cancelled`    | build worker callback |
+| `ready`                    | `approval_pending`, `cancelled`         | platform              |
+| `approval_pending`         | `approved`, `rejected`                  | approval API          |
+| `approved`                 | `publishing`, `cancelled`               | platform              |
+| `publishing`               | `published`, `publish_failed_retryable` | publisher             |
+| `publish_failed_retryable` | `publishing`, `cancelled`               | retry API             |
 
 重复请求必须返回当前资源，不得重复创建候选、发布任务或对象。
 

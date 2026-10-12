@@ -2,15 +2,15 @@
 
 ## 映射规则
 
-| 当前值 | 默认大小 | 目标值 | 默认大小 |
-|--------|---------|--------|---------|
-| `text-xs` | 12px | `text-ui-sm` | 12px |
-| `text-sm` | 14px | `text-ui-base` | 14px |
-| `text-[13px]` | 13px | `text-ui-base` | 14px |
-| `text-[14px]` | 14px | `text-ui-base` | 14px |
-| `text-[15px]` | 15px | `text-ui-base` | 14px |
-| `text-[16px]` | 16px | `text-ui-lg` | 16px |
-| `text-[28px]` | 28px | **不动** | 页面级 h1，与设置页标题同级 |
+| 当前值        | 默认大小 | 目标值         | 默认大小                    |
+| ------------- | -------- | -------------- | --------------------------- |
+| `text-xs`     | 12px     | `text-ui-sm`   | 12px                        |
+| `text-sm`     | 14px     | `text-ui-base` | 14px                        |
+| `text-[13px]` | 13px     | `text-ui-base` | 14px                        |
+| `text-[14px]` | 14px     | `text-ui-base` | 14px                        |
+| `text-[15px]` | 15px     | `text-ui-base` | 14px                        |
+| `text-[16px]` | 16px     | `text-ui-lg`   | 16px                        |
+| `text-[28px]` | 28px     | **不动**       | 页面级 h1，与设置页标题同级 |
 
 ## 文件清单
 

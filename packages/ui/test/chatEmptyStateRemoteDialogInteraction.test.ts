@@ -69,9 +69,7 @@ afterEach(() => {
 
 describe("ChatEmptyWorkspacePreviewMenu remote dialog interaction", () => {
   it("打开远程连接弹窗时关闭工作区菜单", async () => {
-    const { ChatEmptyWorkspacePreviewMenu } = await import(
-      "../src/ChatEmptyState.js"
-    );
+    const { ChatEmptyWorkspacePreviewMenu } = await import("../src/ChatEmptyState.js");
 
     render(
       createElement(ChatEmptyWorkspacePreviewMenu, {
@@ -91,13 +89,10 @@ describe("ChatEmptyWorkspacePreviewMenu remote dialog interaction", () => {
       }),
     );
 
-    fireEvent.pointerDown(
-      screen.getByRole("button", { name: "chat.empty.workspaceMenu" }),
-      {
-        button: 0,
-        ctrlKey: false,
-      },
-    );
+    fireEvent.pointerDown(screen.getByRole("button", { name: "chat.empty.workspaceMenu" }), {
+      button: 0,
+      ctrlKey: false,
+    });
     const remoteEntry = await screen.findByText("remote.trigger");
 
     fireEvent.click(remoteEntry);

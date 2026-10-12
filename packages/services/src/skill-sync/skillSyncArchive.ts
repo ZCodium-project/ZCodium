@@ -3,10 +3,7 @@ import { dirname, join, posix, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { promisify } from "node:util";
 import { createGunzip, gzip } from "node:zlib";
-import {
-  normalizeSkillSyncRelativePath,
-  resolveSkillSyncPathWithin,
-} from "./skillSyncPath.js";
+import { normalizeSkillSyncRelativePath, resolveSkillSyncPathWithin } from "./skillSyncPath.js";
 import { createSkillSyncSizeLimitError } from "./skillSyncErrors.js";
 
 const gzipAsync = promisify(gzip);
@@ -265,7 +262,10 @@ function createTarHeader(options: {
   writeTarString(header, "zcode", 265, 32);
   writeTarString(header, "zcode", 297, 32);
   writeTarString(header, prefix, 345, 155);
-  writeTarChecksum(header, header.reduce((sum, byte) => sum + byte, 0));
+  writeTarChecksum(
+    header,
+    header.reduce((sum, byte) => sum + byte, 0),
+  );
   return header;
 }
 
@@ -303,22 +303,14 @@ function readTarOctal(buffer: Buffer, offset: number, length: number): number {
   return raw ? Number.parseInt(raw, 8) : 0;
 }
 
-function writeTarString(
-  buffer: Buffer,
-  value: string,
-  offset: number,
-  length: number,
-): void {
+function writeTarString(buffer: Buffer, value: string, offset: number, length: number): void {
   buffer.write(value, offset, length, "utf8");
 }
 
-function writeTarOctal(
-  buffer: Buffer,
-  value: number,
-  offset: number,
-  length: number,
-): void {
-  const encoded = Math.trunc(value).toString(8).padStart(length - 1, "0");
+function writeTarOctal(buffer: Buffer, value: number, offset: number, length: number): void {
+  const encoded = Math.trunc(value)
+    .toString(8)
+    .padStart(length - 1, "0");
   writeTarString(buffer, encoded.slice(-(length - 1)), offset, length - 1);
 }
 

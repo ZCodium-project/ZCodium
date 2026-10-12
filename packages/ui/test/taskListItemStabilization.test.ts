@@ -87,9 +87,7 @@ describe("buildTaskListItemIdentityKey", () => {
 
 describe("areTaskListItemsEquivalent", () => {
   it("字段数量不同即判为不等价", () => {
-    expect(
-      areTaskListItemsEquivalent(createTask(), createTask({ unreadAt: 7 })),
-    ).toBe(false);
+    expect(areTaskListItemsEquivalent(createTask(), createTask({ unreadAt: 7 }))).toBe(false);
   });
 
   // 回归锁：稳定化的全部价值押在这条等价判断上，一旦退化只表现为「整列表闪一下」，

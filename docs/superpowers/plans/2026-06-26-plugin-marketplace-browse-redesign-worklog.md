@@ -20,7 +20,8 @@ Showing name + description per component is therefore impossible without a new
 CLI→UI data channel.
 
 We checked the marketplace format:
-- The marketplace entry schema *allows* an inlined manifest, but real `marketplace.json`
+
+- The marketplace entry schema _allows_ an inlined manifest, but real `marketplace.json`
   files only carry a **pointer** (`"source": "./plugins/<name>"`).
 - So component names and descriptions are only available by reading the plugin directory
   (installed cache or source) on demand.
@@ -31,13 +32,16 @@ descriptions by reading each component's frontmatter. This is the only protocol 
 ## What was built
 
 ### 1. New protocol method `plugins/describe` (the only protocol change)
+
 `packages/shared/src/zcode-protocol/index.ts`
+
 - `zcodeProtocolMethods.pluginsDescribe = "plugins/describe"`
 - params `{ workspace, marketplace, pluginName }`
 - result `{ components: Array<{ kind: agent|command|skill|hook|mcp, items: Array<{ name, description? }> }>, diagnostics? }`
 - registered in the session-method contract table.
 
 ### 2. CLI handler (apps/zcode-cli)
+
 - `adapters/src/plugins/marketplace.ts` → `describeMarketplacePlugin({ marketplace, name, storageRoot })`:
   - installed → `resolveInstalledPluginRoot` (local cache dir, offline);
   - uninstalled → `resolvePluginSourceRoot` (temp clone via `mkdtemp`, cleaned up in `finally`) — mirrors `validateMarketplacePlugin`.
@@ -51,10 +55,12 @@ descriptions by reading each component's frontmatter. This is the only protocol 
 - `bootstrap/src/zcode-protocol/server.ts` → routed the new method.
 
 ### 3. Services layer
+
 `packages/services/src/zcode-agent/{zcodeAgent.ts,zcodeAgentService.ts}` →
 `describePlugin(params)` following the `pluginsValidate` call pattern.
 
 ### 4. UI (packages/ui)
+
 - **`PluginMarketplaceManagement.tsx`** (rewritten): marketplace source card (kept) → search →
   left `MarketplaceSwitcher` (vertical, degrades to horizontal chips on narrow widths) +
   right content area that toggles between `MarketplaceGrid` (view A: card grid) and
@@ -66,10 +72,11 @@ descriptions by reading each component's frontmatter. This is the only protocol 
   result into ordered display groups (agent→command→skill→hook→mcp).
 - **`InstalledPluginManagement.tsx`**: switched its group rendering to the shared component.
 - **`store/pluginManagementStore.ts`**: `describeCache` (keyed by pluginId, loading/loaded/error)
-  + `describePlugin` action; cache hits skip refetch, `force` retries.
+  - `describePlugin` action; cache hits skip refetch, `force` retries.
 - **i18n**: en-US + zh-CN keys for the switcher, Get button, loading/error/empty states.
 
 ### Out of scope (YAGNI)
+
 A left category nav (Featured / Infrastructure / …) — the protocol has no
 `category` field, deferred. install/uninstall/marketplace CRUD untouched.
 
@@ -89,17 +96,20 @@ A left category nav (Featured / Infrastructure / …) — the protocol has no
     works end-to-end and renders name+description groups.
 
 ### Bugfix during verification
+
 The user's screenshot exposed garbled card text. Root cause: `MarketplacePluginCard`'s outer
 grid used `grid-cols-[auto_minmax(0,1fr)_auto]` (3 columns) with only 2 direct children, so the
 "Get" button landed in the middle `1fr` column and overlapped the text. Fixed to 2 columns
 `[minmax(0,1fr)_auto]`. Re-verified by screenshot.
 
 ## Commits (all on origin/feature-harness-improve)
+
 - `bdd833ddf` docs(plugins): spec marketplace browse redesign and on-demand plugins/describe
 - `443dc16b8` feat(plugins): add plugins/describe to enumerate marketplace plugin components
 - `30bb48bdf` feat(ui): redesign plugin marketplace browse with switcher, card grid and detail view
 
 ## Follow-ups / risks
+
 - **Windows/Linux:** the CLI describe path uses only `node:path`/`node:fs`/`mkdtemp(tmpdir())`,
   no hand-written separators — but git-clone-on-describe for uninstalled plugins was only
   exercised on macOS. Cross-platform clone/cleanup still needs a Windows pass.
@@ -112,6 +122,7 @@ grid used `grid-cols-[auto_minmax(0,1fr)_auto]` (3 columns) with only 2 direct c
 - The category nav was deferred pending a protocol `category` field.
 
 ## Throwaway artifacts (not committed)
+
 - `tmp/cdp-shot.mjs` — CDP screenshot helper (raw `ws` over page target; puppeteer hangs on Electron).
 - `tmp/shots/*.png` — verification screenshots.
 - `.claude/plans/plugin-ui-redesign-notes.md` — prior-session notes (a different task: the

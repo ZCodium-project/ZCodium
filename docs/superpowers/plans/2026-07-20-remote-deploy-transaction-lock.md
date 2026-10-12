@@ -23,10 +23,12 @@
 ### Task 1: Remote deploy lock-holder
 
 **Files:**
+
 - Create: `packages/server/src/remote/remoteDeployLock.ts`
 - Test: `packages/server/test/remoteDeployLock.test.ts`
 
 **Interfaces:**
+
 - Produces: `acquireRemoteDeployLock(backend, options?): Promise<RemoteDeployLockHandle>`。
 - Produces: `RemoteDeployLockHandle.release(): Promise<void>`，重复 release 幂等。
 
@@ -66,10 +68,12 @@
 ### Task 2: Deploy transaction 与 lock 内版本复查
 
 **Files:**
+
 - Modify: `packages/server/src/remote/deploy.ts`
 - Test: `packages/server/test/remoteDeploy.test.ts`
 
 **Interfaces:**
+
 - Consumes: `acquireRemoteDeployLock()`。
 - Produces: `deployServer()` 在持锁后调用 `checkServerDeployDecision()`，并在所有成功/失败出口 release。
 
@@ -96,12 +100,14 @@
 ### Task 3: Owner 唯一目录 staging 与清理
 
 **Files:**
+
 - Modify: `packages/server/src/remote/remoteAssetInstaller.ts`
 - Modify: `packages/server/src/remote/zcodeAgentDevDeploy.ts`
 - Test: `packages/server/test/remoteAssetInstaller.test.ts`
 - Test: `packages/server/test/remoteDeploy.test.ts`
 
 **Interfaces:**
+
 - Consumes: deploy-root transaction lock 保证最终目录替换串行。
 - Produces: 每次目录部署唯一 `remoteArchivePath`、`extractRoot`、`stagingDir`；失败 cleanup 只引用这些 owner 路径。
 

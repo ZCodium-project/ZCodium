@@ -4,10 +4,7 @@
 // config.provider/model/thought 更新（首次选型不产 marker）→ 控制条 data-* 同步。
 // 证明模型切换全链路（ModelSelected 补发 + config 投影 + 通用配置表单 UI）。
 import { clearAppData } from "../helpers/desktop-app.js";
-import {
-  UPSTREAM_MODEL,
-  UPSTREAM_PROVIDER_ID,
-} from "../helpers/upstream-provider.js";
+import { UPSTREAM_MODEL, UPSTREAM_PROVIDER_ID } from "../helpers/upstream-provider.js";
 import {
   getV4ModelConfig,
   prepareV4ConversationE2E,

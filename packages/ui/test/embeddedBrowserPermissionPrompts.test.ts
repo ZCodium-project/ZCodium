@@ -16,16 +16,17 @@ import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
 import { useEmbeddedBrowserPermissionStore } from "@/store/embeddedBrowserPermissionStore.js";
 
 /** 模拟 main 的设备列表热更新：同 requestId 的推送应替换列表而非追加。 */
-function pushDeviceListUpdate(requestId: string, devices: Array<{ deviceId: string; name?: string }>) {
-  useEmbeddedBrowserPermissionStore
-    .getState()
-    .receivePrompt({
-      requestId,
-      kind: "device",
-      origin: "https://example.com",
-      permission: "select-bluetooth-device",
-      devices,
-    });
+function pushDeviceListUpdate(
+  requestId: string,
+  devices: Array<{ deviceId: string; name?: string }>,
+) {
+  useEmbeddedBrowserPermissionStore.getState().receivePrompt({
+    requestId,
+    kind: "device",
+    origin: "https://example.com",
+    permission: "select-bluetooth-device",
+    devices,
+  });
 }
 
 const resolveEmbeddedBrowserPermissionPrompt = vi.fn();
@@ -38,9 +39,8 @@ vi.mock("@/hooks/usePlatform.js", () => ({
   }),
 }));
 
-const { EmbeddedBrowserPermissionPrompts } = await import(
-  "@/browser-use/EmbeddedBrowserPermissionPrompts.js"
-);
+const { EmbeddedBrowserPermissionPrompts } =
+  await import("@/browser-use/EmbeddedBrowserPermissionPrompts.js");
 
 function renderWithPrompts(
   prompts: EmbeddedBrowserPermissionPromptEvent[],
@@ -132,18 +132,12 @@ describe("EmbeddedBrowserPermissionPrompts Chrome 式权限气泡", () => {
 
   it("permission 请求按 guest 归属过滤：后台 tab 的请求不在当前 tab 渲染", () => {
     // 当前 tab 的 guest id = 42；请求来自 99（后台 tab）
-    renderWithPrompts(
-      [{ ...permissionPrompt, guestWebContentsId: 99 }],
-      42,
-    );
+    renderWithPrompts([{ ...permissionPrompt, guestWebContentsId: 99 }], 42);
     expect(screen.queryByTestId(TID_BROWSER_PERMISSION_PROMPTS)).toBeNull();
 
     // 请求来自当前 tab（42）：渲染
     cleanup();
-    renderWithPrompts(
-      [{ ...permissionPrompt, guestWebContentsId: 42 }],
-      42,
-    );
+    renderWithPrompts([{ ...permissionPrompt, guestWebContentsId: 42 }], 42);
     expect(screen.getByTestId(TID_BROWSER_PERMISSION_PROMPTS)).toBeTruthy();
     expect(screen.getByText("https://example.com")).toBeTruthy();
 

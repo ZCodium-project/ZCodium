@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZCodeTaskMeta } from "@zcode/shared";
-import {
-  DEFAULT_TASK_RUNTIME_STATE,
-  getDefaultWorkspaceState,
-} from "@/store/zcodeSessionStore.js";
+import { DEFAULT_TASK_RUNTIME_STATE, getDefaultWorkspaceState } from "@/store/zcodeSessionStore.js";
 import { markRemoteWorkspaceRunningTasksFailed } from "@/lib/remoteWorkspaceSessionRuntime.js";
 
 function createTask(taskId: string, status: ZCodeTaskMeta["status"]): ZCodeTaskMeta {

@@ -138,7 +138,8 @@ export async function setComposerPrefill(
     PNG_FIXTURE_SIZE_BYTES,
   )) as { count?: number; ok: boolean; reason?: string };
 
-  const expectedAttachmentCount = expectation.attachments?.length ?? expectation.attachmentFilenames.length;
+  const expectedAttachmentCount =
+    expectation.attachments?.length ?? expectation.attachmentFilenames.length;
   if (!result.ok || result.count !== expectedAttachmentCount) {
     throw new Error(`设置 composer prefill 附件失败: ${JSON.stringify(result)}`);
   }

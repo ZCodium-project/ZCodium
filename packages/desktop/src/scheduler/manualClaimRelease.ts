@@ -1,7 +1,5 @@
 export interface ManualClaimReleaseRepo {
-  get(
-    automationId: string,
-  ): Promise<{ workspaceKey: string } | null>;
+  get(automationId: string): Promise<{ workspaceKey: string } | null>;
   getRun(runId: string): Promise<{ workspaceKey: string } | null>;
   releaseManualClaim(automationId: string, workspaceKey: string): Promise<void>;
 }

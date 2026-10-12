@@ -2,10 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 function readUiSource(relativePath: string): string {
-  return readFileSync(
-    new URL(`../src/${relativePath}`, import.meta.url),
-    "utf8",
-  );
+  return readFileSync(new URL(`../src/${relativePath}`, import.meta.url), "utf8");
 }
 
 describe("workspace sidebar new-task routing", () => {
@@ -21,13 +18,8 @@ describe("workspace sidebar new-task routing", () => {
     const deactivateIndex = source.indexOf(
       "useWorkbenchGroupStore.getState().deactivateActiveGroup()",
     );
-    const resetPaneIndex = source.indexOf(
-      "usePaneLayoutStore.getState().resetToPrimaryPane()",
-    );
-    const startDraftIndex = source.indexOf(
-      "store.startDraft(",
-      deactivateIndex,
-    );
+    const resetPaneIndex = source.indexOf("usePaneLayoutStore.getState().resetToPrimaryPane()");
+    const startDraftIndex = source.indexOf("store.startDraft(", deactivateIndex);
 
     expect(deactivateIndex).toBeGreaterThan(-1);
     expect(resetPaneIndex).toBeGreaterThan(deactivateIndex);
@@ -81,8 +73,6 @@ describe("workspace sidebar new-task routing", () => {
     const remoteDraftEnd = source.indexOf("});", remoteDraftStart);
     const remoteDraftSource = source.slice(remoteDraftStart, remoteDraftEnd);
 
-    expect(remoteDraftSource).toContain(
-      "startDraftInWorkspace(workspacePath, workspaceIdentity)",
-    );
+    expect(remoteDraftSource).toContain("startDraftInWorkspace(workspacePath, workspaceIdentity)");
   });
 });

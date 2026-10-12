@@ -55,13 +55,8 @@ export function OffPeakHistoryTab({
     );
   }
   const status = resolveOffPeakHistoryStatus(task);
-  const endAt = isOffPeakTerminalStatus(task.status)
-    ? (task.endedAt ?? Date.now())
-    : Date.now();
-  const durationMin = Math.max(
-    1,
-    Math.round((endAt - task.startedAt) / 60_000),
-  );
+  const endAt = isOffPeakTerminalStatus(task.status) ? (task.endedAt ?? Date.now()) : Date.now();
+  const durationMin = Math.max(1, Math.round((endAt - task.startedAt) / 60_000));
   return (
     <div className="overflow-x-auto rounded-[8px]">
       {/* 修复原因：History 表格字号可缩放，使用相对行高避免大字号内容被固定 18px 行盒裁切。 */}
@@ -85,10 +80,7 @@ export function OffPeakHistoryTab({
         </thead>
         <tbody>
           <tr className="h-[46px] transition-colors hover:bg-surface-hover">
-            <td
-              className="max-w-64 truncate px-4 text-foreground-subtle"
-              title={task.prompt}
-            >
+            <td className="max-w-64 truncate px-4 text-foreground-subtle" title={task.prompt}>
               {task.prompt}
             </td>
             <td className="whitespace-nowrap px-4 text-foreground-subtle">
@@ -128,10 +120,7 @@ export function OffPeakHistoryTab({
                       })}
                       className="flex size-6 items-center justify-center rounded-[6px] text-foreground-subtle transition-colors hover:bg-white/10 hover:text-foreground data-[state=open]:bg-white/10 data-[state=open]:text-foreground"
                     >
-                      <AutomationMoreHorizontalIcon
-                        className="size-4"
-                        aria-hidden="true"
-                      />
+                      <AutomationMoreHorizontalIcon className="size-4" aria-hidden="true" />
                     </button>
                   </DropdownMenuTrigger>
                   {/* 旧版按触发器右缘对齐且沿用紧凑菜单内距，导致浮层向表格内侧偏移并少 17.5px。 */}
@@ -148,10 +137,7 @@ export function OffPeakHistoryTab({
                         onSelect={() => onOpenSession(task)}
                       >
                         <span className="flex size-5 shrink-0 items-center justify-center">
-                          <AutomationExternalLinkIcon
-                            className="size-4"
-                            aria-hidden="true"
-                          />
+                          <AutomationExternalLinkIcon className="size-4" aria-hidden="true" />
                         </span>
                         {intl.formatMessage({ id: "offPeak.goToSession" })}
                       </DropdownMenuItem>

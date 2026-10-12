@@ -131,7 +131,11 @@ http 路径下凭证只在 agent 进程的 fetch wrapper 里出现，插件拿�
 失败：
 
 ```json
-{ "_meta": { "com.zcode/official-mcp-auth": { "ok": false, "reason": "official_auth_plan_required" } } }
+{
+  "_meta": {
+    "com.zcode/official-mcp-auth": { "ok": false, "reason": "official_auth_plan_required" }
+  }
+}
 ```
 
 - `headers` 的键集合、Team 成对原子性、`Bigmodel-Target-Type` 的取值，全部由
@@ -162,12 +166,12 @@ phase-1 §6.3.3 对 http 是全 fail closed。stdio 路径改为**把 `{ok:false
 
 因此：
 
-| 情况 | 下发 | agent 侧 |
-| --- | --- | --- |
-| host auth port 不可用（standalone CLI） | `{ok:false, reason:"official_auth_unavailable"}` | 连接保持正常，仅该键为失败 |
-| 未登录 / 无选中 connection | `{ok:false, reason:"official_auth_unavailable"}` | 同上 |
-| Start Plan 或无 Coding Plan key | `{ok:false, reason:"official_auth_plan_required"}` | 同上 |
-| host 二次校验未命中 | `{ok:false, reason:"official_mcp_origin_untrusted"}` | 同上，凭据零读取 |
+| 情况                                    | 下发                                                 | agent 侧                   |
+| --------------------------------------- | ---------------------------------------------------- | -------------------------- |
+| host auth port 不可用（standalone CLI） | `{ok:false, reason:"official_auth_unavailable"}`     | 连接保持正常，仅该键为失败 |
+| 未登录 / 无选中 connection              | `{ok:false, reason:"official_auth_unavailable"}`     | 同上                       |
+| Start Plan 或无 Coding Plan key         | `{ok:false, reason:"official_auth_plan_required"}`   | 同上                       |
+| host 二次校验未命中                     | `{ok:false, reason:"official_mcp_origin_untrusted"}` | 同上，凭据零读取           |
 
 注意"连接保持正常"这一条与 http 路径的"连接置 failed"也不同：stdio server 上通常还挂着大量与
 官方 MCP 无关的工具（`video-edit` 有 30+ 个），因为拿不到身份头就把整个 server 置 failed 会误伤
@@ -188,14 +192,14 @@ phase-1 §6.3.1 的短路（`resolveAuthorizationCodeOAuthConfig` 遇 `zcode_off
 
 ## 7. 实现落位
 
-| 职责 | 文件 |
-| --- | --- |
-| stdio 配置类型 | `apps/zcode-cli/packages/contracts/src/interfaces/mcp.port.ts`（`McpStdioServerConfig` 加 `auth?` / `official?`） |
-| Plugin loader 解析 | `apps/zcode-cli/packages/adapters/src/plugins/mcp.ts`（`officialAuth && type !== "http"` 改为只拒 `sse`；stdio 分支带上 auth + provenance） |
-| 身份头解析与注入 | `apps/zcode-cli/packages/adapters/src/mcp/index.ts`（`callTool` 的 `_meta` 注入点；`mcpRequestMeta` 扩参） |
-| 凭证解析 / 身份头构造 | 复用 `packages/services/src/official-mcp/officialMcpCredentials.ts`，零改动 |
-| 信任判定 | 复用 `packages/shared/src/official-mcp-auth.ts`，零改动 |
-| host 二次校验 | 复用 `packages/services/src/zcode-agent/zcodeAgentService.ts`，零改动 |
+| 职责                  | 文件                                                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| stdio 配置类型        | `apps/zcode-cli/packages/contracts/src/interfaces/mcp.port.ts`（`McpStdioServerConfig` 加 `auth?` / `official?`）                           |
+| Plugin loader 解析    | `apps/zcode-cli/packages/adapters/src/plugins/mcp.ts`（`officialAuth && type !== "http"` 改为只拒 `sse`；stdio 分支带上 auth + provenance） |
+| 身份头解析与注入      | `apps/zcode-cli/packages/adapters/src/mcp/index.ts`（`callTool` 的 `_meta` 注入点；`mcpRequestMeta` 扩参）                                  |
+| 凭证解析 / 身份头构造 | 复用 `packages/services/src/official-mcp/officialMcpCredentials.ts`，零改动                                                                 |
+| 信任判定              | 复用 `packages/shared/src/official-mcp-auth.ts`，零改动                                                                                     |
+| host 二次校验         | 复用 `packages/services/src/zcode-agent/zcodeAgentService.ts`，零改动                                                                       |
 
 不需要改 `SANITIZED_RUNTIME_ENV_KEYS`：身份头不进 env，没有新的子进程泄漏面。
 

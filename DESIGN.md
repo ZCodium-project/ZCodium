@@ -191,31 +191,31 @@ feature-scoped token family:
 
 ### Specialized color tokens
 
-| Token | Purpose |
-| --- | --- |
-| `--color-markdown-inline-code` | Markdown 行内代码背景，沿用 tag / label 胶囊层级 |
-| `--color-popover-header` | Popover header |
-| `--color-tab` | Tab 默认背景 |
-| `--color-tab-active` | 当前激活 tab |
-| `--color-tab-border` | Tab 分隔线 |
-| `--color-feedback-privacy-hint` | 反馈截图隐私提醒文字及叹号图标；独立一行，使用辅助说明字号 |
-| `--color-git-none` | Git 无变更状态，沿用普通文件名颜色 |
-| `--color-git-modified` | Git modified，表示已跟踪文件有未提交修改 |
-| `--color-git-added` | Git added，表示新增文件已进入工作树 / 暂存区 |
-| `--color-git-deleted` | Git deleted，表示已跟踪文件被删除 |
-| `--color-git-renamed` | Git renamed，表示已跟踪文件移动或重命名 |
-| `--color-git-untracked` | Git untracked，表示 Git 尚未跟踪的新文件 |
-| `--color-git-ignored` | Git ignored，继承弱化文本层级 |
-| `--color-git-descendant` | Git descendant，表示目录后代包含变更 |
-| `--color-file-node` | 文件 mention node 背景 |
-| `--color-file-node-hover` | 文件 mention node hover 背景 |
-| `--color-file-node-foreground` | 文件 mention node 文字 / 图标 |
-| `--color-skill-node` | Skill mention node 背景 |
-| `--color-skill-node-hover` | Skill mention node hover 背景 |
-| `--color-skill-node-foreground` | Skill mention node 文字 / 图标 |
-| `--color-command-node` | Command mention node 背景 |
-| `--color-command-node-hover` | Command mention node hover 背景 |
-| `--color-command-node-foreground` | Command mention node 文字 / 图标 |
+| Token                             | Purpose                                                    |
+| --------------------------------- | ---------------------------------------------------------- |
+| `--color-markdown-inline-code`    | Markdown 行内代码背景，沿用 tag / label 胶囊层级           |
+| `--color-popover-header`          | Popover header                                             |
+| `--color-tab`                     | Tab 默认背景                                               |
+| `--color-tab-active`              | 当前激活 tab                                               |
+| `--color-tab-border`              | Tab 分隔线                                                 |
+| `--color-feedback-privacy-hint`   | 反馈截图隐私提醒文字及叹号图标；独立一行，使用辅助说明字号 |
+| `--color-git-none`                | Git 无变更状态，沿用普通文件名颜色                         |
+| `--color-git-modified`            | Git modified，表示已跟踪文件有未提交修改                   |
+| `--color-git-added`               | Git added，表示新增文件已进入工作树 / 暂存区               |
+| `--color-git-deleted`             | Git deleted，表示已跟踪文件被删除                          |
+| `--color-git-renamed`             | Git renamed，表示已跟踪文件移动或重命名                    |
+| `--color-git-untracked`           | Git untracked，表示 Git 尚未跟踪的新文件                   |
+| `--color-git-ignored`             | Git ignored，继承弱化文本层级                              |
+| `--color-git-descendant`          | Git descendant，表示目录后代包含变更                       |
+| `--color-file-node`               | 文件 mention node 背景                                     |
+| `--color-file-node-hover`         | 文件 mention node hover 背景                               |
+| `--color-file-node-foreground`    | 文件 mention node 文字 / 图标                              |
+| `--color-skill-node`              | Skill mention node 背景                                    |
+| `--color-skill-node-hover`        | Skill mention node hover 背景                              |
+| `--color-skill-node-foreground`   | Skill mention node 文字 / 图标                             |
+| `--color-command-node`            | Command mention node 背景                                  |
+| `--color-command-node-hover`      | Command mention node hover 背景                            |
+| `--color-command-node-foreground` | Command mention node 文字 / 图标                           |
 
 Git file statuses must use `text-git-*` / `bg-git-*`, rather than borrowing diff or warning tokens.
 Mention tokens belong to prompt-editor and UserPrompt mention nodes; their background, hover,
@@ -260,15 +260,15 @@ Each `text-ui-*` utility maps to the corresponding `--text-ui-*` CSS token.
 
 All interface typography must use the dedicated `text-ui-*` scale. The Appearance setting controls `--ui-font-size`, whose default is `14px`:
 
-| Token | Formula | Default |
-| --- | --- | ---: |
-| `text-ui-xl` | `--ui-font-size + 4px` | 18px |
-| `text-ui-lg` | `--ui-font-size + 2px` | 16px |
-| `text-ui-base` | `--ui-font-size` | 14px |
-| `text-ui-caption` | `--ui-font-size - 1px` | 13px |
-| `text-ui-sm` | `--ui-font-size - 2px` | 12px |
-| `text-ui-xs` | `--ui-font-size - 4px` | 10px |
-| `text-ui-2xs` | `--ui-font-size - 5px` | 9px |
+| Token             | Formula                | Default |
+| ----------------- | ---------------------- | ------: |
+| `text-ui-xl`      | `--ui-font-size + 4px` |    18px |
+| `text-ui-lg`      | `--ui-font-size + 2px` |    16px |
+| `text-ui-base`    | `--ui-font-size`       |    14px |
+| `text-ui-caption` | `--ui-font-size - 1px` |    13px |
+| `text-ui-sm`      | `--ui-font-size - 2px` |    12px |
+| `text-ui-xs`      | `--ui-font-size - 4px` |    10px |
+| `text-ui-2xs`     | `--ui-font-size - 5px` |     9px |
 
 `text-ui-2xs` is a restricted exception below the `text-ui-xs` floor: it is permitted
 only for graph **axis furniture** — timebase tick labels, channel codes, and unit
@@ -288,14 +288,14 @@ be prevented, and therefore does not scale with `--ui-font-size`.
 
 The `text-ui-*` scale expresses stable semantic roles. Choose a token by content role rather than by isolated visual preference:
 
-| Token | Primary roles |
-| --- | --- |
-| `text-ui-xl` | Markdown `h1` and equivalent first-level reading headings |
-| `text-ui-lg` | Markdown `h2` and equivalent second-level reading headings |
-| `text-ui-base` | Markdown `h3`-`h6`, body copy, common buttons, workspace and section titles, and other primary UI text |
+| Token             | Primary roles                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `text-ui-xl`      | Markdown `h1` and equivalent first-level reading headings                                                    |
+| `text-ui-lg`      | Markdown `h2` and equivalent second-level reading headings                                                   |
+| `text-ui-base`    | Markdown `h3`-`h6`, body copy, common buttons, workspace and section titles, and other primary UI text       |
 | `text-ui-caption` | Compact supporting copy that must remain one step below body text, such as the New Task feature announcement |
-| `text-ui-sm` | Secondary copy, supporting information, helper text, Tooltip copy, and Markdown inline code |
-| `text-ui-xs` | Tooltip keyboard shortcuts, badges, compact labels, counters, and very weak metadata |
+| `text-ui-sm`      | Secondary copy, supporting information, helper text, Tooltip copy, and Markdown inline code                  |
+| `text-ui-xs`      | Tooltip keyboard shortcuts, badges, compact labels, counters, and very weak metadata                         |
 
 - Markdown `h3`-`h6` share `text-ui-base`; distinguish their hierarchy through weight: `h3`-`h4` use `font-semibold`, `h5` uses `font-medium`, and `h6` uses `font-normal`.
 - Body copy and common controls normally use `text-ui-base font-normal`; titles and labels may strengthen weight without changing their semantic size role.
@@ -380,11 +380,11 @@ These exceptions do not automatically grant `2xl` to nested controls or content 
 
 Buttons, menu trigger buttons, ordinary Input, Textarea, and Select triggers default to `rounded-lg`. Adjust them according to the nearest rounded parent container:
 
-| Nearest rounded parent | Control radius |
-| --- | --- |
-| None, or `rounded-xl` and above | `rounded-lg` |
-| `rounded-lg` | `rounded-md` |
-| `rounded-md` / `rounded-sm` | `rounded-sm` |
+| Nearest rounded parent          | Control radius |
+| ------------------------------- | -------------- |
+| None, or `rounded-xl` and above | `rounded-lg`   |
+| `rounded-lg`                    | `rounded-md`   |
+| `rounded-md` / `rounded-sm`     | `rounded-sm`   |
 
 Control size and primary/secondary action emphasis do not independently change radius.
 
@@ -576,13 +576,13 @@ Rules:
 
 ### Breakpoint roles
 
-| Breakpoint | Preferred use |
-| --- | --- |
-| `sm:` | Dialog width, button arrangement, small-screen layout corrections |
-| `md:` | Grid columns and form layout expansion |
-| `lg:` | Desktop toolbar visibility and secondary information density |
-| `xl:` | Chat and complex content arrangements |
-| `2xl:` | Wide-screen reading-width caps, not ordinary page behavior |
+| Breakpoint | Preferred use                                                     |
+| ---------- | ----------------------------------------------------------------- |
+| `sm:`      | Dialog width, button arrangement, small-screen layout corrections |
+| `md:`      | Grid columns and form layout expansion                            |
+| `lg:`      | Desktop toolbar visibility and secondary information density      |
+| `xl:`      | Chat and complex content arrangements                             |
+| `2xl:`     | Wide-screen reading-width caps, not ordinary page behavior        |
 
 Start with the unprefixed layout, then add the fewest breakpoints needed. Prefer changing
 layout, `max-width`, and visibility to repeatedly switching fixed dimensions or semantic

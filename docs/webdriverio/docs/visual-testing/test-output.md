@@ -16,20 +16,20 @@ This can be set on the [Service Options](./service-options#enablelayouttesting) 
 ```js
 // wdio.conf.(js|ts)
 export const config = {
-    // ...
-    // =====
-    // Setup
-    // =====
-    services: [
-        [
-            'visual',
-            {
-                enableLayoutTesting: true
-            }
-        ]
-    ]
-    // ...
-}
+  // ...
+  // =====
+  // Setup
+  // =====
+  services: [
+    [
+      "visual",
+      {
+        enableLayoutTesting: true,
+      },
+    ],
+  ],
+  // ...
+};
 ```
 
 The image output for the [Service Options](./service-options#enablelayouttesting) is equal to the [Method](./method-options), see below.
@@ -37,20 +37,20 @@ The image output for the [Service Options](./service-options#enablelayouttesting
 ### Image Output
 
 <Tabs
-    defaultValue="saveelement"
-    values={[
-        {label: 'saveElement | checkElement', value: 'saveelement'},
-        {label: 'saveScreen | checkScreen', value: 'savescreen'},
-        {label: 'saveFullPageScreen | checkFullPageScreen', value: 'savefullpagescreen'},
-        {label: 'saveTabbablePage | checkTabbablePage', value: 'saveTabbablePage'},
-    ]}
->
-<TabItem value="saveelement">
+defaultValue="saveelement"
+values={[
+{label: 'saveElement | checkElement', value: 'saveelement'},
+{label: 'saveScreen | checkScreen', value: 'savescreen'},
+{label: 'saveFullPageScreen | checkFullPageScreen', value: 'savefullpagescreen'},
+{label: 'saveTabbablePage | checkTabbablePage', value: 'saveTabbablePage'},
+]}
+
+> <TabItem value="saveelement">
 
 ```js
-await browser.saveElement(".features_vqN4", "example-element-tag", {enableLayoutTesting: true})
+await browser.saveElement(".features_vqN4", "example-element-tag", { enableLayoutTesting: true });
 // Or
-await browser.checkElement(".features_vqN4", "example-element-tag", {enableLayoutTesting: true})
+await browser.checkElement(".features_vqN4", "example-element-tag", { enableLayoutTesting: true });
 ```
 
 ![saveElement Desktop](/img/visual/layout-element-local-chrome-latest-1366x768.png)
@@ -60,7 +60,7 @@ await browser.checkElement(".features_vqN4", "example-element-tag", {enableLayou
 <TabItem value="savescreen">
 
 ```js
-await browser.saveScreen("example-page-tag")
+await browser.saveScreen("example-page-tag");
 ```
 
 ![saveScreen Desktop](/img/visual/layout-viewportScreenshot-chrome-latest-1366x768.png)
@@ -70,9 +70,9 @@ await browser.saveScreen("example-page-tag")
 <TabItem value="savefullpagescreen">
 
 ```js
-await browser.saveFullPageScreen("full-page-tag")
+await browser.saveFullPageScreen("full-page-tag");
 // Or
-await browser.checkFullPageScreen("full-page-tag", {enableLayoutTesting: true})
+await browser.checkFullPageScreen("full-page-tag", { enableLayoutTesting: true });
 ```
 
 ![saveFullPageScreens Desktop](/img/visual/layout-fullPage-chrome-latest-1366x768.png)
@@ -82,16 +82,15 @@ await browser.checkFullPageScreen("full-page-tag", {enableLayoutTesting: true})
 <TabItem value="saveTabbablePage">
 
 ```js
-await browser.saveTabbablePage("tabbable-page-tag")
+await browser.saveTabbablePage("tabbable-page-tag");
 // Or
-await browser.checkTabbablePage("tabbable-page-tag", {enableLayoutTesting: true})
+await browser.checkTabbablePage("tabbable-page-tag", { enableLayoutTesting: true });
 ```
 
 ![saveFullPageScreens Desktop](/img/visual/layout-tabbable-chrome-latest-1366x768.png)
 
 </TabItem>
 </Tabs>
-
 
 ## save(Screen/Element/FullPageScreen)
 
@@ -117,64 +116,64 @@ console.log(saveResults)
 ### Image Output
 
 <Tabs
-    defaultValue="saveelement"
-    values={[
-        {label: 'saveElement', value: 'saveelement'},
-        {label: 'saveScreen', value: 'savescreen'},
-        {label: 'saveFullPageScreen', value: 'savefullpagescreen'},
-    ]}
->
-<TabItem value="saveelement">
+defaultValue="saveelement"
+values={[
+{label: 'saveElement', value: 'saveelement'},
+{label: 'saveScreen', value: 'savescreen'},
+{label: 'saveFullPageScreen', value: 'savefullpagescreen'},
+]}
+
+> <TabItem value="saveelement">
 
 ```js
-await browser.saveElement(".hero__title-logo", "example-element-tag")
+await browser.saveElement(".hero__title-logo", "example-element-tag");
 ```
 
 <Tabs
-    defaultValue="desktop"
-    values={[
-        {label: 'Desktop', value: 'desktop'},
-        {label: 'Android', value: 'android'},
-        {label: 'iOS', value: 'ios'},
-    ]}
->
-<TabItem value="desktop">
-![saveElement Desktop](/img/visual/wdioLogo-chrome-latest-1-1366x768.png)
-</TabItem>
-<TabItem value="android">
-![saveElement Mobile Android](/img/visual/wdioLogo-EmulatorAndroidGoogleAPIPortraitNativeWebScreenshot14.0-384x640.png)
-</TabItem>
-<TabItem value="ios">
-![saveElement Mobile iOS](/img/visual/wdioLogo-Iphone12Portrait16-390x844.png)
-</TabItem>
-</Tabs>
-</TabItem>
+defaultValue="desktop"
+values={[
+{label: 'Desktop', value: 'desktop'},
+{label: 'Android', value: 'android'},
+{label: 'iOS', value: 'ios'},
+]}
+
+> <TabItem value="desktop">
+> ![saveElement Desktop](/img/visual/wdioLogo-chrome-latest-1-1366x768.png)
+> </TabItem>
+> <TabItem value="android">
+> ![saveElement Mobile Android](/img/visual/wdioLogo-EmulatorAndroidGoogleAPIPortraitNativeWebScreenshot14.0-384x640.png)
+> </TabItem>
+> <TabItem value="ios">
+> ![saveElement Mobile iOS](/img/visual/wdioLogo-Iphone12Portrait16-390x844.png)
+> </TabItem>
+> </Tabs>
+> </TabItem>
 
 <TabItem value="savescreen">
 
 ```js
-await browser.saveScreen("example-page-tag")
+await browser.saveScreen("example-page-tag");
 ```
 
 <Tabs
-    defaultValue="desktop"
-    values={[
-        {label: 'Desktop', value: 'desktop'},
-        {label: 'Android ChromeDriver', value: 'android-chromedriver'},
-        {label: 'Android nativeWebScreenshot', value: 'android-native'},
-        {label: 'iOS', value: 'ios'},
-    ]}
->
-<TabItem value="desktop">
-![saveScreen Desktop](/img/visual/examplePage-chrome-latest-1366x768.png)
-</TabItem>
-<TabItem value="android-chromedriver">
-![saveScreen Mobile Android ChromeDriver](/img/visual/screenshot-EmulatorAndroidGoogleAPIPortraitChromeDriver14.0-384x640.png)
-</TabItem>
-<TabItem value="android-native">
-![saveScreen Mobile Android nativeWebScreenshot](/img/visual/screenshot-EmulatorAndroidGoogleAPIPortraitNativeWebScreenshot14.0-384x640.png)
-</TabItem>
-<TabItem value="ios">
+defaultValue="desktop"
+values={[
+{label: 'Desktop', value: 'desktop'},
+{label: 'Android ChromeDriver', value: 'android-chromedriver'},
+{label: 'Android nativeWebScreenshot', value: 'android-native'},
+{label: 'iOS', value: 'ios'},
+]}
+
+> <TabItem value="desktop">
+> ![saveScreen Desktop](/img/visual/examplePage-chrome-latest-1366x768.png)
+> </TabItem>
+> <TabItem value="android-chromedriver">
+> ![saveScreen Mobile Android ChromeDriver](/img/visual/screenshot-EmulatorAndroidGoogleAPIPortraitChromeDriver14.0-384x640.png)
+> </TabItem>
+> <TabItem value="android-native">
+> ![saveScreen Mobile Android nativeWebScreenshot](/img/visual/screenshot-EmulatorAndroidGoogleAPIPortraitNativeWebScreenshot14.0-384x640.png)
+> </TabItem>
+> <TabItem value="ios">
 
 :::info TIP
 iOS `saveScreen` executions are by default not with the device bezel corners. To have this please add the `addIOSBezelCorners:true` option when instantiating the service, see [this](./service-options#addiosbezelcorners)
@@ -188,29 +187,29 @@ iOS `saveScreen` executions are by default not with the device bezel corners. To
 <TabItem value="savefullpagescreen">
 
 ```js
-await browser.saveFullPageScreen("full-page-tag")
+await browser.saveFullPageScreen("full-page-tag");
 ```
 
 <Tabs
-    defaultValue="desktop"
-    values={[
-        {label: 'Desktop', value: 'desktop'},
-        {label: 'Android', value: 'android'},
-        {label: 'iOS', value: 'ios'},
-    ]}
->
-<TabItem value="desktop">
-![saveFullPageScreens Desktop](/img/visual/fullPage-chrome-latest-1366x768.png)
-</TabItem>
-<TabItem value="android">
-![saveFullPageScreens Mobile Android](/img/visual/fullPage-EmulatorAndroidGoogleAPIPortraitChromeDriver14.0-384x640.png)
-</TabItem>
-<TabItem value="ios">
-![saveFullPageScreens Mobile iOS](/img/visual/fullPage-Iphone12Portrait16-390x844.png)
-</TabItem>
-</Tabs>
-</TabItem>
-</Tabs>
+defaultValue="desktop"
+values={[
+{label: 'Desktop', value: 'desktop'},
+{label: 'Android', value: 'android'},
+{label: 'iOS', value: 'ios'},
+]}
+
+> <TabItem value="desktop">
+> ![saveFullPageScreens Desktop](/img/visual/fullPage-chrome-latest-1366x768.png)
+> </TabItem>
+> <TabItem value="android">
+> ![saveFullPageScreens Mobile Android](/img/visual/fullPage-EmulatorAndroidGoogleAPIPortraitChromeDriver14.0-384x640.png)
+> </TabItem>
+> <TabItem value="ios">
+> ![saveFullPageScreens Mobile iOS](/img/visual/fullPage-Iphone12Portrait16-390x844.png)
+> </TabItem>
+> </Tabs>
+> </TabItem>
+> </Tabs>
 
 ## check(Screen/Element/FullPageScreen)
 
@@ -248,17 +247,20 @@ The images below will only show differences as a result of running the check com
 :::
 
 <Tabs
-    defaultValue="checkelement"
-    values={[
-        {label: 'checkElement', value: 'checkelement'},
-        {label: 'checkScreen', value: 'checkscreen'},
-        {label: 'checkFullPageScreen', value: 'checkfullpagescreen'},
-    ]}
->
-<TabItem value="checkelement">
+defaultValue="checkelement"
+values={[
+{label: 'checkElement', value: 'checkelement'},
+{label: 'checkScreen', value: 'checkscreen'},
+{label: 'checkFullPageScreen', value: 'checkfullpagescreen'},
+]}
+
+> <TabItem value="checkelement">
 
 ```js
-await browser.checkElement("#__docusaurus_skipToContent_fallback > header > div > div.buttons_pzbO > a:nth-child(1)", "example-element-tag")
+await browser.checkElement(
+  "#__docusaurus_skipToContent_fallback > header > div > div.buttons_pzbO > a:nth-child(1)",
+  "example-element-tag",
+);
 ```
 
 :::info
@@ -271,7 +273,7 @@ The button text has been changed from `Get Started` to `Getting Started!` and de
 <TabItem value="checkscreen">
 
 ```js
-await browser.checkScreen("example-page-tag")
+await browser.checkScreen("example-page-tag");
 ```
 
 :::info
@@ -285,7 +287,7 @@ The button text has been changed from `Get Started` to `Getting Started!` and de
 <TabItem value="checkfullpagescreen">
 
 ```js
-await browser.checkFullPageScreen("full-page-tag")
+await browser.checkFullPageScreen("full-page-tag");
 ```
 
 :::info
@@ -303,13 +305,13 @@ The button text has been changed from `Get Started` to `Getting Started!` and de
 Here you will find an example output for block-outs in Android NativeWebScreenshot and iOS where the status+address and toolbar are blocked out.
 
 <Tabs
-    defaultValue="nativeWebScreenshot"
-    values={[
-        {label: 'Android nativeWebScreenshot', value: 'nativeWebScreenshot'},
-        {label: 'iOS', value: 'ios'},
-    ]}
->
-<TabItem value="nativeWebScreenshot">
+defaultValue="nativeWebScreenshot"
+values={[
+{label: 'Android nativeWebScreenshot', value: 'nativeWebScreenshot'},
+{label: 'iOS', value: 'ios'},
+]}
+
+> <TabItem value="nativeWebScreenshot">
 
 ![Blockouts Android](/img/visual/android.blockouts.png)
 

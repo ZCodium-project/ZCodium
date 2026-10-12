@@ -28,8 +28,8 @@ Starts a new session with specific capabilities. Based on the session response c
 
 ```js
 const client = await WebDriver.newSession({
-    capabilities: { browserName: 'chrome' }
-})
+  capabilities: { browserName: "chrome" },
+});
 ```
 
 #### `attachToSession(attachInstance, modifier, userPrototype, customCommandWrapper)`
@@ -89,11 +89,11 @@ Starts a WebdriverIO session. The instance contains all commands as the protocol
 ##### Example
 
 ```js
-import { remote } from 'webdriverio'
+import { remote } from "webdriverio";
 
 const browser = await remote({
-    capabilities: { browserName: 'chrome' }
-})
+  capabilities: { browserName: "chrome" },
+});
 ```
 
 #### `attach(attachOptions)`
@@ -132,20 +132,20 @@ Initiates a multiremote instance which allows you to control multiple session wi
 ##### Example
 
 ```js
-import { multiremote } from 'webdriverio'
+import { multiremote } from "webdriverio";
 
 const matrix = await multiremote({
-    myChromeBrowser: {
-        capabilities: { browserName: 'chrome' }
-    },
-    myFirefoxBrowser: {
-        capabilities: { browserName: 'firefox' }
-    }
-})
-await matrix.url('http://json.org')
-await matrix.getInstance('browserA').url('https://google.com')
+  myChromeBrowser: {
+    capabilities: { browserName: "chrome" },
+  },
+  myFirefoxBrowser: {
+    capabilities: { browserName: "firefox" },
+  },
+});
+await matrix.url("http://json.org");
+await matrix.getInstance("browserA").url("https://google.com");
 
-console.log(await matrix.getTitle())
+console.log(await matrix.getTitle());
 // returns ['Google', 'JSON']
 ```
 
@@ -154,23 +154,23 @@ console.log(await matrix.getTitle())
 Instead of calling the `wdio` command, you can also include the test runner as module and run it in an arbitrary environment. For that, you'll need to require the `@wdio/cli` package as module, like this:
 
 <Tabs
-  defaultValue="esm"
-  values={[
-    {label: 'EcmaScript Modules', value: 'esm'},
-    {label: 'CommonJS', value: 'cjs'}
-  ]
+defaultValue="esm"
+values={[
+{label: 'EcmaScript Modules', value: 'esm'},
+{label: 'CommonJS', value: 'cjs'}
+]
 }>
 <TabItem value="esm">
 
 ```js
-import Launcher from '@wdio/cli'
+import Launcher from "@wdio/cli";
 ```
 
 </TabItem>
 <TabItem value="cjs">
 
 ```js
-const Launcher = require('@wdio/cli').default
+const Launcher = require("@wdio/cli").default;
 ```
 
 </TabItem>
@@ -190,17 +190,17 @@ The `Launcher` class constructor expects the URL to the config file, and an `opt
 ##### Example
 
 ```js
-const wdio = new Launcher(
-    '/path/to/my/wdio.conf.js',
-    { spec: '/path/to/a/single/spec.e2e.js' }
-)
+const wdio = new Launcher("/path/to/my/wdio.conf.js", { spec: "/path/to/a/single/spec.e2e.js" });
 
-wdio.run().then((exitCode) => {
-    process.exit(exitCode)
-}, (error) => {
-    console.error('Launcher failed to start the test', error.stacktrace)
-    process.exit(1)
-})
+wdio.run().then(
+  (exitCode) => {
+    process.exit(exitCode);
+  },
+  (error) => {
+    console.error("Launcher failed to start the test", error.stacktrace);
+    process.exit(1);
+  },
+);
 ```
 
 The `run` command returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). It is resolved if tests ran successfully or failed, and it is rejected if the launcher was unable to start run the tests.
@@ -210,7 +210,7 @@ The `run` command returns a [Promise](https://developer.mozilla.org/en-US/docs/W
 When running unit or component tests using WebdriverIO's [browser runner](/docs/runner#browser-runner) you can import mocking utilities for your tests, e.g.:
 
 ```ts
-import { fn, spyOn, mock, unmock } from '@wdio/browser-runner'
+import { fn, spyOn, mock, unmock } from "@wdio/browser-runner";
 ```
 
 The following named exports are available:
@@ -259,5 +259,5 @@ Unmock dependency that is defined within the manual mock (`__mocks__`) directory
 ##### Example
 
 ```js
-unmock('lodash')
+unmock("lodash");
 ```

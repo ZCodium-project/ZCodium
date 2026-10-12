@@ -4,10 +4,7 @@ import { describe, expect, it } from "vitest";
 import { capabilityGroups } from "@/data/productCapabilityMap.js";
 
 const devDocsRoot = process.cwd();
-const ownershipDataPath = resolve(
-  devDocsRoot,
-  "src/data/productCapabilityOwnership.ts",
-);
+const ownershipDataPath = resolve(devDocsRoot, "src/data/productCapabilityOwnership.ts");
 const capabilityMapInteractionFiles = [
   "src/capability-map/CapabilityMapView.tsx",
   "src/capability-map/CapabilityMapDetail.tsx",
@@ -29,9 +26,7 @@ describe("能力图不承载具体人员分工", () => {
   it("不保留人员职责数据或人员选择交互", async () => {
     await expect(access(ownershipDataPath)).rejects.toThrow();
     const interactionSources = (
-      await Promise.all(
-        capabilityMapInteractionFiles.map((path) => readFile(path, "utf8")),
-      )
+      await Promise.all(capabilityMapInteractionFiles.map((path) => readFile(path, "utf8")))
     ).join("\n");
 
     expect(interactionSources).not.toMatch(

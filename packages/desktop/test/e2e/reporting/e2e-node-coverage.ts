@@ -11,10 +11,7 @@ import {
 } from "node:fs";
 import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import {
-  createCoverageMap,
-  type CoverageMapData,
-} from "istanbul-lib-coverage";
+import { createCoverageMap, type CoverageMapData } from "istanbul-lib-coverage";
 import { createInstrumenter } from "istanbul-lib-instrument";
 import { createContext } from "istanbul-lib-report";
 import { create as createIstanbulReport } from "istanbul-reports";
@@ -98,9 +95,7 @@ const SOURCE_EXTENSIONS = [".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts",
 const SOURCE_MAP_CACHE_INDEX_MARKER = ".zcode-source-map-cache-index-v2.marker";
 const COMPACTED_FILE_INDEX_MARKER = ".zcode-compacted-coverage-files-v1.marker";
 
-export function createE2ENodeCoverageCollector(
-  options: E2ENodeCoverageCollectorOptions,
-) {
+export function createE2ENodeCoverageCollector(options: E2ENodeCoverageCollectorOptions) {
   const enabled = process.env.ZCODE_E2E_COVERAGE === COVERAGE_ENABLED_VALUE;
   const coverageDir = resolve(options.artifactDir, "coverage");
   const rawRoot = resolve(coverageDir, "raw");
@@ -168,10 +163,7 @@ export function createE2ENodeCoverageCollector(
   return { beforeSession, compactRawCoverage, enabled, finalize, prepare };
 }
 
-export function compactV8CoverageDirectory(params: {
-  rawDir: string;
-  sourceMapRoot: string;
-}) {
+export function compactV8CoverageDirectory(params: { rawDir: string; sourceMapRoot: string }) {
   mkdirSync(params.rawDir, { recursive: true });
   const normalizedSourceMapRoot = normalizePath(resolve(params.sourceMapRoot));
   const sourceMapCacheMarker = resolve(params.rawDir, SOURCE_MAP_CACHE_INDEX_MARKER);
@@ -266,10 +258,7 @@ function writeDomainReport(params: {
   const rawFileCount = listFiles(params.rawDir, (path) => path.endsWith(".json")).length;
   const rawProcessPids = collectRawProcessPids(params.rawDir);
   const readyProcessPids = collectReadyProcessPids(params.rawDir);
-  const expectedProcessPids = collectExpectedProcessPids(
-    params.artifactDir,
-    params.domain,
-  );
+  const expectedProcessPids = collectExpectedProcessPids(params.artifactDir, params.domain);
   const missingRawProcessCount = expectedProcessPids
     ? [...expectedProcessPids].filter(
         (pid) => readyProcessPids.has(pid) && !rawProcessPids.has(pid),
@@ -356,10 +345,7 @@ function collectReadyProcessPids(rawDir: string) {
   return pids;
 }
 
-function collectExpectedProcessPids(
-  artifactDir: string,
-  domain: E2ENodeCoverageDomain,
-) {
+function collectExpectedProcessPids(artifactDir: string, domain: E2ENodeCoverageDomain) {
   if (domain !== "cli") return undefined;
   const pids = new Set<number>();
   const runtimeLogsDir = resolve(artifactDir, "runtime-logs");
@@ -374,11 +360,7 @@ function collectExpectedProcessPids(
   return pids.size > 0 ? pids : undefined;
 }
 
-function runC8Conversion(params: {
-  rawDir: string;
-  reportDir: string;
-  repoRoot: string;
-}) {
+function runC8Conversion(params: { rawDir: string; reportDir: string; repoRoot: string }) {
   const convertedDir = resolve(params.reportDir, "converted");
   const configPath = resolve(params.reportDir, "c8-convert-config.json");
   writeFileSync(
@@ -429,9 +411,7 @@ function writeNodeIstanbulReports(params: {
   const coverageMap = createCoverageMap(converted);
   coverageMap.filter((path) => sourceSet.has(normalizePath(resolve(path))));
 
-  const loadedPaths = new Set(
-    coverageMap.files().map((path) => normalizePath(resolve(path))),
-  );
+  const loadedPaths = new Set(coverageMap.files().map((path) => normalizePath(resolve(path))));
   let baselineFailureCount = 0;
   for (const sourceFile of params.sourceFiles) {
     if (loadedPaths.has(normalizePath(resolve(sourceFile)))) continue;
@@ -505,11 +485,7 @@ function resolveSourceMapSource(mapPath: string, sourceRoot: string | undefined,
   }
 }
 
-function isFirstPartyRuntimeSource(
-  domain: E2ENodeCoverageDomain,
-  path: string,
-  repoRoot: string,
-) {
+function isFirstPartyRuntimeSource(domain: E2ENodeCoverageDomain, path: string, repoRoot: string) {
   const normalized = normalizePath(resolve(path));
   const root = `${normalizePath(resolve(repoRoot))}/`;
   if (!normalized.startsWith(root) || normalized.includes("/node_modules/")) return false;

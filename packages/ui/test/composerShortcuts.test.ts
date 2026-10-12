@@ -69,34 +69,28 @@ describe("composer 作用域键位解析（spec §12.3）", () => {
 
   it("非 Enter 事件默认表不命中（开放策略下改绑非 Enter 键才会命中，SG-09）", () => {
     // 默认绑定全是 Enter 族：非 Enter 键不命中 → 主链照常处理
-    expect(resolveComposerKeyAction(enterEvent({ key: "k", code: "KeyK" }), defaultEffective())).toBe(
-      null,
-    );
+    expect(
+      resolveComposerKeyAction(enterEvent({ key: "k", code: "KeyK" }), defaultEffective()),
+    ).toBe(null);
     // 统一开放策略（SG-09）：composerSend 改绑为非 Enter 键（如 F9）后照常触发
     const f9Effective: ComposerEffectiveBindings = {
       ...defaultEffective(),
       composerSend: ["F9"],
     };
     expect(
-      resolveComposerKeyAction(
-        enterEvent({ key: "F9", code: "F9", ctrlKey: false }),
-        f9Effective,
-      ),
+      resolveComposerKeyAction(enterEvent({ key: "F9", code: "F9", ctrlKey: false }), f9Effective),
     ).toBe("send");
     // 未绑定的非 Enter 键仍不命中
-    expect(resolveComposerKeyAction(enterEvent({ key: "F9", code: "F9" }), defaultEffective())).toBe(
-      null,
-    );
+    expect(
+      resolveComposerKeyAction(enterEvent({ key: "F9", code: "F9" }), defaultEffective()),
+    ).toBe(null);
     // 换行同样开放：composerInsertNewline 改绑为 F2 后 F2 触发换行
     const f2Newline: ComposerEffectiveBindings = {
       ...defaultEffective(),
       composerInsertNewline: ["F2"],
     };
     expect(
-      resolveComposerKeyAction(
-        enterEvent({ key: "F2", code: "F2", shiftKey: false }),
-        f2Newline,
-      ),
+      resolveComposerKeyAction(enterEvent({ key: "F2", code: "F2", shiftKey: false }), f2Newline),
     ).toBe("newline");
   });
 
@@ -129,9 +123,13 @@ describe("composer 作用域键位解析（spec §12.3）", () => {
     );
     // mac 上 CmdOrCtrl 归一为 Cmd：Cmd+Enter 不在默认绑定（裸 Enter 不带修饰），
     // 必须落回主链给反转投递（onModifiedSubmit 接受 metaKey）
-    expect(resolveComposerKeyAction(enterEvent({ metaKey: true }), defaultEffective(), MAC)).toBeNull();
+    expect(
+      resolveComposerKeyAction(enterEvent({ metaKey: true }), defaultEffective(), MAC),
+    ).toBeNull();
     // mac 的 Win 键等价物不存在；Option（alt）+Enter 同样不命中默认绑定
-    expect(resolveComposerKeyAction(enterEvent({ altKey: true }), defaultEffective(), MAC)).toBeNull();
+    expect(
+      resolveComposerKeyAction(enterEvent({ altKey: true }), defaultEffective(), MAC),
+    ).toBeNull();
   });
 
   it("mac：改绑 CmdOrCtrl+Enter 后 Cmd+Enter 发送，显式 Ctrl+Enter 不命中（保留系统编辑区语义）", () => {
@@ -148,6 +146,8 @@ describe("composer 作用域键位解析（spec §12.3）", () => {
     expect(resolveComposerKeyAction(enterEvent({ ctrlKey: true }), effective, LINUX)).toBe("send");
     // 裸键绑定要求主修饰键抬起：meta（Win/Super）+Enter 不命中任何绑定
     expect(resolveComposerKeyAction(enterEvent({ metaKey: true }), effective, WIN)).toBeNull();
-    expect(resolveComposerKeyAction(enterEvent({ metaKey: true }), defaultEffective(), LINUX)).toBeNull();
+    expect(
+      resolveComposerKeyAction(enterEvent({ metaKey: true }), defaultEffective(), LINUX),
+    ).toBeNull();
   });
 });

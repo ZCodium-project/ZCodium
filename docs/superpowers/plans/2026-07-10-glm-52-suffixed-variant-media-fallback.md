@@ -23,10 +23,12 @@
 ### Task 1: Narrow the documented N08 contract
 
 **Files:**
+
 - Modify: `docs/conversation-session-case-catalog.md:275`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md:176`
 
 **Interfaces:**
+
 - Consumes: `docs/superpowers/specs/2026-07-10-glm-52-suffixed-variant-media-fallback-design.md`.
 - Produces: an accepted explicit text-only GLM-5.2 provider-visible strip contract without claiming that the E2E covers the unknown provider-aware fallback.
 
@@ -65,9 +67,11 @@ Expected: exit code `0` and no stale catalog/matrix coverage error for N08.
 ### Task 2: Add the failing capability boundary tests
 
 **Files:**
+
 - Test: `apps/zcode-cli/packages/bootstrap/tests/model-selection.test.ts:136-220`
 
 **Interfaces:**
+
 - Consumes: `resolveRuntimeModelInputCapabilities(modelRef, modelCatalog)`.
 - Produces: regression coverage proving suffixed GLM-5.2 variants stay unknown while canonical and other GLM-family models remain fail-closed.
 
@@ -76,18 +80,17 @@ Expected: exit code `0` and no stale catalog/matrix coverage error for N08.
 Add inside `describe("resolveRuntimeModelInputCapabilities", ...)`:
 
 ```ts
-it.each([
-  "GLM-5.2-variant",
-  "vendor/GLM-5.2-variant",
-  "GLM-5.2-variant[1m]",
-])("keeps unknown suffixed GLM-5.2 variant capability unknown for %s", (modelId) => {
-  expect(
-    resolveRuntimeModelInputCapabilities(
-      { providerId: "custom-glm", modelId },
-      { overrides: {} },
-    ),
-  ).toBeUndefined();
-});
+it.each(["GLM-5.2-variant", "vendor/GLM-5.2-variant", "GLM-5.2-variant[1m]"])(
+  "keeps unknown suffixed GLM-5.2 variant capability unknown for %s",
+  (modelId) => {
+    expect(
+      resolveRuntimeModelInputCapabilities(
+        { providerId: "custom-glm", modelId },
+        { overrides: {} },
+      ),
+    ).toBeUndefined();
+  },
+);
 ```
 
 - [ ] **Step 2: Add canonical normalization assertions**
@@ -125,10 +128,12 @@ Expected: the three neutral suffixed-variant cases fail because the current broa
 ### Task 3: Implement the public structural exception
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/app/model-input-capabilities.ts:1-179`
 - Test: `apps/zcode-cli/packages/bootstrap/tests/model-selection.test.ts`
 
 **Interfaces:**
+
 - Consumes: `normalizeModelIdForProviderRequest(modelId: string): string` from `@zcode/adapters/model`.
 - Produces: `isGlm52SuffixedVariant(modelId: string): boolean`, used only by the provider-aware media fallback.
 
@@ -154,9 +159,7 @@ After `isGlmFamilyModelId`, add:
 function isGlm52SuffixedVariant(modelId: string): boolean {
   const finalModelIdSegment = modelId.trim().split("/").filter(Boolean).at(-1);
   return finalModelIdSegment
-    ? GLM_5_2_SUFFIXED_VARIANT_PATTERN.test(
-        normalizeModelIdForProviderRequest(finalModelIdSegment),
-      )
+    ? GLM_5_2_SUFFIXED_VARIANT_PATTERN.test(normalizeModelIdForProviderRequest(finalModelIdSegment))
     : false;
 }
 ```
@@ -199,10 +202,12 @@ Expected: all tests pass; explicit false still strips, while unknown remains unc
 ### Task 4: Clear stale active-session media capabilities on registry refresh
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/workspace-model-catalog.ts:964-1056`
 - Test: `apps/zcode-cli/packages/bootstrap/tests/zcode-protocol.test.ts:3964-4141`
 
 **Interfaces:**
+
 - Consumes: `resolveRuntimeModelInputCapabilities(...)` and `AgentRuntime.updateConfig(...)` property-presence semantics.
 - Produces: a `ProviderModelLimits` patch that explicitly carries `modelInputMediaCapabilities: undefined` when a newer registry revision removes the previous media capability facts.
 
@@ -278,9 +283,11 @@ Expected: both active-session refresh tests pass, including context/max-token cl
 ### Task 5: Run repository verification without committing
 
 **Files:**
+
 - Verify only: all files modified by Tasks 1-4.
 
 **Interfaces:**
+
 - Consumes: completed documentation and code changes.
 - Produces: focused, E2E-contract, type, lint, and whitespace evidence for handoff.
 

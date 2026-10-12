@@ -36,10 +36,10 @@ describe("v4 M4 门禁：renameSession", () => {
     await renameV4Session(customTitle);
 
     // meta.title 投影更新为自定义值（custom 粘性，自动标题不再覆盖）
-    await browser.waitUntil(
-      async () => (await getV4SessionTitle()) === customTitle,
-      { timeout: 30000, timeoutMsg: "会话标题没有更新为自定义值" },
-    );
+    await browser.waitUntil(async () => (await getV4SessionTitle()) === customTitle, {
+      timeout: 30000,
+      timeoutMsg: "会话标题没有更新为自定义值",
+    });
     expect(await getV4SessionTitle()).toBe(customTitle);
   });
 });

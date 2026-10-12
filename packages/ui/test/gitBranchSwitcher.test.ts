@@ -22,15 +22,12 @@ vi.mock("@/components/ui/button.js", () => ({
 
 vi.mock("@/components/ui/command.js", () => ({
   Command: ({ children }: { children: ReactNode }) => createElement("div", null, children),
-  CommandEmpty: ({ children }: { children: ReactNode }) =>
-    createElement("div", null, children),
-  CommandGroup: ({ children }: { children: ReactNode }) =>
-    createElement("div", null, children),
+  CommandEmpty: ({ children }: { children: ReactNode }) => createElement("div", null, children),
+  CommandGroup: ({ children }: { children: ReactNode }) => createElement("div", null, children),
   CommandInput: (props: Record<string, unknown>) => createElement("input", props),
   CommandItem: ({ children, ...props }: { children: ReactNode }) =>
     createElement("div", props, children),
-  CommandList: ({ children }: { children: ReactNode }) =>
-    createElement("div", null, children),
+  CommandList: ({ children }: { children: ReactNode }) => createElement("div", null, children),
 }));
 
 vi.mock("@/components/ui/popover.js", () => ({

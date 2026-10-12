@@ -32,9 +32,7 @@ describe("file path action surfaces", () => {
     const rowSource = readSource(
       "packages/ui/src/workspace-file-tree/WorkspaceFileTreeRowView.tsx",
     );
-    const treeSource = readSource(
-      "packages/ui/src/workspace-file-tree/WorkspaceFileTree.tsx",
-    );
+    const treeSource = readSource("packages/ui/src/workspace-file-tree/WorkspaceFileTree.tsx");
 
     expect(rowSource).toContain("resolveWorkspaceFileManagerEditor");
     expect(rowSource).toContain("await handleOpenInEditor(wslFileManagerEditor)");
@@ -52,9 +50,7 @@ describe("file path action surfaces", () => {
 
   it("Git 审查区仅为精确匹配的 WSL target 开放 Explorer", () => {
     const paneSource = readSource("packages/ui/src/GitPane.tsx");
-    const actionSource = readSource(
-      "packages/ui/src/hooks/useFileContextActions.ts",
-    );
+    const actionSource = readSource("packages/ui/src/hooks/useFileContextActions.ts");
 
     expect(paneSource).toContain("useWorkspaceOpenInEditorTarget");
     expect(paneSource).toContain("workspaceIdentity");
@@ -70,9 +66,7 @@ describe("file path action surfaces", () => {
   });
 
   it("同一路径匹配多个远程工作区时保持远程失败关闭", () => {
-    const source = readSource(
-      "packages/ui/src/hooks/useWorkspaceOpenInEditorTarget.ts",
-    );
+    const source = readSource("packages/ui/src/hooks/useWorkspaceOpenInEditorTarget.ts");
 
     expect(source).toContain("matches.some");
     expect(source).toContain("isRemoteWorkspace: hasRemoteMatch");

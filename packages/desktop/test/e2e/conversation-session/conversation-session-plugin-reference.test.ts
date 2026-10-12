@@ -15,11 +15,7 @@ import {
   setInputValueByTestIdDom,
 } from "../helpers/desktop-app.js";
 import { waitForUpstreamNetworkCapture } from "../helpers/upstream-capture.js";
-import {
-  TID_PROMPT_SUGGESTION_OPTION,
-  TID_V4_COMPOSER_INPUT,
-  testId,
-} from "@zcode/shared";
+import { TID_PROMPT_SUGGESTION_OPTION, TID_V4_COMPOSER_INPUT, testId } from "@zcode/shared";
 import {
   clickV4SlashOption,
   getV4ComposerText,
@@ -60,17 +56,15 @@ async function readPluginMentionPresentation(pluginId: string): Promise<{
 }> {
   return browser.execute(
     (inputTestId, mentionId) => {
-      const input = document.querySelector<HTMLElement>(
-        `[data-testid="${inputTestId}"]`,
-      );
+      const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
       const mention = Array.from(
         input?.querySelectorAll<HTMLElement>("[data-mention-category='plugins']") ?? [],
       ).find((element) => element.getAttribute("data-mention-id") === mentionId);
       return {
         found: Boolean(mention),
-        iconSrc: mention?.querySelector<HTMLImageElement>(
-          "img[data-plugin-mention-icon='true']",
-        )?.src ?? null,
+        iconSrc:
+          mention?.querySelector<HTMLImageElement>("img[data-plugin-mention-icon='true']")?.src ??
+          null,
         label: mention?.textContent ?? "",
       };
     },
@@ -120,13 +114,10 @@ describe("PLG plugin 引用：@ 面板 plugins 分组与 plugin_reference remind
     await captureEvidence("01-picker-plugins-group");
 
     expect(await clickV4SlashOption(pluginOptionId)).toBe(true);
-    await browser.waitUntil(
-      async () => ((await getV4ComposerText()) ?? "").includes("plugin://"),
-      {
-        timeout: 15000,
-        timeoutMsg: "选中 plugin mention 后 composer 没有插入 canonical plugin:// markdown",
-      },
-    );
+    await browser.waitUntil(async () => ((await getV4ComposerText()) ?? "").includes("plugin://"), {
+      timeout: 15000,
+      timeoutMsg: "选中 plugin mention 后 composer 没有插入 canonical plugin:// markdown",
+    });
     await browser.waitUntil(async () => !(await hasV4SlashPanel()), {
       timeout: 15000,
       timeoutMsg: "选中 plugin mention 后面板没有关闭",
@@ -159,9 +150,8 @@ describe("PLG plugin 引用：@ 面板 plugins 分组与 plugin_reference remind
       30000,
     );
     await browser.waitUntil(
-      async () => ((await getV4ComposerText()) ?? "").includes(
-        `plugin://${STORE_TRY_PLUGIN_STABLE_ID}`,
-      ),
+      async () =>
+        ((await getV4ComposerText()) ?? "").includes(`plugin://${STORE_TRY_PLUGIN_STABLE_ID}`),
       {
         timeout: 30000,
         timeoutMsg: "Plugin 商店 Try now 没有预填 canonical Plugin 引用",
@@ -189,9 +179,7 @@ describe("PLG plugin 引用：@ 面板 plugins 分组与 plugin_reference remind
     await browser.keys(" ");
     const afterSpaceMention = await readPluginMentionPresentation(STORE_TRY_PLUGIN_STABLE_ID);
     expect(afterSpaceMention.found).toBe(true);
-    expect((await getV4ComposerText()) ?? "").toContain(
-      `plugin://${STORE_TRY_PLUGIN_STABLE_ID}`,
-    );
+    expect((await getV4ComposerText()) ?? "").toContain(`plugin://${STORE_TRY_PLUGIN_STABLE_ID}`);
     await captureEvidence("04b-plugin-store-try-now-after-space");
 
     await setInputValueByTestIdDom(TID_V4_COMPOSER_INPUT, "", {

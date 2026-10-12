@@ -30,8 +30,7 @@ describe("会话区 Held Queue 操作 E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const runningPrompt =
-      `E2E_SLOW_STREAM E2E_QUEUE_OPS_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const runningPrompt = `E2E_SLOW_STREAM E2E_QUEUE_OPS_RUNNING_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(runningPrompt);
     await waitForComposerText("", "held queue 操作首轮发送后输入框没有清空");
     await waitForChatState(
@@ -40,12 +39,9 @@ describe("会话区 Held Queue 操作 E2E", () => {
       30000,
     );
 
-    const firstQueuedPrompt =
-      `E2E_QUEUE_OPS_FIRST_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    const secondQueuedPrompt =
-      `E2E_QUEUE_OPS_SECOND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    const thirdQueuedPrompt =
-      `E2E_QUEUE_OPS_THIRD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const firstQueuedPrompt = `E2E_QUEUE_OPS_FIRST_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const secondQueuedPrompt = `E2E_QUEUE_OPS_SECOND_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const thirdQueuedPrompt = `E2E_QUEUE_OPS_THIRD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
     await sendPrompt(firstQueuedPrompt);
     await waitForQueueCount(1);
@@ -74,8 +70,7 @@ describe("会话区 Held Queue 操作 E2E", () => {
       throw new Error(`队列项 id 缺失: ${JSON.stringify(queue)}`);
     }
 
-    const editedSecondPrompt =
-      `E2E_QUEUE_OPS_SECOND_EDITED_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const editedSecondPrompt = `E2E_QUEUE_OPS_SECOND_EDITED_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     const editedRequestsBefore = await countUpstreamRequestsContaining(
       `E2E_QUEUE_OPS_SECOND_EDITED_${runId}`,
     );
@@ -92,9 +87,9 @@ describe("会话区 Held Queue 操作 E2E", () => {
     );
     expect(queue[1]?.id).toBe(secondId);
     expect(await getComposerText()).toBe("");
-    expect(
-      await countUpstreamRequestsContaining(`E2E_QUEUE_OPS_SECOND_EDITED_${runId}`),
-    ).toBe(editedRequestsBefore);
+    expect(await countUpstreamRequestsContaining(`E2E_QUEUE_OPS_SECOND_EDITED_${runId}`)).toBe(
+      editedRequestsBefore,
+    );
 
     await dragQueueItemOnto(thirdId, firstId);
     queue = await waitForQueueOrderContaining(
@@ -118,8 +113,8 @@ describe("会话区 Held Queue 操作 E2E", () => {
       `E2E_QUEUE_OPS_FIRST_${runId}`,
     );
     expect(await getComposerText()).toBe("");
-    expect(
-      await countUpstreamRequestsContaining(`E2E_QUEUE_OPS_FIRST_${runId}`),
-    ).toBe(removedRequestsBefore);
+    expect(await countUpstreamRequestsContaining(`E2E_QUEUE_OPS_FIRST_${runId}`)).toBe(
+      removedRequestsBefore,
+    );
   });
 });

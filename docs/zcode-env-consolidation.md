@@ -42,9 +42,9 @@ renderer、host/service 和 agent 里的 ZCode API、远控链接、zcode-plan O
 
 默认域名矩阵：
 
-| 产品环境 | ZCode API | ZAI OAuth | ZAI Business API | BigModel API |
-| --- | --- | --- | --- | --- |
-| `test` | `https://zcode.z.ai` | `https://chat.z.ai` | `https://api.z.ai` | `https://bigmodel.cn` |
+| 产品环境     | ZCode API            | ZAI OAuth           | ZAI Business API   | BigModel API          |
+| ------------ | -------------------- | ------------------- | ------------------ | --------------------- |
+| `test`       | `https://zcode.z.ai` | `https://chat.z.ai` | `https://api.z.ai` | `https://bigmodel.cn` |
 | `production` | `https://zcode.z.ai` | `https://chat.z.ai` | `https://api.z.ai` | `https://bigmodel.cn` |
 
 覆盖优先级：

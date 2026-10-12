@@ -126,9 +126,11 @@
 ### Task 0: 写入 Plan File 合同 Spec
 
 **Files:**
+
 - Create: `docs/plan-mode-plan-file.md`
 
 **Interfaces:**
+
 - Produces: `docs/plan-mode-plan-file.md` 中的 `## Tool Contract`，后续任务只能引用这里的合同。
 
 - [ ] **Step 1: 写 spec 文档**
@@ -190,10 +192,12 @@ Expected: commit succeeds.
 ### Task 1: 更新现有 Plan Mode 语义文档
 
 **Files:**
+
 - Modify: `apps/zcode-cli/docs/design/v2/tool/16-plan-mode.md`
 - Modify: `docs/plan-mode-approval-boundary.md`
 
 **Interfaces:**
+
 - Consumes: `docs/plan-mode-plan-file.md`.
 - Produces: docs no longer claim `ExitPlanMode.plan` is current contract.
 
@@ -268,6 +272,7 @@ Expected: commit succeeds.
 ### Task 2: 拆分 Provider Schema 与 Runtime Injected Schema
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/tools/plan-mode.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/types.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/executor/validation.ts`
@@ -277,6 +282,7 @@ Expected: commit succeeds.
 - Test: `apps/zcode-cli/packages/core/tests/plan-mode-tool.test.ts`
 
 **Interfaces:**
+
 - Produces: `ExitPlanModeInputSchema` for provider input: `{ allowedPrompts? }`.
 - Produces: `ExitPlanModeInjectedInputSchema` for runtime input: `{ allowedPrompts?, plan?, planFilePath? }`.
 - Produces: `ToolEntry.executionInputSchema?: JsonSchema`.
@@ -352,7 +358,10 @@ export type ExitPlanModeInput = z.infer<typeof ExitPlanModeInputSchema>;
 export const ExitPlanModeInputJsonSchema = toToolJsonSchema(ExitPlanModeInputSchema);
 
 export const ExitPlanModeInjectedInputSchema = ExitPlanModeInputSchema.extend({
-  plan: z.string().optional().describe("The plan content (injected by the runtime from the plan file)"),
+  plan: z
+    .string()
+    .optional()
+    .describe("The plan content (injected by the runtime from the plan file)"),
   planFilePath: z.string().optional().describe("The plan file path (injected by the runtime)"),
 });
 export type ExitPlanModeInjectedInput = z.infer<typeof ExitPlanModeInjectedInputSchema>;
@@ -369,11 +378,16 @@ export const ExitPlanModeOutputSchema = z
     plan: z.string().nullable().describe("The plan that was presented to the user"),
     isAgent: z.boolean(),
     filePath: z.string().optional().describe("The file path where the plan was saved"),
-    hasTaskTool: z.boolean().optional().describe("Whether the Agent tool is available in the current context"),
+    hasTaskTool: z
+      .boolean()
+      .optional()
+      .describe("Whether the Agent tool is available in the current context"),
     planWasEdited: z
       .boolean()
       .optional()
-      .describe("True when the user edited the plan; determines whether the plan is echoed back in tool_result"),
+      .describe(
+        "True when the user edited the plan; determines whether the plan is echoed back in tool_result",
+      ),
     awaitingLeaderApproval: z
       .boolean()
       .optional()
@@ -429,7 +443,8 @@ export function validateInput(
   entry: ToolEntry,
   phase: "provider" | "execution" = "execution",
 ): Error | undefined {
-  const schema = phase === "provider" ? entry.inputSchema : entry.executionInputSchema ?? entry.inputSchema;
+  const schema =
+    phase === "provider" ? entry.inputSchema : (entry.executionInputSchema ?? entry.inputSchema);
   const validation = validateJsonSchemaValue(input, schema);
   if (validation.valid) return undefined;
 
@@ -452,7 +467,12 @@ export function validateInput(
 In `call-runner.ts`, use this order:
 
 ```ts
-let executionInput = normalizeToolExecutionInput({ entry, input: toolCall.input, logger: deps.logger, source: "initial" });
+let executionInput = normalizeToolExecutionInput({
+  entry,
+  input: toolCall.input,
+  logger: deps.logger,
+  source: "initial",
+});
 const providerInputValidation = validateInput(executionInput, entry, "provider");
 if (providerInputValidation) return createErrorResult(toolCall, providerInputValidation);
 
@@ -468,7 +488,12 @@ if (entry.prepareInput) {
     workingDirectory: deps.getWorkingDirectory(),
     workspaceRoot: deps.getWorkspaceRoot(),
   });
-  executionInput = normalizeToolExecutionInput({ entry, input: executionInput, logger: deps.logger, source: "initial" });
+  executionInput = normalizeToolExecutionInput({
+    entry,
+    input: executionInput,
+    logger: deps.logger,
+    source: "initial",
+  });
 }
 
 const executionInputValidation = validateInput(executionInput, entry, "execution");
@@ -515,6 +540,7 @@ Expected: commit succeeds.
 ### Task 3: 实现 Plan File Path 生命周期与 Plan Mode 写入例外
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/runtime/helpers/plan-file.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/internal.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/agent-runtime.ts`
@@ -529,6 +555,7 @@ Expected: commit succeeds.
 - Test: `apps/zcode-cli/packages/core/tests/permission-service.test.ts`
 
 **Interfaces:**
+
 - Produces: `runtime.currentPlanFilePath?: string`.
 - Produces: `runtime.approvedPlanFilePath?: string`.
 - Produces: `buildPlanFilePath({ workspaceRoot, sessionId, now, exists })`.
@@ -540,20 +567,28 @@ In `plan-mode-tool.test.ts`, add:
 
 ```ts
 it("reserves a .claude/plans markdown file when entering plan mode", async () => {
-  const result = await enterPlanModeHandler({}, createPlanModeToolContextWithFileSystem({
-    mode: "build",
-    workspaceRoot: "/workspace/project",
-  }));
+  const result = await enterPlanModeHandler(
+    {},
+    createPlanModeToolContextWithFileSystem({
+      mode: "build",
+      workspaceRoot: "/workspace/project",
+    }),
+  );
 
   expect(result.mode).toBe("plan");
-  expect(testRuntime.currentPlanFilePath).toMatch(/^\/workspace\/project\/\.claude\/plans\/[a-z0-9-]+\.md$/u);
+  expect(testRuntime.currentPlanFilePath).toMatch(
+    /^\/workspace\/project\/\.claude\/plans\/[a-z0-9-]+\.md$/u,
+  );
 });
 
 it("does not create the plan file when entering plan mode", async () => {
-  await enterPlanModeHandler({}, createPlanModeToolContextWithFileSystem({
-    mode: "build",
-    workspaceRoot: "/workspace/project",
-  }));
+  await enterPlanModeHandler(
+    {},
+    createPlanModeToolContextWithFileSystem({
+      mode: "build",
+      workspaceRoot: "/workspace/project",
+    }),
+  );
 
   expect(fakeFileSystem.writeTextFile).not.toHaveBeenCalled();
 });
@@ -593,7 +628,10 @@ export function buildPlanFileCandidate(workspaceRoot: string, slug: string): str
 }
 
 export function slugFromSessionId(sessionId: SessionId): string {
-  return `plan-${String(sessionId).replace(/[^a-zA-Z0-9]+/gu, "-").replace(/^-+|-+$/gu, "").toLowerCase()}`;
+  return `plan-${String(sessionId)
+    .replace(/[^a-zA-Z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "")
+    .toLowerCase()}`;
 }
 
 export async function reservePlanFilePath(input: PlanFilePathInput): Promise<string> {
@@ -800,6 +838,7 @@ Expected: commit succeeds.
 ### Task 4: 从 Plan File 注入 ExitPlanMode Input 并输出 Plan-File Tool Result
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/plan-mode.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/plan-mode-prompts.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/session-mode-port.ts`
@@ -808,6 +847,7 @@ Expected: commit succeeds.
 - Test: `apps/zcode-cli/packages/core/tests/tool-contracts.test.ts`
 
 **Interfaces:**
+
 - Produces: `prepareExitPlanModeInput(input, context)`.
 - Produces: model result content for the normal main-agent flow.
 
@@ -871,32 +911,46 @@ async function prepareExitPlanModeInput(
   const parsed = ExitPlanModeInputSchema.parse(input);
   const planFilePath = context.getCurrentPlanFilePath?.();
   if (!planFilePath) {
-    throw createCoreError(CoreErrorType.ToolExecutionFailed, "No plan file is registered for the current plan mode session.", {
-      context: { toolCallId: context.toolCallId, toolName: EXIT_PLAN_MODE_TOOL_NAME },
-      recoverable: true,
-    });
+    throw createCoreError(
+      CoreErrorType.ToolExecutionFailed,
+      "No plan file is registered for the current plan mode session.",
+      {
+        context: { toolCallId: context.toolCallId, toolName: EXIT_PLAN_MODE_TOOL_NAME },
+        recoverable: true,
+      },
+    );
   }
   if (!context.fileSystemPort) {
-    throw createCoreError(CoreErrorType.ConfigurationError, "FileSystemPort is not configured for ExitPlanMode", {
-      context: { toolCallId: context.toolCallId, toolName: EXIT_PLAN_MODE_TOOL_NAME },
-      recoverable: false,
-    });
+    throw createCoreError(
+      CoreErrorType.ConfigurationError,
+      "FileSystemPort is not configured for ExitPlanMode",
+      {
+        context: { toolCallId: context.toolCallId, toolName: EXIT_PLAN_MODE_TOOL_NAME },
+        recoverable: false,
+      },
+    );
   }
-  const read = await context.fileSystemPort.readTextFile(
-    { path: planFilePath, trace: context.traceContext },
-    { signal: context.abortSignal },
-  ).catch((error) => {
+  const read = await context.fileSystemPort
+    .readTextFile(
+      { path: planFilePath, trace: context.traceContext },
+      { signal: context.abortSignal },
+    )
+    .catch((error) => {
+      throw createCoreError(
+        CoreErrorType.ToolExecutionFailed,
+        `No plan file found at ${planFilePath}. Please write your plan to this file before calling ExitPlanMode.`,
+        { cause: error instanceof Error ? error : undefined, recoverable: true },
+      );
+    });
+  const plan = read.content.trim();
+  if (!plan) {
     throw createCoreError(
       CoreErrorType.ToolExecutionFailed,
       `No plan file found at ${planFilePath}. Please write your plan to this file before calling ExitPlanMode.`,
-      { cause: error instanceof Error ? error : undefined, recoverable: true },
+      {
+        recoverable: true,
+      },
     );
-  });
-  const plan = read.content.trim();
-  if (!plan) {
-    throw createCoreError(CoreErrorType.ToolExecutionFailed, `No plan file found at ${planFilePath}. Please write your plan to this file before calling ExitPlanMode.`, {
-      recoverable: true,
-    });
   }
   return { ...parsed, plan, planFilePath };
 }
@@ -926,7 +980,12 @@ After transition, set:
 context.sessionModePort.approvePlanFile?.({
   planFilePath: parsed.planFilePath,
   toolCallId: context.toolCallId,
-  traceContext: { traceId: context.traceId, spanId: context.spanId, parentSpanId: context.parentSpanId, turnId: context.turnId },
+  traceContext: {
+    traceId: context.traceId,
+    spanId: context.spanId,
+    parentSpanId: context.parentSpanId,
+    turnId: context.turnId,
+  },
 });
 ```
 
@@ -1019,6 +1078,7 @@ Expected: commit succeeds.
 ### Task 5: 用 Session Event / Snapshot 恢复 Plan File State
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/events/session.events.ts`
 - Modify: `apps/zcode-cli/packages/contracts/src/events/event-reducer.ts`
 - Modify: `packages/shared/src/zcode-protocol/index.ts`
@@ -1029,6 +1089,7 @@ Expected: commit succeeds.
 - Test: `packages/services/test/zcodeSessionService.test.ts`
 
 **Interfaces:**
+
 - Produces: `SessionEventType.PlanFileChanged`.
 - Produces: `SessionProjection.planFile?: { currentPath?: string; approvedPath?: string; status: "none" | "draft" | "approved" }`.
 - Produces: protocol snapshot field `planFile`.
@@ -1097,7 +1158,11 @@ Reducer behavior:
 
 ```ts
 if (payload.status === "draft") {
-  planFile = { currentPath: payload.planFilePath, approvedPath: p.planFile?.approvedPath, status: "draft" };
+  planFile = {
+    currentPath: payload.planFilePath,
+    approvedPath: p.planFile?.approvedPath,
+    status: "draft",
+  };
 }
 if (payload.status === "approved") {
   planFile = { approvedPath: payload.planFilePath, currentPath: undefined, status: "approved" };
@@ -1134,7 +1199,7 @@ planFile: z.object({
   approvedPath: z.string().optional(),
   currentPath: z.string().optional(),
   status: z.enum(["none", "draft", "approved"]),
-}).optional()
+}).optional();
 ```
 
 The UI and services must receive this under session projection, not as relay/main state.
@@ -1167,12 +1232,14 @@ Expected: commit succeeds.
 ### Task 6: Compact / Resume 注入 `plan_file_reference`
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/helpers/plan-file.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/helpers/compact-post-reminders.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - Produces: `buildPlanFileReferenceEntry({ planFilePath, planContent })`.
 - Produces: `buildPostCompactPlanFileReminderEntries(runtime)`.
 
@@ -1193,7 +1260,9 @@ it("re-injects approved plan file contents after compact", async () => {
   const entries = runtime.messageHistory.toRuntimeEntries();
   const planReference = entries.find((entry) => entry.metadata?.source === "plan_file_reference");
 
-  expect(planReference?.message.content).toContain("A plan file exists from plan mode at: /workspace/.claude/plans/plan-session.md");
+  expect(planReference?.message.content).toContain(
+    "A plan file exists from plan mode at: /workspace/.claude/plans/plan-session.md",
+  );
   expect(planReference?.message.content).toContain("# Approved plan\n\n1. Keep this exact plan.");
 });
 ```
@@ -1255,16 +1324,30 @@ const postCompactReminderEntries = [
 Helper behavior:
 
 ```ts
-async function buildPostCompactPlanFileReminderEntries(this: AgentRuntimeInternal, input: { traceContext: TraceContext }) {
+async function buildPostCompactPlanFileReminderEntries(
+  this: AgentRuntimeInternal,
+  input: { traceContext: TraceContext },
+) {
   const planFilePath = this.currentPlanFilePath ?? this.approvedPlanFilePath;
   if (!planFilePath) return [];
   if (!this.fileSystemPort) {
-    throw createCoreError(CoreErrorType.ConfigurationError, "FileSystemPort is required to restore plan file context after compact", { recoverable: false });
+    throw createCoreError(
+      CoreErrorType.ConfigurationError,
+      "FileSystemPort is required to restore plan file context after compact",
+      { recoverable: false },
+    );
   }
-  const read = await this.fileSystemPort.readTextFile({ path: planFilePath, trace: input.traceContext });
+  const read = await this.fileSystemPort.readTextFile({
+    path: planFilePath,
+    trace: input.traceContext,
+  });
   const planContent = read.content.trim();
   if (!planContent) {
-    throw createCoreError(CoreErrorType.ToolExecutionFailed, `Plan file is empty at ${planFilePath}`, { recoverable: true });
+    throw createCoreError(
+      CoreErrorType.ToolExecutionFailed,
+      `Plan file is empty at ${planFilePath}`,
+      { recoverable: true },
+    );
   }
   return [buildPlanFileReferenceEntry({ planFilePath, planContent })];
 }
@@ -1291,10 +1374,15 @@ it("re-injects draft plan file contents when compact runs during plan mode", asy
   });
 
   await runtime.compactActiveConversation({ trigger: CompactTrigger.Manual });
-  expect(runtime.messageHistory.toRuntimeEntries().some((entry) =>
-    entry.metadata?.source === "plan_file_reference" &&
-    String(entry.message.content).includes("# Draft plan")
-  )).toBe(true);
+  expect(
+    runtime.messageHistory
+      .toRuntimeEntries()
+      .some(
+        (entry) =>
+          entry.metadata?.source === "plan_file_reference" &&
+          String(entry.message.content).includes("# Draft plan"),
+      ),
+  ).toBe(true);
 });
 ```
 
@@ -1324,6 +1412,7 @@ Expected: commit succeeds.
 ### Task 7: 修复 Pending Approval / UI / Replayable Snapshot 的 Plan Payload
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/interaction-broker.ts`
 - Modify: `packages/services/src/zcode-agent/zcodeTaskServiceAdapter.ts`
 - Modify: `packages/ui/src/lib/zcodeSessionProjection.ts`
@@ -1335,6 +1424,7 @@ Expected: commit succeeds.
 - Test: `packages/services/test/zcodeSessionService.test.ts`
 
 **Interfaces:**
+
 - Produces: pending ExitPlanMode elicitation `schema` includes original injected input plus `{ interaction: "plan_approval", toolName }`.
 - Produces: UI plan result reads `output.filePath`.
 
@@ -1448,6 +1538,7 @@ Expected: commit succeeds.
 ### Task 8: Provider-Visible Trajectory 和 Request 验收
 
 **Files:**
+
 - Modify: `apps/zcode-cli/tools/prompt-trajectory/testcases/system-reminder-sr9-runtime/expect.json`
 - Create: `apps/zcode-cli/tools/prompt-trajectory/testcases/plan-file-exit/fixture.json`
 - Create: `apps/zcode-cli/tools/prompt-trajectory/testcases/plan-file-exit/expect.json`
@@ -1455,6 +1546,7 @@ Expected: commit succeeds.
 - Test: prompt trajectory tests
 
 **Interfaces:**
+
 - Produces: provider-visible evidence that `ExitPlanMode` schema has no `plan`.
 - Produces: provider-visible evidence that post-compact request includes `plan_file_reference`.
 
@@ -1528,9 +1620,11 @@ Expected: commit succeeds.
 ### Task 9: Full Validation
 
 **Files:**
+
 - No planned source edits.
 
 **Interfaces:**
+
 - Produces: final validation evidence.
 
 - [ ] **Step 1: Check working tree**

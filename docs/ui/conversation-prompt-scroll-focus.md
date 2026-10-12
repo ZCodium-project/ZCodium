@@ -46,12 +46,12 @@ scrollToBottom(): following=true -> instant bottom -> existing content-follow be
 user scrolls up: following=false -> hold reading position
 ```
 
-| State / fact              | Authority                                                  | Evidence                             |
-| ------------------------- | ---------------------------------------------------------- | ------------------------------------ |
-| start-now vs enqueue      | current V4 `snapshot.inputRouting.mode` + held disposition | focused policy unit test             |
-| queue send-now click      | `ConversationQueuePanel` user action                       | SessionPane component test           |
-| scroll position/following | `ConversationTimeline` component instance                  | timeline action-ref unit test         |
-| conversation/queue truth  | CLI projection                                             | unchanged                            |
+| State / fact              | Authority                                                  | Evidence                      |
+| ------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| start-now vs enqueue      | current V4 `snapshot.inputRouting.mode` + held disposition | focused policy unit test      |
+| queue send-now click      | `ConversationQueuePanel` user action                       | SessionPane component test    |
+| scroll position/following | `ConversationTimeline` component instance                  | timeline action-ref unit test |
+| conversation/queue truth  | CLI projection                                             | unchanged                     |
 
 ## Dimensions And Candidate Combinations
 

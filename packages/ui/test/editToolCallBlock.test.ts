@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { buildEditCodeViewerSource } from "../src/ToolCallBlocks/renderers/edit.js";
-import {
-  getEditKindLabelMessageId,
-  renderFileChip,
-} from "../src/ToolCallBlocks/renderers.js";
+import { getEditKindLabelMessageId, renderFileChip } from "../src/ToolCallBlocks/renderers.js";
 
 describe("buildEditCodeViewerSource", () => {
   it("uses the real file path instead of the display directory", () => {

@@ -21,10 +21,12 @@
 ### Task 1: Define and test the cross-platform runtime path contract
 
 **Files:**
+
 - Create: `packages/desktop/test/e2e/helpers/e2e-runtime-paths.ts`
 - Create: `packages/desktop/test/e2eRuntimePaths.test.ts`
 
 **Interfaces:**
+
 - Produces: `E2E_RUNTIME_RELATIVE_ROOT`, `E2E_RUNTIME_ROOT_REPLAY_TOKEN`, `resolveE2EHomeDir()`, `resolveE2ERuntimeRoot()`, `resolveE2ERuntimePath()`, `resolveE2EToolPath()`, and `resolveE2EShellPath()`.
 
 - [ ] **Step 1: Write failing tests** proving runtime files resolve below `<home>/ZCodeProject/.zcode-e2e`, tool paths use `/`, shell paths remain workspace-relative, and the E2E tree contains no raw `/tmp`.
@@ -55,11 +57,13 @@ export function resolveE2EShellPath(...segments: string[]) {
 ### Task 2: Expand static replay variables before request matching
 
 **Files:**
+
 - Modify: `packages/desktop/test/e2e/helpers/upstream-replay-server.ts`
 - Modify: `packages/desktop/test/upstreamReplayServer.test.ts`
 - Modify: `packages/desktop/wdio.conf.ts`
 
 **Interfaces:**
+
 - Consumes: `resolveE2ERuntimeRoot()` and `E2E_RUNTIME_ROOT_REPLAY_TOKEN` from Task 1.
 - Produces: `StartUpstreamReplayServerOptions.fixtureVariables?: Readonly<Record<string, string>>`.
 
@@ -72,7 +76,9 @@ const server = await startUpstreamReplayServer({
   fixtureVariables: { e2eRuntimeRoot: "C:/e2e/.zcode-e2e" },
 });
 const response = await fetch(`${server.baseUrl}/messages`, {
-  body: JSON.stringify({ messages: [{ role: "user", content: "Read C:/e2e/.zcode-e2e/file.txt" }] }),
+  body: JSON.stringify({
+    messages: [{ role: "user", content: "Read C:/e2e/.zcode-e2e/file.txt" }],
+  }),
   method: "POST",
 });
 expect(await response.text()).toContain("C:/e2e/.zcode-e2e/file.txt");
@@ -93,6 +99,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 ### Task 3: Migrate specs and helpers to the runtime root
 
 **Files:**
+
 - Modify: `packages/desktop/test/e2e/helpers/conversation-session.ts`
 - Modify: `packages/desktop/test/e2e/helpers/conversation-session-tool-cross-product.ts`
 - Modify: `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-respond-to-coordinator.test.ts`
@@ -109,6 +116,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 - Modify: `packages/desktop/test/e2e/bots/feishu-streaming-card-lifecycle.test.ts`
 
 **Interfaces:**
+
 - Consumes: native/tool/shell path resolvers from Task 1.
 
 - [ ] **Step 1: Replace Node filesystem constants** with native runtime paths scoped by case.
@@ -119,6 +127,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 ### Task 4: Migrate provider fixtures, manifests, and E2E snapshots
 
 **Files:**
+
 - Modify: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-compact-interrupted.json`
 - Modify: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-compact-manual-queue.json`
 - Modify: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-edit.json`
@@ -147,6 +156,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 - Modify: `packages/desktop/test/e2e/fixtures/upstream/provider-conversation-tool-cross-product.json`
 
 **Interfaces:**
+
 - Consumes: `{{e2eRuntimeRoot}}` for absolute tool/matcher values and `.zcode-e2e/<case>` for Bash commands.
 
 - [ ] **Step 1: Replace Read/Write/Edit/Glob/Grep absolute values** with `{{e2eRuntimeRoot}}/<case>/...`.
@@ -158,7 +168,9 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 - [ ] **Step 2: Replace Bash command values** with `.zcode-e2e/<case>/...`.
 
 ```json
-{ "command": "while [ ! -f '.zcode-e2e/conversation-session-subagent-respond-to-coordinator/release-child-bash' ]; do sleep 0.05; done" }
+{
+  "command": "while [ ! -f '.zcode-e2e/conversation-session-subagent-respond-to-coordinator/release-child-bash' ]; do sleep 0.05; done"
+}
 ```
 
 - [ ] **Step 3: Replace manifest file paths** with workspace-relative `.zcode-e2e/<case>/...` metadata.
@@ -168,6 +180,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 ### Task 5: Verify fixtures and the original cross-platform failure path
 
 **Files:**
+
 - Verify: `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-respond-to-coordinator.test.ts`
 - Verify: `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-background.test.ts`
 - Verify: `packages/desktop/test/e2e/conversation-session/conversation-session-v4-permission.test.ts`
@@ -176,6 +189,7 @@ const fixtures = options.fixturePaths.flatMap((path) =>
 - Verify: `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-tool-cross-product.test.ts`
 
 **Interfaces:**
+
 - Consumes: migrated specs, replay fixtures, and manifests.
 
 - [ ] **Step 1: Run focused Vitest suites** for runtime paths, replay variables, and fixture resolution.

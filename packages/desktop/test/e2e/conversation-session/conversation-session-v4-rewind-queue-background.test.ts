@@ -40,10 +40,7 @@ describe("PV4-20/PV4-23 rewind queue and background fencing", () => {
     // 的 testid，并没有建立 held queue。当前可达路径是先中断一次 compact，把两个 future
     // intent 与第二个 compact 一起 held，再 send-now 第二个 compact 覆盖 latest query。
     await sendV4Prompt("/compact");
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "running" },
-      60000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "running" }, 60000);
     await sendV4Prompt("E2E_PV4_20_QUEUE_ONE 队列第一项");
     await waitForV4QueueCount(1, 30000);
     await sendV4Prompt("E2E_PV4_20_QUEUE_TWO 队列第二项");
@@ -66,10 +63,7 @@ describe("PV4-20/PV4-23 rewind queue and background fencing", () => {
       expect.stringContaining("E2E_PV4_20_QUEUE_TWO"),
     ]);
     expect(await clickV4QueueItemSendNow(queued[2]!.queueItemId)).toBe(true);
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "success" },
-      90000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "success" }, 90000);
     await waitForV4QueueCount(2, 30000);
     const before = await getV4QueueItems();
     expect(before).toEqual(queued.slice(0, 2));
@@ -79,17 +73,13 @@ describe("PV4-20/PV4-23 rewind queue and background fencing", () => {
 
     const after = await getV4QueueItems();
     expect(after).toEqual(before);
-    expect((await getV4PaneSnapshot()).timelineText).not.toContain(
-      "PV4_20_ORIGINAL_REPLY",
-    );
+    expect((await getV4PaneSnapshot()).timelineText).not.toContain("PV4_20_ORIGINAL_REPLY");
     expect(await countUpstreamRequestsContaining("E2E_PV4_20_EDITED")).toBe(1);
 
     expect(await clickV4QueueItemSendNow(before[0]!.queueItemId)).toBe(true);
     await waitForV4TimelineContaining("PV4_20_QUEUE_ONE_REPLY", 60000);
     await waitForV4QueueCount(1, 30000);
-    expect((await getV4QueueItems())[0]?.queueItemId).toBe(
-      before[1]!.queueItemId,
-    );
+    expect((await getV4QueueItems())[0]?.queueItemId).toBe(before[1]!.queueItemId);
     expect(await clickV4QueueItemSendNow(before[1]!.queueItemId)).toBe(true);
     await waitForV4TimelineContaining("PV4_20_QUEUE_TWO_REPLY", 60000);
     await waitForV4QueueCount(0, 30000);
@@ -111,41 +101,25 @@ describe("PV4-20/PV4-23 rewind queue and background fencing", () => {
     await switchV4Mode("yolo");
 
     await sendV4Prompt("E2E_PV4_23_BACKGROUND_ORIGINAL 启动后台 Bash");
-    await waitForV4TimelineContaining(
-      "PV4_23_BACKGROUND_ORIGINAL_REPLY",
-      90000,
-    );
+    await waitForV4TimelineContaining("PV4_23_BACKGROUND_ORIGINAL_REPLY", 90000);
     await openV4RunningBackgroundWorks(60000);
-    const running = (await getV4BackgroundWorks()).find(
-      (work) => work.status === "running",
-    );
+    const running = (await getV4BackgroundWorks()).find((work) => work.status === "running");
     expect(running?.workId).toBeTruthy();
 
     await waitForV4Edit();
     await editFirstV4UserQuery("E2E_PV4_23_BACKGROUND_EDITED 取消旧后台后重发");
     await waitForV4TimelineContaining("PV4_23_BACKGROUND_EDITED_REPLY", 90000);
-    await waitForV4Pane(
-      (snapshot) => !snapshot.canStop,
-      "PV4-23 edit 后没有回到 idle",
-      60000,
-    );
+    await waitForV4Pane((snapshot) => !snapshot.canStop, "PV4-23 edit 后没有回到 idle", 60000);
 
     await browser.waitUntil(
-      async () =>
-        !(await getV4BackgroundWorks()).some(
-          (work) => work.workId === running?.workId,
-        ),
+      async () => !(await getV4BackgroundWorks()).some((work) => work.workId === running?.workId),
       {
         timeout: 60000,
         timeoutMsg: "PV4-23 被裁 turn 的后台 Bash 仍在 running 列表",
       },
     );
     const finalSnapshot = await getV4PaneSnapshot();
-    expect(finalSnapshot.timelineText).not.toContain(
-      "PV4_23_BACKGROUND_ORIGINAL_REPLY",
-    );
-    expect(
-      await countUpstreamRequestsContaining("E2E_PV4_23_BACKGROUND_EDITED"),
-    ).toBe(1);
+    expect(finalSnapshot.timelineText).not.toContain("PV4_23_BACKGROUND_ORIGINAL_REPLY");
+    expect(await countUpstreamRequestsContaining("E2E_PV4_23_BACKGROUND_EDITED")).toBe(1);
   });
 });

@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { shouldSlashPanelProcessUpdate } from "@/lib/slashPanelUpdateFilter.js";
-import {
-  HISTORY_NAVIGATION_UPDATE_TAG,
-  PROGRAMMATIC_UPDATE_TAG,
-} from "@/lib/editorUpdateTags.js";
+import { HISTORY_NAVIGATION_UPDATE_TAG, PROGRAMMATIC_UPDATE_TAG } from "@/lib/editorUpdateTags.js";
 
 describe("shouldSlashPanelProcessUpdate", () => {
   it("普通用户输入时处理更新", () => {
@@ -20,7 +17,9 @@ describe("shouldSlashPanelProcessUpdate", () => {
 
   it("历史导航标记与其他标记共存时同样跳过", () => {
     expect(
-      shouldSlashPanelProcessUpdate(new Set([HISTORY_NAVIGATION_UPDATE_TAG, PROGRAMMATIC_UPDATE_TAG])),
+      shouldSlashPanelProcessUpdate(
+        new Set([HISTORY_NAVIGATION_UPDATE_TAG, PROGRAMMATIC_UPDATE_TAG]),
+      ),
     ).toBe(false);
   });
 });

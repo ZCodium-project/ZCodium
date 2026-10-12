@@ -87,10 +87,7 @@ describe("Upstream replay fixture resolution", () => {
   });
 
   it("replays a manual-review worker when its deterministic case-local fixture exists", () => {
-    const caseFixture = join(
-      caseFixtureDir,
-      "conversation-session-agent-step-message-scope.json",
-    );
+    const caseFixture = join(caseFixtureDir, "conversation-session-agent-step-message-scope.json");
     expect(
       hasUpstreamCaseLocalReplayFixtureForWorker({
         caseFixtureDir,
@@ -149,10 +146,7 @@ describe("Upstream replay fixture resolution", () => {
   });
 
   it("includes an existing manual-review case-local fixture in replay paths", () => {
-    const caseFixture = join(
-      caseFixtureDir,
-      "conversation-session-agent-step-message-scope.json",
-    );
+    const caseFixture = join(caseFixtureDir, "conversation-session-agent-step-message-scope.json");
     const paths = resolveUpstreamReplayFixturePaths({
       ...createOptions([commonFixturePath, caseFixture]),
       mode: "compatible",

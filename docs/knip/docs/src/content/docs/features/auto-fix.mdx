@@ -2,8 +2,8 @@
 title: Auto-fix
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-import { Badge } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Badge } from "@astrojs/starlight/components";
 
 Run Knip as you normally would, and if the report looks good then run it again
 with the `--fix` flag to let Knip automatically apply fixes. It fixes the
@@ -109,17 +109,9 @@ manager.
     ```
   </TabItem>
 
-  <TabItem label="pnpm">
-    ```shell
-    pnpm install
-    ```
-  </TabItem>
+<TabItem label="pnpm">```shell pnpm install ```</TabItem>
 
-  <TabItem label="bun">
-    ```shell
-    bun install
-    ```
-  </TabItem>
+<TabItem label="bun">```shell bun install ```</TabItem>
 
   <TabItem label="yarn">
     ```shell
@@ -140,17 +132,9 @@ using the package manager in the project, for example:
     ```
   </TabItem>
 
-  <TabItem label="pnpm">
-    ```shell
-    pnpm add unlisted-package
-    ```
-  </TabItem>
+<TabItem label="pnpm">```shell pnpm add unlisted-package ```</TabItem>
 
-  <TabItem label="bun">
-    ```shell
-    bun add unlisted-package
-    ```
-  </TabItem>
+<TabItem label="bun">```shell bun add unlisted-package ```</TabItem>
 
   <TabItem label="yarn">
     ```shell
@@ -207,11 +191,7 @@ Also across any chain of re-exports:
     ```
   </TabItem>
 
-  <TabItem label="barrel.ts">
-    ```diff
-    export * from './module.js';
-    ```
-  </TabItem>
+<TabItem label="barrel.ts">```diff export * from './module.js'; ```</TabItem>
 
   <TabItem label="index.ts">
     ```diff

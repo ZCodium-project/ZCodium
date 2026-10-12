@@ -52,11 +52,11 @@ main wake round from background notification
    `agent_id`，且模型取 child 的真实请求模型。
 6. background child 的 usage 只归属它自己的 `Agent` step，不回填已结束父轮的 completion。
    child tool 保持 token `0`，Agent step 在首个 child terminal 或 SubagentStopped 追加，
-   使用 child-local 下一 loop_index。
-   Agent step 的 tool_call_id 使用 `tool_subagent_<agentId>_<parentToolCallId>`；父会话中原有
-   Agent launch step 仍只描述启动动作。累计 usage 不是每个工具结束时的 so-far 快照。
-   活跃 child 收到上述任一终态时，即使没有 usage，也保留 Agent step 的状态、错误与已知模型；
-   token/request count 沿用 foreground 的默认 `0`，不伪造 requestId 或 usage scope。
+   使用 child-local 下一 loop*index。
+   Agent step 的 tool_call_id 使用 `tool_subagent*<agentId>\_<parentToolCallId>`；父会话中原有
+Agent launch step 仍只描述启动动作。累计 usage 不是每个工具结束时的 so-far 快照。
+活跃 child 收到上述任一终态时，即使没有 usage，也保留 Agent step 的状态、错误与已知模型；
+token/request count 沿用 foreground 的默认 `0`，不伪造 requestId 或 usage scope。
    对齐 foreground 异常收口时的已知 usage 快照，不重复汇总、不追补收口后才收到的 usage。
 7. background mirror 的 tool/permission fact 必须携带 `background=true`，进入 main prompt
    telemetry 前过滤，避免同一 child tool 或 permission wait 重复计入 main。
@@ -86,13 +86,13 @@ SubagentSpawned(childSessionId, parentToolCallId, agentId)
 
 权威字段来源：
 
-| 字段             | 事实源                                                                 |
-| ---------------- | ---------------------------------------------------------------------- |
+| 字段             | 事实源                                                           |
+| ---------------- | ---------------------------------------------------------------- |
 | `model_name`     | `ModelNetworkStatus.modelId`，沿用 `<provider>/<model>` 上报编码 |
 | `model_provider` | `ModelNetworkStatus.providerId`                                  |
-| `provider_name`  | `ModelNetworkStatus.baseURL` 经过 hostname 裁剪                        |
-| token usage      | 与该 completed request 相邻的 `ModelComplete.usage`                    |
-| child 归属       | `SubagentSpawned.childSessionId + parentToolCallId + agentId`          |
+| `provider_name`  | `ModelNetworkStatus.baseURL` 经过 hostname 裁剪                  |
+| token usage      | 与该 completed request 相邻的 `ModelComplete.usage`              |
+| child 归属       | `SubagentSpawned.childSessionId + parentToolCallId + agentId`    |
 
 `ModelComplete` 没有独立 requestId，因此 normalizer 只在同 session、同 `querySource` 内关联最近完成的
 request；无法关联时仍可用于 message completion 总量，但不得伪造 step 模型归属。

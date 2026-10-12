@@ -50,7 +50,7 @@ vi.mock("@/hooks/useFileContextActions.js", () => ({
 }));
 
 vi.mock("@/store/StoreProvider.js", () => ({
-  useZCodeStore: <T,>(selector: (state: Record<string, unknown>) => T) =>
+  useZCodeStore: <T>(selector: (state: Record<string, unknown>) => T) =>
     selector({
       codePreviewSettings: {
         darkTheme: "github-dark",
@@ -64,11 +64,7 @@ vi.mock("@/store/StoreProvider.js", () => ({
 }));
 
 vi.mock("@/previewPaneContent.js", () => ({
-  PreviewPaneContent: ({
-    codeComments,
-  }: {
-    codeComments: readonly unknown[];
-  }) =>
+  PreviewPaneContent: ({ codeComments }: { codeComments: readonly unknown[] }) =>
     createElement("div", {
       "data-code-comment-count": String(codeComments.length),
     }),

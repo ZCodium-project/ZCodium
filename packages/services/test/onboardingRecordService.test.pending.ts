@@ -72,9 +72,7 @@ describe("onboardingRecordService", () => {
     expect(await service.getRecords()).toMatchObject({
       version: 2,
       entries: [],
-      decisions: [
-        { userId: "u1", status: "existing_local_user", reason: "existing_local_task" },
-      ],
+      decisions: [{ userId: "u1", status: "existing_local_user", reason: "existing_local_task" }],
     });
   });
 

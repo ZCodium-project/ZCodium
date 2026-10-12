@@ -143,12 +143,12 @@ reason musical intervals do.
 
 Common scales and their character:
 
-| Ratio | Name           | Character                       | Example progression (from 11pt) |
-|-------|----------------|---------------------------------|---------------------------------|
-| 1.200 | Minor third    | Subtle, refined                 | 11 → 13.2 → 15.8 → 19.0       |
-| 1.250 | Major third    | Balanced, professional          | 11 → 13.75 → 17.2 → 21.5      |
-| 1.333 | Perfect fourth | Strong, authoritative           | 11 → 14.7 → 19.5 → 26.0       |
-| 1.414 | Augmented 4th  | Dramatic, presentation-style    | 11 → 15.6 → 22.0 → 31.1       |
+| Ratio | Name           | Character                    | Example progression (from 11pt) |
+| ----- | -------------- | ---------------------------- | ------------------------------- |
+| 1.200 | Minor third    | Subtle, refined              | 11 → 13.2 → 15.8 → 19.0         |
+| 1.250 | Major third    | Balanced, professional       | 11 → 13.75 → 17.2 → 21.5        |
+| 1.333 | Perfect fourth | Strong, authoritative        | 11 → 14.7 → 19.5 → 26.0         |
+| 1.414 | Augmented 4th  | Dramatic, presentation-style | 11 → 15.6 → 22.0 → 31.1         |
 
 For most business documents, 1.25 (major third) works best:
 
@@ -247,6 +247,7 @@ hierarchy even in peripheral vision.
 ```
 
 Problems:
+
 - H3 (12pt bold) and body (12pt regular) differ only by weight -- too subtle.
 - H1 (14pt) to H2 (13pt) is a 1pt step -- invisible at reading distance.
 - Everything is pure black so color provides no differentiating signal.
@@ -280,6 +281,7 @@ is asymmetric spacing: **large space before the heading, small space after**.
 The recommended ratio is 2:1 or 3:1 (space-before : space-after).
 
 This same principle applies to:
+
 - **List items**: spacing between items should be less than spacing between
   paragraphs. Items in a list are a group and should visually cluster.
 - **Captions**: a figure caption should be close to its figure, not floating
@@ -485,6 +487,7 @@ boundaries). Using both wastes space and creates visual stutter.
 ```
 
 Problems:
+
 - Justified English text with narrow columns creates uneven word gaps.
 - Using both first-line indent AND paragraph spacing is redundant.
 - Left-aligned CJK breaks the character grid that CJK readers expect.
@@ -602,6 +605,7 @@ When using a table style, define it once and reference it for every table:
 ```
 
 Problems:
+
 - No style references -- everything is direct formatting.
 - Second H2 has different size (30 vs 32), color, and spacing.
 - If there are 20 headings, each could drift slightly differently.
@@ -641,16 +645,16 @@ similar, the hierarchy collapses at that point.
 
 Effective hierarchy uses **multiple simultaneous signals**:
 
-| Level    | Size  | Weight  | Color   | Spacing above |
-|----------|-------|---------|---------|---------------|
-| Title    | 26pt  | Bold    | #1F3864 | 0 (top)       |
-| Subtitle | 15pt  | Regular | #4472C4 | 4pt           |
-| H1       | 20pt  | Bold    | #1F3864 | 24pt          |
-| H2       | 16pt  | Bold    | #1F3864 | 18pt          |
-| H3       | 13pt  | Bold    | #1F3864 | 12pt          |
-| Body     | 11pt  | Regular | #333333 | 0pt           |
-| Caption  | 9pt   | Italic  | #666666 | 4pt           |
-| Footnote | 9pt   | Regular | #666666 | 0pt           |
+| Level    | Size | Weight  | Color   | Spacing above |
+| -------- | ---- | ------- | ------- | ------------- |
+| Title    | 26pt | Bold    | #1F3864 | 0 (top)       |
+| Subtitle | 15pt | Regular | #4472C4 | 4pt           |
+| H1       | 20pt | Bold    | #1F3864 | 24pt          |
+| H2       | 16pt | Bold    | #1F3864 | 18pt          |
+| H3       | 13pt | Bold    | #1F3864 | 12pt          |
+| Body     | 11pt | Regular | #333333 | 0pt           |
+| Caption  | 9pt  | Italic  | #666666 | 4pt           |
+| Footnote | 9pt  | Regular | #666666 | 0pt           |
 
 Notice how each level differs from its neighbors on at least two dimensions
 (size + weight, or size + color, or weight + style). Single-dimension
@@ -774,6 +778,7 @@ less intimidating.
 ```
 
 Problems:
+
 - H1 at 14pt is too close to body at 11pt (ratio 1.27 -- acceptable in
   isolation but with black color matching body, the hierarchy is weak).
 - Caption is indistinguishable from body text.
@@ -802,14 +807,14 @@ Problems:
 
 When you are unsure about a typographic choice, run through these checks:
 
-| Principle | Question | If No... |
-|-----------|----------|----------|
-| White Space | Does the page have at least 30% white space? | Increase margins or spacing |
-| Contrast | Can I count heading levels by squinting? | Increase size ratios (target 1.25x) |
-| Proximity | Does each heading clearly belong to text below it? | Make space-before > space-after (2:1) |
-| Alignment | Is English left-aligned and CJK justified? | Switch alignment mode |
-| Repetition | Do all same-level elements use the same style? | Replace direct formatting with styles |
-| Hierarchy | Can I see the document structure at arm's length? | Add more differentiation signals |
+| Principle   | Question                                           | If No...                              |
+| ----------- | -------------------------------------------------- | ------------------------------------- |
+| White Space | Does the page have at least 30% white space?       | Increase margins or spacing           |
+| Contrast    | Can I count heading levels by squinting?           | Increase size ratios (target 1.25x)   |
+| Proximity   | Does each heading clearly belong to text below it? | Make space-before > space-after (2:1) |
+| Alignment   | Is English left-aligned and CJK justified?         | Switch alignment mode                 |
+| Repetition  | Do all same-level elements use the same style?     | Replace direct formatting with styles |
+| Hierarchy   | Can I see the document structure at arm's length?  | Add more differentiation signals      |
 
 **When two principles conflict, prioritize in this order:**
 

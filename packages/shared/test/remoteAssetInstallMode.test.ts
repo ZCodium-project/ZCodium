@@ -7,9 +7,7 @@ import { remoteTargetSchema } from "../src/validation.js";
 
 describe("remote asset install mode", () => {
   it("defaults missing SSH assetInstallMode to local download upload", () => {
-    expect(normalizeRemoteAssetInstallMode()).toBe(
-      DEFAULT_REMOTE_ASSET_INSTALL_MODE,
-    );
+    expect(normalizeRemoteAssetInstallMode()).toBe(DEFAULT_REMOTE_ASSET_INSTALL_MODE);
   });
 
   it("accepts remote-download on SSH targets", () => {

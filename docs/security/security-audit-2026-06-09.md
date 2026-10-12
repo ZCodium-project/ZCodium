@@ -38,12 +38,12 @@
 
 高风险模块摘要：
 
-| 模块 | 当前版本 | 路径 | 风险摘要 | 建议版本 |
-| --- | --- | --- | --- | --- |
-| `axios` | `1.13.6` | `packages__desktop>@larksuiteoapi/node-sdk>axios` | 多个 prototype pollution、代理凭据泄漏、请求劫持、ReDoS/DoS | `>=1.16.0` 或依赖方升级 |
-| `protobufjs` | `7.5.5` | `packages__desktop>@larksuiteoapi/node-sdk>protobufjs` | 原型污染后代码生成 gadget、递归 DoS、unsafe option path | `>=7.5.8` |
-| `basic-ftp` | `5.2.2` | `apps__zcode-cli>proxy-agent>pac-proxy-agent>get-uri>basic-ftp` | 恶意 FTP server 可触发客户端内存/响应缓冲 DoS | `>=5.3.1` |
-| `fast-uri` | `3.1.0` | `apps__zcode-cli__packages__adapters>@modelcontextprotocol/sdk>ajv>fast-uri` | percent-encoded authority/path 混淆，可能影响 SSRF/path traversal 判断 | `>=3.1.2` |
+| 模块         | 当前版本 | 路径                                                                         | 风险摘要                                                               | 建议版本                |
+| ------------ | -------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------- |
+| `axios`      | `1.13.6` | `packages__desktop>@larksuiteoapi/node-sdk>axios`                            | 多个 prototype pollution、代理凭据泄漏、请求劫持、ReDoS/DoS            | `>=1.16.0` 或依赖方升级 |
+| `protobufjs` | `7.5.5`  | `packages__desktop>@larksuiteoapi/node-sdk>protobufjs`                       | 原型污染后代码生成 gadget、递归 DoS、unsafe option path                | `>=7.5.8`               |
+| `basic-ftp`  | `5.2.2`  | `apps__zcode-cli>proxy-agent>pac-proxy-agent>get-uri>basic-ftp`              | 恶意 FTP server 可触发客户端内存/响应缓冲 DoS                          | `>=5.3.1`               |
+| `fast-uri`   | `3.1.0`  | `apps__zcode-cli__packages__adapters>@modelcontextprotocol/sdk>ajv>fast-uri` | percent-encoded authority/path 混淆，可能影响 SSRF/path traversal 判断 | `>=3.1.2`               |
 
 其他 moderate/low 重点：
 

@@ -3,8 +3,7 @@ import { resolveAppWorkspaceRpcTarget } from "@/app-shell/workspaceRpcTarget.js"
 
 describe("resolveAppWorkspaceRpcTarget", () => {
   it("falls back to the explicit remote workspace identity when active tab has no workspace metadata", () => {
-    const workspaceIdentity =
-      "remote:ssh:124.223.19.106:22:ubuntu:/home/ubuntu/workspace";
+    const workspaceIdentity = "remote:ssh:124.223.19.106:22:ubuntu:/home/ubuntu/workspace";
 
     expect(
       resolveAppWorkspaceRpcTarget({

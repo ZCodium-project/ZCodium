@@ -10,11 +10,11 @@ WebdriverIO can be used for various purposes. It implements the WebDriver protoc
 For basic interactions with the WebDriver and other automation protocols WebdriverIO uses its own protocol bindings based on the [`webdriver`](https://www.npmjs.com/package/webdriver) NPM package:
 
 <Tabs
-  defaultValue="webdriver"
-  values={[
-    {label: 'WebDriver', value: 'webdriver'},
-    {label: 'Chrome DevTools', value: 'devtools'},
-  ]
+defaultValue="webdriver"
+values={[
+{label: 'WebDriver', value: 'webdriver'},
+{label: 'Chrome DevTools', value: 'devtools'},
+]
 }>
 <TabItem value="webdriver">
 
@@ -32,7 +32,7 @@ https://github.com/webdriverio/example-recipes/blob/e8b147e88e7a38351b0918b4f7ef
 </TabItem>
 </Tabs>
 
-All [protocol commands](api/webdriver) return the raw response from the automation driver. The package is very lightweight and there is __no__ smart logic like auto-waits to simplify the interaction with the protocol usage.
+All [protocol commands](api/webdriver) return the raw response from the automation driver. The package is very lightweight and there is **no** smart logic like auto-waits to simplify the interaction with the protocol usage.
 
 The protocol commands applied to the instance depend on the initial session response of the driver. For example if the response indicates that a mobile session was started, the package applies all Appium and Mobile JSON Wire protocol commands to the instance prototype.
 

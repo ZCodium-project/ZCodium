@@ -33,10 +33,10 @@
 
 检测结果的 URL 语义必须与 `apps/zcode-cli/packages/adapters` 中正式模型执行链一致：
 
-| apiType | 请求 URL | 鉴权头 |
-| --- | --- | --- |
-| `openai-chat-completions` / `openai-responses` | `{baseUrl 原样}/models`（不插入 `/v1`） | `Authorization: Bearer {apiKey}` |
-| `anthropic-messages` | baseUrl 归一化补 `/v1` 后拼 `/models` | `x-api-key: {apiKey}`、`anthropic-version`、兼容网关同时补 `Authorization: Bearer` |
+| apiType                                        | 请求 URL                                | 鉴权头                                                                             |
+| ---------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- |
+| `openai-chat-completions` / `openai-responses` | `{baseUrl 原样}/models`（不插入 `/v1`） | `Authorization: Bearer {apiKey}`                                                   |
+| `anthropic-messages`                           | baseUrl 归一化补 `/v1` 后拼 `/models`   | `x-api-key: {apiKey}`、`anthropic-version`、兼容网关同时补 `Authorization: Bearer` |
 
 - 显式配置的 headers 保持最高优先级，检测头不覆盖同名显式头。
 - Anthropic 分页：请求带 `?limit=1000`，若响应 `has_more` 为真则跟随 `after` 游标继续拉取，

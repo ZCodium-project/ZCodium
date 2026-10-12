@@ -16,7 +16,7 @@ This page explains how the WebdriverIO testrunner supports headless execution on
   - You run into Chromium errors such as:
     - `session not created: probably user data directory is already in use ...`
     - `Chrome failed to start: exited abnormally. (DevToolsActivePort file doesn't exist)`
-    The user data directory collision error can be misleading as it is often the result of a browser crash and immediate restart that reuses the same profile directory from the prior instance. Ensuring a stable display (e.g., via Xvfb) often resolves it - if not, you should pass a unique `--user-data-dir` per worker.
+      The user data directory collision error can be misleading as it is often the result of a browser crash and immediate restart that reuses the same profile directory from the prior instance. Ensuring a stable display (e.g., via Xvfb) often resolves it - if not, you should pass a unique `--user-data-dir` per worker.
 
 ## Configuration
 
@@ -55,13 +55,15 @@ export const config: WebdriverIO.Config = {
 
   // Auto-install Xvfb packages using sudo
   xvfbAutoInstall: true,
-  xvfbAutoInstallMode: 'sudo',
+  xvfbAutoInstallMode: "sudo",
 
-  capabilities: [{
-    browserName: 'chrome',
-    'goog:chromeOptions': { args: ['--headless=new', '--no-sandbox'] }
-  }]
-}
+  capabilities: [
+    {
+      browserName: "chrome",
+      "goog:chromeOptions": { args: ["--headless=new", "--no-sandbox"] },
+    },
+  ],
+};
 ```
 
 ```ts
@@ -71,14 +73,17 @@ export const config: WebdriverIO.Config = {
 
   // Auto-install Xvfb packages using a custom command and sudo
   xvfbAutoInstall: true,
-  xvfbAutoInstallMode: 'sudo',
-  xvfbAutoInstallCommand: 'curl -L https://github.com/X11/xvfb/releases/download/v1.20.14/xvfb-linux-x64.tar.gz | tar -xz -C /usr/local/bin/',
+  xvfbAutoInstallMode: "sudo",
+  xvfbAutoInstallCommand:
+    "curl -L https://github.com/X11/xvfb/releases/download/v1.20.14/xvfb-linux-x64.tar.gz | tar -xz -C /usr/local/bin/",
 
-  capabilities: [{
-    browserName: 'chrome',
-    'goog:chromeOptions': { args: ['--headless=new', '--no-sandbox'] }
-  }]
-}
+  capabilities: [
+    {
+      browserName: "chrome",
+      "goog:chromeOptions": { args: ["--headless=new", "--no-sandbox"] },
+    },
+  ],
+};
 ```
 
 ```ts
@@ -88,29 +93,31 @@ export const config: WebdriverIO.Config = {
 
   // Auto-install Xvfb packages using sudo
   xvfbAutoInstall: true,
-  xvfbAutoInstallMode: 'sudo',
+  xvfbAutoInstallMode: "sudo",
 
   // Configure retry behavior for flaky CI environments
   xvfbMaxRetries: 5,
   xvfbRetryDelay: 1500,
 
-  capabilities: [{
-    browserName: 'chrome',
-    'goog:chromeOptions': { args: ['--headless=new', '--no-sandbox'] }
-  }]
-}
+  capabilities: [
+    {
+      browserName: "chrome",
+      "goog:chromeOptions": { args: ["--headless=new", "--no-sandbox"] },
+    },
+  ],
+};
 ```
 
 ## Detection logic
 
 - The runner considers Xvfb when:
-
   - Running on Linux
   - No `DISPLAY` is set (headless environment), or headless browser flags are passed
 
 - If `DISPLAY` is set, the runner won’t force Xvfb by default and will honor your existing X server/window manager.
 
 Notes:
+
 - `autoXvfb: false` disables Xvfb usage entirely (no wrapping with `xvfb-run`).
 - `xvfbAutoInstall` only affects installation if `xvfb-run` is missing; it does not turn usage on/off.
 - `xvfbAutoInstallMode` controls the installation method: 'root' for root-only installs, 'sudo' for sudo-based installs (default: 'sudo').
@@ -139,8 +146,8 @@ GitHub Actions (virtual display via Xvfb if missing and opted in):
 // wdio.conf.ts
 export const config = {
   autoXvfb: true,
-  xvfbAutoInstall: true
-}
+  xvfbAutoInstall: true,
+};
 ```
 
 Docker (Ubuntu/Debian example – preinstall xvfb):
@@ -155,17 +162,18 @@ For other distributions, adjust the package manager and package name accordingly
 
 When `xvfbAutoInstall` is enabled, WebdriverIO attempts to install `xvfb` using your system package manager. The following managers and packages are supported:
 
-| Package Manager | Command         | Distributions (examples)                                   | Package Name(s)                 |
-|-----------------|-----------------|-------------------------------------------------------------|----------------------------------|
-| apt             | `apt-get`       | Ubuntu, Debian, Pop!_OS, Mint, Elementary, Zorin, etc.      | `xvfb`                           |
-| dnf             | `dnf`           | Fedora, Rocky Linux, AlmaLinux, Nobara, Bazzite, etc.       | `xorg-x11-server-Xvfb`           |
-| yum             | `yum`           | CentOS, RHEL (legacy)                                       | `xorg-x11-server-Xvfb`           |
-| zypper          | `zypper`        | openSUSE, SUSE Linux Enterprise                             | `xvfb-run`                       |
-| pacman          | `pacman`        | Arch Linux, Manjaro, EndeavourOS, CachyOS, etc.             | `xorg-server-xvfb`               |
-| apk             | `apk`           | Alpine Linux, PostmarketOS                                  | `xvfb-run`                       |
-| xbps-install    | `xbps-install`  | Void Linux                                                  | `xvfb`                           |
+| Package Manager | Command        | Distributions (examples)                                | Package Name(s)        |
+| --------------- | -------------- | ------------------------------------------------------- | ---------------------- |
+| apt             | `apt-get`      | Ubuntu, Debian, Pop!\_OS, Mint, Elementary, Zorin, etc. | `xvfb`                 |
+| dnf             | `dnf`          | Fedora, Rocky Linux, AlmaLinux, Nobara, Bazzite, etc.   | `xorg-x11-server-Xvfb` |
+| yum             | `yum`          | CentOS, RHEL (legacy)                                   | `xorg-x11-server-Xvfb` |
+| zypper          | `zypper`       | openSUSE, SUSE Linux Enterprise                         | `xvfb-run`             |
+| pacman          | `pacman`       | Arch Linux, Manjaro, EndeavourOS, CachyOS, etc.         | `xorg-server-xvfb`     |
+| apk             | `apk`          | Alpine Linux, PostmarketOS                              | `xvfb-run`             |
+| xbps-install    | `xbps-install` | Void Linux                                              | `xvfb`                 |
 
 Notes:
+
 - If your environment uses a different package manager, the install will fail with an error; install `xvfb` manually.
 - Package names are distro-specific; the table reflects the common names per family.
 
@@ -187,4 +195,3 @@ Notes:
 
 - The runner creates processes via a factory that wraps the node worker with `xvfb-run` if Xvfb is needed and available.
 - Headless browser flags (Chrome/Edge/Firefox) signal headless usage and can trigger Xvfb in environments without a `DISPLAY`.
-

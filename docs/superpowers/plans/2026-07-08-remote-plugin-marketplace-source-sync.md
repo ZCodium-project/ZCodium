@@ -13,6 +13,7 @@
 ### Task 1: Service-Level Source Archive
 
 **Files:**
+
 - Modify: `packages/shared/src/plugin-sync.ts`
 - Modify: `packages/services/src/plugin-sync/pluginSync.ts`
 - Modify: `packages/services/src/plugin-sync/pluginSyncArchive.ts`
@@ -22,6 +23,7 @@
 - [ ] **Step 1: Write failing tests**
 
 Add tests that call `exportMarketplaceSourceArchive` and `importMarketplaceSourceArchive` for:
+
 - a `directory` marketplace with a local plugin directory;
 - a `settings` marketplace with a network plugin source;
 - a `settings` marketplace with an unresolved local relative source that must fail without cache fallback.
@@ -45,12 +47,14 @@ Expected: PASS.
 ### Task 2: Remote Sync UI Flow
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/RemotePluginSyncDialog.tsx`
 - Test: `packages/ui/test/remotePluginSyncDialog.test.ts`
 
 - [ ] **Step 1: Write failing tests**
 
 Add tests that verify:
+
 - `directory` marketplace summaries create candidates with source archive metadata instead of a string source input;
 - syncing selected marketplace plugins exports/imports the source archive once per marketplace and calls remote `addPluginMarketplace` with the imported remote path before installing.
 
@@ -73,6 +77,7 @@ Expected: PASS.
 ### Task 3: Full Verification And Commit
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-07-06-remote-plugin-sync-design.md`
 
 - [ ] **Step 1: Run targeted tests**

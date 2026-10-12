@@ -42,13 +42,13 @@
 
 ## Concept Map
 
-| Concept                            | Why it matters                                                                 | Source                                               |
-| ---------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| `RemoteServicePort`                | renderer 注册 remote services 的唯一运行态入口。                               | `packages/desktop/src/renderer/src/main.tsx`         |
+| Concept                       | Why it matters                                                                 | Source                                               |
+| ----------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| `RemoteServicePort`           | renderer 注册 remote services 的唯一运行态入口。                               | `packages/desktop/src/renderer/src/main.tsx`         |
 | `remoteWorkspaceSessionsById` | main 侧 logical session、Host 引用和 attachment 的权威索引。                   | `packages/desktop/src/main/desktopRemoteSessions.ts` |
-| `sshHostsByPoolKey`                 | 同窗口 SSH Host 存活和 readiness 的权威索引。                                  | `packages/desktop/src/main/desktopRemoteSessions.ts` |
-| `AttachServicePort`                | remote host 已有 `activeServices` 时可补挂新的 RPC port。                      | `packages/desktop/src/host/index.ts`                 |
-| disconnected remote tab            | settings 恢复的 remote tab 不含 live `remoteSessionId`，必须等待用户手动重连。 | `docs/remote-workspace-session-unified-settings.md`  |
+| `sshHostsByPoolKey`           | 同窗口 SSH Host 存活和 readiness 的权威索引。                                  | `packages/desktop/src/main/desktopRemoteSessions.ts` |
+| `AttachServicePort`           | remote host 已有 `activeServices` 时可补挂新的 RPC port。                      | `packages/desktop/src/host/index.ts`                 |
+| disconnected remote tab       | settings 恢复的 remote tab 不含 live `remoteSessionId`，必须等待用户手动重连。 | `docs/remote-workspace-session-unified-settings.md`  |
 
 ## State Owners
 
@@ -80,11 +80,11 @@
 
 ## Accepted Cases
 
-| Case ID   | Setup                                                                | Action                                                            | Assertions                                                                                                              | Evidence layers                 | E2E status |
-| --------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
+| Case ID   | Setup                                                                | Action                                                            | Assertions                                                                                                                                | Evidence layers                 | E2E status |
+| --------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
 | DRS-RR-01 | 已 connected 的 remote workspace session 属于 `webContents.id=99`。  | 同一窗口 renderer 重新 ready，main 调用 remote session reattach。 | 旧 attachment 被精确 detach，child 收到带新 `attachmentId` 的 `AttachServicePort`；renderer 收到同一 `sessionId` 的 `RemoteServicePort`。 | unit: main manager message/port | covered    |
-| DRS-RR-02 | pending remote workspace session 尚未收到 `Connected`。              | renderer 重新 ready。                                             | 不投递端口。                                                                                                            | unit: main manager no-op        | planned    |
-| DRS-RR-05 | renderer 收到 remote `RemoteServicePort` 时 base services 尚未注册。 | 随后收到本地 `ServicePort`。                                      | remote port 不丢弃；base services ready 后 flush pending remote ports。                                                 | unit: renderer source guard     | planned    |
+| DRS-RR-02 | pending remote workspace session 尚未收到 `Connected`。              | renderer 重新 ready。                                             | 不投递端口。                                                                                                                              | unit: main manager no-op        | planned    |
+| DRS-RR-05 | renderer 收到 remote `RemoteServicePort` 时 base services 尚未注册。 | 随后收到本地 `ServicePort`。                                      | remote port 不丢弃；base services ready 后 flush pending remote ports。                                                                   | unit: renderer source guard     | planned    |
 
 ## Pruning Decisions
 

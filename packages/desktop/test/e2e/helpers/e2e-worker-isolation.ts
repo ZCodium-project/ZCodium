@@ -72,9 +72,7 @@ export function applyE2EWorkerReplayProxyEnv(
   restoreEnvValue(env, NO_PROXY_ENV, configuredEnv.noProxy);
 }
 
-export function resolveE2EWorkerModelStreamIdleTimeoutMs(
-  specs: string[],
-): number | undefined {
+export function resolveE2EWorkerModelStreamIdleTimeoutMs(specs: string[]): number | undefined {
   if (workerSpecsContain(specs, SSE_STALL_DIAGNOSTIC_SPEC_MARKER)) {
     // 诊断原因：该 case 必须让 socket 保持打开且不再下发 event，再由真实
     // model-stream idle watchdog 触发恢复；只缩短当前 worker，避免五个 cutoff

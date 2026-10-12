@@ -177,10 +177,7 @@ describe("filterGroupedViewByTaskKeys", () => {
     const rootTask = createTaskMeta({ taskId: "root-task" });
     const groupTask = createTaskMeta({ taskId: "group-task" });
     const staleView: ZCodeGroupedTaskView = {
-      nodes: [
-        { type: "task", task: rootTask },
-        createGroupNode("group-a", [groupTask]),
-      ],
+      nodes: [{ type: "task", task: rootTask }, createGroupNode("group-a", [groupTask])],
     };
 
     const filteredView = filterGroupedViewByTaskKeys(
@@ -214,11 +211,7 @@ describe("filterGroupedViewByTaskKeys", () => {
       ],
     };
 
-    const nextView = moveTaskByMenu(
-      authoritativeView,
-      movingTask,
-      "group-b",
-    );
+    const nextView = moveTaskByMenu(authoritativeView, movingTask, "group-b");
 
     expect(describeGroupedView(nextView)).toEqual([
       ["group-a", "archiving-task"],

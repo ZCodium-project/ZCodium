@@ -62,13 +62,10 @@ describe("shouldSyncWebRemoteControlTaskSnapshot", () => {
     });
 
     expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(
-      expect.not.stringContaining("空任务快照"),
-      {
-        archivedLoading: false,
-        pinnedLoading: true,
-        timelineLoading: false,
-      },
-    );
+    expect(logger.debug).toHaveBeenCalledWith(expect.not.stringContaining("空任务快照"), {
+      archivedLoading: false,
+      pinnedLoading: true,
+      timelineLoading: false,
+    });
   });
 });

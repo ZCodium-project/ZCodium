@@ -22,11 +22,13 @@
 ## 目标与非目标
 
 **目标**
+
 - 新增「启动到能输入」总耗时 + 6 个细分阶段耗时，全部进 ARMS `group=ui_perf`。
 - 复刻现有 `perf_network_*_dns_ms` 的「每阶段一个事件名 + 各自 value」范式，使每段都能稳定出 mean/p50/p90/p99。
 - 全采（100%），每个 renderer 进程冷启动仅一次。
 
 **非目标**
+
 - 不改 main / preload / IPC 通道定义——复用现有 `PlatformChannels.ReportArmsCustomEvent` 链路与 `additionalArguments` 注入机制。
 - 不动 `perf_ui_first_token` / `perf_ui_message_complete` / `perf_ui_stream_stall` 三个事件。
 - 不覆盖二次窗口 / 运行时 reload（仅冷启动主窗口首次链路）。
@@ -46,27 +48,27 @@ ARMS 上报链路（`desktopMainIpcRemote.ts:126-148`）里，只有 `value` 被
 
 ### 七个时刻
 
-| 标记 | 采集位置 | 进程 | 含义 |
-|------|----------|------|------|
-| `T0` | `process.getCreationTime()` | main | 进程创建（锚点） |
-| `T1` | `main/index.ts` 模块顶部第一行 `Date.now()` | main | main JS 起点 |
-| `T2` | `app.whenReady().then` 回调入口（index.ts:981）`Date.now()` | main | 框架就绪 |
-| `T3` | 主窗口 `loadURL` 调用前 `Date.now()` | main | 开始加载 renderer |
-| `T4` | `renderer/src/main.tsx` 模块顶部 `Date.now()` | renderer | bundle 开始执行 |
-| `T5` | `zcode-react-startup-ready` 触发时 `Date.now()` | renderer | React 首次 commit |
-| `T6` | 启动门禁 `isStartupRenderBlocked` 由 `true→false` 时 `Date.now()` | renderer | 输入框可用 |
+| 标记 | 采集位置                                                          | 进程     | 含义              |
+| ---- | ----------------------------------------------------------------- | -------- | ----------------- |
+| `T0` | `process.getCreationTime()`                                       | main     | 进程创建（锚点）  |
+| `T1` | `main/index.ts` 模块顶部第一行 `Date.now()`                       | main     | main JS 起点      |
+| `T2` | `app.whenReady().then` 回调入口（index.ts:981）`Date.now()`       | main     | 框架就绪          |
+| `T3` | 主窗口 `loadURL` 调用前 `Date.now()`                              | main     | 开始加载 renderer |
+| `T4` | `renderer/src/main.tsx` 模块顶部 `Date.now()`                     | renderer | bundle 开始执行   |
+| `T5` | `zcode-react-startup-ready` 触发时 `Date.now()`                   | renderer | React 首次 commit |
+| `T6` | 启动门禁 `isStartupRenderBlocked` 由 `true→false` 时 `Date.now()` | renderer | 输入框可用        |
 
 ### 七个阶段（相邻差）
 
-| 事件名（`group=ui_perf`） | `value` | 区间 | 优化指向 |
-|---------------------------|---------|------|----------|
-| `perf_ui_launch_to_input` | **总时长** | `T6 - T0` | 用户主观「启动到可用」主指标 |
-| `perf_ui_launch_electron_init_ms` | `T1 - T0` | 进程创建 → main JS | Electron 二进制 + V8 启动（基本不可控，看基线） |
-| `perf_ui_launch_app_ready_ms` | `T2 - T1` | main JS → whenReady | main 同步初始化 |
-| `perf_ui_launch_window_ms` | `T3 - T2` | whenReady → loadURL | 窗口/数据目录/网络策略等启动编排 |
-| `perf_ui_launch_renderer_load_ms` | `T4 - T3` | loadURL → bundle 执行 | HTML 壳、bundle 下载/解析 |
-| `perf_ui_launch_react_commit_ms` | `T5 - T4` | bundle → React commit | renderer 内部渲染（= 旧 `perf_ui_first_screen` 语义） |
-| `perf_ui_launch_startup_gate_ms` | `T6 - T5` | React commit → 输入框可用 | 鉴权 / provider / workspace 恢复 |
+| 事件名（`group=ui_perf`）         | `value`    | 区间                      | 优化指向                                              |
+| --------------------------------- | ---------- | ------------------------- | ----------------------------------------------------- |
+| `perf_ui_launch_to_input`         | **总时长** | `T6 - T0`                 | 用户主观「启动到可用」主指标                          |
+| `perf_ui_launch_electron_init_ms` | `T1 - T0`  | 进程创建 → main JS        | Electron 二进制 + V8 启动（基本不可控，看基线）       |
+| `perf_ui_launch_app_ready_ms`     | `T2 - T1`  | main JS → whenReady       | main 同步初始化                                       |
+| `perf_ui_launch_window_ms`        | `T3 - T2`  | whenReady → loadURL       | 窗口/数据目录/网络策略等启动编排                      |
+| `perf_ui_launch_renderer_load_ms` | `T4 - T3`  | loadURL → bundle 执行     | HTML 壳、bundle 下载/解析                             |
+| `perf_ui_launch_react_commit_ms`  | `T5 - T4`  | bundle → React commit     | renderer 内部渲染（= 旧 `perf_ui_first_screen` 语义） |
+| `perf_ui_launch_startup_gate_ms`  | `T6 - T5`  | React commit → 输入框可用 | 鉴权 / provider / workspace 恢复                      |
 
 每条 `properties` 带 `session_id`（同一次启动关联键，用 `T0` 派生或 renderer_id）以便把 7 段拼回一次启动。
 
@@ -117,25 +119,25 @@ renderer 进程
 
 ## 改动文件清单
 
-| 文件 | 改动 |
-|------|------|
-| `packages/desktop/src/main/index.ts` | 模块顶部记 `T1`；`whenReady` 回调入口记 `T2`；取 `T0=process.getCreationTime()` |
-| `packages/desktop/src/main/desktopWindowLifecycle.ts` | `loadURL` 前记 `T3`；把 `{T0,T1,T2,T3}` 注入主窗口 `additionalArguments` |
-| `packages/desktop/src/preload/index.ts` 或 renderer 入口 | 从 `process.argv` 解析 launch marks，暴露给 renderer |
-| `packages/desktop/src/renderer/src/main.tsx` | 记 `T4`；`zcode-react-startup-ready` 里记 `T5`（移除旧 `reportUiFirstScreen` 调用） |
-| `packages/ui/src/Root.tsx` | `useEffect` 监听 `isStartupRenderBlocked` 翻转记 `T6`，组装 marks 调 `reportUiLaunchStages`（含 WelcomeScreen 跳过判定） |
-| `packages/ui/src/lib/uiPerfArmsTelemetry.ts` | 新增 `reportUiLaunchStages(marks)` 发 7 条；删除 `reportUiFirstScreen` 及暂存逻辑；新增常量 |
-| `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts` | 删旧 first_screen 用例；新增：7 段 payload 正确、负值钳为 0、哨兵丢弃、WelcomeScreen 跳过、reporter 未注入吞错 |
-| `docs/monitoring/performance-monitoring.md` | 事件一览替换 `perf_ui_first_screen` 为 7 个 `perf_ui_launch_*` |
+| 文件                                                     | 改动                                                                                                                     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `packages/desktop/src/main/index.ts`                     | 模块顶部记 `T1`；`whenReady` 回调入口记 `T2`；取 `T0=process.getCreationTime()`                                          |
+| `packages/desktop/src/main/desktopWindowLifecycle.ts`    | `loadURL` 前记 `T3`；把 `{T0,T1,T2,T3}` 注入主窗口 `additionalArguments`                                                 |
+| `packages/desktop/src/preload/index.ts` 或 renderer 入口 | 从 `process.argv` 解析 launch marks，暴露给 renderer                                                                     |
+| `packages/desktop/src/renderer/src/main.tsx`             | 记 `T4`；`zcode-react-startup-ready` 里记 `T5`（移除旧 `reportUiFirstScreen` 调用）                                      |
+| `packages/ui/src/Root.tsx`                               | `useEffect` 监听 `isStartupRenderBlocked` 翻转记 `T6`，组装 marks 调 `reportUiLaunchStages`（含 WelcomeScreen 跳过判定） |
+| `packages/ui/src/lib/uiPerfArmsTelemetry.ts`             | 新增 `reportUiLaunchStages(marks)` 发 7 条；删除 `reportUiFirstScreen` 及暂存逻辑；新增常量                              |
+| `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts`        | 删旧 first_screen 用例；新增：7 段 payload 正确、负值钳为 0、哨兵丢弃、WelcomeScreen 跳过、reporter 未注入吞错           |
+| `docs/monitoring/performance-monitoring.md`              | 事件一览替换 `perf_ui_first_screen` 为 7 个 `perf_ui_launch_*`                                                           |
 
 ## 常量
 
-| 常量 | 值 | 位置 |
-|------|-----|------|
-| `UI_PERF_ARMS_GROUP` | `"ui_perf"`（复用） | uiPerfArmsTelemetry.ts |
-| `UI_PERF_EVENT_LAUNCH_TO_INPUT` 等 7 个事件名 | 见上表 | uiPerfArmsTelemetry.ts |
-| `LAUNCH_TO_INPUT_SANITY_MAX_MS` | `300000` | uiPerfArmsTelemetry.ts |
-| `LAUNCH_MARKS_ARGV_PREFIX` | `"--zcode-launch-marks="` | 共享常量 |
+| 常量                                          | 值                        | 位置                   |
+| --------------------------------------------- | ------------------------- | ---------------------- |
+| `UI_PERF_ARMS_GROUP`                          | `"ui_perf"`（复用）       | uiPerfArmsTelemetry.ts |
+| `UI_PERF_EVENT_LAUNCH_TO_INPUT` 等 7 个事件名 | 见上表                    | uiPerfArmsTelemetry.ts |
+| `LAUNCH_TO_INPUT_SANITY_MAX_MS`               | `300000`                  | uiPerfArmsTelemetry.ts |
+| `LAUNCH_MARKS_ARGV_PREFIX`                    | `"--zcode-launch-marks="` | 共享常量               |
 
 ## 错误处理
 

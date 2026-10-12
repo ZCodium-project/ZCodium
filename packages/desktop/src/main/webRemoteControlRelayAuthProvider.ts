@@ -17,8 +17,6 @@ export function createNodeWebRemoteControlRelayAuthProvider(): WebRemoteControlR
     createPassword: () => randomBytes(24).toString("base64url"),
     createPassHash: (password) => createHash("sha256").update(password).digest("base64"),
     calculateProof: (passHash, nonce, role, deviceSid) =>
-      createHmac("sha256", passHash)
-        .update(`${nonce}|${role}|${deviceSid}`)
-        .digest("base64url"),
+      createHmac("sha256", passHash).update(`${nonce}|${role}|${deviceSid}`).digest("base64url"),
   };
 }

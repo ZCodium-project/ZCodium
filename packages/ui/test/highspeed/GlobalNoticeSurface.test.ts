@@ -81,5 +81,4 @@ describe("GlobalNoticeSurface", () => {
 
     expect(container.querySelector('[data-global-notice-type="highspeed-share"]')).toBeNull();
   });
-
 });

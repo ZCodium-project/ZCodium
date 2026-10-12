@@ -45,11 +45,7 @@ export function useActiveTaskSnapshotMeta(
     let cancelled = false;
 
     setSnapshotMeta((currentSnapshotMeta) =>
-      resolveImmediateActiveTaskSnapshotMeta(
-        currentSnapshotMeta,
-        taskId,
-        taskMetaFromLists,
-      ),
+      resolveImmediateActiveTaskSnapshotMeta(currentSnapshotMeta, taskId, taskMetaFromLists),
     );
 
     if (!taskId) {

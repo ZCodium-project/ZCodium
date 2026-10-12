@@ -12,11 +12,11 @@
 
 ## 1. 版本决策
 
-| 包 | 旧版本 | 新版本 | 决策依据 |
-| --- | --- | --- | --- |
-| `@zcode/browser-use-plugin` | 0.4.2 | 0.5.0 | 发布单元内容变了：node_repl MCP server 不再由本插件携带（`dist/mcp/server.js` 移出 seed 清单），插件只剩 skill、client runtime 与文档。这是发布物构成的变化，不是缺陷修复，取 minor。 |
-| `@zcode/node-repl-host` | 0.4.2 | 0.5.0 | 宿主契约本身变了：从 Browser Use 内部抽成独立 seed 单元，工具面随 Computer Use 的 node_repl SDK 重建调整。抽出时它继承了 Browser Use 的 0.4.2，本次按同一 minor 台阶抬到 0.5.0。 |
-| `zcode-cua` / `@zcode/zcode-cua-plugin` | 0.5.14 | 0.6.0 | producer 侧是破坏性重建（`feat(cua)!`：重建工具面、后台输入与观察面），patch 号不足以让下游区分新旧 producer。 |
+| 包                                      | 旧版本 | 新版本 | 决策依据                                                                                                                                                                              |
+| --------------------------------------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@zcode/browser-use-plugin`             | 0.4.2  | 0.5.0  | 发布单元内容变了：node_repl MCP server 不再由本插件携带（`dist/mcp/server.js` 移出 seed 清单），插件只剩 skill、client runtime 与文档。这是发布物构成的变化，不是缺陷修复，取 minor。 |
+| `@zcode/node-repl-host`                 | 0.4.2  | 0.5.0  | 宿主契约本身变了：从 Browser Use 内部抽成独立 seed 单元，工具面随 Computer Use 的 node_repl SDK 重建调整。抽出时它继承了 Browser Use 的 0.4.2，本次按同一 minor 台阶抬到 0.5.0。      |
+| `zcode-cua` / `@zcode/zcode-cua-plugin` | 0.5.14 | 0.6.0  | producer 侧是破坏性重建（`feat(cua)!`：重建工具面、后台输入与观察面），patch 号不足以让下游区分新旧 producer。                                                                        |
 
 node-repl-host 与 Browser Use 数字相同**只是同源历史的巧合**，不构成耦合：两者各自独立升版，
 `NODE_REPL_SERVER_VERSION` 的注释里已就地记录这一点。
@@ -93,13 +93,13 @@ discovery 只应指向新版本。
 
 ## 5. 防漂移的机械校验
 
-| 校验点 | 覆盖范围 |
-| --- | --- |
-| `plugins.test.ts`「keeps every bundled plugin package, manifest, and seed version aligned」 | 逐个官方插件比对 package / manifest / Bootstrap definition |
-| `build-sea.test.mjs`「keeps SEA official plugin versions aligned with package and plugin manifests」 | 逐个 SEA 条目比对 package / manifest / SEA 清单 |
-| `node-repl-host/test/mcp-server.test.ts` | 钉住 `serverInfo.version` == 本包 `package.json.version` |
-| `check-version-coherence.mjs --check` | 钉住 CUA 全链（catalog / lock / wrapper / 官方定义 / upstream provenance / 实现契约） |
-| `zcode-cua` 的 `scripts/checks/dist_freshness.sh` | 钉住 git-tracked `dist/` 与 src 在同一提交内干净重建一致 |
+| 校验点                                                                                               | 覆盖范围                                                                              |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `plugins.test.ts`「keeps every bundled plugin package, manifest, and seed version aligned」          | 逐个官方插件比对 package / manifest / Bootstrap definition                            |
+| `build-sea.test.mjs`「keeps SEA official plugin versions aligned with package and plugin manifests」 | 逐个 SEA 条目比对 package / manifest / SEA 清单                                       |
+| `node-repl-host/test/mcp-server.test.ts`                                                             | 钉住 `serverInfo.version` == 本包 `package.json.version`                              |
+| `check-version-coherence.mjs --check`                                                                | 钉住 CUA 全链（catalog / lock / wrapper / 官方定义 / upstream provenance / 实现契约） |
+| `zcode-cua` 的 `scripts/checks/dist_freshness.sh`                                                    | 钉住 git-tracked `dist/` 与 src 在同一提交内干净重建一致                              |
 
 ## 6. 验证
 

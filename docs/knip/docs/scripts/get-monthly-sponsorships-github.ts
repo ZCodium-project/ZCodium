@@ -1,4 +1,4 @@
-import { graphql } from '@octokit/graphql';
+import { graphql } from "@octokit/graphql";
 
 const token = process.env.GITHUB_TOKEN_SPONSORSHIPS;
 
@@ -10,7 +10,7 @@ type Options = {
 };
 
 interface SponsorActivity {
-  action: 'NEW_SPONSORSHIP' | 'CANCELLED_SPONSORSHIP';
+  action: "NEW_SPONSORSHIP" | "CANCELLED_SPONSORSHIP";
   timestamp: string;
   sponsorsTier: {
     monthlyPriceInDollars: number;
@@ -59,7 +59,7 @@ const getMonthlyTotals = async (options: Options) => {
   });
 
   const activities = [...viewer.sponsorsActivities.nodes].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
   );
 
   const activeRecurring = new Map<string, number>();
@@ -77,12 +77,12 @@ const getMonthlyTotals = async (options: Options) => {
     const monthYear = new Date(timestamp).toISOString().substring(0, 7);
 
     if (sponsorsTier?.isOneTime) {
-      if (!recurringOnly && action === 'NEW_SPONSORSHIP') {
+      if (!recurringOnly && action === "NEW_SPONSORSHIP") {
         monthlyTotals.set(monthYear, (monthlyTotals.get(monthYear) || 0) + amount);
       }
     } else {
-      if (action === 'NEW_SPONSORSHIP') activeRecurring.set(sponsor.login, amount);
-      if (action === 'CANCELLED_SPONSORSHIP') activeRecurring.delete(sponsor.login);
+      if (action === "NEW_SPONSORSHIP") activeRecurring.set(sponsor.login, amount);
+      if (action === "CANCELLED_SPONSORSHIP") activeRecurring.delete(sponsor.login);
       const total = Array.from(activeRecurring.values()).reduce((sum, a) => sum + a, 0);
       for (const month of monthlyTotals.keys()) {
         if (month >= monthYear) monthlyTotals.set(month, total);
@@ -94,7 +94,7 @@ const getMonthlyTotals = async (options: Options) => {
 };
 
 export const getGitHubTotals = async (options: Options) => {
-  if (!token) throw new Error('GITHUB_TOKEN_SPONSORSHIPS is not set');
+  if (!token) throw new Error("GITHUB_TOKEN_SPONSORSHIPS is not set");
   const monthlyData = await getMonthlyTotals({ ...options, token });
   const startMonth = options.startDate.toISOString().substring(0, 7);
   const endMonth = options.endDate?.toISOString().substring(0, 7);

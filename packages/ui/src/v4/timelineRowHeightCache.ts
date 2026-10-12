@@ -18,9 +18,7 @@ export type TimelineRowHeightCacheKey = string | number;
 export class TimelineRowHeightCache {
   private readonly sizes = new Map<TimelineRowHeightCacheKey, number>();
 
-  constructor(
-    private readonly maxEntries: number = MAX_ROW_HEIGHT_CACHE_ENTRIES,
-  ) {}
+  constructor(private readonly maxEntries: number = MAX_ROW_HEIGHT_CACHE_ENTRIES) {}
 
   get size(): number {
     return this.sizes.size;

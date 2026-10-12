@@ -84,11 +84,7 @@ describe("会话区 Plan mode MCP 权限边界 E2E", () => {
     await waitForUpstreamRequest(
       {
         includes: [PROMPT_MARKER, LOOKUP_TOOL_CALL_ID, LOOKUP_RESULT],
-        excludes: [
-          DENIAL_TEXT,
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY",
-        ],
+        excludes: [DENIAL_TEXT, "Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
       },
       "非 destructive MCP lookup 没有真实执行并进入 provider continuation",
       60000,
@@ -98,20 +94,12 @@ describe("会话区 Plan mode MCP 权限边界 E2E", () => {
     await waitForUpstreamRequest(
       {
         includes: [PROMPT_MARKER, RESET_TOOL_CALL_ID, DENIAL_TEXT],
-        excludes: [
-          RESET_RESULT,
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY",
-        ],
+        excludes: [RESET_RESULT, "Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
       },
       "destructive MCP reset 没有在调用 server 前被 Plan mode 拒绝",
       60000,
     );
-    const resetBlock = await waitForToolCallBlockStatus(
-      RESET_TOOL_NAME,
-      "failed",
-      60000,
-    );
+    const resetBlock = await waitForToolCallBlockStatus(RESET_TOOL_NAME, "failed", 60000);
     expect(resetBlock.text).not.toContain("Running");
 
     await waitForAssistantMessageContaining(E2E_REPLY_TOKEN);
@@ -178,11 +166,7 @@ async function waitForMcpCall(tool: string, timeoutMs: number) {
   );
 }
 
-async function waitForToolCallBlockStatus(
-  toolName: string,
-  status: string,
-  timeoutMs: number,
-) {
+async function waitForToolCallBlockStatus(toolName: string, status: string, timeoutMs: number) {
   let latest = await waitForToolCallBlockByToolName(toolName, timeoutMs);
   await browser.waitUntil(
     async () => {

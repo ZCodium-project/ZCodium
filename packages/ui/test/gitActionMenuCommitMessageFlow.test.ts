@@ -105,7 +105,7 @@ describe("GitActionMenu commit message flow", () => {
     expect(source).toContain("tabIndex={0}");
     expect(source).toContain("onKeyDownCapture={handleDialogKeyDown}");
     expect(source).toContain("onKeyDown={handleActionCommandKeyDown}");
-    expect(source).toContain("matchesPrimaryShortcut(event, \"Enter\")");
+    expect(source).toContain('matchesPrimaryShortcut(event, "Enter")');
     expect(source).not.toContain("<CommitActionRow");
     expect(source).toContain("<GitBranchSwitcher");
     expect(source).toContain("showFooterActions={false}");
@@ -118,16 +118,14 @@ describe("GitActionMenu commit message flow", () => {
     expect(source).toContain("displayChangeSummary?.removed ?? totalRemoved");
     expect(source).toContain("getCurrentSessionFilePaths");
     expect(source).toContain("currentSessionFilePaths");
-    expect(source).toContain("commitMessageConversationContext?: GitCommitMessageConversationContext");
+    expect(source).toContain(
+      "commitMessageConversationContext?: GitCommitMessageConversationContext",
+    );
     expect(source).toContain("conversationContext: commitMessageConversationContext");
     expect(source).toContain("paths: stagePaths");
 
-    const includeUnstagedPosition = source.indexOf(
-      "git.actionMenu.commitDialog.includeUnstaged",
-    );
-    const actionSeparatorPosition = source.indexOf(
-      "border-t border-border/50 px-2.5 py-2",
-    );
+    const includeUnstagedPosition = source.indexOf("git.actionMenu.commitDialog.includeUnstaged");
+    const actionSeparatorPosition = source.indexOf("border-t border-border/50 px-2.5 py-2");
     expect(includeUnstagedPosition).toBeGreaterThanOrEqual(0);
     expect(actionSeparatorPosition).toBeGreaterThan(includeUnstagedPosition);
   });
@@ -141,24 +139,14 @@ describe("GitActionMenu commit message flow", () => {
 
     expect(actionMenuSource).toContain("activeTaskChangeSummary?: ZCodeTaskChangeSummary");
     expect(actionMenuSource).toContain("activeTaskChangeSummary,");
-    expect(v4ChatPaneSource).toContain(
-      "activeTaskChangeSummary={activeTaskChangeSummary}",
-    );
-    expect(sessionPaneSource).toContain(
-      "activeTaskChangeSummary={activeTaskChangeSummary}",
-    );
+    expect(v4ChatPaneSource).toContain("activeTaskChangeSummary={activeTaskChangeSummary}");
+    expect(sessionPaneSource).toContain("activeTaskChangeSummary={activeTaskChangeSummary}");
     expect(statusPanelSource).toContain(
       "activeTaskChangeSummary={activeTaskChangeSummary ?? null}",
     );
-    expect(shellLayoutSource).toContain(
-      "activeTaskChangeSummary={activeTaskChangeSummary}",
-    );
-    expect(actionMenuSource).toContain(
-      "conversationMessageCount:",
-    );
-    expect(actionMenuSource).toContain(
-      "currentSessionFileCount:",
-    );
+    expect(shellLayoutSource).toContain("activeTaskChangeSummary={activeTaskChangeSummary}");
+    expect(actionMenuSource).toContain("conversationMessageCount:");
+    expect(actionMenuSource).toContain("currentSessionFileCount:");
   });
 
   it("removes the auxiliary dropdown menu from the trigger", () => {

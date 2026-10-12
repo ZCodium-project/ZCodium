@@ -12,11 +12,7 @@ export function sendWebRemoteControlStatusChangedToWindow(
   targetWindow: WebRemoteControlStatusEventTarget | null | undefined,
   status: WebRemoteControlStatus,
 ): void {
-  if (
-    !targetWindow ||
-    targetWindow.isDestroyed() ||
-    targetWindow.webContents.isDestroyed()
-  ) {
+  if (!targetWindow || targetWindow.isDestroyed() || targetWindow.webContents.isDestroyed()) {
     return;
   }
 

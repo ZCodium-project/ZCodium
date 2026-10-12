@@ -72,8 +72,7 @@ afterEach(() => {
   vi.useRealTimers();
   delete (globalThis as { document?: unknown }).document;
   delete (globalThis as { window?: unknown }).window;
-  delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-    .IS_REACT_ACT_ENVIRONMENT;
+  delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
 });
 
 describe("useRunningBackgroundTaskElapsedClock", () => {

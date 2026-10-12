@@ -8,11 +8,7 @@ import { InfoIcon, SparklesIcon, TrendingUpIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/components/lib/utils.js";
 import { MessageResponse } from "@/components/ai-elements/message.js";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog.js";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useOptionalServices } from "@/hooks/useServices.js";
 import { useZCodeStoreWithDefault } from "@/store/StoreProvider.js";
@@ -28,9 +24,7 @@ let billingDiscountCache: {
   value: CodingPlanBillingDiscountConfig | undefined;
   expiresAt: number;
 } | null = null;
-let billingDiscountRequest: Promise<
-  CodingPlanBillingDiscountConfig | undefined
-> | null = null;
+let billingDiscountRequest: Promise<CodingPlanBillingDiscountConfig | undefined> | null = null;
 
 export function useCodingPlanBillingDiscount(): {
   active: boolean;
@@ -39,15 +33,11 @@ export function useCodingPlanBillingDiscount(): {
   refresh: () => Promise<void>;
 } {
   const services = useOptionalServices();
-  return useCodingPlanBillingDiscountFromService(
-    services?.codingPlanSubscriptionService,
-  );
+  return useCodingPlanBillingDiscountFromService(services?.codingPlanSubscriptionService);
 }
 
 export function useCodingPlanBillingDiscountFromService(
-  service:
-    | Pick<ICodingPlanSubscriptionService, "getBillingDiscount">
-    | undefined,
+  service: Pick<ICodingPlanSubscriptionService, "getBillingDiscount"> | undefined,
 ): {
   active: boolean;
   config: CodingPlanBillingDiscountConfig | undefined;
@@ -145,9 +135,7 @@ export function CodingPlanBillingDiscountBadgePill({
         // Bugfix: 活动徽标文案来自服务端多语言配置，英文可能需要保留 Title Case。
         // 不能用 uppercase 强制转写，否则 "150% Quota" 会被渲染成 "150% QUOTA"。
         "inline-flex items-center py-0.5 whitespace-nowrap",
-        size === "compact"
-          ? "gap-0.5 px-1.5 text-ui-xs leading-none"
-          : "gap-1 px-2 text-ui-xs",
+        size === "compact" ? "gap-0.5 px-1.5 text-ui-xs leading-none" : "gap-1 px-2 text-ui-xs",
         variant === "surface"
           ? "rounded-full bg-white text-[#191A1D]"
           : variant === "tag"
@@ -156,18 +144,14 @@ export function CodingPlanBillingDiscountBadgePill({
       )}
     >
       {iconVisible ? (
-        <TrendingUpIcon
-          className={size === "compact" ? "size-2.5" : "size-3"}
-        />
+        <TrendingUpIcon className={size === "compact" ? "size-2.5" : "size-3"} />
       ) : null}
       {copy.badgeBody}
     </div>
   );
 }
 
-export function CodingPlanBillingDiscountBadge(
-  props: CodingPlanBillingDiscountBadgePillProps,
-) {
+export function CodingPlanBillingDiscountBadge(props: CodingPlanBillingDiscountBadgePillProps) {
   const { locale } = useZCodeIntl();
   const copy = resolveCodingPlanBillingDiscountCopy(props.config, locale);
   if (!copy.badgeBody) {
@@ -203,12 +187,8 @@ export function CodingPlanBillingDiscountBanner({
             <SparklesIcon className="size-4 text-white" />
           </div>
           <div className="min-w-0">
-            <div className="text-ui-lg font-medium leading-6 text-white">
-              {copy.cardTitle}
-            </div>
-            <div className="mt-0.5 text-ui-base leading-5 text-white/80">
-              {copy.cardBody}
-            </div>
+            <div className="text-ui-lg font-medium leading-6 text-white">{copy.cardTitle}</div>
+            <div className="mt-0.5 text-ui-base leading-5 text-white/80">{copy.cardBody}</div>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -258,12 +238,7 @@ export function CodingPlanBillingDiscountInfoDialog({
           )}
         />
       </DialogTrigger>
-      <DialogContent
-        className={cn(
-          CODING_PLAN_BILLING_DISCOUNT_DIALOG_CONTENT_CLASS,
-          "block",
-        )}
-      >
+      <DialogContent className={cn(CODING_PLAN_BILLING_DISCOUNT_DIALOG_CONTENT_CLASS, "block")}>
         <div className={CODING_PLAN_BILLING_DISCOUNT_DIALOG_BODY_CLASS}>
           <MessageResponse
             className="min-h-0 overflow-y-auto pr-1 text-foreground"

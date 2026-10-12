@@ -103,7 +103,5 @@ export function resolveMobileInputTextSizeClassName({
 }): "text-ui-base leading-5" | "text-mobile-input-safe leading-6" {
   // Bugfix: iOS Safari / WKWebView 聚焦低于 16px 的可编辑输入区时会自动放大页面。
   // text-ui-lg 会随用户偏好降到 14px，因此手机远控必须使用固定 16px 的平台兼容 token。
-  return avoidIosInputFocusZoom
-    ? "text-mobile-input-safe leading-6"
-    : "text-ui-base leading-5";
+  return avoidIosInputFocusZoom ? "text-mobile-input-safe leading-6" : "text-ui-base leading-5";
 }

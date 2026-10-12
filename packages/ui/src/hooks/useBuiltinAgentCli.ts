@@ -124,9 +124,7 @@ function easeOutCubic(t: number): number {
 }
 
 function easeInOutCubic(t: number): number {
-  return t < 0.5
-    ? 4 * t ** 3
-    : 1 - ((-2 * t + 2) ** 3) / 2;
+  return t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
 }
 
 function easeInCubic(t: number): number {
@@ -156,7 +154,10 @@ function pickInstallStageDurations(
     randomInt(template.stageDurationRatioRanges[2][0], template.stageDurationRatioRanges[2][1]) /
     100;
   const minStage4Ratio = template.stageDurationRatioRanges[3][0] / 100;
-  const normalizedStage4Ratio = Math.max(minStage4Ratio, 1 - stage1Ratio - stage2Ratio - stage3Ratio);
+  const normalizedStage4Ratio = Math.max(
+    minStage4Ratio,
+    1 - stage1Ratio - stage2Ratio - stage3Ratio,
+  );
   const ratioSum = stage1Ratio + stage2Ratio + stage3Ratio + normalizedStage4Ratio;
   const normalizedRatios: [number, number, number, number] = [
     stage1Ratio / ratioSum,
@@ -177,15 +178,14 @@ function pickInstallStageDurations(
 
 function createInstallProgressPlan(): InstallProgressPlan {
   const template = pickInstallTemplate();
-  const totalDurationMs = randomInt(
-    MIN_INSTALL_DURATION_MS,
-    MAX_INSTALL_DURATION_MS,
-  );
+  const totalDurationMs = randomInt(MIN_INSTALL_DURATION_MS, MAX_INSTALL_DURATION_MS);
   const stage1End = randomInt(template.stage1EndRange[0], template.stage1EndRange[1]);
   const stage2End = randomInt(template.stage2EndRange[0], template.stage2EndRange[1]);
   const stage3End = randomInt(template.stage3EndRange[0], template.stage3EndRange[1]);
-  const [stage1Duration, stage2Duration, stage3Duration] =
-    pickInstallStageDurations(totalDurationMs, template);
+  const [stage1Duration, stage2Duration, stage3Duration] = pickInstallStageDurations(
+    totalDurationMs,
+    template,
+  );
 
   const stages: InstallStagePlan[] = [
     {
@@ -233,10 +233,7 @@ function createInstallProgressPlan(): InstallProgressPlan {
       Math.floor(((phase2To3PauseEnd - phase2To3PauseStart) * index) / stage2To3PauseCount);
     const segmentEnd =
       phase2To3PauseStart +
-      Math.floor(
-        ((phase2To3PauseEnd - phase2To3PauseStart) * (index + 1)) /
-          stage2To3PauseCount,
-      );
+      Math.floor(((phase2To3PauseEnd - phase2To3PauseStart) * (index + 1)) / stage2To3PauseCount);
 
     pauses.push({
       triggerProgress: clamp(
@@ -270,24 +267,15 @@ function createInstallProgressPlan(): InstallProgressPlan {
   };
 }
 
-function getInstallTargetProgressAtElapsed(
-  plan: InstallProgressPlan,
-  elapsedMs: number,
-): number {
+function getInstallTargetProgressAtElapsed(plan: InstallProgressPlan, elapsedMs: number): number {
   const clampedElapsed = clamp(elapsedMs, 0, plan.totalDurationMs);
   const lastStage = plan.stages[plan.stages.length - 1];
   if (!lastStage) {
     return 100;
   }
-  const activeStage =
-    plan.stages.find((stage) => clampedElapsed <= stage.endAtMs) ??
-    lastStage;
+  const activeStage = plan.stages.find((stage) => clampedElapsed <= stage.endAtMs) ?? lastStage;
   const stageDuration = Math.max(1, activeStage.endAtMs - activeStage.startAtMs);
-  const stageElapsed = clamp(
-    clampedElapsed - activeStage.startAtMs,
-    0,
-    stageDuration,
-  );
+  const stageElapsed = clamp(clampedElapsed - activeStage.startAtMs, 0, stageDuration);
   const easedProgress = activeStage.easing(stageElapsed / stageDuration);
   return Math.floor(
     activeStage.startProgress +
@@ -359,10 +347,7 @@ export function useBuiltinAgentCli() {
   >({});
   const [error, setError] = useState<string | null>(null);
 
-  const enabledProviders = useMemo(
-    () => getEnabledBuiltinAgentCliProviders(settings),
-    [settings],
-  );
+  const enabledProviders = useMemo(() => getEnabledBuiltinAgentCliProviders(settings), [settings]);
   const activeMutatingProvider = enablingProvider ?? disablingProvider;
   const hasPendingMutation = activeMutatingProvider !== null;
 
@@ -388,8 +373,7 @@ export function useBuiltinAgentCli() {
   );
 
   const canMutateProvider = useCallback(
-    (provider: ZCodeProvider) =>
-      !hasPendingMutation || activeMutatingProvider === provider,
+    (provider: ZCodeProvider) => !hasPendingMutation || activeMutatingProvider === provider,
     [activeMutatingProvider, hasPendingMutation],
   );
 
@@ -426,11 +410,7 @@ export function useBuiltinAgentCli() {
           enabledBuiltinAgentCliProviders: nextEnabledProviders,
         });
       } catch (installError) {
-        setError(
-          installError instanceof Error
-            ? installError.message
-            : String(installError),
-        );
+        setError(installError instanceof Error ? installError.message : String(installError));
         throw installError;
       } finally {
         setEnablingProvider((current) => (current === provider ? null : current));
@@ -459,9 +439,7 @@ export function useBuiltinAgentCli() {
       try {
         await simulateUninstallDelay();
 
-        const nextEnabledProviders = enabledProviders.filter(
-          (candidate) => candidate !== provider,
-        );
+        const nextEnabledProviders = enabledProviders.filter((candidate) => candidate !== provider);
         await update({
           enabledBuiltinAgentCliProviders: nextEnabledProviders,
         });
@@ -473,11 +451,7 @@ export function useBuiltinAgentCli() {
           persistLastSelectedAgentProvider("glm");
         }
       } catch (uninstallError) {
-        setError(
-          uninstallError instanceof Error
-            ? uninstallError.message
-            : String(uninstallError),
-        );
+        setError(uninstallError instanceof Error ? uninstallError.message : String(uninstallError));
         throw uninstallError;
       } finally {
         setDisablingProvider((current) => (current === provider ? null : current));
@@ -498,8 +472,7 @@ export function useBuiltinAgentCli() {
     canMutateProvider,
     getEffectiveProvider,
     getStatus,
-    getInstallProgress: (provider: ZCodeProvider) =>
-      installProgressByProvider[provider] ?? null,
+    getInstallProgress: (provider: ZCodeProvider) => installProgressByProvider[provider] ?? null,
     installProvider,
     uninstallProvider,
     refresh,

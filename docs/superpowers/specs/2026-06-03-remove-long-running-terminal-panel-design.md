@@ -31,34 +31,42 @@ zcode app 当前有一套逻辑：当某个 bash/shell 工具调用运行时间�
 ## 改动清单
 
 ### 1. 删除整文件
+
 - `packages/ui/src/LongRunningToolCallPanel.tsx`
 
 ### 2. `packages/ui/src/ChatView/ChatViewSupplementPanels.tsx`
+
 - 删 `LongRunningToolCallPanel` import
 - 删 `isTaskRunning ? <LongRunningToolCallPanel … /> : null` 渲染块及其上方对应注释
 - 清理因此变为未使用的 props：`displayedMessages`、`closeTask`
 - `taskId` 仍被 `QueuedPromptList` 条件使用，保留
 
 ### 3. `packages/ui/src/ChatView.tsx`（调用处，约 653 行）
+
 - 去掉传给 `ChatViewSupplementPanels` 的 `displayedMessages`、`closeTask` 两个 prop
 - `hasActiveToolCalls` / `hasRunningToolCalls` / `panelNow` 链路保持不变（shimmer 仍需）
 
 ### 4. `packages/ui/src/ChatView/useChatViewDisplayFlags.ts`
+
 - 删 `collectLongRunningToolCalls` import 与 `hasVisibleLongRunningPanel` memo
 - `shouldShowSupplementPanels` 改为 `planLength > 0 || queuedPromptsLength > 0`
 - 从返回对象删 `hasVisibleLongRunningPanel`（源码已无消费者）
 - 保留 ChatLoading tool blocker import 及其用法（后续已替换为 `hasCurrentTurnForegroundActiveToolCalls`）
 
 ### 5. `packages/ui/src/lib/longRunningToolCalls.ts`
+
 - 删 `collectLongRunningToolCalls` 函数与 `LongRunningToolCall` interface
 - 保留 `hasActiveToolCalls`、ChatLoading tool blocker、`LONG_RUNNING_TOOL_CALL_THRESHOLD_MS`
 - 文件名不改（改名牵连多处 import，价值低）
 
 ### 6. `packages/shared/src/test-ids.ts`
+
 - 删 `TID_CHAT_LONG_RUNNING_PANEL`、`TID_CHAT_LONG_RUNNING_STOP_BUTTON`
 
 ### 7. i18n
+
 en-US.ts / zh-CN.ts 删除 5 个面板专用 key：
+
 - `chat.longRunning.title`
 - `chat.longRunning.description`
 - `chat.longRunning.stop`
@@ -68,6 +76,7 @@ en-US.ts / zh-CN.ts 删除 5 个面板专用 key：
 **保留** `chat.longRunning.collapse` / `chat.longRunning.expand` —— `TodoPanel.tsx:144` 仍复用这两个 key。
 
 ### 8. 测试
+
 - `packages/ui/test/chatViewSupplementPanels.test.ts`：两条用例均为面板显隐断言，面板移除后无独立可测行为 → 删除整文件
 - `packages/ui/test/longRunningToolCalls.test.ts`：删 `collectLongRunningToolCalls` 相关用例，保留 `hasActiveToolCalls` / ChatLoading tool blocker 用例
 

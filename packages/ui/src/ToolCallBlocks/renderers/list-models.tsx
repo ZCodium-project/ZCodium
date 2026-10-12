@@ -200,10 +200,7 @@ function levelWord(level: string, formatMessage: FormatMessage): string {
  * 行的 tooltip：第一行是思考强度档位（没有档位就说没有），换行后是规范 id。规范 id 是给
  * 机器回填 `subagent_model` 用的，它只该住在这里（subagent-model-label.ts 的同款分工）。
  */
-function listModelsRowTooltip(
-  model: ListModelsEntryView,
-  formatMessage: FormatMessage,
-): string {
+function listModelsRowTooltip(model: ListModelsEntryView, formatMessage: FormatMessage): string {
   let levelsLine: string;
   if (model.reasoningLevels.length === 0) {
     levelsLine = formatMessage({ id: "chat.toolCall.workflow.models.noLevels" });

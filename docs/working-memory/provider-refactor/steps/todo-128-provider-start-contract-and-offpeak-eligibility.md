@@ -50,12 +50,12 @@ configService.read() 已返回新的 Personal revision。
 
 ### 3.1 生命周期接口
 
-| 对象 | 当前再次调用结果 | 确认后的结果 |
-| --- | --- | --- |
-| `ProviderRuntime.start()` | 缓存的首次 Registry 快照 | `Promise<void>` |
-| `NodeProviderConfigRuntime.start()` | 缓存的首次 Config 快照 | `Promise<void>` |
-| `ProviderRegistryService.start()` | 当前已完成的 Registry 快照 | `Promise<void>` |
-| `NodeProviderRegistryRuntime.start()` | 转交底层 Registry 快照 | `Promise<void>` |
+| 对象                                  | 当前再次调用结果           | 确认后的结果    |
+| ------------------------------------- | -------------------------- | --------------- |
+| `ProviderRuntime.start()`             | 缓存的首次 Registry 快照   | `Promise<void>` |
+| `NodeProviderConfigRuntime.start()`   | 缓存的首次 Config 快照     | `Promise<void>` |
+| `ProviderRegistryService.start()`     | 当前已完成的 Registry 快照 | `Promise<void>` |
+| `NodeProviderRegistryRuntime.start()` | 转交底层 Registry 快照     | `Promise<void>` |
 
 Services 的 `ProviderConfigRuntime.start()` 是 Node Config Runtime 的转交包装，也需同步改为 `Promise<void>`。
 
@@ -82,15 +82,15 @@ Registry 重算并发布新快照
 
 ### 3.3 所有返回值消费点
 
-| 调用位置 | 当前用途 | 实施要求 |
-| --- | --- | --- |
-| `packages/services/src/node.ts` 的闲时 `resolveAccountProvider()` | 持续筛选 `start()` 返回快照中的套餐 Provider | 等待启动后读取当前 Registry；保留唯一当前连接、entitlement、模型和鉴权约束 |
-| 同文件启动日志 | 记录启动配置版本与 Provider 数量 | 启动完成后显式读取 Registry |
-| `packages/provider-node/src/provider-registry-runtime.ts` | Account Source 未初始化时，以 Config 构造默认不可用快照 | 等待 Config 启动后，从 `configService.read()` 读取所需配置 |
-| `packages/services/src/model-provider/providerRuntime.ts` | 缓存并向外返回 Registry 启动结果 | 缓存就绪 Promise，不再返回业务快照 |
-| `apps/zcode-cli/packages/bootstrap/src/app/process-provider-registry-runtime.ts` | 把 Node Registry Runtime 启动结果保存为外层 `snapshot` | 显式读取启动快照供必要的一次性日志使用，不将该属性用作持续状态读取 |
-| `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-entrypoint.ts` | 使用上述 `snapshot` 写启动日志 | 与上一项一起适配；运行期仍使用 Registry 服务 |
-| 测试与包装层 | 返回、断言启动快照 | 改为等待启动后通过读取接口断言；同步返回类型 |
+| 调用位置                                                                         | 当前用途                                                | 实施要求                                                                   |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `packages/services/src/node.ts` 的闲时 `resolveAccountProvider()`                | 持续筛选 `start()` 返回快照中的套餐 Provider            | 等待启动后读取当前 Registry；保留唯一当前连接、entitlement、模型和鉴权约束 |
+| 同文件启动日志                                                                   | 记录启动配置版本与 Provider 数量                        | 启动完成后显式读取 Registry                                                |
+| `packages/provider-node/src/provider-registry-runtime.ts`                        | Account Source 未初始化时，以 Config 构造默认不可用快照 | 等待 Config 启动后，从 `configService.read()` 读取所需配置                 |
+| `packages/services/src/model-provider/providerRuntime.ts`                        | 缓存并向外返回 Registry 启动结果                        | 缓存就绪 Promise，不再返回业务快照                                         |
+| `apps/zcode-cli/packages/bootstrap/src/app/process-provider-registry-runtime.ts` | 把 Node Registry Runtime 启动结果保存为外层 `snapshot`  | 显式读取启动快照供必要的一次性日志使用，不将该属性用作持续状态读取         |
+| `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-entrypoint.ts`             | 使用上述 `snapshot` 写启动日志                          | 与上一项一起适配；运行期仍使用 Registry 服务                               |
+| 测试与包装层                                                                     | 返回、断言启动快照                                      | 改为等待启动后通过读取接口断言；同步返回类型                               |
 
 已核查的 Provider 设置、模型选择、官方 MCP、Bot、Wiki、Git 提交信息生成、Agent 启动准备和配置分发入口，使用独立服务或仅等待就绪；不将它们误记为均存在旧快照故障。CLI Prompt/TUI 的执行面使用 Registry 服务，外层启动 `snapshot` 的生产消费目前为 Protocol 启动日志。实施前再跑引用检查，避免遗漏后续新调用。
 
@@ -139,17 +139,17 @@ Account 刷新完成 → Registry 更新完成并通知
 4. 统一资格/额度检查协调，补上过期成功及失败结果保护。
 5. 跑定向验证与架构、类型、Lint 门禁，再到 Air 验证实际 Team Plan 场景，记录结果后提交。
 
-| 场景 | 必须证明的结果 |
-| --- | --- |
-| 启动接口 | 四个接口及转交包装返回 `Promise<void>`；并发首次访问不重复创建资源，失败与 dispose 行为不退化 |
-| 启动后更新 Account / Personal | 显式读取返回更新后的状态；不得靠重启进程恢复 |
-| 无套餐 → BigModel Team Plan | Registry 更新完成后入口自动恢复，不需要退出重进页面 |
-| 已有 Team Plan 冷启动 | 首次账号解析较慢也能在更新完成后收敛到正确资格 |
-| Team Plan 切走 / 登出 | 旧资格失效，不能被旧成功结果重新放开 |
-| 快速切换连接 | 故意倒置请求完成顺序，旧成功、旧失败均不得覆盖新状态 |
-| 手动刷新 | 重新解析套餐及凭据；仅资格通过时查询额度 |
-| 多闲时入口同时挂载 | 检查去重，后续变化仍能触发必要重查，不因重复请求造成额度接口相互干扰 |
-| 执行与其他消费者 | 闲时资格、取号、派发继续共用当前连接鉴权；模型选择、Provider 设置、配置分发和 Agent 启动正常 |
+| 场景                          | 必须证明的结果                                                                                |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| 启动接口                      | 四个接口及转交包装返回 `Promise<void>`；并发首次访问不重复创建资源，失败与 dispose 行为不退化 |
+| 启动后更新 Account / Personal | 显式读取返回更新后的状态；不得靠重启进程恢复                                                  |
+| 无套餐 → BigModel Team Plan   | Registry 更新完成后入口自动恢复，不需要退出重进页面                                           |
+| 已有 Team Plan 冷启动         | 首次账号解析较慢也能在更新完成后收敛到正确资格                                                |
+| Team Plan 切走 / 登出         | 旧资格失效，不能被旧成功结果重新放开                                                          |
+| 快速切换连接                  | 故意倒置请求完成顺序，旧成功、旧失败均不得覆盖新状态                                          |
+| 手动刷新                      | 重新解析套餐及凭据；仅资格通过时查询额度                                                      |
+| 多闲时入口同时挂载            | 检查去重，后续变化仍能触发必要重查，不因重复请求造成额度接口相互干扰                          |
+| 执行与其他消费者              | 闲时资格、取号、派发继续共用当前连接鉴权；模型选择、Provider 设置、配置分发和 Agent 启动正常  |
 
 APP 交互修复须有对应 E2E。至少覆盖 BigModel Team Plan，并通过分层用例覆盖 Z.ai/个人套餐现有规则；在 Air 做真实账号运行时复核，真实创建/执行的动作与证据按实施时用户授权和 E2E 规则处理，不把纯 mock 结果写成真实服务成功。
 

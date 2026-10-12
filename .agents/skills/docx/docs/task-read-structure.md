@@ -30,25 +30,25 @@ python3 <skill_dir>/scripts/read_docx_structure.py <input.docx> --json
 
 The report owns these structure axes — none of them are delegated to dotnet:
 
-| Section | What it gives you |
-|---------|-------------------|
-| `packaging` | `[Content_Types]`, package rels, document rels, full part inventory with sizes |
-| `sections` | per-section graph: type, page size (mm), margins (mm), columns, `titlePg`, `lineNumbering`, `pageBorders`, header/footer rId references |
-| `headerFooterParts` | every header/footer part resolved through rels with paragraph / field / drawing / hyperlink counts and per-part field kinds |
-| `styles.byId` + `defaults` | full styles dictionary with `basedOn`, `linked`, `next`, `outlineLvl`, `numId`, `isCustom`, `isDefault` |
-| `styles.usedParagraphStyles` / `usedRunStyles` | usage histograms straight from document body |
-| `styles.missingReferenced` / `definedButUnused` / `headingsWithoutOutlineLvl` | template-diagnosis cross-reference audit |
-| `numbering.abstractNums` / `nums` | the `numId → abstractNumId → levels` chain with `multiLevelType`, per-level `numFmt`, `lvlText`, `start`, `pStyle` |
-| `numbering.usage` | paragraph counts per `numId` and per `(numId, ilvl)` |
-| `fields.simple` / `complex` | full instruction text, classified `kind` (TOC, PAGE, REF, STYLEREF, …), `dirty` / `locked` flags, captured field result |
-| `fields.kindCountsAllParts` | rolled-up field-kind counts including header/footer parts |
-| `bookmarks` | start/end pairing with paragraph spans, orphan starts and ends, reserved-name flag |
-| `hyperlinks` | anchor + rId resolved to URL via document rels, `external` flag |
-| `comments` | comment defs, `commentsExtended` parent links, in-body range/reference counts, orphans both ways |
-| `revisions` | per-kind counts (`ins`, `del`, `moveFrom`, `moveTo`, `cell*`, `rPrChange`, `pPrChange`, `sectPrChange`, …), authors, date range |
-| `contamination` | direct-formatting heatmap: `pPrDirect`, `rPrDirectRuns`, dirty-paragraph ratio |
-| `settingsFlags` | `trackChanges`, `evenAndOddHeaders`, `mirrorMargins`, `updateFields`, footnote/endnote presence |
-| `diagnostics` | categorized findings (`severity` × `code` × `message`) for missing styles, broken section / hyperlink rels, undefined comment ids, orphan bookmarks, missing numIds, heading styles without outline level |
+| Section                                                                       | What it gives you                                                                                                                                                                                         |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packaging`                                                                   | `[Content_Types]`, package rels, document rels, full part inventory with sizes                                                                                                                            |
+| `sections`                                                                    | per-section graph: type, page size (mm), margins (mm), columns, `titlePg`, `lineNumbering`, `pageBorders`, header/footer rId references                                                                   |
+| `headerFooterParts`                                                           | every header/footer part resolved through rels with paragraph / field / drawing / hyperlink counts and per-part field kinds                                                                               |
+| `styles.byId` + `defaults`                                                    | full styles dictionary with `basedOn`, `linked`, `next`, `outlineLvl`, `numId`, `isCustom`, `isDefault`                                                                                                   |
+| `styles.usedParagraphStyles` / `usedRunStyles`                                | usage histograms straight from document body                                                                                                                                                              |
+| `styles.missingReferenced` / `definedButUnused` / `headingsWithoutOutlineLvl` | template-diagnosis cross-reference audit                                                                                                                                                                  |
+| `numbering.abstractNums` / `nums`                                             | the `numId → abstractNumId → levels` chain with `multiLevelType`, per-level `numFmt`, `lvlText`, `start`, `pStyle`                                                                                        |
+| `numbering.usage`                                                             | paragraph counts per `numId` and per `(numId, ilvl)`                                                                                                                                                      |
+| `fields.simple` / `complex`                                                   | full instruction text, classified `kind` (TOC, PAGE, REF, STYLEREF, …), `dirty` / `locked` flags, captured field result                                                                                   |
+| `fields.kindCountsAllParts`                                                   | rolled-up field-kind counts including header/footer parts                                                                                                                                                 |
+| `bookmarks`                                                                   | start/end pairing with paragraph spans, orphan starts and ends, reserved-name flag                                                                                                                        |
+| `hyperlinks`                                                                  | anchor + rId resolved to URL via document rels, `external` flag                                                                                                                                           |
+| `comments`                                                                    | comment defs, `commentsExtended` parent links, in-body range/reference counts, orphans both ways                                                                                                          |
+| `revisions`                                                                   | per-kind counts (`ins`, `del`, `moveFrom`, `moveTo`, `cell*`, `rPrChange`, `pPrChange`, `sectPrChange`, …), authors, date range                                                                           |
+| `contamination`                                                               | direct-formatting heatmap: `pPrDirect`, `rPrDirectRuns`, dirty-paragraph ratio                                                                                                                            |
+| `settingsFlags`                                                               | `trackChanges`, `evenAndOddHeaders`, `mirrorMargins`, `updateFields`, footnote/endnote presence                                                                                                           |
+| `diagnostics`                                                                 | categorized findings (`severity` × `code` × `message`) for missing styles, broken section / hyperlink rels, undefined comment ids, orphan bookmarks, missing numIds, heading styles without outline level |
 
 To request a subset of axes (cheaper context), pass `--section`:
 
@@ -89,5 +89,5 @@ Return:
 ## Common mistake
 
 Do not claim a visual fix or visual defect from structure evidence alone when the user asked about
-pages. That belongs in `READ_RENDERED` or `REPAIR_LAYOUT`. And do not run `dotnet analyze` *before*
+pages. That belongs in `READ_RENDERED` or `REPAIR_LAYOUT`. And do not run `dotnet analyze` _before_
 the Python analyzer — the dotnet command is a corroboration shot, not the entry point.

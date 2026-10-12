@@ -432,7 +432,11 @@ export async function createElectronBrowserWebmRecorder(
     await recorderWindow.loadFile(recorderDocumentPath);
     await rm(recorderDocumentPath, { force: true }).catch(() => undefined);
     recorderWindow.webContents.postMessage(RECORDER_PORT_CHANNEL, null, [rendererPort]);
-    await withTimeout(ready.promise, RECORDER_START_TIMEOUT_MS, "recorder renderer did not become ready");
+    await withTimeout(
+      ready.promise,
+      RECORDER_START_TIMEOUT_MS,
+      "recorder renderer did not become ready",
+    );
     mainPort.postMessage({
       type: "start",
       fps: input.fps,

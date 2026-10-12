@@ -1,8 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
-const sourceUrl = (name: string) =>
-  new URL(`../src/workspace-file-tree/${name}`, import.meta.url);
+const sourceUrl = (name: string) => new URL(`../src/workspace-file-tree/${name}`, import.meta.url);
 
 describe("workspace file tree sticky layout", () => {
   it("renders all sticky folders in one zero-height list container", async () => {
@@ -15,24 +14,18 @@ describe("workspace file tree sticky layout", () => {
     expect(stickySource).toContain(
       'className="pointer-events-none sticky top-0 z-10 h-0 overflow-visible px-1"',
     );
-    expect(stickySource).toContain(
-      'className="pointer-events-auto overflow-hidden rounded-lg"',
-    );
+    expect(stickySource).toContain('className="pointer-events-auto overflow-hidden rounded-lg"');
     expect(stickySource).not.toContain("bg-sidebar");
     expect(stickySource).toContain('layout="static"');
     expect(rowSource).toContain('layout?: "absolute" | "static"');
     expect(rowSource).not.toContain('layout === "sticky"');
-    expect(rowSource).toContain(
-      'className="pointer-events-none absolute -inset-y-px left-2.5"',
-    );
+    expect(rowSource).toContain('className="pointer-events-none absolute -inset-y-px left-2.5"');
     expect(rowSource).not.toContain("-inset-y-0.5");
 
-    const scrollContents = treeSource.slice(
-      treeSource.indexOf("ref={scrollRef}"),
+    const scrollContents = treeSource.slice(treeSource.indexOf("ref={scrollRef}"));
+    expect(scrollContents.indexOf("<WorkspaceFileTreeStickyFolders")).toBeLessThan(
+      scrollContents.indexOf("<WorkspaceFileTreeList"),
     );
-    expect(
-      scrollContents.indexOf("<WorkspaceFileTreeStickyFolders"),
-    ).toBeLessThan(scrollContents.indexOf("<WorkspaceFileTreeList"));
   });
 
   it("does not migrate sticky rows or rewrite the scroll offset", async () => {

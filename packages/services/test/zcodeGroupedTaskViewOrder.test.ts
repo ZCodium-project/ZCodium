@@ -270,17 +270,18 @@ it.each([false, true])(
           }),
     ).rejects.toThrow("reject deleted task cleanup");
 
-  expect(
-    database
-      .prepare("SELECT deleted FROM tasks WHERE workspace_key = ? AND task_id = ?")
-      .get("/repo", task.taskId),
-  ).toEqual({ deleted: 0 });
-  expect(
-    database
-      .prepare("SELECT task_id FROM task_group_members WHERE workspace_key = ? AND task_id = ?")
-      .get("/repo", task.taskId),
-  ).toEqual({ task_id: task.taskId });
-});
+    expect(
+      database
+        .prepare("SELECT deleted FROM tasks WHERE workspace_key = ? AND task_id = ?")
+        .get("/repo", task.taskId),
+    ).toEqual({ deleted: 0 });
+    expect(
+      database
+        .prepare("SELECT task_id FROM task_group_members WHERE workspace_key = ? AND task_id = ?")
+        .get("/repo", task.taskId),
+    ).toEqual({ task_id: task.taskId });
+  },
+);
 
 it("cleans historical deleted task grouping references when the index reopens", async () => {
   const repo = createTrackedRepo();

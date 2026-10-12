@@ -22,9 +22,11 @@
 ### Task 1: Layout Parity Test
 
 **Files:**
+
 - Create: `packages/ui/test/v4SessionPaneLayoutParity.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SessionPane` props `paneId`, `sessionId`, `workspacePath`.
 - Produces: a regression test that fails until the composer is rendered inside the timeline scroll viewport and both timeline content and dock share `max-w-3xl`.
 
@@ -34,10 +36,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type {
-  ConversationSnapshot,
-  UserInputRow,
-} from "@zcode/shared/zcode-protocol-v4";
+import type { ConversationSnapshot, UserInputRow } from "@zcode/shared/zcode-protocol-v4";
 import { SessionPane } from "@/v4/SessionPane.js";
 import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
 
@@ -104,24 +103,21 @@ vi.mock("@/v4/ConversationHeader.js", async () => {
 vi.mock("@/v4/ConversationStatusPanel.js", async () => {
   const React = await import("react");
   return {
-    ConversationStatusPanel: () =>
-      React.createElement("div", { "data-testid": "mock-status" }),
+    ConversationStatusPanel: () => React.createElement("div", { "data-testid": "mock-status" }),
   };
 });
 
 vi.mock("@/v4/ConversationQueuePanel.js", async () => {
   const React = await import("react");
   return {
-    ConversationQueuePanel: () =>
-      React.createElement("div", { "data-testid": "mock-queue" }),
+    ConversationQueuePanel: () => React.createElement("div", { "data-testid": "mock-queue" }),
   };
 });
 
 vi.mock("@/v4/V4InteractionDialogs.js", async () => {
   const React = await import("react");
   return {
-    V4InteractionDialogs: () =>
-      React.createElement("div", { "data-testid": "mock-interactions" }),
+    V4InteractionDialogs: () => React.createElement("div", { "data-testid": "mock-interactions" }),
   };
 });
 
@@ -144,8 +140,7 @@ vi.mock("@/v4/ConversationDraftEmptyState.js", async () => {
 vi.mock("@/v4/ConversationTurnGroup.js", async () => {
   const React = await import("react");
   return {
-    ConversationTurnGroup: () =>
-      React.createElement("div", { "data-testid": "mock-turn-group" }),
+    ConversationTurnGroup: () => React.createElement("div", { "data-testid": "mock-turn-group" }),
   };
 });
 
@@ -253,11 +248,13 @@ Expected: FAIL because `data-v4-composer-dock` and `data-v4-timeline-content-col
 ### Task 2: Shared Scroll Dock
 
 **Files:**
+
 - Modify: `packages/ui/src/v4/ConversationTimeline.tsx`
 - Modify: `packages/ui/src/v4/SessionPane.tsx`
 - Modify: `packages/ui/src/v4/ConversationComposer.tsx`
 
 **Interfaces:**
+
 - `ConversationTimelineProps` adds `bottomDock?: ReactNode`.
 - `SessionPane` passes `composerNode` as `bottomDock` only in bound-session mode.
 - `ConversationComposer` keeps draft `centered` behavior and lets the dock own horizontal padding for session mode.
@@ -281,9 +278,11 @@ Expected: PASS.
 ### Task 3: Full Verification And Commit
 
 **Files:**
+
 - Verify all touched files.
 
 **Interfaces:**
+
 - Produces a Conventional Commit containing only this task's docs, test, and v4 UI layout code.
 
 - [ ] **Step 1: Run required repo checks**

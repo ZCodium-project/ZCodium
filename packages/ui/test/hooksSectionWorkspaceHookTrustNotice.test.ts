@@ -70,8 +70,9 @@ vi.mock("@/store/TabStoreProvider.js", () => ({
 }));
 
 vi.mock("@/store/workspaceHookReviewStore.js", () => ({
-  useWorkspaceHookReviewStore: (selector: (state: { bindings: Record<string, never> }) => unknown) =>
-    selector({ bindings: {} }),
+  useWorkspaceHookReviewStore: (
+    selector: (state: { bindings: Record<string, never> }) => unknown,
+  ) => selector({ bindings: {} }),
 }));
 
 vi.mock("@/settings/useWorkspaceHookInlineTrust.js", () => ({
@@ -103,10 +104,16 @@ vi.mock("@/settings/PluginScopeMenu.js", async (importOriginal) => ({
 }));
 
 vi.mock("@/settings/HookForm.js", () => ({ HookForm: () => null }));
-vi.mock("@/settings/SettingsHeaderBreadcrumb.js", () => ({ SettingsBreadcrumbReporter: () => null }));
-vi.mock("@/settings/SettingsResourceHeaderActions.js", () => ({ SettingsResourceHeaderActions: () => null }));
+vi.mock("@/settings/SettingsHeaderBreadcrumb.js", () => ({
+  SettingsBreadcrumbReporter: () => null,
+}));
+vi.mock("@/settings/SettingsResourceHeaderActions.js", () => ({
+  SettingsResourceHeaderActions: () => null,
+}));
 vi.mock("@/settings/HooksList.js", () => ({ HooksList: () => null }));
-vi.mock("@/settings/pluginStoreListing.js", () => ({ formatCanonicalPluginName: (name: string) => name }));
+vi.mock("@/settings/pluginStoreListing.js", () => ({
+  formatCanonicalPluginName: (name: string) => name,
+}));
 vi.mock("@/components/ui/button.js", () => ({
   Button: ({ children }: { children?: unknown }) => createElement("button", null, children),
 }));

@@ -1,11 +1,7 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 /* eslint-disable max-lines -- Web 远程控制弹层集中处理启动、状态轮询、二维码和错误文案，后续稳定后再拆分子组件。 */
-import type {
-  BotProvider,
-  WebRemoteControlFailure,
-  WebRemoteControlStatus,
-} from "@zcode/shared";
+import type { BotProvider, WebRemoteControlFailure, WebRemoteControlStatus } from "@zcode/shared";
 import { resolveWebRemoteControlWorkspaceKey } from "@zcode/shared";
 import {
   Bot as BotIcon,
@@ -34,10 +30,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { logger } from "@/logger.js";
 import { getBotProviderRegionTagLabelId } from "@/botsUi.js";
 
-type RemoteControlBotProvider = Extract<
-  BotProvider,
-  "weixin" | "feishu" | "lark" | "telegram"
->;
+type RemoteControlBotProvider = Extract<BotProvider, "weixin" | "feishu" | "lark" | "telegram">;
 
 const REMOTE_CONTROL_BOT_ENTRIES: Array<{
   provider: RemoteControlBotProvider;
@@ -87,9 +80,7 @@ export function isSameWebRemoteControlTarget(
   return Boolean(status.windowControlSessionId ?? status.sessionId);
 }
 
-export function isReusableWebRemoteControlSession(
-  status: WebRemoteControlStatus,
-): boolean {
+export function isReusableWebRemoteControlSession(status: WebRemoteControlStatus): boolean {
   if (status.status === "idle" || status.status === "error") {
     return false;
   }
@@ -159,8 +150,7 @@ export function getWebRemoteControlStatusTagLabel(
   formatMessage: ReturnType<typeof useZCodeIntl>["intl"]["formatMessage"],
 ): string {
   const deviceName =
-    status.mobileDeviceInfo?.browserPlatform?.trim() ||
-    status.mobileDeviceInfo?.name?.trim();
+    status.mobileDeviceInfo?.browserPlatform?.trim() || status.mobileDeviceInfo?.name?.trim();
 
   if (deviceName) {
     return deviceName;
@@ -194,10 +184,8 @@ function isSameWebRemoteControlStatus(
     left.mobileConnected === right.mobileConnected &&
     left.mobileDeviceInfo?.updatedAt === right.mobileDeviceInfo?.updatedAt &&
     left.mobileDeviceInfo?.userAgent === right.mobileDeviceInfo?.userAgent &&
-    left.mobileDeviceInfo?.viewport?.width ===
-      right.mobileDeviceInfo?.viewport?.width &&
-    left.mobileDeviceInfo?.viewport?.height ===
-      right.mobileDeviceInfo?.viewport?.height &&
+    left.mobileDeviceInfo?.viewport?.width === right.mobileDeviceInfo?.viewport?.width &&
+    left.mobileDeviceInfo?.viewport?.height === right.mobileDeviceInfo?.viewport?.height &&
     left.qrUrl === right.qrUrl &&
     left.connectUrl === right.connectUrl &&
     left.workspacePath === right.workspacePath &&
@@ -280,8 +268,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
   const [loading, setLoading] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [botsDialogOpen, setBotsDialogOpen] = useState(false);
-  const [botEntryProvider, setBotEntryProvider] =
-    useState<RemoteControlBotProvider | null>(null);
+  const [botEntryProvider, setBotEntryProvider] = useState<RemoteControlBotProvider | null>(null);
 
   const statusLabel = useMemo(
     () => getStatusLabel(status, intl.formatMessage),
@@ -357,12 +344,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
             remoteSessionId,
             error: message,
           });
-          toast(
-            intl.formatMessage(
-              { id: "webRemoteControl.startFailed" },
-              { error: message },
-            ),
-          );
+          toast(intl.formatMessage({ id: "webRemoteControl.startFailed" }, { error: message }));
         }
         logger.error("[WebRemoteControlDialog] 启动 Web 远程控制失败", {
           workspacePath,
@@ -383,15 +365,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
     return () => {
       cancelled = true;
     };
-  }, [
-    intl,
-    open,
-    platform,
-    remoteSessionId,
-    workspaceIdentity,
-    workspacePath,
-    initialTaskId,
-  ]);
+  }, [intl, open, platform, remoteSessionId, workspaceIdentity, workspacePath, initialTaskId]);
 
   useEffect(() => {
     if (!open) {
@@ -422,9 +396,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
         }
 
         setStatus((currentStatus) =>
-          isSameWebRemoteControlStatus(currentStatus, nextStatus)
-            ? currentStatus
-            : nextStatus,
+          isSameWebRemoteControlStatus(currentStatus, nextStatus) ? currentStatus : nextStatus,
         );
       } catch {
         // Bugfix: Web 远程控制的状态变化发生在 main / relay 侧，
@@ -486,16 +458,8 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      toast(
-        intl.formatMessage(
-          { id: "webRemoteControl.copyLinkFailed" },
-          { error: message },
-        ),
-      );
-      logger.error(
-        "[WebRemoteControlDialog] 复制 Web 远程控制链接失败",
-        message,
-      );
+      toast(intl.formatMessage({ id: "webRemoteControl.copyLinkFailed" }, { error: message }));
+      logger.error("[WebRemoteControlDialog] 复制 Web 远程控制链接失败", message);
     }
   };
 
@@ -538,12 +502,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      toast(
-        intl.formatMessage(
-          { id: "webRemoteControl.refreshQr.failed" },
-          { error: message },
-        ),
-      );
+      toast(intl.formatMessage({ id: "webRemoteControl.refreshQr.failed" }, { error: message }));
       logger.error("[WebRemoteControlDialog] 刷新 Web 远程控制二维码失败", {
         workspacePath,
         workspaceIdentity: workspaceIdentity ?? "none",
@@ -569,12 +528,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      toast(
-        intl.formatMessage(
-          { id: "webRemoteControl.stopFailed" },
-          { error: message },
-        ),
-      );
+      toast(intl.formatMessage({ id: "webRemoteControl.stopFailed" }, { error: message }));
       logger.error("[WebRemoteControlDialog] 关闭 Web 远程控制失败", message);
     } finally {
       setLoading(false);
@@ -653,9 +607,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
                   <MonitorSmartphone className="size-5" />
                 </div>
                 <div className="space-y-1">
-                  <DialogTitle>
-                    {intl.formatMessage({ id: "webRemoteControl.title" })}
-                  </DialogTitle>
+                  <DialogTitle>{intl.formatMessage({ id: "webRemoteControl.title" })}</DialogTitle>
                   <DialogDescription>
                     {intl.formatMessage({ id: "webRemoteControl.description" })}
                   </DialogDescription>
@@ -726,17 +678,14 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
                   {failureDescription ? (
                     <div className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-ui-base/relaxed text-destructive">
                       <p>{failureDescription}</p>
-                      {status.failure?.message &&
-                      status.failure.message !== failureDescription ? (
+                      {status.failure?.message && status.failure.message !== failureDescription ? (
                         <p className="mt-1 text-ui-xs/relaxed opacity-80">
                           {status.failure.message}
                         </p>
                       ) : null}
                     </div>
                   ) : status.error ? (
-                    <p className="mt-3 text-ui-base/relaxed text-destructive">
-                      {status.error}
-                    </p>
+                    <p className="mt-3 text-ui-base/relaxed text-destructive">{status.error}</p>
                   ) : null}
                   <div
                     data-testid="web-remote-control-copy-link-row"
@@ -809,9 +758,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
                 </div>
                 <div className="grid min-h-0 flex-1 gap-3">
                   {REMOTE_CONTROL_BOT_ENTRIES.map((entry) => {
-                    const regionTagLabelId = getBotProviderRegionTagLabelId(
-                      entry.provider,
-                    );
+                    const regionTagLabelId = getBotProviderRegionTagLabelId(entry.provider);
 
                     return (
                       <button
@@ -822,10 +769,7 @@ export const WebRemoteControlDialog = memo(function WebRemoteControlDialogCompon
                       >
                         {/* Bugfix: 远控 Bot Channel 入口原来用通用 lucide 图标，用户无法一眼区分微信、飞书和 Telegram。
                             这里直接复用 BotsDialog 的渠道 logo，不再额外包裹容器，保证品牌图标本身作为视觉识别。 */}
-                        <ProviderIcon
-                          provider={entry.provider}
-                          className="size-12 shrink-0"
-                        />
+                        <ProviderIcon provider={entry.provider} className="size-12 shrink-0" />
                         <span className="min-w-0 flex-1 space-y-1">
                           <span className="flex min-w-0 items-center gap-1.5 text-ui-base font-medium text-foreground">
                             <span className="min-w-0 truncate">

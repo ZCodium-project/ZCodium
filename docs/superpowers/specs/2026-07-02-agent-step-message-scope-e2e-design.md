@@ -6,50 +6,50 @@
 
 ## Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Change | 修复 `message_completion` 错误累计整个 session 历史的问题，并以失败复现 E2E 锁定 message scope |
-| User-visible surfaces | 无 UI 新行为；验证 `/report` 的 `agent_trace` payload |
-| Existing docs | `docs/monitoring/business-monitoring.md`、`docs/monitoring/performance-telemetry-catalog.md`、`docs/conversation-session-case-catalog.md` |
-| Existing code owners | `packages/ui/src/lib/messageTelemetry.ts`、`packages/ui/src/hooks/useZCodeChat.ts`、`packages/ui/src/hooks/taskStreamEventHandlers.ts` |
-| Out of scope | queue/stop、跨 session、手机 replayable 恢复协议、真实 telemetry 服务端接收 |
+| Field                 | Value                                                                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Change                | 修复 `message_completion` 错误累计整个 session 历史的问题，并以失败复现 E2E 锁定 message scope                                            |
+| User-visible surfaces | 无 UI 新行为；验证 `/report` 的 `agent_trace` payload                                                                                     |
+| Existing docs         | `docs/monitoring/business-monitoring.md`、`docs/monitoring/performance-telemetry-catalog.md`、`docs/conversation-session-case-catalog.md` |
+| Existing code owners  | `packages/ui/src/lib/messageTelemetry.ts`、`packages/ui/src/hooks/useZCodeChat.ts`、`packages/ui/src/hooks/taskStreamEventHandlers.ts`    |
+| Out of scope          | queue/stop、跨 session、手机 replayable 恢复协议、真实 telemetry 服务端接收                                                               |
 
 ## Clarification Log
 
-| Round | Question | User answer | Boundary fixed | Follow-up needed |
-| --- | --- | --- | --- | --- |
-| 1 | 覆盖历史累计问题（A），还是同时覆盖活动 tool step 未收口（A+B） | A | 只验证 `agent_step_cnt` 的 message scope | no |
-| 2 | 使用日志对账、preload mock，还是 endpoint 改写 | 日志对账 | 优先从本地可观测证据对账，不依赖外部 telemetry 服务端 | no |
-| 3 | production renderer 禁用本地日志，无法读取原计划 payload | 使用 Electron `net.fetch` mock 的调用历史作为等价且更强的本地证据 | 对账主进程实际 HTTP transport 入参，不为测试重新打开生产日志 | no |
+| Round | Question                                                        | User answer                                                       | Boundary fixed                                               | Follow-up needed |
+| ----- | --------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ | ---------------- |
+| 1     | 覆盖历史累计问题（A），还是同时覆盖活动 tool step 未收口（A+B） | A                                                                 | 只验证 `agent_step_cnt` 的 message scope                     | no               |
+| 2     | 使用日志对账、preload mock，还是 endpoint 改写                  | 日志对账                                                          | 优先从本地可观测证据对账，不依赖外部 telemetry 服务端        | no               |
+| 3     | production renderer 禁用本地日志，无法读取原计划 payload        | 使用 Electron `net.fetch` mock 的调用历史作为等价且更强的本地证据 | 对账主进程实际 HTTP transport 入参，不为测试重新打开生产日志 | no               |
 
 ## Boundary Decisions
 
-| Boundary | Decision | Includes | Excludes / prunes | Source |
-| --- | --- | --- | --- | --- |
-| 客户端链路 | `desktop-continuous` | 桌面 renderer 的正常 session stream | `web-remote-replayable`、snapshot/gap recovery | user |
-| 会话形态 | 同一 session 连续两轮 | 第二轮必须能看到第一轮历史 | 跨 session、fork/edit/compact | user |
-| step 形态 | 每轮一个普通 generation step | 确定性纯文本 replay | reasoning、tool call、permission/elicitation | design |
-| 对账主键 | `talkId + messageId` | 同一 completion 与它的逐 step 事件 | 仅按 talkId 聚合 | monitoring spec |
-| 证据 | Electron 主进程 telemetry fetch 调用参数 | 最终 HTTP body 中的 `agent_step`、`message_completion` | 外部 telemetry 服务端落库结果 | code constraint + user-approved local reconciliation |
+| Boundary   | Decision                                 | Includes                                               | Excludes / prunes                              | Source                                               |
+| ---------- | ---------------------------------------- | ------------------------------------------------------ | ---------------------------------------------- | ---------------------------------------------------- |
+| 客户端链路 | `desktop-continuous`                     | 桌面 renderer 的正常 session stream                    | `web-remote-replayable`、snapshot/gap recovery | user                                                 |
+| 会话形态   | 同一 session 连续两轮                    | 第二轮必须能看到第一轮历史                             | 跨 session、fork/edit/compact                  | user                                                 |
+| step 形态  | 每轮一个普通 generation step             | 确定性纯文本 replay                                    | reasoning、tool call、permission/elicitation   | design                                               |
+| 对账主键   | `talkId + messageId`                     | 同一 completion 与它的逐 step 事件                     | 仅按 talkId 聚合                               | monitoring spec                                      |
+| 证据       | Electron 主进程 telemetry fetch 调用参数 | 最终 HTTP body 中的 `agent_step`、`message_completion` | 外部 telemetry 服务端落库结果                  | code constraint + user-approved local reconciliation |
 
 ## Domain Scope
 
-| Domain | Include? | Why it can change behavior | Primary sources |
-| --- | --- | --- | --- |
-| Conversation/session behavior | yes | 必须证明两轮属于同一 session 且都完成 | conversation catalog/workflow |
-| Monitoring/telemetry | yes | 被测字段和逐事件对账都属于 `/report agent_trace` | monitoring specs |
-| Provider replay | yes | 两轮需要确定性、无工具的纯文本响应 | E2E fixture workflow |
-| Mobile remote/replayable | no | message scope 缺陷不需要恢复链路即可复现 | user pruning |
+| Domain                        | Include? | Why it can change behavior                       | Primary sources               |
+| ----------------------------- | -------- | ------------------------------------------------ | ----------------------------- |
+| Conversation/session behavior | yes      | 必须证明两轮属于同一 session 且都完成            | conversation catalog/workflow |
+| Monitoring/telemetry          | yes      | 被测字段和逐事件对账都属于 `/report agent_trace` | monitoring specs              |
+| Provider replay               | yes      | 两轮需要确定性、无工具的纯文本响应               | E2E fixture workflow          |
+| Mobile remote/replayable      | no       | message scope 缺陷不需要恢复链路即可复现         | user pruning                  |
 
 ## Concept Map And State Owners
 
-| Concept | State owner | Evidence |
-| --- | --- | --- |
-| 当前 prompt telemetry | UI `activePromptTelemetryByTask` | completion 的 `messageId` |
-| agent step lifecycle | UI `agentStepTelemetryByTask` | 同 `talkId + messageId` 的 `agent_step` payload |
-| session message history | Agent runtime/session + UI projection | 第二轮发送前第一轮已完成；同一 `talkId` |
+| Concept                   | State owner                                                                  | Evidence                                              |
+| ------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 当前 prompt telemetry     | UI `activePromptTelemetryByTask`                                             | completion 的 `messageId`                             |
+| agent step lifecycle      | UI `agentStepTelemetryByTask`                                                | 同 `talkId + messageId` 的 `agent_step` payload       |
+| session message history   | Agent runtime/session + UI projection                                        | 第二轮发送前第一轮已完成；同一 `talkId`               |
 | telemetry transport input | renderer `reportAppTelemetryEvent` → main `createDesktopTelemetryFetch(net)` | Electron `net.fetch` mock calls 中的最终 request body |
-| E2E observation boundary | WDIO Electron service | `browser.electron.mock("net", "fetch")` 调用历史 |
+| E2E observation boundary  | WDIO Electron service                                                        | `browser.electron.mock("net", "fetch")` 调用历史      |
 
 ## Production Fix Design
 
@@ -89,13 +89,13 @@
 
 ## Candidate Combinations And Pruning
 
-| Candidate ID | State | Event | Expected effect | Status | Reason |
-| --- | --- | --- | --- | --- | --- |
-| R01 | 同一 desktop session，第一轮已完成 | 第二轮纯文本完成 | 第二轮 `agent_step_cnt` 等于同 message 的实际 step 数 1 | accepted | 最小稳定生产缺陷复现 |
-| R02 | 同一 session，第二轮含工具 | 第二轮完成 | tool/reasoning/generation 全量对账 | pruned | 属于后续 step 类型覆盖，不是本次 A 的最小边界 |
-| R03 | 两个不同 session 各发一轮 | 两轮完成 | 各 session 独立计数 | pruned | 不经过历史累计条件 |
-| R04 | 手机 replayable 恢复历史后发送 | 第二轮完成 | 恢复链路仍按 message 计数 | ignored | 高风险跨端语义单独规划 |
-| R05 | 运行中 stop/error | completion 收口 | 中断 step 与 completion 对账 | ignored | fault/terminal lifecycle 单独规划 |
+| Candidate ID | State                              | Event            | Expected effect                                         | Status   | Reason                                        |
+| ------------ | ---------------------------------- | ---------------- | ------------------------------------------------------- | -------- | --------------------------------------------- |
+| R01          | 同一 desktop session，第一轮已完成 | 第二轮纯文本完成 | 第二轮 `agent_step_cnt` 等于同 message 的实际 step 数 1 | accepted | 最小稳定生产缺陷复现                          |
+| R02          | 同一 session，第二轮含工具         | 第二轮完成       | tool/reasoning/generation 全量对账                      | pruned   | 属于后续 step 类型覆盖，不是本次 A 的最小边界 |
+| R03          | 两个不同 session 各发一轮          | 两轮完成         | 各 session 独立计数                                     | pruned   | 不经过历史累计条件                            |
+| R04          | 手机 replayable 恢复历史后发送     | 第二轮完成       | 恢复链路仍按 message 计数                               | ignored  | 高风险跨端语义单独规划                        |
+| R05          | 运行中 stop/error                  | completion 收口  | 中断 step 与 completion 对账                            | ignored  | fault/terminal lifecycle 单独规划             |
 
 ## Accepted Case
 

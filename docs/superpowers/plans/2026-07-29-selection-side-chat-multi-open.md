@@ -22,11 +22,13 @@
 ### Task 1: Freeze product semantics in specs
 
 **Files:**
+
 - Modify: `docs/ui/conversation-selection-side-chat.md`
 - Modify: `docs/conversation-session-case-catalog.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 
 **Interfaces:**
+
 - Produces: SSC25（多开）、SSC26（当前激活路由）、SSC27（无激活目标时新建）验收定义。
 
 - [ ] **Step 1:** 把单一 parent→child 绑定改为 parent→children tab registry。
@@ -36,10 +38,12 @@
 ### Task 2: Add failing registry and tab tests
 
 **Files:**
+
 - Modify: `packages/ui/test/selectionSideChatRuntime.test.ts`
 - Modify: `packages/ui/test/workspaceSidePane.test.ts`
 
 **Interfaces:**
+
 - Consumes: `buildSelectionSideChatKey(workspaceKey, parentSessionId)` 作为 opener scope。
 - Produces: `createSelectionSideChatInstance()` 的并发创建合同、child 唯一 tab id、序号标题、active tab resolver 合同。
 
@@ -52,12 +56,14 @@
 ### Task 3: Implement multi-instance renderer state
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/selectionSideChatRuntime.ts`
 - Modify: `packages/ui/src/lib/workspaceSidePane.ts`
 - Modify: `packages/ui/src/app-shell/SidePaneTabTrigger.tsx`
 - Modify: `packages/ui/src/app-shell/sidePaneTabPresentation.ts`
 
 **Interfaces:**
+
 - Produces: child-scoped blocked lookup；tab `title`；`getActiveSelectionSideChatTab(state, workspaceKey, parentSessionId)`。
 - Produces: selection tab id `selection-side-chat:<workspace>:<parent>:<child>`。
 
@@ -70,6 +76,7 @@
 ### Task 4: Route selection to the active auxiliary tab
 
 **Files:**
+
 - Modify: `packages/ui/src/v4/SessionPane.tsx`
 - Modify: `packages/ui/src/v4/V4WorkspaceChatArea.tsx`
 - Modify: `packages/ui/src/v4/WorkbenchPane.tsx`
@@ -78,6 +85,7 @@
 - Modify: `packages/ui/src/app-shell/SelectionSideChatPane.tsx`
 
 **Interfaces:**
+
 - Consumes: active selection tab's `childSessionId`.
 - Produces: `activeSelectionSideChatSessionId?: string | null` down to the focused main `SessionPane`。
 - Produces: opener request mode `"new"` for fixed launcher and `"selection"` for selection tooltip。
@@ -91,9 +99,11 @@
 ### Task 5: Expand E2E coverage
 
 **Files:**
+
 - Modify: `packages/desktop/test/e2e/conversation-session/manual-review/pending/conversation-session-selection-side-chat.test.ts`
 
 **Interfaces:**
+
 - Produces: SSC25/26/27 desktop-continuous manual-review evidence。
 
 - [ ] **Step 1:** 通过固定入口连续创建两个辅助 tab，并断言 childSessionId 不同。
@@ -104,6 +114,7 @@
 ### Task 6: Verify all boundaries
 
 **Files:**
+
 - Verify only.
 
 - [ ] **Step 1:** 运行 selection runtime/workspace side pane focused Vitest。

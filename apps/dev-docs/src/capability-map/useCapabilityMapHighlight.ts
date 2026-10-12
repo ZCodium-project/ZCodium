@@ -1,12 +1,6 @@
 import { useMemo } from "react";
-import {
-  capabilityNodes,
-  type CapabilityEdge,
-} from "@/data/productCapabilityMap.js";
-import {
-  nodeById,
-  type CapabilitySelection,
-} from "@/capability-map/capabilityMapTypes.js";
+import { capabilityNodes, type CapabilityEdge } from "@/data/productCapabilityMap.js";
+import { nodeById, type CapabilitySelection } from "@/capability-map/capabilityMapTypes.js";
 
 export function useCapabilityMapHighlight(
   selection: CapabilitySelection,

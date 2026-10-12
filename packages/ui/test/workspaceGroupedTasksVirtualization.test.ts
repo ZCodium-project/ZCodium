@@ -23,8 +23,9 @@ describe("workspace grouped task virtualization", () => {
     expect(shouldVirtualizeGroupedTopLevelNodes(GROUPED_TOP_LEVEL_VIRTUALIZATION_THRESHOLD)).toBe(
       false,
     );
-    expect(shouldVirtualizeGroupedTopLevelNodes(GROUPED_TOP_LEVEL_VIRTUALIZATION_THRESHOLD + 1))
-      .toBe(true);
+    expect(
+      shouldVirtualizeGroupedTopLevelNodes(GROUPED_TOP_LEVEL_VIRTUALIZATION_THRESHOLD + 1),
+    ).toBe(true);
   });
 
   it("treats overflow auto containers as scroll targets before content overflows", () => {

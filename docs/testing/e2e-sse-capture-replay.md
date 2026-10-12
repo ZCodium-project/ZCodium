@@ -36,9 +36,7 @@
     "statusCode": 200,
     "headers": { "content-type": "text/event-stream; charset=utf-8" },
     "closeMode": "end",
-    "events": [
-      { "sequence": 0, "offsetMs": 0, "byteLength": 100, "text": "event: ...\n\n" }
-    ],
+    "events": [{ "sequence": 0, "offsetMs": 0, "byteLength": 100, "text": "event: ...\n\n" }],
     "body": "event: ...\n\n"
   }
 }

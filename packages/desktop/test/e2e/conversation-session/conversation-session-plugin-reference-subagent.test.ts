@@ -41,9 +41,7 @@ describe("PLG16 Plugin 引用 reminder 包含对应 Subagent", () => {
     await sendV4Prompt(prompt);
     await waitForV4TimelineContaining(REPLY_MARKER, 60_000);
     await waitForV4Pane(
-      (state) =>
-        !state.canStop &&
-        Boolean(state.sessionId && state.sessionId !== "draft"),
+      (state) => !state.canStop && Boolean(state.sessionId && state.sessionId !== "draft"),
       "Plugin Subagent 引用回合没有回到 idle",
       60_000,
     );
@@ -53,9 +51,7 @@ describe("PLG16 Plugin 引用 reminder 包含对应 Subagent", () => {
     expect(reminderMessages).toHaveLength(1);
     const reminder = JSON.stringify(reminderMessages[0]);
     expect(reminder).toContain(PLUGIN_INLINE_ID);
-    expect(reminder).toContain(
-      `subagents: [\\"${PLUGIN_INLINE_SUBAGENT_NAME}\\"]`,
-    );
+    expect(reminder).toContain(`subagents: [\\"${PLUGIN_INLINE_SUBAGENT_NAME}\\"]`);
     expect(reminder).not.toContain("E2E inline Plugin reviewer profile");
     expect(reminder).not.toContain("Review the requested files");
     expect(reminder).not.toContain("inline-reviewer.md");
@@ -69,18 +65,12 @@ describe("PLG16 Plugin 引用 reminder 包含对应 Subagent", () => {
 });
 
 function readPluginReminderMessages(requestJson: unknown): unknown[] {
-  if (
-    !requestJson ||
-    typeof requestJson !== "object" ||
-    Array.isArray(requestJson)
-  ) {
+  if (!requestJson || typeof requestJson !== "object" || Array.isArray(requestJson)) {
     throw new Error("Plugin Subagent provider request 不是 JSON object");
   }
   const messages = (requestJson as { messages?: unknown }).messages;
   if (!Array.isArray(messages)) {
     throw new Error("Plugin Subagent provider request 缺少 messages 数组");
   }
-  return messages.filter((message) =>
-    JSON.stringify(message).includes(PLUGIN_REFERENCE_TAG),
-  );
+  return messages.filter((message) => JSON.stringify(message).includes(PLUGIN_REFERENCE_TAG));
 }

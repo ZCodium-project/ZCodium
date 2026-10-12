@@ -6,11 +6,7 @@ import {
   resolvePluginDisplayName,
   sortPluginStoreEntries,
 } from "@zcode/shared";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover.js";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover.js";
 import {
   Command,
   CommandInput,
@@ -28,9 +24,7 @@ import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import type { ComposerMentionPrefill } from "@/store/zcodeSessionStoreTypes.js";
 
-type WorkspacePluginPreviewEntry = ReturnType<
-  typeof usePluginReferenceCatalog
->["entries"][number];
+type WorkspacePluginPreviewEntry = ReturnType<typeof usePluginReferenceCatalog>["entries"][number];
 
 export function isWorkspacePluginReferenceable(entry: WorkspacePluginPreviewEntry): boolean {
   return entry.enabled && entry.conflictingPluginIds.length === 0;
@@ -98,9 +92,7 @@ export function WorkspacePluginPreview({
     const modeOrder = isOfficeMode ? order?.work : order?.code;
     const referenceableEntries = previewEntries.filter(isWorkspacePluginReferenceable);
     const publicEntries = sortPluginStoreEntries(
-      referenceableEntries.filter((entry) =>
-        isPublicStoreMarketplaceId(entry.marketplace),
-      ),
+      referenceableEntries.filter((entry) => isPublicStoreMarketplaceId(entry.marketplace)),
       (entry) => ({
         id: entry.pluginId,
         category: entry.category,
@@ -122,9 +114,7 @@ export function WorkspacePluginPreview({
       ...publicEntries.toSorted((left, right) =>
         compareDocumentPluginPriority(left.pluginId, right.pluginId),
       ),
-      ...referenceableEntries.filter(
-        (entry) => !isPublicStoreMarketplaceId(entry.marketplace),
-      ),
+      ...referenceableEntries.filter((entry) => !isPublicStoreMarketplaceId(entry.marketplace)),
     ];
   }, [previewEntries, isOfficeMode, locale, order]);
   const browse = (pluginId?: string) => {
@@ -152,10 +142,7 @@ export function WorkspacePluginPreview({
           className="shrink-0 gap-1.5 rounded-full bg-transparent ps-3 pe-2 text-ui-base/relaxed text-foreground hover:bg-surface-hover focus-visible:bg-surface-hover"
           data-workspace-plugin-preview=""
         >
-          <span
-            className="isolate flex shrink-0 items-center -space-x-1"
-            aria-hidden="true"
-          >
+          <span className="isolate flex shrink-0 items-center -space-x-1" aria-hidden="true">
             {visibleEntries.slice(0, 3).map((entry) => (
               <PluginIcon
                 key={entry.pluginId}
@@ -187,10 +174,7 @@ export function WorkspacePluginPreview({
             aria-busy={loading}
           >
             {loading ? (
-              <div
-                role="status"
-                aria-label={intl.formatMessage({ id: "common.loading" })}
-              >
+              <div role="status" aria-label={intl.formatMessage({ id: "common.loading" })}>
                 {Array.from({ length: 8 }, (_, index) => (
                   <div
                     key={index}
@@ -203,10 +187,7 @@ export function WorkspacePluginPreview({
                 ))}
               </div>
             ) : error ? (
-              <div
-                role="status"
-                className="p-3 text-ui-caption text-foreground-subtle"
-              >
+              <div role="status" className="p-3 text-ui-caption text-foreground-subtle">
                 {intl.formatMessage({ id: "chat.plugins.loadError" })}
               </div>
             ) : (
@@ -233,11 +214,7 @@ export function WorkspacePluginPreview({
                     <CommandItem
                       key={entry.pluginId}
                       value={entry.pluginId}
-                      keywords={[
-                        name,
-                        entry.name,
-                        ...Object.values(entry.displayNameI18n ?? {}),
-                      ]}
+                      keywords={[name, entry.name, ...Object.values(entry.displayNameI18n ?? {})]}
                       onSelect={() => selectPlugin(entry)}
                       className="my-px h-8 gap-3 rounded-xl px-3 py-0 hover:bg-hover data-selected:bg-selected"
                     >

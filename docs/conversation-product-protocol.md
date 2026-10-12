@@ -14,19 +14,19 @@ reducer 只存在于历史文档或兼容层，不得覆盖本文语义。
 
 ## Source Documents
 
-| 文档 | 当前职责 |
-| --- | --- |
-| [conversation-protocol-declaration.md](./conversation-protocol-declaration.md) | V4 前的术语与裁决历史；冲突时不作为当前实现依据 |
-| [conversation-product-state-space.md](./conversation-product-state-space.md) | 状态空间与 guard 剪枝方法；具体字段以 V4 schema 为准 |
-| [conversation-session-case-catalog.md](./conversation-session-case-catalog.md) | 已有自然语言 case catalog，包含当前 accepted、undefined 和扩展 case |
-| [testing/conversation-session-e2e-coverage-matrix.md](./testing/conversation-session-e2e-coverage-matrix.md) | 自动化覆盖矩阵，只说明证据状态，不作为产品语义第一来源 |
-| [testing/conversation-session-compact-decision-worksheet.md](./testing/conversation-session-compact-decision-worksheet.md) | compact 故障和 pendingAction 的决策工作单 |
-| [testing/conversation-session-fork-cross-product-matrix.md](./testing/conversation-session-fork-cross-product-matrix.md) | fork 专项矩阵，收敛能否 fork、历史边界和未来状态继承 |
-| `packages/shared/src/validationAppSettings.ts` | app setting `zcodeInteractionBehavior = queue | guide` 的校验与默认值 |
-| `packages/shared/src/zcode-protocol-v4/` | command、snapshot、delta、topic 和 ACK 的当前 schema |
-| `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/` | command inbox、guard、projection、topic 发布和恢复的当前事实源 |
-| `packages/ui/src/v4/ConversationComposer.tsx`、`conversationStatusPanelModel.ts`、`SessionPane.tsx` | composer 控制、停止/状态面板、命令派发和 projection 消费逻辑 |
-| `packages/formal-proof/src/model.ts` | 当前形式化枚举器原型，作为协议可执行化参考 |
+| 文档                                                                                                                       | 当前职责                                                            |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------- |
+| [conversation-protocol-declaration.md](./conversation-protocol-declaration.md)                                             | V4 前的术语与裁决历史；冲突时不作为当前实现依据                     |
+| [conversation-product-state-space.md](./conversation-product-state-space.md)                                               | 状态空间与 guard 剪枝方法；具体字段以 V4 schema 为准                |
+| [conversation-session-case-catalog.md](./conversation-session-case-catalog.md)                                             | 已有自然语言 case catalog，包含当前 accepted、undefined 和扩展 case |
+| [testing/conversation-session-e2e-coverage-matrix.md](./testing/conversation-session-e2e-coverage-matrix.md)               | 自动化覆盖矩阵，只说明证据状态，不作为产品语义第一来源              |
+| [testing/conversation-session-compact-decision-worksheet.md](./testing/conversation-session-compact-decision-worksheet.md) | compact 故障和 pendingAction 的决策工作单                           |
+| [testing/conversation-session-fork-cross-product-matrix.md](./testing/conversation-session-fork-cross-product-matrix.md)   | fork 专项矩阵，收敛能否 fork、历史边界和未来状态继承                |
+| `packages/shared/src/validationAppSettings.ts`                                                                             | app setting `zcodeInteractionBehavior = queue                       | guide` 的校验与默认值 |
+| `packages/shared/src/zcode-protocol-v4/`                                                                                   | command、snapshot、delta、topic 和 ACK 的当前 schema                |
+| `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/`                                                                 | command inbox、guard、projection、topic 发布和恢复的当前事实源      |
+| `packages/ui/src/v4/ConversationComposer.tsx`、`conversationStatusPanelModel.ts`、`SessionPane.tsx`                        | composer 控制、停止/状态面板、命令派发和 projection 消费逻辑        |
+| `packages/formal-proof/src/model.ts`                                                                                       | 当前形式化枚举器原型，作为协议可执行化参考                          |
 
 ## Protocol Shape
 
@@ -101,11 +101,11 @@ Renderer / Web UI
 conversation 产品语义。`productTurnId`、phase、actions、inputRouting、revision、seq 和 command ACK
 属于 V4 protocol/projection，不属于 RPC。
 
-| 层 | 应拥有的内容 | 不应拥有的内容 |
-| --- | --- | --- |
-| CLI / agent runtime | transcript、turn/runtime identity、active/background work、command guard、conversation projection | DOM、滚动、hover、面板展开 |
-| Host / service | 可信连接上下文、owned subscription 路由、owner/lease、continuous/replayable 恢复、projection cache | 新增或修改 conversation 产品裁决、第二份 conversation queue |
-| Renderer / Web UI | draft、cursor、scroll、hover、focus、panel open、optimistic pending/stopping overlay | turn 分组事实、timeline 归属、session endedness、action availability |
+| 层                  | 应拥有的内容                                                                                       | 不应拥有的内容                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| CLI / agent runtime | transcript、turn/runtime identity、active/background work、command guard、conversation projection  | DOM、滚动、hover、面板展开                                           |
+| Host / service      | 可信连接上下文、owned subscription 路由、owner/lease、continuous/replayable 恢复、projection cache | 新增或修改 conversation 产品裁决、第二份 conversation queue          |
+| Renderer / Web UI   | draft、cursor、scroll、hover、focus、panel open、optimistic pending/stopping overlay               | turn 分组事实、timeline 归属、session endedness、action availability |
 
 ### Projection Shape
 
@@ -192,13 +192,13 @@ UI local intent
   -> UI reconciles optimistic overlay with projection
 ```
 
-| ACK | 含义 | UI 结果 |
-| --- | --- | --- |
-| `accepted` | command 已进入权威 command inbox 或已立即执行 | 保留 optimistic 展示，等待 projection 确认 |
-| `rejected` | 当前 guard 明确拒绝 command | 移除 optimistic 展示，显示协议给出的 reason |
-| `stale` | command 基于过旧 projection，必须先刷新再重试或让用户确认 | 拉取最新 projection，不静默重放非幂等动作 |
-| `duplicate` | 同一 `commandId` 已处理过 | 使用已有处理结果，避免重发导致重复消息或重复 stop |
-| `failed` | command 已 accepted 但执行失败 | 按 fault catalog 展示错误并保留可恢复状态 |
+| ACK         | 含义                                                      | UI 结果                                           |
+| ----------- | --------------------------------------------------------- | ------------------------------------------------- |
+| `accepted`  | command 已进入权威 command inbox 或已立即执行             | 保留 optimistic 展示，等待 projection 确认        |
+| `rejected`  | 当前 guard 明确拒绝 command                               | 移除 optimistic 展示，显示协议给出的 reason       |
+| `stale`     | command 基于过旧 projection，必须先刷新再重试或让用户确认 | 拉取最新 projection，不静默重放非幂等动作         |
+| `duplicate` | 同一 `commandId` 已处理过                                 | 使用已有处理结果，避免重发导致重复消息或重复 stop |
+| `failed`    | command 已 accepted 但执行失败                            | 按 fault catalog 展示错误并保留可恢复状态         |
 
 所有会改变 conversation 的 command 必须具备幂等身份：`commandId`、`clientId`、`sessionId`、可选 `baseRevision` 和业务 target。`clientMode` 由 host attachment 可信注入，UI 不得自行选择。Web 秒级链路下，允许 UI stale；不要求每个 renderer 本地状态都实时同步。正确性边界是 `revision + eventSeq + snapshot/projection` 能把 UI 重新收口到权威状态。
 
@@ -234,14 +234,14 @@ commands/query ─ await same promise ──────────────
 
 ### Session Phase
 
-| 值 | 含义 |
-| --- | --- |
-| `draft` | 尚未创建正式 session，用户仍在输入首条 query |
-| `prewarming` | 首发已提交，session 正在准备或首轮尚未进入稳定 running |
-| `running` | 当前 session 有 active foreground turn 或 completion-blocking active work 正在执行，包括 assistant/tool/foreground subagent/compact/goal verifier/goal continuation/turn-steer |
-| `completed(success)` | 当前 session 的 completion-blocking active work 都已正常收口，可接受下一步动作；允许仍有 background work pending |
-| `completed(interrupted)` | 用户 stop 或等价中断已经终止 completion-blocking active work，可接受下一步动作；允许仍有 background work pending |
-| `error` | session 进入错误态；具体恢复语义由 fault catalog 定义 |
+| 值                       | 含义                                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `draft`                  | 尚未创建正式 session，用户仍在输入首条 query                                                                                                                                   |
+| `prewarming`             | 首发已提交，session 正在准备或首轮尚未进入稳定 running                                                                                                                         |
+| `running`                | 当前 session 有 active foreground turn 或 completion-blocking active work 正在执行，包括 assistant/tool/foreground subagent/compact/goal verifier/goal continuation/turn-steer |
+| `completed(success)`     | 当前 session 的 completion-blocking active work 都已正常收口，可接受下一步动作；允许仍有 background work pending                                                               |
+| `completed(interrupted)` | 用户 stop 或等价中断已经终止 completion-blocking active work，可接受下一步动作；允许仍有 background work pending                                                               |
+| `error`                  | session 进入错误态；具体恢复语义由 fault catalog 定义                                                                                                                          |
 
 `compacting` 和 `goalVerifying` 不是与 `running` 平级的顶层 phase；它们是 `running` 内部的 active work kind。本文后续若需要表达这两种上下文，使用 `activeWork.kind=compact` 和 `activeWork.kind=goalVerifier`。
 
@@ -298,19 +298,19 @@ session/
     `-- completed(success/interrupted) once foreground-work/ is empty
 ```
 
-| Completion-blocking Active Work | 含义 | 完成门槛 |
-| --- | --- | --- |
-| `primaryTurn` | 当前用户输入触发的主 assistant turn、模型流、工具调用或阻塞请求 | 收到正常完成、失败收口或 stop 中断收口 |
-| `foregroundSubagent` | 主 turn 派生且需要在当前 assistant 回合内汇总的子 agent、child request | foreground 子 agent 完成、失败或被 stop 终止 |
-| `compact` | manual compact 或 auto compact 的压缩请求和 pendingAction 前置维护 | compact 完成、noop、失败或被 stop 终止 |
-| `goalVerifier` | goal target 的达成验证请求 | verifier 返回 pass/notSatisfied、failed 或被 stop 终止 |
-| `goalContinuation` | goal 未完成后自动续跑的下一步执行链路 | 续跑完成、进入下一轮 active work、或被 stop 终止 |
-| `turnSteer` | guide 模式提交给运行时但尚未确认 drained 的后续引导 | 被运行时确认、拒绝、回退到 queue 或被 stop 收口 |
+| Completion-blocking Active Work | 含义                                                                   | 完成门槛                                               |
+| ------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------ |
+| `primaryTurn`                   | 当前用户输入触发的主 assistant turn、模型流、工具调用或阻塞请求        | 收到正常完成、失败收口或 stop 中断收口                 |
+| `foregroundSubagent`            | 主 turn 派生且需要在当前 assistant 回合内汇总的子 agent、child request | foreground 子 agent 完成、失败或被 stop 终止           |
+| `compact`                       | manual compact 或 auto compact 的压缩请求和 pendingAction 前置维护     | compact 完成、noop、失败或被 stop 终止                 |
+| `goalVerifier`                  | goal target 的达成验证请求                                             | verifier 返回 pass/notSatisfied、failed 或被 stop 终止 |
+| `goalContinuation`              | goal 未完成后自动续跑的下一步执行链路                                  | 续跑完成、进入下一轮 active work、或被 stop 终止       |
+| `turnSteer`                     | guide 模式提交给运行时但尚未确认 drained 的后续引导                    | 被运行时确认、拒绝、回退到 queue 或被 stop 收口        |
 
-| Background Work | 含义 | 产品收口 |
-| --- | --- | --- |
-| `backgroundBash` | 主 turn 派生但声明为后台运行的 bash/process work | 不阻塞 `sessionEnded`；完成后产生 background result |
-| `backgroundSubagent` | 主 turn 派生但声明为后台运行的 subagent | 不阻塞 `sessionEnded`；完成后产生 background result |
+| Background Work                | 含义                                                 | 产品收口                                                                       |
+| ------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `backgroundBash`               | 主 turn 派生但声明为后台运行的 bash/process work     | 不阻塞 `sessionEnded`；完成后产生 background result                            |
+| `backgroundSubagent`           | 主 turn 派生但声明为后台运行的 subagent              | 不阻塞 `sessionEnded`；完成后产生 background result                            |
 | `backgroundResultContinuation` | background result 回到 main session 后触发的后续输入 | 进入 `continuation-inbox`；可启动新的 foreground run 或在 busy/held 状态下排队 |
 
 `BackgroundTaskStarted/Updated/Completed` 必须携带 runtime 已裁决的
@@ -345,10 +345,10 @@ background result 回到 main 后，provider 视角可以用 `role=user` 作为�
 
 `sessionEnded` 是产品态派生值，只回答一个问题：当前 composer 输入是否可以立即成为下一轮 active turn。它不重定义 agent/runtime hook 的触发时机，也不把某个 hook 当成产品完成门槛。它必须来自 CLI/agent runtime facts 或 host/service 对这些 facts 的规范化投影，UI 不能只靠 assistant 文本流、timeline 横条或本地 `streaming` 状态自行判断。
 
-| 判定 | 条件 | 产品含义 |
-| --- | --- | --- |
-| `sessionEnded=false` | `prewarming`、`running`，或任何 completion-blocking `activeWork!=empty` | 当前 session 仍未结束；composer 新输入是未来意图，不能直接启动第二条 active turn |
-| `sessionEnded=true` | `completed(success)` 或 `completed(interrupted)`，且 completion-blocking `activeWork=empty`；`backgroundWork` 可为非空 | 当前 session 已结束；completed-only 操作开放，普通输入可按 queue 状态启动下一轮 |
+| 判定                 | 条件                                                                                                                   | 产品含义                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `sessionEnded=false` | `prewarming`、`running`，或任何 completion-blocking `activeWork!=empty`                                                | 当前 session 仍未结束；composer 新输入是未来意图，不能直接启动第二条 active turn |
+| `sessionEnded=true`  | `completed(success)` 或 `completed(interrupted)`，且 completion-blocking `activeWork=empty`；`backgroundWork` 可为非空 | 当前 session 已结束；completed-only 操作开放，普通输入可按 queue 状态启动下一轮  |
 
 当 `sessionEnded=false` 时，普通 `sendText` 默认进入 queue；如果处在 `running + followupInput.mode=guide` 且满足 turn-steer 条件，则按 guide 规则提交给运行时，否则回退 queue。`sendGoalCommand` 同样进入 queue，消费时才设置或更新 goal。
 
@@ -394,14 +394,14 @@ UI
 
 产品控制层用于让 UI 保持粗粒度、稳定的交互壳，同时不丢内部细节：
 
-| 字段 | 值 | 含义 |
-| --- | --- | --- |
-| `sessionEnded` | `true` / `false` | 是否允许 composer 输入立即成为下一轮 active turn |
-| `hasBackgroundWork` | `true` / `false` | 当前 session 是否仍有 background bash/subagent pending；不决定主停止按钮 |
-| `canStop` | `true` / `false` | 当前 session 是否存在可被用户 stop 终止的 completion-blocking active work |
-| `stopState` | `idle`、`stoppable`、`stopping` | 停止按钮的稳定展示态；点击后可 optimistic 进入 `stopping`，直到权威投影收口 |
-| `stopTargetKind` | `assistant`、`tool`、`subagent`、`compact`、`goalVerifier`、`goalContinuation`、`mixed`、`unknown` | 当前 stop 将主要作用于哪类 work；只影响 tooltip、日志、埋点和细节文案，不决定按钮是否闪烁 |
-| `inputRouting` | `startNow`、`enqueue`、`guide`、`reject` | 当前 composer 输入的产品裁决摘要，必须能追溯到 rule table guard |
+| 字段                | 值                                                                                                 | 含义                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `sessionEnded`      | `true` / `false`                                                                                   | 是否允许 composer 输入立即成为下一轮 active turn                                          |
+| `hasBackgroundWork` | `true` / `false`                                                                                   | 当前 session 是否仍有 background bash/subagent pending；不决定主停止按钮                  |
+| `canStop`           | `true` / `false`                                                                                   | 当前 session 是否存在可被用户 stop 终止的 completion-blocking active work                 |
+| `stopState`         | `idle`、`stoppable`、`stopping`                                                                    | 停止按钮的稳定展示态；点击后可 optimistic 进入 `stopping`，直到权威投影收口               |
+| `stopTargetKind`    | `assistant`、`tool`、`subagent`、`compact`、`goalVerifier`、`goalContinuation`、`mixed`、`unknown` | 当前 stop 将主要作用于哪类 work；只影响 tooltip、日志、埋点和细节文案，不决定按钮是否闪烁 |
+| `inputRouting`      | `startNow`、`enqueue`、`guide`、`reject`                                                           | 当前 composer 输入的产品裁决摘要，必须能追溯到 rule table guard                           |
 
 停止按钮不应该在 `assistant -> compact -> goalVerifier -> goalContinuation` 这类 active work 交接中闪烁。只要 `canStop=true` 或 `stopState=stopping`，UI 就保留同一个停止按钮；`stopTargetKind` 变化只能更新 tooltip/辅助说明，不能让按钮先消失再出现。
 
@@ -411,23 +411,23 @@ UI
 
 `stop` 是 session 内最高优先级用户动作。只要当前 session 不是 completed，`stop` 都优先于 queue drain、guide 注入、auto goal continuation、compact pendingAction 和迟到的 runtime terminal event。
 
-| 场景 | 协议 |
-| --- | --- |
-| `running + stop` | 终止 primary turn、工具/阻塞请求、所有运行中的 foreground subagent、goal continuation、goal verifier 和未确认的 turn-steer |
-| `running + activeWork.kind=compact + stop` | 终止当前 compact；manual/auto compact 不能继续写入成功结果，auto compact 的 pendingAction 不能在 stop 后自动执行 |
-| `running + activeWork.kind=goalVerifier + stop` | 终止当前 verifier；本次 verifier 归为 `failed(cancelled)`，不能再触发 pass/notSatisfied 后续动作 |
-| `running + sendQueuedNow` | 等价于先执行最高优先级 `stop`，等 completion-blocking active work 清空后再消费被点 queue item；`activeWork.kind=compact + sendQueuedNow` 仍按操作锁 reject；`activeWork.kind=goalVerifier + sendQueuedNow` 允许走 stop barrier 后 drain |
-| `stop requested + late terminal event` | 迟到的 foreground subagent/compact/verifier/assistant 完成事件只能收口被 stop 的旧 work，不能把 session 重新置为 success，不能覆盖新一轮 active input |
-| `backgroundWork only + stop` | 主停止按钮不可用；若用户从 background drawer 取消，走 background task cancel，不等同于 session stop |
+| 场景                                            | 协议                                                                                                                                                                                                                                    |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `running + stop`                                | 终止 primary turn、工具/阻塞请求、所有运行中的 foreground subagent、goal continuation、goal verifier 和未确认的 turn-steer                                                                                                              |
+| `running + activeWork.kind=compact + stop`      | 终止当前 compact；manual/auto compact 不能继续写入成功结果，auto compact 的 pendingAction 不能在 stop 后自动执行                                                                                                                        |
+| `running + activeWork.kind=goalVerifier + stop` | 终止当前 verifier；本次 verifier 归为 `failed(cancelled)`，不能再触发 pass/notSatisfied 后续动作                                                                                                                                        |
+| `running + sendQueuedNow`                       | 等价于先执行最高优先级 `stop`，等 completion-blocking active work 清空后再消费被点 queue item；`activeWork.kind=compact + sendQueuedNow` 仍按操作锁 reject；`activeWork.kind=goalVerifier + sendQueuedNow` 允许走 stop barrier 后 drain |
+| `stop requested + late terminal event`          | 迟到的 foreground subagent/compact/verifier/assistant 完成事件只能收口被 stop 的旧 work，不能把 session 重新置为 success，不能覆盖新一轮 active input                                                                                   |
+| `backgroundWork only + stop`                    | 主停止按钮不可用；若用户从 background drawer 取消，走 background task cancel，不等同于 session stop                                                                                                                                     |
 
 `stop` 不是普通 queue item，不能排队等待。实现上可以存在短暂 `stopRequested` 标记或 UI “stopping” 展示，但它不是独立产品 phase；最终只有 completion-blocking active work 清空后的 `completed(interrupted)`、明确失败后的 `error`，或后续重新开始的新 active turn。
 
 ### Queue
 
-| 维度 | 值 | 含义 |
-| --- | --- | --- |
-| `queue.length` | `0`、`1`、`2`、`3+` | GUI 展示和 case 收敛用的长度等价类 |
-| `queue.autoDrain` | `true`、`false` | 当前轮完成后是否自动消费队首 |
+| 维度              | 值                  | 含义                               |
+| ----------------- | ------------------- | ---------------------------------- |
+| `queue.length`    | `0`、`1`、`2`、`3+` | GUI 展示和 case 收敛用的长度等价类 |
+| `queue.autoDrain` | `true`、`false`     | 当前轮完成后是否自动消费队首       |
 
 queue 表示未来用户意图，不属于已完成历史。所有来自桌面或手机、已经提交且在 busy/running 中不能立即启动的输入，都由同一个 CLI/runtime `CommandInbox` 按串行 admission 顺序进入权威 FIFO；桌面 renderer-local queue 和手机 host runtime command queue 都不是 V4 的第二事实源。UI 只保留未提交 draft 和短暂 optimistic overlay。
 
@@ -451,10 +451,10 @@ background result 真正触发 model-only wake 时，无论 live 还是 cold 都
 
 `followupInput.mode` 定义同一个 session 正在 `running` 时，用户从 composer 继续输入普通后续内容的处理方式。它不是 queue item 的类型，而是 running follow-up 的路由策略。
 
-| 值 | 默认 | 含义 |
-| --- | --- | --- |
-| `queue` | 是 | 后续普通文本进入 CLI 权威 queue，等待当前 active turn 完成或用户显式 `sendQueuedNow` |
-| `guide` | 否 | 符合条件的后续普通文本进入 agent-side turn steering，作为当前 active turn 的后续引导；不符合条件时回退到 CLI queue |
+| 值      | 默认 | 含义                                                                                                               |
+| ------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| `queue` | 是   | 后续普通文本进入 CLI 权威 queue，等待当前 active turn 完成或用户显式 `sendQueuedNow`                               |
+| `guide` | 否   | 符合条件的后续普通文本进入 agent-side turn steering，作为当前 active turn 的后续引导；不符合条件时回退到 CLI queue |
 
 `guide` 模式不表示可以改写已经发给 provider 的 in-flight 请求。它只允许把完整 input intent 提交给运行时的 turn-steer 机制，等待运行时确认注入、拒绝或回退。guide 不适用、带 attachments、compact/verifier busy 或 runtime 拒绝 steer 时，必须以原字段回退 CLI queue。empty、超限或 admission/runtime reject 必须返回显式 `rejected/failed`，让 UI 保留文本与附件。无论是 `queue` 还是 `guide`，用户输入都必须保留：不能从 composer 或临时状态消失后，既不在 queue/guided row/transcript 中，也没有显式 `rejected/failed/discarded` 结果。
 
@@ -464,38 +464,38 @@ background result 真正触发 model-only wake 时，无论 live 还是 cold 都
 
 当前已确认的边界：
 
-| 场景 | 协议 |
-| --- | --- |
-| `running + followupInput.mode=queue + sendText` | 入队为 deferred `sendText`，不打断当前 active turn |
-| `running + followupInput.mode=queue + sendGoalCommand` | 入队为 deferred `sendGoalCommand`，消费时设置或更新 goal |
-| `running + followupInput.mode=guide + sendText + guide eligible` | 进入 turn-steer submitting/queued 状态，或被运行时确认后投影为 guided user message |
-| `running + followupInput.mode=guide + sendText + guide ineligible` | 回退为 deferred `sendText` queue item |
-| `running + followupInput.mode=guide + sendGoalCommand` | 仍按 `sendGoalCommand` 的状态规则处理；当前语义是入队为 deferred `sendGoalCommand`，除非后续 rule table 明确接受 goal steering |
-| `activeWork.kind=compact/goalVerifier + sendText/sendGoalCommand` | 入队为 deferred input，不启动新 turn，不打断当前 active work |
-| `running + sendCompactCommand/clickCompact` | 不受 follow-up mode 影响，始终 reject，不入队、不作为普通消息、不启动 compact |
-| `sendQueuedNow` | 是显式 queue 抢占消费动作，中文 UI 可称“立即引导”；它不等同于 `followupInput.mode=guide` |
+| 场景                                                               | 协议                                                                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `running + followupInput.mode=queue + sendText`                    | 入队为 deferred `sendText`，不打断当前 active turn                                                                             |
+| `running + followupInput.mode=queue + sendGoalCommand`             | 入队为 deferred `sendGoalCommand`，消费时设置或更新 goal                                                                       |
+| `running + followupInput.mode=guide + sendText + guide eligible`   | 进入 turn-steer submitting/queued 状态，或被运行时确认后投影为 guided user message                                             |
+| `running + followupInput.mode=guide + sendText + guide ineligible` | 回退为 deferred `sendText` queue item                                                                                          |
+| `running + followupInput.mode=guide + sendGoalCommand`             | 仍按 `sendGoalCommand` 的状态规则处理；当前语义是入队为 deferred `sendGoalCommand`，除非后续 rule table 明确接受 goal steering |
+| `activeWork.kind=compact/goalVerifier + sendText/sendGoalCommand`  | 入队为 deferred input，不启动新 turn，不打断当前 active work                                                                   |
+| `running + sendCompactCommand/clickCompact`                        | 不受 follow-up mode 影响，始终 reject，不入队、不作为普通消息、不启动 compact                                                  |
+| `sendQueuedNow`                                                    | 是显式 queue 抢占消费动作，中文 UI 可称“立即引导”；它不等同于 `followupInput.mode=guide`                                       |
 
 ### Compact
 
-| 维度 | 值 | 含义 |
-| --- | --- | --- |
-| `compact.origin` | `manual`、`auto` | 用户主动触发或系统前置维护触发 |
-| `compact.memory` | `never`、`compactable`、`justCompacted`、`notNeeded` | 当前上下文是否需要或允许继续 compact |
-| `compact.canCompactAgain` | `true`、`false` | 刚 compact 后再次 compact 是否还可能产生有效压缩 |
-| `compact.pendingAction` | 普通发送、queue item、queued goal、edit rerun 等 | auto compact 成功后应继续执行的动作 |
+| 维度                      | 值                                                   | 含义                                             |
+| ------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
+| `compact.origin`          | `manual`、`auto`                                     | 用户主动触发或系统前置维护触发                   |
+| `compact.memory`          | `never`、`compactable`、`justCompacted`、`notNeeded` | 当前上下文是否需要或允许继续 compact             |
+| `compact.canCompactAgain` | `true`、`false`                                      | 刚 compact 后再次 compact 是否还可能产生有效压缩 |
+| `compact.pendingAction`   | 普通发送、queue item、queued goal、edit rerun 等     | auto compact 成功后应继续执行的动作              |
 
 auto compact 是系统插入的前置维护步骤，不占用户 queue。它围绕一个 `pendingAction` 运行；成功后继续 `pendingAction`。auto compact 被 stop 后不能继续执行 `pendingAction`；`pendingAction` 是回 held queue、保留为待用户确认还是丢弃，仍由 compact decision worksheet 确认。
 
 ### Goal
 
-| 值 | 含义 |
-| --- | --- |
-| `none` | 当前 session 没有 goal target |
-| `active` | 当前 session 有未完成 target |
-| `verifying` | verifier 正在判断 target 是否达成 |
-| `verified` | verifier 已判断达成 |
-| `notSatisfied` | verifier 正常完成，但判断当前 target 尚未达成 |
-| `failed` | verifier 被中途取消、接口失败、超时或内部异常，未能产生有效达成判断 |
+| 值             | 含义                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| `none`         | 当前 session 没有 goal target                                       |
+| `active`       | 当前 session 有未完成 target                                        |
+| `verifying`    | verifier 正在判断 target 是否达成                                   |
+| `verified`     | verifier 已判断达成                                                 |
+| `notSatisfied` | verifier 正常完成，但判断当前 target 尚未达成                       |
+| `failed`       | verifier 被中途取消、接口失败、超时或内部异常，未能产生有效达成判断 |
 
 `notSatisfied` 和 `failed` 必须分开。`notSatisfied` 是有效验证结论，表示目标还没完成，后续可以继续自动续跑、等待用户输入或按 goal 规则处理 queue；`failed` 是验证过程失败，表示这次 verifier 没有可靠结论，不能被当作“目标未完成”的业务判断。
 
@@ -513,31 +513,31 @@ target。只有当前 active branch 的 latest real-user input 可编辑；当�
 
 Fork 是从父 session 的某个稳定 assistant turn 派生 child session。它不是复制当前窗口状态，也不是复制父 session 的未来动作队列或 live background work。父 session 可以正在执行新的 foreground turn 或 background work；只要 fork 目标本身已经是稳定 assistant 历史，就可以 fork。
 
-| 维度 | 协议 |
-| --- | --- |
-| `fork.sourceSession` | 触发 fork 的父 session |
-| `fork.target` | 必须是 `completedSuccess` product turn 最后一段 completed assistant；当前 streaming/interrupted/failed partial、中间 assistant 段都不是 fork target |
-| `fork.historyBoundary` | CLI 唯一 resolver 固定返回 turnId、ordered messageIds 和 boundaryMessageId；child 只继承边界及之前的稳定可见 transcript |
-| `fork.configSnapshot` | child 继承 fork 点持久化的 provider、model、思考深度配置，不读取父 session fork 时刻的后续配置 |
-| `fork.goalSnapshot` | child 继承 fork 点之前的 goal target、iteration 和 verifier timeline |
-| `fork.queuePolicy` | 父 queue 保留；child queue 为空 |
+| 维度                    | 协议                                                                                                                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fork.sourceSession`    | 触发 fork 的父 session                                                                                                                                                                          |
+| `fork.target`           | 必须是 `completedSuccess` product turn 最后一段 completed assistant；当前 streaming/interrupted/failed partial、中间 assistant 段都不是 fork target                                             |
+| `fork.historyBoundary`  | CLI 唯一 resolver 固定返回 turnId、ordered messageIds 和 boundaryMessageId；child 只继承边界及之前的稳定可见 transcript                                                                         |
+| `fork.configSnapshot`   | child 继承 fork 点持久化的 provider、model、思考深度配置，不读取父 session fork 时刻的后续配置                                                                                                  |
+| `fork.goalSnapshot`     | child 继承 fork 点之前的 goal target、iteration 和 verifier timeline                                                                                                                            |
+| `fork.queuePolicy`      | 父 queue 保留；child queue 为空                                                                                                                                                                 |
 | `fork.backgroundPolicy` | 父 session 的 live background bash/subagent、pending background result 和 continuation inbox 不复制到 child；已在 fork 点之前 materialize 成稳定 transcript 的 background result 才会随历史复制 |
-| `fork.workspacePolicy` | running fork 只复制对话，不 rewind 共享 workspace；completed/idle 既有 checkpoint 行为本轮不扩大 |
-| `fork.timeline` | fork notice 是 turn boundary，不进入 assistant 工作历史，也不被“已工作”折叠 |
+| `fork.workspacePolicy`  | running fork 只复制对话，不 rewind 共享 workspace；completed/idle 既有 checkpoint 行为本轮不扩大                                                                                                |
+| `fork.timeline`         | fork notice 是 turn boundary，不进入 assistant 工作历史，也不被“已工作”折叠                                                                                                                     |
 
 Fork 的允许性按“历史是否稳定”裁决：
 
-| 前置 | 目标 | Decision | 说明 |
-| --- | --- | --- | --- |
-| `completed(success)` 或 `completed(interrupted)` | assistant message/turn | `allow` | 创建 child session，继承 fork 点前历史和 fork 点持久化配置 |
-| `running + activeWork.kind=primaryTurn/foregroundSubagent/goalContinuation/turnSteer` | 稳定 historical assistant message/turn | `allow` | 父 session 正在运行不等于 fork 目标不稳定；child 只继承 fork 点前历史，不复制当前 active work |
-| `backgroundWork!=empty`，无论父 session 是否 completed | 稳定 assistant message/turn | `allow` | background bash/subagent 不阻塞 fork；live background handle 和 pending result 仍只属于父 session |
-| `prewarming` 且没有稳定 assistant target | 任意 assistant message/turn | `reject` | 尚无可作为 fork 边界的稳定 assistant 历史 |
-| `activeWork.kind=compact` | 任意 assistant message/turn | `reject` | compact 正在改写/维护上下文边界，不能同时创建 child |
-| `activeWork.kind=goalVerifier` | 稳定 assistant message/turn | `allow` | verifier 正在运行不等于历史目标不稳定；child 只继承 fork 点前稳定历史，不复制 verifier 或后续 goal loop |
-| 任意状态 | 当前 streaming assistant partial | `reject` | partial 还不是稳定 transcript 边界，不能作为 fork 点 |
-| `error` 或 failed/error partial，且未形成 `completed(interrupted)` 产品最终态 | assistant partial | `reject` | partial 历史不稳定，不能作为 fork 点 |
-| 任意状态 | user message、tool message、timeline marker | `reject` 或入口不存在 | fork 点只定义在 assistant message/turn 上 |
+| 前置                                                                                  | 目标                                        | Decision              | 说明                                                                                                    |
+| ------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------- |
+| `completed(success)` 或 `completed(interrupted)`                                      | assistant message/turn                      | `allow`               | 创建 child session，继承 fork 点前历史和 fork 点持久化配置                                              |
+| `running + activeWork.kind=primaryTurn/foregroundSubagent/goalContinuation/turnSteer` | 稳定 historical assistant message/turn      | `allow`               | 父 session 正在运行不等于 fork 目标不稳定；child 只继承 fork 点前历史，不复制当前 active work           |
+| `backgroundWork!=empty`，无论父 session 是否 completed                                | 稳定 assistant message/turn                 | `allow`               | background bash/subagent 不阻塞 fork；live background handle 和 pending result 仍只属于父 session       |
+| `prewarming` 且没有稳定 assistant target                                              | 任意 assistant message/turn                 | `reject`              | 尚无可作为 fork 边界的稳定 assistant 历史                                                               |
+| `activeWork.kind=compact`                                                             | 任意 assistant message/turn                 | `reject`              | compact 正在改写/维护上下文边界，不能同时创建 child                                                     |
+| `activeWork.kind=goalVerifier`                                                        | 稳定 assistant message/turn                 | `allow`               | verifier 正在运行不等于历史目标不稳定；child 只继承 fork 点前稳定历史，不复制 verifier 或后续 goal loop |
+| 任意状态                                                                              | 当前 streaming assistant partial            | `reject`              | partial 还不是稳定 transcript 边界，不能作为 fork 点                                                    |
+| `error` 或 failed/error partial，且未形成 `completed(interrupted)` 产品最终态         | assistant partial                           | `reject`              | partial 历史不稳定，不能作为 fork 点                                                                    |
+| 任意状态                                                                              | user message、tool message、timeline marker | `reject` 或入口不存在 | fork 点只定义在 assistant message/turn 上                                                               |
 
 父 session 后续仍按自己的 queue、goal、config、foreground/background work 和运行状态继续，不受 child session 影响。running fork 不经过要求 idle 的 legacy bridge，也不恢复、回滚或复制共享 workspace checkpoint；child 只得到稳定 transcript、fork 点持久化配置和 fork 点之前的 goal 状态。child session 后续请求使用 fork 点配置快照，之后再按 child 自己的配置变化演进。父 session 的 background bash/subagent 如果在 fork 后返回，只能唤醒父 session；不能回调到 child，也不能在 child 中生成 synthetic user input。
 
@@ -630,16 +630,16 @@ map。legacy workspace fork 可以保留原 checkpoint 策略，但 V4 入口不
 
 ### Target Object
 
-| 值 | 含义 |
-| --- | --- |
-| `composer` | 当前输入框提交的内容 |
-| `queueItem` | queue 面板里的某一项 |
-| `latestUserQuery` | 最新 real-user input；可以是普通 text query 或用户提交的 goal input |
-| `oldUserQuery` | 非 latest 的历史 real-user input（text/goal） |
-| `latestAssistantTurn` | 最新 assistant turn |
-| `oldAssistantTurn` | 历史 assistant turn |
-| `toolMessage` | tool block 或 tool result |
-| `timelineMarker` | compact、fork、goal verification、model change 等 timeline marker |
+| 值                    | 含义                                                                |
+| --------------------- | ------------------------------------------------------------------- |
+| `composer`            | 当前输入框提交的内容                                                |
+| `queueItem`           | queue 面板里的某一项                                                |
+| `latestUserQuery`     | 最新 real-user input；可以是普通 text query 或用户提交的 goal input |
+| `oldUserQuery`        | 非 latest 的历史 real-user input（text/goal）                       |
+| `latestAssistantTurn` | 最新 assistant turn                                                 |
+| `oldAssistantTurn`    | 历史 assistant turn                                                 |
+| `toolMessage`         | tool block 或 tool result                                           |
+| `timelineMarker`      | compact、fork、goal verification、model change 等 timeline marker   |
 
 fork 目标只定义在 assistant message/turn 上。edit 目标只定义在 user query 上。tool message 和 timeline marker 不提供 fork/edit 入口，除非后续协议另行定义。
 
@@ -647,56 +647,56 @@ fork 目标只定义在 assistant message/turn 上。edit 目标只定义在 use
 
 ### User Events
 
-| Event ID | Surface | Payload | 常见目标 |
-| --- | --- | --- | --- |
-| `sendText` | composer | 普通文本 | `composer` |
-| `sendGoalCommand` | composer 或 goal control | `/goal xxx` 或 goal text | `composer` |
-| `sendCompactCommand` | composer | `/compact` | `composer` |
-| `clickCompact` | toolbar 或 action menu | compact intent | current session |
-| `stop` | toolbar | stop current session activity | current session active work |
-| `forkAssistant` | turn actions | fork intent | latest/old assistant turn |
-| `retryTurn` | 协议兼容入口（产品 UI 已隐藏） | retry intent | latest assistant turn |
-| `editUserQuery` | real-user row actions | edited text/goal text；保留原 intent kind | latest real-user input |
-| `sendQueuedNow` | queue actions | queue item id | `queueItem` |
-| `editQueueItem` | queue actions | edited queue content | `queueItem` |
-| `reorderQueueItem` | queue actions | new order | `queueItem` |
-| `deleteQueueItem` | queue actions | queue item id | `queueItem` |
-| `switchModelConfig` | toolbar/model selector | provider/model/thought config | current session |
+| Event ID             | Surface                        | Payload                                   | 常见目标                    |
+| -------------------- | ------------------------------ | ----------------------------------------- | --------------------------- |
+| `sendText`           | composer                       | 普通文本                                  | `composer`                  |
+| `sendGoalCommand`    | composer 或 goal control       | `/goal xxx` 或 goal text                  | `composer`                  |
+| `sendCompactCommand` | composer                       | `/compact`                                | `composer`                  |
+| `clickCompact`       | toolbar 或 action menu         | compact intent                            | current session             |
+| `stop`               | toolbar                        | stop current session activity             | current session active work |
+| `forkAssistant`      | turn actions                   | fork intent                               | latest/old assistant turn   |
+| `retryTurn`          | 协议兼容入口（产品 UI 已隐藏） | retry intent                              | latest assistant turn       |
+| `editUserQuery`      | real-user row actions          | edited text/goal text；保留原 intent kind | latest real-user input      |
+| `sendQueuedNow`      | queue actions                  | queue item id                             | `queueItem`                 |
+| `editQueueItem`      | queue actions                  | edited queue content                      | `queueItem`                 |
+| `reorderQueueItem`   | queue actions                  | new order                                 | `queueItem`                 |
+| `deleteQueueItem`    | queue actions                  | queue item id                             | `queueItem`                 |
+| `switchModelConfig`  | toolbar/model selector         | provider/model/thought config             | current session             |
 
 ### System Events
 
-| Event ID | 来源 | 适用上下文 |
-| --- | --- | --- |
-| `assistantComplete` | runtime/model stream | `running` |
-| `assistantFailed` | runtime/model stream | `running` |
-| `compactStarted` | runtime | auto/manual compact |
-| `compactComplete` | runtime | `activeWork.kind=compact` |
-| `compactNoop` | runtime | `activeWork.kind=compact` 或 completed 后再次 compact |
-| `compactFailed` | runtime | `activeWork.kind=compact` |
-| `goalVerifyStart` | goal runtime | goal active 后进入 verifier |
-| `goalVerifyPass` | goal runtime | `activeWork.kind=goalVerifier` |
-| `goalVerifyNotSatisfied` | goal runtime | `activeWork.kind=goalVerifier`，verifier 正常返回“目标尚未达成” |
-| `goalVerifyFailed` | goal runtime | `activeWork.kind=goalVerifier`，verifier 被取消、接口失败、超时或内部异常 |
-| `foregroundSubagentStarted` | runtime/tool | `running`，primary turn 派生 foreground 子 agent |
-| `foregroundSubagentComplete` | runtime/tool | `running`，对应 foreground subagent active work 收口 |
-| `foregroundSubagentFailed` | runtime/tool | `running`，对应 foreground subagent active work 失败或被 stop 终止 |
-| `backgroundWorkStarted` | runtime/tool | background bash/subagent 启动；不阻塞 `sessionEnded` |
-| `backgroundWorkComplete` | runtime/tool | background bash/subagent 完成；产生 background result 或 no-op |
-| `backgroundWorkFailed` | runtime/tool | background bash/subagent 失败或被 background cancel |
-| `backgroundResultQueued` | runtime/tool | background result 已进入 continuation inbox 或 deferred queue |
-| `sessionRestored` | restore/snapshot | app reload、切 session、remote replayable |
+| Event ID                     | 来源                 | 适用上下文                                                                |
+| ---------------------------- | -------------------- | ------------------------------------------------------------------------- |
+| `assistantComplete`          | runtime/model stream | `running`                                                                 |
+| `assistantFailed`            | runtime/model stream | `running`                                                                 |
+| `compactStarted`             | runtime              | auto/manual compact                                                       |
+| `compactComplete`            | runtime              | `activeWork.kind=compact`                                                 |
+| `compactNoop`                | runtime              | `activeWork.kind=compact` 或 completed 后再次 compact                     |
+| `compactFailed`              | runtime              | `activeWork.kind=compact`                                                 |
+| `goalVerifyStart`            | goal runtime         | goal active 后进入 verifier                                               |
+| `goalVerifyPass`             | goal runtime         | `activeWork.kind=goalVerifier`                                            |
+| `goalVerifyNotSatisfied`     | goal runtime         | `activeWork.kind=goalVerifier`，verifier 正常返回“目标尚未达成”           |
+| `goalVerifyFailed`           | goal runtime         | `activeWork.kind=goalVerifier`，verifier 被取消、接口失败、超时或内部异常 |
+| `foregroundSubagentStarted`  | runtime/tool         | `running`，primary turn 派生 foreground 子 agent                          |
+| `foregroundSubagentComplete` | runtime/tool         | `running`，对应 foreground subagent active work 收口                      |
+| `foregroundSubagentFailed`   | runtime/tool         | `running`，对应 foreground subagent active work 失败或被 stop 终止        |
+| `backgroundWorkStarted`      | runtime/tool         | background bash/subagent 启动；不阻塞 `sessionEnded`                      |
+| `backgroundWorkComplete`     | runtime/tool         | background bash/subagent 完成；产生 background result 或 no-op            |
+| `backgroundWorkFailed`       | runtime/tool         | background bash/subagent 失败或被 background cancel                       |
+| `backgroundResultQueued`     | runtime/tool         | background result 已进入 continuation inbox 或 deferred queue             |
+| `sessionRestored`            | restore/snapshot     | app reload、切 session、remote replayable                                 |
 
 ## Decision Types
 
-| Decision | 含义 | 必须说明 |
-| --- | --- | --- |
-| `allow` | 动作立即生效 | 下一状态、产生的协议请求或本地状态变化 |
-| `reject` | 动作被明确拒绝 | 用户反馈、禁止副作用、状态不变部分 |
-| `enqueue` | 动作不立即执行，进入 queue | deferred input event、payload、顺序、是否 autoDrain |
-| `noop` | 动作可触发但不改变业务状态 | 用户反馈和为什么不需要动作 |
-| `system-transition` | 系统事件推进状态 | 事件归属、下一状态、是否触发后续动作 |
-| `undefined` | 产品语义未定义 | 需要确认的问题和候选口径 |
-| `bug-candidate` | 当前实现疑似违反已确认协议 | 已确认协议、观察到的冲突、证据入口 |
+| Decision            | 含义                       | 必须说明                                            |
+| ------------------- | -------------------------- | --------------------------------------------------- |
+| `allow`             | 动作立即生效               | 下一状态、产生的协议请求或本地状态变化              |
+| `reject`            | 动作被明确拒绝             | 用户反馈、禁止副作用、状态不变部分                  |
+| `enqueue`           | 动作不立即执行，进入 queue | deferred input event、payload、顺序、是否 autoDrain |
+| `noop`              | 动作可触发但不改变业务状态 | 用户反馈和为什么不需要动作                          |
+| `system-transition` | 系统事件推进状态           | 事件归属、下一状态、是否触发后续动作                |
+| `undefined`         | 产品语义未定义             | 需要确认的问题和候选口径                            |
+| `bug-candidate`     | 当前实现疑似违反已确认协议 | 已确认协议、观察到的冲突、证据入口                  |
 
 `reject` 不是兜底错误。每条 reject 必须声明反馈和禁止副作用，例如“不入队、不作为普通 user message、不发 compact 请求”。
 
@@ -706,122 +706,122 @@ fork 目标只定义在 assistant message/turn 上。edit 目标只定义在 use
 
 这些不变量优先于单条 case。任何 rule 的 effect 如果违反不变量，应标成 `bug-candidate` 或 `undefined`，不能被当作普通 accepted case。
 
-| Invariant ID | 说明 | 当前状态 |
-| --- | --- | --- |
-| `sameSessionActiveTurnExclusive` | 同一个 session 不能同时跑两条 active turn；同 session 后续输入必须通过 queue、turn-steer 或明确 stop/drain 规则处理 | accepted |
-| `sessionCompletionRequiresNoForegroundWork` | `completed(success/interrupted)` 必须要求 primary turn、foreground subagent、compact、goal verifier、goal continuation、turn-steer 全部收口；background work 不参与 completion gate | accepted |
-| `foregroundSubagentKeepsSessionBusy` | assistant stream 或主 turn 局部完成后，只要仍有归属当前 session 的 foreground subagent 在运行，session 就不能进入 completed | accepted |
-| `backgroundWorkDoesNotBlockSessionEnd` | background bash/subagent 运行时，session 仍可在 foreground work 清空后进入 completed，并开放 completed-only 操作 | accepted |
-| `sessionEndedDrivesImmediateStart` | 只有 `sessionEnded=true` 的 completed 上下文才能让 composer 普通输入立即成为下一轮 active turn；`sessionEnded=false` 时必须命中 queue、guide、reject 或 stop/drain guard | accepted |
-| `runtimeFactsAreAuthoritative` | `sessionEnded`、`canStop`、`stopState`、`stopTargetKind` 必须来自 CLI/runtime facts 或 host/service 的规范化投影；UI 不能只靠本地 message stream、timeline 或 `streaming` 状态猜测 | accepted |
-| `persistentConversationFactsAreAuthoritative` | message、part、session metadata 与 goal 是持久权威；live/cold 必须先归一为同一 canonical facts，再生成 projection | accepted |
-| `rowIdentityIsDisplayOnly` | `rowId` 只用于展示；edit/retry/fork 的 action 与 command target 必须绑定 `entityId/productTurnId` | accepted |
-| `trustedDeliveryBoundary` | desktop（含 SSH/WSL/Docker）固定 continuous，mobile/Web remote 固定 replayable；profile 由 host attachment 可信注入，UI 不可选择 | accepted |
-| `subscriptionOwnedByConnection` | 每个 connection 有独立 subscription registry；frame 只发给 owning port，一个慢订阅者不得污染其他连接 | accepted |
-| `acceptedInputHasSingleAuthority` | 所有端已提交 busy/running 输入按 CLI admission 顺序进入同一 FIFO；host/runtime/UI 不保留第二份权威队列 | accepted |
-| `acceptedInputAlwaysAccountedFor` | 每条已提交输入必须且只能处于 queue、guided row、transcript、explicit rejected/failed/discarded 之一 | accepted |
-| `sourceCommandIdEndToEnd` | queue item、drain/guided event、user row、message anchor、marker、fork child metadata 保留原始 sourceCommandId | accepted |
-| `restartDiscardRespectsDeliveryLifetime` | CLI restart 后未完成 admitted input 明确 discarded；旧 runtime 的 `queue/guide` 与无权威结论的 `unknown` 静默结算且不显示 UI 错误，只有未进入 transcript 的 `startNow` 提示确认重发，禁止自动重放 | accepted |
-| `stopButtonStableAcrossActiveWork` | assistant、compact、goal verifier、goal continuation、foreground subagent 等 active work 交接时，只要 session 仍可 stop，UI 停止按钮必须保持稳定，不因内部阶段切换而闪烁 | accepted |
-| `stopPausesActiveGoalTarget` | goal target 为 active 时，用户 stop 不管作用于 assistant、compact、goal verifier 还是 goal continuation，都必须把 target 置为非 active 的暂停态 | accepted |
-| `cancelledTurnColdHydrationParity` | 用户 stop 产生的 typed/legacy ZCode cancellation 在 live 与 cold hydration 后都必须归约为 `TurnComplete(cancelled)`；不得产生 `TurnError`、`phase=error` 或 `control.lastError` | accepted |
-| `followupInputModeExplicit` | running 中后续普通输入必须按 `queue` 或 `guide` 模式裁决；默认是 `queue` | accepted |
-| `runningPromptQueues` | `running` 且 follow-up mode 为 `queue` 时，普通文本进入 queue，不打断当前 in-flight 请求 | accepted |
-| `unfinishedSessionPromptQueues` | `sessionEnded=false` 且未命中 guide allow 时，普通文本进入 queue，不启动第二条 active turn | accepted |
-| `unfinishedSessionGoalQueues` | `sessionEnded=false` 时 `/goal xxx` 进入 queue，消费时设置或更新 goal；这是 `/goal` 自己的 rule，不代表所有 command 都可入队 | accepted |
-| `guideModeEligibilityGuard` | `guide` 模式只在满足 turn-steer 条件时生效；不满足条件必须回退 queue | accepted |
-| `guideModePreservesMessage` | `guide` 模式下后续文本必须保留在 turn-steer/guided history 或 fallback queue，不能丢失 | accepted |
-| `runningCompactQueues` | `running` 时 `/compact` 作为 typed maintenance intent 进入统一 FIFO；不能当普通消息，也不能并发启动 compact | accepted |
-| `runningStableAssistantForkAllowed` | `running` 时可以 fork 更早 `completedSuccess` turn 最后一段 completed assistant；当前 streaming/interrupted/failed partial 和中间 assistant 段不能 fork | accepted |
-| `latestQueryEditPreemptsActiveTurn` | 只有最后一条 real-user input（text 或 goal）可以 edit；running 时提交 edit 等价先 stop 当前 active work，再从该 input 重跑且保留原 intent kind | accepted |
-| `compactCoveredLatestEditRewindsInPlace` | latest real-user input 已被稳定 compact summary 覆盖时，原 session append-only branch cut，重置被跨过的 compact 派生状态并按原 kind 重放；不创建 child、不追加 rewind reminder | accepted |
-| `latestAssistantRetryOnly` | 底层 capability 先锁定当前投影里全时间线最后一条 `assistantText` row，再要求同一 product turn 存在 `origin=realUser` 的 canonical user input；background result/goal continuation/mailbox 等 synthetic turn 和更早真实用户轮均不得获得 capability。产品 UI 在桌面、Web、手机端统一隐藏普通 assistant retry 入口，`canRetry` / `retryTurn` 仅为协议兼容继续保留 | accepted |
-| `retryPreservesFullIntent` | retry 从 canonical cause 恢复 input kind、text、attachments、goal intent、delivery/fallback 与来源 cause，禁止仅从可见文本重建 | accepted |
-| `goalInputUsesUnifiedEditTarget` | `goalSet` lifecycle 不产 marker；用户 goal input 产 canonical visible real-user row，并与 text query 共用 `editUserQuery` target；重发仍是 `sendGoalCommand` | accepted |
-| `stopHighestPriorityCancelsForegroundWork` | stop 是最高优先级；必须终止当前 session 的 primary turn、foreground subagent、compact、goal verifier、goal continuation 和未确认 turn-steer | accepted |
-| `stopEndsAsInterruptedCompleted` | stop 终止所有 completion-blocking active work 后进入 `completed(interrupted)`，没有 paused 产品态 | accepted |
-| `stopKeepsQueueAndDisablesAutoDrain` | stop 后 queue 保留，`autoDrain=false` | accepted |
-| `lateTerminalEventsAfterStopDoNotRevive` | stop 之后迟到的 assistant/foreground subagent/compact/verifier 终态不能把旧 work 改回 success，也不能覆盖新一轮 active input | accepted |
-| `heldQueueInputRequiresChoice` | `completed` 且 held queue（queue>0 + autoDrain=false）下，composer 新输入不静默入队：由用户选择「清空 queue 后发送」或「保留 queue 立即发送」（2026-07-05 重裁决，替代原 heldQueueCapturesNewInput） | accepted |
-| `queueContentIndependence` | queue 是未来意图，不绑定某段已完成历史；edit、compact、fork 不改写 queue | accepted |
-| `forkAssistantOnly` | 只能 fork assistant message；user/tool/timeline 不提供 fork | accepted |
-| `forkDoesNotCopyQueue` | fork 新 session 不复制父 queue；父 queue 保留 | accepted |
-| `forkStableHistoryOnly` | child 只继承 `completedSuccess` turn 最后一段 completed assistant 及之前的稳定历史；父 session 正在 running 不自动禁止 fork，但当前 partial、中间 assistant 和 compact operation lock 不能作为稳定 fork 边界 | accepted |
-| `runningForkDoesNotRewindWorkspace` | running fork 是 conversation-only；不恢复共享 workspace checkpoint，父 session 继续 running；completed/idle 既有 workspace 行为不扩大 | accepted |
-| `forkDoesNotCopyBackgroundWork` | fork 不复制父 session 的 live background bash/subagent、pending background result 或 continuation inbox；只复制已进入 fork 点前 transcript 的 background result | accepted |
-| `forkInheritsSessionFutureState` | child 继承 fork 点持久化的 provider/model/思考深度和 fork 点之前的 goal 状态，但不继承父 session 后续 config 或 queue | accepted |
-| `forkTimelineIsBoundary` | fork notice 是 turn boundary，不进入 assistant 工作历史折叠 | accepted |
-| `editUserOnly` | 只能 edit latest real-user input（text query 或用户 goal input）；assistant/tool/timeline 不提供 edit | accepted |
-| `editKeepsQueue` | edit latest real-user input 会按原 intent kind 重跑分支，但 queue 原样保留 | accepted |
-| `sessionConfigScoped` | 模型、provider、思考深度是 session 级未来配置，不能串 session | accepted |
-| `queuedSubmissionPreservesSelection` | queue 保存完整 Submission；消费时继续使用入队时固定的 Provider、Model 与思考深度，Provider 配置在创建 Model 时读取最新事实 | accepted |
-| `crossSessionUnlimitedConcurrency` | 不同 session 可以真实并发运行，queue/模型/sidebar 互相隔离 | accepted |
-| `autoCompactIsSystemTurnPrefix` | auto compact 是 pendingAction 前置维护步骤，成功后继续 pendingAction | accepted |
-| `goalVerificationOutcomeSeparation` | verifier 正常判断未达成必须标为 `notSatisfied`；取消、接口失败、超时或内部异常才标为 `failed` | accepted |
-| `compactActiveWorkOperationLock` | `activeWork.kind=compact` 是 running 内部维护态；普通文本和 `/goal` 入队，compact、fork、edit、retry、sendQueuedNow 必须 reject | accepted |
-| `goalVerifierBusyRouting` | `activeWork.kind=goalVerifier` 是 running 内部验证态；普通文本、`/goal` 和 `/compact` 都作为未来意图入队，stop 可中断 verifier；latest user query edit 走 stop barrier 后重跑，fork 稳定历史允许，sendQueuedNow 走 stop barrier 后 drain | accepted |
-| `backgroundWakeStartsIndependentProductTurn` | background model-only wake 无论 live/cold 都创建独立 product turn；无可见 user trigger row且不得并入上一 real-user turn | accepted |
-| `stableForkIsAtomicAndFullyRemapped` | stable fork 只有在 child metadata、历史、goal/provenance 与全部 child-local references 原子写入并 remap 后才发布；失败不留半成品 child | accepted |
+| Invariant ID                                  | 说明                                                                                                                                                                                                                                                                                                                                                           | 当前状态 |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `sameSessionActiveTurnExclusive`              | 同一个 session 不能同时跑两条 active turn；同 session 后续输入必须通过 queue、turn-steer 或明确 stop/drain 规则处理                                                                                                                                                                                                                                            | accepted |
+| `sessionCompletionRequiresNoForegroundWork`   | `completed(success/interrupted)` 必须要求 primary turn、foreground subagent、compact、goal verifier、goal continuation、turn-steer 全部收口；background work 不参与 completion gate                                                                                                                                                                            | accepted |
+| `foregroundSubagentKeepsSessionBusy`          | assistant stream 或主 turn 局部完成后，只要仍有归属当前 session 的 foreground subagent 在运行，session 就不能进入 completed                                                                                                                                                                                                                                    | accepted |
+| `backgroundWorkDoesNotBlockSessionEnd`        | background bash/subagent 运行时，session 仍可在 foreground work 清空后进入 completed，并开放 completed-only 操作                                                                                                                                                                                                                                               | accepted |
+| `sessionEndedDrivesImmediateStart`            | 只有 `sessionEnded=true` 的 completed 上下文才能让 composer 普通输入立即成为下一轮 active turn；`sessionEnded=false` 时必须命中 queue、guide、reject 或 stop/drain guard                                                                                                                                                                                       | accepted |
+| `runtimeFactsAreAuthoritative`                | `sessionEnded`、`canStop`、`stopState`、`stopTargetKind` 必须来自 CLI/runtime facts 或 host/service 的规范化投影；UI 不能只靠本地 message stream、timeline 或 `streaming` 状态猜测                                                                                                                                                                             | accepted |
+| `persistentConversationFactsAreAuthoritative` | message、part、session metadata 与 goal 是持久权威；live/cold 必须先归一为同一 canonical facts，再生成 projection                                                                                                                                                                                                                                              | accepted |
+| `rowIdentityIsDisplayOnly`                    | `rowId` 只用于展示；edit/retry/fork 的 action 与 command target 必须绑定 `entityId/productTurnId`                                                                                                                                                                                                                                                              | accepted |
+| `trustedDeliveryBoundary`                     | desktop（含 SSH/WSL/Docker）固定 continuous，mobile/Web remote 固定 replayable；profile 由 host attachment 可信注入，UI 不可选择                                                                                                                                                                                                                               | accepted |
+| `subscriptionOwnedByConnection`               | 每个 connection 有独立 subscription registry；frame 只发给 owning port，一个慢订阅者不得污染其他连接                                                                                                                                                                                                                                                           | accepted |
+| `acceptedInputHasSingleAuthority`             | 所有端已提交 busy/running 输入按 CLI admission 顺序进入同一 FIFO；host/runtime/UI 不保留第二份权威队列                                                                                                                                                                                                                                                         | accepted |
+| `acceptedInputAlwaysAccountedFor`             | 每条已提交输入必须且只能处于 queue、guided row、transcript、explicit rejected/failed/discarded 之一                                                                                                                                                                                                                                                            | accepted |
+| `sourceCommandIdEndToEnd`                     | queue item、drain/guided event、user row、message anchor、marker、fork child metadata 保留原始 sourceCommandId                                                                                                                                                                                                                                                 | accepted |
+| `restartDiscardRespectsDeliveryLifetime`      | CLI restart 后未完成 admitted input 明确 discarded；旧 runtime 的 `queue/guide` 与无权威结论的 `unknown` 静默结算且不显示 UI 错误，只有未进入 transcript 的 `startNow` 提示确认重发，禁止自动重放                                                                                                                                                              | accepted |
+| `stopButtonStableAcrossActiveWork`            | assistant、compact、goal verifier、goal continuation、foreground subagent 等 active work 交接时，只要 session 仍可 stop，UI 停止按钮必须保持稳定，不因内部阶段切换而闪烁                                                                                                                                                                                       | accepted |
+| `stopPausesActiveGoalTarget`                  | goal target 为 active 时，用户 stop 不管作用于 assistant、compact、goal verifier 还是 goal continuation，都必须把 target 置为非 active 的暂停态                                                                                                                                                                                                                | accepted |
+| `cancelledTurnColdHydrationParity`            | 用户 stop 产生的 typed/legacy ZCode cancellation 在 live 与 cold hydration 后都必须归约为 `TurnComplete(cancelled)`；不得产生 `TurnError`、`phase=error` 或 `control.lastError`                                                                                                                                                                                | accepted |
+| `followupInputModeExplicit`                   | running 中后续普通输入必须按 `queue` 或 `guide` 模式裁决；默认是 `queue`                                                                                                                                                                                                                                                                                       | accepted |
+| `runningPromptQueues`                         | `running` 且 follow-up mode 为 `queue` 时，普通文本进入 queue，不打断当前 in-flight 请求                                                                                                                                                                                                                                                                       | accepted |
+| `unfinishedSessionPromptQueues`               | `sessionEnded=false` 且未命中 guide allow 时，普通文本进入 queue，不启动第二条 active turn                                                                                                                                                                                                                                                                     | accepted |
+| `unfinishedSessionGoalQueues`                 | `sessionEnded=false` 时 `/goal xxx` 进入 queue，消费时设置或更新 goal；这是 `/goal` 自己的 rule，不代表所有 command 都可入队                                                                                                                                                                                                                                   | accepted |
+| `guideModeEligibilityGuard`                   | `guide` 模式只在满足 turn-steer 条件时生效；不满足条件必须回退 queue                                                                                                                                                                                                                                                                                           | accepted |
+| `guideModePreservesMessage`                   | `guide` 模式下后续文本必须保留在 turn-steer/guided history 或 fallback queue，不能丢失                                                                                                                                                                                                                                                                         | accepted |
+| `runningCompactQueues`                        | `running` 时 `/compact` 作为 typed maintenance intent 进入统一 FIFO；不能当普通消息，也不能并发启动 compact                                                                                                                                                                                                                                                    | accepted |
+| `runningStableAssistantForkAllowed`           | `running` 时可以 fork 更早 `completedSuccess` turn 最后一段 completed assistant；当前 streaming/interrupted/failed partial 和中间 assistant 段不能 fork                                                                                                                                                                                                        | accepted |
+| `latestQueryEditPreemptsActiveTurn`           | 只有最后一条 real-user input（text 或 goal）可以 edit；running 时提交 edit 等价先 stop 当前 active work，再从该 input 重跑且保留原 intent kind                                                                                                                                                                                                                 | accepted |
+| `compactCoveredLatestEditRewindsInPlace`      | latest real-user input 已被稳定 compact summary 覆盖时，原 session append-only branch cut，重置被跨过的 compact 派生状态并按原 kind 重放；不创建 child、不追加 rewind reminder                                                                                                                                                                                 | accepted |
+| `latestAssistantRetryOnly`                    | 底层 capability 先锁定当前投影里全时间线最后一条 `assistantText` row，再要求同一 product turn 存在 `origin=realUser` 的 canonical user input；background result/goal continuation/mailbox 等 synthetic turn 和更早真实用户轮均不得获得 capability。产品 UI 在桌面、Web、手机端统一隐藏普通 assistant retry 入口，`canRetry` / `retryTurn` 仅为协议兼容继续保留 | accepted |
+| `retryPreservesFullIntent`                    | retry 从 canonical cause 恢复 input kind、text、attachments、goal intent、delivery/fallback 与来源 cause，禁止仅从可见文本重建                                                                                                                                                                                                                                 | accepted |
+| `goalInputUsesUnifiedEditTarget`              | `goalSet` lifecycle 不产 marker；用户 goal input 产 canonical visible real-user row，并与 text query 共用 `editUserQuery` target；重发仍是 `sendGoalCommand`                                                                                                                                                                                                   | accepted |
+| `stopHighestPriorityCancelsForegroundWork`    | stop 是最高优先级；必须终止当前 session 的 primary turn、foreground subagent、compact、goal verifier、goal continuation 和未确认 turn-steer                                                                                                                                                                                                                    | accepted |
+| `stopEndsAsInterruptedCompleted`              | stop 终止所有 completion-blocking active work 后进入 `completed(interrupted)`，没有 paused 产品态                                                                                                                                                                                                                                                              | accepted |
+| `stopKeepsQueueAndDisablesAutoDrain`          | stop 后 queue 保留，`autoDrain=false`                                                                                                                                                                                                                                                                                                                          | accepted |
+| `lateTerminalEventsAfterStopDoNotRevive`      | stop 之后迟到的 assistant/foreground subagent/compact/verifier 终态不能把旧 work 改回 success，也不能覆盖新一轮 active input                                                                                                                                                                                                                                   | accepted |
+| `heldQueueInputRequiresChoice`                | `completed` 且 held queue（queue>0 + autoDrain=false）下，composer 新输入不静默入队：由用户选择「清空 queue 后发送」或「保留 queue 立即发送」（2026-07-05 重裁决，替代原 heldQueueCapturesNewInput）                                                                                                                                                           | accepted |
+| `queueContentIndependence`                    | queue 是未来意图，不绑定某段已完成历史；edit、compact、fork 不改写 queue                                                                                                                                                                                                                                                                                       | accepted |
+| `forkAssistantOnly`                           | 只能 fork assistant message；user/tool/timeline 不提供 fork                                                                                                                                                                                                                                                                                                    | accepted |
+| `forkDoesNotCopyQueue`                        | fork 新 session 不复制父 queue；父 queue 保留                                                                                                                                                                                                                                                                                                                  | accepted |
+| `forkStableHistoryOnly`                       | child 只继承 `completedSuccess` turn 最后一段 completed assistant 及之前的稳定历史；父 session 正在 running 不自动禁止 fork，但当前 partial、中间 assistant 和 compact operation lock 不能作为稳定 fork 边界                                                                                                                                                   | accepted |
+| `runningForkDoesNotRewindWorkspace`           | running fork 是 conversation-only；不恢复共享 workspace checkpoint，父 session 继续 running；completed/idle 既有 workspace 行为不扩大                                                                                                                                                                                                                          | accepted |
+| `forkDoesNotCopyBackgroundWork`               | fork 不复制父 session 的 live background bash/subagent、pending background result 或 continuation inbox；只复制已进入 fork 点前 transcript 的 background result                                                                                                                                                                                                | accepted |
+| `forkInheritsSessionFutureState`              | child 继承 fork 点持久化的 provider/model/思考深度和 fork 点之前的 goal 状态，但不继承父 session 后续 config 或 queue                                                                                                                                                                                                                                          | accepted |
+| `forkTimelineIsBoundary`                      | fork notice 是 turn boundary，不进入 assistant 工作历史折叠                                                                                                                                                                                                                                                                                                    | accepted |
+| `editUserOnly`                                | 只能 edit latest real-user input（text query 或用户 goal input）；assistant/tool/timeline 不提供 edit                                                                                                                                                                                                                                                          | accepted |
+| `editKeepsQueue`                              | edit latest real-user input 会按原 intent kind 重跑分支，但 queue 原样保留                                                                                                                                                                                                                                                                                     | accepted |
+| `sessionConfigScoped`                         | 模型、provider、思考深度是 session 级未来配置，不能串 session                                                                                                                                                                                                                                                                                                  | accepted |
+| `queuedSubmissionPreservesSelection`          | queue 保存完整 Submission；消费时继续使用入队时固定的 Provider、Model 与思考深度，Provider 配置在创建 Model 时读取最新事实                                                                                                                                                                                                                                     | accepted |
+| `crossSessionUnlimitedConcurrency`            | 不同 session 可以真实并发运行，queue/模型/sidebar 互相隔离                                                                                                                                                                                                                                                                                                     | accepted |
+| `autoCompactIsSystemTurnPrefix`               | auto compact 是 pendingAction 前置维护步骤，成功后继续 pendingAction                                                                                                                                                                                                                                                                                           | accepted |
+| `goalVerificationOutcomeSeparation`           | verifier 正常判断未达成必须标为 `notSatisfied`；取消、接口失败、超时或内部异常才标为 `failed`                                                                                                                                                                                                                                                                  | accepted |
+| `compactActiveWorkOperationLock`              | `activeWork.kind=compact` 是 running 内部维护态；普通文本和 `/goal` 入队，compact、fork、edit、retry、sendQueuedNow 必须 reject                                                                                                                                                                                                                                | accepted |
+| `goalVerifierBusyRouting`                     | `activeWork.kind=goalVerifier` 是 running 内部验证态；普通文本、`/goal` 和 `/compact` 都作为未来意图入队，stop 可中断 verifier；latest user query edit 走 stop barrier 后重跑，fork 稳定历史允许，sendQueuedNow 走 stop barrier 后 drain                                                                                                                       | accepted |
+| `backgroundWakeStartsIndependentProductTurn`  | background model-only wake 无论 live/cold 都创建独立 product turn；无可见 user trigger row且不得并入上一 real-user turn                                                                                                                                                                                                                                        | accepted |
+| `stableForkIsAtomicAndFullyRemapped`          | stable fork 只有在 child metadata、历史、goal/provenance 与全部 child-local references 原子写入并 remap 后才发布；失败不留半成品 child                                                                                                                                                                                                                         | accepted |
 
 ## Known Stable Guards
 
 这些 guard 在现有文档中有稳定共识，可作为后续 rule table 的第一批来源。
 
-| Guard ID | 匹配 | Decision | 核心 effect |
-| --- | --- | --- | --- |
-| `firstSend` | `draft + sendText` | `allow` | 创建 session，进入详情页，首条 user message 可见 |
-| `runningPromptQueues` | `running + followupInput.mode=queue + sendText` | `enqueue` | deferred `sendText` 按 FIFO 增长，不发第二个同 session active turn |
-| `guideModeTurnSteer` | `running + followupInput.mode=guide + sendText + guide eligible` | `allow` | 后续文本进入 turn-steer 或 guided user message，不触发普通新 turn |
-| `guideModeFallbackPreservesMessage` | `running + followupInput.mode=guide + sendText + guide ineligible` | `enqueue` | 回退为 deferred `sendText`，不丢失用户输入 |
-| `unfinishedSessionPromptQueues` | `sessionEnded=false + sendText + guide ineligible/not applicable` | `enqueue` | deferred `sendText` 按 FIFO 增长，不启动第二条 active turn |
-| `unfinishedSessionGoalQueues` | `sessionEnded=false + sendGoalCommand` | `enqueue` | deferred `sendGoalCommand` 保留 goal 意图，消费时 set/update goal |
-| `runningCompactQueues` | `running + sendCompactCommand/clickCompact` | `enqueue` | 追加 kind=`compact` 的 queue item；不作为普通 user message；当前 work 结束后严格按 FIFO 执行 |
-| `runningStableAssistantForkAllowed` | `running + forkAssistant + stable historical assistant target` | `allow` | 创建 child；父 session 当前 active work、queue、background work 继续留在父 session |
-| `latestQueryEditPreemptsActiveTurn` | `running + editUserQuery + latest real-user input(text/goal)` | `allow` | 先执行 stop barrier；旧 work 清空后 rewind 并按原 kind 重跑；barrier 失败保留旧 work/input/branch，不启动 text/goal |
-| `compactCoveredLatestEditRewindsInPlace` | `editUserQuery + latest real-user input + coveredByStableCompact` | `allow` | 原 session append-only branch cut；重置跨过的 compact/microcompact 状态，按原 kind 重放，不创建或导航 child |
-| `goalInputUsesUnifiedEditTarget` | `editUserQuery + latest real-user input(kind=goal)` | `allow` | 按稳定 entity target rewind；重发 `sendGoalCommand` intent，goal input row 保持可见，不生成 `goalSet` marker |
-| `latestQueryEditOnly` | `editUserQuery + non-latest real-user input` | `reject` | 历史 text/goal input 不提供 edit，避免 active branch 回退到旧上下文 |
-| `latestAssistantRetryOnly` | `retryTurn + non-latest assistantText row`，或 latest assistant 所在 turn 没有 `origin=realUser` 的 canonical user input | `reject` | 历史 assistant 回复和 background/synthetic 结果轮都不获得 retry capability；禁止跳过最新 synthetic assistant 回退到旧上下文。所有普通 assistant retry capability 均不渲染为产品 UI 入口 |
-| `activeWorkBlocksCompletion` | `assistantComplete + activeWork!=empty` | `system-transition` | 收口已完成 work，但 session 保持 busy，不开放 completed-only 操作 |
-| `controlProjectionKeepsStopVisible` | `canStop=true OR stopState=stopping` | `system-transition` | UI 保留同一个停止按钮；`stopTargetKind` 变化只更新细节文案 |
-| `stopBusySessionCancelsForegroundWork` | `prewarming/running/activeWork!=empty + stop` | `allow` | 终止当前 session completion-blocking active work，清空后进入 `completed(interrupted)`，queue 保留且 `autoDrain=false` |
-| `sendQueuedNowStopsBeforeDrain` | `running + queue>0 + sendQueuedNow` | `allow` | reserve 目标项，执行 stop barrier；启动成功才 remove，失败释放 reservation 并原位保留 |
-| `compactActiveWorkOperationLock` | `activeWork.kind=compact + sendCompactCommand/clickCompact/forkAssistant/editUserQuery/retryTurn/sendQueuedNow` | `reject` | 正在 compact；不能启动第二次 compact，不能 fork/edit/retry，不能抢占 drain queue |
-| `goalVerifierBusyRouting` | `activeWork.kind=goalVerifier + sendText/sendGoalCommand/sendCompactCommand` | `enqueue` | 正在验证 goal；用户输入和维护意图都保存为 typed queue item，不启动第二条 active turn、不打断 verifier |
-| `goalVerifierStopBarrierDrain` | `activeWork.kind=goalVerifier + sendQueuedNow` | `allow` | 先 stop verifier（marker failed/cancelled，goal paused），再按显式 queue 消费规则 drain 目标项 |
-| `completedCanStartNextTurn` | `completed + sendText + queue=0` | `allow` | 立即开始下一轮 |
-| `backgroundOnlyCompletedCanForkOrCompact` | `completed + backgroundWork!=empty + forkAssistant/clickCompact` | `allow` | background work 不阻塞 completed-only 操作；fork/compact 仍只作用于稳定 transcript |
-| `heldQueueInputRequiresChoice` | `completed + queue>0 + autoDrain=false + sendText/sendGoalCommand` | `choice` | 客户端呈现选择：`clearQueueAndSend`（清空 queue 后发送）或 `keepQueueAndSend`（保留 queue 立即发送）；command 重放携带所选 disposition |
-| `manualCompact` | `completed + clickCompact/sendCompactCommand` | `allow` | 进入 `running + activeWork.kind=compact`，插入 compact timeline |
-| `forkAssistantOnly` | `stable assistant target + forkAssistant` | `allow/reject` | assistant 允许 fork；user/tool/timeline 禁止 |
-| `editUserOnly` | `editUserQuery` | `allow/reject` | latest real-user input（text/goal）允许 edit；非最后一条 real-user input、assistant/tool/timeline 禁止 |
-| `forkDoesNotCopyQueue` | `forkAssistant` | `allow` | child 继承稳定历史和 fork 点配置，不复制父 queue |
-| `forkDoesNotCopyBackgroundWork` | `forkAssistant` | `allow` | child 不复制父 session 的 live background work 或 pending background result |
-| `queueContentIndependence` | `editQueueItem/reorderQueueItem/deleteQueueItem` | `allow` | 只改 queue，不触发消费 |
+| Guard ID                                  | 匹配                                                                                                                     | Decision            | 核心 effect                                                                                                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `firstSend`                               | `draft + sendText`                                                                                                       | `allow`             | 创建 session，进入详情页，首条 user message 可见                                                                                                                                        |
+| `runningPromptQueues`                     | `running + followupInput.mode=queue + sendText`                                                                          | `enqueue`           | deferred `sendText` 按 FIFO 增长，不发第二个同 session active turn                                                                                                                      |
+| `guideModeTurnSteer`                      | `running + followupInput.mode=guide + sendText + guide eligible`                                                         | `allow`             | 后续文本进入 turn-steer 或 guided user message，不触发普通新 turn                                                                                                                       |
+| `guideModeFallbackPreservesMessage`       | `running + followupInput.mode=guide + sendText + guide ineligible`                                                       | `enqueue`           | 回退为 deferred `sendText`，不丢失用户输入                                                                                                                                              |
+| `unfinishedSessionPromptQueues`           | `sessionEnded=false + sendText + guide ineligible/not applicable`                                                        | `enqueue`           | deferred `sendText` 按 FIFO 增长，不启动第二条 active turn                                                                                                                              |
+| `unfinishedSessionGoalQueues`             | `sessionEnded=false + sendGoalCommand`                                                                                   | `enqueue`           | deferred `sendGoalCommand` 保留 goal 意图，消费时 set/update goal                                                                                                                       |
+| `runningCompactQueues`                    | `running + sendCompactCommand/clickCompact`                                                                              | `enqueue`           | 追加 kind=`compact` 的 queue item；不作为普通 user message；当前 work 结束后严格按 FIFO 执行                                                                                            |
+| `runningStableAssistantForkAllowed`       | `running + forkAssistant + stable historical assistant target`                                                           | `allow`             | 创建 child；父 session 当前 active work、queue、background work 继续留在父 session                                                                                                      |
+| `latestQueryEditPreemptsActiveTurn`       | `running + editUserQuery + latest real-user input(text/goal)`                                                            | `allow`             | 先执行 stop barrier；旧 work 清空后 rewind 并按原 kind 重跑；barrier 失败保留旧 work/input/branch，不启动 text/goal                                                                     |
+| `compactCoveredLatestEditRewindsInPlace`  | `editUserQuery + latest real-user input + coveredByStableCompact`                                                        | `allow`             | 原 session append-only branch cut；重置跨过的 compact/microcompact 状态，按原 kind 重放，不创建或导航 child                                                                             |
+| `goalInputUsesUnifiedEditTarget`          | `editUserQuery + latest real-user input(kind=goal)`                                                                      | `allow`             | 按稳定 entity target rewind；重发 `sendGoalCommand` intent，goal input row 保持可见，不生成 `goalSet` marker                                                                            |
+| `latestQueryEditOnly`                     | `editUserQuery + non-latest real-user input`                                                                             | `reject`            | 历史 text/goal input 不提供 edit，避免 active branch 回退到旧上下文                                                                                                                     |
+| `latestAssistantRetryOnly`                | `retryTurn + non-latest assistantText row`，或 latest assistant 所在 turn 没有 `origin=realUser` 的 canonical user input | `reject`            | 历史 assistant 回复和 background/synthetic 结果轮都不获得 retry capability；禁止跳过最新 synthetic assistant 回退到旧上下文。所有普通 assistant retry capability 均不渲染为产品 UI 入口 |
+| `activeWorkBlocksCompletion`              | `assistantComplete + activeWork!=empty`                                                                                  | `system-transition` | 收口已完成 work，但 session 保持 busy，不开放 completed-only 操作                                                                                                                       |
+| `controlProjectionKeepsStopVisible`       | `canStop=true OR stopState=stopping`                                                                                     | `system-transition` | UI 保留同一个停止按钮；`stopTargetKind` 变化只更新细节文案                                                                                                                              |
+| `stopBusySessionCancelsForegroundWork`    | `prewarming/running/activeWork!=empty + stop`                                                                            | `allow`             | 终止当前 session completion-blocking active work，清空后进入 `completed(interrupted)`，queue 保留且 `autoDrain=false`                                                                   |
+| `sendQueuedNowStopsBeforeDrain`           | `running + queue>0 + sendQueuedNow`                                                                                      | `allow`             | reserve 目标项，执行 stop barrier；启动成功才 remove，失败释放 reservation 并原位保留                                                                                                   |
+| `compactActiveWorkOperationLock`          | `activeWork.kind=compact + sendCompactCommand/clickCompact/forkAssistant/editUserQuery/retryTurn/sendQueuedNow`          | `reject`            | 正在 compact；不能启动第二次 compact，不能 fork/edit/retry，不能抢占 drain queue                                                                                                        |
+| `goalVerifierBusyRouting`                 | `activeWork.kind=goalVerifier + sendText/sendGoalCommand/sendCompactCommand`                                             | `enqueue`           | 正在验证 goal；用户输入和维护意图都保存为 typed queue item，不启动第二条 active turn、不打断 verifier                                                                                   |
+| `goalVerifierStopBarrierDrain`            | `activeWork.kind=goalVerifier + sendQueuedNow`                                                                           | `allow`             | 先 stop verifier（marker failed/cancelled，goal paused），再按显式 queue 消费规则 drain 目标项                                                                                          |
+| `completedCanStartNextTurn`               | `completed + sendText + queue=0`                                                                                         | `allow`             | 立即开始下一轮                                                                                                                                                                          |
+| `backgroundOnlyCompletedCanForkOrCompact` | `completed + backgroundWork!=empty + forkAssistant/clickCompact`                                                         | `allow`             | background work 不阻塞 completed-only 操作；fork/compact 仍只作用于稳定 transcript                                                                                                      |
+| `heldQueueInputRequiresChoice`            | `completed + queue>0 + autoDrain=false + sendText/sendGoalCommand`                                                       | `choice`            | 客户端呈现选择：`clearQueueAndSend`（清空 queue 后发送）或 `keepQueueAndSend`（保留 queue 立即发送）；command 重放携带所选 disposition                                                  |
+| `manualCompact`                           | `completed + clickCompact/sendCompactCommand`                                                                            | `allow`             | 进入 `running + activeWork.kind=compact`，插入 compact timeline                                                                                                                         |
+| `forkAssistantOnly`                       | `stable assistant target + forkAssistant`                                                                                | `allow/reject`      | assistant 允许 fork；user/tool/timeline 禁止                                                                                                                                            |
+| `editUserOnly`                            | `editUserQuery`                                                                                                          | `allow/reject`      | latest real-user input（text/goal）允许 edit；非最后一条 real-user input、assistant/tool/timeline 禁止                                                                                  |
+| `forkDoesNotCopyQueue`                    | `forkAssistant`                                                                                                          | `allow`             | child 继承稳定历史和 fork 点配置，不复制父 queue                                                                                                                                        |
+| `forkDoesNotCopyBackgroundWork`           | `forkAssistant`                                                                                                          | `allow`             | child 不复制父 session 的 live background work 或 pending background result                                                                                                             |
+| `queueContentIndependence`                | `editQueueItem/reorderQueueItem/deleteQueueItem`                                                                         | `allow`             | 只改 queue，不触发消费                                                                                                                                                                  |
 
 ## Pending Product Boundaries
 
 四个边界已于 2026-07-05 全部裁决（v4 重构 M0 决策清收），本节保留裁决记录；详细子问题结论见 [decision-answers](./testing/conversation-session-decision-answers.md) 与 compact decision worksheet。
 
-| Boundary ID | 裁决结论 | 来源 |
-| --- | --- | --- |
-| `PB-COMP-FAIL-F09` | 保持 completed（回到 compact 前原状态）+ failed marker（带 retry 入口）；queue 保留不自动消费、autoDrain 不变；全部操作恢复 | compact worksheet F09.1–F09.4 |
-| `PB-AUTO-COMP-FAIL-G11` | 继续无压缩执行 pendingAction（保持 running，第 4 个请求为主模型请求）；retrying 历史与 failed marker 保留但不阻塞；circuit breaker 生效、手动 compact 成功后重置计数 | compact worksheet G11.1–G11.4 |
-| `PB-AUTO-COMP-STOP-G12` | 与普通 stop 完全一致：pendingAction 保留为当前轮 interrupted user message（时间线可 edit/retry，不复制回 queue、不丢弃）；session `completed(interrupted)`；compact marker 置 cancelled；显式追加 queue 全部保留不自动消费 | compact worksheet G12.1–G12.4 |
-| `PB-AUTO-COMP-MODEL-N06` | 允许切换：不中断已发出的 compact，config 立即生效；竞态边界 = pendingAction 消费瞬间读取当时最新 config 快照（v4 switchModelConfig 走 revision CAS） | case catalog N06 |
+| Boundary ID              | 裁决结论                                                                                                                                                                                                                   | 来源                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `PB-COMP-FAIL-F09`       | 保持 completed（回到 compact 前原状态）+ failed marker（带 retry 入口）；queue 保留不自动消费、autoDrain 不变；全部操作恢复                                                                                                | compact worksheet F09.1–F09.4 |
+| `PB-AUTO-COMP-FAIL-G11`  | 继续无压缩执行 pendingAction（保持 running，第 4 个请求为主模型请求）；retrying 历史与 failed marker 保留但不阻塞；circuit breaker 生效、手动 compact 成功后重置计数                                                       | compact worksheet G11.1–G11.4 |
+| `PB-AUTO-COMP-STOP-G12`  | 与普通 stop 完全一致：pendingAction 保留为当前轮 interrupted user message（时间线可 edit/retry，不复制回 queue、不丢弃）；session `completed(interrupted)`；compact marker 置 cancelled；显式追加 queue 全部保留不自动消费 | compact worksheet G12.1–G12.4 |
+| `PB-AUTO-COMP-MODEL-N06` | 允许切换：不中断已发出的 compact，config 立即生效；竞态边界 = pendingAction 消费瞬间读取当时最新 config 快照（v4 switchModelConfig 走 revision CAS）                                                                       | case catalog N06              |
 
 ## Evidence Contract
 
 后续每条 rule 或 case 至少声明一条用户可见证据和一条非 UI 证据。
 
-| 层 | 用途 |
-| --- | --- |
-| UI | 用户实际看到的消息、queue、按钮 disabled、toast、timeline marker |
+| 层            | 用途                                                                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI            | 用户实际看到的消息、queue、按钮 disabled、toast、timeline marker                                                                                        |
 | Runtime/Store | `sessionId`、phase、queue、target、activeInputId、activeWork、backgroundWork、sessionEnded、canStop、stopState、stopTargetKind、autoDrain、model config |
-| Protocol | app/agent 命令，如 send、compact、goal、fork、stop、activity terminal event、runtime facts snapshot、product control projection |
-| Network/SSE | provider 请求、compact 请求、stream timing、retry |
-| Files | session snapshot、task index、compact summary、fork history |
-| Logs | UI logger、service logger、agent log，必须带 case/session/input 归属 |
+| Protocol      | app/agent 命令，如 send、compact、goal、fork、stop、activity terminal event、runtime facts snapshot、product control projection                         |
+| Network/SSE   | provider 请求、compact 请求、stream timing、retry                                                                                                       |
+| Files         | session snapshot、task index、compact summary、fork history                                                                                             |
+| Logs          | UI logger、service logger、agent log，必须带 case/session/input 归属                                                                                    |
 
 对于 reject 类 rule，证据必须同时证明 forbidden side effects 不发生。例如 `/compact` running reject 不仅要看到 toast，还要证明 queue 未变、没有普通 user message、没有 compact 请求。
 

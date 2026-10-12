@@ -33,10 +33,10 @@ target Host user storage
 
 ## 2. Historical proposals
 
-| Proposal | Historical shape | Useful analysis retained | Rejected core |
-| --- | --- | --- | --- |
-| 方案 A | Host package store + user/workspace assignment store + effective resolver | package 与项目启用声明必须分离；target Host authority；Session freeze | 外部 assignment authority、workspace data、assignment APIs/GC |
-| 方案 B | CLI-owned workspace state overlay + shared package/cache | cold resume 会重建 App；旧 `scope=workspace` 无 workspace key | 外部 workspace state、ownership overlay、同步/迁移设计 |
+| Proposal | Historical shape                                                          | Useful analysis retained                                              | Rejected core                                                 |
+| -------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------- |
+| 方案 A   | Host package store + user/workspace assignment store + effective resolver | package 与项目启用声明必须分离；target Host authority；Session freeze | 外部 assignment authority、workspace data、assignment APIs/GC |
+| 方案 B   | CLI-owned workspace state overlay + shared package/cache                  | cold resume 会重建 App；旧 `scope=workspace` 无 workspace key         | 外部 workspace state、ownership overlay、同步/迁移设计        |
 
 两份方案仍提供了有效的当前源码诊断：
 
@@ -50,15 +50,15 @@ target Host user storage
 
 ## 3. Why the project file is authoritative
 
-| Dimension | External assignment file | Project config with open ZCode policy |
-| --- | --- | --- |
-| 团队共享 | 每个用户手工重建 | Git 可跟踪 |
-| 可发现性 | 状态藏在用户目录 hash 文件 | repo 内明确声明 |
-| checkout/branch | 容易残留旧 assignment | 随 Git 内容切换 |
-| scope override | 需要自定义 assignment schema | 复用 User/Workspace scope，与 Skill/Command 一致 |
-| 缺包行为 | assignment 容易与 inventory 纠缠 | declaration 保留，package 显示 missing |
-| 安全 | 避开 repo 但无法共享 | 无 Workspace trust/Plugin MCP approval；保留 schema/path validation 与输出脱敏 |
-| 实现复杂度 | 新 persistence/API/GC/migration | 扩展现有 config loader/merger 和 sensitive option 写入 |
+| Dimension       | External assignment file         | Project config with open ZCode policy                                          |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------------ |
+| 团队共享        | 每个用户手工重建                 | Git 可跟踪                                                                     |
+| 可发现性        | 状态藏在用户目录 hash 文件       | repo 内明确声明                                                                |
+| checkout/branch | 容易残留旧 assignment            | 随 Git 内容切换                                                                |
+| scope override  | 需要自定义 assignment schema     | 复用 User/Workspace scope，与 Skill/Command 一致                               |
+| 缺包行为        | assignment 容易与 inventory 纠缠 | declaration 保留，package 显示 missing                                         |
+| 安全            | 避开 repo 但无法共享             | 无 Workspace trust/Plugin MCP approval；保留 schema/path validation 与输出脱敏 |
+| 实现复杂度      | 新 persistence/API/GC/migration  | 扩展现有 config loader/merger 和 sensitive option 写入                         |
 
 最终采用的开放激活链路：
 
@@ -74,16 +74,16 @@ runtime activation
 
 ## 4. Adopted configuration
 
-| Concern | ZCode |
-| --- | --- |
-| Workspace 项目配置 | `.zcode/config.json` |
-| Local scope | 不采用；不做 Local 配置文件 |
-| 启用声明 | `plugins.enabledPlugins` |
-| 额外 Marketplace | `plugins.extraKnownMarketplaces`（仅 User/Host；Workspace 不支持 Marketplace） |
-| Plugin options | `plugins.options` 对 User/Workspace 全开放，含 sensitive values |
-| 项目 Plugin 目录 | `.zcode/plugins` or Workspace `plugins.dirs`，无 Workspace trust |
-| Plugin MCP | 与 Hook/Skill/Command/Agent 一样直接进入 runtime，无独立 approval |
-| per-user Plugin install/cache | target Host `~/.zcode/cli/plugins` |
+| Concern                       | ZCode                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| Workspace 项目配置            | `.zcode/config.json`                                                           |
+| Local scope                   | 不采用；不做 Local 配置文件                                                    |
+| 启用声明                      | `plugins.enabledPlugins`                                                       |
+| 额外 Marketplace              | `plugins.extraKnownMarketplaces`（仅 User/Host；Workspace 不支持 Marketplace） |
+| Plugin options                | `plugins.options` 对 User/Workspace 全开放，含 sensitive values                |
+| 项目 Plugin 目录              | `.zcode/plugins` or Workspace `plugins.dirs`，无 Workspace trust               |
+| Plugin MCP                    | 与 Hook/Skill/Command/Agent 一样直接进入 runtime，无独立 approval              |
+| per-user Plugin install/cache | target Host `~/.zcode/cli/plugins`                                             |
 
 采用 ZCode 既有 config 文件名，避免 `.zcode/settings.json` 与 `.zcode/config.json` 双权威；
 安全策略按 ZCode 产品决策放开。

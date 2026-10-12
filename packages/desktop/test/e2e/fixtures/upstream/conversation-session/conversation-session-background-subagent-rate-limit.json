@@ -82,10 +82,7 @@
           "Async agent launched successfully",
           "toolu_e2e_background_subagent_rate_limit_agent"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
         "lastUserMessageExcludes": ["<task-notification>"]
       },
       "response": {

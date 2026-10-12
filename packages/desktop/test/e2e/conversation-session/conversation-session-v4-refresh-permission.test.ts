@@ -17,9 +17,7 @@ import {
   waitForV4TimelineContaining,
 } from "../helpers/v4-conversation.js";
 
-const V4_REFRESH_PERM_DIR = resolveE2ERuntimePath(
-  "conversation-session-v4-refresh-permission",
-);
+const V4_REFRESH_PERM_DIR = resolveE2ERuntimePath("conversation-session-v4-refresh-permission");
 
 describe("v4 刷新恢复：权限弹窗挂起时 renderer 刷新", () => {
   before(async () => {

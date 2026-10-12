@@ -171,7 +171,7 @@ import type {
 在 `ToolExecutorDeps` 中增加：
 
 ```ts
-  runtimeScope: ToolRuntimeScope;
+runtimeScope: ToolRuntimeScope;
 ```
 
 - [x] **Step 3：executor 默认 main**
@@ -248,7 +248,10 @@ export function decideBashCwdPolicy(input: BashCwdPolicyInput): BashCwdPolicyDec
   if (!input.resolvedCwd) return {};
   if ((input.runtimeScope ?? "main") !== "main") return {};
 
-  const workspaceRoot = normalizeCwdBoundary(input.workspaceRoot, choosePathApi(input.workspaceRoot));
+  const workspaceRoot = normalizeCwdBoundary(
+    input.workspaceRoot,
+    choosePathApi(input.workspaceRoot),
+  );
   const resolvedCwd = normalizeCwdBoundary(
     input.resolvedCwd,
     choosePathApi(input.resolvedCwd, input.workspaceRoot),
@@ -273,7 +276,9 @@ function isInsideOrSamePath(child: string, parent: string): boolean {
   const normalizedChild = normalizeCwdBoundary(child, pathApi);
   const normalizedParent = normalizeCwdBoundary(parent, pathApi);
   const relativePath = pathApi.relative(normalizedParent, normalizedChild);
-  return relativePath === "" || (!relativePath.startsWith("..") && !pathApi.isAbsolute(relativePath));
+  return (
+    relativePath === "" || (!relativePath.startsWith("..") && !pathApi.isAbsolute(relativePath))
+  );
 }
 
 function choosePathApi(...values: string[]): typeof path.posix | typeof path.win32 {
@@ -388,31 +393,31 @@ import { decideBashCwdPolicy } from "./bash-cwd-policy.js";
 把当前逻辑：
 
 ```ts
-  if (result.status === "completed" && result.exitCode === 0 && result.resolvedCwd) {
-    // 修复原因：不复用 shell 进程，但成功 Bash 需要把最终 cwd 写回会话。
-    await context.setWorkingDirectory?.(result.resolvedCwd);
-  }
-  return toBashOutput(result, parsed, context);
+if (result.status === "completed" && result.exitCode === 0 && result.resolvedCwd) {
+  // 修复原因：不复用 shell 进程，但成功 Bash 需要把最终 cwd 写回会话。
+  await context.setWorkingDirectory?.(result.resolvedCwd);
+}
+return toBashOutput(result, parsed, context);
 ```
 
 替换成：
 
 ```ts
-  const cwdDecision = decideBashCwdPolicy({
-    status: result.status,
-    exitCode: result.exitCode,
-    resolvedCwd: result.resolvedCwd,
-    workspaceRoot: context.workspaceRoot,
-    runtimeScope: context.runtimeScope,
-  });
-  if (cwdDecision.nextWorkingDirectory) {
-    // 修复原因：主线程 Bash 成功后保留项目内 cwd；
-    // 离开项目边界时 reset 回原始工作区，并把 reset 文案放进 Bash stderr。
-    await context.setWorkingDirectory?.(cwdDecision.nextWorkingDirectory);
-  }
-  return toBashOutput(result, parsed, context, {
-    stderrSuffix: cwdDecision.stderrSuffix,
-  });
+const cwdDecision = decideBashCwdPolicy({
+  status: result.status,
+  exitCode: result.exitCode,
+  resolvedCwd: result.resolvedCwd,
+  workspaceRoot: context.workspaceRoot,
+  runtimeScope: context.runtimeScope,
+});
+if (cwdDecision.nextWorkingDirectory) {
+  // 修复原因：主线程 Bash 成功后保留项目内 cwd；
+  // 离开项目边界时 reset 回原始工作区，并把 reset 文案放进 Bash stderr。
+  await context.setWorkingDirectory?.(cwdDecision.nextWorkingDirectory);
+}
+return toBashOutput(result, parsed, context, {
+  stderrSuffix: cwdDecision.stderrSuffix,
+});
 ```
 
 - [x] **Step 3：给 toBashOutput 增加 options**
@@ -431,7 +436,10 @@ async function toBashOutput(
 把 stderr 构造改为：
 
 ```ts
-  const stderr = appendStderrSuffix(result.stderr.text || result.error?.message || "", options.stderrSuffix);
+const stderr = appendStderrSuffix(
+  result.stderr.text || result.error?.message || "",
+  options.stderrSuffix,
+);
 ```
 
 在文件底部增加：
@@ -631,14 +639,12 @@ it("resets Bash cwd to workspace root after a successful command leaves the work
     },
   };
 
-  const runtime = createRuntimeForToolLoop(
-    {
-      sessionId,
-      mode: "yolo",
-      workingDirectory: workspaceRoot,
-      executionPort,
-    },
-  );
+  const runtime = createRuntimeForToolLoop({
+    sessionId,
+    mode: "yolo",
+    workingDirectory: workspaceRoot,
+    executionPort,
+  });
 
   await runOneTurnWithToolCalls(runtime, [
     {
@@ -691,13 +697,15 @@ pnpm --filter @zcode/core test -- runtime-tool-loop.test.ts
 新增或复用断言：
 
 ```ts
-expect(bashToolEntry.formatModelContent?.({
-  stdout: "ok\n",
-  stderr: `Shell cwd was reset to ${projectRoot}`,
-  interrupted: false,
-  status: "completed",
-  exitCode: 0,
-} satisfies BashOutput)).toBe(`ok\nShell cwd was reset to ${projectRoot}`);
+expect(
+  bashToolEntry.formatModelContent?.({
+    stdout: "ok\n",
+    stderr: `Shell cwd was reset to ${projectRoot}`,
+    interrupted: false,
+    status: "completed",
+    exitCode: 0,
+  } satisfies BashOutput),
+).toBe(`ok\nShell cwd was reset to ${projectRoot}`);
 ```
 
 - [x] **Step 2：确认 failed/timeout 不追加 reset**

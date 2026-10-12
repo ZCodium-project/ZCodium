@@ -7,7 +7,7 @@ As projects grow, inevitably more and more integration tests are added. This inc
 
 To prevent this, you should run your tests in parallel. WebdriverIO already tests each spec (or _feature file_ in Cucumber) in parallel within a single session. In general, try to test only a single feature per spec file. Try to not have too many or too few tests in one file. (However, there is no golden rule here.)
 
-Once your tests have several spec files, you should start running your tests concurrently. To do so, adjust the `maxInstances` property in your config file. WebdriverIO allows you to run your tests with maximum concurrency—meaning that no matter how many files and tests you have, they can all run in parallel.  (This is still subject to certain limits, like your computer’s CPU, concurrency restrictions, etc.)
+Once your tests have several spec files, you should start running your tests concurrently. To do so, adjust the `maxInstances` property in your config file. WebdriverIO allows you to run your tests with maximum concurrency—meaning that no matter how many files and tests you have, they can all run in parallel. (This is still subject to certain limits, like your computer’s CPU, concurrency restrictions, etc.)
 
 > Let's say you have 3 different capabilities (Chrome, Firefox, and Safari) and you have set `maxInstances` to `1`. The WDIO test runner will spawn 3 processes. Therefore, if you have 10 spec files and you set `maxInstances` to `10`, _all_ spec files will be tested simultaneously, and 30 processes will be spawned.
 
@@ -18,20 +18,23 @@ If you run your own WebDriver grid, you may (for example) have more capacity for
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    // set maxInstance for all browser
-    maxInstances: 10,
-    // ...
-    capabilities: [{
-        browserName: 'firefox'
-    }, {
-        // maxInstances can get overwritten per capability. So if you have an in-house WebDriver
-        // grid with only 5 firefox instance available you can make sure that not more than
-        // 5 instance gets started at a time.
-        browserName: 'chrome'
-    }],
-    // ...
-}
+  // ...
+  // set maxInstance for all browser
+  maxInstances: 10,
+  // ...
+  capabilities: [
+    {
+      browserName: "firefox",
+    },
+    {
+      // maxInstances can get overwritten per capability. So if you have an in-house WebDriver
+      // grid with only 5 firefox instance available you can make sure that not more than
+      // 5 instance gets started at a time.
+      browserName: "chrome",
+    },
+  ],
+  // ...
+};
 ```
 
 ## Inherit From Main Config File
@@ -44,24 +47,28 @@ Then create another config file for each environment, and supplement the the mai
 
 ```js
 // wdio.dev.config.js
-import { deepmerge } from 'deepmerge-ts'
-import wdioConf from './wdio.conf.js'
+import { deepmerge } from "deepmerge-ts";
+import wdioConf from "./wdio.conf.js";
 
 // have main config file as default but overwrite environment specific information
-export const config = deepmerge(wdioConf.config, {
+export const config = deepmerge(
+  wdioConf.config,
+  {
     capabilities: [
-        // more caps defined here
-        // ...
+      // more caps defined here
+      // ...
     ],
 
     // run tests on sauce instead locally
     user: process.env.SAUCE_USERNAME,
     key: process.env.SAUCE_ACCESS_KEY,
-    services: ['sauce']
-}, { clone: false })
+    services: ["sauce"],
+  },
+  { clone: false },
+);
 
 // add an additional reporter
-config.reporters.push('allure')
+config.reporters.push("allure");
 ```
 
 ## Grouping Test Specs In Suites
@@ -73,21 +80,18 @@ First, define your suites in your WDIO config:
 ```js
 // wdio.conf.js
 export const config = {
-    // define all tests
-    specs: ['./test/specs/**/*.spec.js'],
-    // ...
-    // define specific suites
-    suites: {
-        login: [
-            './test/specs/login.success.spec.js',
-            './test/specs/login.failure.spec.js'
-        ],
-        otherFeature: [
-            // ...
-        ]
-    },
-    // ...
-}
+  // define all tests
+  specs: ["./test/specs/**/*.spec.js"],
+  // ...
+  // define specific suites
+  suites: {
+    login: ["./test/specs/login.success.spec.js", "./test/specs/login.failure.spec.js"],
+    otherFeature: [
+      // ...
+    ],
+  },
+  // ...
+};
 ```
 
 Now, if you want to only run a single suite, you can pass the suite name as a CLI argument:
@@ -118,9 +122,11 @@ To group tests to run in a single instance, define them as an array within the s
         "./test/specs/test_b*.js",
     ],
 ```
-In the example above, the tests 'test_login.js', 'test_product_order.js' and 'test_checkout.js' will be run sequentially in a single instance and each of the "test_b*" tests will run concurrently in individual instances.
+
+In the example above, the tests 'test_login.js', 'test_product_order.js' and 'test_checkout.js' will be run sequentially in a single instance and each of the "test_b\*" tests will run concurrently in individual instances.
 
 It is also possible to group specs defined in suites, so you can now also define suites like this:
+
 ```json
     "suites": {
         end2end: [
@@ -133,6 +139,7 @@ It is also possible to group specs defined in suites, so you can now also define
         allb: ["./test/specs/test_b*.js"]
 },
 ```
+
 and in this case all of the tests of the "end2end" suite would be run in a single instance.
 
 When running tests sequentially using a pattern, it will run the spec files in an alphabetical order
@@ -197,7 +204,7 @@ wdio wdio.conf.js --exclude ./test/specs/e2e/login.js
 
 Or, exclude multiple spec files:
 
- ```sh
+```sh
 wdio wdio.conf.js --exclude ./test/specs/signup.js --exclude ./test/specs/forgot-password.js
 ```
 
@@ -290,6 +297,7 @@ This is helpful with large test suites when you already know that your build wil
 The `bail` option expects a number, which specifies how many test failures can occur before WebDriver stop the entire testing run. The default is `0`, meaning that it always runs all tests specs it can find.
 
 Please see [Options Page](configuration) for additional information on the bail configuration.
+
 ## Run options hierarchy
 
 When declaring what specs to run, there is a certain hierarchy defining what pattern will take precedence. Currently, this is how it works, from highest priority to lowest:
@@ -309,7 +317,7 @@ Your config file may define the pattern as such, for non-specific device tests:
 
 ```js
 {
-    specs: ['tests/general/**/*.js']
+  specs: ["tests/general/**/*.js"];
 }
 ```
 
@@ -318,18 +326,14 @@ but then, you will have different capabilities for your Android and iOS devices,
 ```json
 {
   "platformName": "Android",
-  "specs": [
-    "tests/android/**/*.js"
-  ]
+  "specs": ["tests/android/**/*.js"]
 }
 ```
 
 ```json
 {
   "platformName": "iOS",
-  "specs": [
-    "tests/ios/**/*.js"
-  ]
+  "specs": ["tests/ios/**/*.js"]
 }
 ```
 
@@ -338,25 +342,22 @@ If you require both of these capabilities in your config file, then the Android 
 ```js
 //wdio.conf.js
 export const config = {
-    "specs": [
-        "tests/general/**/*.js"
-    ],
-    "capabilities": [
-        {
-            platformName: "Android",
-            specs: ["tests/android/**/*.js"],
-            //...
-        },
-        {
-            platformName: "iOS",
-            specs: ["tests/ios/**/*.js"],
-            //...
-        },
-        {
-            platformName: "Chrome",
-            //config level specs will be used
-        }
-    ]
-}
+  specs: ["tests/general/**/*.js"],
+  capabilities: [
+    {
+      platformName: "Android",
+      specs: ["tests/android/**/*.js"],
+      //...
+    },
+    {
+      platformName: "iOS",
+      specs: ["tests/ios/**/*.js"],
+      //...
+    },
+    {
+      platformName: "Chrome",
+      //config level specs will be used
+    },
+  ],
+};
 ```
-

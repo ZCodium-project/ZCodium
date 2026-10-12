@@ -167,11 +167,11 @@ that's not easy to find. Here's an example of an export/import match that **is**
 easy to find:
 
 ```ts title="import.ts"
-import { MyThing } from './thing.ts';
+import { MyThing } from "./thing.ts";
 ```
 
 ```ts title="export.ts"
-export const MyThing = 'cool';
+export const MyThing = "cool";
 ```
 
 In v2 and v3, Knip collects many of such easy patterns. Other patterns are
@@ -191,7 +191,7 @@ export const OtherName = MyClass;
 ```
 
 ```ts title="instance.ts"
-import * as MyNamespace from './MyClass.ts';
+import * as MyNamespace from "./MyClass.ts";
 
 const { OtherName } = MyNamespace;
 
@@ -228,7 +228,7 @@ export const referencedExport = () => {};
 ```
 
 ```ts title="index.ts"
-import * as NS from './namespace.ts';
+import * as NS from "./namespace.ts";
 
 NS.referencedExport();
 ```

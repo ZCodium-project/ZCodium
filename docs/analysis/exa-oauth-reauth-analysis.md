@@ -352,15 +352,15 @@ credentials.json                              client hash d31ae07a373b
 
 ### 5.6 问题 1 的根因结论
 
-| 层级 | 结论 | 证据等级 | 定性 |
-|---|---|---:|---|
-| 直接触发 | 当前无可用 token，SDK 只能重新授权 | 确认 | 状态事实 |
-| refresh 流程 | 有 refresh 时会加载、尝试 refresh、成功后持久化 | 确认 | 实现正确 |
-| refresh 失败后 | `invalid_grant` 会删 token；`invalid_client` 会删 client+token | 确认 | 合理降级 |
-| 本次具体 refresh error | 日志未记录，无法唯一判定 | 确认缺口 | 可观测性设计缺陷 |
-| 当前多进程覆盖 | canonical pair + 文件锁已保护普通写入 | 确认 | 非当前主根因 |
-| 旧进程/legacy 混写 | 无法证明配对时会主动丢 token | 确认代码行为 | 兼容性风险 |
-| 并发 OAuth/DCR | 不同 lease/process 可重复授权和注册 client | 确认 | 架构设计缺陷 |
+| 层级                   | 结论                                                           |     证据等级 | 定性             |
+| ---------------------- | -------------------------------------------------------------- | -----------: | ---------------- |
+| 直接触发               | 当前无可用 token，SDK 只能重新授权                             |         确认 | 状态事实         |
+| refresh 流程           | 有 refresh 时会加载、尝试 refresh、成功后持久化                |         确认 | 实现正确         |
+| refresh 失败后         | `invalid_grant` 会删 token；`invalid_client` 会删 client+token |         确认 | 合理降级         |
+| 本次具体 refresh error | 日志未记录，无法唯一判定                                       |     确认缺口 | 可观测性设计缺陷 |
+| 当前多进程覆盖         | canonical pair + 文件锁已保护普通写入                          |         确认 | 非当前主根因     |
+| 旧进程/legacy 混写     | 无法证明配对时会主动丢 token                                   | 确认代码行为 | 兼容性风险       |
+| 并发 OAuth/DCR         | 不同 lease/process 可重复授权和注册 client                     |         确认 | 架构设计缺陷     |
 
 ## 6. 问题 2：15 秒超时链路与连接隔离
 
@@ -382,7 +382,7 @@ Session 启动时传入：
 connectConfiguredServers(servers, {
   oauthAuthorizationTimeoutMs: MCP_SESSION_OAUTH_AUTHORIZATION_TIMEOUT_MS,
   // ...
-})
+});
 ```
 
 adapter 把它传到 OAuth session：
@@ -391,8 +391,7 @@ adapter 把它传到 OAuth session：
 - `apps/zcode-cli/packages/adapters/src/mcp/index.ts:770-787`
 
 ```ts
-authorizationTimeoutMs:
-  oauthAuthorizationTimeoutMs ?? this.mcpOAuth?.authorizationTimeoutMs
+authorizationTimeoutMs: oauthAuthorizationTimeoutMs ?? this.mcpOAuth?.authorizationTimeoutMs;
 ```
 
 等待 callback 时实际使用 `oauthSession.timeoutMs`：
@@ -404,7 +403,7 @@ withTimeout(
   oauthSession.waitForAuthorizationCallback(),
   oauthSession.timeoutMs,
   `MCP server ${name} OAuth authorization timed out`,
-)
+);
 ```
 
 OAuth 模块的默认 5 分钟只在调用方没有覆盖时生效：
@@ -413,9 +412,7 @@ OAuth 模块的默认 5 分钟只在调用方没有覆盖时生效：
 - `apps/zcode-cli/packages/adapters/src/mcp/oauth.ts:96-107`
 
 ```ts
-timeoutMs:
-  input.options?.authorizationTimeoutMs
-  ?? DEFAULT_MCP_OAUTH_CALLBACK_TIMEOUT_MS
+timeoutMs: input.options?.authorizationTimeoutMs ?? DEFAULT_MCP_OAUTH_CALLBACK_TIMEOUT_MS;
 ```
 
 所以二次认证若由 Session startup 触发，确定命中 15 秒，不是 5 分钟。
@@ -733,16 +730,16 @@ leaseId/isolation
 
 ## 10. 最终定性表
 
-| 问题 | 根因/因素 | 定性 |
-|---|---|---|
-| 过一段时间要求重认证 | token 已不存在；refresh 未恢复后进入交互授权 | 直接机制已确认 |
-| refresh token 是否保存/加载 | 当前实现会保存、加载、refresh 后更新 | 非 bug |
-| 本次 refresh 为什么失败 | token endpoint 错误码缺失，无法唯一判定 | 可观测性设计缺陷 |
-| client/token 跨进程覆盖 | 当前 canonical pair + 文件锁已保护；旧进程仍有兼容风险 | 当前非主根因 / 历史实现风险 |
-| 二次认证 timed out | Session 硬编码 15 秒并关闭自己的 OAuth session | 实现 bug |
-| 设置页 5 分钟为何无效 | settings/session 是不同 lease 和 connection | 架构设计缺陷 |
-| 超时后 callback/verifier | listener 关闭、当前 state verifier 清理 | 实现基本正确 |
-| stale state | 浏览器旧 URL、废弃 DCR client、多 URL 并存 | 设计缺陷 |
+| 问题                        | 根因/因素                                                             | 定性                                |
+| --------------------------- | --------------------------------------------------------------------- | ----------------------------------- |
+| 过一段时间要求重认证        | token 已不存在；refresh 未恢复后进入交互授权                          | 直接机制已确认                      |
+| refresh token 是否保存/加载 | 当前实现会保存、加载、refresh 后更新                                  | 非 bug                              |
+| 本次 refresh 为什么失败     | token endpoint 错误码缺失，无法唯一判定                               | 可观测性设计缺陷                    |
+| client/token 跨进程覆盖     | 当前 canonical pair + 文件锁已保护；旧进程仍有兼容风险                | 当前非主根因 / 历史实现风险         |
+| 二次认证 timed out          | Session 硬编码 15 秒并关闭自己的 OAuth session                        | 实现 bug                            |
+| 设置页 5 分钟为何无效       | settings/session 是不同 lease 和 connection                           | 架构设计缺陷                        |
+| 超时后 callback/verifier    | listener 关闭、当前 state verifier 清理                               | 实现基本正确                        |
+| stale state                 | 浏览器旧 URL、废弃 DCR client、多 URL 并存                            | 设计缺陷                            |
 | Exa Server Components error | 最可能由旧 client/新 redirect 或并发 stale URL 触发；未抓到服务端错误 | ZCode 边界缺陷 + Exa 页面健壮性 bug |
 
 ## 11. 一句话根因

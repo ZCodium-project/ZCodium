@@ -117,13 +117,13 @@ MTE-02 经真实 Custom 模板创建空 provider，读取节点的 providerId，
 
 ## Clarification Log / Boundary Decisions
 
-| 决定                     | 状态                 | 范围                                                                                              |
-| ------------------------ | -------------------- | ------------------------------------------------------------------------------------------------- |
-| 修复现有失败、补齐 P0/P1 | accepted             | 用户明确要求 Goal 继续完成；包括必要产品缺陷，不只改断言                                          |
-| 覆盖率                   | accepted             | 用户调整为 90%，排除 Lottie；当前 Renderer 90.07%，不冒充跨域整体结果；函数/分支单列，不以单测补数 |
-| 动作能力                 | accepted             | 保留 close/open_url/claim/navigate/copy_text；不创建任务、不切模型、不自动安装/支付               |
-| 旧 API 迁移              | bug-candidate → 修复 | 使用 providerSettingsService.refresh 与当前 providerId/连接结构；不恢复退役服务                   |
-| 测试生命周期             | accepted             | case-local 场景与清理；用户授权达到目标且全部通过后转正，只用本机 Electron 验证，不用 Docker、不 push |
+| 决定                     | 状态                 | 范围                                                                                                   |
+| ------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------ |
+| 修复现有失败、补齐 P0/P1 | accepted             | 用户明确要求 Goal 继续完成；包括必要产品缺陷，不只改断言                                               |
+| 覆盖率                   | accepted             | 用户调整为 90%，排除 Lottie；当前 Renderer 90.07%，不冒充跨域整体结果；函数/分支单列，不以单测补数     |
+| 动作能力                 | accepted             | 保留 close/open_url/claim/navigate/copy_text；不创建任务、不切模型、不自动安装/支付                    |
+| 旧 API 迁移              | bug-candidate → 修复 | 使用 providerSettingsService.refresh 与当前 providerId/连接结构；不恢复退役服务                        |
+| 测试生命周期             | accepted             | case-local 场景与清理；用户授权达到目标且全部通过后转正，只用本机 Electron 验证，不用 Docker、不 push  |
 | 第三方/平台              | pruned combinations  | 官方版本安全校验使用确定性回调替身；真实购买/生产资格不执行。macOS 运行不能替代 Windows/Linux/手机实机 |
 
 ## Domain Scope / Concept Map / State Owners
@@ -362,7 +362,7 @@ App 退出登录确认 -> OAuth 清理真实测试凭据 -> 原 Host 释放
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | 现有用例   | 逐例重启/HTTP reset；迁接 providerId、当前账户 ID、Selection View 分组；真实非空连接快照断言                                         | 自定义 provider 导航的独立 E2E                                           |
 | 关闭与上报 | 新增普通/领取结果 Popup × X/Esc/遮罩 6 例；修复 iframe 默认焦点吞 Esc                                                                | 主动进入 iframe 后的键盘边界未扩展协议                                   |
-| 请求/故障  | 新增 seq 首次 0/连续递增/POST 不计数、必要请求头、report 500 不阻塞、query 503 恢复 3 例                                             | 匿名/凭据切换、安全校验失败/取消、慢响应竞态、完整退避/隐藏恢复            |
+| 请求/故障  | 新增 seq 首次 0/连续递增/POST 不计数、必要请求头、report 500 不阻塞、query 503 恢复 3 例                                             | 匿名/凭据切换、安全校验失败/取消、慢响应竞态、完整退避/隐藏恢复          |
 | 媒体/缓存  | 新增主题资源、坏 dark/default 图片、坏 ZIP 有/无 fallback 5 例；原 Bundle 用例追加解包文件不重写和 lease 404；修复 Host 异步清理漏调 | 解码/超时/大小/重定向边界、伪造握手、视频与 reduced-motion、Web fallback |
 | 产品修复   | Root 错误态图标、领取后的 ProviderSettingsService 刷新、自定义 providerId 匹配、Popup 初始焦点、异步-only 服务回收                   | 更广 P0/P1 仍按 MTE 矩阵推进，不能宣称全部完成                           |
 | 采集设施   | 每例复用 Node 覆盖归一化，避免重启累积 source map 撑满磁盘                                                                           | Node V8/source-map 跨域可执行行口径仍需统一，不能 OR 合并为全分支百分比  |

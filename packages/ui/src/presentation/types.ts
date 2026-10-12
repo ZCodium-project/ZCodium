@@ -13,12 +13,7 @@ export interface PresentationRenderHandle {
   dispose(): void;
 }
 
-export type PresentationElementNodeType =
-  | "shape"
-  | "picture"
-  | "chart"
-  | "table"
-  | "table-cell";
+export type PresentationElementNodeType = "shape" | "picture" | "chart" | "table" | "table-cell";
 
 export interface PresentationElementBounds {
   x: number;

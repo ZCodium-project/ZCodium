@@ -15,6 +15,7 @@
 ### Task 1: Extend Model Draft Data Rules
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderModelMetadata.ts`
 - Modify: `packages/ui/test/modelProviderDraftSave.test.ts`
 
@@ -23,107 +24,103 @@
 Append these cases under `describe("provider model metadata draft", ...)` in `packages/ui/test/modelProviderDraftSave.test.ts`:
 
 ```ts
-  it("会保存模型 API 格式并按当前设置页格式选择 defaultKind", async () => {
-    const module = await import(
-      "@/settings/model-provider-section/ProviderModelMetadata.js"
-    );
-    const resolveProviderModelDraftCommit = (
-      module as unknown as {
-        resolveProviderModelDraftCommit: (input: {
-          currentModel: ReturnType<typeof createModelProviderModelConfig>;
-          draft: {
-            idValue: string;
-            nameValue: string;
-            kindsValue: Array<"anthropic" | "openai-compatible" | "openai">;
-            contextWindowValue: string;
-            maxOutputTokensValue: string;
-            reasoningJsonValue: string;
-          };
-          preferredDefaultKind?: "anthropic" | "openai-compatible" | "openai" | null;
-        }) => unknown;
-      }
-    ).resolveProviderModelDraftCommit;
+it("会保存模型 API 格式并按当前设置页格式选择 defaultKind", async () => {
+  const module = await import("@/settings/model-provider-section/ProviderModelMetadata.js");
+  const resolveProviderModelDraftCommit = (
+    module as unknown as {
+      resolveProviderModelDraftCommit: (input: {
+        currentModel: ReturnType<typeof createModelProviderModelConfig>;
+        draft: {
+          idValue: string;
+          nameValue: string;
+          kindsValue: Array<"anthropic" | "openai-compatible" | "openai">;
+          contextWindowValue: string;
+          maxOutputTokensValue: string;
+          reasoningJsonValue: string;
+        };
+        preferredDefaultKind?: "anthropic" | "openai-compatible" | "openai" | null;
+      }) => unknown;
+    }
+  ).resolveProviderModelDraftCommit;
 
-    const result = resolveProviderModelDraftCommit({
-      currentModel: createModelProviderModelConfig({
-        id: "qwen-old",
-        kinds: ["anthropic"],
-      }),
-      preferredDefaultKind: "openai-compatible",
+  const result = resolveProviderModelDraftCommit({
+    currentModel: createModelProviderModelConfig({
+      id: "qwen-old",
+      kinds: ["anthropic"],
+    }),
+    preferredDefaultKind: "openai-compatible",
+    draft: {
+      idValue: "qwen-new",
+      nameValue: "",
+      kindsValue: ["openai", "anthropic", "openai-compatible"],
+      contextWindowValue: "64000",
+      maxOutputTokensValue: "",
+      reasoningJsonValue: "",
+    },
+  });
+
+  expect(result).toEqual({
+    status: "commit",
+    model: expect.objectContaining({
+      id: "qwen-new",
+      kinds: ["anthropic", "openai-compatible", "openai"],
+      defaultKind: "openai-compatible",
+      contextWindow: 64000,
+    }),
+  });
+});
+
+it("模型 ID 或 API 格式为空时不会提交模型变更", async () => {
+  const module = await import("@/settings/model-provider-section/ProviderModelMetadata.js");
+  const resolveProviderModelDraftCommit = (
+    module as unknown as {
+      resolveProviderModelDraftCommit: (input: {
+        currentModel: ReturnType<typeof createModelProviderModelConfig>;
+        draft: {
+          idValue: string;
+          nameValue: string;
+          kindsValue: Array<"anthropic" | "openai-compatible" | "openai">;
+          contextWindowValue: string;
+          maxOutputTokensValue: string;
+          reasoningJsonValue: string;
+        };
+      }) => unknown;
+    }
+  ).resolveProviderModelDraftCommit;
+
+  const currentModel = createModelProviderModelConfig({
+    id: "qwen-old",
+    kinds: ["openai-compatible"],
+  });
+
+  expect(
+    resolveProviderModelDraftCommit({
+      currentModel,
       draft: {
-        idValue: "qwen-new",
+        idValue: " ",
         nameValue: "",
-        kindsValue: ["openai", "anthropic", "openai-compatible"],
-        contextWindowValue: "64000",
+        kindsValue: ["openai-compatible"],
+        contextWindowValue: "128000",
         maxOutputTokensValue: "",
         reasoningJsonValue: "",
       },
-    });
+    }),
+  ).toEqual({ status: "invalid", field: "id" });
 
-    expect(result).toEqual({
-      status: "commit",
-      model: expect.objectContaining({
-        id: "qwen-new",
-        kinds: ["anthropic", "openai-compatible", "openai"],
-        defaultKind: "openai-compatible",
-        contextWindow: 64000,
-      }),
-    });
-  });
-
-  it("模型 ID 或 API 格式为空时不会提交模型变更", async () => {
-    const module = await import(
-      "@/settings/model-provider-section/ProviderModelMetadata.js"
-    );
-    const resolveProviderModelDraftCommit = (
-      module as unknown as {
-        resolveProviderModelDraftCommit: (input: {
-          currentModel: ReturnType<typeof createModelProviderModelConfig>;
-          draft: {
-            idValue: string;
-            nameValue: string;
-            kindsValue: Array<"anthropic" | "openai-compatible" | "openai">;
-            contextWindowValue: string;
-            maxOutputTokensValue: string;
-            reasoningJsonValue: string;
-          };
-        }) => unknown;
-      }
-    ).resolveProviderModelDraftCommit;
-
-    const currentModel = createModelProviderModelConfig({
-      id: "qwen-old",
-      kinds: ["openai-compatible"],
-    });
-
-    expect(
-      resolveProviderModelDraftCommit({
-        currentModel,
-        draft: {
-          idValue: " ",
-          nameValue: "",
-          kindsValue: ["openai-compatible"],
-          contextWindowValue: "128000",
-          maxOutputTokensValue: "",
-          reasoningJsonValue: "",
-        },
-      }),
-    ).toEqual({ status: "invalid", field: "id" });
-
-    expect(
-      resolveProviderModelDraftCommit({
-        currentModel,
-        draft: {
-          idValue: "qwen-old",
-          nameValue: "",
-          kindsValue: [],
-          contextWindowValue: "128000",
-          maxOutputTokensValue: "",
-          reasoningJsonValue: "",
-        },
-      }),
-    ).toEqual({ status: "invalid", field: "kinds" });
-  });
+  expect(
+    resolveProviderModelDraftCommit({
+      currentModel,
+      draft: {
+        idValue: "qwen-old",
+        nameValue: "",
+        kindsValue: [],
+        contextWindowValue: "128000",
+        maxOutputTokensValue: "",
+        reasoningJsonValue: "",
+      },
+    }),
+  ).toEqual({ status: "invalid", field: "kinds" });
+});
 ```
 
 - [ ] **Step 2: Run tests to verify failure**
@@ -147,11 +144,7 @@ import {
   type ModelProviderModelConfig,
 } from "@zcode/shared";
 
-const MODEL_PROVIDER_KIND_ORDER: ModelProviderKind[] = [
-  "anthropic",
-  "openai-compatible",
-  "openai",
-];
+const MODEL_PROVIDER_KIND_ORDER: ModelProviderKind[] = ["anthropic", "openai-compatible", "openai"];
 
 export interface ProviderModelDraftValues {
   idValue: string;
@@ -164,7 +157,10 @@ export interface ProviderModelDraftValues {
 
 export type ProviderModelDraftCommitResult =
   | { status: "commit"; model: ModelProviderModelConfig }
-  | { status: "invalid"; field: "id" | "kinds" | "contextWindow" | "maxOutputTokens" | "reasoning" };
+  | {
+      status: "invalid";
+      field: "id" | "kinds" | "contextWindow" | "maxOutputTokens" | "reasoning";
+    };
 
 export function createProviderModelDraftValues(
   model: ModelProviderModelConfig,
@@ -174,11 +170,8 @@ export function createProviderModelDraftValues(
     nameValue: model.name ?? "",
     kindsValue: normalizeProviderModelDraftKinds(model.kinds),
     contextWindowValue: String(model.contextWindow),
-    maxOutputTokensValue:
-      model.maxOutputTokens === undefined ? "" : String(model.maxOutputTokens),
-    reasoningJsonValue: model.reasoning
-      ? JSON.stringify(model.reasoning, null, 2)
-      : "",
+    maxOutputTokensValue: model.maxOutputTokens === undefined ? "" : String(model.maxOutputTokens),
+    reasoningJsonValue: model.reasoning ? JSON.stringify(model.reasoning, null, 2) : "",
   };
 }
 
@@ -246,6 +239,7 @@ Expected: PASS.
 ### Task 2: Expand The Model Editor Dialog
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderModelMetadataDialog.tsx`
 - Modify: `packages/ui/test/providerModelMetadataDialog.test.ts`
 - Modify: `packages/ui/src/i18n/locales/en-US.ts`
@@ -270,17 +264,11 @@ Add this mock so dropdown content renders in static markup:
 
 ```ts
 vi.mock("@/components/ui/dropdown-menu.js", () => ({
-  DropdownMenu: ({ children }: { children: ReactNode }) =>
-    createElement("div", null, children),
+  DropdownMenu: ({ children }: { children: ReactNode }) => createElement("div", null, children),
   DropdownMenuContent: ({ children }: { children: ReactNode }) =>
     createElement("div", null, children),
-  DropdownMenuCheckboxItem: ({
-    children,
-    checked,
-  }: {
-    children: ReactNode;
-    checked?: boolean;
-  }) => createElement("div", { "data-checked": checked ? "true" : "false" }, children),
+  DropdownMenuCheckboxItem: ({ children, checked }: { children: ReactNode; checked?: boolean }) =>
+    createElement("div", { "data-checked": checked ? "true" : "false" }, children),
   DropdownMenuTrigger: ({ children }: { children: ReactNode }) =>
     createElement("div", null, children),
 }));
@@ -289,35 +277,35 @@ vi.mock("@/components/ui/dropdown-menu.js", () => ({
 Add a test:
 
 ```ts
-  it("添加模型弹窗展示模型 ID、API 格式、上下文窗口和推理强度", () => {
-    const html = renderToStaticMarkup(
-      createElement(ProviderModelMetadataDialog, {
-        mode: "add",
-        open: true,
-        draft: {
-          idValue: "",
-          nameValue: "",
-          kindsValue: ["anthropic"],
-          contextWindowValue: "128000",
-          maxOutputTokensValue: "",
-          reasoningJsonValue: "",
-        },
-        draftErrorMessage: null,
-        onOpenChange: vi.fn(),
-        onDraftChange: vi.fn(),
-        onCommit: vi.fn(() => true),
-      }),
-    );
+it("添加模型弹窗展示模型 ID、API 格式、上下文窗口和推理强度", () => {
+  const html = renderToStaticMarkup(
+    createElement(ProviderModelMetadataDialog, {
+      mode: "add",
+      open: true,
+      draft: {
+        idValue: "",
+        nameValue: "",
+        kindsValue: ["anthropic"],
+        contextWindowValue: "128000",
+        maxOutputTokensValue: "",
+        reasoningJsonValue: "",
+      },
+      draftErrorMessage: null,
+      onOpenChange: vi.fn(),
+      onDraftChange: vi.fn(),
+      onCommit: vi.fn(() => true),
+    }),
+  );
 
-    expect(html).toContain("添加模型");
-    expect(html).toContain("模型 ID");
-    expect(html).toContain("API 格式");
-    expect(html).toContain("Anthropic Messages (/v1/messages)");
-    expect(html).toContain("Chat Completions (/chat/completions)");
-    expect(html).toContain("Responses (/responses)");
-    expect(html).toContain("上下文窗口");
-    expect(html).toContain("推理强度 JSON");
-  });
+  expect(html).toContain("添加模型");
+  expect(html).toContain("模型 ID");
+  expect(html).toContain("API 格式");
+  expect(html).toContain("Anthropic Messages (/v1/messages)");
+  expect(html).toContain("Chat Completions (/chat/completions)");
+  expect(html).toContain("Responses (/responses)");
+  expect(html).toContain("上下文窗口");
+  expect(html).toContain("推理强度 JSON");
+});
 ```
 
 - [ ] **Step 2: Run test to verify failure**
@@ -391,9 +379,9 @@ function ProviderModelApiFormatMultiSelect({
   onChange: (kinds: ModelProviderKind[]) => void;
 }) {
   const { intl } = useZCodeIntl();
-  const labels = MODEL_API_FORMAT_OPTIONS.filter((option) =>
-    kinds.includes(option.kind),
-  ).map((option) => intl.formatMessage({ id: option.labelId }));
+  const labels = MODEL_API_FORMAT_OPTIONS.filter((option) => kinds.includes(option.kind)).map(
+    (option) => intl.formatMessage({ id: option.labelId }),
+  );
   const triggerText =
     labels.length > 0
       ? labels.join(", ")
@@ -402,12 +390,7 @@ function ProviderModelApiFormatMultiSelect({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          className="w-full justify-between"
-        >
+        <Button type="button" variant="outline" size="lg" className="w-full justify-between">
           <span className="min-w-0 truncate text-left">{triggerText}</span>
           <ChevronDown className="size-3.5 text-foreground-subtle" />
         </Button>
@@ -491,16 +474,18 @@ Set the title to:
 For add mode, render footer:
 
 ```tsx
-{mode === "add" ? (
-  <DialogFooter>
-    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-      {intl.formatMessage({ id: "common.cancel" })}
-    </Button>
-    <Button type="button" onClick={onCommit}>
-      {intl.formatMessage({ id: "settings.modelProvider.addModel" })}
-    </Button>
-  </DialogFooter>
-) : null}
+{
+  mode === "add" ? (
+    <DialogFooter>
+      <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        {intl.formatMessage({ id: "common.cancel" })}
+      </Button>
+      <Button type="button" onClick={onCommit}>
+        {intl.formatMessage({ id: "settings.modelProvider.addModel" })}
+      </Button>
+    </DialogFooter>
+  ) : null;
+}
 ```
 
 - [ ] **Step 4: Add i18n messages**
@@ -532,6 +517,7 @@ Expected: PASS.
 ### Task 3: Wire Add Model To The Dialog
 
 **Files:**
+
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderCardSections.tsx`
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderFormControls.tsx`
 - Modify: `packages/ui/src/settings/model-provider-section/InlineEditableProviderCard.tsx`
@@ -544,17 +530,13 @@ In `packages/ui/test/modelProviderModelRowEditor.test.ts`, add a test for the pu
 ```ts
 import { createProviderModelAddDraft } from "@/settings/model-provider-section/ProviderCardSections.js";
 
-  it("新增模型 draft 默认选中当前设置页 API 格式", () => {
-    expect(
-      createProviderModelAddDraft("openai-chat-completions").kindsValue,
-    ).toEqual(["openai-compatible"]);
-    expect(createProviderModelAddDraft("openai-responses").kindsValue).toEqual([
-      "openai",
-    ]);
-    expect(createProviderModelAddDraft("anthropic-messages").kindsValue).toEqual([
-      "anthropic",
-    ]);
-  });
+it("新增模型 draft 默认选中当前设置页 API 格式", () => {
+  expect(createProviderModelAddDraft("openai-chat-completions").kindsValue).toEqual([
+    "openai-compatible",
+  ]);
+  expect(createProviderModelAddDraft("openai-responses").kindsValue).toEqual(["openai"]);
+  expect(createProviderModelAddDraft("anthropic-messages").kindsValue).toEqual(["anthropic"]);
+});
 ```
 
 - [ ] **Step 2: Run test to verify failure**
@@ -606,7 +588,12 @@ Pass `mode="edit"` into the dialog:
 In `ProviderCardSections.tsx`, change the React import and add `createModelProviderModelConfig` to the existing `@zcode/shared` import:
 
 ```ts
-import { useCallback, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
+import {
+  useCallback,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
+} from "react";
 ```
 
 Import dialog helpers:
@@ -654,9 +641,7 @@ const createAddDraft = useCallback(
   () => createProviderModelAddDraft(currentApiFormat),
   [currentApiFormat],
 );
-const [addDraft, setAddDraft] = useState<ProviderModelDraftValues>(() =>
-  createAddDraft(),
-);
+const [addDraft, setAddDraft] = useState<ProviderModelDraftValues>(() => createAddDraft());
 const [addDraftErrorField, setAddDraftErrorField] = useState<
   "id" | "kinds" | "contextWindow" | "maxOutputTokens" | "reasoning" | null
 >(null);
@@ -756,6 +741,7 @@ Expected: PASS.
 ### Task 4: Verification And Commit
 
 **Files:**
+
 - Inspect all modified files from Tasks 1-3.
 
 - [ ] **Step 1: Run focused tests**

@@ -141,9 +141,7 @@ describe("skill sync service", () => {
 
     const result = await service.listLocalUserSkillCandidates();
 
-    expect(result.candidates.map((candidate) => candidate.directoryName)).toEqual([
-      "review-zcode",
-    ]);
+    expect(result.candidates.map((candidate) => candidate.directoryName)).toEqual(["review-zcode"]);
   });
 
   it("deduplicates agents skills already covered by zcode symlink realpath", async () => {
@@ -177,9 +175,7 @@ describe("skill sync service", () => {
 
     const result = await service.listLocalUserSkillCandidates();
 
-    expect(result.candidates.map((candidate) => candidate.directoryName)).toEqual([
-      "aaa-link",
-    ]);
+    expect(result.candidates.map((candidate) => candidate.directoryName)).toEqual(["aaa-link"]);
   });
 
   it("exports nested agents skills preserving their relative directory path", async () => {

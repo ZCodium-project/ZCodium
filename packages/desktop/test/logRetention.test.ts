@@ -2,10 +2,7 @@ import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  cleanupExpiredLogFiles,
-  shouldDeleteExpiredLogFile,
-} from "../src/main/logRetention.js";
+import { cleanupExpiredLogFiles, shouldDeleteExpiredLogFile } from "../src/main/logRetention.js";
 
 const TEST_NOW = new Date(2026, 3, 14, 12, 0, 0);
 
@@ -13,11 +10,7 @@ describe("main log retention", () => {
   const tempDirs: string[] = [];
 
   afterEach(async () => {
-    await Promise.all(
-      tempDirs.splice(0).map((dir) =>
-        rm(dir, { recursive: true, force: true }),
-      ),
-    );
+    await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
   });
 
   async function createTempDir(): Promise<string> {
@@ -45,15 +38,8 @@ describe("main log retention", () => {
     const result = cleanupExpiredLogFiles(logDir, { now: TEST_NOW });
     const remainingFiles = (await readdir(logDir)).sort();
 
-    expect(result.deletedFiles.sort()).toEqual([
-      "2026-03-30.log",
-      "2026-03-31.log",
-    ]);
+    expect(result.deletedFiles.sort()).toEqual(["2026-03-30.log", "2026-03-31.log"]);
     expect(result.failedFiles).toEqual([]);
-    expect(remainingFiles).toEqual([
-      "2026-04-01.log",
-      "2026-04-14.log",
-      "not-a-log.txt",
-    ]);
+    expect(remainingFiles).toEqual(["2026-04-01.log", "2026-04-14.log", "not-a-log.txt"]);
   });
 });

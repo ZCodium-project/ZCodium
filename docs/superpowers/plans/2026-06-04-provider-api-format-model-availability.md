@@ -13,6 +13,7 @@
 ### Task 1: UI Tests For Format Options And Model Tags
 
 **Files:**
+
 - Modify: `packages/ui/test/modelProviderModelRowEditor.test.ts`
 
 - [x] **Step 1: Add failing render tests**
@@ -28,6 +29,7 @@ Expected: FAIL because `ProviderConnectionSection` still maps the hard-coded `AP
 ### Task 2: Implement Provider Format Filtering And Row Tags
 
 **Files:**
+
 - Create: `packages/ui/src/settings/model-provider-section/ProviderModelApiFormatTags.tsx`
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderCardSections.tsx`
 - Modify: `packages/ui/src/settings/model-provider-section/ProviderFormControls.tsx`
@@ -60,6 +62,7 @@ Expected: PASS.
 ### Task 3: Documentation And Full Verification
 
 **Files:**
+
 - Modify: `docs/model-provider-catalog-metadata.md`
 
 - [x] **Step 1: Document settings behavior**
@@ -69,6 +72,7 @@ Record that API format choices are supplier-supported, settings keep the full mo
 - [x] **Step 2: Run required verification**
 
 Run:
+
 - `pnpm vitest run packages/ui/test/modelProviderModelRowEditor.test.ts`
 - `pnpm typecheck`
 - `pnpm lint`
@@ -78,6 +82,7 @@ Expected: all commands exit 0.
 - [ ] **Step 3: Commit**
 
 Run:
+
 - `git status --short`
 - `git add packages/ui/src/settings/model-provider-section/ProviderCardSections.tsx packages/ui/src/settings/model-provider-section/ProviderFormControls.tsx packages/ui/src/settings/model-provider-section/InlineEditableProviderCard.tsx packages/ui/src/i18n/locales/en-US.ts packages/ui/src/i18n/locales/zh-CN.ts packages/ui/test/modelProviderModelRowEditor.test.ts docs/model-provider-catalog-metadata.md docs/superpowers/plans/2026-06-04-provider-api-format-model-availability.md`
 - `git commit -m "feat(model-provider): mark model availability by api format"`

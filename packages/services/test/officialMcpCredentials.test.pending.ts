@@ -571,17 +571,17 @@ describe("official mcp credential resolver", () => {
 describe("official mcp credential resolved log", () => {
   it("OMCP-LOG-01: dedup key buckets expiry by hour and separates family/scope", () => {
     const personal = { providerFamily: "bigmodel", planTargetType: "PERSONAL" } as const;
-    expect(
-      createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: 3600 }),
-    ).toBe("bigmodel|PERSONAL|t1");
+    expect(createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: 3600 })).toBe(
+      "bigmodel|PERSONAL|t1",
+    );
     // 桶边界：3599 落在 t0，跨过 3600 进入 t1
-    expect(
-      createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: 3599 }),
-    ).toBe("bigmodel|PERSONAL|t0");
+    expect(createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: 3599 })).toBe(
+      "bigmodel|PERSONAL|t0",
+    );
     // 过期（≤0）与解析失败（undefined）是独立桶：跨过零点、token 形态变化必落新键
-    expect(
-      createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: -5 }),
-    ).toBe("bigmodel|PERSONAL|expired");
+    expect(createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: -5 })).toBe(
+      "bigmodel|PERSONAL|expired",
+    );
     expect(
       createCredentialResolvedLogKey({ ...personal, maasJwtExpiresInSeconds: undefined }),
     ).toBe("bigmodel|PERSONAL|unparsable");

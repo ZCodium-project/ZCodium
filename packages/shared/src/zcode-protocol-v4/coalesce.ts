@@ -166,10 +166,7 @@ export function coalesceConversationDeltas(
  * conflation 辅助（sessions-index 等最新态 topic 通用）：按 key 只保留每个对象的最后一次更新。
  * 保序：保留项按其「最后一次出现」的相对顺序输出。
  */
-export function conflateByKey<T>(
-  items: readonly T[],
-  keyOf: (item: T) => string,
-): T[] {
+export function conflateByKey<T>(items: readonly T[], keyOf: (item: T) => string): T[] {
   const lastIndexByKey = new Map<string, number>();
   items.forEach((item, index) => {
     lastIndexByKey.set(keyOf(item), index);

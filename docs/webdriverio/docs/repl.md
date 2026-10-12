@@ -33,13 +33,15 @@ WebdriverIO with capability array:
 
 ```ts title="wdio.conf.ts example"
 export const config = {
-    // ...
-    capabilities:[{
-        browserName: 'chrome', // options: `chrome`, `edge`, `firefox`, `safari`, `chromium`
-        browserVersion: '27.0', // browser version
-        platformName: 'Windows 10' // OS platform
-    }]
-}
+  // ...
+  capabilities: [
+    {
+      browserName: "chrome", // options: `chrome`, `edge`, `firefox`, `safari`, `chromium`
+      browserVersion: "27.0", // browser version
+      platformName: "Windows 10", // OS platform
+    },
+  ],
+};
 ```
 
 ```sh
@@ -50,20 +52,20 @@ WebdriverIO with [multiremote](https://webdriver.io/docs/multiremote/) capabilit
 
 ```ts title="wdio.conf.ts example"
 export const config = {
-    // ...
-    capabilities: {
-        myChromeBrowser: {
-            capabilities: {
-                browserName: 'chrome'
-            }
-        },
-        myFirefoxBrowser: {
-            capabilities: {
-                browserName: 'firefox'
-            }
-        }
-    }
-}
+  // ...
+  capabilities: {
+    myChromeBrowser: {
+      capabilities: {
+        browserName: "chrome",
+      },
+    },
+    myFirefoxBrowser: {
+      capabilities: {
+        browserName: "firefox",
+      },
+    },
+  },
+};
 ```
 
 ```sh
@@ -73,11 +75,11 @@ wdio repl "./path/to/wdio.config.js" "myChromeBrowser" -p 9515
 Or if you want to run local mobile tests using Appium:
 
 <Tabs
-  defaultValue="android"
-  values={[
-    {label: 'Android', value: 'android'},
-    {label: 'iOS', value: 'ios'}
-  ]
+defaultValue="android"
+values={[
+{label: 'Android', value: 'android'},
+{label: 'iOS', value: 'ios'}
+]
 }>
 <TabItem value="android">
 
@@ -105,18 +107,18 @@ This would open App session on connected device/emulator/simulator. Make sure Ap
 
 Capabilities for iOS device can be passed with arguments:
 
-* `-v`      - `platformVersion`: version of Android/iOS platform
-* `-d`      - `deviceName`: name of mobile device
-* `-u`      - `udid`: udid for real devices
+- `-v` - `platformVersion`: version of Android/iOS platform
+- `-d` - `deviceName`: name of mobile device
+- `-u` - `udid`: udid for real devices
 
 Usage:
 
 <Tabs
-  defaultValue="long"
-  values={[
-    {label: 'Long Parameter Names', value: 'long'},
-    {label: 'Short Parameter Names', value: 'short'}
-  ]
+defaultValue="long"
+values={[
+{label: 'Long Parameter Names', value: 'long'},
+{label: 'Short Parameter Names', value: 'short'}
+]
 }>
 <TabItem value="long">
 

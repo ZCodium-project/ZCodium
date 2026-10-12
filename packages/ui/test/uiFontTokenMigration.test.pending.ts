@@ -7,9 +7,7 @@ describe("UI font token migration", () => {
   it("maps legacy 13px UI text to text-ui-base", () => {
     const tokenSpec = readSource("docs/ui/ui-font-tokens.md");
     const remoteFields = readSource("packages/ui/src/RemoteConnectionFields.tsx");
-    const automationEditor = readSource(
-      "packages/ui/src/settings/AutomationEditView.tsx",
-    );
+    const automationEditor = readSource("packages/ui/src/settings/AutomationEditView.tsx");
     const conversationRows = readSource("packages/ui/src/v4/ConversationRowView.tsx");
 
     expect(tokenSpec).toContain("Replace legacy explicit 13px UI text with `text-ui-base`");
@@ -23,21 +21,17 @@ describe("UI font token migration", () => {
     );
     // 附件 pill 重构为 FileDisplayInline 后，13px 文案 token 锚点迁移到
     // fileNameClassName；源码可能跨行，这里只断言 token 组合本身仍在文件里。
-    expect(conversationRows).toContain(
-      '"truncate text-ui-base font-medium text-foreground"',
-    );
+    expect(conversationRows).toContain('"truncate text-ui-base font-medium text-foreground"');
   });
 
   it("uses the base token for the time-of-day picker controls", () => {
-    const automationEditor = readSource(
-      "packages/ui/src/settings/AutomationEditView.tsx",
-    );
+    const automationEditor = readSource("packages/ui/src/settings/AutomationEditView.tsx");
 
     expect(automationEditor).toContain(
       '"rounded-md px-2 py-1 text-center text-ui-base tabular-nums transition-colors"',
     );
     expect(automationEditor).toContain(
-      'pl-2 pr-1.5 text-ui-base leading-5 tabular-nums text-foreground',
+      "pl-2 pr-1.5 text-ui-base leading-5 tabular-nums text-foreground",
     );
   });
 

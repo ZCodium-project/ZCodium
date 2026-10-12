@@ -1,8 +1,4 @@
-import {
-  TID_TASK_ITEM,
-  TID_WORKSPACE_TITLE,
-  testId,
-} from "@zcode/shared";
+import { TID_TASK_ITEM, TID_WORKSPACE_TITLE, testId } from "@zcode/shared";
 import { clearAppData } from "../../../helpers/desktop-app.js";
 import {
   getTaskStoreSnapshot,
@@ -32,8 +28,7 @@ describe("conversation session title generation timeout", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const prompt =
-      `${SKILL_LINK} ${PROMPT_MARKER}_${runId}: 请用一句话回答，并且最终回答必须只包含 ${FINAL_TOKEN}`;
+    const prompt = `${SKILL_LINK} ${PROMPT_MARKER}_${runId}: 请用一句话回答，并且最终回答必须只包含 ${FINAL_TOKEN}`;
     await sendPrompt(prompt);
     await waitForComposerText("", "标题超时 case 首发后输入框没有清空");
     await waitForUserMessageContaining(PROMPT_MARKER);
@@ -79,15 +74,14 @@ async function waitForGeneratedTaskTitle(taskId: string) {
 async function waitForHeaderTitle(expectedTitle: string) {
   await browser.waitUntil(
     async () =>
-      browser.execute((titleTestId, title) => {
-        const header = document.querySelector<HTMLElement>(
-          `[data-testid="${titleTestId}"]`,
-        );
-        return (
-          header?.innerText.includes(title) ||
-          header?.getAttribute("title") === title
-        );
-      }, TID_WORKSPACE_TITLE, expectedTitle),
+      browser.execute(
+        (titleTestId, title) => {
+          const header = document.querySelector<HTMLElement>(`[data-testid="${titleTestId}"]`);
+          return header?.innerText.includes(title) || header?.getAttribute("title") === title;
+        },
+        TID_WORKSPACE_TITLE,
+        expectedTitle,
+      ),
     {
       timeout: 10000,
       timeoutMsg: `WorkspaceHeader 没有展示生成标题: ${expectedTitle}`,
@@ -99,12 +93,14 @@ async function waitForTaskItemTitle(taskId: string, expectedTitle: string) {
   const taskItemTestId = testId(TID_TASK_ITEM, taskId);
   await browser.waitUntil(
     async () =>
-      browser.execute((itemTestId, title) => {
-        const item = document.querySelector<HTMLElement>(
-          `[data-testid="${itemTestId}"]`,
-        );
-        return item?.innerText.includes(title) ?? false;
-      }, taskItemTestId, expectedTitle),
+      browser.execute(
+        (itemTestId, title) => {
+          const item = document.querySelector<HTMLElement>(`[data-testid="${itemTestId}"]`);
+          return item?.innerText.includes(title) ?? false;
+        },
+        taskItemTestId,
+        expectedTitle,
+      ),
     {
       timeout: 10000,
       timeoutMsg: `任务列表没有展示生成标题: ${expectedTitle}`,

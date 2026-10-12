@@ -45,11 +45,11 @@ header 生成阶段构造，和 `User-Agent`、`X-ZCode-App-Version`、`X-Title`
 
 ## 覆盖矩阵
 
-| Case ID | Setup | Action | Assertions | Evidence |
-| --- | --- | --- | --- | --- |
-| AMRPH-001 | 默认 provider config 无自定义 header | 创建 AI SDK provider registry config | provider headers 包含 `X-Platform`、`X-Os-Category`、`X-Os-Version` | bootstrap 单测 |
-| AMRPH-002 | provider config 显式设置同名 header | 创建 AI SDK provider registry config | 用户配置覆盖默认平台 header | bootstrap 单测 |
-| AMRPH-003 | provider headers 已含平台 header | 创建 `generateText` 请求 options | 平台 header 与 `x-request-id`、`x-session-id` 等请求级归因 header 共存 | adapter options 单测 |
+| Case ID   | Setup                                | Action                               | Assertions                                                             | Evidence             |
+| --------- | ------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------- | -------------------- |
+| AMRPH-001 | 默认 provider config 无自定义 header | 创建 AI SDK provider registry config | provider headers 包含 `X-Platform`、`X-Os-Category`、`X-Os-Version`    | bootstrap 单测       |
+| AMRPH-002 | provider config 显式设置同名 header  | 创建 AI SDK provider registry config | 用户配置覆盖默认平台 header                                            | bootstrap 单测       |
+| AMRPH-003 | provider headers 已含平台 header     | 创建 `generateText` 请求 options     | 平台 header 与 `x-request-id`、`x-session-id` 等请求级归因 header 共存 | adapter options 单测 |
 
 ## 验证
 

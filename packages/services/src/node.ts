@@ -194,7 +194,10 @@ export { createOAuthProviderLogoutHandler } from "./oauth/oauthProviderLogout.js
 export { OAuthCredentialRepo } from "./oauth/repo/oauthCredentialRepo.js";
 // 审计版：设备身份由原业务所有者 device/deviceMid.ts 提供，移除独立遥测核心模块；
 // 保留 ensureTelemetryDeviceMid 名称以兼容上游仍引用该名称的调用点。
-export { ensureDeviceMid, ensureDeviceMid as ensureTelemetryDeviceMid } from "./device/deviceMid.js";
+export {
+  ensureDeviceMid,
+  ensureDeviceMid as ensureTelemetryDeviceMid,
+} from "./device/deviceMid.js";
 export type {
   EnsureDeviceMidOptions,
   EnsureDeviceMidOptions as EnsureTelemetryDeviceMidOptions,

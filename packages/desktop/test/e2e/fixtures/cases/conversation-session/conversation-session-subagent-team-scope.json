@@ -8,7 +8,19 @@
   ],
   "fileFixtures": [],
   "requests": [
-    { "id": "subagent-team-scope-parent-agent", "kind": "main", "source": "synthetic", "timingPolicy": "fast-text", "syntheticReason": "固定父 Agent。" },
-    { "id": "subagent-team-scope-parent-final", "kind": "main", "source": "synthetic", "timingPolicy": "fast-text", "syntheticReason": "父 continuation。" }
+    {
+      "id": "subagent-team-scope-parent-agent",
+      "kind": "main",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "固定父 Agent。"
+    },
+    {
+      "id": "subagent-team-scope-parent-final",
+      "kind": "main",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "父 continuation。"
+    }
   ]
 }

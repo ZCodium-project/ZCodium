@@ -68,7 +68,6 @@
 在 `docs/plan-mode-approval-boundary.md` 的 `## 语义` 列表后追加：
 
 ```md
-
 ## MCP 工具例外
 
 Plan mode 默认只允许只读、非 destructive 的工具执行。MCP 工具是外部 server 动态暴露的能力，部分工具不会声明 `readOnlyHint`，但仍需要在计划阶段用于读取外部上下文、设备状态或远端资料。
@@ -166,26 +165,26 @@ const fakeMcpNameCapability: PermissionToolCapability = {
 在 `describe("PermissionService mode policy", () => {` 内、Plan mode 相关测试附近加入：
 
 ```ts
-  it("allows non-destructive MCP tools in plan mode without requiring readOnly metadata", () => {
-    const service = new PermissionService();
+it("allows non-destructive MCP tools in plan mode without requiring readOnly metadata", () => {
+  const service = new PermissionService();
 
-    const decision = service.checkPermission(
-      {
-        input: { query: "current simulator state" },
-        mode: "plan",
-        riskLevel: "medium",
-        toolName: "mcp__ios_simulator__status",
-      },
-      mcpCapability,
-    );
+  const decision = service.checkPermission(
+    {
+      input: { query: "current simulator state" },
+      mode: "plan",
+      riskLevel: "medium",
+      toolName: "mcp__ios_simulator__status",
+    },
+    mcpCapability,
+  );
 
-    expect(decision).toMatchObject({
-      allowed: true,
-      decision: "allow",
-      ruleId: "mode.plan.mcp",
-      sideEffectScope: "network",
-    });
+  expect(decision).toMatchObject({
+    allowed: true,
+    decision: "allow",
+    ruleId: "mode.plan.mcp",
+    sideEffectScope: "network",
   });
+});
 ```
 
 - [ ] **Step 3: 写 destructive MCP 仍拒绝的失败测试**
@@ -193,25 +192,25 @@ const fakeMcpNameCapability: PermissionToolCapability = {
 同一 describe 内继续加入：
 
 ```ts
-  it("denies destructive MCP tools in plan mode", () => {
-    const service = new PermissionService();
+it("denies destructive MCP tools in plan mode", () => {
+  const service = new PermissionService();
 
-    const decision = service.checkPermission(
-      {
-        input: { target: "device" },
-        mode: "plan",
-        riskLevel: "high",
-        toolName: "mcp__device__reset",
-      },
-      destructiveMcpCapability,
-    );
+  const decision = service.checkPermission(
+    {
+      input: { target: "device" },
+      mode: "plan",
+      riskLevel: "high",
+      toolName: "mcp__device__reset",
+    },
+    destructiveMcpCapability,
+  );
 
-    expect(decision).toMatchObject({
-      allowed: false,
-      decision: "deny",
-      ruleId: "mode.plan.nonReadOnly",
-    });
+  expect(decision).toMatchObject({
+    allowed: false,
+    decision: "deny",
+    ruleId: "mode.plan.nonReadOnly",
   });
+});
 ```
 
 - [ ] **Step 4: 写伪 MCP 名称不通过的失败测试**
@@ -219,25 +218,25 @@ const fakeMcpNameCapability: PermissionToolCapability = {
 同一 describe 内继续加入：
 
 ```ts
-  it("does not treat an mcp-prefixed tool name as MCP without the mcp permission declaration", () => {
-    const service = new PermissionService();
+it("does not treat an mcp-prefixed tool name as MCP without the mcp permission declaration", () => {
+  const service = new PermissionService();
 
-    const decision = service.checkPermission(
-      {
-        input: {},
-        mode: "plan",
-        riskLevel: "medium",
-        toolName: "mcp__fake__write",
-      },
-      fakeMcpNameCapability,
-    );
+  const decision = service.checkPermission(
+    {
+      input: {},
+      mode: "plan",
+      riskLevel: "medium",
+      toolName: "mcp__fake__write",
+    },
+    fakeMcpNameCapability,
+  );
 
-    expect(decision).toMatchObject({
-      allowed: false,
-      decision: "deny",
-      ruleId: "mode.plan.nonReadOnly",
-    });
+  expect(decision).toMatchObject({
+    allowed: false,
+    decision: "deny",
+    ruleId: "mode.plan.nonReadOnly",
   });
+});
 ```
 
 - [ ] **Step 5: 写 project deny / ask 优先于 MCP 例外的失败测试**
@@ -245,53 +244,53 @@ const fakeMcpNameCapability: PermissionToolCapability = {
 同一 describe 内继续加入：
 
 ```ts
-  it("lets project deny rules override the plan-mode MCP exception", () => {
-    const service = new PermissionService();
+it("lets project deny rules override the plan-mode MCP exception", () => {
+  const service = new PermissionService();
 
-    const decision = service.checkPermission(
-      {
-        input: { query: "secret" },
-        mode: "plan",
-        riskLevel: "medium",
-        toolName: "mcp__external__search",
-      },
-      mcpCapability,
-      {
-        version: 1,
-        deny: [{ toolName: "mcp__external__search" }],
-      },
-    );
+  const decision = service.checkPermission(
+    {
+      input: { query: "secret" },
+      mode: "plan",
+      riskLevel: "medium",
+      toolName: "mcp__external__search",
+    },
+    mcpCapability,
+    {
+      version: 1,
+      deny: [{ toolName: "mcp__external__search" }],
+    },
+  );
 
-    expect(decision).toMatchObject({
-      allowed: false,
-      decision: "deny",
-      ruleId: "rule.project.deny",
-    });
+  expect(decision).toMatchObject({
+    allowed: false,
+    decision: "deny",
+    ruleId: "rule.project.deny",
   });
+});
 
-  it("lets project ask rules override the plan-mode MCP exception", () => {
-    const service = new PermissionService();
+it("lets project ask rules override the plan-mode MCP exception", () => {
+  const service = new PermissionService();
 
-    const decision = service.checkPermission(
-      {
-        input: { query: "maybe external" },
-        mode: "plan",
-        riskLevel: "medium",
-        toolName: "mcp__external__search",
-      },
-      mcpCapability,
-      {
-        version: 1,
-        ask: [{ toolName: "mcp__external__search" }],
-      },
-    );
+  const decision = service.checkPermission(
+    {
+      input: { query: "maybe external" },
+      mode: "plan",
+      riskLevel: "medium",
+      toolName: "mcp__external__search",
+    },
+    mcpCapability,
+    {
+      version: 1,
+      ask: [{ toolName: "mcp__external__search" }],
+    },
+  );
 
-    expect(decision).toMatchObject({
-      allowed: false,
-      decision: "ask",
-      ruleId: "rule.project.ask",
-    });
+  expect(decision).toMatchObject({
+    allowed: false,
+    decision: "ask",
+    ruleId: "rule.project.ask",
   });
+});
 ```
 
 - [ ] **Step 6: 运行测试确认失败**
@@ -419,36 +418,36 @@ Test Files  1 passed (1)
 在 `describe("MCP tool bridge", () => {` 内加入：
 
 ```ts
-  it("maps destructive MCP annotations into tool metadata", () => {
-    const registry = createToolRegistry();
-    const mcpPort = createMockMcpPort();
+it("maps destructive MCP annotations into tool metadata", () => {
+  const registry = createToolRegistry();
+  const mcpPort = createMockMcpPort();
 
-    registerMcpTools(registry, mcpPort, [
-      {
-        serverName: "device",
-        toolName: "reset",
-        description: "Reset a device",
-        inputSchema: { type: "object" },
-        annotations: {
-          destructiveHint: true,
-        },
+  registerMcpTools(registry, mcpPort, [
+    {
+      serverName: "device",
+      toolName: "reset",
+      description: "Reset a device",
+      inputSchema: { type: "object" },
+      annotations: {
+        destructiveHint: true,
       },
-    ]);
+    },
+  ]);
 
-    const entry = registry.get("mcp__device__reset");
+  const entry = registry.get("mcp__device__reset");
 
-    expect(entry?.metadata).toMatchObject({
-      destructive: true,
-      readOnly: false,
-      riskLevel: "high",
-      sideEffectScope: "network",
-    });
-    expect(entry?.permission).toMatchObject({
-      permission: "mcp",
-      riskLevel: "high",
-      sideEffectScope: "network",
-    });
+  expect(entry?.metadata).toMatchObject({
+    destructive: true,
+    readOnly: false,
+    riskLevel: "high",
+    sideEffectScope: "network",
   });
+  expect(entry?.permission).toMatchObject({
+    permission: "mcp",
+    riskLevel: "high",
+    sideEffectScope: "network",
+  });
+});
 ```
 
 - [ ] **Step 2: 运行 MCP bridge 测试**
@@ -506,126 +505,130 @@ import {
 在 `describe("AgentRuntime MCP integration", () => {` 内加入：
 
 ```ts
-  it("executes non-destructive MCP tools in plan mode without readOnlyHint", async () => {
-    const sessionId = createSessionId("runtime-mcp-plan-mode");
-    const eventStore = createTestSessionEventStore();
-    let modelCallCount = 0;
-    let mcpCallCount = 0;
-    let permissionRequestCount = 0;
+it("executes non-destructive MCP tools in plan mode without readOnlyHint", async () => {
+  const sessionId = createSessionId("runtime-mcp-plan-mode");
+  const eventStore = createTestSessionEventStore();
+  let modelCallCount = 0;
+  let mcpCallCount = 0;
+  let permissionRequestCount = 0;
 
-    const permissionBroker: PermissionBrokerPort = {
-      async requestPermission() {
-        permissionRequestCount++;
-        return {
-          decision: "deny",
-          reason: "permission broker should not be called for plan-mode MCP allow",
-        };
+  const permissionBroker: PermissionBrokerPort = {
+    async requestPermission() {
+      permissionRequestCount++;
+      return {
+        decision: "deny",
+        reason: "permission broker should not be called for plan-mode MCP allow",
+      };
+    },
+  };
+
+  const mcpPort = createMockMcpPort({
+    connectConfiguredServers: async () => ({
+      statuses: {
+        local: {
+          status: "connected",
+          transport: "stdio",
+          toolCount: 1,
+          updatedAt: "now",
+        },
       },
-    };
+      tools: [
+        {
+          serverName: "local",
+          toolName: "lookup",
+          inputSchema: {
+            type: "object",
+            properties: {
+              query: { type: "string" },
+            },
+          },
+        },
+      ],
+    }),
+    callTool: async (request) => {
+      mcpCallCount++;
+      return {
+        content: [{ type: "text", text: `lookup:${request.arguments?.query}` }],
+      };
+    },
+  });
 
-    const mcpPort = createMockMcpPort({
-      connectConfiguredServers: async () => ({
-        statuses: {
+  const runtime = new AgentRuntime(
+    sessionId,
+    {
+      mode: "plan",
+      mcp: {
+        enabled: true,
+        servers: {
           local: {
-            status: "connected",
-            transport: "stdio",
-            toolCount: 1,
-            updatedAt: "now",
-          },
-        },
-        tools: [
-          {
-            serverName: "local",
-            toolName: "lookup",
-            inputSchema: {
-              type: "object",
-              properties: {
-                query: { type: "string" },
-              },
-            },
-          },
-        ],
-      }),
-      callTool: async (request) => {
-        mcpCallCount++;
-        return {
-          content: [{ type: "text", text: `lookup:${request.arguments?.query}` }],
-        };
-      },
-    });
-
-    const runtime = new AgentRuntime(
-      sessionId,
-      {
-        mode: "plan",
-        mcp: {
-          enabled: true,
-          servers: {
-            local: {
-              type: "stdio",
-              command: "node",
-              args: ["server.js"],
-            },
+            type: "stdio",
+            command: "node",
+            args: ["server.js"],
           },
         },
       },
-      {
-        eventStore,
-        mcpPort,
-        permissionBroker,
-        modelAdapter: {
-          async generateText(request: any) {
-            modelCallCount++;
-            if (modelCallCount === 1) {
-              expect(request.tools.map((tool: { name: string }) => tool.name)).toContain(
-                "mcp__local__lookup",
-              );
-              return {
-                finishReason: "tool-calls",
-                model: request.model,
-                providerMetadata: undefined,
-                text: "I will look this up.",
-                toolCalls: [
-                  {
-                    id: "mcp-lookup",
-                    name: "mcp__local__lookup",
-                    input: { query: "plan context" },
-                  },
-                ],
-                usage: {
-                  inputTokens: 1,
-                  outputTokens: 1,
-                  totalTokens: 2,
-                },
-              };
-            }
-
-            expect(request.messages.some((message: any) => {
-              return message.role === "tool" && String(message.content).includes("lookup:plan context");
-            })).toBe(true);
-
+    },
+    {
+      eventStore,
+      mcpPort,
+      permissionBroker,
+      modelAdapter: {
+        async generateText(request: any) {
+          modelCallCount++;
+          if (modelCallCount === 1) {
+            expect(request.tools.map((tool: { name: string }) => tool.name)).toContain(
+              "mcp__local__lookup",
+            );
             return {
-              finishReason: "stop",
+              finishReason: "tool-calls",
               model: request.model,
               providerMetadata: undefined,
-              text: "done",
+              text: "I will look this up.",
+              toolCalls: [
+                {
+                  id: "mcp-lookup",
+                  name: "mcp__local__lookup",
+                  input: { query: "plan context" },
+                },
+              ],
               usage: {
                 inputTokens: 1,
                 outputTokens: 1,
                 totalTokens: 2,
               },
             };
-          },
-        } as never,
-      },
-    );
+          }
 
-    const result = await runtime.executeTurn("use mcp while planning");
+          expect(
+            request.messages.some((message: any) => {
+              return (
+                message.role === "tool" && String(message.content).includes("lookup:plan context")
+              );
+            }),
+          ).toBe(true);
 
-    expect(result.response).toBe("done");
-    expect(mcpCallCount).toBe(1);
-    expect(permissionRequestCount).toBe(0);
-  });
+          return {
+            finishReason: "stop",
+            model: request.model,
+            providerMetadata: undefined,
+            text: "done",
+            usage: {
+              inputTokens: 1,
+              outputTokens: 1,
+              totalTokens: 2,
+            },
+          };
+        },
+      } as never,
+    },
+  );
+
+  const result = await runtime.executeTurn("use mcp while planning");
+
+  expect(result.response).toBe("done");
+  expect(mcpCallCount).toBe(1);
+  expect(permissionRequestCount).toBe(0);
+});
 ```
 
 - [ ] **Step 3: 增加 Plan mode destructive MCP 不执行测试**
@@ -633,109 +636,109 @@ import {
 同一 describe 内加入：
 
 ```ts
-  it("denies destructive MCP tools in plan mode before calling the MCP server", async () => {
-    const sessionId = createSessionId("runtime-mcp-plan-destructive");
-    const eventStore = createTestSessionEventStore();
-    let modelCallCount = 0;
-    let mcpCallCount = 0;
-    let secondRequest: any;
+it("denies destructive MCP tools in plan mode before calling the MCP server", async () => {
+  const sessionId = createSessionId("runtime-mcp-plan-destructive");
+  const eventStore = createTestSessionEventStore();
+  let modelCallCount = 0;
+  let mcpCallCount = 0;
+  let secondRequest: any;
 
-    const mcpPort = createMockMcpPort({
-      connectConfiguredServers: async () => ({
-        statuses: {
+  const mcpPort = createMockMcpPort({
+    connectConfiguredServers: async () => ({
+      statuses: {
+        device: {
+          status: "connected",
+          transport: "stdio",
+          toolCount: 1,
+          updatedAt: "now",
+        },
+      },
+      tools: [
+        {
+          serverName: "device",
+          toolName: "reset",
+          inputSchema: {
+            type: "object",
+            properties: {},
+          },
+          annotations: {
+            destructiveHint: true,
+          },
+        },
+      ],
+    }),
+    callTool: async () => {
+      mcpCallCount++;
+      return { content: [{ type: "text", text: "should-not-run" }] };
+    },
+  });
+
+  const runtime = new AgentRuntime(
+    sessionId,
+    {
+      mode: "plan",
+      mcp: {
+        enabled: true,
+        servers: {
           device: {
-            status: "connected",
-            transport: "stdio",
-            toolCount: 1,
-            updatedAt: "now",
-          },
-        },
-        tools: [
-          {
-            serverName: "device",
-            toolName: "reset",
-            inputSchema: {
-              type: "object",
-              properties: {},
-            },
-            annotations: {
-              destructiveHint: true,
-            },
-          },
-        ],
-      }),
-      callTool: async () => {
-        mcpCallCount++;
-        return { content: [{ type: "text", text: "should-not-run" }] };
-      },
-    });
-
-    const runtime = new AgentRuntime(
-      sessionId,
-      {
-        mode: "plan",
-        mcp: {
-          enabled: true,
-          servers: {
-            device: {
-              type: "stdio",
-              command: "node",
-              args: ["server.js"],
-            },
+            type: "stdio",
+            command: "node",
+            args: ["server.js"],
           },
         },
       },
-      {
-        eventStore,
-        mcpPort,
-        modelAdapter: {
-          async generateText(request: any) {
-            modelCallCount++;
-            if (modelCallCount === 1) {
-              return {
-                finishReason: "tool-calls",
-                model: request.model,
-                providerMetadata: undefined,
-                text: "I will reset the device.",
-                toolCalls: [
-                  {
-                    id: "mcp-reset",
-                    name: "mcp__device__reset",
-                    input: {},
-                  },
-                ],
-                usage: {
-                  inputTokens: 1,
-                  outputTokens: 1,
-                  totalTokens: 2,
-                },
-              };
-            }
-
-            secondRequest = request;
+    },
+    {
+      eventStore,
+      mcpPort,
+      modelAdapter: {
+        async generateText(request: any) {
+          modelCallCount++;
+          if (modelCallCount === 1) {
             return {
-              finishReason: "stop",
+              finishReason: "tool-calls",
               model: request.model,
               providerMetadata: undefined,
-              text: "done",
+              text: "I will reset the device.",
+              toolCalls: [
+                {
+                  id: "mcp-reset",
+                  name: "mcp__device__reset",
+                  input: {},
+                },
+              ],
               usage: {
                 inputTokens: 1,
                 outputTokens: 1,
                 totalTokens: 2,
               },
             };
-          },
-        } as never,
-      },
-    );
+          }
 
-    const result = await runtime.executeTurn("do not mutate while planning");
-    const toolMessage = secondRequest.messages.find((message: any) => message.role === "tool");
+          secondRequest = request;
+          return {
+            finishReason: "stop",
+            model: request.model,
+            providerMetadata: undefined,
+            text: "done",
+            usage: {
+              inputTokens: 1,
+              outputTokens: 1,
+              totalTokens: 2,
+            },
+          };
+        },
+      } as never,
+    },
+  );
 
-    expect(result.response).toBe("done");
-    expect(mcpCallCount).toBe(0);
-    expect(toolMessage?.content).toContain("Plan mode only allows read-only, non-destructive tools");
-  });
+  const result = await runtime.executeTurn("do not mutate while planning");
+  const toolMessage = secondRequest.messages.find((message: any) => message.role === "tool");
+
+  expect(result.response).toBe("done");
+  expect(mcpCallCount).toBe(0);
+  expect(toolMessage?.content).toContain("Plan mode only allows read-only, non-destructive tools");
+});
 ```
 
 - [ ] **Step 4: 运行 MCP runtime 测试**

@@ -13,6 +13,7 @@
 ### Task 1: Tests
 
 **Files:**
+
 - Create: `packages/ui/test/remoteConnectionDockerOptions.test.ts`
 - Modify: `packages/ui/test/remoteConnectionFieldsDockerRefresh.test.ts`
 
@@ -33,6 +34,7 @@ Expected: fail because the helper module and select-open callback are not implem
 ### Task 2: Implementation
 
 **Files:**
+
 - Create: `packages/ui/src/lib/remoteConnectionDockerOptions.ts`
 - Modify: `packages/ui/src/hooks/useRemoteConnectionForm.ts`
 - Modify: `packages/ui/src/RemoteConnectionFields.tsx`
@@ -68,6 +70,7 @@ Render a separate manual `Container` input below the chooser for incomplete Dock
 ### Task 3: Verification
 
 **Files:**
+
 - All modified files.
 
 - [ ] **Step 1: Run targeted tests**

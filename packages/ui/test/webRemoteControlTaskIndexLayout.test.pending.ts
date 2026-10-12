@@ -313,7 +313,9 @@ describe("Web 归档批量删除入口", () => {
     expect(populated).toContain('aria-label="taskList.archivedActions"');
     expect(populated).not.toContain('data-testid="delete-all-archived-tasks"');
     const empty = await renderTaskIndexWithInitialArchivedTasks(false);
-    expect(empty).toMatch(/<button(?=[^>]*disabled="")(?=[^>]*data-testid="archived-tasks-actions")/);
+    expect(empty).toMatch(
+      /<button(?=[^>]*disabled="")(?=[^>]*data-testid="archived-tasks-actions")/,
+    );
     expect(await renderTaskIndex()).not.toContain('data-testid="archived-tasks-actions"');
   });
 });

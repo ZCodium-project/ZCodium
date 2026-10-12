@@ -27,30 +27,90 @@
     {
       "id": "ssh-task-lifecycle-a-first",
       "description": "workspace A 首发响应。",
-      "metadata": { "kind": "main", "timingPolicy": "slow-stream", "source": "synthetic", "syntheticReason": "稳定验证 A 首发和 task 创建。" },
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_A_FIRST_PROMPT"], "bodyExcludes": ["Generate a concise title"] },
-      "response": { "statusCode": 200, "delayMs": 1200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-task-a-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-a-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "slow-stream",
+        "source": "synthetic",
+        "syntheticReason": "稳定验证 A 首发和 task 创建。"
+      },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_A_FIRST_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
+      "response": {
+        "statusCode": 200,
+        "delayMs": 1200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-task-a-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-a-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     },
     {
       "id": "ssh-task-lifecycle-b-first",
       "description": "workspace B 首发响应。",
-      "metadata": { "kind": "main", "timingPolicy": "slow-stream", "source": "synthetic", "syntheticReason": "稳定验证 B 首发和 task 创建。" },
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_B_FIRST_PROMPT"], "bodyExcludes": ["Generate a concise title"] },
-      "response": { "statusCode": 200, "delayMs": 1200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-task-b-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-b-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "slow-stream",
+        "source": "synthetic",
+        "syntheticReason": "稳定验证 B 首发和 task 创建。"
+      },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_B_FIRST_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
+      "response": {
+        "statusCode": 200,
+        "delayMs": 1200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-task-b-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-b-first\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     },
     {
       "id": "ssh-task-lifecycle-a-follow",
       "description": "workspace A 重开后的续发响应。",
-      "metadata": { "kind": "main", "timingPolicy": "slow-stream", "source": "synthetic", "syntheticReason": "稳定验证 A 重开后仍命中原 task。" },
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_A_FOLLOW_PROMPT"], "bodyExcludes": ["Generate a concise title"] },
-      "response": { "statusCode": 200, "delayMs": 1200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-task-a-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-a-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "slow-stream",
+        "source": "synthetic",
+        "syntheticReason": "稳定验证 A 重开后仍命中原 task。"
+      },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_A_FOLLOW_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
+      "response": {
+        "statusCode": 200,
+        "delayMs": 1200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-task-a-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-a-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     },
     {
       "id": "ssh-task-lifecycle-b-follow",
       "description": "workspace B 续发响应。",
-      "metadata": { "kind": "main", "timingPolicy": "slow-stream", "source": "synthetic", "syntheticReason": "稳定验证 A 关闭期间 B 仍可继续工作。" },
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_B_FOLLOW_PROMPT"], "bodyExcludes": ["Generate a concise title"] },
-      "response": { "statusCode": 200, "delayMs": 1200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-task-b-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-b-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "slow-stream",
+        "source": "synthetic",
+        "syntheticReason": "稳定验证 A 关闭期间 B 仍可继续工作。"
+      },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "lastUserMessageIncludes": ["E2E_SSH_P0_TASK_LIFECYCLE_B_FOLLOW_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
+      "response": {
+        "statusCode": 200,
+        "delayMs": 1200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-task-b-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_TASK_LIFECYCLE_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-task-b-follow\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     }
   ]
 }

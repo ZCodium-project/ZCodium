@@ -146,7 +146,9 @@ describe("browserControlMainBridge", () => {
 
   it("rejects a concurrent duplicate requestId in the same scope without replacing the original", async () => {
     const posted: BrowserExecuteRequestMessage[] = [];
-    const bridge = createBrowserControlMainBridge({ postToMain: (message) => posted.push(message) });
+    const bridge = createBrowserControlMainBridge({
+      postToMain: (message) => posted.push(message),
+    });
     const original = bridge.execute({
       requestId: "duplicate",
       sessionId: "s1",
@@ -179,7 +181,9 @@ describe("browserControlMainBridge", () => {
 
   it("rejects a concurrent duplicate requestId across scopes because result routing is global", async () => {
     const posted: BrowserExecuteRequestMessage[] = [];
-    const bridge = createBrowserControlMainBridge({ postToMain: (message) => posted.push(message) });
+    const bridge = createBrowserControlMainBridge({
+      postToMain: (message) => posted.push(message),
+    });
     const original = bridge.execute({
       requestId: "cross-scope-duplicate",
       sessionId: "s1",

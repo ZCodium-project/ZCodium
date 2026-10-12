@@ -86,10 +86,12 @@
 ## Phase 0: Baseline Red Evidence
 
 **Files:**
+
 - Test: `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-provider-registry-cold-start.test.ts`
 - Fixture: `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-subagent-provider-registry-cold-start.json`
 
 **Interfaces:**
+
 - Consumes: committed failing E2E `SR / I14`.
 - Produces: baseline artifact proving current bug is still red before implementation.
 
@@ -136,9 +138,11 @@ If the E2E already passes before code changes, inspect recent commits and update
 ## Phase 1: Add Local Provider Registry Sync Tests
 
 **Files:**
+
 - Modify: `packages/services/test/zcodeAgentService.providerRegistry.test.ts`
 
 **Interfaces:**
+
 - Consumes: `createZCodeAgentService({ providerRegistrySource })`.
 - Consumes: `zcodeProtocolMethods.workspaceUpdateProviderRegistry`.
 - Produces: tests that require full registry sync before local session/create and after local provider registry changes.
@@ -185,9 +189,7 @@ it("syncs the full local provider registry before session/create", async () => {
       disposeAll() {}
     },
   }));
-  const { createZCodeAgentService } = await import(
-    "../src/zcode-agent/zcodeAgentService.js"
-  );
+  const { createZCodeAgentService } = await import("../src/zcode-agent/zcodeAgentService.js");
   const service = createZCodeAgentService({
     providerRegistrySource: {
       async getProviderRegistrySnapshot() {
@@ -228,9 +230,7 @@ it("syncs the full local provider registry before session/create", async () => {
     expect.objectContaining({
       registry: expect.objectContaining({
         revision: "sha256:provider-registry-full",
-        providers: expect.arrayContaining([
-          expect.objectContaining({ providerId: "e2e-alt" }),
-        ]),
+        providers: expect.arrayContaining([expect.objectContaining({ providerId: "e2e-alt" })]),
       }),
       workspace: expect.objectContaining({
         workspacePath: "/workspace/app",
@@ -340,9 +340,7 @@ it("pushes changed local provider registry to active workspace clients", async (
     revision: "sha256:registry-2",
   };
   const providerRegistrySource = createProviderRegistryChangeSource(initial);
-  const { createZCodeAgentService } = await import(
-    "../src/zcode-agent/zcodeAgentService.js"
-  );
+  const { createZCodeAgentService } = await import("../src/zcode-agent/zcodeAgentService.js");
   const service = createZCodeAgentService({
     providerRegistrySource: providerRegistrySource.source,
   });
@@ -358,9 +356,7 @@ it("pushes changed local provider registry to active workspace clients", async (
       expect.objectContaining({
         registry: expect.objectContaining({
           revision: "sha256:registry-2",
-          providers: expect.arrayContaining([
-            expect.objectContaining({ providerId: "e2e-alt" }),
-          ]),
+          providers: expect.arrayContaining([expect.objectContaining({ providerId: "e2e-alt" })]),
         }),
       }),
       expect.any(Object),
@@ -392,11 +388,13 @@ Expected before implementation: the new tests fail because `session/create` curr
 ## Phase 2: Implement Agent Apply Waterline and Local Service Synchronizer
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/server-types.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/workspace-model-catalog.ts`
 - Modify: `packages/services/src/zcode-agent/zcodeAgentService.ts`
 
 **Interfaces:**
+
 - Consumes: `providerRegistrySource?: ZCodeProviderRegistrySource`.
 - Consumes: `ZCodeProtocolClient.request(zcodeProtocolMethods.workspaceUpdateProviderRegistry, ...)`.
 - Produces: agent-side stale snapshot guard plus private helpers that sync complete provider registry to local active CLI clients without touching remote helper code.
@@ -430,20 +428,20 @@ Add a Chinese bugfix comment at the stale guard explaining:
 Near existing maps in `createZCodeAgentService`, add:
 
 ```ts
-  const providerRegistrySyncByWorkspaceKey = new Map<
-    string,
-    {
-      client: ZCodeProtocolClient;
-      generatedAt?: number;
-      inFlight?: Promise<void>;
-      pending?: {
-        includeWorkspaceState: boolean;
-        reason: string;
-        registry: ZCodeProviderRegistrySnapshot;
-      };
-      revision?: string;
-    }
-  >();
+const providerRegistrySyncByWorkspaceKey = new Map<
+  string,
+  {
+    client: ZCodeProtocolClient;
+    generatedAt?: number;
+    inFlight?: Promise<void>;
+    pending?: {
+      includeWorkspaceState: boolean;
+      reason: string;
+      registry: ZCodeProviderRegistrySnapshot;
+    };
+    revision?: string;
+  }
+>();
 ```
 
 This state is separate from `providerRegistryByWorkspaceKey`. The latter is still used by desktop-attached remote fallback; this new map records whether a concrete protocol client has already received a local registry revision and serializes local delivery. Do not use this service-side map as the stale snapshot correctness boundary; that boundary lives in agent apply code.
@@ -453,13 +451,13 @@ This state is separate from `providerRegistryByWorkspaceKey`. The latter is stil
 Inside `wireClient(... onClose ...)`, where the code already deletes `providerRegistryByWorkspaceKey`, also delete the new sync state:
 
 ```ts
-            providerRegistrySyncByWorkspaceKey.delete(workspaceKey);
+providerRegistrySyncByWorkspaceKey.delete(workspaceKey);
 ```
 
 Add a Chinese comment immediately above or near the new delete:
 
 ```ts
-            // Bugfix: provider registry 是 CLI 进程内存态；client 重建后即使 app revision 没变也必须重推。
+// Bugfix: provider registry 是 CLI 进程内存态；client 重建后即使 app revision 没变也必须重推。
 ```
 
 - [ ] **Step 4: Add private sync helper**
@@ -483,26 +481,26 @@ This helper is a delivery/cache optimization and a session preflight. It is not 
 Add:
 
 ```ts
-  async function ensureLocalProviderRegistrySynced(params: {
-    client: ZCodeProtocolClient;
-    includeWorkspaceState?: boolean;
-    reason: string;
-    workspace: ZCodeAgentWorkspaceTarget;
-  }): Promise<void> {
-    if (!providerRegistrySource) {
-      return;
-    }
-    const registry = await providerRegistrySource.getProviderRegistrySnapshot();
-    // Bugfix: 本地 desktop 的 CLI 不读取 app provider store；session create/resume/read 前
-    // 必须先注入完整 registry，否则 subagent profile 引用未选中过的 provider 会 provider_not_found。
-    await syncProviderRegistrySnapshotToClient({
-      client: params.client,
-      includeWorkspaceState: params.includeWorkspaceState,
-      registry,
-      reason: params.reason,
-      workspace: params.workspace,
-    });
+async function ensureLocalProviderRegistrySynced(params: {
+  client: ZCodeProtocolClient;
+  includeWorkspaceState?: boolean;
+  reason: string;
+  workspace: ZCodeAgentWorkspaceTarget;
+}): Promise<void> {
+  if (!providerRegistrySource) {
+    return;
   }
+  const registry = await providerRegistrySource.getProviderRegistrySnapshot();
+  // Bugfix: 本地 desktop 的 CLI 不读取 app provider store；session create/resume/read 前
+  // 必须先注入完整 registry，否则 subagent profile 引用未选中过的 provider 会 provider_not_found。
+  await syncProviderRegistrySnapshotToClient({
+    client: params.client,
+    includeWorkspaceState: params.includeWorkspaceState,
+    registry,
+    reason: params.reason,
+    workspace: params.workspace,
+  });
+}
 ```
 
 This helper must return immediately when `providerRegistrySource` is absent or the target is a desktop-attached remote workspace. That keeps desktop-attached remote behavior on the existing remote sync path.
@@ -514,24 +512,24 @@ In `async updateProviderRegistry(params)`, keep the direct protocol request so t
 Low-risk implementation:
 
 ```ts
-      const result = await client.request(
-        zcodeProtocolMethods.workspaceUpdateProviderRegistry,
-        {
-          workspace: buildWorkspaceRef(params),
-          registry: params.registry,
-          ...(typeof params.includeWorkspaceState === "boolean"
-            ? { includeWorkspaceState: params.includeWorkspaceState }
-            : {}),
-        },
-        zcodeWorkspaceUpdateProviderRegistryResultSchema,
-      );
-      if (result.appliedProviderRevision === params.registry.revision) {
-        providerRegistryByWorkspaceKey.set(resolveWorkspaceKey(params), params.registry);
-        providerRegistrySyncByWorkspaceKey.set(resolveWorkspaceKey(params), {
-          client,
-          revision: params.registry.revision,
-        });
-      }
+const result = await client.request(
+  zcodeProtocolMethods.workspaceUpdateProviderRegistry,
+  {
+    workspace: buildWorkspaceRef(params),
+    registry: params.registry,
+    ...(typeof params.includeWorkspaceState === "boolean"
+      ? { includeWorkspaceState: params.includeWorkspaceState }
+      : {}),
+  },
+  zcodeWorkspaceUpdateProviderRegistryResultSchema,
+);
+if (result.appliedProviderRevision === params.registry.revision) {
+  providerRegistryByWorkspaceKey.set(resolveWorkspaceKey(params), params.registry);
+  providerRegistrySyncByWorkspaceKey.set(resolveWorkspaceKey(params), {
+    client,
+    revision: params.registry.revision,
+  });
+}
 ```
 
 Do not change this method's external contract.
@@ -541,9 +539,11 @@ Do not change this method's external contract.
 ## Phase 3: Wire Local Sync Into Session Read/Create/Resume
 
 **Files:**
+
 - Modify: `packages/services/src/zcode-agent/zcodeAgentService.ts`
 
 **Interfaces:**
+
 - Consumes: `ensureLocalProviderRegistrySynced(...)`.
 - Produces: local CLI has full provider registry before session creation, session resume, session read, and workspace state reads.
 
@@ -552,17 +552,17 @@ Do not change this method's external contract.
 In `createSession`, after:
 
 ```ts
-      const client = await getClient(params);
+const client = await getClient(params);
 ```
 
 add:
 
 ```ts
-      await ensureLocalProviderRegistrySynced({
-        client,
-        reason: "session_create",
-        workspace: params,
-      });
+await ensureLocalProviderRegistrySynced({
+  client,
+  reason: "session_create",
+  workspace: params,
+});
 ```
 
 Keep this before `resolveRuntimeModelConfig(...)` so `session/create` and runtime model fallback both see a CLI workspace whose catalog has already been updated.
@@ -572,11 +572,11 @@ Keep this before `resolveRuntimeModelConfig(...)` so `session/create` and runtim
 In `resumeSession`, after `const client = await getClient(params);`, add:
 
 ```ts
-      await ensureLocalProviderRegistrySynced({
-        client,
-        reason: "session_resume",
-        workspace: params,
-      });
+await ensureLocalProviderRegistrySynced({
+  client,
+  reason: "session_resume",
+  workspace: params,
+});
 ```
 
 Keep `allowDefaultModelForSession: false` unchanged. The registry sync must not make old sessions silently fall back to a different current workspace model.
@@ -586,22 +586,22 @@ Keep `allowDefaultModelForSession: false` unchanged. The registry sync must not 
 In `readSession`, after `const client = await getClient(params);`, add:
 
 ```ts
-      await ensureLocalProviderRegistrySynced({
-        client,
-        reason: "session_read",
-        workspace: params,
-      });
+await ensureLocalProviderRegistrySynced({
+  client,
+  reason: "session_read",
+  workspace: params,
+});
 ```
 
 In `readWorkspaceState`, after `const client = await getClient(params);`, add:
 
 ```ts
-      await ensureLocalProviderRegistrySynced({
-        client,
-        includeWorkspaceState: false,
-        reason: "workspace_read_state",
-        workspace: params,
-      });
+await ensureLocalProviderRegistrySynced({
+  client,
+  includeWorkspaceState: false,
+  reason: "workspace_read_state",
+  workspace: params,
+});
 ```
 
 Do not add this to `respondProviderRuntimeHeaders`. Do not add a blanket sync to every `sendPrompt`.
@@ -621,10 +621,12 @@ Expected: PASS.
 ## Phase 4: Hot Push Local Provider Registry Changes
 
 **Files:**
+
 - Modify: `packages/services/src/zcode-agent/zcodeAgentService.ts`
 - Test: `packages/services/test/zcodeAgentService.providerRegistry.test.ts`
 
 **Interfaces:**
+
 - Consumes: `providerRegistrySource.onDidChangeProviderRegistry`.
 - Produces: active local workspace clients receive full registry updates when provider config changes.
 
@@ -633,17 +635,15 @@ Expected: PASS.
 Replace the current inline event body with a call:
 
 ```ts
-  let providerRegistrySubscription = providerRegistrySource?.onDidChangeProviderRegistry?.(
-    (event) => {
-      void handleProviderRegistryChanged(event).catch((error) => {
-        console.warn(
-          formatLogPrefix("zcode-agent", process.pid),
-          "provider registry 热同步失败",
-          { message: error instanceof Error ? error.message : String(error) },
-        );
+let providerRegistrySubscription = providerRegistrySource?.onDidChangeProviderRegistry?.(
+  (event) => {
+    void handleProviderRegistryChanged(event).catch((error) => {
+      console.warn(formatLogPrefix("zcode-agent", process.pid), "provider registry 热同步失败", {
+        message: error instanceof Error ? error.message : String(error),
       });
-    },
-  );
+    });
+  },
+);
 ```
 
 - [ ] **Step 2: Implement `handleProviderRegistryChanged`**
@@ -651,49 +651,47 @@ Replace the current inline event body with a call:
 Add this function near the subscription:
 
 ```ts
-  async function handleProviderRegistryChanged(event: ModelProviderRegistryChangedEvent) {
-    if (providerRegistrySource) {
-      await Promise.all(
-        Array.from(activeClientsByWorkspaceKey.entries()).map(
-          async ([workspaceKey, active]) => {
-            await syncProviderRegistrySnapshotToClient({
-              client: active.client,
-              registry: event.snapshot,
-              reason: event.reason,
-              workspace: active.workspace,
-            });
-            logger.info(undefined, "provider registry 变更已推送到本地 active workspace", {
-              providerCount: event.snapshot.providers.length,
-              reason: event.reason,
-              revision: event.snapshot.revision,
-              workspaceKey,
-              workspacePath: active.workspace.workspacePath,
-            });
-          },
-        ),
-      );
-    }
-
-    for (const [key, previousRuntimeModel] of runtimeModelConfigBySessionKey) {
-      const target = runtimeModelSessionTargetByKey.get(key);
-      if (!target) {
-        continue;
-      }
-      const active = activeClientsByWorkspaceKey.get(resolveWorkspaceKey(target));
-      if (!active) {
-        continue;
-      }
-      const runtimeModel = createRuntimeModelConfig({
-        model: previousRuntimeModel.model,
-        providerRegistry: event.snapshot,
-        thoughtLevel: previousRuntimeModel.thoughtLevel,
-      });
-      if (!runtimeModel || runtimeModel.revision === previousRuntimeModel.revision) {
-        continue;
-      }
-      await updateRuntimeModelConfigOnClient({ ...target, runtimeModel }, active.client);
-    }
+async function handleProviderRegistryChanged(event: ModelProviderRegistryChangedEvent) {
+  if (providerRegistrySource) {
+    await Promise.all(
+      Array.from(activeClientsByWorkspaceKey.entries()).map(async ([workspaceKey, active]) => {
+        await syncProviderRegistrySnapshotToClient({
+          client: active.client,
+          registry: event.snapshot,
+          reason: event.reason,
+          workspace: active.workspace,
+        });
+        logger.info(undefined, "provider registry 变更已推送到本地 active workspace", {
+          providerCount: event.snapshot.providers.length,
+          reason: event.reason,
+          revision: event.snapshot.revision,
+          workspaceKey,
+          workspacePath: active.workspace.workspacePath,
+        });
+      }),
+    );
   }
+
+  for (const [key, previousRuntimeModel] of runtimeModelConfigBySessionKey) {
+    const target = runtimeModelSessionTargetByKey.get(key);
+    if (!target) {
+      continue;
+    }
+    const active = activeClientsByWorkspaceKey.get(resolveWorkspaceKey(target));
+    if (!active) {
+      continue;
+    }
+    const runtimeModel = createRuntimeModelConfig({
+      model: previousRuntimeModel.model,
+      providerRegistry: event.snapshot,
+      thoughtLevel: previousRuntimeModel.thoughtLevel,
+    });
+    if (!runtimeModel || runtimeModel.revision === previousRuntimeModel.revision) {
+      continue;
+    }
+    await updateRuntimeModelConfigOnClient({ ...target, runtimeModel }, active.client);
+  }
+}
 ```
 
 If `ModelProviderRegistryChangedEvent` is not imported in this file, import it from the existing model-provider type source instead of using `any`.
@@ -703,27 +701,27 @@ If `ModelProviderRegistryChangedEvent` is not imported in this file, import it f
 If one workspace fails to update, it should not prevent other active workspaces from receiving the new registry. If the direct `Promise.all` in Step 2 is too brittle for existing conventions, use:
 
 ```ts
-      await Promise.allSettled(
-        Array.from(activeClientsByWorkspaceKey.entries()).map(async ([workspaceKey, active]) => {
-          try {
-            await syncProviderRegistrySnapshotToClient({
-              client: active.client,
-              registry: event.snapshot,
-              reason: event.reason,
-              workspace: active.workspace,
-            });
-          } catch (error) {
-            logger.warn(undefined, "provider registry 变更推送到 active workspace 失败", {
-              message: error instanceof Error ? error.message : String(error),
-              reason: event.reason,
-              revision: event.snapshot.revision,
-              workspaceKey,
-              workspacePath: active.workspace.workspacePath,
-            });
-            throw error;
-          }
-        }),
-      );
+await Promise.allSettled(
+  Array.from(activeClientsByWorkspaceKey.entries()).map(async ([workspaceKey, active]) => {
+    try {
+      await syncProviderRegistrySnapshotToClient({
+        client: active.client,
+        registry: event.snapshot,
+        reason: event.reason,
+        workspace: active.workspace,
+      });
+    } catch (error) {
+      logger.warn(undefined, "provider registry 变更推送到 active workspace 失败", {
+        message: error instanceof Error ? error.message : String(error),
+        reason: event.reason,
+        revision: event.snapshot.revision,
+        workspaceKey,
+        workspacePath: active.workspace.workspacePath,
+      });
+      throw error;
+    }
+  }),
+);
 ```
 
 Pick one style and keep tests aligned. Prefer `Promise.allSettled` if the product expectation is “一个 workspace 同步失败不影响其他 workspace”。
@@ -743,12 +741,14 @@ Expected: PASS.
 ## Phase 5: Remote Workspace Guard
 
 **Files:**
+
 - Read/Guard: `packages/ui/src/lib/remoteWorkspaceProviderSync.ts`
 - Read/Guard: `packages/ui/test/remoteWorkspaceProviderSync.test.ts`
 - Read/Guard: `packages/ui/test/zcodeSessionPromptControl.test.ts`
 - Read/Guard: `packages/ui/src/lib/zcodeSessionPromptControl.ts`
 
 **Interfaces:**
+
 - Consumes: existing remote provider registry preflight.
 - Produces: evidence that remote subagent users remain covered and remote helper semantics were not changed.
 
@@ -805,11 +805,13 @@ If remote helper changed, stop and explain why the change is necessary before co
 ## Phase 6: E2E Acceptance
 
 **Files:**
+
 - Test: `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-provider-registry-cold-start.test.ts`
 - Fixture: `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-subagent-provider-registry-cold-start.json`
 - Modify after green: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 
 **Interfaces:**
+
 - Consumes: local service provider registry preflight.
 - Produces: provider-visible child subagent request using alternate provider model.
 
@@ -867,13 +869,13 @@ no provider_not_found for e2e-deepseek-alt
 In `docs/testing/conversation-session-e2e-coverage-matrix.md`, change I14 from:
 
 ```markdown
-| I14 | failing  | SR     | 正式 E2E 复现当前缺陷：冷启时 CLI 只有 primary runtime/config，subagent profile 绑定 alternate provider；当前实现未捕获到 alternate child 请求，修复后应最终 idle |
+| I14 | failing | SR | 正式 E2E 复现当前缺陷：冷启时 CLI 只有 primary runtime/config，subagent profile 绑定 alternate provider；当前实现未捕获到 alternate child 请求，修复后应最终 idle |
 ```
 
 to:
 
 ```markdown
-| I14 | covered  | SR     | 冷启时 CLI 只有 primary runtime/config，subagent profile 绑定 alternate provider；child subagent 请求使用 alternate provider 并最终 idle |
+| I14 | covered | SR | 冷启时 CLI 只有 primary runtime/config，subagent profile 绑定 alternate provider；child subagent 请求使用 alternate provider 并最终 idle |
 ```
 
 Do not mark `covered` before the replay passes.
@@ -883,9 +885,11 @@ Do not mark `covered` before the replay passes.
 ## Phase 7: Repository Gates And Commit
 
 **Files:**
+
 - Existing changed files only.
 
 **Interfaces:**
+
 - Consumes: passing unit tests and E2E.
 - Produces: a Conventional Commit containing only this bugfix and doc status update.
 

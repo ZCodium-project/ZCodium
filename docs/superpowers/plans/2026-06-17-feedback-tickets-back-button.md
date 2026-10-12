@@ -22,12 +22,14 @@
 ### Task 1: Feedback Center Tickets Back Button
 
 **Files:**
+
 - Modify: `packages/ui/src/feedback/FeedbackCenter.tsx`
 - Modify: `packages/ui/src/i18n/locales/zh-CN.ts`
 - Modify: `packages/ui/src/i18n/locales/en-US.ts`
 - Modify: `packages/ui/test/feedbackCenter.test.ts`
 
 **Interfaces:**
+
 - Consumes: `useFeedbackStore((state) => state.setTab)` and current `tab`.
 - Produces: tickets header back button with aria-label `feedback.center.backToSubmit`.
 
@@ -39,7 +41,7 @@ Update `packages/ui/test/feedbackCenter.test.ts`:
 expect(source).toContain("ArrowLeftIcon");
 expect(source).toContain('tab === "tickets"');
 expect(source).toContain('data-feedback-back-to-submit="true"');
-expect(source).toContain('feedback.center.backToSubmit');
+expect(source).toContain("feedback.center.backToSubmit");
 expect(source).toContain('setTab("submit")');
 ```
 
@@ -106,9 +108,11 @@ Expected: PASS.
 ### Task 2: Full Verification And Commit
 
 **Files:**
+
 - Verify all files changed by Task 1 and this plan.
 
 **Interfaces:**
+
 - Consumes: implementation from Task 1.
 - Produces: committed feature implementation.
 

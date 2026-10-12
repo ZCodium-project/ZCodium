@@ -9,9 +9,7 @@ const pluginStorePageSource = readFileSync(
   "utf8",
 );
 const workspaceShellSource = readFileSync(
-  fileURLToPath(
-    new URL("../src/app-shell/WorkspaceShellLayout.tsx", import.meta.url),
-  ),
+  fileURLToPath(new URL("../src/app-shell/WorkspaceShellLayout.tsx", import.meta.url)),
   "utf8",
 );
 

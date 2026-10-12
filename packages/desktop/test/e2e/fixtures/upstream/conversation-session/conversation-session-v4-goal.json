@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_V4_GOAL_SEED"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_V4_GOAL_SEED"]
       },
       "response": {
         "statusCode": 200,

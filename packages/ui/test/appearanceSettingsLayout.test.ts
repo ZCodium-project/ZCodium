@@ -38,9 +38,7 @@ describe("appearance settings layout", () => {
   });
 
   it("文案描述可见效果，不再声称修改 rem 布局或显示右侧单一预览", () => {
-    expect(zhCN["settings.appearance.interfaceDescription"]).toBe(
-      "设置应用主题和界面文字大小。",
-    );
+    expect(zhCN["settings.appearance.interfaceDescription"]).toBe("设置应用主题和界面文字大小。");
     expect(zhCN["settings.uiFontSizeDescription"]).toContain("图标和布局尺寸不受影响");
     expect(zhCN["settings.previewDescription"]).toContain("同时预览浅色与深色代码主题");
     expect(enUS["settings.uiFontSizeDescription"]).toContain(

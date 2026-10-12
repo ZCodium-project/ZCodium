@@ -24,9 +24,7 @@ describe("Collapsible", () => {
     );
     expect(html).toContain('data-slot="collapsible-content"');
     expect(html).toContain('data-state="closed"');
-    const contentTag = html.match(
-      /<div[^>]*data-slot="collapsible-content"[^>]*>/,
-    )?.[0];
+    const contentTag = html.match(/<div[^>]*data-slot="collapsible-content"[^>]*>/)?.[0];
     expect(contentTag).toBeDefined();
     expect(contentTag).not.toMatch(/\shidden(?:=|\s|>)/u);
   });

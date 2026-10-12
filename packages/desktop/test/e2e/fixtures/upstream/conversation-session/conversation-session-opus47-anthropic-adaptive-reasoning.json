@@ -41,7 +41,11 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_OPUS47_ANTHROPIC_REASONING_MEDIUM"],
-        "bodyIncludes": ["E2E_OPUS47_ANTHROPIC_REASONING_MEDIUM", "upstream-e2e-ok", "claude-opus-4-7"],
+        "bodyIncludes": [
+          "E2E_OPUS47_ANTHROPIC_REASONING_MEDIUM",
+          "upstream-e2e-ok",
+          "claude-opus-4-7"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
@@ -68,7 +72,11 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_OPUS47_ANTHROPIC_REASONING_MAX"],
-        "bodyIncludes": ["E2E_OPUS47_ANTHROPIC_REASONING_MAX", "upstream-e2e-ok", "claude-opus-4-7"],
+        "bodyIncludes": [
+          "E2E_OPUS47_ANTHROPIC_REASONING_MAX",
+          "upstream-e2e-ok",
+          "claude-opus-4-7"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

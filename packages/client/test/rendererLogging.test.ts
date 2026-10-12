@@ -36,11 +36,9 @@ describe("client renderer logging", () => {
 
     logger.warn("visible", { id: "client-warn" });
 
-    expect(consoleWarn).toHaveBeenCalledWith(
-      expect.stringContaining("[renderer]"),
-      "visible",
-      { id: "client-warn" },
-    );
+    expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining("[renderer]"), "visible", {
+      id: "client-warn",
+    });
     expect(bridgeLog).toHaveBeenCalledWith("warn", ["visible", { id: "client-warn" }]);
   });
 

@@ -18,9 +18,7 @@ interface SeedTaskTitleMarqueeFixtureOptions {
   workspacePath: string;
 }
 
-export function resolveTaskTitleMarqueeDatabasePath(
-  e2eHomeDir: string,
-): string {
+export function resolveTaskTitleMarqueeDatabasePath(e2eHomeDir: string): string {
   return join(resolveE2EStorageRoot(e2eHomeDir), "v2", "tasks-index.sqlite");
 }
 

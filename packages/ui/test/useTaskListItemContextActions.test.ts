@@ -204,15 +204,11 @@ describe("useTaskListItemContextActions", () => {
 
     await latestResult!.handleOpenTaskPathInFileManager();
 
-    expect(mockOpenInEditor).toHaveBeenCalledWith(
-      "explorer",
-      "/workspace/remote",
-      {
-        pathKind: "directory",
-        remoteTarget,
-        workspaceIdentity: "remote:wsl:Ubuntu-24.04:dev:/workspace/remote",
-      },
-    );
+    expect(mockOpenInEditor).toHaveBeenCalledWith("explorer", "/workspace/remote", {
+      pathKind: "directory",
+      remoteTarget,
+      workspaceIdentity: "remote:wsl:Ubuntu-24.04:dev:/workspace/remote",
+    });
     expect(mockOpenInFileManager).not.toHaveBeenCalled();
   });
 
@@ -279,31 +275,19 @@ describe("useTaskListItemContextActions", () => {
     expect(latestResult).not.toBeNull();
     await latestResult!.handleOpenProviderConfig();
 
-    expect(mockOpenInEditor).toHaveBeenCalledWith(
-      "vscode",
-      "/tmp/providers/demo",
-    );
+    expect(mockOpenInEditor).toHaveBeenCalledWith("vscode", "/tmp/providers/demo");
     expect(mockOpenInFileManager).not.toHaveBeenCalled();
   });
 
   it("resolveProviderConfigOpenTargetPath 会兼容文件与不同平台路径", () => {
-    expect(
-      resolveProviderConfigOpenTargetPath(
-        "/tmp/providers/demo/config.toml",
-        true,
-      ),
-    ).toBe("/tmp/providers/demo/config.toml");
-    expect(
-      resolveProviderConfigOpenTargetPath(
-        "/tmp/providers/demo/config.toml",
-        false,
-      ),
-    ).toBe("/tmp/providers/demo");
-    expect(
-      resolveProviderConfigOpenTargetPath(
-        "C:\\Users\\dev\\.codex\\config.toml",
-        false,
-      ),
-    ).toBe("C:\\Users\\dev\\.codex");
+    expect(resolveProviderConfigOpenTargetPath("/tmp/providers/demo/config.toml", true)).toBe(
+      "/tmp/providers/demo/config.toml",
+    );
+    expect(resolveProviderConfigOpenTargetPath("/tmp/providers/demo/config.toml", false)).toBe(
+      "/tmp/providers/demo",
+    );
+    expect(resolveProviderConfigOpenTargetPath("C:\\Users\\dev\\.codex\\config.toml", false)).toBe(
+      "C:\\Users\\dev\\.codex",
+    );
   });
 });

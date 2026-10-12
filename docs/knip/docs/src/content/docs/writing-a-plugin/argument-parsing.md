@@ -34,7 +34,7 @@ Example:
 
 ```ts
 {
-  require: ['r'];
+  require: ["r"];
 }
 ```
 
@@ -49,7 +49,7 @@ Example:
 
 ```ts
 {
-  args: (args: string[]) => args.filter(arg => arg !== 'omit');
+  args: (args: string[]) => args.filter((arg) => arg !== "omit");
 }
 ```
 
@@ -61,7 +61,7 @@ Example:
 
 ```ts
 {
-  binaries: ['tsc'];
+  binaries: ["tsc"];
 }
 ```
 
@@ -93,7 +93,7 @@ Example:
 
 ```ts
 {
-  config: ['p'];
+  config: ["p"];
 }
 ```
 
@@ -109,7 +109,7 @@ Example:
 
 ```ts
 {
-  fromArgs: ['exec'];
+  fromArgs: ["exec"];
 }
 ```
 
@@ -162,7 +162,7 @@ Example:
 
 ```ts
 {
-  resolve: ['plugin'];
+  resolve: ["plugin"];
 }
 ```
 
@@ -175,8 +175,7 @@ Return inputs from parsed arguments
 
 ```ts
 {
-  resolveInputs: (parsed: ParsedArgs) =>
-    parsed['flag'] ? [toDependency('package')] : [];
+  resolveInputs: (parsed: ParsedArgs) => (parsed["flag"] ? [toDependency("package")] : []);
 }
 ```
 

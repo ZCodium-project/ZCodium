@@ -24,11 +24,7 @@ function ControlledInstructions() {
 describe("AutomationInstructionsTextarea", () => {
   it("moves the shared Input border states from the surface parent to the textarea", () => {
     const { container } = render(
-      createElement(
-        AutomationInstructionsComposer,
-        null,
-        createElement(ControlledInstructions),
-      ),
+      createElement(AutomationInstructionsComposer, null, createElement(ControlledInstructions)),
     );
     const composer = container.firstElementChild;
     const textarea = screen.getByRole("textbox", { name: "Instructions" });
@@ -42,8 +38,7 @@ describe("AutomationInstructionsTextarea", () => {
   });
 
   it("uses secondary color for idle controls until hover or menu expansion", () => {
-    const classes =
-      AUTOMATION_INSTRUCTIONS_TOOLBAR_TRIGGER_CLASSNAME.split(" ");
+    const classes = AUTOMATION_INSTRUCTIONS_TOOLBAR_TRIGGER_CLASSNAME.split(" ");
 
     expect(classes).toContain("text-foreground-subtle");
     expect(classes).not.toContain("text-foreground");
@@ -102,15 +97,9 @@ describe("AutomationInstructionsTextarea", () => {
       expect(textarea.style.overflowY).toBe("hidden");
     } finally {
       if (originalScrollHeight) {
-        Object.defineProperty(
-          HTMLTextAreaElement.prototype,
-          "scrollHeight",
-          originalScrollHeight,
-        );
+        Object.defineProperty(HTMLTextAreaElement.prototype, "scrollHeight", originalScrollHeight);
       } else {
-        delete (
-          HTMLTextAreaElement.prototype as unknown as Record<string, unknown>
-        ).scrollHeight;
+        delete (HTMLTextAreaElement.prototype as unknown as Record<string, unknown>).scrollHeight;
       }
     }
   });
@@ -148,15 +137,9 @@ describe("AutomationInstructionsTextarea", () => {
       expect(textarea.style.overflowY).toBe("hidden");
     } finally {
       if (originalScrollHeight) {
-        Object.defineProperty(
-          HTMLTextAreaElement.prototype,
-          "scrollHeight",
-          originalScrollHeight,
-        );
+        Object.defineProperty(HTMLTextAreaElement.prototype, "scrollHeight", originalScrollHeight);
       } else {
-        delete (
-          HTMLTextAreaElement.prototype as unknown as Record<string, unknown>
-        ).scrollHeight;
+        delete (HTMLTextAreaElement.prototype as unknown as Record<string, unknown>).scrollHeight;
       }
     }
   });

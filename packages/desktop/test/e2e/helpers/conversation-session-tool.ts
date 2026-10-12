@@ -60,26 +60,16 @@ export interface SuccessfulToolCallSnapshot {
   toolName: string | null;
 }
 
-export async function assertToolCallNotFailedByToolCallId(
-  toolCallId: string,
-): Promise<void> {
+export async function assertToolCallNotFailedByToolCallId(toolCallId: string): Promise<void> {
   const diagnostics = await getToolCallDiagnostics({
     type: "toolCallId",
     value: toolCallId,
   });
   const toolCall = findRendererStoreToolCall(diagnostics, toolCallId);
-  if (
-    toolCall?.status === "failed" ||
-    diagnostics.matchedBlock?.status === "failed"
-  ) {
-    throw createToolCallFailure(
-      toolCallId,
-      toolCall,
-      diagnostics.matchedBlock,
-    );
+  if (toolCall?.status === "failed" || diagnostics.matchedBlock?.status === "failed") {
+    throw createToolCallFailure(toolCallId, toolCall, diagnostics.matchedBlock);
   }
-  const providerResult =
-    await getLatestUpstreamToolResultByToolCallId(toolCallId);
+  const providerResult = await getLatestUpstreamToolResultByToolCallId(toolCallId);
   if (providerResult?.isError) {
     // Bug 根因：V4 历史投影可能在工具已经返回 is_error 后仍短暂显示 pending，
     // 直接读取模型实际收到的 tool_result，避免错误再次退化为 guest/UI 超时。
@@ -106,8 +96,7 @@ export async function waitForSuccessfulToolCallByToolCallId(
       // 但旧 E2E 继续等待 guest/UI，最终只报焦点超时。工具错误必须在真实边界立即暴露。
       throw createToolCallFailure(toolCallId, latest, block);
     }
-    const providerResult =
-      await getLatestUpstreamToolResultByToolCallId(toolCallId);
+    const providerResult = await getLatestUpstreamToolResultByToolCallId(toolCallId);
     if (providerResult?.isError) {
       throw createProviderToolResultFailure(providerResult);
     }
@@ -122,11 +111,7 @@ export async function waitForSuccessfulToolCallByToolCallId(
       };
     }
     if (providerResult) {
-      assertToolResultContains(
-        toolCallId,
-        providerResult.content,
-        expectedOutputIncludes,
-      );
+      assertToolResultContains(toolCallId, providerResult.content, expectedOutputIncludes);
       return {
         output: providerResult.content,
         status: "completed",
@@ -134,10 +119,7 @@ export async function waitForSuccessfulToolCallByToolCallId(
         toolName: block?.toolName ?? latest?.toolName ?? null,
       };
     }
-    if (
-      block?.status === "completed" &&
-      expectedOutputIncludes.length === 0
-    ) {
+    if (block?.status === "completed" && expectedOutputIncludes.length === 0) {
       // V4 history case 的 renderer-store 旧消息投影可能为空，但 DOM tool block 是
       // 真实执行终态；要求 marker 时必须继续等模型实际收到的 provider tool_result。
       return {
@@ -147,14 +129,10 @@ export async function waitForSuccessfulToolCallByToolCallId(
         toolName: block.toolName,
       };
     }
-    await new Promise<void>((resolveDelay) =>
-      setTimeout(resolveDelay, 100),
-    );
+    await new Promise<void>((resolveDelay) => setTimeout(resolveDelay, 100));
   }
   throw new Error(
-    `toolCallId=${toolCallId} 没有在 ${timeout}ms 内成功完成; latest=${JSON.stringify(
-      latest,
-    )}`,
+    `toolCallId=${toolCallId} 没有在 ${timeout}ms 内成功完成; latest=${JSON.stringify(latest)}`,
   );
 }
 
@@ -177,23 +155,17 @@ export async function openAssistantHistoryForAssistantContaining(
   } catch {
     latest = await safeClickAssistantHistoryForAssistantContaining(text, latest);
     throw new Error(
-      `没有展开包含指定内容的 assistant history: ${text}; latest=${JSON.stringify(
-        latest,
-      )}`,
+      `没有展开包含指定内容的 assistant history: ${text}; latest=${JSON.stringify(latest)}`,
     );
   }
   const result = await clickAssistantHistoryForAssistantContaining(text);
   if (!result.expanded) {
-    throw new Error(
-      `assistant history 等待后仍未展开: ${text}; latest=${JSON.stringify(result)}`,
-    );
+    throw new Error(`assistant history 等待后仍未展开: ${text}; latest=${JSON.stringify(result)}`);
   }
   return result;
 }
 
-export function getToolCallBlockContaining(
-  text: string,
-): Promise<ToolCallBlockSnapshot | null> {
+export function getToolCallBlockContaining(text: string): Promise<ToolCallBlockSnapshot | null> {
   return getMatchingToolCallBlock({ type: "text", value: text });
 }
 
@@ -260,15 +232,11 @@ async function getMatchingToolCallBlock(
   return diagnostics.matchedBlock;
 }
 
-function findRendererStoreToolCall(
-  diagnostics: ToolCallDiagnostics,
-  toolCallId: string,
-) {
+function findRendererStoreToolCall(diagnostics: ToolCallDiagnostics, toolCallId: string) {
   for (const message of diagnostics.rendererStore.messages) {
     const match = message.toolCalls.find(
       (toolCall) =>
-        toolCall.toolId === toolCallId ||
-        toolCall.toolId?.startsWith(`${toolCallId}:`) === true,
+        toolCall.toolId === toolCallId || toolCall.toolId?.startsWith(`${toolCallId}:`) === true,
     );
     if (match) return match;
   }
@@ -281,21 +249,13 @@ function createToolCallFailure(
   block: ToolCallBlockSnapshot | null,
 ): Error {
   return new Error(
-    `toolCallId=${toolCallId} 执行失败; error=${JSON.stringify(
-      toolCall?.error,
-    )}; ` +
-      `rawError=${JSON.stringify(
-        toolCall?.rawErrorMessage ?? toolCall?.rawErrorDetail,
-      )}; ` +
-      `output=${JSON.stringify(toolCall?.output)}; block=${JSON.stringify(
-        block,
-      )}`,
+    `toolCallId=${toolCallId} 执行失败; error=${JSON.stringify(toolCall?.error)}; ` +
+      `rawError=${JSON.stringify(toolCall?.rawErrorMessage ?? toolCall?.rawErrorDetail)}; ` +
+      `output=${JSON.stringify(toolCall?.output)}; block=${JSON.stringify(block)}`,
   );
 }
 
-function createProviderToolResultFailure(
-  result: UpstreamToolResultSnapshot,
-): Error {
+function createProviderToolResultFailure(result: UpstreamToolResultSnapshot): Error {
   return new Error(
     `toolCallId=${result.toolCallId} 执行失败; providerToolResult=${JSON.stringify(
       result.content,
@@ -308,9 +268,7 @@ function assertToolResultContains(
   output: string,
   expectedOutputIncludes: readonly string[],
 ): void {
-  const missing = expectedOutputIncludes.filter(
-    (value) => !output.includes(value),
-  );
+  const missing = expectedOutputIncludes.filter((value) => !output.includes(value));
   if (missing.length > 0) {
     throw new Error(
       `toolCallId=${toolCallId} 已返回 tool_result，但结果缺少 ${JSON.stringify(
@@ -335,18 +293,10 @@ function clickAssistantHistoryForAssistantContaining(
   text: string,
 ): Promise<AssistantHistoryOpenSnapshot> {
   return browser.execute(
-    (
-      assistantMessagePrefix,
-      historyTriggerPrefix,
-      historyContentPrefix,
-      expectedText,
-    ) => {
-      const normalizeText = (value: string) =>
-        value.replace(/\u00a0/g, " ").trim();
+    (assistantMessagePrefix, historyTriggerPrefix, historyContentPrefix, expectedText) => {
+      const normalizeText = (value: string) => value.replace(/\u00a0/g, " ").trim();
       const assistantMessages = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${assistantMessagePrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${assistantMessagePrefix}-"]`),
       );
       const assistantMessage = assistantMessages.find((message) =>
         normalizeText(message.innerText).includes(expectedText),

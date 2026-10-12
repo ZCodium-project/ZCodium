@@ -9,11 +9,19 @@ import {
 
 describe("planModeTool", () => {
   it.each(["full-auto", "full_auto"])("keeps %s as a YOLO alias, not Guarded", (alias) => {
-    const configOptions = [{
-      id: "mode", name: "Mode", category: "mode", type: "select" as const,
-      currentValue: "guarded",
-      options: [{ value: "guarded", name: "Guarded" }, { value: "yolo", name: "YOLO" }],
-    }];
+    const configOptions = [
+      {
+        id: "mode",
+        name: "Mode",
+        category: "mode",
+        type: "select" as const,
+        currentValue: "guarded",
+        options: [
+          { value: "guarded", name: "Guarded" },
+          { value: "yolo", name: "YOLO" },
+        ],
+      },
+    ];
     expect(resolveProviderNativeModeIdFromSemantic(configOptions, alias)).toBe("yolo");
     expect(resolveProviderNativeModeIdFromSemantic(configOptions, "guarded")).toBe("guarded");
     const legacyOptions = [{ ...configOptions[0], options: [{ value: alias, name: "YOLO" }] }];

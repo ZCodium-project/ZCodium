@@ -40,8 +40,7 @@ describe("generic empty completion retry E2E", () => {
     );
 
     await browser.waitUntil(
-      async () =>
-        (await countUpstreamRequests({ includes: [EMPTY_COMPLETION_MARKER] })) === 2,
+      async () => (await countUpstreamRequests({ includes: [EMPTY_COMPLETION_MARKER] })) === 2,
       {
         timeout: 30000,
         timeoutMsg: "空 completion 没有严格产生 first-empty → second-success 两次请求",

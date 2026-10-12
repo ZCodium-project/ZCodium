@@ -542,8 +542,10 @@ export interface BashAutoBackgroundExecutionPort extends ExecutionPort {
 export function supportsBashAutoBackground(
   executionPort: ExecutionPort,
 ): executionPort is BashAutoBackgroundExecutionPort {
-  return typeof (executionPort as Partial<BashAutoBackgroundExecutionPort>)
-    .runBashWithAutoBackground === "function";
+  return (
+    typeof (executionPort as Partial<BashAutoBackgroundExecutionPort>).runBashWithAutoBackground ===
+    "function"
+  );
 }
 
 export async function runBashWithOptionalAutoBackground(input: {

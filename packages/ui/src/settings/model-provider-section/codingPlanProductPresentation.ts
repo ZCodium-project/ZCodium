@@ -1,19 +1,11 @@
-import type {
-  CodingPlanCardCopyItem,
-  CodingPlanProductPreviewPayment,
-} from "@zcode/shared";
+import type { CodingPlanCardCopyItem, CodingPlanProductPreviewPayment } from "@zcode/shared";
 
-export function normalizeCodingPlanCardCopyItems(
-  items: unknown,
-): CodingPlanCardCopyItem[] {
+export function normalizeCodingPlanCardCopyItems(items: unknown): CodingPlanCardCopyItem[] {
   if (!Array.isArray(items)) {
     return [];
   }
   return items.flatMap((item) => {
-    if (
-      typeof item !== "string" &&
-      (!item || typeof item !== "object")
-    ) {
+    if (typeof item !== "string" && (!item || typeof item !== "object")) {
       return [];
     }
     const text =
@@ -26,8 +18,7 @@ export function normalizeCodingPlanCardCopyItems(
       return [];
     }
     const tooltip =
-      typeof item === "string" ||
-      typeof (item as { tooltip?: unknown }).tooltip !== "string"
+      typeof item === "string" || typeof (item as { tooltip?: unknown }).tooltip !== "string"
         ? ""
         : (item as { tooltip: string }).tooltip.trim();
     return [{ text, ...(tooltip ? { tooltip } : {}) }];
@@ -46,22 +37,14 @@ export type CodingPlanProductDisplay = CodingPlanProductPreviewPayment & {
   descriptionItems?: CodingPlanCardCopyItem[];
 };
 
-const CODING_PLAN_CURRENCY_LABELS_ZH: Record<CodingPlanPriceCurrency, string> =
-  {
-    CNY: "人民币",
-    USD: "美元",
-  };
+const CODING_PLAN_CURRENCY_LABELS_ZH: Record<CodingPlanPriceCurrency, string> = {
+  CNY: "人民币",
+  USD: "美元",
+};
 
-export const CODING_PLAN_PERIODS: CodingPlanBillingPeriod[] = [
-  "monthly",
-  "quarterly",
-  "yearly",
-];
+export const CODING_PLAN_PERIODS: CodingPlanBillingPeriod[] = ["monthly", "quarterly", "yearly"];
 
-export const CODING_PLAN_PERIOD_LABEL_IDS: Record<
-  CodingPlanBillingPeriod,
-  string
-> = {
+export const CODING_PLAN_PERIOD_LABEL_IDS: Record<CodingPlanBillingPeriod, string> = {
   monthly: "settings.modelProvider.codingPlan.period.monthly",
   quarterly: "settings.modelProvider.codingPlan.period.quarterly",
   yearly: "settings.modelProvider.codingPlan.period.yearly",
@@ -87,19 +70,11 @@ export function groupProductsByPeriod(
   return groups;
 }
 
-export function pickProductTitle(
-  product: CodingPlanProductPreviewPayment,
-): string {
-  return (
-    product.productName?.trim() ||
-    product.productBigTitle?.trim() ||
-    product.productId
-  );
+export function pickProductTitle(product: CodingPlanProductPreviewPayment): string {
+  return product.productName?.trim() || product.productBigTitle?.trim() || product.productId;
 }
 
-export function pickProductDetails(
-  product: CodingPlanProductPreviewPayment,
-): string[] {
+export function pickProductDetails(product: CodingPlanProductPreviewPayment): string[] {
   // 修复原因：套餐卡片的运营文案现在由静态配置的 description 控制；
   // 继续优先拼 productEquityList 会展示旧权益字段，和服务端配置的套餐说明不一致。
   const descriptionDetails = [
@@ -128,12 +103,8 @@ export function pickProductDetails(
     .slice(0, 4);
 }
 
-export function pickProductPrice(
-  product: CodingPlanProductPreviewPayment,
-): number | null {
-  return (
-    product.payAmount ?? product.discountAmount ?? product.renewAmount ?? null
-  );
+export function pickProductPrice(product: CodingPlanProductPreviewPayment): number | null {
+  return product.payAmount ?? product.discountAmount ?? product.renewAmount ?? null;
 }
 
 export function normalizeCodingPlanCurrency(
@@ -193,8 +164,7 @@ export function inferBillingPeriod(
     return "monthly";
   }
 
-  const monthlyAmount =
-    product.monthlyOriginalAmount ?? product.monthlyPayAmount;
+  const monthlyAmount = product.monthlyOriginalAmount ?? product.monthlyPayAmount;
   const totalAmount = product.originalAmount ?? product.payAmount;
   if (typeof monthlyAmount === "number" && typeof totalAmount === "number") {
     const ratio = Math.round(totalAmount / monthlyAmount);

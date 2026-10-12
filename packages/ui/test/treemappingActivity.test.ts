@@ -231,8 +231,8 @@ describe("buildTreemappingActivityModel", () => {
                   newLines: 502,
                   lines: [
                     ' "use client";',
-                    "-import { useState } from \"react\";",
-                    "+import { useState, useEffect } from \"react\";",
+                    '-import { useState } from "react";',
+                    '+import { useState, useEffect } from "react";',
                   ],
                 },
               ],
@@ -254,8 +254,8 @@ describe("buildTreemappingActivityModel", () => {
                     newLines: 502,
                     lines: [
                       ' "use client";',
-                      "-import { useState } from \"react\";",
-                      "+import { useState, useEffect } from \"react\";",
+                      '-import { useState } from "react";',
+                      '+import { useState, useEffect } from "react";',
                     ],
                   },
                 ],

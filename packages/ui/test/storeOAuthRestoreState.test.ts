@@ -156,9 +156,7 @@ describe("createZCodeStore global state", () => {
     );
 
     expect(
-      store.getState().codingPlanQuotaResetAutomaticObservationsBySource[
-        "composer:test"
-      ]?.week,
+      store.getState().codingPlanQuotaResetAutomaticObservationsBySource["composer:test"]?.week,
     ).toEqual({ completedAt: firstCompletedAt, authSessionSeq: 1 });
 
     // 上一鉴权会话尚未结束的异步请求不能覆盖当前会话状态。
@@ -180,8 +178,7 @@ describe("createZCodeStore global state", () => {
       1,
     );
     expect(
-      store.getState().codingPlanQuotaResetUiBySource["composer:test"]?.week
-        ?.completedAt,
+      store.getState().codingPlanQuotaResetUiBySource["composer:test"]?.week?.completedAt,
     ).toBe(firstCompletedAt);
   });
 
@@ -203,8 +200,6 @@ describe("createZCodeStore global state", () => {
 
     expect(store.getState().performanceMode).toBe(true);
     expect(localStorageState.get("zcode-performance-mode")).toBe("true");
-    expect(
-      createZCodeStore(mockBroadcastService).getState().performanceMode,
-    ).toBe(true);
+    expect(createZCodeStore(mockBroadcastService).getState().performanceMode).toBe(true);
   });
 });

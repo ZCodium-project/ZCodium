@@ -17,10 +17,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_MODEL_SWITCH_RESTORE_REPRO_FAIL"],
         "bodyIncludes": ["E2E_MODEL_SWITCH_RESTORE_REPRO_FAIL"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "E2E_MODEL_SWITCH_RESTORE_REPRO_SUCCESS"
-        ]
+        "bodyExcludes": ["Generate a concise title", "E2E_MODEL_SWITCH_RESTORE_REPRO_SUCCESS"]
       },
       "response": {
         "statusCode": 429,

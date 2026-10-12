@@ -7,6 +7,7 @@
 ## 1. 架构（renderer 只报 bounds，不碰命令）
 
 CDP 设计下，浏览器命令全走 agent→host→main（interaction/browserExecute），**renderer 不在命令路径**。T7 renderer 的唯一职责：
+
 1. 渲染一个空占位 `<div>`（浏览器像素由 main 的 WebContentsView 盖在其上）。
 2. `ResizeObserver` + 滚动/布局变化 → 把该 div 的 `getBoundingClientRect()`（CSS px，相对视口=内容区）经 IPC 报给 main。
 3. 显隐：pane 出现/隐藏时通知 main show/hide（隐藏=view 移出屏或 removeChildView）。
@@ -22,12 +23,14 @@ main 收到 bounds → `browserViewManager.setBounds(key, rect)`（WebContentsVi
 ## 3. 落点
 
 ### 契约 / IPC（`packages/shared/src/channels.ts`）
+
 - `PlatformChannels` 增：
   - `BrowserViewSetBounds: "zcode:browser-view-set-bounds"`（renderer→main，invoke/send，payload `{key, rect:{x,y,width,height}}`）。
   - `BrowserViewSetVisible: "zcode:browser-view-set-visible"`（payload `{key, visible}`）。
 - channel 类型表加 request/response（response void）。
 
 ### main
+
 - `desktopMainIpcPlatform.ts`：`ipcMain.handle(BrowserViewSetBounds)` → `browserViewManager.setBounds(key, rect, senderWindow)`；`BrowserViewSetVisible` → `browserViewManager.setVisible(key, visible, senderWindow)`。
 - `browserViewManager.ts`：新增
   - `setBounds(win, key, rect)`：ensureAttached(win, key) + `view.setBounds(rect)`。
@@ -36,6 +39,7 @@ main 收到 bounds → `browserViewManager.setBounds(key, rect)`（WebContentsVi
   - 把 T5 里「离屏 setBounds」改为：默认 hidden（`setVisible(false)`），等 renderer 报 bounds + show 才显示。
 
 ### renderer（`packages/ui`）
+
 - 新增 `packages/ui/src/browser-use/BrowserUseViewPane.tsx`：
   - 渲染 `<div ref>` 占位（`bg-surface` 等，遵 DESIGN.md）。
   - `ResizeObserver` 观察 div + 监听窗口 resize/side-pane 动画结束 → `platform.browserViewSetBounds({key, rect})`（rect=getBoundingClientRect 取 x/y/width/height，round 整数）。
@@ -50,12 +54,14 @@ main 收到 bounds → `browserViewManager.setBounds(key, rect)`（WebContentsVi
 - side-pane 有展开动画：动画中 rect 变化 → ResizeObserver 持续上报（可能高频，加 rAF 节流）。
 
 ## 5. 验证点（T7）
+
 - 单测（browserViewManager，stub WebContentsView）：setBounds 缓存 + 调 view.setBounds；setVisible(false) 调 view.setVisible(false)；ensure 幂等；view 未建时 setBounds 缓存、建后套用。
 - BrowserUseViewPane（无 jsdom：验证 bounds 计算/节流纯函数——把 rect 提取+round 抽成纯函数单测）。
 - typecheck：channels/platform/preload/main/ui。
 - 真机（手动）：desktop 起，出现 browser-use pane，agent navigate 后能在 pane 区域看到网页；resize 窗口/pane，网页跟随。
 
 ## 6. 边界
+
 - 仅 desktop（Web/mobile 无 WebContentsView，platform 方法 no-op）。
 - 多 tab（多 view 定位）留 T9；T7 单 view（key=sessionId）。
 - P0 不做自动开 pane；先保证「有 pane 时正确覆盖显示」。

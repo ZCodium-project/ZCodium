@@ -133,7 +133,9 @@ function PrewarmHarness(props: {
   transportIdentity: unknown;
   dispatchCommand: ReturnType<typeof createDispatchRecorder>["dispatch"];
   resolveInitialConfig?: () => Partial<SessionConfigState>;
-  resolveInitialRuntimeModel?: Parameters<typeof useDraftSessionPrewarm>[0]["resolveInitialRuntimeModel"];
+  resolveInitialRuntimeModel?: Parameters<
+    typeof useDraftSessionPrewarm
+  >[0]["resolveInitialRuntimeModel"];
   onRender: (binding: ReturnType<typeof useDraftSessionPrewarm>["binding"]) => void;
 }) {
   const result = useDraftSessionPrewarm({

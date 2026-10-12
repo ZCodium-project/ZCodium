@@ -36,25 +36,25 @@ R2 不交付：
 
 ## 2. 核心决策
 
-| 决策项 | R2 结论 |
-| --- | --- |
-| 新代码目录 | 新建 `packages/zcode-server-cli`；R2 不在 `packages/server` 中增加代码 |
-| 旧 `packages/server` | 仅作为现有 HTTP/WS、stdio、远程部署和协议行为参考；保持其当前入口兼容 |
-| 用户入口 | 独立发行包提供 `zcode`；无参数继续进入既有 TUI |
-| Server Core | 新目录内实现新的 Core 入口和生命周期合同，不继承旧 `entry-http` / `entry-stdio` 的进程语义 |
-| 业务服务 | 经过审查后复用 `@zcode/services`、`@zcode/shared`、`@zcode/rpc` 等底层能力 |
-| Supervisor | 只拥有生命周期状态，不拥有 task/session/stream/queue/snapshot 业务状态 |
-| 监听地址 | 默认回环地址和动态端口；非回环监听必须启用鉴权 |
-| Web / WS | R2 实现并验证 Core 的 HTTP/WS ingress；具体远程 Transport 留给后续阶段 |
-| 数据目录 | 复用 `getZCodeDataRootDir()` 和 `ZCODE_DATA_BASE_DIR`；标准目录为 `<dataRoot>/server`。OS service 必须携带内部参数 `--server-root <absolute-path>`，不得依赖注册时 shell 的环境 |
-| Node runtime | 沿用现有远端资产流程的 Node `v22.16.0`；Server CLI 不依赖系统 Node 或 Electron Node |
-| 崩溃策略 | 5 次/5 分钟预算，退避 1、2、4、8、16 秒；超出后进入 `crash-loop-stopped` |
-| Task 恢复 | Core 崩溃或更新后，运行中的 Task 中断，不自动恢复或重放输入 |
-| stop | 停止当前实例，但保留自启动注册 |
-| uninstall | 停止实例、移除服务注册、删除 ZCode 自有数据；Workspace/Repo/用户文件不删除 |
-| update | 默认从配置的 release catalog 在线下载并校验；无网络时可应用本地 pending；使用原子切换和失败回滚 |
-| 组件更新 | 以 Node、server、agent、official-plugins、native-search-tools 五个粗粒度组件做内容寻址缓存；完整 release 仍是原子运行单元 |
-| 平台服务注册 | 生成 descriptor 后调用当前用户的 launchctl / systemctl --user / schtasks；命令不可用时保留 descriptor 并返回可诊断错误；OS service 是 daemon 的唯一启动 owner，Supervisor 不重复注册服务 |
+| 决策项               | R2 结论                                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 新代码目录           | 新建 `packages/zcode-server-cli`；R2 不在 `packages/server` 中增加代码                                                                                                                   |
+| 旧 `packages/server` | 仅作为现有 HTTP/WS、stdio、远程部署和协议行为参考；保持其当前入口兼容                                                                                                                    |
+| 用户入口             | 独立发行包提供 `zcode`；无参数继续进入既有 TUI                                                                                                                                           |
+| Server Core          | 新目录内实现新的 Core 入口和生命周期合同，不继承旧 `entry-http` / `entry-stdio` 的进程语义                                                                                               |
+| 业务服务             | 经过审查后复用 `@zcode/services`、`@zcode/shared`、`@zcode/rpc` 等底层能力                                                                                                               |
+| Supervisor           | 只拥有生命周期状态，不拥有 task/session/stream/queue/snapshot 业务状态                                                                                                                   |
+| 监听地址             | 默认回环地址和动态端口；非回环监听必须启用鉴权                                                                                                                                           |
+| Web / WS             | R2 实现并验证 Core 的 HTTP/WS ingress；具体远程 Transport 留给后续阶段                                                                                                                   |
+| 数据目录             | 复用 `getZCodeDataRootDir()` 和 `ZCODE_DATA_BASE_DIR`；标准目录为 `<dataRoot>/server`。OS service 必须携带内部参数 `--server-root <absolute-path>`，不得依赖注册时 shell 的环境          |
+| Node runtime         | 沿用现有远端资产流程的 Node `v22.16.0`；Server CLI 不依赖系统 Node 或 Electron Node                                                                                                      |
+| 崩溃策略             | 5 次/5 分钟预算，退避 1、2、4、8、16 秒；超出后进入 `crash-loop-stopped`                                                                                                                 |
+| Task 恢复            | Core 崩溃或更新后，运行中的 Task 中断，不自动恢复或重放输入                                                                                                                              |
+| stop                 | 停止当前实例，但保留自启动注册                                                                                                                                                           |
+| uninstall            | 停止实例、移除服务注册、删除 ZCode 自有数据；Workspace/Repo/用户文件不删除                                                                                                               |
+| update               | 默认从配置的 release catalog 在线下载并校验；无网络时可应用本地 pending；使用原子切换和失败回滚                                                                                          |
+| 组件更新             | 以 Node、server、agent、official-plugins、native-search-tools 五个粗粒度组件做内容寻址缓存；完整 release 仍是原子运行单元                                                                |
+| 平台服务注册         | 生成 descriptor 后调用当前用户的 launchctl / systemctl --user / schtasks；命令不可用时保留 descriptor 并返回可诊断错误；OS service 是 daemon 的唯一启动 owner，Supervisor 不重复注册服务 |
 
 ## 3. 进程与职责模型
 
@@ -435,16 +435,16 @@ zcode update --force
 zcode uninstall
 ```
 
-| 命令 | 行为 |
-| --- | --- |
-| `serve` | 由当前 CLI 进程运行 Supervisor/Core；不注册 OS 自启动；终止信号后有界退出 |
-| `serve --daemon` | 安装/复用当前用户的服务注册，并启动或复用 Supervisor/Core |
-| `status` | 返回注册状态、Core 状态、PID、端口、版本、最近退出原因和 crash budget |
-| `stop` | 请求 Supervisor 停止 Core；保留自启动注册 |
-| `restart` | 有界停止并重新启动；不自动恢复中断 Task |
-| `update` | 获取 catalog 中当前 target 的新 release（或使用已有 pending），校验并安装后应用；catalog 与 current archive 相同返回成功的 `up-to-date`，不得继续请求 apply；未配置 catalog 且没有 pending 时返回明确的 release source 错误；有运行 Task 时默认返回可操作的 guard 错误，不中断任务 |
-| `update --force` | 明确允许中断运行 Task 后应用 release |
-| `uninstall` | 检查运行 Task（有运行 Task 时拒绝并保持原状态），要求两次输入 `DELETE`，停止并移除服务，删除允许列表内的 ZCode 数据 |
+| 命令             | 行为                                                                                                                                                                                                                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `serve`          | 由当前 CLI 进程运行 Supervisor/Core；不注册 OS 自启动；终止信号后有界退出                                                                                                                                                                                                          |
+| `serve --daemon` | 安装/复用当前用户的服务注册，并启动或复用 Supervisor/Core                                                                                                                                                                                                                          |
+| `status`         | 返回注册状态、Core 状态、PID、端口、版本、最近退出原因和 crash budget                                                                                                                                                                                                              |
+| `stop`           | 请求 Supervisor 停止 Core；保留自启动注册                                                                                                                                                                                                                                          |
+| `restart`        | 有界停止并重新启动；不自动恢复中断 Task                                                                                                                                                                                                                                            |
+| `update`         | 获取 catalog 中当前 target 的新 release（或使用已有 pending），校验并安装后应用；catalog 与 current archive 相同返回成功的 `up-to-date`，不得继续请求 apply；未配置 catalog 且没有 pending 时返回明确的 release source 错误；有运行 Task 时默认返回可操作的 guard 错误，不中断任务 |
+| `update --force` | 明确允许中断运行 Task 后应用 release                                                                                                                                                                                                                                               |
+| `uninstall`      | 检查运行 Task（有运行 Task 时拒绝并保持原状态），要求两次输入 `DELETE`，停止并移除服务，删除允许列表内的 ZCode 数据                                                                                                                                                                |
 
 `uninstall` 允许删除：
 
@@ -517,22 +517,22 @@ Workspace / Repo / User files
 
 ## 11. 验收用例
 
-| Case | 验收目标 |
-| --- | --- |
-| R2-CLI-01 | 无参数不加载 Server Core，仍进入 TUI |
-| R2-CLI-02 | 前台 `serve` 启动 Core、监听回环动态端口并完成 ready |
-| R2-CLI-03 | `serve --daemon` 注册平台服务并启动 Supervisor |
-| R2-CLI-04 | 重复启动复用当前实例，不产生第二个 Core |
-| R2-CLI-05 | `status`、`stop`、`restart` 状态收敛且幂等 |
-| R2-CLI-06 | Core 崩溃按 1/2/4/8/16 秒退避，超过预算进入熔断 |
-| R2-CLI-07 | Core 崩溃后运行 Task 中断，不自动恢复 |
-| R2-CLI-08 | 无运行 Task 时 update 原子切换 release 并完成 ready |
-| R2-CLI-09 | 有运行 Task 时 update 默认返回 guard 错误且不中断任务，`--force` 才允许中断 |
-| R2-CLI-10 | uninstall 双重 `DELETE` 确认并移除服务注册 |
-| R2-CLI-11 | uninstall 保留 Workspace、Repo 和用户文件 |
+| Case      | 验收目标                                                                     |
+| --------- | ---------------------------------------------------------------------------- |
+| R2-CLI-01 | 无参数不加载 Server Core，仍进入 TUI                                         |
+| R2-CLI-02 | 前台 `serve` 启动 Core、监听回环动态端口并完成 ready                         |
+| R2-CLI-03 | `serve --daemon` 注册平台服务并启动 Supervisor                               |
+| R2-CLI-04 | 重复启动复用当前实例，不产生第二个 Core                                      |
+| R2-CLI-05 | `status`、`stop`、`restart` 状态收敛且幂等                                   |
+| R2-CLI-06 | Core 崩溃按 1/2/4/8/16 秒退避，超过预算进入熔断                              |
+| R2-CLI-07 | Core 崩溃后运行 Task 中断，不自动恢复                                        |
+| R2-CLI-08 | 无运行 Task 时 update 原子切换 release 并完成 ready                          |
+| R2-CLI-09 | 有运行 Task 时 update 默认返回 guard 错误且不中断任务，`--force` 才允许中断  |
+| R2-CLI-10 | uninstall 双重 `DELETE` 确认并移除服务注册                                   |
+| R2-CLI-11 | uninstall 保留 Workspace、Repo 和用户文件                                    |
 | R2-CLI-12 | HTTP/WS ingress 通过 server-info、Web replayable 和 Host continuous 合同测试 |
-| R2-CLI-13 | 不同 data root 互相隔离，单实例锁不误伤其他 root |
-| R2-CLI-14 | macOS/Linux/Windows service descriptor 和 Node runtime 可启动 |
+| R2-CLI-13 | 不同 data root 互相隔离，单实例锁不误伤其他 root                             |
+| R2-CLI-14 | macOS/Linux/Windows service descriptor 和 Node runtime 可启动                |
 
 ## 12. 发布与回滚
 

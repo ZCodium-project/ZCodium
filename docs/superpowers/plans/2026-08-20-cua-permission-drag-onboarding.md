@@ -28,18 +28,18 @@ kTCCServiceAccessibility | com.apple.calculator | auth_value=2 | 17:34:58
 
 ### 弹窗触发源（本次要摘掉的）
 
-| API | 弹窗 |
-|---|---|
+| API                                             | 弹窗                                           |
+| ----------------------------------------------- | ---------------------------------------------- |
 | `AXIsProcessTrustedWithOptions({prompt: true})` | **弹** — 上游 `ax_macos.mm:2967` `PromptTrust` |
-| `CGRequestScreenCaptureAccess()` | **弹** |
-| `AXIsProcessTrusted()` / `{prompt: false}` | 不弹 — 上游 `FreshAXIsTrusted` |
-| `CGPreflightScreenCaptureAccess()` | 不弹 |
+| `CGRequestScreenCaptureAccess()`                | **弹**                                         |
+| `AXIsProcessTrusted()` / `{prompt: false}`      | 不弹 — 上游 `FreshAXIsTrusted`                 |
+| `CGPreflightScreenCaptureAccess()`              | 不弹                                           |
 
 链路：`openCuaPermissionOnboarding` → `requestHelper*PermissionViaLaunchServices`（上游 `dist/broker/server/helperLauncher.js:563`）→ `/usr/bin/open` 拉起 Helper 到一次性权限请求模式 → Helper 进程内命中上述弹窗 API。
 
 ### 为什么浮窗不能做进 Helper
 
-Helper 是 **Node SEA + `LSUIElement=true`**（实测 `NODE_SEA_BLOB` 命中、Info.plist `LSUIElement=true`），"原生"部分只是 `Resources/ax_native.node` 这个 Node 扩展，不是 AppKit app。`ax_macos.mm` 注释原文：*"does not run a normal NSApplication event loop"*。NSPanel 显示与 `beginDraggingSession` 都需要 run loop。更关键的是**循环依赖**：授权 UI 的目的就是给 Helper 授权，若 UI 由 Helper 承载，则 Helper 起不来时引导一并瘸掉 —— 这正是 macOS ≤14 `lockf` 事故的形态（`broker_unavailable` → 工具不注册 → 授权引导永不弹）。
+Helper 是 **Node SEA + `LSUIElement=true`**（实测 `NODE_SEA_BLOB` 命中、Info.plist `LSUIElement=true`），"原生"部分只是 `Resources/ax_native.node` 这个 Node 扩展，不是 AppKit app。`ax_macos.mm` 注释原文：_"does not run a normal NSApplication event loop"_。NSPanel 显示与 `beginDraggingSession` 都需要 run loop。更关键的是**循环依赖**：授权 UI 的目的就是给 Helper 授权，若 UI 由 Helper 承载，则 Helper 起不来时引导一并瘸掉 —— 这正是 macOS ≤14 `lockf` 事故的形态（`broker_unavailable` → 工具不注册 → 授权引导永不弹）。
 
 ### 吸附为什么需要新二进制
 
@@ -79,33 +79,35 @@ zcode:cua-permission-panel-state { permission, locale, iconDataUrl }
 
 ## 文件结构
 
-| 文件 | 职责 |
-|---|---|
-| `packages/shared/src/cuaAccessibilitySettings.ts` | 新增 `PrepareCuaHelperPermissionDragResult` 类型 |
-| `packages/shared/src/channels.ts` | 新增两个 IPC 通道常量 + schema |
-| `packages/shared/src/platform.ts` | 新增两个 platform 方法声明 |
-| `packages/desktop/src/main/cuaAccessibilitySettings.ts` | 删除 request* 调用；新增 `prepareCuaHelperPermissionDrag` |
-| `packages/desktop/src/main/desktopCuaPermissionIpc.ts` | 新增 drag IPC handlers（缓存 + TOCTOU 门 + 同步 startDrag） |
-| `packages/desktop/src/main/cuaPermissionDragPanel.ts` | **新建** 浮窗生命周期管理 |
-| `packages/desktop/src/main/cuaPermissionPanelPositioner.ts` | **新建** 纯函数定位计算（可独立单测） |
-| `packages/desktop/src/main/cuaSystemSettingsWindowWatcher.ts` | **新建** 常驻 Swift CLI 的 spawn/解析/fail-open |
-| `packages/desktop/native/macos-window-bounds/main.swift` | **新建** 输出系统设置窗口 bounds 的 CLI |
-| `packages/desktop/scripts/build-macos-window-bounds.mjs` | **新建** swiftc 构建脚本 |
-| `packages/desktop/electron-builder.config.js` | 打包 + 签名新 CLI |
-| `packages/desktop/src/renderer/permission-panel/` | **新建** 浮窗内容页（拖拽 tile） |
-| `packages/ui/src/cua/CuaPermissionChecklistModal.tsx` | **新建** 首弹窗（权限清单） |
+| 文件                                                          | 职责                                                        |
+| ------------------------------------------------------------- | ----------------------------------------------------------- |
+| `packages/shared/src/cuaAccessibilitySettings.ts`             | 新增 `PrepareCuaHelperPermissionDragResult` 类型            |
+| `packages/shared/src/channels.ts`                             | 新增两个 IPC 通道常量 + schema                              |
+| `packages/shared/src/platform.ts`                             | 新增两个 platform 方法声明                                  |
+| `packages/desktop/src/main/cuaAccessibilitySettings.ts`       | 删除 request\* 调用；新增 `prepareCuaHelperPermissionDrag`  |
+| `packages/desktop/src/main/desktopCuaPermissionIpc.ts`        | 新增 drag IPC handlers（缓存 + TOCTOU 门 + 同步 startDrag） |
+| `packages/desktop/src/main/cuaPermissionDragPanel.ts`         | **新建** 浮窗生命周期管理                                   |
+| `packages/desktop/src/main/cuaPermissionPanelPositioner.ts`   | **新建** 纯函数定位计算（可独立单测）                       |
+| `packages/desktop/src/main/cuaSystemSettingsWindowWatcher.ts` | **新建** 常驻 Swift CLI 的 spawn/解析/fail-open             |
+| `packages/desktop/native/macos-window-bounds/main.swift`      | **新建** 输出系统设置窗口 bounds 的 CLI                     |
+| `packages/desktop/scripts/build-macos-window-bounds.mjs`      | **新建** swiftc 构建脚本                                    |
+| `packages/desktop/electron-builder.config.js`                 | 打包 + 签名新 CLI                                           |
+| `packages/desktop/src/renderer/permission-panel/`             | **新建** 浮窗内容页（拖拽 tile）                            |
+| `packages/ui/src/cua/CuaPermissionChecklistModal.tsx`         | **新建** 首弹窗（权限清单）                                 |
 
 ---
 
 ## Task 1: shared 契约 —— 恢复两个 IPC 通道与结果类型
 
 **Files:**
+
 - Modify: `packages/shared/src/cuaAccessibilitySettings.ts`
 - Modify: `packages/shared/src/channels.ts:279`（通道常量）、`:818` 附近（schema）
 - Modify: `packages/shared/src/platform.ts:643` 附近
 - Test: `packages/shared/test/channels.test.ts`
 
 **Interfaces:**
+
 - Produces: `PlatformChannels.PrepareCuaHelperPermissionDrag = "zcode:prepare-cua-helper-permission-drag"`、`PlatformChannels.StartCuaHelperPermissionDrag = "zcode:start-cua-helper-permission-drag"`；类型 `PrepareCuaHelperPermissionDragResult { success: boolean; error?: string; helperAppPath?: string; helperDisplayName?: string; helperBundleId?: string }`（**注意**：`helperBundleFingerprint` 故意不进 shared —— 它只允许 main 进程内存消费，不得跨 IPC 暴露给 renderer）；platform 方法 `prepareCuaHelperPermissionDrag?(): Promise<PrepareCuaHelperPermissionDragResult>`、`startCuaHelperPermissionDrag?(): void`
 
 - [ ] **Step 1: 写失败测试**
@@ -205,10 +207,12 @@ git commit -m "feat(cua): restore helper permission drag IPC contract"
 ## Task 2: 摘掉 native 权限弹窗（核心改动）
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/cuaAccessibilitySettings.ts`（`runSession` 内 stage 循环）
 - Test: `packages/desktop/test/cuaAccessibilitySettings.test.ts`
 
 **Interfaces:**
+
 - Consumes: 无（本任务只删除调用）
 - Produces: `OpenCuaAccessibilitySettingsOptions` 移除 `requestHelperAccessibilityPermission` / `requestHelperScreenRecordingPermission` 两个注入点；`HelperPermissionRequestContext` 不再在本文件构造。`verifyHelperPermissionIdentityUnchanged` 返回的 `launchFingerprint` 改为交给 Task 4 的缓存消费。
 
@@ -274,14 +278,14 @@ Expected: FAIL — `requestCalls` 为 `["screen_recording", "accessibility"]`
 并把原 `const launchFingerprint = await verifyHelperPermissionIdentityUnchanged(...)` 改为：
 
 ```ts
-        // 保留每 stage 重新验签：用户停留设置页期间同 UID 进程可能替换安装目录。
-        // 原先这份指纹交给 requestHelper*ViaLaunchServices 在 open(2) 前同步终检；
-        // 改造后 native 请求已删除，终检下沉到 dragstart（见 desktopCuaPermissionIpc）。
-        session.launchFingerprint = await verifyHelperPermissionIdentityUnchanged(
-          session.identity,
-          options,
-          "launch",
-        );
+// 保留每 stage 重新验签：用户停留设置页期间同 UID 进程可能替换安装目录。
+// 原先这份指纹交给 requestHelper*ViaLaunchServices 在 open(2) 前同步终检；
+// 改造后 native 请求已删除，终检下沉到 dragstart（见 desktopCuaPermissionIpc）。
+session.launchFingerprint = await verifyHelperPermissionIdentityUnchanged(
+  session.identity,
+  options,
+  "launch",
+);
 ```
 
 从 `OpenCuaAccessibilitySettingsOptions` 接口删除 `requestHelperAccessibilityPermission` 与 `requestHelperScreenRecordingPermission` 两个可选注入点，并删除文件顶部对 `requestHelperAccessibilityPermissionViaLaunchServices`、`requestHelperScreenRecordingPermissionViaLaunchServices`、`HelperPermissionRequestContext` 的 import。同时删除已无引用的 `DEFAULT_PERMISSION_REQUEST_TIMEOUT_MS` 与 `permissionRequestTimeoutMs` 选项。
@@ -297,7 +301,7 @@ Expected: FAIL — `requestCalls` 为 `["screen_recording", "accessibility"]`
 - [ ] **Step 4: 运行测试确认通过**
 
 Run: `pnpm --filter @zcode/desktop exec vitest run test/cuaAccessibilitySettings.test.ts`
-Expected: PASS。**注意**：原有断言「会调用 request*」的用例会失败，逐个改为断言不调用；断言 `openSettingsUrl` 顺序、会话协调、recovery 权的用例应全部保持通过。
+Expected: PASS。**注意**：原有断言「会调用 request\*」的用例会失败，逐个改为断言不调用；断言 `openSettingsUrl` 顺序、会话协调、recovery 权的用例应全部保持通过。
 
 - [ ] **Step 5: 提交**
 
@@ -311,10 +315,12 @@ git commit -m "feat(cua): stop triggering native permission prompts in onboardin
 ## Task 3: 恢复 `prepareCuaHelperPermissionDrag`
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/cuaAccessibilitySettings.ts`
 - Test: `packages/desktop/test/cuaAccessibilitySettings.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的 `PrepareCuaHelperPermissionDragResult`
 - Produces: `prepareCuaHelperPermissionDrag(options?: PrepareCuaHelperPermissionDragOptions): Promise<PrepareCuaHelperPermissionDragResult & { helperBundleFingerprint?: CuaHelperBundleFingerprint }>`；`PrepareCuaHelperPermissionDragOptions { env?; platform?; logger?; ensureHelperInstalled?; bundledHelperAppPath?; verifyHelperInstalled?; resolveHelperIdentity? }`
 
@@ -383,8 +389,7 @@ export interface PrepareCuaHelperPermissionDragOptions {
   resolveHelperIdentity?: (appPath: string) => Promise<HelperPermissionSubjectIdentity>;
 }
 
-export interface PrepareCuaHelperPermissionDragMainResult
-  extends PrepareCuaHelperPermissionDragResult {
+export interface PrepareCuaHelperPermissionDragMainResult extends PrepareCuaHelperPermissionDragResult {
   /** 只允许 main 内存缓存消费，绝不跨 IPC 返回 renderer。 */
   helperBundleFingerprint?: CuaHelperBundleFingerprint;
 }
@@ -461,6 +466,7 @@ git commit -m "feat(cua): restore verified helper drag preparation"
 ## Task 4: 恢复 drag IPC handlers 与 renderer 桥
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/desktopCuaPermissionIpc.ts`
 - Modify: `packages/desktop/src/preload/index.ts:616` 附近
 - Modify: `packages/desktop/src/renderer/src/desktopPlatform.ts:48` 附近
@@ -468,6 +474,7 @@ git commit -m "feat(cua): restore verified helper drag preparation"
 - Test: `packages/desktop/test/desktopCuaPermissionIpc.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 通道常量、Task 3 的 `prepareCuaHelperPermissionDrag`
 - Produces: 两个 IPC handler；renderer 侧 `platform.prepareCuaHelperPermissionDrag()` / `platform.startCuaHelperPermissionDrag()`
 
@@ -477,7 +484,7 @@ git commit -m "feat(cua): restore verified helper drag preparation"
 it("指纹在 prepare 之后被篡改时拒绝拖拽", async () => {
   const startDragCalls: unknown[] = [];
   const sender = { startDrag: (item: unknown) => startDragCalls.push(item) };
-  registerCuaPermissionIpc({ ipcMain: fakeIpcMain, logger, /* … */ });
+  registerCuaPermissionIpc({ ipcMain: fakeIpcMain, logger /* … */ });
 
   await fakeIpcMain.invoke(PlatformChannels.PrepareCuaHelperPermissionDrag);
   // 篡改 bundle：dragstart 的同步指纹比对必须拦住
@@ -493,7 +500,7 @@ it("指纹在 prepare 之后被篡改时拒绝拖拽", async () => {
 it("预热后未被篡改则同步发起拖拽", async () => {
   const startDragCalls: Array<{ file: string }> = [];
   const sender = { startDrag: (item: { file: string }) => startDragCalls.push(item) };
-  registerCuaPermissionIpc({ ipcMain: fakeIpcMain, logger, /* … */ });
+  registerCuaPermissionIpc({ ipcMain: fakeIpcMain, logger /* … */ });
 
   await fakeIpcMain.invoke(PlatformChannels.PrepareCuaHelperPermissionDrag);
   fakeIpcMain.emit(PlatformChannels.StartCuaHelperPermissionDrag, { sender });
@@ -522,92 +529,92 @@ const CUA_HELPER_DRAG_ICON_DATA_URL =
 在 `registerCuaPermissionIpc` 作用域内加入缓存与刷新：
 
 ```ts
-  // 原生文件拖拽必须在 dragstart 链路里*同步*调用 startDrag，不能等 install/verify 这类异步 I/O
-  // （否则错过 OS 拖拽手势窗口，用户拖不出任何文件）。故浮窗挂载时预热并缓存已验证路径 + 指纹。
-  let verifiedHelperAppPath: string | null = null;
-  let verifiedHelperFingerprint: string | null = null;
+// 原生文件拖拽必须在 dragstart 链路里*同步*调用 startDrag，不能等 install/verify 这类异步 I/O
+// （否则错过 OS 拖拽手势窗口，用户拖不出任何文件）。故浮窗挂载时预热并缓存已验证路径 + 指纹。
+let verifiedHelperAppPath: string | null = null;
+let verifiedHelperFingerprint: string | null = null;
 
-  function cacheVerifiedHelper(helperAppPath: string, verifiedFingerprint: string): void {
-    verifiedHelperAppPath = helperAppPath;
-    verifiedHelperFingerprint = verifiedFingerprint;
+function cacheVerifiedHelper(helperAppPath: string, verifiedFingerprint: string): void {
+  verifiedHelperAppPath = helperAppPath;
+  verifiedHelperFingerprint = verifiedFingerprint;
+}
+
+function clearVerifiedHelper(): void {
+  verifiedHelperAppPath = null;
+  verifiedHelperFingerprint = null;
+}
+
+async function refreshVerifiedHelperAppPath(): Promise<void> {
+  const result = await prepareCuaHelperPermissionDrag({ logger: options.logger });
+  if (result.success && result.helperAppPath && result.helperBundleFingerprint) {
+    cacheVerifiedHelper(result.helperAppPath, result.helperBundleFingerprint);
+  } else {
+    clearVerifiedHelper();
+    options.logger.warn("[cua-permission-onboarding] prepare helper drag failed", result.error);
   }
+}
 
-  function clearVerifiedHelper(): void {
-    verifiedHelperAppPath = null;
-    verifiedHelperFingerprint = null;
+ipcMain.handle(PlatformChannels.PrepareCuaHelperPermissionDrag, async () => {
+  const result = await prepareCuaHelperPermissionDrag({ logger: options.logger });
+  if (result.success && result.helperAppPath && result.helperBundleFingerprint) {
+    cacheVerifiedHelper(result.helperAppPath, result.helperBundleFingerprint);
+  } else {
+    clearVerifiedHelper();
+    options.logger.warn("[cua-permission-onboarding] prepare helper drag failed", result.error);
   }
+  // 指纹绝不跨 IPC 返回 renderer
+  return {
+    success: result.success,
+    ...(result.error !== undefined ? { error: result.error } : {}),
+    ...(result.helperAppPath !== undefined ? { helperAppPath: result.helperAppPath } : {}),
+    ...(result.helperDisplayName !== undefined
+      ? { helperDisplayName: result.helperDisplayName }
+      : {}),
+    ...(result.helperBundleId !== undefined ? { helperBundleId: result.helperBundleId } : {}),
+  };
+});
 
-  async function refreshVerifiedHelperAppPath(): Promise<void> {
-    const result = await prepareCuaHelperPermissionDrag({ logger: options.logger });
-    if (result.success && result.helperAppPath && result.helperBundleFingerprint) {
-      cacheVerifiedHelper(result.helperAppPath, result.helperBundleFingerprint);
-    } else {
-      clearVerifiedHelper();
-      options.logger.warn("[cua-permission-onboarding] prepare helper drag failed", result.error);
-    }
-  }
-
-  ipcMain.handle(PlatformChannels.PrepareCuaHelperPermissionDrag, async () => {
-    const result = await prepareCuaHelperPermissionDrag({ logger: options.logger });
-    if (result.success && result.helperAppPath && result.helperBundleFingerprint) {
-      cacheVerifiedHelper(result.helperAppPath, result.helperBundleFingerprint);
-    } else {
-      clearVerifiedHelper();
-      options.logger.warn("[cua-permission-onboarding] prepare helper drag failed", result.error);
-    }
-    // 指纹绝不跨 IPC 返回 renderer
-    return {
-      success: result.success,
-      ...(result.error !== undefined ? { error: result.error } : {}),
-      ...(result.helperAppPath !== undefined ? { helperAppPath: result.helperAppPath } : {}),
-      ...(result.helperDisplayName !== undefined
-        ? { helperDisplayName: result.helperDisplayName }
-        : {}),
-      ...(result.helperBundleId !== undefined ? { helperBundleId: result.helperBundleId } : {}),
-    };
-  });
-
-  ipcMain.on(PlatformChannels.StartCuaHelperPermissionDrag, (event) => {
-    const helperAppPath = verifiedHelperAppPath;
-    const fingerprint = verifiedHelperFingerprint;
-    if (!helperAppPath || !fingerprint) {
-      // 尚未预热：这里绝不能做异步 install/verify（会错过拖拽手势）。后台补一次让下次可用。
-      options.logger.warn(
-        "[cua-permission-onboarding] helper drag not prepared yet; verifying in background for next drag",
-      );
-      void refreshVerifiedHelperAppPath();
-      return;
-    }
-    // TOCTOU 门：prepare(验签) 到此刻之间，同 UID 攻击者可能覆写 Helper.app，而 TCC 绑定的是被拖入的
-    // bundle 身份。同步比对字节指纹（微秒级，不会错过手势）；不符即拒拖 + 清缓存重新 prepare。
-    if (!cuaHelperBundleFingerprintUnchanged(helperAppPath, fingerprint)) {
-      options.logger.warn(
-        "[cua-permission-onboarding] cached helper changed since verification; refusing to drag a possibly-tampered bundle",
-      );
-      clearVerifiedHelper();
-      void refreshVerifiedHelperAppPath();
-      return;
-    }
-    const namedIcon = nativeImage.createFromNamedImage("NSApplicationIcon");
-    const icon = namedIcon.isEmpty()
-      ? nativeImage.createFromDataURL(CUA_HELPER_DRAG_ICON_DATA_URL)
-      : namedIcon;
-    try {
-      event.sender.startDrag({ file: helperAppPath, icon });
-    } catch (error) {
-      options.logger.warn(
-        "[cua-permission-onboarding] helper drag failed",
-        error instanceof Error ? error.message : String(error),
-      );
-    }
+ipcMain.on(PlatformChannels.StartCuaHelperPermissionDrag, (event) => {
+  const helperAppPath = verifiedHelperAppPath;
+  const fingerprint = verifiedHelperFingerprint;
+  if (!helperAppPath || !fingerprint) {
+    // 尚未预热：这里绝不能做异步 install/verify（会错过拖拽手势）。后台补一次让下次可用。
+    options.logger.warn(
+      "[cua-permission-onboarding] helper drag not prepared yet; verifying in background for next drag",
+    );
     void refreshVerifiedHelperAppPath();
-  });
+    return;
+  }
+  // TOCTOU 门：prepare(验签) 到此刻之间，同 UID 攻击者可能覆写 Helper.app，而 TCC 绑定的是被拖入的
+  // bundle 身份。同步比对字节指纹（微秒级，不会错过手势）；不符即拒拖 + 清缓存重新 prepare。
+  if (!cuaHelperBundleFingerprintUnchanged(helperAppPath, fingerprint)) {
+    options.logger.warn(
+      "[cua-permission-onboarding] cached helper changed since verification; refusing to drag a possibly-tampered bundle",
+    );
+    clearVerifiedHelper();
+    void refreshVerifiedHelperAppPath();
+    return;
+  }
+  const namedIcon = nativeImage.createFromNamedImage("NSApplicationIcon");
+  const icon = namedIcon.isEmpty()
+    ? nativeImage.createFromDataURL(CUA_HELPER_DRAG_ICON_DATA_URL)
+    : namedIcon;
+  try {
+    event.sender.startDrag({ file: helperAppPath, icon });
+  } catch (error) {
+    options.logger.warn(
+      "[cua-permission-onboarding] helper drag failed",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+  void refreshVerifiedHelperAppPath();
+});
 ```
 
 在现有 `OpenCuaPermissionOnboarding` handler 的 `return result;` 之前插入（onboarding 含用户在设置页的长等待，不能把 stage 启动时的旧验签证据当作"已验证指纹"，成功后另起一次 prepare）：
 
 ```ts
-    if (result.success) void refreshVerifiedHelperAppPath();
+if (result.success) void refreshVerifiedHelperAppPath();
 ```
 
 `preload/index.ts` 追加：
@@ -651,6 +658,7 @@ git commit -m "feat(cua): restore helper permission drag IPC handlers"
 ## Task 5: 系统设置窗口 bounds CLI（吸附数据源）
 
 **Files:**
+
 - Create: `packages/desktop/native/macos-window-bounds/main.swift`
 - Create: `packages/desktop/scripts/build-macos-window-bounds.mjs`
 - Create: `packages/desktop/src/main/cuaSystemSettingsWindowWatcher.ts`
@@ -659,6 +667,7 @@ git commit -m "feat(cua): restore helper permission drag IPC handlers"
 - Test: `packages/desktop/test/cuaSystemSettingsWindowWatcher.test.ts`
 
 **Interfaces:**
+
 - Produces: `createSystemSettingsWindowWatcher(options): { start(): void; stop(): void; latest(): SettingsWindowBounds | null }`，其中 `SettingsWindowBounds = { x: number; y: number; width: number; height: number }`
 
 - [ ] **Step 1: 写失败测试**
@@ -768,12 +777,14 @@ git commit -m "feat(cua): add macOS system settings window bounds watcher"
 ## Task 6: 拖拽浮窗
 
 **Files:**
+
 - Create: `packages/desktop/src/main/cuaPermissionPanelPositioner.ts`
 - Create: `packages/desktop/src/main/cuaPermissionDragPanel.ts`
 - Create: `packages/desktop/src/renderer/permission-panel/index.html`
 - Test: `packages/desktop/test/cuaPermissionPanelPositioner.test.ts`、`packages/desktop/test/cuaPermissionDragPanel.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 5 的 `createSystemSettingsWindowWatcher`、Task 1 通道
 - Produces: `resolvePanelBounds({ settings, display, panel }): Rect`；`createCuaPermissionDragPanel(options): { show(permission: CuaPermissionKind): void; hide(): void; destroy(): void }`
 
@@ -841,19 +852,20 @@ Expected: FAIL — 模块不存在
 
 ```ts
 const win = new BrowserWindow({
-  width, height,
+  width,
+  height,
   frame: false,
   transparent: true,
   hasShadow: true,
   resizable: false,
-  focusable: false,   // 关键：一点就把 System Settings 踢到后台就毁了整个流程
+  focusable: false, // 关键：一点就把 System Settings 踢到后台就毁了整个流程
   skipTaskbar: true,
   show: false,
   webPreferences: { preload, contextIsolation: true },
 });
 win.once("ready-to-show", () => {
-  win.showInactive();                                    // 显示但不激活
-  win.setAlwaysOnTop(true, "screen-saver");              // 需压过 System Settings
+  win.showInactive(); // 显示但不激活
+  win.setAlwaysOnTop(true, "screen-saver"); // 需压过 System Settings
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 });
 ```
@@ -881,6 +893,7 @@ git commit -m "feat(cua): add draggable permission panel anchored to system sett
 ## Task 7: 首弹窗（权限清单模态）与串联
 
 **Files:**
+
 - Create: `packages/ui/src/cua/CuaPermissionChecklistModal.tsx`
 - Modify: `packages/ui/src/settings/ComputerUseSection.tsx:330-400`
 - Modify: `packages/ui/src/cua/CuaPermissionGateController.tsx`
@@ -888,6 +901,7 @@ git commit -m "feat(cua): add draggable permission panel anchored to system sett
 - Test: `packages/ui/test/cuaPermissionChecklistModal.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `isCuaPermissionTccGranted`（`packages/ui/src/lib/cuaPermissionStatusStore.ts`）、`platform.openCuaPermissionOnboarding`
 - Produces: `<CuaPermissionChecklistModal open onContinue onCancel />`
 
@@ -967,6 +981,7 @@ tccutil reset ScreenCapture dev.zcode.cua-helper.dev
 sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
   "select service,auth_value from access where client='dev.zcode.cua-helper.dev';"
 ```
+
 Expected: 无输出（零条目 = 模拟全新用户）
 
 - [ ] **Step 2: 起 dev**
@@ -975,6 +990,7 @@ Expected: 无输出（零条目 = 模拟全新用户）
 nohup env ZCODE_CUA_DEV_MODE=1 ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/" \
   pnpm run dev:desktop > /tmp/zcode-desktop-dev.log 2>&1 < /dev/null & disown
 ```
+
 就绪判据：`grep -a "cua helper ready at" /tmp/zcode-desktop-dev.log`。**不要**用 harness 的 background 启动 dev（任务被清理会把整条 dev 链带走）；失败只认 `ELIFECYCLE` / `exited with code [1-9]`。
 
 - [ ] **Step 3: 走一遍授权流程，逐条核对**
@@ -993,6 +1009,7 @@ nohup env ZCODE_CUA_DEV_MODE=1 ELECTRON_MIRROR="https://npmmirror.com/mirrors/el
 sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
   "select service,auth_value from access where client='dev.zcode.cua-helper.dev';"
 ```
+
 Expected: 两条记录 `auth_value=2`
 
 - [ ] **Step 5: 提交验证记录**

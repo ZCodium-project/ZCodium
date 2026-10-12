@@ -118,11 +118,7 @@ describe("createLatestConfigCommandScheduler", () => {
 
     releaseBlocker();
     await Promise.all([beforeSend, send, afterSend]);
-    expect(order).toEqual([
-      "config:before-send",
-      "send",
-      "config:after-send",
-    ]);
+    expect(order).toEqual(["config:before-send", "send", "config:after-send"]);
   });
 
   it("does not merge model and mode domains that share one barrier", async () => {

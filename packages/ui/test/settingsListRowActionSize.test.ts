@@ -1,10 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
-const rowActionFiles = [
-  "PluginStoreCard.tsx",
-  "SubagentsSection.tsx",
-] as const;
+const rowActionFiles = ["PluginStoreCard.tsx", "SubagentsSection.tsx"] as const;
 
 describe("settings list row actions", () => {
   it("行内纯图标操作统一使用 icon-md", async () => {
@@ -14,8 +11,7 @@ describe("settings list row actions", () => {
         "utf8",
       );
       expect(
-        source.includes('size="icon-md"') ||
-          source.includes('triggerSize = "icon-md"'),
+        source.includes('size="icon-md"') || source.includes('triggerSize = "icon-md"'),
         fileName,
       ).toBe(true);
       expect(source, fileName).not.toContain('size="icon-sm"');

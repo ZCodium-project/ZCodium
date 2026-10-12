@@ -62,7 +62,7 @@ export function resolveWorkspaceEditorSelection({
   const preferredEditor =
     selectedEditorId === null
       ? null
-      : availableEditors.find((editor) => editor.id === selectedEditorId) ?? null;
+      : (availableEditors.find((editor) => editor.id === selectedEditorId) ?? null);
   const fallbackEditor = availableEditors[0] ?? null;
 
   if (preferredEditor) {

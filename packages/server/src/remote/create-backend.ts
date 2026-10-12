@@ -32,6 +32,8 @@ export async function createRemoteBackend(target: RemoteTarget): Promise<IRemote
       return new DockerBackend(target);
     }
     case "server":
-      throw new Error("server remote target connects to an existing server and has no deploy backend");
+      throw new Error(
+        "server remote target connects to an existing server and has no deploy backend",
+      );
   }
 }

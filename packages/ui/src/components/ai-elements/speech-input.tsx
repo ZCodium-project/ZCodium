@@ -15,12 +15,8 @@ interface SpeechRecognition extends EventTarget {
   stop(): void;
   onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
   onend: ((this: SpeechRecognition, ev: Event) => void) | null;
-  onresult:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
-    | null;
-  onerror:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void)
-    | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
 }
 
 interface SpeechRecognitionEvent extends Event {
@@ -102,11 +98,9 @@ export const SpeechInput = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const onTranscriptionChangeRef = useRef<
-    SpeechInputProps["onTranscriptionChange"]
-  >(onTranscriptionChange);
-  const onAudioRecordedRef =
-    useRef<SpeechInputProps["onAudioRecorded"]>(onAudioRecorded);
+  const onTranscriptionChangeRef =
+    useRef<SpeechInputProps["onTranscriptionChange"]>(onTranscriptionChange);
+  const onAudioRecordedRef = useRef<SpeechInputProps["onAudioRecorded"]>(onAudioRecorded);
 
   // Keep refs in sync
   onTranscriptionChangeRef.current = onTranscriptionChange;
@@ -118,8 +112,7 @@ export const SpeechInput = ({
       return;
     }
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const speechRecognition = new SpeechRecognition();
 
     speechRecognition.continuous = true;
@@ -138,11 +131,7 @@ export const SpeechInput = ({
       const speechEvent = event as SpeechRecognitionEvent;
       let finalTranscript = "";
 
-      for (
-        let i = speechEvent.resultIndex;
-        i < speechEvent.results.length;
-        i += 1
-      ) {
+      for (let i = speechEvent.resultIndex; i < speechEvent.results.length; i += 1) {
         const result = speechEvent.results[i];
         // Bugfix: Web Speech API 的结果列表在 noUncheckedIndexedAccess 下会被视为可能缺项，
         // 直接读取 result.isFinal / result[0] 会触发未定义报错。这里先判空，再按浏览器实际返回值继续处理。
@@ -194,7 +183,7 @@ export const SpeechInput = ({
         }
       }
     },
-    []
+    [],
   );
 
   // Start MediaRecorder recording
@@ -313,7 +302,7 @@ export const SpeechInput = ({
           isListening
             ? "bg-destructive text-white hover:bg-destructive/80 hover:text-white"
             : "bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground",
-          className
+          className,
         )}
         disabled={isDisabled}
         onClick={toggleListening}

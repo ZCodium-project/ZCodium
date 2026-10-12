@@ -84,10 +84,7 @@ export function createUsageStatsService(
       ? { officialMcpCredentialSource: dependencies.officialMcpCredentialSource }
       : {}),
   });
-  const regularTpsCache = new Map<
-    string,
-    { expiresAt: number; value: number | undefined }
-  >();
+  const regularTpsCache = new Map<string, { expiresAt: number; value: number | undefined }>();
   const regularTpsInFlight = new Map<string, Promise<number | undefined>>();
 
   function regularTpsCacheKey(request: CodingPlanRegularTpsRequest): string {

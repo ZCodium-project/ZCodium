@@ -6008,7 +6008,6 @@ describe("BrowserGuestManager", () => {
     ).resolves.toBeUndefined();
     expect(mgr.hasGuest("browser:remote-drift")).toBe(false);
   });
-
 });
 
 describe("BrowserGuestManager.collectMemoryDiagnostics", () => {

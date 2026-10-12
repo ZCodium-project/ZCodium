@@ -125,7 +125,7 @@ web search，只需把这一条属性改 `false`，不影响其余迁移面。
 
 | 位置                                                                            | 内容                                                                                                                                               |
 | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/sync-test-builtin-provider-config.mjs` 的 `accountEndpoints`           | `https://zcode.z.ai/api/v1/highspeed/anthropic` → `https://zcode.z.ai/api/v1/highspeed/anthropic`                                          |
+| `scripts/sync-test-builtin-provider-config.mjs` 的 `accountEndpoints`           | `https://zcode.z.ai/api/v1/highspeed/anthropic` → `https://zcode.z.ai/api/v1/highspeed/anthropic`                                                  |
 | `scripts/test/sync-test-builtin-provider-config.test.mjs` 的 `pairs` 与数量断言 | 该测试独立维护一份端点表，用于校验脚本的白名单没被改错；新增内置账号 Provider 后 `providerRules` 数量与派生站点规则副本数（当前 10 / 9）要一起更新 |
 
 ### 3.3 单轮执行材料

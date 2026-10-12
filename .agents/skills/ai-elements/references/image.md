@@ -86,10 +86,7 @@ const ImageDemo = () => {
           {isLoading && <Spinner />}
         </div>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={prompt}
             placeholder="Describe the image you want to generate..."
@@ -146,8 +143,8 @@ export async function POST(req: Request) {
 
 ### `<Image />`
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `alt` | `string` | - | Alternative text for the image. |
-| `className` | `string` | - | Additional CSS classes to apply to the image. |
-| `...props` | `Experimental_GeneratedImage` | - | The image data to display, as returned by the AI SDK. |
+| Prop        | Type                          | Default | Description                                           |
+| ----------- | ----------------------------- | ------- | ----------------------------------------------------- |
+| `alt`       | `string`                      | -       | Alternative text for the image.                       |
+| `className` | `string`                      | -       | Additional CSS classes to apply to the image.         |
+| `...props`  | `Experimental_GeneratedImage` | -       | The image data to display, as returned by the AI SDK. |

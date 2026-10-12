@@ -18,13 +18,13 @@ running 时，普通 `sendText` 与 `sendGoalCommand` 都由 CLI admission 决�
 
 ## 操作
 
-| 用户动作 | V4 command         | 权威结果                         |
-| -------- | ------------------ | -------------------------------- |
-| 删除     | `deleteQueueItem`  | projection 移除 queue item       |
+| 用户动作 | V4 command         | 权威结果                                      |
+| -------- | ------------------ | --------------------------------------------- |
+| 删除     | `deleteQueueItem`  | projection 移除 queue item                    |
 | 撤回编辑 | `deleteQueueItem`  | projection 移除后，仅发起端恢复 composer 草稿 |
-| 立即发送 | `sendQueuedNow`    | CLI 按 stop barrier/优先规则消费 |
-| 排序     | `reorderQueueItem` | projection 返回新顺序            |
-| 自动续跑 | `setAutoDrain`     | snapshot 更新 auto-drain 状态    |
+| 立即发送 | `sendQueuedNow`    | CLI 按 stop barrier/优先规则消费              |
+| 排序     | `reorderQueueItem` | projection 返回新顺序                         |
+| 自动续跑 | `setAutoDrain`     | snapshot 更新 auto-drain 状态                 |
 
 UI 可对点击做短暂 pending/disabled 反馈，但不能只改本地数组。刷新、切 pane、桌面与手机同时在线时，均以 snapshot/delta 为准。
 

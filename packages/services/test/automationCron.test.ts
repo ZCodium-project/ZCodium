@@ -118,16 +118,10 @@ describe("automationCron", () => {
     const nextYear = new Date(2027, 6, 16, 17, 31, 0).getTime();
 
     expect(
-      computeInitialAutomationNextRunAt(
-        { cronExpr: "31 17 16 7 *", recurring: true },
-        from,
-      ),
+      computeInitialAutomationNextRunAt({ cronExpr: "31 17 16 7 *", recurring: true }, from),
     ).toBe(nextYear);
     expect(
-      computeInitialAutomationNextRunAt(
-        { cronExpr: "32 17 16 7 *", recurring: false },
-        from,
-      ),
+      computeInitialAutomationNextRunAt({ cronExpr: "32 17 16 7 *", recurring: false }, from),
     ).toBe(new Date(2026, 6, 16, 17, 32, 0).getTime());
   });
 
@@ -137,10 +131,7 @@ describe("automationCron", () => {
     const from = new Date(2026, 6, 16, 17, 37, 0).getTime();
 
     expect(() =>
-      computeInitialAutomationNextRunAt(
-        { cronExpr: "31 17 16 7 *", recurring: false },
-        from,
-      ),
+      computeInitialAutomationNextRunAt({ cronExpr: "31 17 16 7 *", recurring: false }, from),
     ).toThrow(StaleOneShotAutomationScheduleError);
   });
 
@@ -150,10 +141,7 @@ describe("automationCron", () => {
     const from = new Date(2026, 7, 16, 12, 0, 0).getTime();
 
     expect(
-      computeInitialAutomationNextRunAt(
-        { cronExpr: "31 17 16 7 *", recurring: false },
-        from,
-      ),
+      computeInitialAutomationNextRunAt({ cronExpr: "31 17 16 7 *", recurring: false }, from),
     ).toBe(new Date(2027, 6, 16, 17, 31, 0).getTime());
   });
 
@@ -169,9 +157,7 @@ describe("automationCron", () => {
 
     const first = computeScheduleRuleNextRunAt(rule, anchorAt);
     expect(first).toBe(new Date(2026, 7, 4, 18, 49).getTime());
-    expect(computeScheduleRuleNextRunAt(rule, first!)).toBe(
-      new Date(2026, 7, 6, 1, 49).getTime(),
-    );
+    expect(computeScheduleRuleNextRunAt(rule, first!)).toBe(new Date(2026, 7, 6, 1, 49).getTime());
   });
 
   it("computeScheduleRuleNextRunAt：每 2 周保持锚点周序", () => {

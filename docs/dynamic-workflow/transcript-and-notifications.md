@@ -12,12 +12,12 @@ A workflow run lives in the background. Its owner, the main agent, learns about 
 notifications, and the user reads those notifications in the transcript. Four surfaces
 come out of this:
 
-| Surface | Where | When |
-|---|---|---|
-| the **notification row** | the transcript turn that a run event wakes | every terminal state, every escalated question, every stall |
-| the **completion card** | the tail of that turn | completed runs only |
-| the **script transcript** | a side-pane tab, one per run | any run that has touched the project |
-| the **epilogue fold** | a subagent's transcript tab | every ask the engine dispatched |
+| Surface                   | Where                                      | When                                                        |
+| ------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| the **notification row**  | the transcript turn that a run event wakes | every terminal state, every escalated question, every stall |
+| the **completion card**   | the tail of that turn                      | completed runs only                                         |
+| the **script transcript** | a side-pane tab, one per run               | any run that has touched the project                        |
+| the **epilogue fold**     | a subagent's transcript tab                | every ask the engine dispatched                             |
 
 The rule behind all four: the transcript shows what the engine recorded, never what the
 model said about it. Every number on the completion card is an engine count, every card in
@@ -84,11 +84,11 @@ their bytes through the artifact queries.
 
 ### Where the payload is minted
 
-| Kind | Emitter | Trigger |
-|---|---|---|
-| `terminal` | the background task tracker's settlement path in `packages/core` (`background-tasks.ts`), for both `CreateWorkflow` and `ResumeWorkflowRun` launches | the run's terminal snapshot arrives |
-| `escalation` | `dynamic-workflow-run-progress.ts` in `packages/core`, next to the run progress event | an `escalation-raised` run event |
-| `stall` | the same file | a `run-stalled` run event |
+| Kind         | Emitter                                                                                                                                              | Trigger                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `terminal`   | the background task tracker's settlement path in `packages/core` (`background-tasks.ts`), for both `CreateWorkflow` and `ResumeWorkflowRun` launches | the run's terminal snapshot arrives |
+| `escalation` | `dynamic-workflow-run-progress.ts` in `packages/core`, next to the run progress event                                                                | an `escalation-raised` run event    |
+| `stall`      | the same file                                                                                                                                        | a `run-stalled` run event           |
 
 The terminal payload exists only when the tracker status is terminal **and** a snapshot is
 present. A run whose in-process state was lost has no snapshot and gets no payload; the
@@ -128,14 +128,14 @@ body. Bash and subagent notifications, batch turns, and old transcripts keep the
 row. The turn container drops its top padding when it starts with this row, so the card
 sits at the ordinary flow gap below the previous turn.
 
-| Kind | Icon | Kind label | Primary text | Expanded body |
-|---|---|---|---|---|
-| terminal, completed | `Workflow` | Workflow completed / 工作流已完成 | `· <run name>` | the result: prose as a paragraph, JSON pretty-printed in a code block with the language and copy toolbar; both capped at 320 px with the body scrolling |
-| terminal, errored | `Workflow` | Workflow errored / 工作流出错 | `· <run name>` | the error in a destructive-bordered panel |
-| terminal, stopped | `Workflow` | Workflow stopped / 工作流已停止 `· <reason>` | `· <run name>` | the error panel when an error is present (provider, interrupted), else the result |
-| escalation | `MessageCircleQuestion` | one of three live states, below | the question, one line, 160 characters | the question in full, then the context in subtle text, then how long the subagent has waited, then the run link |
-| hole | `Pen` | one of three live states, below | `· <run name> · <hole name>` (the type is on the wire for the model, never on the row) | the prompt in full (the values the author interpolated as it carries them), where the hole stands (the phases before and after), the draft path, then how long it has waited, then the run link |
-| stall | `Hourglass` | Workflow waiting on the model / 工作流等待模型 | `· <run name>` | one sentence naming the minutes, then `Retry reason` and `Max concurrency` / 「最大并发数」 fact lines when present (the second is the shared cap at the moment of the stall: a bound, so it carries the bound's word, never a word that reads as a count of what is running) |
+| Kind                | Icon                    | Kind label                                     | Primary text                                                                           | Expanded body                                                                                                                                                                                                                                                                 |
+| ------------------- | ----------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| terminal, completed | `Workflow`              | Workflow completed / 工作流已完成              | `· <run name>`                                                                         | the result: prose as a paragraph, JSON pretty-printed in a code block with the language and copy toolbar; both capped at 320 px with the body scrolling                                                                                                                       |
+| terminal, errored   | `Workflow`              | Workflow errored / 工作流出错                  | `· <run name>`                                                                         | the error in a destructive-bordered panel                                                                                                                                                                                                                                     |
+| terminal, stopped   | `Workflow`              | Workflow stopped / 工作流已停止 `· <reason>`   | `· <run name>`                                                                         | the error panel when an error is present (provider, interrupted), else the result                                                                                                                                                                                             |
+| escalation          | `MessageCircleQuestion` | one of three live states, below                | the question, one line, 160 characters                                                 | the question in full, then the context in subtle text, then how long the subagent has waited, then the run link                                                                                                                                                               |
+| hole                | `Pen`                   | one of three live states, below                | `· <run name> · <hole name>` (the type is on the wire for the model, never on the row) | the prompt in full (the values the author interpolated as it carries them), where the hole stands (the phases before and after), the draft path, then how long it has waited, then the run link                                                                               |
+| stall               | `Hourglass`             | Workflow waiting on the model / 工作流等待模型 | `· <run name>`                                                                         | one sentence naming the minutes, then `Retry reason` and `Max concurrency` / 「最大并发数」 fact lines when present (the second is the shared cap at the moment of the stall: a bound, so it carries the bound's word, never a word that reads as a count of what is running) |
 
 The stop reason words are by you / by the agent / model error / process exited (你停止的 /
 代理停止的 / 模型侧错误 / 进程已退出).
@@ -163,11 +163,11 @@ cannot join the tool call id; then the link is absent and the chips still work.
 The escalation row's kind label flips as the run progresses, using the run projection's
 pending questions rather than any text:
 
-| The run projection says | Kind label |
-|---|---|
+| The run projection says                                         | Kind label                                                                                                  |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | the run is present and its pending questions include this `qid` | Subagent is waiting for an answer / 子代理正在等待回答, with the waited-for time refreshed every 30 seconds |
-| the run is present and the `qid` is gone | Subagent question answered / 子代理的问题已回答 |
-| the run is not in the projection | Subagent asked a question / 子代理提出了问题 |
+| the run is present and the `qid` is gone                        | Subagent question answered / 子代理的问题已回答                                                             |
+| the run is not in the projection                                | Subagent asked a question / 子代理提出了问题                                                                |
 
 The third state is neutral on purpose: a run evicted from the projection's cap of eight
 recent runs tells the GUI nothing about whether the question was answered. The row never
@@ -178,11 +178,11 @@ quoted in the row: it sits in the adjacent `ResolveWorkflowQuestion` tool card.
 
 The hole row's kind label flips on the run projection's `holes`, never on text:
 
-| Condition | Kind label |
-|---|---|
+| Condition                                                        | Kind label                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | the run is present and its holes list this `siteId` as `waiting` | Workflow waiting for code / 工作流留白 · 等待补全, with the waited-for time refreshed every 30 seconds |
-| the run is present and the hole is `filled` | Hole filled / 留白已补全 |
-| the run is not in the projection | Workflow left a hole / 工作流留白 |
+| the run is present and the hole is `filled`                      | Hole filled / 留白已补全                                                                               |
+| the run is not in the projection                                 | Workflow left a hole / 工作流留白                                                                      |
 
 The row never shimmers: a hole waits on the main agent, not on work. The body is never
 quoted in the row; it sits in the adjacent `FillWorkflowHole` tool card
@@ -213,16 +213,16 @@ The terminal text is a `<task-notification>` of type `local_workflow`:
 
 The summary sentence says how the run ended before the model reads any field:
 
-| Ending | Summary |
-|---|---|
-| completed | `Workflow "<name>" completed.` |
-| errored | `Workflow "<name>" errored: the script failed.` |
-| stopped, user | `Workflow "<name>" was stopped by the user.` |
-| stopped, model | `Workflow "<name>" was stopped by you (TaskStop).` |
-| stopped, provider | `Workflow "<name>" was stopped on a provider error.` |
-| stopped, interrupted | `Workflow "<name>" was stopped: the process that owned it exited.` |
-| stopped, superseded | no notification: the `AmendWorkflow` result that stopped it is the model's account of the stop (below) |
-| state lost | `Workflow "<name>" failed because its in-process state was lost.` |
+| Ending               | Summary                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| completed            | `Workflow "<name>" completed.`                                                                         |
+| errored              | `Workflow "<name>" errored: the script failed.`                                                        |
+| stopped, user        | `Workflow "<name>" was stopped by the user.`                                                           |
+| stopped, model       | `Workflow "<name>" was stopped by you (TaskStop).`                                                     |
+| stopped, provider    | `Workflow "<name>" was stopped on a provider error.`                                                   |
+| stopped, interrupted | `Workflow "<name>" was stopped: the process that owned it exited.`                                     |
+| stopped, superseded  | no notification: the `AmendWorkflow` result that stopped it is the model's account of the stop (below) |
+| state lost           | `Workflow "<name>" failed because its in-process state was lost.`                                      |
 
 `<result>` is the script's return value serialized; it never falls back to the launch
 output, whose text only says the run started. `<reports>` and `<artifacts>` are carried
@@ -239,15 +239,15 @@ a fact line (`provider= model= subagent= phase= code=`), and the provider's raw 
 The **delivery guidance** after the block tells the main agent how to present the outcome
 and what its next move is. It is chosen by status and stop reason:
 
-| Ending | Guidance |
-|---|---|
-| completed | present the outcome as a deliverable: conclusion, each finding with its evidence, what was checked versus judged, what was not covered; treat reported items individually; do not restate the graph or the script |
-| stopped, user | the user stopped it on purpose; do not resume with `ResumeWorkflowRun` and do not rebuild with `CreateWorkflow` unless asked; present what was finished, then wait |
-| stopped, model | you stopped it with `TaskStop`; if you stopped it to fix the script, amend it now with `AmendWorkflow`; otherwise present what was finished and resume only if the user wants |
-| stopped, provider | the error block names cause and fix; present what was finished; resolve the cause with the user, then `ResumeWorkflowRun` with the run id; do not rebuild |
-| stopped, interrupted | the owning process exited; present what was finished, then `ResumeWorkflowRun`; finished steps replay from the journal |
-| stopped, reason unknown | it can be continued; ask the user before resuming a run you did not stop |
-| errored | present what was salvaged, explain the failure, then fix the script and submit it with `AmendWorkflow`; `ResumeWorkflowRun` will refuse an errored run. When the run recorded a script file (`docs/dynamic-workflow/launch.md`, "Script files") the guidance names it and says to edit it in place and pass `path`, not to paste the script; a run without one gets the older sentence |
+| Ending                  | Guidance                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| completed               | present the outcome as a deliverable: conclusion, each finding with its evidence, what was checked versus judged, what was not covered; treat reported items individually; do not restate the graph or the script                                                                                                                                                                      |
+| stopped, user           | the user stopped it on purpose; do not resume with `ResumeWorkflowRun` and do not rebuild with `CreateWorkflow` unless asked; present what was finished, then wait                                                                                                                                                                                                                     |
+| stopped, model          | you stopped it with `TaskStop`; if you stopped it to fix the script, amend it now with `AmendWorkflow`; otherwise present what was finished and resume only if the user wants                                                                                                                                                                                                          |
+| stopped, provider       | the error block names cause and fix; present what was finished; resolve the cause with the user, then `ResumeWorkflowRun` with the run id; do not rebuild                                                                                                                                                                                                                              |
+| stopped, interrupted    | the owning process exited; present what was finished, then `ResumeWorkflowRun`; finished steps replay from the journal                                                                                                                                                                                                                                                                 |
+| stopped, reason unknown | it can be continued; ask the user before resuming a run you did not stop                                                                                                                                                                                                                                                                                                               |
+| errored                 | present what was salvaged, explain the failure, then fix the script and submit it with `AmendWorkflow`; `ResumeWorkflowRun` will refuse an errored run. When the run recorded a script file (`docs/dynamic-workflow/launch.md`, "Script files") the guidance names it and says to edit it in place and pass `path`, not to paste the script; a run without one gets the older sentence |
 
 When the `<artifacts>` section is present, one more sentence says the artifacts are already
 in front of the user as cards and should be referred to by title, not pasted.
@@ -381,14 +381,14 @@ door, not an artifact: an ellipsis icon, subtle text, ↗ at rest; it reads no b
 
 The preview shows the artifact itself, by kind and content type:
 
-| Artifact | Preview |
-|---|---|
-| markdown, or `text/markdown` | the document's opening, laid out at twice the width and scaled by 0.5 (a thumbnail of the content, not a smaller font), fading to the panel colour over the bottom 28 % |
-| `text/plain`, `application/json` | the same, as preformatted text |
-| `text/csv` | a mini table of the first 6 rows × 5 columns, cells cut at 28 characters |
-| `image/*` | the image, covering the frame |
-| chart, table, metrics, board | the preset body in compact form, fed by the artifact data query |
-| anything else (PDF, binary, oversized) | a quiet sheet glyph with the extension as a badge |
+| Artifact                               | Preview                                                                                                                                                                 |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| markdown, or `text/markdown`           | the document's opening, laid out at twice the width and scaled by 0.5 (a thumbnail of the content, not a smaller font), fading to the panel colour over the bottom 28 % |
+| `text/plain`, `application/json`       | the same, as preformatted text                                                                                                                                          |
+| `text/csv`                             | a mini table of the first 6 rows × 5 columns, cells cut at 28 characters                                                                                                |
+| `image/*`                              | the image, covering the frame                                                                                                                                           |
+| chart, table, metrics, board           | the preset body in compact form, fed by the artifact data query                                                                                                         |
+| anything else (PDF, binary, oversized) | a quiet sheet glyph with the extension as a badge                                                                                                                       |
 
 Bytes are read only within limits: text up to 256 KiB, images up to 4 MiB; beyond that the
 glyph is drawn without reading. Of a text artifact only the first 8 KiB are decoded and the
@@ -399,12 +399,12 @@ pane the row or the gallery's tiles; index lines and the "N more" line never do.
 
 ### Where the numbers come from
 
-| Figure | Source |
-|---|---|
-| time | `durationMs` on the notification payload, the lineage's active time (see "How long it took"), written in the same words as the turn's "worked for" label: seconds rounded, at least one second, at most two units (`1h 3m`, `1 分 42 秒`) |
-| tokens | `run.usage.spentTokens` from the run projection, joined by run id; shown compactly (`812`, `386.4k`, `1.30M`) with the full count in the tooltip. For an amended run this is the lineage total, predecessor included (`docs/dynamic-workflow/launch.md`, "The `AmendWorkflow` tool") |
-| subagents | `run.actors.length` from the projection |
-| phases | `run.phases.length`, the phases entered; a script with no `phase()` markers has none, and the figure shows `—` |
+| Figure    | Source                                                                                                                                                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| time      | `durationMs` on the notification payload, the lineage's active time (see "How long it took"), written in the same words as the turn's "worked for" label: seconds rounded, at least one second, at most two units (`1h 3m`, `1 分 42 秒`)                                            |
+| tokens    | `run.usage.spentTokens` from the run projection, joined by run id; shown compactly (`812`, `386.4k`, `1.30M`) with the full count in the tooltip. For an amended run this is the lineage total, predecessor included (`docs/dynamic-workflow/launch.md`, "The `AmendWorkflow` tool") |
+| subagents | `run.actors.length` from the projection                                                                                                                                                                                                                                              |
+| phases    | `run.phases.length`, the phases entered; a script with no `phase()` markers has none, and the figure shows `—`                                                                                                                                                                       |
 
 Artifacts start from the payload's list, which is persisted with the notification and
 survives cold restore. In a live session the artifact metadata query then fills in content
@@ -440,7 +440,7 @@ A life is bounded by its `run-started` event and the last event it recorded, so 
 is a sum over lives read from the journal: `Σ (last event − run-started)` for the run, plus
 the same sum for each ancestor reached through `resumedFrom`. Idle time between lives is
 excluded, because nothing was running in it — a run interrupted by a restart on Friday and
-resumed on Monday did not work all weekend. Idle time *within* a life is included: a run
+resumed on Monday did not work all weekend. Idle time _within_ a life is included: a run
 parked on an escalation is live and waiting, which is the same thing a turn's "worked for"
 label counts while a tool is slow.
 
@@ -495,11 +495,11 @@ value, not of their cost:
 The three fields serve both paths: whatever is typed rides the message the lead sends, and is
 what the verbatim path writes.
 
-| Field | Content |
-|---|---|
-| 名称 | the file name, mono, with a `.dwf.ts` suffix in subtle text. Prefilled with the run's name only when that name already satisfies the saved-workflow rule (`[A-Za-z0-9_.-]`, at most 64 characters, `launch.md`, "Names and scopes"); a run named in the user's own language therefore starts empty, with a placeholder, because a name is a file name. Helper line: 「字母、数字、`- _ .`，最多 64 个字符」; an invalid name turns it into an error and disables 「直接保存」. |
-| 作用域 | 「项目」 or 「全局 · 对所有项目可见」, defaulting to project. A remote project offers project only, with 「远程项目只能保存到项目里。」: `~` on the agent's machine is not a place this hub reads. |
-| 说明 | prefilled with the run's name, which is what the model called this run in the user's language and reads as a one-line description in the hub. Helper: 「「何时使用」和参数可以之后在工作流中枢里补。」 |
+| Field  | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 名称   | the file name, mono, with a `.dwf.ts` suffix in subtle text. Prefilled with the run's name only when that name already satisfies the saved-workflow rule (`[A-Za-z0-9_.-]`, at most 64 characters, `launch.md`, "Names and scopes"); a run named in the user's own language therefore starts empty, with a placeholder, because a name is a file name. Helper line: 「字母、数字、`- _ .`，最多 64 个字符」; an invalid name turns it into an error and disables 「直接保存」. |
+| 作用域 | 「项目」 or 「全局 · 对所有项目可见」, defaulting to project. A remote project offers project only, with 「远程项目只能保存到项目里。」: `~` on the agent's machine is not a place this hub reads.                                                                                                                                                                                                                                                                             |
+| 说明   | prefilled with the run's name, which is what the model called this run in the user's language and reads as a one-line description in the hub. Helper: 「「何时使用」和参数可以之后在工作流中枢里补。」                                                                                                                                                                                                                                                                         |
 
 Under the fields, one consequence line in subtle text: 「将写入 {path}；之后可在「自动化 ›
 工作流」按名字再次运行。」 It is replaced by the overwrite warning — 「本项目已有同名工作流，保存
@@ -592,7 +592,7 @@ tool cards in execution order, landing on the clicked phase.
 
 The engine records each `files.*` / `git.*` / `world.run` call as a `dwf_node` row of kind
 `world-read` or `world-run`, keyed by site and ordinal, with the result in `result_json`.
-The transcript must also say *what* ran, so the row carries `input_json`: a bounded
+The transcript must also say _what_ ran, so the row carries `input_json`: a bounded
 `{ op, args, truncated? }` written at admission together with the input hash and carried
 unchanged through the settlement upsert. Bounding is 4,096 bytes serialized; a larger input
 is replaced by per-argument string previews, at most 8 arguments of at most 400 characters,
@@ -606,19 +606,24 @@ Both are read-only v4 conversation queries, stateless and safe to resend, with n
 sequence or epoch parameter, because they read the journal and there is no staleness to
 guard against.
 
-| Method | Params | Result |
-|---|---|---|
-| `v4/conversation/workflowRunWorkspace` | `{ sessionId, runId }` | `{ nodes: WorkflowRunWorkspaceNode[], truncated?: true }` |
-| `v4/conversation/workflowRunNodeResult` | `{ sessionId, runId, siteId, ordinal, maxBytes? }` | `{ status, result?, error?, truncated, totalBytes }` |
+| Method                                  | Params                                             | Result                                                    |
+| --------------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| `v4/conversation/workflowRunWorkspace`  | `{ sessionId, runId }`                             | `{ nodes: WorkflowRunWorkspaceNode[], truncated?: true }` |
+| `v4/conversation/workflowRunNodeResult` | `{ sessionId, runId, siteId, ordinal, maxBytes? }` | `{ status, result?, error?, truncated, totalBytes }`      |
 
 ```ts
 interface WorkflowRunWorkspaceNode {
-  siteId; ordinal; kind: "world-read" | "world-run";
-  op?; args?; inputTruncated?: true;           // absent on pre-column rows
+  siteId;
+  ordinal;
+  kind: "world-read" | "world-run";
+  op?;
+  args?;
+  inputTruncated?: true; // absent on pre-column rows
   status: "running" | "completed" | "failed";
   error?: { code; message };
   summary?: { resultBytes; resultCount?; exitCode?; stdoutBytes?; stderrBytes? };
-  createdAt; updatedAt;                        // journal timestamps; their difference is the step's duration
+  createdAt;
+  updatedAt; // journal timestamps; their difference is the step's duration
 }
 ```
 
@@ -628,13 +633,13 @@ length of the body, array length for list results, and for a `world.run` result 
 code and the byte lengths of `stdout` and `stderr`. Rows come back in journal insertion
 order, which is admission order.
 
-| Limit | Value |
-|---|---|
-| list rows | 2,000; the gateway cuts the tail and sets `truncated` |
-| `op` length | 32 |
-| `args` count | 16 |
-| error message | 2,000 characters, cut by the host |
-| result bytes | 32 KiB, the default and the maximum of `maxBytes`; the gateway clamps |
+| Limit         | Value                                                                 |
+| ------------- | --------------------------------------------------------------------- |
+| list rows     | 2,000; the gateway cuts the tail and sets `truncated`                 |
+| `op` length   | 32                                                                    |
+| `args` count  | 16                                                                    |
+| error message | 2,000 characters, cut by the host                                     |
+| result bytes  | 32 KiB, the default and the maximum of `maxBytes`; the gateway clamps |
 
 **Authorization** is the same chain as the artifact reads, and both queries walk it: the
 run row must exist, and its `parent_session_id` must equal the calling session (a `NULL`
@@ -707,13 +712,13 @@ chapters and there are no lamps or rails.
 
 A card's kind follows the recorded `op`, which is how the three facade containers divide:
 
-| `op` | Kind | First line | Result line (settled) |
-|---|---|---|---|
-| `read` | Read | Read + a file chip | the path, bytes |
-| `glob`, `grep` | Search | Searched + pattern, `in` + scope | `n files` or `n matches`, duration |
-| `git-*` | Git | git + subcommand and arguments | count or bytes, duration |
-| `run` | Terminal | Ran (or Running) + the command line, quoted like a shell | `exit n`, duration, stdout bytes |
-| absent | Step | the static graph's step label | count, bytes, duration |
+| `op`           | Kind     | First line                                               | Result line (settled)              |
+| -------------- | -------- | -------------------------------------------------------- | ---------------------------------- |
+| `read`         | Read     | Read + a file chip                                       | the path, bytes                    |
+| `glob`, `grep` | Search   | Searched + pattern, `in` + scope                         | `n files` or `n matches`, duration |
+| `git-*`        | Git      | git + subcommand and arguments                           | count or bytes, duration           |
+| `run`          | Terminal | Ran (or Running) + the command line, quoted like a shell | `exit n`, duration, stdout bytes   |
+| absent         | Step     | the static graph's step label                            | count, bytes, duration             |
 
 Every card has a kind tile on the left (tinted red when failed, amber while running), the
 two lines in the middle, and a time-ruler mark on the right: `+m:ss` from the first card's
@@ -739,12 +744,12 @@ same cache, so expanding later costs no read.
 
 The **expanded body** depends on the result shape:
 
-| Result | Body | Footer |
-|---|---|---|
-| `{ exitCode, stdout, stderr }` | `$ command`, then `stdout` (up to 200 lines), then `stderr` on a faintly red section, or "no output" when both are empty | `exit n · duration · bytes` and Copy (copies `stdout`) |
-| an array (`glob`, `grep`, changed files) | a numbered list, up to 200 items; `grep` matches show the match's own line number, the path, and the text | `n files` or `n matches`, duration; Copy joins the items |
-| a string (`read`, `git-diff`, status) | preformatted text, up to 200 lines; a diff colours `+`, `-`, and hunk headers | duration, bytes |
-| anything else | pretty-printed JSON | duration, bytes |
+| Result                                   | Body                                                                                                                     | Footer                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| `{ exitCode, stdout, stderr }`           | `$ command`, then `stdout` (up to 200 lines), then `stderr` on a faintly red section, or "no output" when both are empty | `exit n · duration · bytes` and Copy (copies `stdout`)   |
+| an array (`glob`, `grep`, changed files) | a numbered list, up to 200 items; `grep` matches show the match's own line number, the path, and the text                | `n files` or `n matches`, duration; Copy joins the items |
+| a string (`read`, `git-diff`, status)    | preformatted text, up to 200 lines; a diff colours `+`, `-`, and hunk headers                                            | duration, bytes                                          |
+| anything else                            | pretty-printed JSON                                                                                                      | duration, bytes                                          |
 
 Whenever the body was cut by the line cap or by the gateway, a note under the footer says
 "Showing the first {shown} of {total}; the full result stays in the journal."

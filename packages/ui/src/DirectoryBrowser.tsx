@@ -22,9 +22,7 @@ export function filterDirectoryBrowserEntries(entries: FileEntry[]): FileEntry[]
 export function getDirectoryBrowserEntryIconKind(
   entry: Pick<FileEntry, "isSymbolicLink" | "type">,
 ): "folder" | "folder-symlink" {
-  return entry.type === "directory" && entry.isSymbolicLink === true
-    ? "folder-symlink"
-    : "folder";
+  return entry.type === "directory" && entry.isSymbolicLink === true ? "folder-symlink" : "folder";
 }
 
 export function createDirectoryBrowserRequestGuard(): {
@@ -114,12 +112,7 @@ export function DirectoryBrowser({
       // 用户快速切换目录或隐藏目录时，较早 readdir 可能后返回；
       // 过期错误不能覆盖最新导航状态，否则 UI 会展示和当前按钮状态不一致的目录/错误。
       logger.error("[DirectoryBrowser] readdir 失败:", err);
-      setError(
-        intl.formatMessage(
-          { id: "directoryBrowser.errorReadDir" },
-          { error: String(err) },
-        ),
-      );
+      setError(intl.formatMessage({ id: "directoryBrowser.errorReadDir" }, { error: String(err) }));
     } finally {
       if (requestGuardRef.current.isCurrent(requestId)) {
         setLoading(false);

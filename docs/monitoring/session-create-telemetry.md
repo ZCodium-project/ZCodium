@@ -24,12 +24,12 @@ Automation Host 新建 + 首发 accepted -> 严格 telemetry 消息 -> Desktop M
 顶层 `talk_id` 为创建的 session ID，`message_id` 必填，为首次 accepted 输入的 command ID，
 与该轮 message_completion.message_id 一致。公共 user/device/version/marketing 字段沿用 TelemetryCore。
 
-| event_extra_detail 字段 | 值 |
-| --- | --- |
-| create_source | `group` / `project` / `session` / `automation_idle` / `automation_scheduled` |
-| client_kind | `desktop` / `mobile` / `web`；mobile 表示 Web 远控入口，不按 UA 猜设备 |
-| workspace_kind | `local` / `remote` |
-| remote_kind | `ssh` / `wsl` / `docker` / `server` / 空字符串 |
+| event_extra_detail 字段 | 值                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| create_source           | `group` / `project` / `session` / `automation_idle` / `automation_scheduled` |
+| client_kind             | `desktop` / `mobile` / `web`；mobile 表示 Web 远控入口，不按 UA 猜设备       |
+| workspace_kind          | `local` / `remote`                                                           |
+| remote_kind             | `ssh` / `wsl` / `docker` / `server` / 空字符串                               |
 
 workspace 类型复用 conversation telemetry：identity 或 remoteSessionId 任一非空就是
 remote；remote_kind 由 `parseRemoteWorkspaceIdentity` 提取，未知 identity 保留 remote。

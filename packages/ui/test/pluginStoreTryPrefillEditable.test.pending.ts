@@ -122,9 +122,7 @@ describe("前置 Plugin mention 保留现有 Lexical 节点", () => {
     editor.getEditorState().read(() => {
       const paragraphs = $getRoot().getChildren();
       expect(paragraphs).toHaveLength(2);
-      const mentionNodes = $getRoot()
-        .getAllTextNodes()
-        .filter($isPromptMentionNode);
+      const mentionNodes = $getRoot().getAllTextNodes().filter($isPromptMentionNode);
       expect(mentionNodes.map((node) => node.getMention().id)).toEqual([
         SECOND_PLUGIN_MENTION.id,
         TRY_NOW_MENTION.id,

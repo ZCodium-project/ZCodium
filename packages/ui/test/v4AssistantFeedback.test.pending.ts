@@ -59,9 +59,7 @@ function renderActions(params: {
 }
 
 function feedbackAction(testId: string): Record<string, unknown> {
-  const action = actionCapture.props.find(
-    (props) => props["data-testid"] === testId,
-  );
+  const action = actionCapture.props.find((props) => props["data-testid"] === testId);
   if (!action) throw new Error(`missing feedback action ${testId}`);
   return action;
 }

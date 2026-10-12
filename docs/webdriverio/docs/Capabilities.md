@@ -114,17 +114,18 @@ In order to propagate options to the driver you can use the following custom cap
 - Safari: `wdio:safaridriverOptions`
 
 <Tabs
-  defaultValue="chrome"
-  values={[
-    {label: 'wdio:chromedriverOptions', value: 'chrome'},
-    {label: 'wdio:geckodriverOptions', value: 'firefox'},
-    {label: 'wdio:edgedriverOptions', value: 'msedge'},
-    {label: 'wdio:safaridriverOptions', value: 'safari'},
-  ]
+defaultValue="chrome"
+values={[
+{label: 'wdio:chromedriverOptions', value: 'chrome'},
+{label: 'wdio:geckodriverOptions', value: 'firefox'},
+{label: 'wdio:edgedriverOptions', value: 'msedge'},
+{label: 'wdio:safaridriverOptions', value: 'safari'},
+]
 }>
 <TabItem value="chrome">
 
 ##### adbPort
+
 The port on which the ADB driver should run.
 
 Example: `9515`
@@ -132,6 +133,7 @@ Example: `9515`
 Type: `number`
 
 ##### urlBase
+
 Base URL path prefix for commands, e.g. `wd/url`.
 
 Example: `/`
@@ -139,63 +141,75 @@ Example: `/`
 Type: `string`
 
 ##### logPath
+
 Write server log to file instead of stderr, increases log level to `INFO`
 
 Type: `string`
 
 ##### logLevel
+
 Set log level. Possible options `ALL`, `DEBUG`, `INFO`, `WARNING`, `SEVERE`, `OFF`.
 
 Type: `string`
 
 ##### verbose
+
 Log verbosely (equivalent to `--log-level=ALL`)
 
 Type: `boolean`
 
 ##### silent
+
 Log nothing (equivalent to `--log-level=OFF`)
 
 Type: `boolean`
 
 ##### appendLog
+
 Append log file instead of rewriting.
 
 Type: `boolean`
 
 ##### replayable
+
 Log verbosely and don't truncate long strings so that the log can be replayed (experimental).
 
 Type: `boolean`
 
 ##### readableTimestamp
+
 Add readable timestamps to log.
 
 Type: `boolean`
 
 ##### enableChromeLogs
+
 Show logs from the browser (overrides other logging options).
 
 Type: `boolean`
 
 ##### bidiMapperPath
+
 Custom bidi mapper path.
 
 Type: `string`
 
 ##### allowedIps
+
 Comma-separated allowlist of remote IP addresses which are allowed to connect to EdgeDriver.
 
 Type: `string[]`<br />
 Default: `['']`
 
 ##### allowedOrigins
+
 Comma-separated allowlist of request origins which are allowed to connect to EdgeDriver. Using `*` to allow any host origin is dangerous!
 
 Type: `string[]`<br />
 Default: `['*']`
 
 ##### spawnOpts
+
 Options to be passed into the driver process.
 
 Type: `SpawnOptionsWithoutStdio | SpawnOptionsWithStdioTuple<StdioOption, StdioOption, StdioOption>`<br />
@@ -228,13 +242,13 @@ This is a list of examples showing which capabilities need to be applied to achi
 Running a headless browser means to run a browser instance without window or UI. This is mostly used within CI/CD environments where no display is used. To run a browser in headless mode, apply the following capabilities:
 
 <Tabs
-  defaultValue="chrome"
-  values={[
-    {label: 'Chrome', value: 'chrome'},
-    {label: 'Firefox', value: 'firefox'},
-    {label: 'Microsoft Edge', value: 'msedge'},
-    {label: 'Safari', value: 'safari'},
-  ]
+defaultValue="chrome"
+values={[
+{label: 'Chrome', value: 'chrome'},
+{label: 'Firefox', value: 'firefox'},
+{label: 'Microsoft Edge', value: 'msedge'},
+{label: 'Safari', value: 'safari'},
+]
 }>
 <TabItem value="chrome">
 
@@ -280,13 +294,13 @@ It seems that Safari [doesn't support](https://discussions.apple.com/thread/2518
 If you like to test a browser version that is not yet released as stable, e.g. Chrome Canary, you can do so by setting capabilities and pointing to the browser you like to start, e.g.:
 
 <Tabs
-  defaultValue="chrome"
-  values={[
-    {label: 'Chrome', value: 'chrome'},
-    {label: 'Firefox', value: 'firefox'},
-    {label: 'Microsoft Edge', value: 'msedge'},
-    {label: 'Safari', value: 'safari'},
-  ]
+defaultValue="chrome"
+values={[
+{label: 'Chrome', value: 'chrome'},
+{label: 'Firefox', value: 'firefox'},
+{label: 'Microsoft Edge', value: 'msedge'},
+{label: 'Safari', value: 'safari'},
+]
 }>
 <TabItem value="chrome">
 
@@ -396,7 +410,7 @@ When testing on Safari, make sure you have the [Safari Technology Preview](https
 
 ```ts
 {
-    browserName: 'safari technology preview'
+  browserName: "safari technology preview";
 }
 ```
 
@@ -409,32 +423,34 @@ If you like to define your own set of capabilities in order to e.g. store arbitr
 
 ```js title=wdio.conf.ts
 export const config = {
-    // ...
-    capabilities: [{
-        browserName: 'chrome',
-        'custom:caps': {
-            // custom configurations
-        }
-    }]
-}
+  // ...
+  capabilities: [
+    {
+      browserName: "chrome",
+      "custom:caps": {
+        // custom configurations
+      },
+    },
+  ],
+};
 ```
 
 It is advised to follow the [W3C protocol](https://w3c.github.io/webdriver/#dfn-extension-capability) when it comes to capability naming which requires a `:` (colon) character, denoting an implementation specific namespace. Within your tests you can access your custom capability through, e.g.:
 
 ```ts
-browser.capabilities['custom:caps']
+browser.capabilities["custom:caps"];
 ```
 
 In order to ensure type safety you can extend WebdriverIOs capability interface via:
 
 ```ts
 declare global {
-    namespace WebdriverIO {
-        interface Capabilities {
-            'custom:caps': {
-                // ...
-            }
-        }
+  namespace WebdriverIO {
+    interface Capabilities {
+      "custom:caps": {
+        // ...
+      };
     }
+  }
 }
 ```

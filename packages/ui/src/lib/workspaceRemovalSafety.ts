@@ -73,7 +73,8 @@ export async function scanWindowsReservedDeviceNameFiles(
 ): Promise<WorkspaceRemovalRiskScanResult> {
   const maxEntries = options.maxEntries ?? DEFAULT_MAX_SCAN_ENTRIES;
   const maxFindings = options.maxFindings ?? DEFAULT_MAX_FINDINGS;
-  const skippedDirectories = options.skippedDirectories ?? WINDOWS_RESERVED_NAME_SCAN_SKIPPED_DIRECTORIES;
+  const skippedDirectories =
+    options.skippedDirectories ?? WINDOWS_RESERVED_NAME_SCAN_SKIPPED_DIRECTORIES;
   const pendingDirectories = [rootPath];
   const findings: string[] = [];
   let scannedEntries = 0;

@@ -137,11 +137,7 @@ function normalizeText(value: string | null | undefined) {
   return (value ?? "").replace(/\u00a0/g, " ").trim();
 }
 
-async function waitForElicitationPage(
-  pageText: string,
-  questionText: string,
-  timeout = 60000,
-) {
+async function waitForElicitationPage(pageText: string, questionText: string, timeout = 60000) {
   let latest = "";
   try {
     await browser.waitUntil(

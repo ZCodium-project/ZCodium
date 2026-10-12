@@ -46,8 +46,7 @@ import {
 const HOOKS_SECTION_SELECTOR = '[data-testid="hooks-settings-section"]';
 const HOOK_ROW_SELECTOR = '//div[@data-testid="configured-hook-row"]';
 // 信任按钮通过 ShieldCheck 图标定位（lucide class），不依赖 locale 文案。
-const TRUST_BUTTON_IN_ROW =
-  './/button[.//*[contains(@class, "lucide-shield-check")]]';
+const TRUST_BUTTON_IN_ROW = './/button[.//*[contains(@class, "lucide-shield-check")]]';
 
 describe("Workspace Hook Trust (HK05–HK07)", () => {
   before(async function () {
@@ -122,10 +121,7 @@ describe("Workspace Hook Trust (HK05–HK07)", () => {
 
     // 被信任的行按钮消失；其余两条仍显示“信任”。
     await assertNoTrustButton(E2E_HOOK_TRUST_LABELS.sessionStartA);
-    for (const label of [
-      E2E_HOOK_TRUST_LABELS.sessionStartB,
-      E2E_HOOK_TRUST_LABELS.promptSubmit,
-    ]) {
+    for (const label of [E2E_HOOK_TRUST_LABELS.sessionStartB, E2E_HOOK_TRUST_LABELS.promptSubmit]) {
       await (await findTrustButton(label)).waitForDisplayed({ timeout: 15000 });
     }
 
@@ -154,14 +150,10 @@ describe("Workspace Hook Trust (HK05–HK07)", () => {
     await waitForIdle("Second turn did not return to idle");
 
     const inTaskExecutions = await readHookTrustExecutions();
-    expect(
-      inTaskExecutions.filter((item) => item.event === "SessionStart"),
-    ).toHaveLength(0);
-    expect(
-      inTaskExecutions.some(
-        (item) => item.label === E2E_HOOK_TRUST_LABELS.promptSubmit,
-      ),
-    ).toBe(true);
+    expect(inTaskExecutions.filter((item) => item.event === "SessionStart")).toHaveLength(0);
+    expect(inTaskExecutions.some((item) => item.label === E2E_HOOK_TRUST_LABELS.promptSubmit)).toBe(
+      true,
+    );
 
     // 第二段（新 task）：catalog HK07 字面语义——新 task 的自然 SessionStart
     // 按 Trust 执行。该路径与 UserPromptSubmit 不同：覆盖新 session 冷启动时
@@ -180,20 +172,16 @@ describe("Workspace Hook Trust (HK05–HK07)", () => {
     expect(
       executions.filter((item) => item.label === E2E_HOOK_TRUST_LABELS.sessionStartA),
     ).toHaveLength(1);
-    expect(
-      executions.some(
-        (item) => item.label === E2E_HOOK_TRUST_LABELS.sessionStartB,
-      ),
-    ).toBe(false);
+    expect(executions.some((item) => item.label === E2E_HOOK_TRUST_LABELS.sessionStartB)).toBe(
+      false,
+    );
   });
 });
 
 async function waitForIdle(timeoutMsg: string): Promise<void> {
   await waitForV4Pane(
     (snapshot) =>
-      snapshot.sessionId !== null &&
-      snapshot.sessionId !== "draft" &&
-      !snapshot.canStop,
+      snapshot.sessionId !== null && snapshot.sessionId !== "draft" && !snapshot.canStop,
     timeoutMsg,
     60000,
   );
@@ -225,11 +213,8 @@ async function waitForHookTrustRowCount(count: number): Promise<void> {
       browser.execute(
         (expected: number) =>
           Array.from(
-            document.querySelectorAll<HTMLElement>(
-              '[data-testid="configured-hook-row"]',
-            ),
-          ).filter((row) => row.innerText.includes("hook-trust-")).length ===
-          expected,
+            document.querySelectorAll<HTMLElement>('[data-testid="configured-hook-row"]'),
+          ).filter((row) => row.innerText.includes("hook-trust-")).length === expected,
         count,
       ),
     {
@@ -256,7 +241,9 @@ async function clickTrustButton(label: string): Promise<void> {
 async function assertNoTrustButton(label: string): Promise<void> {
   const row = await $(hookRowSelector(label));
   await row.waitForDisplayed({ timeout: 15000 });
-  await (await row.$(TRUST_BUTTON_IN_ROW)).waitForExist({
+  await (
+    await row.$(TRUST_BUTTON_IN_ROW)
+  ).waitForExist({
     timeout: 15000,
     reverse: true,
   });

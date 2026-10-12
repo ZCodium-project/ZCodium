@@ -16,10 +16,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_SET",
-          "Continue working toward the active session goal"
-        ],
+        "bodyIncludes": ["E2E_GOAL_SET", "Continue working toward the active session goal"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -132,10 +129,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_UPDATE",
-          "Continue working toward the active session goal"
-        ],
+        "bodyIncludes": ["E2E_GOAL_UPDATE", "Continue working toward the active session goal"],
         "bodyExcludes": [
           "Generate a concise title",
           "CRITICAL: Respond with TEXT ONLY",
@@ -248,17 +242,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_SLOW_STREAM",
-          "E2E_GOAL_RUNNING"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_RUNNING"
-        ]
+        "bodyIncludes": ["E2E_SLOW_STREAM", "E2E_GOAL_RUNNING"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_RUNNING"]
       },
       "response": {
         "statusCode": 200,
@@ -333,16 +319,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_RUNNING_QUEUE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_RUNNING_QUEUE"
-        ]
+        "bodyIncludes": ["E2E_GOAL_RUNNING_QUEUE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_RUNNING_QUEUE"]
       },
       "response": {
         "statusCode": 200,
@@ -367,16 +346,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_GOAL_HELD_QUEUE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_GOAL_HELD_QUEUE"
-        ]
+        "bodyIncludes": ["E2E_GOAL_HELD_QUEUE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_GOAL_HELD_QUEUE"]
       },
       "response": {
         "statusCode": 200,
@@ -401,16 +373,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_SLOW_STREAM"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_SLOW_STREAM"
-        ]
+        "bodyIncludes": ["E2E_SLOW_STREAM"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_SLOW_STREAM"]
       },
       "response": {
         "statusCode": 200,

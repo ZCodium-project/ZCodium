@@ -2,15 +2,10 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const componentSources = await Promise.all(
-  ["popover.tsx", "select.tsx", "dropdown-menu.tsx", "context-menu.tsx"].map(
-    async (fileName) => ({
-      fileName,
-      source: await readFile(
-        new URL(`../src/components/ui/${fileName}`, import.meta.url),
-        "utf8",
-      ),
-    }),
-  ),
+  ["popover.tsx", "select.tsx", "dropdown-menu.tsx", "context-menu.tsx"].map(async (fileName) => ({
+    fileName,
+    source: await readFile(new URL(`../src/components/ui/${fileName}`, import.meta.url), "utf8"),
+  })),
 );
 
 const tooltipSource = await readFile(
@@ -30,14 +25,9 @@ describe("floating overlay layering", () => {
 
   it("Dropdown 获得焦点时仍持续显示默认阴影", () => {
     const dropdownSource =
-      componentSources.find(({ fileName }) => fileName === "dropdown-menu.tsx")
-        ?.source ?? "";
+      componentSources.find(({ fileName }) => fileName === "dropdown-menu.tsx")?.source ?? "";
 
-    expect(dropdownSource).toContain(
-      "!shadow-md focus:!shadow-md focus-visible:!shadow-md",
-    );
-    expect(dropdownSource).not.toContain(
-      "text-foreground shadow-md duration-100",
-    );
+    expect(dropdownSource).toContain("!shadow-md focus:!shadow-md focus-visible:!shadow-md");
+    expect(dropdownSource).not.toContain("text-foreground shadow-md duration-100");
   });
 });

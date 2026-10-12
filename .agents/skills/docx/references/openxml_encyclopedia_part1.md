@@ -4055,7 +4055,7 @@ public static class OpenXmlUnits
 
 ---
 
-*Document Version: 1.0*
-*OpenXML SDK: 3.x*
-*.NET Version: 10*
-*C# Version: 13*
+_Document Version: 1.0_
+_OpenXML SDK: 3.x_
+_.NET Version: 10_
+_C# Version: 13_

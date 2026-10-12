@@ -1,11 +1,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type {
-  DesktopWindowChromeState,
-  IPlatformService,
-  UpdateStatePayload,
-} from "@zcode/shared";
+import type { DesktopWindowChromeState, IPlatformService, UpdateStatePayload } from "@zcode/shared";
 
 vi.mock("@/i18n/IntlProvider.js", () => ({
   useZCodeIntl: () => ({
@@ -166,9 +162,7 @@ describe("useAppChromeState auto update state", () => {
 
   it("does not let an initial stale snapshot hide a later available update event", async () => {
     const { useAppChromeState } = await import("@/app-shell/useAppChromeState.js");
-    let resolveInitialSnapshot:
-      | ((payload: UpdateStatePayload) => void)
-      | null = null;
+    let resolveInitialSnapshot: ((payload: UpdateStatePayload) => void) | null = null;
     let stateCallback: ((payload: UpdateStatePayload) => void) | null = null;
     let latestChromeState: {
       updateReadyVersion: string | null;
@@ -238,7 +232,8 @@ describe("useAppChromeState desktop chrome state", () => {
     [26, 12],
   ])("loads macOS %i from the platform before resolving radius %i", async (version, radius) => {
     const { useAppChromeState } = await import("@/app-shell/useAppChromeState.js");
-    const { resolveWorkspaceShellPanelRadiusPx } = await import("@/app-shell/workspaceShellWindowChrome.js");
+    const { resolveWorkspaceShellPanelRadiusPx } =
+      await import("@/app-shell/workspaceShellWindowChrome.js");
     const dispose = vi.fn();
     const platform = {
       onWindowFullscreenChanged: vi.fn(() => () => {}),

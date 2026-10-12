@@ -27,12 +27,14 @@ npm install @wdio/mocha-framework --save-dev
 By default WebdriverIO provides an [assertion library](assertion) that is built-in which you can start right away:
 
 ```js
-describe('my awesome website', () => {
-    it('should do some assertions', async () => {
-        await browser.url('https://webdriver.io')
-        await expect(browser).toHaveTitle('WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO')
-    })
-})
+describe("my awesome website", () => {
+  it("should do some assertions", async () => {
+    await browser.url("https://webdriver.io");
+    await expect(browser).toHaveTitle(
+      "WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO",
+    );
+  });
+});
 ```
 
 WebdriverIO supports Mocha's `BDD` (default), `TDD`, and `QUnit` [interfaces](https://mochajs.org/#interfaces).
@@ -40,27 +42,29 @@ WebdriverIO supports Mocha's `BDD` (default), `TDD`, and `QUnit` [interfaces](ht
 If you like to write your specs in TDD style, set the `ui` property in your `mochaOpts` config to `tdd`. Now your test files should be written like this:
 
 ```js
-suite('my awesome website', () => {
-    test('should do some assertions', async () => {
-        await browser.url('https://webdriver.io')
-        await expect(browser).toHaveTitle('WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO')
-    })
-})
+suite("my awesome website", () => {
+  test("should do some assertions", async () => {
+    await browser.url("https://webdriver.io");
+    await expect(browser).toHaveTitle(
+      "WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO",
+    );
+  });
+});
 ```
 
 If you want to define other Mocha-specific settings, you can do it with the `mochaOpts` key in your configuration file. A list of all options can be found on the [Mocha project website](https://mochajs.org/api/mocha).
 
-__Note:__ WebdriverIO does not support the deprecated usage of `done` callbacks in Mocha:
+**Note:** WebdriverIO does not support the deprecated usage of `done` callbacks in Mocha:
 
 ```js
-it('should test something', (done) => {
-    done() // throws "done is not a function"
-})
+it("should test something", (done) => {
+  done(); // throws "done is not a function"
+});
 ```
 
 ### Mocha Options
 
-The following options can be applied in your `wdio.conf.js` to configure your Mocha environment. __Note:__ not all options are supported, e.g. applying the `parallel` option will cause an error as the WDIO testrunner has its own way to run tests in parallel. You can pass these framework options as arguments, e.g.:
+The following options can be applied in your `wdio.conf.js` to configure your Mocha environment. **Note:** not all options are supported, e.g. applying the `parallel` option will cause an error as the WDIO testrunner has its own way to run tests in parallel. You can pass these framework options as arguments, e.g.:
 
 ```sh
 wdio run wdio.conf.ts --mochaOpts.grep "my test" --mochaOpts.bail --no-mochaOpts.checkLeaks
@@ -79,90 +83,105 @@ This will pass along the following Mocha options:
 The following Mocha options are supported:
 
 #### require
+
 The `require` option is useful when you want to add or extend some basic functionality (WebdriverIO framework option).
 
 Type: `string|string[]`<br />
 Default: `[]`
 
 #### compilers
+
 Use the given module(s) to compile files. Compilers will be included before requires (WebdriverIO framework option).
 
 Type: `string[]`<br />
 Default: `[]`
 
 #### allowUncaught
+
 Propagate uncaught errors.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### bail
+
 Bail after first test failure.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### checkLeaks
+
 Check for global variable leaks.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### delay
+
 Delay root suite execution.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### fgrep
+
 Test filter given string.
 
 Type: `string`<br />
 Default: `null`
 
 #### forbidOnly
+
 Tests marked `only` fail the suite.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### forbidPending
+
 Pending tests fail the suite.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### fullTrace
+
 Full stacktrace upon failure.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### global
+
 Variables expected in global scope.
 
 Type: `string[]`<br />
 Default: `[]`
 
 #### grep
+
 Test filter given regular expression.
 
 Type: `RegExp|string`<br />
 Default: `null`
 
 #### invert
+
 Invert test filter matches.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### retries
+
 Number of times to retry failed tests.
 
 Type: `number`<br />
 Default: `0`
 
 #### timeout
+
 Timeout threshold value (in ms).
 
 Type: `number`<br />
@@ -199,60 +218,70 @@ This will pass along the following Mocha options:
 The following Jasmine options are supported:
 
 #### defaultTimeoutInterval
+
 Default Timeout Interval for Jasmine operations.
 
 Type: `number`<br />
 Default: `60000`
 
 #### helpers
+
 Array of filepaths (and globs) relative to spec_dir to include before jasmine specs.
 
 Type: `string[]`<br />
 Default: `[]`
 
 #### requires
+
 The `requires` option is useful when you want to add or extend some basic functionality.
 
 Type: `string[]`<br />
 Default: `[]`
 
 #### random
+
 Whether to randomize spec execution order.
 
 Type: `boolean`<br />
 Default: `true`
 
 #### seed
+
 Seed to use as the basis of randomization. Null causes the seed to be determined randomly at the start of execution.
 
 Type: `Function`<br />
 Default: `null`
 
 #### failSpecWithNoExpectations
+
 Whether to fail the spec if it ran no expectations. By default a spec that ran no expectations is reported as passed. Setting this to true will report such spec as a failure.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### oneFailurePerSpec
+
 Whether to cause specs to only have one expectation failure.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### specFilter
+
 Function to use to filter specs.
 
 Type: `Function`<br />
 Default: `(spec) => true`
 
 #### grep
+
 Only run tests matching this string or regexp. (Only applicable if no custom `specFilter` function is set)
 
 Type: `string|Regexp`<br />
 Default: `null`
 
 #### invertGrep
+
 If true it inverts the matching tests and only runs tests that don't match with the expression used in `grep`. (Only applicable if no custom `specFilter` function is set)
 
 Type: `boolean`<br />
@@ -292,12 +321,14 @@ This command sets the `tags` option in `cucumberOpts` to `@smoke`, ensuring that
 :::
 
 #### backtrace
+
 Show full backtrace for errors.
 
 Type: `Boolean`<br />
 Default: `true`
 
 #### requireModule
+
 Require modules prior to requiring any support files.
 
 Type: `string[]`<br />
@@ -306,33 +337,36 @@ Example:
 
 ```js
 cucumberOpts: {
-    requireModule: ['@babel/register']
-    // or
-    requireModule: [
-        [
-            '@babel/register',
-            {
-                rootMode: 'upward',
-                ignore: ['node_modules']
-            }
-        ]
-    ]
- }
- ```
+  requireModule: ["@babel/register"];
+  // or
+  requireModule: [
+    [
+      "@babel/register",
+      {
+        rootMode: "upward",
+        ignore: ["node_modules"],
+      },
+    ],
+  ];
+}
+```
 
 #### failFast
+
 Abort the run on first failure.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### name
+
 Only execute the scenarios with name matching the expression (repeatable).
 
 Type: `RegExp[]`<br />
 Default: `[]`
 
 #### require
+
 Require files containing your step definitions before executing features. You can also specify a glob to your step definitions.
 
 Type: `string[]`<br />
@@ -341,11 +375,12 @@ Example:
 
 ```js
 cucumberOpts: {
-    require: [path.join(__dirname, 'step-definitions', 'my-steps.js')]
+  require: [path.join(__dirname, "step-definitions", "my-steps.js")];
 }
 ```
 
 #### import
+
 Paths to where your support code is, for ESM.
 
 Type: `String[]`<br />
@@ -359,12 +394,14 @@ cucumberOpts: {
 ```
 
 #### strict
+
 Fail if there are any undefined or pending steps.
 
 Type: `boolean`<br />
 Default: `false`
 
 #### tags
+
 Only execute the features or scenarios with tags matching the expression.
 Please see the [Cucumber documentation](https://docs.cucumber.io/cucumber/api/#tag-expressions) for more details.
 
@@ -372,85 +409,97 @@ Type: `String`<br />
 Default: ``
 
 #### timeout
+
 Timeout in milliseconds for step definitions.
 
 Type: `Number`<br />
 Default: `30000`
 
 #### retry
+
 Specify the number of times to retry failing test cases.
 
 Type: `Number`<br />
 Default: `0`
 
 #### retryTagFilter
+
 Only retries the features or scenarios with tags matching the expression (repeatable). This option requires '--retry' to be specified.
 
 Type: `RegExp`
 
 #### language
+
 Default language for your feature files
 
 Type: `String`<br />
 Default: `en`
 
 #### order
+
 Run tests in defined / random order
 
 Type: `String`<br />
 Default: `defined`
 
 #### format
+
 Name and output file path of formatter to use.
 WebdriverIO primarily supports only the [Formatters](https://github.com/cucumber/cucumber-js/blob/main/docs/formatters.md) that writes output to a file.
 
 Type: `string[]`<br />
 
 #### formatOptions
+
 Options to be provided to formatters
 
 Type: `object`<br />
 
 #### tagsInTitle
+
 Add cucumber tags to feature or scenario name
 
 Type: `Boolean`<br />
 Default: `false`
 
-***Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself***<br/>
+**_Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself_**<br/>
 
 #### ignoreUndefinedDefinitions
+
 Treat undefined definitions as warnings.
 
 Type: `Boolean`<br />
 Default: `false`
 
-***Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself***<br/>
+**_Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself_**<br/>
 
 #### failAmbiguousDefinitions
+
 Treat ambiguous definitions as errors.
 
 Type: `Boolean`<br />
 Default: `false`
 
-***Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself***<br/>
+**_Please note that this is a @wdio/cucumber-framework specific option and not recognized by cucumber-js itself_**<br/>
 
 #### tagExpression
+
 Only execute the features or scenarios with tags matching the expression.
 Please see the [Cucumber documentation](https://docs.cucumber.io/cucumber/api/#tag-expressions) for more details.
 
 Type: `String`<br />
 Default: ``
 
-***Please note that this option would be deprecated in future. Use [`tags`](#tags) config property instead***
+**_Please note that this option would be deprecated in future. Use [`tags`](#tags) config property instead_**
 
 #### profile
+
 Specify the profile to use.
 
 Type: `string[]`<br />
 Default: `[]`
 
-***Kindly take note that only specific values (worldParameters, name, retryTagFilter) are supported within profiles, as `cucumberOpts` takes precedence. Additionally, when using a profile, make sure that the mentioned values are not declared within `cucumberOpts`.***
+**_Kindly take note that only specific values (worldParameters, name, retryTagFilter) are supported within profiles, as `cucumberOpts` takes precedence. Additionally, when using a profile, make sure that the mentioned values are not declared within `cucumberOpts`._**
 
 ### Skipping tests in cucumber
 
@@ -463,6 +512,7 @@ were condition is an optional combination of capabilities properties with their 
 You can also use the '@skip' annotation to skip tests without changing `tagExpression'. In this case the skipped tests will be displayed in the test report.
 
 Here you have some examples of this syntax:
+
 - `@skip` or `@skip()`: will always skip the tagged item
 - `@skip(browserName="chrome")`: the test will not be executed against chrome browsers.
 - `@skip(browserName="firefox";platformName="linux")`: will skip the test in firefox over linux executions.
@@ -474,13 +524,13 @@ Here you have some examples of this syntax:
 In order to use step definition helper like `Given`, `When` or `Then` or hooks, you are suppose to import then from `@cucumber/cucumber`, e.g. like this:
 
 ```js
-import { Given, When, Then } from '@cucumber/cucumber'
+import { Given, When, Then } from "@cucumber/cucumber";
 ```
 
 Now, if you use Cucumber already for other types of tests unrelated to WebdriverIO for which you use a specific version you need to import these helpers in your e2e tests from the WebdriverIO Cucumber package, e.g.:
 
 ```js
-import { Given, When, Then, world, context } from '@wdio/cucumber-framework'
+import { Given, When, Then, world, context } from "@wdio/cucumber-framework";
 ```
 
 This ensures that you use the right helpers within the WebdriverIO framework and allows you to use an independent Cucumber version for other types of testing.
@@ -494,28 +544,29 @@ To overcome this limitation, we've introduced a promise-based method called `pub
 You can generate `cucumber message` reports by configuring the `format` option in your `cucumberOpts`. It's highly recommended to provide a dynamic file name within the `cucumber message` format option to prevent overwriting reports and ensure that each test run is accurately recorded.
 
 Before using this function, make sure to set the following environment variables:
+
 - CUCUMBER_PUBLISH_REPORT_URL: The URL where you want to publish the Cucumber report. If not provided, the default URL 'https://messages.cucumber.io/api/reports' will be used.
 - CUCUMBER_PUBLISH_REPORT_TOKEN: The authorization token required to publish the report. If this token is not set, the function will exit without publishing the report.
 
 Here's an example of the necessary configurations and code samples for implementation:
 
 ```javascript
-import { v4 as uuidv4 } from 'uuid'
-import { publishCucumberReport } from '@wdio/cucumber-framework';
+import { v4 as uuidv4 } from "uuid";
+import { publishCucumberReport } from "@wdio/cucumber-framework";
 
 export const config = {
-    // ... Other Configuration Options
-    cucumberOpts: {
-        // ... Cucumber Options Configuration
-        format: [
-            ['message', `./reports/${uuidv4()}.ndjson`],
-            ['json', './reports/test-report.json']
-        ]
-    },
-    async onComplete() {
-        await publishCucumberReport('./reports');
-    }
-}
+  // ... Other Configuration Options
+  cucumberOpts: {
+    // ... Cucumber Options Configuration
+    format: [
+      ["message", `./reports/${uuidv4()}.ndjson`],
+      ["json", "./reports/test-report.json"],
+    ],
+  },
+  async onComplete() {
+    await publishCucumberReport("./reports");
+  },
+};
 ```
 
 Please note that `./reports/` is the directory where `cucumber message` reports will be stored.
@@ -525,6 +576,7 @@ Please note that `./reports/` is the directory where `cucumber message` reports 
 [Serenity/JS](https://serenity-js.org?pk_campaign=wdio8&pk_source=webdriver.io) is an open-source framework designed to make acceptance and regression testing of complex software systems faster, more collaborative, and easier to scale.
 
 For WebdriverIO test suites, Serenity/JS offers:
+
 - [Enhanced Reporting](https://serenity-js.org/handbook/reporting/?pk_campaign=wdio8&pk_source=webdriver.io) - You can use Serenity/JS
   as a drop-in replacement of any built-in WebdriverIO framework to produce in-depth test execution reports and living documentation of your project.
 - [Screenplay Pattern APIs](https://serenity-js.org/handbook/design/screenplay-pattern/?pk_campaign=wdio8&pk_source=webdriver.io) - To make your test code portable and reusable across projects and teams,
@@ -544,6 +596,7 @@ npm install @serenity-js/{core,web,webdriverio,assertions,console-reporter,seren
 ```
 
 Learn more about Serenity/JS modules:
+
 - [`@serenity-js/core`](https://serenity-js.org/api/core/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [`@serenity-js/web`](https://serenity-js.org/api/web/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [`@serenity-js/webdriverio`](https://serenity-js.org/api/webdriverio/?pk_campaign=wdio8&pk_source=webdriver.io)
@@ -559,53 +612,51 @@ To enable integration with Serenity/JS, configure WebdriverIO as follows:
 <TabItem value="wdio-conf-typescript" label="TypeScript" default>
 
 ```typescript title="wdio.conf.ts"
-import { WebdriverIOConfig } from '@serenity-js/webdriverio';
+import { WebdriverIOConfig } from "@serenity-js/webdriverio";
 
 export const config: WebdriverIOConfig = {
+  // Tell WebdriverIO to use Serenity/JS framework
+  framework: "@serenity-js/webdriverio",
 
-    // Tell WebdriverIO to use Serenity/JS framework
-    framework: '@serenity-js/webdriverio',
+  // Serenity/JS configuration
+  serenity: {
+    // Configure Serenity/JS to use the appropriate adapter for your test runner
+    runner: "cucumber",
+    // runner: 'mocha',
+    // runner: 'jasmine',
 
-    // Serenity/JS configuration
-    serenity: {
-        // Configure Serenity/JS to use the appropriate adapter for your test runner
-        runner: 'cucumber',
-        // runner: 'mocha',
-        // runner: 'jasmine',
+    // Register Serenity/JS reporting services, a.k.a. the "stage crew"
+    crew: [
+      // Optional, print test execution results to standard output
+      "@serenity-js/console-reporter",
 
-        // Register Serenity/JS reporting services, a.k.a. the "stage crew"
-        crew: [
-            // Optional, print test execution results to standard output
-            '@serenity-js/console-reporter',
+      // Optional, produce Serenity BDD reports and living documentation (HTML)
+      "@serenity-js/serenity-bdd",
+      ["@serenity-js/core:ArtifactArchiver", { outputDirectory: "target/site/serenity" }],
 
-            // Optional, produce Serenity BDD reports and living documentation (HTML)
-            '@serenity-js/serenity-bdd',
-            [ '@serenity-js/core:ArtifactArchiver', { outputDirectory: 'target/site/serenity' } ],
+      // Optional, automatically capture screenshots upon interaction failure
+      ["@serenity-js/web:Photographer", { strategy: "TakePhotosOfFailures" }],
+    ],
+  },
 
-            // Optional, automatically capture screenshots upon interaction failure
-            [ '@serenity-js/web:Photographer', { strategy: 'TakePhotosOfFailures' } ],
-        ]
-    },
+  // Configure your Cucumber runner
+  cucumberOpts: {
+    // see Cucumber configuration options below
+  },
 
-    // Configure your Cucumber runner
-    cucumberOpts: {
-        // see Cucumber configuration options below
-    },
+  // ... or Jasmine runner
+  jasmineOpts: {
+    // see Jasmine configuration options below
+  },
 
+  // ... or Mocha runner
+  mochaOpts: {
+    // see Mocha configuration options below
+  },
 
-    // ... or Jasmine runner
-    jasmineOpts: {
-        // see Jasmine configuration options below
-    },
+  runner: "local",
 
-    // ... or Mocha runner
-    mochaOpts: {
-        // see Mocha configuration options below
-    },
-
-    runner: 'local',
-
-    // Any other WebdriverIO configuration
+  // Any other WebdriverIO configuration
 };
 ```
 
@@ -614,45 +665,43 @@ export const config: WebdriverIOConfig = {
 
 ```typescript title="wdio.conf.js"
 export const config = {
+  // Tell WebdriverIO to use Serenity/JS framework
+  framework: "@serenity-js/webdriverio",
 
-    // Tell WebdriverIO to use Serenity/JS framework
-    framework: '@serenity-js/webdriverio',
+  // Serenity/JS configuration
+  serenity: {
+    // Configure Serenity/JS to use the appropriate adapter for your test runner
+    runner: "cucumber",
+    // runner: 'mocha',
+    // runner: 'jasmine',
 
-    // Serenity/JS configuration
-    serenity: {
-        // Configure Serenity/JS to use the appropriate adapter for your test runner
-        runner: 'cucumber',
-        // runner: 'mocha',
-        // runner: 'jasmine',
+    // Register Serenity/JS reporting services, a.k.a. the "stage crew"
+    crew: [
+      "@serenity-js/console-reporter",
+      "@serenity-js/serenity-bdd",
+      ["@serenity-js/core:ArtifactArchiver", { outputDirectory: "target/site/serenity" }],
+      ["@serenity-js/web:Photographer", { strategy: "TakePhotosOfFailures" }],
+    ],
+  },
 
-        // Register Serenity/JS reporting services, a.k.a. the "stage crew"
-        crew: [
-            '@serenity-js/console-reporter',
-            '@serenity-js/serenity-bdd',
-            [ '@serenity-js/core:ArtifactArchiver', { outputDirectory: 'target/site/serenity' } ],
-            [ '@serenity-js/web:Photographer', { strategy: 'TakePhotosOfFailures' } ],
-        ]
-    },
+  // Configure your Cucumber runner
+  cucumberOpts: {
+    // see Cucumber configuration options below
+  },
 
-    // Configure your Cucumber runner
-    cucumberOpts: {
-        // see Cucumber configuration options below
-    },
+  // ... or Jasmine runner
+  jasmineOpts: {
+    // see Jasmine configuration options below
+  },
 
+  // ... or Mocha runner
+  mochaOpts: {
+    // see Mocha configuration options below
+  },
 
-    // ... or Jasmine runner
-    jasmineOpts: {
-        // see Jasmine configuration options below
-    },
+  runner: "local",
 
-    // ... or Mocha runner
-    mochaOpts: {
-        // see Mocha configuration options below
-    },
-
-    runner: 'local',
-
-    // Any other WebdriverIO configuration
+  // Any other WebdriverIO configuration
 };
 ```
 
@@ -660,6 +709,7 @@ export const config = {
 </Tabs>
 
 Learn more about:
+
 - [Serenity/JS Cucumber configuration options](https://serenity-js.org/api/cucumber-adapter/interface/CucumberConfig/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [Serenity/JS Jasmine configuration options](https://serenity-js.org/api/jasmine-adapter/interface/JasmineConfig/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [Serenity/JS Mocha configuration options](https://serenity-js.org/api/mocha-adapter/interface/MochaConfig/?pk_campaign=wdio8&pk_source=webdriver.io)
@@ -671,12 +721,14 @@ Learn more about:
 a Java program downloaded and managed by the [`@serenity-js/serenity-bdd`](https://serenity-js.org/api/serenity-bdd/?pk_campaign=wdio8&pk_source=webdriver.io) module.
 
 To produce Serenity BDD reports, your test suite must:
+
 - download the Serenity BDD CLI, by calling `serenity-bdd update` which caches the CLI `jar` locally
 - produce intermediate Serenity BDD `.json` reports, by registering [`SerenityBDDReporter`](https://serenity-js.org/api/serenity-bdd/class/SerenityBDDReporter/?pk_campaign=wdio8&pk_source=webdriver.io) as per the [configuration instructions](#configuring-serenityjs)
 - invoke the Serenity BDD CLI when you want to produce the report, by calling `serenity-bdd run`
 
 The pattern used by all the [Serenity/JS Project Templates](https://serenity-js.org/handbook/project-templates/?pk_campaign=wdio8&pk_source=webdriver.io#webdriverio) relies
 on using:
+
 - a [`postinstall`](https://docs.npmjs.com/cli/v9/using-npm/scripts#life-cycle-operation-order) NPM script to download the Serenity BDD CLI
 - [`npm-failsafe`](https://www.npmjs.com/package/npm-failsafe) to run the reporting process even if the test suite itself has failed (which is precisely when you need test reports the most...).
 - [`rimraf`](https://www.npmjs.com/package/rimraf) as a convenience method to remove any test reports left over from the previous run
@@ -694,6 +746,7 @@ on using:
 ```
 
 To learn more about the `SerenityBDDReporter`, please consult:
+
 - installation instructions in [`@serenity-js/serenity-bdd` documentation](https://serenity-js.org/api/serenity-bdd/?pk_campaign=wdio8&pk_source=webdriver.io),
 - configuration examples in [`SerenityBDDReporter` API docs](https://serenity-js.org/api/serenity-bdd/class/SerenityBDDReporter/?pk_campaign=wdio8&pk_source=webdriver.io),
 - [Serenity/JS examples on GitHub](https://github.com/serenity-js/serenity-js/tree/main/examples).
@@ -706,36 +759,41 @@ helps your test scenarios capture the business vernacular of your domain, and en
 By default, when you register `@serenity-js/webdriverio` as your WebdriverIO `framework`,
 Serenity/JS configures a default [cast](https://serenity-js.org/api/core/class/Cast/?pk_campaign=wdio8&pk_source=webdriver.io) of [actors](https://serenity-js.org/api/core/class/Actor/?pk_campaign=wdio8&pk_source=webdriver.io),
 where every actor can:
+
 - [`BrowseTheWebWithWebdriverIO`](https://serenity-js.org/api/webdriverio/class/BrowseTheWebWithWebdriverIO/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [`TakeNotes.usingAnEmptyNotepad()`](https://serenity-js.org/api/core/class/TakeNotes/?pk_campaign=wdio8&pk_source=webdriver.io)
 
 This should be enough to help you get started with introducing test scenarios that follow the Screenplay Pattern even to an existing test suite, for example:
 
 ```typescript title="specs/example.spec.ts"
-import { actorCalled } from '@serenity-js/core'
-import { Navigate, Page } from '@serenity-js/web'
-import { Ensure, equals } from '@serenity-js/assertions'
+import { actorCalled } from "@serenity-js/core";
+import { Navigate, Page } from "@serenity-js/web";
+import { Ensure, equals } from "@serenity-js/assertions";
 
-describe('My awesome website', () => {
-    it('can have test scenarios that follow the Screenplay Pattern', async () => {
-        await actorCalled('Alice').attemptsTo(
-            Navigate.to(`https://webdriver.io`),
-            Ensure.that(
-                Page.current().title(),
-                equals(`WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO`)
-            ),
-        )
-    })
+describe("My awesome website", () => {
+  it("can have test scenarios that follow the Screenplay Pattern", async () => {
+    await actorCalled("Alice").attemptsTo(
+      Navigate.to(`https://webdriver.io`),
+      Ensure.that(
+        Page.current().title(),
+        equals(
+          `WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO`,
+        ),
+      ),
+    );
+  });
 
-    it('can have non-Screenplay scenarios too', async () => {
-        await browser.url('https://webdriver.io')
-        await expect(browser)
-            .toHaveTitle('WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO')
-    })
-})
+  it("can have non-Screenplay scenarios too", async () => {
+    await browser.url("https://webdriver.io");
+    await expect(browser).toHaveTitle(
+      "WebdriverIO · Next-gen browser and mobile automation test framework for Node.js | WebdriverIO",
+    );
+  });
+});
 ```
 
 To learn more about the Screenplay Pattern, check out:
+
 - [The Screenplay Pattern](https://serenity-js.org/handbook/design/screenplay-pattern/?pk_campaign=wdio8&pk_source=webdriver.io)
 - [Web testing with Serenity/JS](https://serenity-js.org/handbook/web-testing/?pk_campaign=wdio8&pk_source=webdriver.io)
 - ["BDD in Action, Second Edition"](https://www.manning.com/books/bdd-in-action-second-edition)

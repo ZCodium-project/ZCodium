@@ -73,7 +73,10 @@ describe("desktop e2e renderer bridge root hook", () => {
   });
 
   it("treats a falsy non-null beforeSession rejection as a failure", async () => {
-    const result = await runMochaWithRendererPreflight(async () => {}, () => "");
+    const result = await runMochaWithRendererPreflight(
+      async () => {},
+      () => "",
+    );
 
     expect(result.events).toEqual([]);
     expect(result.failureCount).toBe(1);

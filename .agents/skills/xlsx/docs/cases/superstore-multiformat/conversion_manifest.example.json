@@ -11,20 +11,9 @@
     "csv_to_xlsx_xml_template": "{{DATA_DIR}}/agents/agent4/workspace/superstore_conversion_outputs/superstore_orders_from_csv_verified.xlsx"
   },
   "type_rules": {
-    "date": [
-      "Order Date",
-      "Ship Date"
-    ],
-    "integer": [
-      "Postal Code",
-      "Quantity",
-      "Row ID"
-    ],
-    "number": [
-      "Discount",
-      "Profit",
-      "Sales"
-    ],
+    "date": ["Order Date", "Ship Date"],
+    "integer": ["Postal Code", "Quantity", "Row ID"],
+    "number": ["Discount", "Profit", "Sales"],
     "text": [
       "Category",
       "City",

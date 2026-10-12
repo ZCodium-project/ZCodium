@@ -4,17 +4,14 @@ import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-export const PROVIDER_READINESS_HISTORY_SESSION_ID =
-  "sess_e2e_provider_readiness_history";
-export const PROVIDER_READINESS_HISTORY_TITLE =
-  "E2E_PROVIDER_READINESS_HISTORY 可读历史";
+export const PROVIDER_READINESS_HISTORY_SESSION_ID = "sess_e2e_provider_readiness_history";
+export const PROVIDER_READINESS_HISTORY_TITLE = "E2E_PROVIDER_READINESS_HISTORY 可读历史";
 export const PROVIDER_READINESS_HISTORY_USER_TEXT =
   "E2E_PROVIDER_READINESS_HISTORY_USER 已持久化的用户消息";
 export const PROVIDER_READINESS_HISTORY_ASSISTANT_TEXT =
   "E2E_PROVIDER_READINESS_HISTORY_ASSISTANT 已持久化的助手回复";
 export const CONTEXT_WINDOW_COLD_RESUME_PROVIDER_ID = "context-provider";
-export const CONTEXT_WINDOW_COLD_RESUME_PROVIDER_NAME =
-  "Context Window Cold Resume E2E";
+export const CONTEXT_WINDOW_COLD_RESUME_PROVIDER_NAME = "Context Window Cold Resume E2E";
 export const CONTEXT_WINDOW_COLD_RESUME_MODEL_ID = "model-1m";
 export const CONTEXT_WINDOW_COLD_RESUME_MAX_TOKENS = 1_000_000;
 export const CONTEXT_WINDOW_COLD_RESUME_MAX_OUTPUT_TOKENS = 64_000;
@@ -38,18 +35,17 @@ export interface ProviderReadinessHistoryFixture {
   userText: string;
 }
 
-const DEFAULT_PROVIDER_READINESS_HISTORY_FIXTURE: ProviderReadinessHistoryFixture =
-  {
-    assistantInputTokens: 0,
-    assistantOutputTokens: 0,
-    assistantText: PROVIDER_READINESS_HISTORY_ASSISTANT_TEXT,
-    modelId: "missing-model",
-    runtimeProviderId: "missing-provider",
-    sessionId: PROVIDER_READINESS_HISTORY_SESSION_ID,
-    taskProviderId: "glm",
-    title: PROVIDER_READINESS_HISTORY_TITLE,
-    userText: PROVIDER_READINESS_HISTORY_USER_TEXT,
-  };
+const DEFAULT_PROVIDER_READINESS_HISTORY_FIXTURE: ProviderReadinessHistoryFixture = {
+  assistantInputTokens: 0,
+  assistantOutputTokens: 0,
+  assistantText: PROVIDER_READINESS_HISTORY_ASSISTANT_TEXT,
+  modelId: "missing-model",
+  runtimeProviderId: "missing-provider",
+  sessionId: PROVIDER_READINESS_HISTORY_SESSION_ID,
+  taskProviderId: "glm",
+  title: PROVIDER_READINESS_HISTORY_TITLE,
+  userText: PROVIDER_READINESS_HISTORY_USER_TEXT,
+};
 
 /**
  * 同时预置 Agent session DB 与 App tasks-index。
@@ -64,13 +60,7 @@ export function seedProviderReadinessHistoryFixture(
   const history = options.history ?? DEFAULT_PROVIDER_READINESS_HISTORY_FIXTURE;
   execFileSync(
     process.execPath,
-    [
-      options.cliEntryPoint,
-      "--cwd",
-      options.workspacePath,
-      "app-server",
-      "--stdio",
-    ],
+    [options.cliEntryPoint, "--cwd", options.workspacePath, "app-server", "--stdio"],
     {
       encoding: "utf8",
       env: {
@@ -85,17 +75,9 @@ export function seedProviderReadinessHistoryFixture(
     },
   );
 
-  const databasePath = join(
-    options.e2eHomeDir,
-    ".zcode",
-    "cli",
-    "db",
-    "db.sqlite",
-  );
+  const databasePath = join(options.e2eHomeDir, ".zcode", "cli", "db", "db.sqlite");
   if (!existsSync(databasePath)) {
-    throw new Error(
-      `provider readiness history fixture 没有初始化 CLI DB: ${databasePath}`,
-    );
+    throw new Error(`provider readiness history fixture 没有初始化 CLI DB: ${databasePath}`);
   }
 
   const database = new DatabaseSync(databasePath);
@@ -121,10 +103,7 @@ function writeHistorySession(
   const createdAt = Date.now() - 60_000;
   const assistantCreatedAt = createdAt + 1_000;
   const completedAt = assistantCreatedAt + 500;
-  const workspaceHash = createHash("sha256")
-    .update(workspacePath)
-    .digest("hex")
-    .slice(0, 12);
+  const workspaceHash = createHash("sha256").update(workspacePath).digest("hex").slice(0, 12);
   const userMessageId = `msg_user_${history.sessionId}`;
   const assistantMessageId = `msg_assistant_${history.sessionId}`;
 

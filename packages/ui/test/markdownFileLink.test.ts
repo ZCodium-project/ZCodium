@@ -54,9 +54,7 @@ describe("parseMarkdownFileLinkTarget", () => {
 
   it("decodes uri-encoded path text while preserving line suffixes", () => {
     expect(
-      parseMarkdownFileLinkTarget(
-        "/Users/dev/ZCodeProject/323/Auto%20Snake/src/game/engine.ts:42",
-      ),
+      parseMarkdownFileLinkTarget("/Users/dev/ZCodeProject/323/Auto%20Snake/src/game/engine.ts:42"),
     ).toEqual({
       path: "/Users/dev/ZCodeProject/323/Auto Snake/src/game/engine.ts",
       lineNumber: 42,

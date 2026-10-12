@@ -314,8 +314,7 @@ describe("ResolveWorkflowQuestionToolCallBlock body 分支", () => {
   });
 
   it("结构化拒绝走失败样式（status failed）", () => {
-    const refusal =
-      "workflow_question_already_resolved: this question was already answered.";
+    const refusal = "workflow_question_already_resolved: this question was already answered.";
     const html = renderResolve(
       { input: { question_id: "dwfq-run1-1", answer: "跳过它。" }, status: "failed" },
       { errorText: refusal },

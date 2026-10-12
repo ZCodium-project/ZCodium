@@ -154,8 +154,10 @@ vi.mock("@/i18n/IntlProvider.js", () => ({
           "chat.summaryPanel.duration.minutes": "分",
           "chat.summaryPanel.duration.seconds": "秒",
         };
-        return durationUnits[descriptor.id] ??
-          (values ? `${descriptor.id} ${Object.values(values).join("/")}` : descriptor.id);
+        return (
+          durationUnits[descriptor.id] ??
+          (values ? `${descriptor.id} ${Object.values(values).join("/")}` : descriptor.id)
+        );
       },
     },
     locale: "zh-CN",
@@ -1309,9 +1311,7 @@ describe("ConversationStatusPanel", () => {
     });
 
     expect(html).toContain('data-status-section-trigger="workflow"');
-    const workflow = statusPanelCapture.collapsibles.find(
-      (entry) => entry.section === "workflow",
-    );
+    const workflow = statusPanelCapture.collapsibles.find((entry) => entry.section === "workflow");
     expect(workflow?.open).toBe(true);
     workflow?.onOpenChange?.(false);
     expect(onWorkflowSectionOpenChange).toHaveBeenCalledWith(false);
@@ -1667,9 +1667,7 @@ describe("ConversationStatusPanel", () => {
     expect(html).toContain('data-child-session-id="agent-older"');
     expect(html).toContain('data-work-id="agent-control-work"');
     expect(html).toContain('data-work-status="running"');
-    expect(html).toContain(
-      'data-testid="v4-background-work-item-agent-control-work"',
-    );
+    expect(html).toContain('data-testid="v4-background-work-item-agent-control-work"');
     expect(html).toContain('data-status-section="terminal"');
     expect(html).toContain('data-status-section="agent"');
     expect(html).toContain("chat.statusPanel.terminals");
@@ -1783,9 +1781,7 @@ describe("ConversationStatusPanel", () => {
     expect(html).toContain('data-side="left"');
     expect(html).toContain('data-align="start"');
     expect(html).toContain('data-side-offset="4"');
-    expect(html).toContain(
-      "flex max-h-[min(24rem,calc(100dvh-2rem))] min-w-0 flex-col",
-    );
+    expect(html).toContain("flex max-h-[min(24rem,calc(100dvh-2rem))] min-w-0 flex-col");
     expect(html).toContain("min-h-0 space-y-0 overflow-y-auto pr-1");
     expect(html).toContain("chat.statusPanel.todoWaitingFold 5");
     expect(html).toContain(

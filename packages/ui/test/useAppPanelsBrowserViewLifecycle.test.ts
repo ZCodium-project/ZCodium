@@ -602,9 +602,9 @@ describe("useAppPanels BrowserView lifecycle", () => {
       sessionId: "sess-a",
     });
     // 授权拿到后 UI 壳必须真的移除（tab 清空后 sidePaneState 本身会归空）。
-    expect((result.current.sidePaneState?.tabs ?? []).filter((tab) => tab.type === "browser")).toEqual(
-      [],
-    );
+    expect(
+      (result.current.sidePaneState?.tabs ?? []).filter((tab) => tab.type === "browser"),
+    ).toEqual([]);
     unmount();
   });
 });

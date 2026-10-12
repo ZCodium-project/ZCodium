@@ -26,14 +26,14 @@
 
 ## 删除 tombstone 的边界裁决
 
-| 边界 | 裁决 | 剪枝理由 |
-| --- | --- | --- |
-| 数据所有权 | CLI session store 继续拥有会话内容；tasks-index `deleted` 拥有任务列表不可见性 | 删除归档任务不等价于物理擦除会话存储，避免扩大数据破坏范围 |
-| 列表 surface | regular、pinned、archived、timeline、workspace、grouped 全部排除 deleted | `deleted` 是所有列表 kind 之前的负向 guard，不按 kind 做重复实现 |
-| 归档对照 | `archived=1, deleted=0` 仍只在归档列表显示 | 防止修复把正常归档一并隐藏 |
-| session type | interactive、fork、workflow parent 共用同一 deleted guard；side chat/subagent/workflow child 仍由 task-type guard 排除 | task type 决定能否成为 task，deleted 决定已成 task 后是否仍可见，两个维度正交 |
-| client/delivery | desktop continuous 与 mobile replayable 收敛到同一最终 membership | delivery 只改变事实到达方式，不新建第二份 deleted 状态 |
-| workspace | 读取和事件继续使用 `workspaceIdentity?.trim() || workspacePath` | 同 path 的远程 workspace 不能串 tombstone |
+| 边界            | 裁决                                                                                                                   | 剪枝理由                                                                      |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------- | ----------------------------------------- |
+| 数据所有权      | CLI session store 继续拥有会话内容；tasks-index `deleted` 拥有任务列表不可见性                                         | 删除归档任务不等价于物理擦除会话存储，避免扩大数据破坏范围                    |
+| 列表 surface    | regular、pinned、archived、timeline、workspace、grouped 全部排除 deleted                                               | `deleted` 是所有列表 kind 之前的负向 guard，不按 kind 做重复实现              |
+| 归档对照        | `archived=1, deleted=0` 仍只在归档列表显示                                                                             | 防止修复把正常归档一并隐藏                                                    |
+| session type    | interactive、fork、workflow parent 共用同一 deleted guard；side chat/subagent/workflow child 仍由 task-type guard 排除 | task type 决定能否成为 task，deleted 决定已成 task 后是否仍可见，两个维度正交 |
+| client/delivery | desktop continuous 与 mobile replayable 收敛到同一最终 membership                                                      | delivery 只改变事实到达方式，不新建第二份 deleted 状态                        |
+| workspace       | 读取和事件继续使用 `workspaceIdentity?.trim()                                                                          |                                                                               | workspacePath` | 同 path 的远程 workspace 不能串 tombstone |
 
 确认轨迹：用户报告“之前归档后删除的对话重启后都出来了”，并确认直接修改。采用保留 CLI 会话内容、增加 deleted membership 字段的方案；不执行物理删除。
 

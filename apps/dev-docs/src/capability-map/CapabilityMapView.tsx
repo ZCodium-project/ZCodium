@@ -52,8 +52,7 @@ function CapabilityMapCanvas() {
         }
         return (
           edgeScope === "all" ||
-          nodeById.get(edge.source)?.groupId !==
-            nodeById.get(edge.target)?.groupId
+          nodeById.get(edge.source)?.groupId !== nodeById.get(edge.target)?.groupId
         );
       }),
     [edgeScope, enabledRelations],
@@ -93,83 +92,71 @@ function CapabilityMapCanvas() {
     if (!layout) {
       return [];
     }
-    const systems: CapabilitySystemFlowNode[] = layout.systems.map(
-      (systemLayout) => {
-        const system = systemById.get(systemLayout.id);
-        if (!system) {
-          throw new Error(`未知顶层区域 ${systemLayout.id}`);
-        }
-        const systemNodeIds = capabilityNodes
-          .filter((node) => groupById.get(node.groupId)?.systemId === system.id)
-          .map((node) => node.id);
-        const active =
-          !selection ||
-          systemNodeIds.some((nodeId) => connectedNodeIds.has(nodeId));
-        const hasSearchMatch =
-          !normalizedQuery ||
-          systemNodeIds.some((nodeId) => matchingNodeIds.has(nodeId));
-        return {
-          id: systemFlowNodeId(system.id),
-          type: "capability-system",
-          position: systemLayout.position,
-          style: {
-            height: systemLayout.height,
-            width: systemLayout.width,
-            zIndex: -1,
-          },
-          data: {
-            system,
-            dimmed: !active || !hasSearchMatch,
-          },
-          draggable: false,
-          selectable: false,
-        };
-      },
-    );
-    const groups: CapabilityGroupFlowNode[] = layout.groups.map(
-      (groupLayout) => {
-        const group = groupById.get(groupLayout.id);
-        if (!group) {
-          throw new Error(`未知能力群 ${groupLayout.id}`);
-        }
-        const groupNodeIds = capabilityNodes
-          .filter((node) => node.groupId === group.id)
-          .map((node) => node.id);
-        const active =
-          !selection ||
-          groupNodeIds.some((nodeId) => connectedNodeIds.has(nodeId));
-        const hasSearchMatch =
-          !normalizedQuery ||
-          groupNodeIds.some((nodeId) => matchingNodeIds.has(nodeId));
-        return {
-          id: groupFlowNodeId(group.id),
-          type: "capability-group",
-          parentId: systemFlowNodeId(group.systemId),
-          extent: "parent",
-          position: groupLayout.position,
-          style: {
-            height: groupLayout.height,
-            width: groupLayout.width,
-            zIndex: 1,
-          },
-          data: {
-            group,
-            selected: selection?.kind === "group" && selection.id === group.id,
-            dimmed: !active || !hasSearchMatch,
-          },
-          draggable: false,
-          selectable: true,
-        };
-      },
-    );
+    const systems: CapabilitySystemFlowNode[] = layout.systems.map((systemLayout) => {
+      const system = systemById.get(systemLayout.id);
+      if (!system) {
+        throw new Error(`未知顶层区域 ${systemLayout.id}`);
+      }
+      const systemNodeIds = capabilityNodes
+        .filter((node) => groupById.get(node.groupId)?.systemId === system.id)
+        .map((node) => node.id);
+      const active = !selection || systemNodeIds.some((nodeId) => connectedNodeIds.has(nodeId));
+      const hasSearchMatch =
+        !normalizedQuery || systemNodeIds.some((nodeId) => matchingNodeIds.has(nodeId));
+      return {
+        id: systemFlowNodeId(system.id),
+        type: "capability-system",
+        position: systemLayout.position,
+        style: {
+          height: systemLayout.height,
+          width: systemLayout.width,
+          zIndex: -1,
+        },
+        data: {
+          system,
+          dimmed: !active || !hasSearchMatch,
+        },
+        draggable: false,
+        selectable: false,
+      };
+    });
+    const groups: CapabilityGroupFlowNode[] = layout.groups.map((groupLayout) => {
+      const group = groupById.get(groupLayout.id);
+      if (!group) {
+        throw new Error(`未知能力群 ${groupLayout.id}`);
+      }
+      const groupNodeIds = capabilityNodes
+        .filter((node) => node.groupId === group.id)
+        .map((node) => node.id);
+      const active = !selection || groupNodeIds.some((nodeId) => connectedNodeIds.has(nodeId));
+      const hasSearchMatch =
+        !normalizedQuery || groupNodeIds.some((nodeId) => matchingNodeIds.has(nodeId));
+      return {
+        id: groupFlowNodeId(group.id),
+        type: "capability-group",
+        parentId: systemFlowNodeId(group.systemId),
+        extent: "parent",
+        position: groupLayout.position,
+        style: {
+          height: groupLayout.height,
+          width: groupLayout.width,
+          zIndex: 1,
+        },
+        data: {
+          group,
+          selected: selection?.kind === "group" && selection.id === group.id,
+          dimmed: !active || !hasSearchMatch,
+        },
+        draggable: false,
+        selectable: true,
+      };
+    });
     const items: CapabilityItemFlowNode[] = layout.nodes.map((nodeLayout) => {
       const capability = nodeById.get(nodeLayout.id);
       if (!capability) {
         throw new Error(`未知能力节点 ${nodeLayout.id}`);
       }
-      const searchMatch = normalizedQuery
-        ? matchingNodeIds.has(capability.id)
-        : false;
+      const searchMatch = normalizedQuery ? matchingNodeIds.has(capability.id) : false;
       return {
         id: capability.id,
         type: "capability-item",
@@ -183,8 +170,7 @@ function CapabilityMapCanvas() {
         },
         data: {
           capability,
-          selected:
-            selection?.kind === "node" && selection.id === capability.id,
+          selected: selection?.kind === "node" && selection.id === capability.id,
           searchMatch,
           dimmed:
             (Boolean(selection) && !connectedNodeIds.has(capability.id)) ||

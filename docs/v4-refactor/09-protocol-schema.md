@@ -68,9 +68,7 @@ interface TopicFrame<S, D> {
   fromSeq: number;
   toSeq: number;
   sentAt: number;
-  payload:
-    | { kind: "snapshot"; snapshot: S }
-    | { kind: "deltas"; deltas: D[] };
+  payload: { kind: "snapshot"; snapshot: S } | { kind: "deltas"; deltas: D[] };
 }
 
 type TopicWireFrame<S, D> =
@@ -121,9 +119,7 @@ interface ConversationSnapshot {
   rows: RowsWindow;
 }
 
-type ActionAvailability =
-  | { allowed: true }
-  | { allowed: false; reasonCode: string };
+type ActionAvailability = { allowed: true } | { allowed: false; reasonCode: string };
 
 interface SessionActionAvailability {
   fork: ActionAvailability; // session/global operation lock；目标资格仍看 row.actions.canFork
@@ -148,11 +144,11 @@ UI 展示 fork 的条件来自 `availability.fork` 与目标行 `actions.canFork
 
 ```ts
 interface ConversationInputIntent {
-  sourceCommandId: string;      // 原始提交 commandId，贯穿所有后续事实
-  queueItemId: string;          // admission 时分配，edit/reorder/reserve/drain 均不变
+  sourceCommandId: string; // 原始提交 commandId，贯穿所有后续事实
+  queueItemId: string; // admission 时分配，edit/reorder/reserve/drain 均不变
   clientId: string;
   kind: "sendText" | "sendGoalCommand";
-  text: string;                 // 原文，不存解析后摘要替代值
+  text: string; // 原文，不存解析后摘要替代值
   attachments: AttachmentRef[]; // 无附件为 []，避免沿途 undefined 丢字段
   delivery: {
     requested: "auto" | "startNow" | "queue" | "guide";
@@ -160,7 +156,7 @@ interface ConversationInputIntent {
     fallbackReasonCode?: string;
   };
   order: {
-    admissionSeq: number;       // CLI 串行 admission 顺序
+    admissionSeq: number; // CLI 串行 admission 顺序
     queuePosition?: number;
   };
   steer: {

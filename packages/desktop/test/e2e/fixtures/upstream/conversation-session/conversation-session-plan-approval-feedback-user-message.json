@@ -16,18 +16,13 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_APPROVAL_FEEDBACK_USER_MESSAGE"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_APPROVAL_FEEDBACK_USER_MESSAGE"],
         "bodyIncludes": [
           "E2E_PLAN_APPROVAL_FEEDBACK_USER_MESSAGE",
           "E2E_PLAN_APPROVAL_ENTER_PLAN",
           "E2E_PLAN_APPROVAL_EXIT_PLAN"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -51,14 +46,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_PLAN_APPROVAL_EXIT_PLAN",
-          "toolu_e2e_plan_approval_enter_plan_mode"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_PLAN_APPROVAL_EXIT_PLAN", "toolu_e2e_plan_approval_enter_plan_mode"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -84,19 +73,14 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_APPROVAL_FEEDBACK"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_APPROVAL_FEEDBACK"],
         "bodyIncludes": [
           "E2E_PLAN_APPROVAL_FEEDBACK",
           "E2E_PLAN_APPROVAL_EXIT_PLAN",
           "toolu_e2e_plan_approval_exit_plan_mode",
           "The plan was not approved by the user."
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

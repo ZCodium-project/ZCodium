@@ -39,10 +39,7 @@ describe("feedback contact preference", () => {
 
     persistFeedbackContactPreference("  user@example.com  ", storage);
 
-    expect(storage.setItem).toHaveBeenCalledWith(
-      "zcode.feedback.contact",
-      "user@example.com",
-    );
+    expect(storage.setItem).toHaveBeenCalledWith("zcode.feedback.contact", "user@example.com");
     expect(readFeedbackContactPreference(storage)).toBe("user@example.com");
   });
 
@@ -52,10 +49,7 @@ describe("feedback contact preference", () => {
     const nextValue = rememberFeedbackContactInput("  user@example.com  ", storage);
 
     expect(nextValue).toBe("  user@example.com  ");
-    expect(storage.setItem).toHaveBeenCalledWith(
-      "zcode.feedback.contact",
-      "user@example.com",
-    );
+    expect(storage.setItem).toHaveBeenCalledWith("zcode.feedback.contact", "user@example.com");
     expect(readFeedbackContactPreference(storage)).toBe("user@example.com");
   });
 

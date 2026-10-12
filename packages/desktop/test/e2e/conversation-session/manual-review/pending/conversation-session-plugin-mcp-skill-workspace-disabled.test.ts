@@ -1,7 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { TID_SETTINGS_BACK_BUTTON } from "@zcode/shared";
-import { clearAppData, clickTestIdByDom, getE2EAppDataPaths } from "../../../helpers/desktop-app.js";
+import {
+  clearAppData,
+  clickTestIdByDom,
+  getE2EAppDataPaths,
+} from "../../../helpers/desktop-app.js";
 import {
   getPluginList,
   openPluginManagementSettings,

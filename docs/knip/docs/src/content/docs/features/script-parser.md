@@ -119,7 +119,7 @@ If the `bun` dependency is imported in source code, Knip considers the contents
 of `$` template tags to be scripts:
 
 ```ts
-import { $ } from 'bun';
+import { $ } from "bun";
 await $`bun boxen I ❤ unicorns`;
 await $`boxen I ❤ unicorns`;
 ```
@@ -133,7 +133,7 @@ If the `execa` dependency is imported in source code, Knip considers the
 contents of `$` template tags to be scripts:
 
 ```ts
-await $({ stdio: 'inherit' })`c8 node hydrate.js`;
+await $({ stdio: "inherit" })`c8 node hydrate.js`;
 ```
 
 Parsing the script results in `hydrate.js` added as an entry file and the `c8`

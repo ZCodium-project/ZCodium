@@ -10,11 +10,7 @@ import {
   TID_WORKSPACE_FILE_TREE_ROW,
   testId,
 } from "@zcode/shared";
-import {
-  clearAppData,
-  clickTestIdByDom,
-  waitForTestIdByDom,
-} from "../helpers/desktop-app.js";
+import { clearAppData, clickTestIdByDom, waitForTestIdByDom } from "../helpers/desktop-app.js";
 import { prepareV4ConversationE2E } from "../helpers/v4-conversation.js";
 import {
   connectSSHWorkspace,
@@ -35,9 +31,7 @@ describe(`${CASE_MARKER}: SSH 远端开发基础能力 P0`, () => {
 
   after(async () => {
     if (config && isCaseFixturePath(fixturePath, config.workspacePaths[0])) {
-      await runSSHCommand(config, `rm -rf -- '${fixturePath}'`).catch(
-        () => undefined,
-      );
+      await runSSHCommand(config, `rm -rf -- '${fixturePath}'`).catch(() => undefined);
     }
     await browser.electron.restoreAllMocks();
     await clearAppData();
@@ -47,11 +41,7 @@ describe(`${CASE_MARKER}: SSH 远端开发基础能力 P0`, () => {
     this.timeout(20 * 60_000);
     config = readSSHRuntimeConfig(CASE_MARKER);
     // Bugfix：远端 E2E fixture 也必须落在专用隔离根目录，不能写入系统临时目录。
-    fixturePath = posix.join(
-      config.workspacePaths[0],
-      ".zcode-e2e",
-      `ssh-p0-dev-${Date.now()}`,
-    );
+    fixturePath = posix.join(config.workspacePaths[0], ".zcode-e2e", `ssh-p0-dev-${Date.now()}`);
     if (!isCaseFixturePath(fixturePath, config.workspacePaths[0])) {
       throw new Error(`${CASE_MARKER}: 非法远端 fixture path`);
     }
@@ -99,13 +89,10 @@ describe(`${CASE_MARKER}: SSH 远端开发基础能力 P0`, () => {
   });
 });
 
-async function assertRemoteFileTreeAndPreview(
-  workspacePath: string,
-): Promise<void> {
-  await clickTestIdByDom(
-    testId(TID_WORKSPACE_FILE_TREE_BUTTON, workspacePath),
-    { timeoutMsg: `${CASE_MARKER}: 没有找到远端文件树入口` },
-  );
+async function assertRemoteFileTreeAndPreview(workspacePath: string): Promise<void> {
+  await clickTestIdByDom(testId(TID_WORKSPACE_FILE_TREE_BUTTON, workspacePath), {
+    timeoutMsg: `${CASE_MARKER}: 没有找到远端文件树入口`,
+  });
   await waitForTestIdByDom(TID_WORKSPACE_FILE_TREE_PANEL, {
     timeoutMsg: `${CASE_MARKER}: 远端文件树没有打开`,
   });
@@ -119,15 +106,11 @@ async function assertRemoteFileTreeAndPreview(
     () =>
       browser.execute(
         (previewTestId, marker) => {
-          const preview = document.querySelector<HTMLElement>(
-            `[data-testid="${previewTestId}"]`,
-          );
+          const preview = document.querySelector<HTMLElement>(`[data-testid="${previewTestId}"]`);
           if (!preview) return false;
           const fragments = [preview.innerText, preview.textContent ?? ""];
           const visit = (root: ParentNode) => {
-            for (const element of Array.from(
-              root.querySelectorAll<HTMLElement>("*"),
-            )) {
+            for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
               if (!element.shadowRoot) continue;
               fragments.push(element.shadowRoot.textContent ?? "");
               visit(element.shadowRoot);
@@ -190,14 +173,9 @@ async function assertRemoteTerminal(workspacePath: string): Promise<void> {
       browser.execute(
         (terminalTestId, marker, expectedPath) => {
           const text =
-            document.querySelector<HTMLElement>(
-              `[data-testid="${terminalTestId}"] .xterm-rows`,
-            )?.textContent ?? "";
-          return (
-            text.includes(marker) &&
-            text.includes(expectedPath) &&
-            text.includes("Linux")
-          );
+            document.querySelector<HTMLElement>(`[data-testid="${terminalTestId}"] .xterm-rows`)
+              ?.textContent ?? "";
+          return text.includes(marker) && text.includes(expectedPath) && text.includes("Linux");
         },
         TID_TERMINAL,
         TERMINAL_MARKER,
@@ -231,10 +209,7 @@ async function assertRemoteGitStatus(): Promise<void> {
   await browser.waitUntil(
     async () => {
       for (const item of await $$('[role="menuitem"]')) {
-        if (
-          (await item.isDisplayed()) &&
-          /审查|Review/i.test(await item.getText())
-        ) {
+        if ((await item.isDisplayed()) && /审查|Review/i.test(await item.getText())) {
           await item.click();
           reviewItemClicked = true;
           return true;
@@ -255,12 +230,9 @@ async function assertRemoteGitStatus(): Promise<void> {
   await browser.waitUntil(
     () =>
       browser.execute((gitPaneTestId) => {
-        const pane = document.querySelector<HTMLElement>(
-          `[data-testid="${gitPaneTestId}"]`,
-        );
+        const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
         return (
-          pane?.innerText.includes("README.txt") &&
-          pane.innerText.includes("terminal-created.txt")
+          pane?.innerText.includes("README.txt") && pane.innerText.includes("terminal-created.txt")
         );
       }, TID_GIT_PANE),
     {
@@ -275,9 +247,9 @@ async function clickWorkspaceFileTreeRow(path: string): Promise<void> {
   await browser.waitUntil(
     () =>
       browser.execute((currentTestId) => {
-        const row = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === currentTestId);
+        const row = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+          (candidate) => candidate.dataset.testid === currentTestId,
+        );
         row?.click();
         return Boolean(row);
       }, rowTestId),
@@ -293,9 +265,9 @@ async function waitForWorkspaceFileTreeRow(path: string): Promise<void> {
     () =>
       browser.execute(
         (currentTestId) =>
-          Array.from(
-            document.querySelectorAll<HTMLElement>("[data-testid]"),
-          ).some((candidate) => candidate.dataset.testid === currentTestId),
+          Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).some(
+            (candidate) => candidate.dataset.testid === currentTestId,
+          ),
         testId(TID_WORKSPACE_FILE_TREE_ROW, path),
       ),
     {

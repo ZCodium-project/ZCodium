@@ -9,7 +9,11 @@ import { ControlRequestError } from "./controlError.js";
 type DistributedOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 export type ControlRequestInput = DistributedOmit<ControlRequest, "id">;
 
-export async function requestControl(endpoint: string, request: ControlRequestInput, timeoutMs = 10_000): Promise<unknown> {
+export async function requestControl(
+  endpoint: string,
+  request: ControlRequestInput,
+  timeoutMs = 10_000,
+): Promise<unknown> {
   const id = randomUUID();
   const socket = connect(endpoint);
   const decoder = new JsonLineDecoder();
@@ -32,11 +36,14 @@ export async function requestControl(endpoint: string, request: ControlRequestIn
         clearTimeout(timeout);
         socket.end();
         if (parsed.ok) resolve(parsed.result);
-        else reject(new ControlRequestError(
-          parsed.error?.code ?? "request-failed",
-          parsed.error?.message ?? "Supervisor request failed",
-          parsed.error?.retryable,
-        ));
+        else
+          reject(
+            new ControlRequestError(
+              parsed.error?.code ?? "request-failed",
+              parsed.error?.message ?? "Supervisor request failed",
+              parsed.error?.retryable,
+            ),
+          );
       } catch (error) {
         clearTimeout(timeout);
         socket.destroy();

@@ -38,13 +38,13 @@ Account Provider Resolver 必须集中生成状态结果，UI、Registry 和 Mod
 
 ```ts
 {
-  availability, // available | pending | unavailable | unknown
-  entitled,     // 当前是否已经可以使用该账号权益
-  effectiveAt,  // 待生效时刻（没有则为空）
-  current,      // 当前 Family 是否选中了该连接方式
-  models,       // 账号返回的模型成员
-  executable,   // 是否存在可执行模型
-  selectable    // 是否可以进入当前模型选择器
+  (availability, // available | pending | unavailable | unknown
+    entitled, // 当前是否已经可以使用该账号权益
+    effectiveAt, // 待生效时刻（没有则为空）
+    current, // 当前 Family 是否选中了该连接方式
+    models, // 账号返回的模型成员
+    executable, // 是否存在可执行模型
+    selectable); // 是否可以进入当前模型选择器
 }
 ```
 

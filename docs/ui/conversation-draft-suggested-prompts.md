@@ -235,14 +235,14 @@ Desktop 中每次点击推荐 Prompt 模板（包括普通 Prompt 预填、Autom
 `reportAppTelemetryEvent()` 上报一次产品埋点。Web 和手机远控本轮只保留既有 UI 行为，不调用该埋点；
 两端真实上报链路后续单独补齐。事件固定为：
 
-| 字段 | 值 / 口径 |
-| --- | --- |
-| `elementName` | `prompt_template_ck` |
-| `eventRegion` | `app.session` |
-| `eventType` | `ck` |
-| `eventText` | 当前界面语言下用户实际看到的模板名称 |
-| `eventExtraDetail.template_id` | Client Scenes prompt item 的 `item.id`，作为跨语言和改名稳定的统计维度 |
-| `eventExtraDetail.template_prompt` | 当前界面语言解析后的完整 Prompt；不包含用户后续编辑内容 |
+| 字段                               | 值 / 口径                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `elementName`                      | `prompt_template_ck`                                                   |
+| `eventRegion`                      | `app.session`                                                          |
+| `eventType`                        | `ck`                                                                   |
+| `eventText`                        | 当前界面语言下用户实际看到的模板名称                                   |
+| `eventExtraDetail.template_id`     | Client Scenes prompt item 的 `item.id`，作为跨语言和改名稳定的统计维度 |
+| `eventExtraDetail.template_prompt` | 当前界面语言解析后的完整 Prompt；不包含用户后续编辑内容                |
 
 `eventExtraDetail` 严格只包含 `template_id` 和 `template_prompt`，不上传 `template_name`、
 `template_action`、`talkId` 或 `messageId`。点击埋点在点击处理开始时触发，并与异步 Plugin 操作、导航

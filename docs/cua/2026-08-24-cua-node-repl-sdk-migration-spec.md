@@ -24,7 +24,7 @@ const computerUseRoot =
   process.env.ZCODE_PLUGIN_ROOT ??
   process.env.CLAUDE_PLUGIN_ROOT;
 const { setupComputerUseRuntime } = await import(
-  pathToFileURL(join(computerUseRoot, "scripts", "computer-use-client.mjs")).href,
+  pathToFileURL(join(computerUseRoot, "scripts", "computer-use-client.mjs")).href
 );
 
 await setupComputerUseRuntime({ globals: globalThis });

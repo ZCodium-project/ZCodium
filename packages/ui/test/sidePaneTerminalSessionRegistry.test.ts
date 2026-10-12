@@ -79,9 +79,7 @@ describe("sidePaneTerminalSessionRegistry", () => {
     registry.detachDom("t1");
     expect(entry.hostEl.parentElement).not.toBe(host);
     // hostEl 应回到隐藏暂存容器
-    expect(
-      entry.hostEl.parentElement?.getAttribute("data-side-pane-terminal-stash"),
-    ).toBe("");
+    expect(entry.hostEl.parentElement?.getAttribute("data-side-pane-terminal-stash")).toBe("");
   });
 
   it("detachDom 不删 entry —— 跨 workspace 切换保活的核心", () => {

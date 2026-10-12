@@ -92,15 +92,13 @@ async function submitCustomElicitationAnswer(answer: string) {
   const clicked = (await browser.execute(() => {
     const normalizeText = (value: string | null | undefined) =>
       (value ?? "").replace(/\u00a0/g, " ").trim();
-    const footer = document.querySelector<HTMLElement>(
-      '[data-elicitation-dialog-footer="true"]',
+    const footer = document.querySelector<HTMLElement>('[data-elicitation-dialog-footer="true"]');
+    const button = Array.from(footer?.querySelectorAll<HTMLButtonElement>("button") ?? []).find(
+      (candidate) => {
+        const text = normalizeText(candidate.textContent);
+        return text === "Submit" || text === "提交";
+      },
     );
-    const button = Array.from(
-      footer?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-    ).find((candidate) => {
-      const text = normalizeText(candidate.textContent);
-      return text === "Submit" || text === "提交";
-    });
     button?.click();
     return Boolean(button);
   })) as boolean;
@@ -112,17 +110,12 @@ function getElicitationDialogText() {
     const normalizeText = (value: string | null | undefined) =>
       (value ?? "").replace(/\u00a0/g, " ").trim();
     return normalizeText(
-      document.querySelector<HTMLElement>(
-        '[data-elicitation-dialog-body="true"]',
-      )?.innerText,
+      document.querySelector<HTMLElement>('[data-elicitation-dialog-body="true"]')?.innerText,
     );
   });
 }
 
-async function waitForExpandedAskUserQuestionBlockContaining(
-  text: string,
-  timeout: number,
-) {
+async function waitForExpandedAskUserQuestionBlockContaining(text: string, timeout: number) {
   let latest: AskUserQuestionBlockDiagnostics | null = null;
   try {
     await browser.waitUntil(
@@ -138,9 +131,7 @@ async function waitForExpandedAskUserQuestionBlockContaining(
   } catch (error) {
     latest = await getExpandedAskUserQuestionBlockDiagnostics(text);
     throw new Error(
-      `AskUserQuestion 自定义回答没有显示在已询问消息详情里; diagnostics=${JSON.stringify(
-        latest,
-      )}`,
+      `AskUserQuestion 自定义回答没有显示在已询问消息详情里; diagnostics=${JSON.stringify(latest)}`,
       { cause: error },
     );
   }
@@ -159,18 +150,11 @@ function getExpandedAskUserQuestionBlockDiagnostics(
   text: string,
 ): Promise<AskUserQuestionBlockDiagnostics> {
   return browser.execute(
-    (
-      historyTriggerPrefix,
-      toolBlockPrefix,
-      summaryTriggerPrefix,
-      expectedText,
-    ) => {
+    (historyTriggerPrefix, toolBlockPrefix, summaryTriggerPrefix, expectedText) => {
       const normalizeText = (value: string | null | undefined) =>
         (value ?? "").replace(/\u00a0/g, " ").trim();
       const historyTriggers = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${historyTriggerPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${historyTriggerPrefix}-"]`),
       );
       for (const trigger of historyTriggers) {
         if (

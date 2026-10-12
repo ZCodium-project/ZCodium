@@ -20,7 +20,7 @@ async function hashReleaseTree(root: string, relativeRoot = ""): Promise<string>
   const hash = createHash("sha256");
   const visit = async (relativeDirectory: string): Promise<void> => {
     const entries = await readdir(join(root, relativeDirectory), { withFileTypes: true });
-    entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0);
+    entries.sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0));
     for (const entry of entries) {
       const relativePath = join(relativeDirectory, entry.name);
       if (relativePath === RELEASE_INTEGRITY_FILE) continue;
@@ -102,7 +102,9 @@ export async function promoteImmutableReleaseDirectory(options: {
     const existingKind = await existingPathKind(options.targetDir);
     if (existingKind !== null) {
       if (existingKind !== "directory") {
-        throw new Error(`Existing immutable release conflict at ${options.targetDir}: target is not a directory`);
+        throw new Error(
+          `Existing immutable release conflict at ${options.targetDir}: target is not a directory`,
+        );
       }
       await assertExistingReleaseMatches(options.targetDir, integrity);
       return;

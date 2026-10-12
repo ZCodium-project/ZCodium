@@ -12,21 +12,21 @@ Since version 3 of Mocha, you can rerun whole test suites (everything inside an 
 Here is an example:
 
 ```js
-describe('retries', function () {
-    // Retry all tests in this suite up to 4 times
-    this.retries(4)
+describe("retries", function () {
+  // Retry all tests in this suite up to 4 times
+  this.retries(4);
 
-    beforeEach(async () => {
-        await browser.url('http://www.yahoo.com')
-    })
+  beforeEach(async () => {
+    await browser.url("http://www.yahoo.com");
+  });
 
-    it('should succeed on the 3rd try', async function () {
-        // Specify this test to only retry up to 2 times
-        this.retries(2)
-        console.log('run')
-        await expect($('.foo')).toBeDisplayed()
-    })
-})
+  it("should succeed on the 3rd try", async function () {
+    // Specify this test to only retry up to 2 times
+    this.retries(2);
+    console.log("run");
+    await expect($(".foo")).toBeDisplayed();
+  });
+});
 ```
 
 ## Rerun single tests in Jasmine or Mocha
@@ -34,69 +34,78 @@ describe('retries', function () {
 To rerun a certain test block you can just apply the number of reruns as last parameter after the test block function:
 
 <Tabs
-  defaultValue="mocha"
-  values={[
-    {label: 'Mocha', value: 'mocha'},
-    {label: 'Jasmine', value: 'jasmine'},
-  ]
+defaultValue="mocha"
+values={[
+{label: 'Mocha', value: 'mocha'},
+{label: 'Jasmine', value: 'jasmine'},
+]
 }>
 <TabItem value="mocha">
 
 ```js
-describe('my flaky app', () => {
-    /**
-     * spec that runs max 4 times (1 actual run + 3 reruns)
-     */
-    it('should rerun a test at least 3 times', async function () {
-        console.log(this.wdioRetries) // returns number of retries
-        // ...
-    }, 3)
-})
+describe("my flaky app", () => {
+  /**
+   * spec that runs max 4 times (1 actual run + 3 reruns)
+   */
+  it("should rerun a test at least 3 times", async function () {
+    console.log(this.wdioRetries); // returns number of retries
+    // ...
+  }, 3);
+});
 ```
 
 The same works for hooks too:
 
 ```js
-describe('my flaky app', () => {
-    /**
-     * hook that runs max 2 times (1 actual run + 1 rerun)
-     */
-    beforeEach(async () => {
-        // ...
-    }, 1)
-
+describe("my flaky app", () => {
+  /**
+   * hook that runs max 2 times (1 actual run + 1 rerun)
+   */
+  beforeEach(async () => {
     // ...
-})
+  }, 1);
+
+  // ...
+});
 ```
 
 </TabItem>
 <TabItem value="jasmine">
 
 ```js
-describe('my flaky app', () => {
-    /**
-     * spec that runs max 4 times (1 actual run + 3 reruns)
-     */
-    it('should rerun a test at least 3 times', async function () {
-        console.log(this.wdioRetries) // returns number of retries
-        // ...
-    }, jasmine.DEFAULT_TIMEOUT_INTERVAL, 3)
-})
+describe("my flaky app", () => {
+  /**
+   * spec that runs max 4 times (1 actual run + 3 reruns)
+   */
+  it(
+    "should rerun a test at least 3 times",
+    async function () {
+      console.log(this.wdioRetries); // returns number of retries
+      // ...
+    },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL,
+    3,
+  );
+});
 ```
 
 The same works for hooks too:
 
 ```js
-describe('my flaky app', () => {
-    /**
-     * hook that runs max 2 times (1 actual run + 1 rerun)
-     */
-    beforeEach(async () => {
-        // ...
-    }, jasmine.DEFAULT_TIMEOUT_INTERVAL, 1)
+describe("my flaky app", () => {
+  /**
+   * hook that runs max 2 times (1 actual run + 1 rerun)
+   */
+  beforeEach(
+    async () => {
+      // ...
+    },
+    jasmine.DEFAULT_TIMEOUT_INTERVAL,
+    1,
+  );
 
-    // ...
-})
+  // ...
+});
 ```
 
 If you are using Jasmine, the second parameter is reserved for timeout. To apply a retry parameter you need to set the timeout to its default value `jasmine.DEFAULT_TIMEOUT_INTERVAL` and then apply your retry count.
@@ -140,20 +149,20 @@ A new `browser` instance is created for each specfile, which makes this an ideal
 
 ```js title="wdio.conf.js"
 export const config = {
-    // ...
-    /**
-     * The number of times to retry the entire specfile when it fails as a whole
-     */
-    specFileRetries: 1,
-    /**
-     * Delay in seconds between the spec file retry attempts
-     */
-    specFileRetriesDelay: 0,
-    /**
-     * Retried specfiles are inserted at the beginning of the queue and retried immediately
-     */
-    specFileRetriesDeferred: false
-}
+  // ...
+  /**
+   * The number of times to retry the entire specfile when it fails as a whole
+   */
+  specFileRetries: 1,
+  /**
+   * Delay in seconds between the spec file retry attempts
+   */
+  specFileRetriesDelay: 0,
+  /**
+   * Retried specfiles are inserted at the beginning of the queue and retried immediately
+   */
+  specFileRetriesDeferred: false,
+};
 ```
 
 ## Run a specific test multiple times

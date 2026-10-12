@@ -3,10 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { McpSource, CliMcpSource } from "../src/mcp.js";
-import {
-  MCP_SOURCE_DESCRIPTORS,
-  getSourceDescriptor,
-} from "../src/main/mcpUserDirectory/types.js";
+import { MCP_SOURCE_DESCRIPTORS, getSourceDescriptor } from "../src/main/mcpUserDirectory/types.js";
 import {
   loadCliMcpFromUserDirectory,
   saveCliMcpToUserDirectory,
@@ -46,7 +43,9 @@ describe("MCP Source Types", () => {
 
 describe("MCP Source Descriptors", () => {
   it("只为 ZCode Agent 提供描述符", () => {
-    expect(MCP_SOURCE_DESCRIPTORS.map((descriptor) => descriptor.source)).toEqual(["zcodeagentmcp"]);
+    expect(MCP_SOURCE_DESCRIPTORS.map((descriptor) => descriptor.source)).toEqual([
+      "zcodeagentmcp",
+    ]);
   });
 
   it("应能通过 getSourceDescriptor 获取 zcodeagentmcp 描述符", () => {
@@ -61,16 +60,24 @@ describe("MCP Source Descriptors", () => {
   });
 
   it("应为其他旧 provider source 抛出错误", () => {
-    expect(() => getSourceDescriptor("claudeclimcp" as CliMcpSource)).toThrow("Unsupported MCP source");
-    expect(() => getSourceDescriptor("geminiclimcp" as CliMcpSource)).toThrow("Unsupported MCP source");
-    expect(() => getSourceDescriptor("codexclimcp" as CliMcpSource)).toThrow("Unsupported MCP source");
-    expect(() => getSourceDescriptor("opencodemcp" as CliMcpSource)).toThrow("Unsupported MCP source");
+    expect(() => getSourceDescriptor("claudeclimcp" as CliMcpSource)).toThrow(
+      "Unsupported MCP source",
+    );
+    expect(() => getSourceDescriptor("geminiclimcp" as CliMcpSource)).toThrow(
+      "Unsupported MCP source",
+    );
+    expect(() => getSourceDescriptor("codexclimcp" as CliMcpSource)).toThrow(
+      "Unsupported MCP source",
+    );
+    expect(() => getSourceDescriptor("opencodemcp" as CliMcpSource)).toThrow(
+      "Unsupported MCP source",
+    );
   });
 
   it("应为无效 source 抛出错误", () => {
-    expect(() =>
-      getSourceDescriptor("invalid_source" as CliMcpSource)
-    ).toThrow("Unsupported MCP source");
+    expect(() => getSourceDescriptor("invalid_source" as CliMcpSource)).toThrow(
+      "Unsupported MCP source",
+    );
   });
 });
 

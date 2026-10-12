@@ -5,9 +5,7 @@
       "label": "zcode: tsup watch (debug)",
       "type": "process",
       "command": "node",
-      "args": [
-        "${workspaceFolder}/.vscode/tsup-watch.mjs"
-      ],
+      "args": ["${workspaceFolder}/.vscode/tsup-watch.mjs"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -34,9 +32,7 @@
       "label": "zcode: vite dev",
       "type": "process",
       "command": "node",
-      "args": [
-        "${workspaceFolder}/.vscode/vite-dev.mjs"
-      ],
+      "args": ["${workspaceFolder}/.vscode/vite-dev.mjs"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -61,26 +57,19 @@
     },
     {
       "label": "zcode: prepare desktop debug",
-      "dependsOn": [
-        "zcode: tsup watch (debug)",
-        "zcode: vite dev"
-      ],
+      "dependsOn": ["zcode: tsup watch (debug)", "zcode: vite dev"],
       "dependsOrder": "parallel"
     },
     {
       "label": "zcode: start electron (debug)",
       "type": "process",
       "command": "node",
-      "args": [
-        "${workspaceFolder}/.vscode/start-electron.mjs"
-      ],
+      "args": ["${workspaceFolder}/.vscode/start-electron.mjs"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "isBackground": true,
-      "dependsOn": [
-        "zcode: prepare desktop debug"
-      ],
+      "dependsOn": ["zcode: prepare desktop debug"],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
@@ -103,17 +92,12 @@
       "label": "zcode: start electron (debug with host inspect)",
       "type": "process",
       "command": "node",
-      "args": [
-        "${workspaceFolder}/.vscode/start-electron.mjs",
-        "--host-inspect"
-      ],
+      "args": ["${workspaceFolder}/.vscode/start-electron.mjs", "--host-inspect"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "isBackground": true,
-      "dependsOn": [
-        "zcode: prepare desktop debug"
-      ],
+      "dependsOn": ["zcode: prepare desktop debug"],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",

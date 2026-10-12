@@ -15,18 +15,18 @@
 
 ## 当前判断
 
-| 编号 | 问题 | 当前理解 | 状态 |
-| --- | --- | --- | --- |
-| R1 | 设置页曾经过共享旧 `ModelProviderConfig` 双向转换 | Renderer 编辑态已经改为正式 Config 同源 View；旧 Store 字段与反向转换退出设置页 | 已收口 |
-| R2 | 新建自定义 Provider 要求已有 Settings View | 新建时允许缺少继承 View，并直接从完整表单 Draft 保存；编辑现有 Provider 继续复用 View | 已修复 |
-| R3 | Account Access 可能进入 Personal Config | Personal 投影忽略 Account Overlay 注入的动态 `accessId`，继续保持 Official、Personal、Account 三层事实边界 | 已修复 |
-| R4 | `reasoningMapping` 差异与整体 Overlay 语义冲突 | Mapping 变化时保存完整字段，与普通值字段的整体覆盖规则一致 | 已修复 |
-| R5 | 请求鉴权刷新重新进入 Registry | Model 创建时固定 Provider 静态执行快照；请求鉴权只覆盖该快照的 API Key 与 Header | 已修复 |
-| R6 | 登出与重新登录可能复用旧 Coding Plan Key | OAuth 清理前捕获账号身份并删除账号作用域 Key；重新登录强制根据新 Token 刷新 Key | 已修复 |
-| R7 | 设置保存可能覆盖并发 Personal Config 修改 | Effective 保存已经移入 Repository 的原子 `update()`，锁内只修改目标 Provider 与对应精确模型规则 | 已修复 |
-| R8 | Account 刷新失败可能遗留未消费的 pending reason | 失败轮释放 in-flight 后会自动继续消费期间到达的事件；上一份成功快照保持不变 | 已修复 |
-| R9 | Connectivity 测试仍调用旧 Probe 参数 | 生产“测试连接”继续保留；专项测试已迁移到正式 Provider/Model Config 请求形状 | 已修复 |
-| R10 | Remote Workspace 曾混合远端模型事实与本地账号服务 | Remote Host/Worker 已使用远端自己的 Config、Credential、Account Source 与 Registry；Desktop 不再下发 Provider/Secret | 已收口；Provisioning Sync 属于 M7 |
+| 编号 | 问题                                              | 当前理解                                                                                                             | 状态                              |
+| ---- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| R1   | 设置页曾经过共享旧 `ModelProviderConfig` 双向转换 | Renderer 编辑态已经改为正式 Config 同源 View；旧 Store 字段与反向转换退出设置页                                      | 已收口                            |
+| R2   | 新建自定义 Provider 要求已有 Settings View        | 新建时允许缺少继承 View，并直接从完整表单 Draft 保存；编辑现有 Provider 继续复用 View                                | 已修复                            |
+| R3   | Account Access 可能进入 Personal Config           | Personal 投影忽略 Account Overlay 注入的动态 `accessId`，继续保持 Official、Personal、Account 三层事实边界           | 已修复                            |
+| R4   | `reasoningMapping` 差异与整体 Overlay 语义冲突    | Mapping 变化时保存完整字段，与普通值字段的整体覆盖规则一致                                                           | 已修复                            |
+| R5   | 请求鉴权刷新重新进入 Registry                     | Model 创建时固定 Provider 静态执行快照；请求鉴权只覆盖该快照的 API Key 与 Header                                     | 已修复                            |
+| R6   | 登出与重新登录可能复用旧 Coding Plan Key          | OAuth 清理前捕获账号身份并删除账号作用域 Key；重新登录强制根据新 Token 刷新 Key                                      | 已修复                            |
+| R7   | 设置保存可能覆盖并发 Personal Config 修改         | Effective 保存已经移入 Repository 的原子 `update()`，锁内只修改目标 Provider 与对应精确模型规则                      | 已修复                            |
+| R8   | Account 刷新失败可能遗留未消费的 pending reason   | 失败轮释放 in-flight 后会自动继续消费期间到达的事件；上一份成功快照保持不变                                          | 已修复                            |
+| R9   | Connectivity 测试仍调用旧 Probe 参数              | 生产“测试连接”继续保留；专项测试已迁移到正式 Provider/Model Config 请求形状                                          | 已修复                            |
+| R10  | Remote Workspace 曾混合远端模型事实与本地账号服务 | Remote Host/Worker 已使用远端自己的 Config、Credential、Account Source 与 Registry；Desktop 不再下发 Provider/Secret | 已收口；Provisioning Sync 属于 M7 |
 
 ## 设置编辑链路
 

@@ -10,13 +10,13 @@
 
 ## 关键约束
 
-| 约束项 | 说明 |
-|--------|------|
-| 部署域名 | `https://zcode.z.ai`（已在 ZAI OAuth 白名单内） |
-| OAuth 提供方 | ZAI（`chat.z.ai/auth`），**不走桌面端 deep-link `zcode://`** |
-| Token 存储 | Web 的 `localStorage`，核心 key 与桌面端保持一致：`zcodejwttoken`、`oauth:zai:access_token`、`oauth:zai:user_info`、`oauth:active_provider` |
-| 生产态同域 | 远控页面部署在 `zcode.z.ai` 下，调用 `zcode.z.ai/api/v1/oauth/token` 同源，无 CORS 问题 |
-| 开发态 | 通过环境变量注入本地 origin，ZAI 回调先回到生产域名再转发回局域网 IP；本地 token 交换必须走 Vite proxy 或后端 CORS 白名单，不能假设本地 Vite origin 天然拥有 `/api/v1/oauth/token` |
+| 约束项       | 说明                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 部署域名     | `https://zcode.z.ai`（已在 ZAI OAuth 白名单内）                                                                                                                                    |
+| OAuth 提供方 | ZAI（`chat.z.ai/auth`），**不走桌面端 deep-link `zcode://`**                                                                                                                       |
+| Token 存储   | Web 的 `localStorage`，核心 key 与桌面端保持一致：`zcodejwttoken`、`oauth:zai:access_token`、`oauth:zai:user_info`、`oauth:active_provider`                                        |
+| 生产态同域   | 远控页面部署在 `zcode.z.ai` 下，调用 `zcode.z.ai/api/v1/oauth/token` 同源，无 CORS 问题                                                                                            |
+| 开发态       | 通过环境变量注入本地 origin，ZAI 回调先回到生产域名再转发回局域网 IP；本地 token 交换必须走 Vite proxy 或后端 CORS 白名单，不能假设本地 Vite origin 天然拥有 `/api/v1/oauth/token` |
 
 ## 本期范围与联调边界
 
@@ -161,12 +161,14 @@ interface OAuthStatePayload {
 ### CSRF 防护
 
 发起登录前：
+
 ```js
 const nonce = crypto.randomUUID();
 sessionStorage.setItem("oauth_pending_nonce", nonce);
 ```
 
 回调页解出 `state` 后：
+
 ```js
 function decodeBase64Url(value) {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -354,26 +356,26 @@ async function bootstrapWebApp() {
 
 远控页面 SPA 内复用 URL 参数区分"主应用"和"回调页"：
 
-| URL | 渲染内容 |
-|-----|----------|
-| `/web-remote?remoteControlToken=...&relayOrigin=...` | 旧远控链接入口；需已登录，登录后继续现有 relay bootstrap |
-| `/web-remote` 或 `/web-remote/` | 无旧远控 token 的入口；需已登录，本期显示已登录占位页，后续接设备列表 |
-| `/web-remote/callback` | 回调处理页，自动处理 token 交换或 return_to 转发 |
+| URL                                                  | 渲染内容                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| `/web-remote?remoteControlToken=...&relayOrigin=...` | 旧远控链接入口；需已登录，登录后继续现有 relay bootstrap              |
+| `/web-remote` 或 `/web-remote/`                      | 无旧远控 token 的入口；需已登录，本期显示已登录占位页，后续接设备列表 |
+| `/web-remote/callback`                               | 回调处理页，自动处理 token 交换或 return_to 转发                      |
 
 由于是 SPA，通过 `window.location.pathname` 判断，不需要额外路由库。
 
 ## 存储设计
 
-| localStorage key | 值 | 用途 |
-|-----------------|-----|------|
-| `zcodejwttoken` | 后端 JWT 字符串，即 `data.token` | 业务 API 鉴权；后续设备列表接口也凭它识别当前用户 |
-| `oauth:zai:access_token` | ZAI access token，即 `data.zai.access_token` | 与桌面端 ZAI OAuth token set 结构保持一致 |
-| `oauth:zai:user_info` | JSON；优先保存后端 `data.user` 原始结构，恢复展示态时映射为 `UserInfo` | 显示用户名/头像，并兼容现有 `OAuthCredentialRepo` 的 ZAI user_info 恢复逻辑 |
-| `oauth:active_provider` | `"zai"` | 标识当前登录方式 |
-| `oauth:zai:expires_at` | timestamp | token 过期判断（可选，后续迭代） |
+| localStorage key         | 值                                                                     | 用途                                                                        |
+| ------------------------ | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `zcodejwttoken`          | 后端 JWT 字符串，即 `data.token`                                       | 业务 API 鉴权；后续设备列表接口也凭它识别当前用户                           |
+| `oauth:zai:access_token` | ZAI access token，即 `data.zai.access_token`                           | 与桌面端 ZAI OAuth token set 结构保持一致                                   |
+| `oauth:zai:user_info`    | JSON；优先保存后端 `data.user` 原始结构，恢复展示态时映射为 `UserInfo` | 显示用户名/头像，并兼容现有 `OAuthCredentialRepo` 的 ZAI user_info 恢复逻辑 |
+| `oauth:active_provider`  | `"zai"`                                                                | 标识当前登录方式                                                            |
+| `oauth:zai:expires_at`   | timestamp                                                              | token 过期判断（可选，后续迭代）                                            |
 
-| sessionStorage key | 值 | 用途 |
-|--------------------|-----|------|
+| sessionStorage key    | 值   | 用途      |
+| --------------------- | ---- | --------- |
 | `oauth_pending_nonce` | UUID | CSRF 防护 |
 
 > 存储 key 与 `OAuthCredentialRepo` 现有命名一致。前端展示使用 `@zcode/shared` 的 `UserInfo` 类型，不从 `@zcode/ui` 反向导入类型。
@@ -478,15 +480,15 @@ const DEV_RETURN_TO = import.meta.env.VITE_DEV_ORIGIN;
 
 ### E2E 测试（手动）
 
-| 场景 | 步骤 | 预期 |
-|------|------|------|
-| 生产态首次登录 | 清空 localStorage，访问远控页，点击登录，完成授权 | 跳转回主应用，进入已登录后的前端流程 |
-| 旧远控链接登录 | 清空 localStorage，访问带 `remoteControlToken` / `relayOrigin` 的远控链接，完成授权 | 登录后回到原 URL，query 中仍保留 `remoteControlToken` / `relayOrigin`，继续 relay bootstrap |
-| 无远控 token 登录 | 清空 localStorage，访问 `/web-remote`，完成授权 | 登录后显示已登录占位页，不误连普通 `/ws` |
-| 生产态回访 | 已有完整缓存登录态后刷新页面 | 不再展示登录页；带旧远控 token 时继续 relay bootstrap，无旧远控 token 时显示已登录占位页 |
-| 生产态 token 过期 | mock 后端 401 | 显示错误页或跳转登录页 |
-| 开发态登录 | 手机访问局域网 IP，点击登录 | 回调到生产页 → 转发回局域网 IP → 登录成功 |
-| 取消授权 | 在 ZAI 页点拒绝 | 留在登录页，无异常 |
+| 场景              | 步骤                                                                                | 预期                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 生产态首次登录    | 清空 localStorage，访问远控页，点击登录，完成授权                                   | 跳转回主应用，进入已登录后的前端流程                                                        |
+| 旧远控链接登录    | 清空 localStorage，访问带 `remoteControlToken` / `relayOrigin` 的远控链接，完成授权 | 登录后回到原 URL，query 中仍保留 `remoteControlToken` / `relayOrigin`，继续 relay bootstrap |
+| 无远控 token 登录 | 清空 localStorage，访问 `/web-remote`，完成授权                                     | 登录后显示已登录占位页，不误连普通 `/ws`                                                    |
+| 生产态回访        | 已有完整缓存登录态后刷新页面                                                        | 不再展示登录页；带旧远控 token 时继续 relay bootstrap，无旧远控 token 时显示已登录占位页    |
+| 生产态 token 过期 | mock 后端 401                                                                       | 显示错误页或跳转登录页                                                                      |
+| 开发态登录        | 手机访问局域网 IP，点击登录                                                         | 回调到生产页 → 转发回局域网 IP → 登录成功                                                   |
+| 取消授权          | 在 ZAI 页点拒绝                                                                     | 留在登录页，无异常                                                                          |
 
 ### 机械检查
 

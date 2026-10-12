@@ -32,10 +32,9 @@ const virtualizer = vi.hoisted(() => ({
   scrollOffset: null as number | null,
   scrollRect: null as { height: number } | null,
   scrollToIndex: vi.fn(),
-  shouldAdjustScrollPositionOnItemSizeChange: null as null | ((item: {
-    end: number;
-    start: number;
-  }) => boolean),
+  shouldAdjustScrollPositionOnItemSizeChange: null as
+    | null
+    | ((item: { end: number; start: number }) => boolean),
 }));
 
 vi.mock("@tanstack/react-virtual", () => ({
@@ -218,7 +217,11 @@ function installMinimalDom(): TestElement {
   return createMinimalElement(documentMock, "div");
 }
 
-function findByTestId(node: TestElement, testId: string, attribute = "data-testid"): TestElement | null {
+function findByTestId(
+  node: TestElement,
+  testId: string,
+  attribute = "data-testid",
+): TestElement | null {
   if (node.getAttribute(attribute) === testId) return node;
   for (const child of node.childNodes) {
     if (child.nodeType !== 1) continue;
@@ -469,17 +472,11 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     mountedRoot = createRoot(container);
 
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-        undefined,
-        {
-          canLoadOlder: true,
-          onLoadOlder,
-          rows: [{ ...row, rowId: 100, turnId: "turn-100" }],
-        },
-      ),
+      renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1", undefined, {
+        canLoadOlder: true,
+        onLoadOlder,
+        rows: [{ ...row, rowId: 100, turnId: "turn-100" }],
+      }),
     );
     const timeline = findByTestId(container, TID_V4_TIMELINE)!;
     act(() => {
@@ -513,17 +510,11 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
       },
     ];
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-        undefined,
-        {
-          canLoadOlder: false,
-          onLoadOlder,
-          rows: [...olderRows, { ...row, rowId: 100, turnId: "turn-100" }],
-        },
-      ),
+      renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1", undefined, {
+        canLoadOlder: false,
+        onLoadOlder,
+        rows: [...olderRows, { ...row, rowId: 100, turnId: "turn-100" }],
+      }),
     );
 
     // 旧锚点已在 viewport + 8 行 overscan 之外，DOM 查询和旧 totalSize 都无法给出位移。
@@ -705,27 +696,13 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
 
     act(() => scrollToBottomActionRef.current?.());
 
-    expect(
-      readChatSessionScrollMemoryState("workspace::pane:a::session:1"),
-    ).toMatchObject({
+    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")).toMatchObject({
       scrollTop: 900,
       wasPinnedToBottom: true,
     });
 
-    act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-2",
-        "workspace::pane:a::session:2",
-      ),
-    );
-    act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-      ),
-    );
+    act(() => renderTimeline(mountedRoot!, "session-2", "workspace::pane:a::session:2"));
+    act(() => renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1"));
 
     const timeline = findByTestId(container, TID_V4_TIMELINE)!;
     expect(timeline.scrollTop).toBe(900);
@@ -745,13 +722,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     mountedRoot = createRoot(container);
 
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-        undefined,
-        { rows: [] },
-      ),
+      renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1", undefined, {
+        rows: [],
+      }),
     );
 
     let timeline = findByTestId(container, TID_V4_TIMELINE)!;
@@ -765,13 +738,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
 
     layout.scrollHeight = 1200;
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-        undefined,
-        { rows: [row] },
-      ),
+      renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1", undefined, {
+        rows: [row],
+      }),
     );
 
     timeline = findByTestId(container, TID_V4_TIMELINE)!;
@@ -793,27 +762,17 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     mountedRoot = createRoot(container);
 
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-1",
-        "workspace::pane:a::session:1",
-        undefined,
-        { rows: [] },
-      ),
+      renderTimeline(mountedRoot!, "session-1", "workspace::pane:a::session:1", undefined, {
+        rows: [],
+      }),
     );
     act(() =>
-      renderTimeline(
-        mountedRoot!,
-        "session-2",
-        "workspace::pane:a::session:2",
-        undefined,
-        { rows: [] },
-      ),
+      renderTimeline(mountedRoot!, "session-2", "workspace::pane:a::session:2", undefined, {
+        rows: [],
+      }),
     );
 
-    expect(
-      readChatSessionScrollMemoryState("workspace::pane:a::session:1"),
-    ).toMatchObject({
+    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")).toMatchObject({
       scrollTop: 240,
       wasPinnedToBottom: false,
     });
@@ -868,8 +827,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     });
 
     expect(timeline.scrollTop).toBe(310);
-    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom)
-      .toBe(false);
+    expect(
+      readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom,
+    ).toBe(false);
     expect(readChatSessionScrollMemoryState("workspace::pane:b::session:1")?.scrollTop).toBe(620);
   });
 
@@ -890,8 +850,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     });
 
     expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.scrollTop).toBe(520);
-    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom)
-      .toBe(false);
+    expect(
+      readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom,
+    ).toBe(false);
   });
 
   it("does not overwrite a saved user position after the next scope collapses the DOM", () => {
@@ -911,8 +872,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     });
 
     expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.scrollTop).toBe(280);
-    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom)
-      .toBe(false);
+    expect(
+      readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom,
+    ).toBe(false);
   });
 
   it("saves the last observed DOM position when the timeline unmounts", () => {
@@ -930,8 +892,9 @@ describe("ConversationTimeline renderer-local scroll memory", () => {
     });
 
     expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.scrollTop).toBe(410);
-    expect(readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom)
-      .toBe(false);
+    expect(
+      readChatSessionScrollMemoryState("workspace::pane:a::session:1")?.wasPinnedToBottom,
+    ).toBe(false);
   });
 
   // 浮岛删除后（docs/dynamic-workflow/presentation.md「Other places a run appears」item 1）composer 上方不再有共享的

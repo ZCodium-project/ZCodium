@@ -24,11 +24,13 @@
 ### Task 1: Lock Visible Model List Fallback Behavior
 
 **Files:**
+
 - Modify: `packages/ui/test/chatInputToolbarModelGroups.test.ts`
 - Modify: `packages/ui/src/chat-input-toolbar/modelSelection.ts`
 - Modify: `packages/ui/src/ChatInputToolbar.tsx`
 
 **Interfaces:**
+
 - Consumes: `resolveUnavailableModelListFallback(params)`
 - Produces: active task fallback may return `modelSelectGroups[0].items[0].value`
 
@@ -53,11 +55,13 @@ Expected: PASS.
 ### Task 2: Stop Provider Snapshot First-Model Restore Fallback
 
 **Files:**
+
 - Modify: `packages/ui/test/useZCodeChatSendPromptQueuePolicy.test.ts`
 - Modify: `packages/ui/src/lib/zcodeTaskResumeModel.ts`
 - Modify: `packages/ui/src/hooks/useTaskRestore.ts`
 
 **Interfaces:**
+
 - Consumes: `resolveAvailableResumeModelForExistingTask(params)`
 - Produces: unavailable task model resolution without provider snapshot fallback
 
@@ -82,6 +86,7 @@ Expected: PASS.
 ### Task 3: Final Verification
 
 **Files:**
+
 - Verify all files changed by Tasks 1-2.
 
 - [x] **Step 1: Run targeted tests**
@@ -100,6 +105,7 @@ Expected: exit 0; existing warnings may remain.
 - [ ] **Step 3: Commit**
 
 Run:
+
 ```bash
 git add docs/superpowers/specs/2026-06-23-task-restore-model-list-fallback-design.md docs/superpowers/plans/2026-06-23-task-restore-model-list-fallback.md packages/ui/src/ChatInputToolbar.tsx packages/ui/src/chat-input-toolbar/modelSelection.ts packages/ui/src/hooks/useTaskRestore.ts packages/ui/src/lib/zcodeTaskResumeModel.ts packages/ui/test/chatInputToolbarModelGroups.test.ts packages/ui/test/useZCodeChatSendPromptQueuePolicy.test.ts
 git commit -m "fix: use visible model list for task restore fallback"

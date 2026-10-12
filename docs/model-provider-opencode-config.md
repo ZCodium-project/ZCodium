@@ -11,13 +11,13 @@
 
 ## 文件边界
 
-| 文件                                             | 语义                                                         |
-| ------------------------------------------------ | ------------------------------------------------------------ |
+| 文件                                             | 语义                                                               |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
 | `~/.zcode/v2/config.json`                        | app 模型供应商权威源，包含 `provider` 字段（见 Provider Schema）。 |
-| `~/.zcode/v2/model-providers.json`               | 一次性迁移来源，只读取有效旧内容，迁移后保留原文件不改。     |
-| `~/.zcode/v2/model-providers.v2.json`            | 完全忽略，不读取、不删除、不迁移。                           |
-| `~/.zcode/cli/config.json`                       | standalone CLI 使用的配置文件，不参与 app provider 迁移。    |
-| `models_catalog_china_llm_zcode_2026-06-03.json` | legacy `model-providers.json` 迁移时的模型 metadata 补齐源。 |
+| `~/.zcode/v2/model-providers.json`               | 一次性迁移来源，只读取有效旧内容，迁移后保留原文件不改。           |
+| `~/.zcode/v2/model-providers.v2.json`            | 完全忽略，不读取、不删除、不迁移。                                 |
+| `~/.zcode/cli/config.json`                       | standalone CLI 使用的配置文件，不参与 app provider 迁移。          |
+| `models_catalog_china_llm_zcode_2026-06-03.json` | legacy `model-providers.json` 迁移时的模型 metadata 补齐源。       |
 
 `config.json` 已经存在且包含有效 `provider` 时，不用旧文件覆盖用户的新配置。
 

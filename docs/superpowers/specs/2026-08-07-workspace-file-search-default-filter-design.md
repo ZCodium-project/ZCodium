@@ -222,5 +222,6 @@ Composer `@`、Command Center 与 Workspace File Tree 搜索因共享 `listWorks
 用户在默认段的删改（如放开 node_modules）与自定义规则区的内容，任何按钮都不会覆盖。
 标记行被删除时（旧格式/手动清理）无法结构化定位分区，按钮退化为整体初始内容重建。
 两个按钮都只把结果填入编辑框，保存才落盘。
+
 - 只读文件系统或权限失败时扫描不中断，降级链（.zcodeignore → .gitignore → 内置黑名单）产生 warn 日志。
 - 远程 workspace 的规则读取/创建/匹配发生在远端 Host，与本地行为一致。

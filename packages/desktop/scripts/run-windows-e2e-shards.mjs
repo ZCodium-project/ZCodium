@@ -9,10 +9,7 @@ import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { spawnCancellableStep, startStepExecution } from "./e2e-step-process.mjs";
-import {
-  hasRequiredSshE2EEnvironment,
-  isSshFormalSpec,
-} from "./e2e-formal-spec-selection.mjs";
+import { hasRequiredSshE2EEnvironment, isSshFormalSpec } from "./e2e-formal-spec-selection.mjs";
 
 const RUNNER_SHARD_ARG_PREFIX = "--shards=";
 const DEFAULT_SPEC_DURATION_PROFILE_PATH = "test/e2e/spec-duration-weights.json";

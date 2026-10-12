@@ -110,7 +110,11 @@ describe("Browser Use Desktop IAB 多 tab 生命周期 E2E", () => {
     await waitForUpstreamRequest(
       {
         includes: [TURN_TWO_MARKER, "E2E_BROWSER_FIXTURE_URL:", TOOL_NAME],
-        excludes: [TURN_TWO_LIST_TOOL_CALL_ID, "Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        excludes: [
+          TURN_TWO_LIST_TOOL_CALL_ID,
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+        ],
       },
       "第二轮初始 provider 请求没有恢复 Browser Use 工具",
       60000,
@@ -119,13 +123,7 @@ describe("Browser Use Desktop IAB 多 tab 生命周期 E2E", () => {
     await waitForPermissionAndApproveOnce("列出已有 Browser tab");
     await waitForSuccessfulToolCallByToolCallId(
       TURN_TWO_LIST_TOOL_CALL_ID,
-      [
-        TURN_TWO_LIST_RESULT_MARKER,
-        "e2eBrowserTabAId",
-        "e2eBrowserTabBId",
-        "/a",
-        "/b",
-      ],
+      [TURN_TWO_LIST_RESULT_MARKER, "e2eBrowserTabAId", "e2eBrowserTabBId", "/a", "/b"],
       90000,
     );
     await waitForUpstreamRequest(
@@ -138,7 +136,11 @@ describe("Browser Use Desktop IAB 多 tab 生命周期 E2E", () => {
           "/a",
           "/b",
         ],
-        excludes: [TURN_TWO_ACTION_TOOL_CALL_ID, "Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        excludes: [
+          TURN_TWO_ACTION_TOOL_CALL_ID,
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+        ],
       },
       "第二轮独立 tabs.list 结果没有进入下一次模型选择",
       90000,
@@ -238,31 +240,39 @@ async function waitForFixtureTabs(expectedCount: number, timeout = 60000) {
 }
 
 async function readFixtureTabs(): Promise<FixtureTabSnapshot[]> {
-  const ids = await browser.execute((webviewTestId) =>
-    Array.from(document.querySelectorAll<HTMLElement>(`[data-testid="${webviewTestId}"]`))
-      .map((element) =>
-        (element as HTMLElement & { getWebContentsId?: () => number }).getWebContentsId?.() ?? 0,
-      )
-      .filter((id) => id > 0),
-  TID_BROWSER_WEBVIEW);
-  return browser.electron.execute(async (electron, targetIds, fixtureRoot) => {
-    const fixtureOrigin = new URL(fixtureRoot).origin;
-    const snapshots = await Promise.all(
-      targetIds.map(async (id) => {
-        const guest = electron.webContents.fromId(id);
-        if (!guest || guest.isDestroyed()) {
-          return { exists: false, id, state: "", title: "", url: "" };
-        }
-        const url = guest.getURL();
-        if (!url.startsWith(fixtureOrigin)) return null;
-        const state = (await guest.executeJavaScript(
-          "document.querySelector('#state')?.value ?? ''",
-        )) as string;
-        return { exists: true, id, state, title: guest.getTitle(), url };
-      }),
-    );
-    return snapshots.filter((item): item is FixtureTabSnapshot => item !== null);
-  }, ids, fixtureRootUrl) as unknown as Promise<FixtureTabSnapshot[]>;
+  const ids = await browser.execute(
+    (webviewTestId) =>
+      Array.from(document.querySelectorAll<HTMLElement>(`[data-testid="${webviewTestId}"]`))
+        .map(
+          (element) =>
+            (element as HTMLElement & { getWebContentsId?: () => number }).getWebContentsId?.() ??
+            0,
+        )
+        .filter((id) => id > 0),
+    TID_BROWSER_WEBVIEW,
+  );
+  return browser.electron.execute(
+    async (electron, targetIds, fixtureRoot) => {
+      const fixtureOrigin = new URL(fixtureRoot).origin;
+      const snapshots = await Promise.all(
+        targetIds.map(async (id) => {
+          const guest = electron.webContents.fromId(id);
+          if (!guest || guest.isDestroyed()) {
+            return { exists: false, id, state: "", title: "", url: "" };
+          }
+          const url = guest.getURL();
+          if (!url.startsWith(fixtureOrigin)) return null;
+          const state = (await guest.executeJavaScript(
+            "document.querySelector('#state')?.value ?? ''",
+          )) as string;
+          return { exists: true, id, state, title: guest.getTitle(), url };
+        }),
+      );
+      return snapshots.filter((item): item is FixtureTabSnapshot => item !== null);
+    },
+    ids,
+    fixtureRootUrl,
+  ) as unknown as Promise<FixtureTabSnapshot[]>;
 }
 
 function findFixtureTab(tabs: FixtureTabSnapshot[], pathname: "/a" | "/b") {
@@ -294,12 +304,12 @@ async function waitForPermissionAndApproveOnce(expectedTitle: string) {
   let latest = "";
   const clickUniqueAllowOnce = () =>
     browser.execute(() => {
-      const listboxes = Array.from(document.querySelectorAll<HTMLElement>('[role="listbox"]')).filter(
-        (element) => {
-          const label = element.getAttribute("aria-label")?.trim();
-          return label === "Permission required" || label === "需要权限";
-        },
-      );
+      const listboxes = Array.from(
+        document.querySelectorAll<HTMLElement>('[role="listbox"]'),
+      ).filter((element) => {
+        const label = element.getAttribute("aria-label")?.trim();
+        return label === "Permission required" || label === "需要权限";
+      });
       const options = listboxes.flatMap((listbox) =>
         Array.from(
           listbox.querySelectorAll<HTMLButtonElement>(
@@ -315,12 +325,12 @@ async function waitForPermissionAndApproveOnce(expectedTitle: string) {
   await browser.waitUntil(
     async () => {
       const state = await browser.execute(() => {
-        const listboxes = Array.from(document.querySelectorAll<HTMLElement>('[role="listbox"]')).filter(
-          (element) => {
-            const label = element.getAttribute("aria-label")?.trim();
-            return label === "Permission required" || label === "需要权限";
-          },
-        );
+        const listboxes = Array.from(
+          document.querySelectorAll<HTMLElement>('[role="listbox"]'),
+        ).filter((element) => {
+          const label = element.getAttribute("aria-label")?.trim();
+          return label === "Permission required" || label === "需要权限";
+        });
         return {
           allowOnceCount: listboxes.reduce(
             (count, element) =>

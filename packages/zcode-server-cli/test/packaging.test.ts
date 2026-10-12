@@ -26,7 +26,9 @@ async function makeTempDir(): Promise<string> {
 }
 
 afterEach(async () => {
-  await Promise.all(temporaryDirs.splice(0).map((dir) => rm(dir, { force: true, recursive: true })));
+  await Promise.all(
+    temporaryDirs.splice(0).map((dir) => rm(dir, { force: true, recursive: true })),
+  );
 });
 
 interface FakePackageSpec {
@@ -187,14 +189,28 @@ describe("stageRelease", () => {
       node: "Copyright Node\nComplete runtime terms\n",
       nodeSource: '{"version":"22.16.0"}\n',
     };
-    return { distDir, workspaceNodeModulesDir, agentBundlePath, nodeBinaryPath, outputDir, notices };
+    return {
+      distDir,
+      workspaceNodeModulesDir,
+      agentBundlePath,
+      nodeBinaryPath,
+      outputDir,
+      notices,
+    };
   }
 
-  async function writeFakeNativeTools(toolsDir: string, tools: Record<string, string>): Promise<void> {
+  async function writeFakeNativeTools(
+    toolsDir: string,
+    tools: Record<string, string>,
+  ): Promise<void> {
     for (const [tool, binaryName] of Object.entries(tools)) {
       await mkdir(join(toolsDir, tool), { recursive: true });
       await writeFile(join(toolsDir, tool, binaryName), tool, "utf8");
-      await writeFile(join(toolsDir, tool, "THIRD-PARTY-NOTICES.txt"), `Copyright ${tool}\nFull terms\n`, "utf8");
+      await writeFile(
+        join(toolsDir, tool, "THIRD-PARTY-NOTICES.txt"),
+        `Copyright ${tool}\nFull terms\n`,
+        "utf8",
+      );
       await writeFile(join(toolsDir, tool, "SOURCES.json"), JSON.stringify({ tool }), "utf8");
     }
   }
@@ -302,13 +318,26 @@ describe("stageRelease", () => {
     const fixture = await makeStageFixture();
     const toolsDir = join(await makeTempDir(), "tools");
     await writeFakeNativeTools(toolsDir, { ripgrep: "rg.exe", ugrep: "ugrep.exe" });
-    const staged = await stageRelease({ target: "win32-x64", appVersion: "9.9.9-test", nativeToolsDir: toolsDir, ...fixture });
+    const staged = await stageRelease({
+      target: "win32-x64",
+      appVersion: "9.9.9-test",
+      nativeToolsDir: toolsDir,
+      ...fixture,
+    });
     expect(staged.archivePath).toMatch(/\.zip$/u);
-    expect(await readFile(join(staged.releaseDir, "bin", "zcode.cmd"), "utf8")).toContain("node.exe");
+    expect(await readFile(join(staged.releaseDir, "bin", "zcode.cmd"), "utf8")).toContain(
+      "node.exe",
+    );
     await expect(stat(join(staged.releaseDir, "runtime", "node.exe"))).resolves.toBeTruthy();
-    await expect(stat(join(staged.releaseDir, "runtime", "tools", "ripgrep", "rg.exe"))).resolves.toBeTruthy();
-    await expect(stat(join(staged.releaseDir, "runtime", "tools", "ugrep", "ugrep.exe"))).resolves.toBeTruthy();
-    await expect(stat(join(staged.releaseDir, "runtime", "tools", "ugrep", "THIRD-PARTY-NOTICES.txt"))).resolves.toBeTruthy();
+    await expect(
+      stat(join(staged.releaseDir, "runtime", "tools", "ripgrep", "rg.exe")),
+    ).resolves.toBeTruthy();
+    await expect(
+      stat(join(staged.releaseDir, "runtime", "tools", "ugrep", "ugrep.exe")),
+    ).resolves.toBeTruthy();
+    await expect(
+      stat(join(staged.releaseDir, "runtime", "tools", "ugrep", "THIRD-PARTY-NOTICES.txt")),
+    ).resolves.toBeTruthy();
     await expect(stat(join(staged.releaseDir, "runtime", "tools", "bfs"))).rejects.toThrow();
   });
 
@@ -316,24 +345,38 @@ describe("stageRelease", () => {
     const fixture = await makeStageFixture();
     const toolsDir = join(await makeTempDir(), "tools");
     await writeFakeNativeTools(toolsDir, { bfs: "bfs", ripgrep: "rg", ugrep: "ugrep" });
-    const staged = await stageRelease({ target: "linux-x64", appVersion: "9.9.9-test", nativeToolsDir: toolsDir, ...fixture });
-    const manifest = JSON.parse(await readFile(join(staged.releaseDir, "manifest.json"), "utf8")) as {
+    const staged = await stageRelease({
+      target: "linux-x64",
+      appVersion: "9.9.9-test",
+      nativeToolsDir: toolsDir,
+      ...fixture,
+    });
+    const manifest = JSON.parse(
+      await readFile(join(staged.releaseDir, "manifest.json"), "utf8"),
+    ) as {
       components: Array<{ id: string; archivePath: string }>;
     };
     const expected: Record<string, string[]> = {
       "node-runtime": ["runtime/LICENSE.node.txt", "runtime/NODE-SOURCES.json"],
       "server-runtime": ["runtime/THIRD-PARTY-NOTICES.md", "runtime/node_modules/node-pty/LICENSE"],
       "agent-runtime": ["runtime/licenses/agent/THIRD-PARTY-NOTICES.md"],
-      "native-search-tools": ["runtime/tools/ripgrep/THIRD-PARTY-NOTICES.txt", "runtime/tools/ugrep/SOURCES.json"],
+      "native-search-tools": [
+        "runtime/tools/ripgrep/THIRD-PARTY-NOTICES.txt",
+        "runtime/tools/ugrep/SOURCES.json",
+      ],
     };
-    expect(manifest.components.map((component) => component.id).sort()).toEqual(Object.keys(expected).sort());
+    expect(manifest.components.map((component) => component.id).sort()).toEqual(
+      Object.keys(expected).sort(),
+    );
     const extractRoot = await makeTempDir();
     for (const component of manifest.components) {
       const extractDir = join(extractRoot, component.id);
       await mkdir(extractDir, { recursive: true });
       await runTar(["-xf", join(fixture.outputDir, component.archivePath), "-C", extractDir]);
       for (const member of expected[component.id] ?? []) {
-        expect(await readFile(join(extractDir, member))).toEqual(await readFile(join(staged.releaseDir, member)));
+        expect(await readFile(join(extractDir, member))).toEqual(
+          await readFile(join(staged.releaseDir, member)),
+        );
       }
     }
   });
@@ -344,7 +387,13 @@ describe("stageRelease", () => {
     await writeFakeNativeTools(toolsDir, { bfs: "bfs", ripgrep: "rg", ugrep: "ugrep" });
     await rm(join(toolsDir, "ripgrep", "THIRD-PARTY-NOTICES.txt"));
     await expect(
-      stageRelease({ target: "linux-x64", appVersion: "9.9.9-test", archive: false, nativeToolsDir: toolsDir, ...fixture }),
+      stageRelease({
+        target: "linux-x64",
+        appVersion: "9.9.9-test",
+        archive: false,
+        nativeToolsDir: toolsDir,
+        ...fixture,
+      }),
     ).rejects.toThrow(/ENOENT/u);
     await expect(
       stageRelease({
@@ -384,12 +433,16 @@ describe("stageRelease", () => {
     });
 
     for (const name of pluginNames.filter((name) => name !== "superpowers-plugin")) {
-      await expect(stat(join(staged.releaseDir, "runtime/packages", name, "README.md"))).resolves.toBeTruthy();
+      await expect(
+        stat(join(staged.releaseDir, "runtime/packages", name, "README.md")),
+      ).resolves.toBeTruthy();
     }
     await expect(
       stat(join(staged.releaseDir, "runtime/packages/superpowers-plugin")),
     ).rejects.toThrow();
-    const manifest = JSON.parse(await readFile(join(staged.releaseDir, "manifest.json"), "utf8")) as {
+    const manifest = JSON.parse(
+      await readFile(join(staged.releaseDir, "manifest.json"), "utf8"),
+    ) as {
       plugins?: string[];
       components?: Array<{ id: string }>;
     };
@@ -402,7 +455,9 @@ describe("stageRelease", () => {
       "skill-creator",
       "zcode-guide",
     ]);
-    expect(manifest.components?.some((component) => component.id === "official-plugins")).toBe(true);
+    expect(manifest.components?.some((component) => component.id === "official-plugins")).toBe(
+      true,
+    );
   });
 
   it("removes stale component archives before restaging a target", async () => {
@@ -411,7 +466,12 @@ describe("stageRelease", () => {
     await mkdir(staleDir, { recursive: true });
     await writeFile(join(staleDir, "stale-component.tar.gz"), "stale", "utf8");
 
-    await stageRelease({ target: "linux-x64", appVersion: "9.9.9-test", archive: false, ...fixture });
+    await stageRelease({
+      target: "linux-x64",
+      appVersion: "9.9.9-test",
+      archive: false,
+      ...fixture,
+    });
 
     await expect(stat(join(staleDir, "stale-component.tar.gz"))).rejects.toThrow();
   });

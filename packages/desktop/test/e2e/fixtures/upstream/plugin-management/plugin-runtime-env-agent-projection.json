@@ -11,10 +11,7 @@
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_PLUGIN_SECRET_ENV_CASE_"],
         "bodyIncludes": ["E2E_PLUGIN_SECRET_ENV_CASE_"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "replay": { "consumeOnce": true },
       "response": {
@@ -37,10 +34,7 @@
           "toolu_e2e_plugin_secret_env",
           "E2E_PLUGIN_RUNTIME_SECRET_RESOLVED"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": { "statusCode": 200, "text": "upstream-e2e-ok" }
     }

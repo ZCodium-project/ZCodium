@@ -218,57 +218,55 @@ async function renderHarness(options: HarnessOptions) {
   );
   const activeTaskMetas =
     options.activeTaskMetas ??
-    defaultTaskMetas.filter(
-      (task) => !pinnedIds.has(task.taskId) && !archivedIds.has(task.taskId),
-    );
+    defaultTaskMetas.filter((task) => !pinnedIds.has(task.taskId) && !archivedIds.has(task.taskId));
   const pinnedTaskMetas =
     options.pinnedTaskMetas ??
-    defaultTaskMetas.filter(
-      (task) => pinnedIds.has(task.taskId) && !archivedIds.has(task.taskId),
-    );
+    defaultTaskMetas.filter((task) => pinnedIds.has(task.taskId) && !archivedIds.has(task.taskId));
   const archivedTaskMetas =
     options.archivedTaskMetas ??
     (options.archivedTaskIds ?? []).map((taskId) =>
       createTaskMeta({ taskId, title: taskId, traceId: `trace-${taskId}` }),
     );
   const controllerFrames = new Emitter<never>();
-  const controllerListTaskList = vi.fn(async (params: { kind: ZCodeTaskListKind; search?: string; limit?: number }) => {
-    if (params.search) {
-      return listTaskList();
-    }
-    const rows =
-      params.kind === "pinned"
-        ? pinnedTaskMetas
-        : params.kind === "archived"
-          ? archivedTaskMetas
-          : params.kind === "active"
-            ? [...activeTaskMetas, ...pinnedTaskMetas]
-            : activeTaskMetas;
-    const sessionById = new Map(options.sessions.map((session) => [session.sessionId, session]));
-    const items = rows
-      .map((task) => {
-        const session = sessionById.get(task.taskId);
-        return {
-          ...task,
-          ...(session
-            ? {
-                title: session.title,
-                updatedAt: session.lastActivityAt,
-                status:
-                  session.phase === "completedSuccess"
-                    ? ("completed" as const)
-                    : session.phase === "completedError"
-                      ? ("error" as const)
-                      : task.status,
-              }
-            : {}),
-          sourceAvailability: "online" as const,
-        };
-      })
-      .sort((left, right) => right.updatedAt - left.updatedAt);
-    const visible = params.limit == null ? items : items.slice(0, params.limit);
-    return { items: visible, total: items.length, hasMore: items.length > visible.length };
-  });
+  const controllerListTaskList = vi.fn(
+    async (params: { kind: ZCodeTaskListKind; search?: string; limit?: number }) => {
+      if (params.search) {
+        return listTaskList();
+      }
+      const rows =
+        params.kind === "pinned"
+          ? pinnedTaskMetas
+          : params.kind === "archived"
+            ? archivedTaskMetas
+            : params.kind === "active"
+              ? [...activeTaskMetas, ...pinnedTaskMetas]
+              : activeTaskMetas;
+      const sessionById = new Map(options.sessions.map((session) => [session.sessionId, session]));
+      const items = rows
+        .map((task) => {
+          const session = sessionById.get(task.taskId);
+          return {
+            ...task,
+            ...(session
+              ? {
+                  title: session.title,
+                  updatedAt: session.lastActivityAt,
+                  status:
+                    session.phase === "completedSuccess"
+                      ? ("completed" as const)
+                      : session.phase === "completedError"
+                        ? ("error" as const)
+                        : task.status,
+                }
+              : {}),
+            sourceAvailability: "online" as const,
+          };
+        })
+        .sort((left, right) => right.updatedAt - left.updatedAt);
+      const visible = params.limit == null ? items : items.slice(0, params.limit);
+      return { items: visible, total: items.length, hasMore: items.length > visible.length };
+    },
+  );
   const services = {
     windowControllerService: {
       listTaskList: controllerListTaskList,

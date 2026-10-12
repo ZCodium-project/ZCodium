@@ -85,13 +85,13 @@ identifier and is only shown as a technical fallback.
 
 ### Lifecycle matrix
 
-| Row state | Summary | Primary detail | Secondary call detail |
-| --- | --- | --- | --- |
-| input streaming / pending approval | MCP source + action; omit pending status | not expandable | not expandable |
-| running | MCP source + action; omit running status | current status until output exists | description + normalized input |
-| success | MCP source + action; omit completed status | result | description + normalized input |
-| error | MCP source + action + failed status | error/result | description + normalized input |
-| cancelled / stopped | MCP source + action + stopped status | not expandable | not expandable |
+| Row state                          | Summary                                    | Primary detail                     | Secondary call detail          |
+| ---------------------------------- | ------------------------------------------ | ---------------------------------- | ------------------------------ |
+| input streaming / pending approval | MCP source + action; omit pending status   | not expandable                     | not expandable                 |
+| running                            | MCP source + action; omit running status   | current status until output exists | description + normalized input |
+| success                            | MCP source + action; omit completed status | result                             | description + normalized input |
+| error                              | MCP source + action + failed status        | error/result                       | description + normalized input |
+| cancelled / stopped                | MCP source + action + stopped status       | not expandable                     | not expandable                 |
 
 ## Compatibility and boundaries
 
@@ -103,7 +103,7 @@ identifier and is only shown as a technical fallback.
   change does not introduce a separate stream, queue, snapshot or recovery state.
 - Pending and running tool-part persistence carries the bounded MCP display metadata. Cold
   hydration must reuse it when an unfinished call is closed as stopped, so `MCP server · tool ·
-  stopped` never regresses to the generic `Tool call · Stopped` summary.
+stopped` never regresses to the generic `Tool call · Stopped` summary.
 - Streaming-early tool execution is a first durable writer rather than a later optimization: its
   pending and running part writes must carry the same bounded MCP display metadata before tool
   scheduling/execution. A turn Stop or process loss may happen before end-of-stream drain, so no

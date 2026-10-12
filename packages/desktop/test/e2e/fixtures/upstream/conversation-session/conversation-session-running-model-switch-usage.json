@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_RUNNING_MODEL_SWITCH_USAGE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_RUNNING_MODEL_SWITCH_USAGE"
-        ]
+        "bodyIncludes": ["E2E_RUNNING_MODEL_SWITCH_USAGE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_RUNNING_MODEL_SWITCH_USAGE"]
       },
       "response": {
         "statusCode": 200,

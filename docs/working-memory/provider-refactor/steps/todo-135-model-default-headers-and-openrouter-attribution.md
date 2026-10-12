@@ -28,12 +28,12 @@
 
 复用现有来源构造能力，通过执行环境装配接入公共模型请求边界，不恢复旧 Registry，也不在标题、Wiki、Subagent 等业务中分别补头。
 
-| 类别 | 恢复的默认内容 |
-| --- | --- |
-| 客户端版本 | `User-Agent: ZCode/<version>`、有效版本对应的 `X-ZCode-App-Version` |
-| 产品来源 | `HTTP-Referer`、`X-Title: Z Code@electron/cli`、`X-ZCode-Agent: glm` |
-| 环境 | `X-Release-Channel`、`X-Client-Language`、`X-Client-Timezone` |
-| 平台 | `X-Platform`、`X-Os-Category`、`X-Os-Version` |
+| 类别       | 恢复的默认内容                                                       |
+| ---------- | -------------------------------------------------------------------- |
+| 客户端版本 | `User-Agent: ZCode/<version>`、有效版本对应的 `X-ZCode-App-Version`  |
+| 产品来源   | `HTTP-Referer`、`X-Title: Z Code@electron/cli`、`X-ZCode-Agent: glm` |
+| 环境       | `X-Release-Channel`、`X-Client-Language`、`X-Client-Timezone`        |
+| 平台       | `X-Platform`、`X-Os-Category`、`X-Os-Version`                        |
 
 - 保留显式客户端版本、来源和环境的装配关系，不能把 SDK 版本或远端 Worker 自己的版本误当桌面客户端版本；审查本地、远程 Worker 和独立 CLI 的现有来源传递。
 - 保留原有取值规范化与缺失值语义，不把非法换行等写入 Header；正常版本已提供时必须实际发出，不能静默变成 `unknown`。
@@ -86,15 +86,15 @@
 
 ### 验证证据
 
-| 范围 | 结果 | 本地日志 |
-| --- | --- | --- |
-| Bootstrap wire、来源装配、Registry、runtime headers | 6 文件 39 项通过；含新增 20 项最终请求测试 | `/tmp/todo135-bootstrap-tests.log` |
-| Adapter Header、鉴权与绑定、模型请求 | 5 文件 55 项通过；含新增 2 项合并/绑定测试 | `/tmp/todo135-adapters-tests.log` |
-| 既有手动 Coding Plan 安全校验及端点路由 | 2 文件 47 项通过 | `/tmp/todo135-signing-tests.log` |
-| Desktop 环境、远程启动命令、OpenRouter 匹配 | 3 文件 43 项通过，4 项 macOS 专属用例在 Linux 跳过 | `/tmp/todo135-source-tests.log` |
-| 根类型、Bootstrap 类型、Adapter 构建 | 通过 | `/tmp/todo135-typecheck.log`、`/tmp/todo135-bootstrap-typecheck.log`、`/tmp/todo135-adapters-build.log` |
-| 新增/修改测试独立严格类型检查 | 通过，使用 NodeNext / ES2023 / strict | `/tmp/todo135-test-types.log`、`/tmp/todo135-adapter-test-types.log` |
-| 根 lint、CLI 改动文件 lint、架构 | 根 0 errors / 42 既有 warnings；CLI 7 文件 0 warnings/errors；架构 0 violations | `/tmp/todo135-lint.log`、`/tmp/todo135-cli-lint.log`、`/tmp/todo135-architecture.log` |
+| 范围                                                | 结果                                                                            | 本地日志                                                                                                |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Bootstrap wire、来源装配、Registry、runtime headers | 6 文件 39 项通过；含新增 20 项最终请求测试                                      | `/tmp/todo135-bootstrap-tests.log`                                                                      |
+| Adapter Header、鉴权与绑定、模型请求                | 5 文件 55 项通过；含新增 2 项合并/绑定测试                                      | `/tmp/todo135-adapters-tests.log`                                                                       |
+| 既有手动 Coding Plan 安全校验及端点路由             | 2 文件 47 项通过                                                                | `/tmp/todo135-signing-tests.log`                                                                        |
+| Desktop 环境、远程启动命令、OpenRouter 匹配         | 3 文件 43 项通过，4 项 macOS 专属用例在 Linux 跳过                              | `/tmp/todo135-source-tests.log`                                                                         |
+| 根类型、Bootstrap 类型、Adapter 构建                | 通过                                                                            | `/tmp/todo135-typecheck.log`、`/tmp/todo135-bootstrap-typecheck.log`、`/tmp/todo135-adapters-build.log` |
+| 新增/修改测试独立严格类型检查                       | 通过，使用 NodeNext / ES2023 / strict                                           | `/tmp/todo135-test-types.log`、`/tmp/todo135-adapter-test-types.log`                                    |
+| 根 lint、CLI 改动文件 lint、架构                    | 根 0 errors / 42 既有 warnings；CLI 7 文件 0 warnings/errors；架构 0 violations | `/tmp/todo135-lint.log`、`/tmp/todo135-cli-lint.log`、`/tmp/todo135-architecture.log`                   |
 
 根 lint 默认排除 CLI，因此额外以临时配置保留同等 max-lines 和测试例外规则，对 CLI 改动文件实际检查；没有改仓库 lint 配置。Bootstrap 测试使用 Adapter 的包导出，先构建 Adapter，避免拿旧 dist 当作当前代码验证。
 

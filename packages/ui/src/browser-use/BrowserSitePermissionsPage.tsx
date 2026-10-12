@@ -21,10 +21,23 @@ export function BrowserSitePermissionsPage({
 }) {
   const { intl } = useZCodeIntl();
   const t = (id: string) => intl.formatMessage({ id: `browser.permission.${id}` });
-  const { states, error: readError, refresh, supported, write, setPermission, reset, retryWrite } =
-    useBrowserSitePermissions(origin, isVisible);
+  const {
+    states,
+    error: readError,
+    refresh,
+    supported,
+    write,
+    setPermission,
+    reset,
+    retryWrite,
+  } = useBrowserSitePermissions(origin, isVisible);
   const busy = write.status === "pending";
-  const notice = write.status === "succeeded" ? (write.operation.kind === "reset" ? "resetDone" : "saved") : null;
+  const notice =
+    write.status === "succeeded"
+      ? write.operation.kind === "reset"
+        ? "resetDone"
+        : "saved"
+      : null;
   return (
     <div
       className="h-full min-h-0 overflow-auto bg-background text-foreground"
@@ -50,7 +63,8 @@ export function BrowserSitePermissionsPage({
             <div className="flex flex-col gap-4" aria-busy={busy}>
               {BROWSER_PERMISSION_CAPABILITIES.map((capability) => {
                 const persisted = states?.[capability.key];
-                const setting = persisted === "allow" ? "allow" : persisted === "deny" ? "block" : "ask";
+                const setting =
+                  persisted === "allow" ? "allow" : persisted === "deny" ? "block" : "ask";
                 return (
                   <div
                     key={capability.key}
@@ -106,7 +120,9 @@ export function BrowserSitePermissionsPage({
                 role="status"
                 className="text-ui-sm text-foreground-subtle"
                 data-testid={
-                  notice === "resetDone" ? "browser-permission-reset-done" : "browser-permission-saved"
+                  notice === "resetDone"
+                    ? "browser-permission-reset-done"
+                    : "browser-permission-saved"
                 }
               >
                 {t(notice)}

@@ -765,20 +765,23 @@ describe("直接启动 E2E", () => {
     //     长出一条 running 的运行行；sleep 脚本没有 phase() 标记，所以轨道是一个隐含站点。
     await browser.waitUntil(
       async () =>
-        browser.execute((prefix) => {
-          const rows = Array.from(
-            document.querySelectorAll<HTMLElement>(`[data-testid^="${prefix}"]`),
-          );
-          return rows.some((row) => {
-            const line = row.querySelector<HTMLElement>(
-              '[data-workflow-run-line][data-run-status="running"]',
+        browser.execute(
+          (prefix) => {
+            const rows = Array.from(
+              document.querySelectorAll<HTMLElement>(`[data-testid^="${prefix}"]`),
             );
-            return (
-              line !== null &&
-              line.querySelector('[data-workflow-run-rail][data-implicit="true"]') !== null
-            );
-          });
-        }, testId(TID_TASK_ITEM, "")),
+            return rows.some((row) => {
+              const line = row.querySelector<HTMLElement>(
+                '[data-workflow-run-line][data-run-status="running"]',
+              );
+              return (
+                line !== null &&
+                line.querySelector('[data-workflow-run-rail][data-implicit="true"]') !== null
+              );
+            });
+          },
+          testId(TID_TASK_ITEM, ""),
+        ),
       { timeout: 60000, timeoutMsg: "侧栏里发起工作流的会话行没有长出 running 的运行行" },
     );
 

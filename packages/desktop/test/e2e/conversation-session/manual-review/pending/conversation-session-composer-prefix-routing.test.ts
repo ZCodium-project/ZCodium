@@ -1,14 +1,8 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  TID_V4_COMPOSER_INPUT,
-  ZCODE_AGENT_PROVIDER,
-} from "@zcode/shared";
+import { TID_V4_COMPOSER_INPUT, ZCODE_AGENT_PROVIDER } from "@zcode/shared";
 import { DEFAULT_WORKSPACE } from "../../../helpers/desktop-app.js";
-import {
-  prepareConversationE2E,
-  startNewTask,
-} from "../../../helpers/conversation-session.js";
+import { prepareConversationE2E, startNewTask } from "../../../helpers/conversation-session.js";
 
 const TEST_TIMEOUT_MS = 120000;
 const TID_PROMPT_SUGGESTION_PANEL = "prompt-suggestion-panel";
@@ -45,9 +39,7 @@ describe("会话区 Composer 前缀提示路由 E2E", () => {
 
   after(async () => {
     await Promise.all(
-      createdWorkspacePaths.map((targetPath) =>
-        rm(targetPath, { recursive: true, force: true }),
-      ),
+      createdWorkspacePaths.map((targetPath) => rm(targetPath, { recursive: true, force: true })),
     );
     await browser.electron.restoreAllMocks();
     // 修复原因：task index sqlite 由 host/service 生命周期持有，Windows 上在
@@ -91,7 +83,11 @@ describe("会话区 Composer 前缀提示路由 E2E", () => {
     );
 
     await setComposerText(`@${seed.whiteboardName}`);
-    const atWhiteboardPanel = await waitForPanelSections("@", ["whiteboards"], "@ 画板候选面板没有打开");
+    const atWhiteboardPanel = await waitForPanelSections(
+      "@",
+      ["whiteboards"],
+      "@ 画板候选面板没有打开",
+    );
     expect(optionTexts(atWhiteboardPanel).join("\n")).toContain(seed.whiteboardName);
     assertPanelExcludesSections(atWhiteboardPanel, ["commands", "subagents", "skills"]);
 
@@ -109,11 +105,19 @@ describe("会话区 Composer 前缀提示路由 E2E", () => {
     );
 
     await setComposerText("/");
-    const slashPanel = await waitForPanelSections("/", ["commands", "skills", "subagents"], "/ 候选面板没有打开");
+    const slashPanel = await waitForPanelSections(
+      "/",
+      ["commands", "skills", "subagents"],
+      "/ 候选面板没有打开",
+    );
     assertPanelExcludesSections(slashPanel, ["files", "whiteboards"]);
 
     await setComposerText(`/${seed.commandName}`);
-    const slashCommandPanel = await waitForPanelSections("/", ["commands"], "/ command 候选面板没有打开");
+    const slashCommandPanel = await waitForPanelSections(
+      "/",
+      ["commands"],
+      "/ command 候选面板没有打开",
+    );
     expect(optionTexts(slashCommandPanel).join("\n")).toContain(`/${seed.commandName}`);
     await browser.keys("Enter");
     await waitForComposerMarkdown(
@@ -131,7 +135,11 @@ describe("会话区 Composer 前缀提示路由 E2E", () => {
     );
 
     await setComposerText(`/${seed.subagentName}`);
-    const slashSubagentPanel = await waitForPanelSections("/", ["subagents"], "/ subagent 候选面板没有打开");
+    const slashSubagentPanel = await waitForPanelSections(
+      "/",
+      ["subagents"],
+      "/ subagent 候选面板没有打开",
+    );
     expect(optionTexts(slashSubagentPanel).join("\n")).toContain(seed.subagentName);
     await browser.keys("Tab");
     await waitForComposerMarkdown(
@@ -151,18 +159,11 @@ describe("会话区 Composer 前缀提示路由 E2E", () => {
   });
 });
 
-async function seedWorkspaceFileCandidates(seed: {
-  directoryName: string;
-  fileName: string;
-}) {
+async function seedWorkspaceFileCandidates(seed: { directoryName: string; fileName: string }) {
   const directoryPath = join(DEFAULT_WORKSPACE, seed.directoryName);
   const filePath = join(DEFAULT_WORKSPACE, seed.fileName);
   await mkdir(directoryPath, { recursive: true });
-  await writeFile(
-    filePath,
-    "export const e2eComposerPrefixRouting = true;\n",
-    "utf-8",
-  );
+  await writeFile(filePath, "export const e2eComposerPrefixRouting = true;\n", "utf-8");
   createdWorkspacePaths.push(directoryPath, filePath);
 }
 
@@ -179,15 +180,10 @@ async function seedRendererPromptSources(seed: {
         __subagentsStoreE2E?: { setState: (state: Record<string, unknown>) => void };
         __whiteboardStoreE2E?: {
           getState: () => {
-            createBoard: (params: {
-              defaultNamePrefix: string;
-              workspacePath: string;
-            }) => { id: string };
-            renameBoard: (params: {
-              boardId: string;
-              name: string;
-              workspacePath: string;
-            }) => void;
+            createBoard: (params: { defaultNamePrefix: string; workspacePath: string }) => {
+              id: string;
+            };
+            renameBoard: (params: { boardId: string; name: string; workspacePath: string }) => void;
           };
         };
         __zcodeSessionStoreE2E?: {
@@ -302,23 +298,27 @@ async function seedRendererPromptSources(seed: {
 async function setComposerText(text: string) {
   await browser.waitUntil(
     async () =>
-      browser.execute((inputTestId, nextText) => {
-        const input = document.querySelector<HTMLElement>(
-          `[data-testid="${inputTestId}"]`,
-        ) as (HTMLElement & {
-          __zcodeLexicalInputE2E?: {
-            focus: () => void;
-            setText: (value: string) => void;
-          };
-        }) | null;
-        const bridge = input?.__zcodeLexicalInputE2E;
-        if (!bridge) {
-          return false;
-        }
-        bridge.setText(nextText);
-        bridge.focus();
-        return true;
-      }, TID_V4_COMPOSER_INPUT, text),
+      browser.execute(
+        (inputTestId, nextText) => {
+          const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`) as
+            | (HTMLElement & {
+                __zcodeLexicalInputE2E?: {
+                  focus: () => void;
+                  setText: (value: string) => void;
+                };
+              })
+            | null;
+          const bridge = input?.__zcodeLexicalInputE2E;
+          if (!bridge) {
+            return false;
+          }
+          bridge.setText(nextText);
+          bridge.focus();
+          return true;
+        },
+        TID_V4_COMPOSER_INPUT,
+        text,
+      ),
     {
       timeout: 10000,
       timeoutMsg: `composer prefix routing: 输入框 E2E bridge 未就绪，无法输入 ${text}`,
@@ -358,9 +358,7 @@ function arraysEqual(left: string[], right: string[]) {
 function getPanelSnapshot(): Promise<PanelSnapshot> {
   return browser.execute(
     (panelTestId, optionPrefix, statusPrefix) => {
-      const panel = document.querySelector<HTMLElement>(
-        `[data-testid="${panelTestId}"]`,
-      );
+      const panel = document.querySelector<HTMLElement>(`[data-testid="${panelTestId}"]`);
       const options = Array.from(
         panel?.querySelectorAll<HTMLElement>(`[data-testid^="${optionPrefix}-"]`) ?? [],
       ).map((element) => ({
@@ -426,11 +424,11 @@ async function waitForComposerMarkdownContaining(expected: string, timeoutMsg: s
 
 function getComposerMarkdown(): Promise<string> {
   return browser.execute((inputTestId) => {
-    const input = document.querySelector<HTMLElement>(
-      `[data-testid="${inputTestId}"]`,
-    ) as (HTMLElement & {
-      __zcodeLexicalInputE2E?: { getText: () => string };
-    }) | null;
+    const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`) as
+      | (HTMLElement & {
+          __zcodeLexicalInputE2E?: { getText: () => string };
+        })
+      | null;
     return input?.__zcodeLexicalInputE2E?.getText() ?? "";
   }, TID_V4_COMPOSER_INPUT);
 }

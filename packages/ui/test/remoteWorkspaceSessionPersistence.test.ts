@@ -181,9 +181,7 @@ describe("restorePersistedRemoteWorkspaceSessions", () => {
 
     restorePersistedRemoteWorkspaceSessions({
       settings: {
-        lastWorkspaceSession: [
-          { kind: "local", workspacePath: "/Users/demo/project" },
-        ],
+        lastWorkspaceSession: [{ kind: "local", workspacePath: "/Users/demo/project" }],
         lastActiveTabIndex: 0,
       },
       conversationWorkspacePath,

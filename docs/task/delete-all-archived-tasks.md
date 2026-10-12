@@ -77,19 +77,19 @@ accepted：工具栏菜单定位、打开菜单不查询/删除、菜单选择�
 
 ### Feature Summary
 
-| 字段 | 内容 |
-| --- | --- |
-| Capability / mode | 归档任务批量删除 / planning |
-| Change layer | presentation、validation、commit-effect、persistence |
-| Primary seeds | WorkspaceArchivedTasksFlatSection、WebRemoteControlTaskIndex、createControllerRoutedTaskService、TaskIndexRepo |
-| Out of scope | 会话物理清理、工作区文件、CLI lifecycle、自动重连、全局磁盘项目扫描 |
+| 字段              | 内容                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| Capability / mode | 归档任务批量删除 / planning                                                                                    |
+| Change layer      | presentation、validation、commit-effect、persistence                                                           |
+| Primary seeds     | WorkspaceArchivedTasksFlatSection、WebRemoteControlTaskIndex、createControllerRoutedTaskService、TaskIndexRepo |
+| Out of scope      | 会话物理清理、工作区文件、CLI lifecycle、自动重连、全局磁盘项目扫描                                            |
 
 ### UI Surface Matrix
 
-| 场景/入口 | 共享实现 | 展示状态/默认来源 | 校验与提交 | 权威落点 | 模式及隔离 |
-| --- | --- | --- | --- | --- | --- |
-| 桌面归档平铺 | 工具栏更多菜单、确认框、workspace services resolver | useGlobalTaskList；默认折叠 20 条 | 全量 listArchivedTasks；deleteArchivedTasks | 对应 Host tasks-index | 当前窗口全部 tabs；local/remote 按完整身份路由 |
-| 手机 Web 归档索引 | 同一批量控件和服务接口 | desktop workspace-list snapshot；不受显示过滤影响 | 只处理当前 attachment 可操作的 workspace | shared-host / 对应远端 tasks-index | 不能把本地任务送往远端 baseServices |
+| 场景/入口         | 共享实现                                            | 展示状态/默认来源                                 | 校验与提交                                  | 权威落点                           | 模式及隔离                                     |
+| ----------------- | --------------------------------------------------- | ------------------------------------------------- | ------------------------------------------- | ---------------------------------- | ---------------------------------------------- |
+| 桌面归档平铺      | 工具栏更多菜单、确认框、workspace services resolver | useGlobalTaskList；默认折叠 20 条                 | 全量 listArchivedTasks；deleteArchivedTasks | 对应 Host tasks-index              | 当前窗口全部 tabs；local/remote 按完整身份路由 |
+| 手机 Web 归档索引 | 同一批量控件和服务接口                              | desktop workspace-list snapshot；不受显示过滤影响 | 只处理当前 attachment 可操作的 workspace    | shared-host / 对应远端 tasks-index | 不能把本地任务送往远端 baseServices            |
 
 ### Shared And Divergent Behavior
 
@@ -97,13 +97,13 @@ accepted：工具栏菜单定位、打开菜单不查询/删除、菜单选择�
 
 ### Feature Relationships / State Owners And Commit Sinks
 
-| 等级 | 关系 | 原因/证据 |
-| --- | --- | --- |
-| must-inspect | 归档入口 -> scoped task service -> Controller -> Repo | 跨 source 写入必须保留 host 路由与事务内归档检查 |
-| must-inspect | deleted -> task_deleted -> 列表 membership | CLI session 保留，不能被后续 summary 重新展示 |
-| should-inspect | 删除 -> 分组引用与选中任务状态 | 与单条删除相同，事务成功后清理 |
-| invariant-only | 桌面 continuous / 手机 replayable | 本功能不改 stream、snapshot recovery、queue、owner/lease，不向 main/relay 下沉状态 |
-| evidence-only | TSL20、task-index row authority fixture | 提供保留会话和全量列表的回归证据 |
+| 等级           | 关系                                                  | 原因/证据                                                                          |
+| -------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| must-inspect   | 归档入口 -> scoped task service -> Controller -> Repo | 跨 source 写入必须保留 host 路由与事务内归档检查                                   |
+| must-inspect   | deleted -> task_deleted -> 列表 membership            | CLI session 保留，不能被后续 summary 重新展示                                      |
+| should-inspect | 删除 -> 分组引用与选中任务状态                        | 与单条删除相同，事务成功后清理                                                     |
+| invariant-only | 桌面 continuous / 手机 replayable                     | 本功能不改 stream、snapshot recovery、queue、owner/lease，不向 main/relay 下沉状态 |
+| evidence-only  | TSL20、task-index row authority fixture               | 提供保留会话和全量列表的回归证据                                                   |
 
 ### Must-Preserve Invariants
 
@@ -125,12 +125,12 @@ accepted：工具栏菜单定位、打开菜单不查询/删除、菜单选择�
 
 主域为 UI、持久化、workspace 隔离。维度为任务数量 0/1/大于20、确认/取消、归档状态变化、成功/失败/离线，以及 desktop/Web。
 
-| Case | Setup -> Action | Assertions | Evidence / 状态 |
-| --- | --- | --- | --- |
-| TSL39 | 25 条归档 + 普通任务；点击批量、取消、再确认 | 确认数量含折叠项；取消无写入；全部归档 deleted，普通项保留，UI 空态禁用 | 真实 SQLite + desktop pending E2E |
-| TSL39-guard | 同路径不同 identity；确认后恢复/新增归档；重复删除 | 只删除确认集合且仍归档目标；恢复/已删除跳过；身份隔离 | Repo/adapter focused tests |
-| TSL39-partial | 一个 source 不可访问、一个 task 写失败 | 明示未处理项目；其它项继续；失败项保留、无成功广播 | 批量 orchestration + Repo focused tests |
-| TSL39-web | Web 归档入口，attachment 可写 scope 与只读 scope 混合 | 同一确认/全量删除行为；成功项移除快照，未授权 source 不调用 | Web UI / shared control focused tests |
+| Case          | Setup -> Action                                       | Assertions                                                              | Evidence / 状态                         |
+| ------------- | ----------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------- |
+| TSL39         | 25 条归档 + 普通任务；点击批量、取消、再确认          | 确认数量含折叠项；取消无写入；全部归档 deleted，普通项保留，UI 空态禁用 | 真实 SQLite + desktop pending E2E       |
+| TSL39-guard   | 同路径不同 identity；确认后恢复/新增归档；重复删除    | 只删除确认集合且仍归档目标；恢复/已删除跳过；身份隔离                   | Repo/adapter focused tests              |
+| TSL39-partial | 一个 source 不可访问、一个 task 写失败                | 明示未处理项目；其它项继续；失败项保留、无成功广播                      | 批量 orchestration + Repo focused tests |
+| TSL39-web     | Web 归档入口，attachment 可写 scope 与只读 scope 混合 | 同一确认/全量删除行为；成功项移除快照，未授权 source 不调用             | Web UI / shared control focused tests   |
 
 accepted：以上用例。pruned：provider/Goal/queue/工具/主题与删除状态全排列（删除只修改 membership）；主题/locale 使用 UI 代表验证，stream 边界维持既有回归。undefined：无。bug-candidate：旧确认框虚称清理会话数据，本次纠正。
 

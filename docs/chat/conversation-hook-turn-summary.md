@@ -91,6 +91,7 @@ Projection 归位（live / cold 同源约束）
 | cancelled        | 已取消  |
 
 Hook 失败不自动展开 Popover、不弹全局 Toast，也不直接把 task 标成失败。
+
 - 已实际执行的 `UserPromptSubmit` Hook 若阻断当前输入，则将脱敏后的阻断原因同步到
   `snapshot.control.lastError`，由聊天区的 `ChatErrorBanner` 展示；这只是当前输入的错误提示，
   不把成功完成的 turn 改成 `phase=error`，下一次 `TurnStarted` 会清除该提示。准入阶段尚未执行的

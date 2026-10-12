@@ -9,10 +9,7 @@ import {
   type SSHLifecycleProvider,
   type SSHLifecycleTask,
 } from "../../../helpers/ssh-remote-lifecycle.js";
-import {
-  readHostProcesses,
-  waitForRemoteTab,
-} from "../../../helpers/ssh-remote-p0.js";
+import { readHostProcesses, waitForRemoteTab } from "../../../helpers/ssh-remote-p0.js";
 
 const CASE_MARKER = "E2E_SSH_P0_TASK_LIFECYCLE";
 

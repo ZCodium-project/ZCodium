@@ -81,7 +81,9 @@ export async function executeDeepseekRun(input: ExecuteRunInput) {
 
     if (!response.ok || !response.body) {
       const errorBody = await response.text();
-      throw new Error(`DeepSeek request failed: ${response.status} ${response.statusText} ${errorBody}`);
+      throw new Error(
+        `DeepSeek request failed: ${response.status} ${response.statusText} ${errorBody}`,
+      );
     }
 
     let buffer = "";

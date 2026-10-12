@@ -1,7 +1,10 @@
 import { clearAppData, getE2EAppDataPaths } from "../../../helpers/desktop-app.js";
 import { getPluginList } from "../../../helpers/plugin-management-lifecycle.js";
 import { PLUGIN_MCP_PLUGIN_ID } from "../../../helpers/plugin-mcp-skill.js";
-import { pluginConfigEnabled, readWorkspacePluginConfig } from "../../../helpers/workspace-plugin-runtime.js";
+import {
+  pluginConfigEnabled,
+  readWorkspacePluginConfig,
+} from "../../../helpers/workspace-plugin-runtime.js";
 
 describe("WPL-001 Workspace Plugin workspace isolation E2E", () => {
   after(async () => {
@@ -15,20 +18,16 @@ describe("WPL-001 Workspace Plugin workspace isolation E2E", () => {
     const { homeDir, workspace } = getE2EAppDataPaths();
     const workspaceB = `${homeDir}/WorkspaceB`;
     expect(pluginConfigEnabled(await readWorkspacePluginConfig())).toBe(true);
-    const userPluginA = (
-      await getPluginList(workspace, undefined, "user")
-    ).plugins.find((item) => item.id === PLUGIN_MCP_PLUGIN_ID);
-    const workspacePluginA = (
-      await getPluginList(workspace, undefined, "workspace")
-    ).plugins.find(
+    const userPluginA = (await getPluginList(workspace, undefined, "user")).plugins.find(
       (item) => item.id === PLUGIN_MCP_PLUGIN_ID,
     );
-    const userPluginB = (
-      await getPluginList(workspaceB, undefined, "user")
-    ).plugins.find((item) => item.id === PLUGIN_MCP_PLUGIN_ID);
-    const workspacePluginB = (
-      await getPluginList(workspaceB, undefined, "workspace")
-    ).plugins.find(
+    const workspacePluginA = (await getPluginList(workspace, undefined, "workspace")).plugins.find(
+      (item) => item.id === PLUGIN_MCP_PLUGIN_ID,
+    );
+    const userPluginB = (await getPluginList(workspaceB, undefined, "user")).plugins.find(
+      (item) => item.id === PLUGIN_MCP_PLUGIN_ID,
+    );
+    const workspacePluginB = (await getPluginList(workspaceB, undefined, "workspace")).plugins.find(
       (item) => item.id === PLUGIN_MCP_PLUGIN_ID,
     );
     expect(userPluginA).toMatchObject({ enabled: false, enabledSource: "user" });

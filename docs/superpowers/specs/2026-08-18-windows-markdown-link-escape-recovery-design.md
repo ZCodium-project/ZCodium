@@ -90,6 +90,7 @@ markdown 源文本
    UNC 只要求**单个**前导反斜杠：源码里的 `\\host` 中 `\\` 自身就是一次标点转义，
    解析后只剩一个反斜杠（实测 `[log](\\build01\share\.logs\run.txt)` →
    `\build01\share.logs\run.txt`）。要求两个反而会把真正需要还原的 UNC 全部漏掉。
+
 2. `node.title` 非空则跳过（不解析 title 语法）。
 3. 用 `node.position` 的 start/end offset 从 VFile 原文切出整段，按节点形态取
    destination：

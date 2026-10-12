@@ -300,14 +300,14 @@ pnpm lint
 
 ### 9.2 关系分级
 
-| 等级           | 关系                                          | 原因                                   |
-| -------------- | --------------------------------------------- | -------------------------------------- |
-| must-inspect   | zcode-cua package -> z-code staging/resolver  | producer/consumer 同一运行时契约       |
-| must-inspect   | Host lifecycle -> official plugin credentials | Helper ready 后才可投影 authority      |
-| should-inspect | electron-builder/runtime preparation          | clean checkout 必须可重现              |
+| 等级           | 关系                                          | 原因                                |
+| -------------- | --------------------------------------------- | ----------------------------------- |
+| must-inspect   | zcode-cua package -> z-code staging/resolver  | producer/consumer 同一运行时契约    |
+| must-inspect   | Host lifecycle -> official plugin credentials | Helper ready 后才可投影 authority   |
+| should-inspect | electron-builder/runtime preparation          | clean checkout 必须可重现           |
 | invariant-only | macOS Helper/TCC/PiP                          | Windows 迁移不得改变上游 macOS 语义 |
-| invariant-only | web remote shared-host                        | 不新增独立 runtime                     |
-| evidence-only  | Windows live smoke                            | 证明实机行为，不定义产品边界           |
+| invariant-only | web remote shared-host                        | 不新增独立 runtime                  |
+| evidence-only  | Windows live smoke                            | 证明实机行为，不定义产品边界        |
 
 ### 9.3 Graph drift
 

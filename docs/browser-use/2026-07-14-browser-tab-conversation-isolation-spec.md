@@ -106,15 +106,15 @@ A active：resolve active tab from registry[A] + ensureResident[A] + side pane e
 
 ## 4. 验收案例
 
-| Case    | Setup                                                    | Action                              | 断言                                   |
-| ------- | -------------------------------------------------------- | ----------------------------------- | -------------------------------------- |
-| BCP-176 | session A、B 位于同 window/workspace，A 有非空 human tab | B 调用 `user.openTabs()`            | 返回 `[]`                              |
-| BCP-177 | session A 有非空 human tab                               | A 调用 `user.openTabs()`            | 返回 A 的 tab，且可 claim              |
-| BCP-178 | A claim 后 turn end / deliverable / closeSession         | B 调用 `user.openTabs()`            | B 始终看不到；A 恢复时仍可看到非空 tab |
-| BCP-179 | A 有 URL `""`、`about:blank`、https 三个 human tabs      | A 调用 `user.openTabs()`            | 只返回 https tab                       |
-| BCP-180 | A 调用 `tabs.new()`，guest 当前为 `about:blank`          | A 调用 `tabs.list()`                | 仍返回受控 tab                         |
-| BCP-181 | 旧 renderer attach 缺少 sessionId                        | 任意 session 调用 `user.openTabs()` | 旧 tab 不可认领，不跨对话泄漏          |
-| BCP-182 | 相同 path、不同 workspaceIdentity/session                | 两侧分别枚举                        | 不串 workspace、不串 session           |
+| Case    | Setup                                                    | Action                              | 断言                                                            |
+| ------- | -------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------- |
+| BCP-176 | session A、B 位于同 window/workspace，A 有非空 human tab | B 调用 `user.openTabs()`            | 返回 `[]`                                                       |
+| BCP-177 | session A 有非空 human tab                               | A 调用 `user.openTabs()`            | 返回 A 的 tab，且可 claim                                       |
+| BCP-178 | A claim 后 turn end / deliverable / closeSession         | B 调用 `user.openTabs()`            | B 始终看不到；A 恢复时仍可看到非空 tab                          |
+| BCP-179 | A 有 URL `""`、`about:blank`、https 三个 human tabs      | A 调用 `user.openTabs()`            | 只返回 https tab                                                |
+| BCP-180 | A 调用 `tabs.new()`，guest 当前为 `about:blank`          | A 调用 `tabs.list()`                | 仍返回受控 tab                                                  |
+| BCP-181 | 旧 renderer attach 缺少 sessionId                        | 任意 session 调用 `user.openTabs()` | 旧 tab 不可认领，不跨对话泄漏                                   |
+| BCP-182 | 相同 path、不同 workspaceIdentity/session                | 两侧分别枚举                        | 不串 workspace、不串 session                                    |
 | BCP-206 | A 已有 mounted Browser/browser-use tab；B 无归属 tab     | 无预算压力下 A → B → A 切换对话     | A 的 webview 保持挂载；B 收起；切回 A 重新选中原 tab 并主动展开 |
 | BCP-217 | A 的后台 guest 因窗口预算已挂起                          | 切回 A                              | stable tabId/shell 不变；新 guest 恢复后展示；B 的状态不泄漏    |
 
@@ -150,10 +150,10 @@ A active：resolve active tab from registry[A] + ensureResident[A] + side pane e
 
 2026-07-23 guest 恢复补充的澄清记录：
 
-| 轮次 | 问题 | 用户确认 | 固定边界 |
-| ---- | ---- | -------- | -------- |
-| 1 | 历史对话 browser tab 是否应因切换而释放 | “即使切换对话也应该一直后台保留” | 普通切换继续保持同一 guest，不做刷新/重建 |
-| 2 | 已被 Chromium 异常终止的 guest 如何处理 | 用户在收到“最后 URL + 稳定 tabId 原位恢复”的根因/方案后要求修改 | 仅替换失效 guest；显式关闭不恢复；不扩展跨进程重启持久化 |
+| 轮次            | 问题                                    | 用户确认                                                        | 固定边界                                                                                                  |
+| --------------- | --------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 1               | 历史对话 browser tab 是否应因切换而释放 | “即使切换对话也应该一直后台保留”                                | 普通切换继续保持同一 guest，不做刷新/重建                                                                 |
+| 2               | 已被 Chromium 异常终止的 guest 如何处理 | 用户在收到“最后 URL + 稳定 tabId 原位恢复”的根因/方案后要求修改 | 仅替换失效 guest；显式关闭不恢复；不扩展跨进程重启持久化                                                  |
 | 3（2026-07-31） | 后台 Tab 是否引入预算挂起与跨重启恢复   | 确认引入                                                        | task 切换本身仍不卸载；每窗口超过 32 个 live-detached 后允许按保护/LRU 挂起，并新增跨重启 page-state 恢复 |
 
 第 3 轮取代前两轮中的“始终同一 guest”和“不跨进程恢复”，但不改变对话/workspace 隔离。

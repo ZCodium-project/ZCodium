@@ -9,8 +9,6 @@ describe("shared tabs layout spacing", () => {
     );
 
     expect(source).toContain('"group/tabs flex data-horizontal:flex-col"');
-    expect(source).not.toContain(
-      '"group/tabs flex gap-2 data-horizontal:flex-col"',
-    );
+    expect(source).not.toContain('"group/tabs flex gap-2 data-horizontal:flex-col"');
   });
 });

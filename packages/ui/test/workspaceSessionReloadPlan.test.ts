@@ -44,17 +44,11 @@ describe("buildWorkspaceSessionReloadPlan", () => {
 
   it("短时间内重复触发 reload 会命中防抖", () => {
     expect(
-      shouldDebounceWorkspaceSessionReload(
-        1_000,
-        1_000 + WORKSPACE_SESSION_RELOAD_DEBOUNCE_MS - 1,
-      ),
+      shouldDebounceWorkspaceSessionReload(1_000, 1_000 + WORKSPACE_SESSION_RELOAD_DEBOUNCE_MS - 1),
     ).toBe(true);
 
     expect(
-      shouldDebounceWorkspaceSessionReload(
-        1_000,
-        1_000 + WORKSPACE_SESSION_RELOAD_DEBOUNCE_MS,
-      ),
+      shouldDebounceWorkspaceSessionReload(1_000, 1_000 + WORKSPACE_SESSION_RELOAD_DEBOUNCE_MS),
     ).toBe(false);
   });
 });

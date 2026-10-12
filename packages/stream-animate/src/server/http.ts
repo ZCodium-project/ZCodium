@@ -5,7 +5,14 @@ import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ViteDevServer } from "vite";
 import type { ChatMessageInput, RunRequestInput, RunSummary } from "../shared/types.js";
-import { DATA_DIR_NAME, createRunId, listRuns, readRawLines, readRun, writeRunSummary } from "./dataStore.js";
+import {
+  DATA_DIR_NAME,
+  createRunId,
+  listRuns,
+  readRawLines,
+  readRun,
+  writeRunSummary,
+} from "./dataStore.js";
 import { executeDeepseekRun } from "./deepseekRunner.js";
 
 const DEFAULT_BASE_URL = "https://api.deepseek.com/chat/completions";
@@ -39,7 +46,9 @@ export async function startStreamAnimateServer(options: ServerOptions) {
     }
   });
 
-  await new Promise<void>((resolveServer) => server.listen(options.port, "127.0.0.1", resolveServer));
+  await new Promise<void>((resolveServer) =>
+    server.listen(options.port, "127.0.0.1", resolveServer),
+  );
   return {
     close: async () => {
       await Promise.all([
@@ -182,7 +191,9 @@ function mergeActiveRuns(storedRuns: RunSummary[]) {
   for (const run of activeRuns.values()) {
     runById.set(run.id, run);
   }
-  return [...runById.values()].sort((first, second) => second.createdAt.localeCompare(first.createdAt));
+  return [...runById.values()].sort((first, second) =>
+    second.createdAt.localeCompare(first.createdAt),
+  );
 }
 
 async function createViteServer(packageRoot: string): Promise<ViteDevServer> {
@@ -196,7 +207,11 @@ async function createViteServer(packageRoot: string): Promise<ViteDevServer> {
   });
 }
 
-async function serveStatic(packageRoot: string, request: IncomingMessage, response: ServerResponse) {
+async function serveStatic(
+  packageRoot: string,
+  request: IncomingMessage,
+  response: ServerResponse,
+) {
   const requestUrl = new URL(request.url ?? "/", "http://127.0.0.1");
   const staticRoot = join(packageRoot, "dist");
   const candidate = resolve(staticRoot, `.${decodeURIComponent(requestUrl.pathname)}`);

@@ -17,6 +17,7 @@ Rendered evidence judges the problem. Structure evidence helps explain the cause
 ## Execution path
 
 ### Preferred route: DOCX -> PDF / page artifacts inside this skill
+
 ```bash
 python3 <skill_dir>/scripts/docx_to_pdf.py --input <input.docx> --output /tmp/docx-render.pdf
 ```
@@ -25,6 +26,7 @@ Then inspect the generated PDF or derived page artifacts from inside `docx`. Ren
 must stay in this skill so DOCX page diagnosis and repair are all-in-one.
 
 ### Page PNG route
+
 ```bash
 python3 <skill_dir>/scripts/render_docx_pages.py <input.docx> --output-dir /tmp/docx-pages
 ```
@@ -32,6 +34,7 @@ python3 <skill_dir>/scripts/render_docx_pages.py <input.docx> --output-dir /tmp/
 This route is valid only when full-fidelity rendering requirements are met. If the required render toolchain is missing, block and report the missing dependency. Do not degrade to a lower-fidelity preview path.
 
 ### Delivery route: rendered artifact -> page issue summary -> structure alignment
+
 After page inspection, write down the observed rendered symptoms and produce the rendered report from
 inside `docx`:
 
@@ -50,6 +53,7 @@ The exact issue-file format and output contract are defined in `rendered-deliver
 ## Output contract
 
 Return:
+
 - `artifactSummary`: PDF / PNG artifact inventory
 - `pageIssueSummary`: each issue must name pages, severity, and visual symptom
 - `structureCauseAlignment`: for each issue, align the symptom to structure signals
@@ -57,6 +61,7 @@ Return:
 - `recommendedChecks`: tell the next operator what to verify or rerender
 
 Typical issue classes that must use this format:
+
 - `layout_overflow_or_clipping`
 - `template_fidelity`
 - `toc_layout_or_update`

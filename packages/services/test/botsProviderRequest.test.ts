@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  fetchBotProvider,
-  fetchBotProviderJson,
-} from "#src/bots/providers/providerRequest.js";
+import { fetchBotProvider, fetchBotProviderJson } from "#src/bots/providers/providerRequest.js";
 
 describe("fetchBotProvider", () => {
   it("aborts a provider request when its deadline expires", async () => {

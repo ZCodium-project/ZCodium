@@ -97,7 +97,10 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": ["E2E_FILE_TOOLS_ATOMIC_WRITE", "The file file-tools-atomic-write-e2e/write.sh has been updated successfully"],
+        "bodyIncludes": [
+          "E2E_FILE_TOOLS_ATOMIC_WRITE",
+          "The file file-tools-atomic-write-e2e/write.sh has been updated successfully"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

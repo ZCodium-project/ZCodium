@@ -41,11 +41,11 @@ DEPRECATED: Background tasks return their output file path in the tool result, a
 
 输入 schema 是 strict object：
 
-| 字段      | Provider schema                                                       | Runtime                             |
-| --------- | --------------------------------------------------------------------- | ----------------------------------- |
-| `task_id` | required string，`The task ID to get output from`                              | 空字符串报 `Task ID is required`    |
-| `block`   | required boolean，default `true`，`Whether to wait for completion`              | 省略时仍补默认值；额外兼容字符串 `"true"` / `"false"` |
-| `timeout` | required number，default `30000`，min `0`，max `600000`，`Max wait time in ms` | 省略时仍补默认值；单位毫秒          |
+| 字段      | Provider schema                                                                | Runtime                                               |
+| --------- | ------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| `task_id` | required string，`The task ID to get output from`                              | 空字符串报 `Task ID is required`                      |
+| `block`   | required boolean，default `true`，`Whether to wait for completion`             | 省略时仍补默认值；额外兼容字符串 `"true"` / `"false"` |
+| `timeout` | required number，default `30000`，min `0`，max `600000`，`Max wait time in ms` | 省略时仍补默认值；单位毫秒                            |
 
 Provider `input_schema.required` 固定为
 `["task_id", "block", "timeout"]`。其中 `block`、`timeout` 同时保留 runtime default；

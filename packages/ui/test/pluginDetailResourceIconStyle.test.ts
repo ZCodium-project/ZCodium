@@ -3,10 +3,7 @@ import { describe, expect, it } from "vitest";
 
 describe("Plugin detail resource icons", () => {
   it("matches the resource icons used by settings lists", () => {
-    const pluginDetail = readFileSync(
-      "packages/ui/src/settings/PluginStoreDetailView.tsx",
-      "utf8",
-    );
+    const pluginDetail = readFileSync("packages/ui/src/settings/PluginStoreDetailView.tsx", "utf8");
 
     expect(pluginDetail).toContain("mcp: Server");
     expect(pluginDetail).toContain("skill: WandSparkles");

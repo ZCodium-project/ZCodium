@@ -10,24 +10,26 @@ fail repeatedly. This guide documents the ACTUAL patterns found in Chinese templ
 
 ### Pattern A: Numeric IDs (most common in Chinese Word templates)
 
-| Style Purpose | styleId | w:name | w:basedOn |
-|--------------|---------|--------|-----------|
-| Normal body | `a` | "Normal" | — |
-| Default paragraph font | `a0` | "Default Paragraph Font" | — |
-| Heading 1 (章标题) | `1` | "heading 1" | `a` |
-| Heading 2 (节标题) | `2` | "heading 2" | `a` |
-| Heading 3 (小节标题) | `3` | "heading 3" | `a` |
-| TOC 1 | `11` | "toc 1" | `a` |
-| TOC 2 | `21` | "toc 2" | `a` |
-| TOC 3 | `31` | "toc 3" | `a` |
-| Header | `a3` | "header" | `a` |
-| Footer | `a4` | "footer" | `a` |
-| Table of Contents heading | `10` | "TOC Heading" | `1` |
+| Style Purpose             | styleId | w:name                   | w:basedOn |
+| ------------------------- | ------- | ------------------------ | --------- |
+| Normal body               | `a`     | "Normal"                 | —         |
+| Default paragraph font    | `a0`    | "Default Paragraph Font" | —         |
+| Heading 1 (章标题)        | `1`     | "heading 1"              | `a`       |
+| Heading 2 (节标题)        | `2`     | "heading 2"              | `a`       |
+| Heading 3 (小节标题)      | `3`     | "heading 3"              | `a`       |
+| TOC 1                     | `11`    | "toc 1"                  | `a`       |
+| TOC 2                     | `21`    | "toc 2"                  | `a`       |
+| TOC 3                     | `31`    | "toc 3"                  | `a`       |
+| Header                    | `a3`    | "header"                 | `a`       |
+| Footer                    | `a4`    | "footer"                 | `a`       |
+| Table of Contents heading | `10`    | "TOC Heading"            | `1`       |
 
 ### Pattern B: English IDs (less common, usually from international templates)
+
 Standard Heading1/Heading2/Heading3/Normal — these follow the Western pattern.
 
 ### Pattern C: Mixed (some Chinese, some English)
+
 Some templates define custom styles with Chinese names:
 | Style Purpose | styleId | w:name |
 |--------------|---------|--------|
@@ -99,12 +101,14 @@ Chinese university theses follow a highly standardized structure:
 Templates contain EXAMPLE content that must be replaced. Here's how to find the zones:
 
 ### Zone A (Front matter) — KEEP from template
+
 - Starts at: paragraph 0
 - Ends at: the paragraph BEFORE the first chapter heading
 - Contains: cover, declaration, abstracts, TOC
 - How to detect end: search for first paragraph with style `1` (or Heading1) containing "第1章" or "绪论"
 
 ### Zone B (Body content) — REPLACE with user content
+
 - Starts at: first chapter heading ("第1章...")
 - Ends at: "参考文献" heading (inclusive) or last body paragraph before acknowledgments
 - How to detect:
@@ -119,22 +123,23 @@ Templates contain EXAMPLE content that must be replaced. Here's how to find the 
   ```
 
 ### Zone C (Back matter) — KEEP from template (or remove)
+
 - Starts after: 参考文献
 - Contains: 致谢, 附录, final sectPr
 
 ## Font Expectations in Chinese Thesis Templates
 
-| Element | Font | Size (字号) | Size (pt) | w:sz |
-|---------|------|------------|-----------|------|
-| 论文标题 | 华文中宋 or 黑体 | 二号 or 小二 | 22pt or 18pt | 44 or 36 |
-| 章标题 (H1) | 黑体 | 三号 | 16pt | 32 |
-| 节标题 (H2) | 黑体 | 四号 | 14pt | 28 |
-| 小节标题 (H3) | 黑体 | 小四 | 12pt | 24 |
-| 正文 | 宋体 | 小四 | 12pt | 24 |
-| 页眉 | 宋体 | 五号 | 10.5pt | 21 |
-| 页脚/页码 | 宋体 | 五号 | 10.5pt | 21 |
-| 表格内容 | 宋体 | 五号 | 10.5pt | 21 |
-| 参考文献条目 | 宋体 | 五号 | 10.5pt | 21 |
+| Element       | Font             | Size (字号)  | Size (pt)    | w:sz     |
+| ------------- | ---------------- | ------------ | ------------ | -------- |
+| 论文标题      | 华文中宋 or 黑体 | 二号 or 小二 | 22pt or 18pt | 44 or 36 |
+| 章标题 (H1)   | 黑体             | 三号         | 16pt         | 32       |
+| 节标题 (H2)   | 黑体             | 四号         | 14pt         | 28       |
+| 小节标题 (H3) | 黑体             | 小四         | 12pt         | 24       |
+| 正文          | 宋体             | 小四         | 12pt         | 24       |
+| 页眉          | 宋体             | 五号         | 10.5pt       | 21       |
+| 页脚/页码     | 宋体             | 五号         | 10.5pt       | 21       |
+| 表格内容      | 宋体             | 五号         | 10.5pt       | 21       |
+| 参考文献条目  | 宋体             | 五号         | 10.5pt       | 21       |
 
 ## RunFonts for CJK Body Text
 
@@ -144,6 +149,7 @@ Templates contain EXAMPLE content that must be replaced. Here's how to find the 
 ```
 
 For headings:
+
 ```xml
 <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"
           w:eastAsia="黑体" w:cs="Times New Roman"/>

@@ -20,10 +20,7 @@ export function isLikelyMermaidCode(code: string): boolean {
     : false;
 }
 
-export function shouldRenderMermaidCodeBlock(
-  language: string,
-  code: string,
-): boolean {
+export function shouldRenderMermaidCodeBlock(language: string, code: string): boolean {
   const normalizedLanguage = language.trim().toLowerCase();
   if (isMermaidLanguage(normalizedLanguage)) {
     return true;
@@ -31,8 +28,5 @@ export function shouldRenderMermaidCodeBlock(
 
   // 模型经常输出未标注语言的 Mermaid fenced code block。
   // 只在纯文本/空语言里做窄首行识别，避免把显式 ts/js/sh 等普通代码误渲染成图表。
-  return (
-    MERMAID_AUTODETECT_LANGUAGES.has(normalizedLanguage) &&
-    isLikelyMermaidCode(code)
-  );
+  return MERMAID_AUTODETECT_LANGUAGES.has(normalizedLanguage) && isLikelyMermaidCode(code);
 }

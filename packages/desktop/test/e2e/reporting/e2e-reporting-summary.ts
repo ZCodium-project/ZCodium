@@ -528,9 +528,7 @@ function buildSummaryPayload(options: WriteSummaryOptions) {
     exitCode: options.exitCode,
     files: {
       containerSamples: options.containerSamplesPath,
-      coverageHeatmap: existsSync(coverageHeatmapPath)
-        ? coverageHeatmapPath
-        : undefined,
+      coverageHeatmap: existsSync(coverageHeatmapPath) ? coverageHeatmapPath : undefined,
       coverageSummary: existsSync(options.coverageSummaryPath)
         ? options.coverageSummaryPath
         : undefined,

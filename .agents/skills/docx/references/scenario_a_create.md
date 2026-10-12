@@ -3,6 +3,7 @@
 ## When to Use
 
 Use Scenario A when:
+
 - The user has no existing file and wants a brand new document
 - The user provides content (text, tables, images) and wants it assembled into a DOCX
 - The user specifies a document type (report, letter, memo, academic) or describes a custom layout
@@ -17,17 +18,18 @@ Do NOT use when: the user already has a DOCX they want to modify (→ Scenario B
 
 Ask or infer the document type from the user's request:
 
-| Type | Typical Signals |
-|------|----------------|
-| Report | "report", "analysis", "whitepaper", sections with headings |
-| Letter | "letter", "dear", address block, salutation |
-| Memo | "memo", "memorandum", To/From/Subject fields |
-| Academic | "paper", "essay", "thesis", APA/MLA/Chicago mention |
-| Custom | None of the above, or user specifies exact formatting |
+| Type     | Typical Signals                                            |
+| -------- | ---------------------------------------------------------- |
+| Report   | "report", "analysis", "whitepaper", sections with headings |
+| Letter   | "letter", "dear", address block, salutation                |
+| Memo     | "memo", "memorandum", To/From/Subject fields               |
+| Academic | "paper", "essay", "thesis", APA/MLA/Chicago mention        |
+| Custom   | None of the above, or user specifies exact formatting      |
 
 ### 2. Gather Content Requirements
 
 Collect from the user:
+
 - Title and subtitle (if any)
 - Author / organization
 - Section structure (headings and nesting)
@@ -39,6 +41,7 @@ Collect from the user:
 ### 3. Select Style Set
 
 Based on document type, load the matching styles XML asset:
+
 - Report → `assets/styles/default_styles.xml` or `assets/styles/corporate_styles.xml`
 - Academic → `assets/styles/academic_styles.xml`
 - Letter / Memo / Custom → `assets/styles/default_styles.xml` (with overrides)
@@ -58,6 +61,7 @@ Set `w:sectPr` values based on document type defaults (see below) or user overri
 ### 5. Build Document Structure
 
 Assemble `word/document.xml` with:
+
 1. `w:body` as root container
 2. Paragraphs (`w:p`) with heading styles for section titles
 3. Body paragraphs with `Normal` style
@@ -67,6 +71,7 @@ Assemble `word/document.xml` with:
 ### 6. Apply Typography Defaults
 
 Set document-level defaults in `styles.xml` under `w:docDefaults`:
+
 ```xml
 <w:docDefaults>
   <w:rPrDefault>
@@ -100,45 +105,49 @@ dotnet run ... validate --xsd business-rules.xsd   # if applying a template
 ## Document Type Defaults
 
 ### Report
-| Property | Value |
-|----------|-------|
-| Body font | Calibri 11pt |
-| Heading font | Calibri Light |
-| H1 / H2 / H3 / H4 size | 28pt / 24pt / 18pt / 14pt |
-| Heading color | #2F5496 (corporate blue) |
-| Margins | 1 inch (1440 DXA) all sides |
-| Page size | A4 (11906 × 16838 DXA) |
-| Line spacing | Single (line="240") |
-| Paragraph spacing | 0pt before, 8pt after body |
+
+| Property               | Value                       |
+| ---------------------- | --------------------------- |
+| Body font              | Calibri 11pt                |
+| Heading font           | Calibri Light               |
+| H1 / H2 / H3 / H4 size | 28pt / 24pt / 18pt / 14pt   |
+| Heading color          | #2F5496 (corporate blue)    |
+| Margins                | 1 inch (1440 DXA) all sides |
+| Page size              | A4 (11906 × 16838 DXA)      |
+| Line spacing           | Single (line="240")         |
+| Paragraph spacing      | 0pt before, 8pt after body  |
 
 ### Letter
-| Property | Value |
-|----------|-------|
-| Font | Calibri 11pt |
-| Page size | Letter (12240 × 15840 DXA) |
-| Margins | 1 inch all sides |
-| Structure | Date → Address → Salutation → Body → Closing → Signature |
-| Line spacing | Single |
+
+| Property     | Value                                                    |
+| ------------ | -------------------------------------------------------- |
+| Font         | Calibri 11pt                                             |
+| Page size    | Letter (12240 × 15840 DXA)                               |
+| Margins      | 1 inch all sides                                         |
+| Structure    | Date → Address → Salutation → Body → Closing → Signature |
+| Line spacing | Single                                                   |
 
 ### Memo
-| Property | Value |
-|----------|-------|
-| Font | Arial 11pt |
-| Page size | Letter |
-| Margins | 0.75 inch (1080 DXA) |
-| Header | "MEMO" centered, bold, 16pt |
-| Fields | To, From, Date, Subject (bold labels, tab-aligned values) |
+
+| Property  | Value                                                     |
+| --------- | --------------------------------------------------------- |
+| Font      | Arial 11pt                                                |
+| Page size | Letter                                                    |
+| Margins   | 0.75 inch (1080 DXA)                                      |
+| Header    | "MEMO" centered, bold, 16pt                               |
+| Fields    | To, From, Date, Subject (bold labels, tab-aligned values) |
 
 ### Academic
-| Property | Value |
-|----------|-------|
-| Font | Times New Roman 12pt |
-| Line spacing | Double (line="480") |
-| Margins | 1 inch all sides |
-| Page size | Letter |
-| Headings | Bold, same font, 14/13/12pt for H1/H2/H3 |
-| First line indent | 0.5 inch (720 DXA) |
-| Heading color | Black (no color) |
+
+| Property          | Value                                    |
+| ----------------- | ---------------------------------------- |
+| Font              | Times New Roman 12pt                     |
+| Line spacing      | Double (line="480")                      |
+| Margins           | 1 inch all sides                         |
+| Page size         | Letter                                   |
+| Headings          | Bold, same font, 14/13/12pt for H1/H2/H3 |
+| First line indent | 0.5 inch (720 DXA)                       |
+| Heading color     | Black (no color)                         |
 
 ---
 
@@ -175,15 +184,14 @@ The CLI `create` command accepts a JSON config:
     {
       "heading": "Detailed Analysis",
       "level": 1,
-      "content": [
-        { "type": "paragraph", "text": "Breaking down by product line..." }
-      ]
+      "content": [{ "type": "paragraph", "text": "Breaking down by product line..." }]
     }
   ]
 }
 ```
 
 Supported content types:
+
 - `paragraph` — body text (applies Normal style)
 - `table` — headers + rows (applies TableGrid style)
 - `image` — inline image with width/height control

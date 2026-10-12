@@ -4,11 +4,13 @@
 > 所列 `memoryStore`、`outputStyleStore` 等路径已不存在；不要将这些步骤用于当前 V4 UI。
 
 ## 症状
+
 应用启动后一直停留在主界面加载状态
 
 ## 已确认正常的部分
 
 ✅ 服务注册成功（日志显示）：
+
 ```
 [rpc:register] channel "hooks"
 [rpc:register] channel "memory"
@@ -22,7 +24,9 @@ local services ready, all channels registered
 ## 可能的原因
 
 ### 1. 原有代码的类型错误
+
 检查发现有一些原有代码的类型错误（非我们新增代码）：
+
 - `src/hooks/taskStreamEventHandlers.ts` 中有多处类型错误
 
 ### 2. 浏览器缓存问题
@@ -56,6 +60,7 @@ pnpm run dev:desktop
 ### 方案 2：检查浏览器控制台
 
 打开开发者工具（F12），查看 Console 标签页：
+
 1. 是否有 JavaScript 错误
 2. 是否有网络请求失败
 3. 查看错误堆栈
@@ -85,6 +90,7 @@ pnpm run dev:desktop
 ## 我们的代码位置
 
 如果需要回滚：
+
 - `packages/shared/src/hooks.ts`
 - `packages/shared/src/memory.ts`
 - `packages/shared/src/output-style.ts`

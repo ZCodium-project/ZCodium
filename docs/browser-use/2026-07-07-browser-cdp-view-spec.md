@@ -49,5 +49,6 @@
 - 真机（T6 P0 一并验）：desktop 起，agent 触发 navigate+screenshot，main 日志见 CDP attach + captureScreenshot，返回非空 PNG。
 
 ## 6. 边界
+
 - executor 只在 main（独占 WebContentsView+CDP）。host/agent 不碰 Electron。
 - P0 单 tab（key=sessionId）；多 tab 生命周期 T9。

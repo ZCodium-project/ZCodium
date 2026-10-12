@@ -14,9 +14,9 @@ afterEach(async () => {
     process.env.ZCODE_E2E_COVERAGE = previousCoverageEnv;
   }
   await Promise.all(
-    temporaryDirectories.splice(0).map((directory) =>
-      rm(directory, { force: true, recursive: true }),
-    ),
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { force: true, recursive: true })),
   );
 });
 

@@ -56,16 +56,18 @@ describe("TGE01 tool stage grouping live transition", () => {
     await prepareFixture();
     await ensureToolCrossProductFullAccessMode();
 
-    await sendV4Prompt([
-      `${CASE_MARKER}: Follow every tool step in order.`,
-      `1. Read exactly ${READ_PATH}.`,
-      `2. Use Bash with exactly: wc -l ${SHELL_READ_PATH}`,
-      `3. Use Bash with exactly: node -e "setTimeout(() => console.log('TGE01_EXEC_A'), 1200)"`,
-      `4. Use Bash with exactly: node -e "console.log('TGE01_EXEC_B')"`,
-      `5. Use Write to create ${WRITE_PATH} with exactly "export const stage = 'written';\\n".`,
-      `6. Use Edit on ${WRITE_PATH} to replace "written" with "edited".`,
-      `7. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    ].join(" "));
+    await sendV4Prompt(
+      [
+        `${CASE_MARKER}: Follow every tool step in order.`,
+        `1. Read exactly ${READ_PATH}.`,
+        `2. Use Bash with exactly: wc -l ${SHELL_READ_PATH}`,
+        `3. Use Bash with exactly: node -e "setTimeout(() => console.log('TGE01_EXEC_A'), 1200)"`,
+        `4. Use Bash with exactly: node -e "console.log('TGE01_EXEC_B')"`,
+        `5. Use Write to create ${WRITE_PATH} with exactly "export const stage = 'written';\\n".`,
+        `6. Use Edit on ${WRITE_PATH} to replace "written" with "edited".`,
+        `7. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
+      ].join(" "),
+    );
 
     await waitForConversationToolGroup(
       "Explore",
@@ -81,7 +83,8 @@ describe("TGE01 tool stage grouping live transition", () => {
     );
     await waitForConversationToolGroup(
       "ChangesGroup",
-      (group) => group.status === "in_progress" && /Writing|Editing|写入|编辑/u.test(group.summaryText),
+      (group) =>
+        group.status === "in_progress" && /Writing|Editing|写入|编辑/u.test(group.summaryText),
       "Write/Edit 没有进入运行中的 Changes",
       90000,
     );
@@ -113,11 +116,7 @@ async function prepareFixture() {
 
 async function waitForTurnIdle() {
   await waitForV4AssistantMessageContaining(E2E_REPLY_TOKEN, 120000);
-  await waitForV4Pane(
-    (snapshot) => !snapshot.canStop,
-    "TGE01 工具轮没有结束",
-    120000,
-  );
+  await waitForV4Pane((snapshot) => !snapshot.canStop, "TGE01 工具轮没有结束", 120000);
 }
 
 async function stopIfBusy() {

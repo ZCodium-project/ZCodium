@@ -39,10 +39,7 @@ export function buildGitCommitMessageConversationContext(params: {
       continue;
     }
 
-    const content = clipConversationText(
-      message.content,
-      MAX_COMMIT_CONVERSATION_MESSAGE_CHARS,
-    );
+    const content = clipConversationText(message.content, MAX_COMMIT_CONVERSATION_MESSAGE_CHARS);
     const nextCost = content.length + message.role.length + 8;
     if (
       selectedMessages.length > 0 &&

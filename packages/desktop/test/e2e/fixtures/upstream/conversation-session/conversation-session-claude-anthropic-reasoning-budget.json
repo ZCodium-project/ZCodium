@@ -41,7 +41,11 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_CLAUDE_ANTHROPIC_REASONING_LOW"],
-        "bodyIncludes": ["E2E_CLAUDE_ANTHROPIC_REASONING_LOW", "upstream-e2e-ok", "claude-sonnet-4"],
+        "bodyIncludes": [
+          "E2E_CLAUDE_ANTHROPIC_REASONING_LOW",
+          "upstream-e2e-ok",
+          "claude-sonnet-4"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
@@ -68,7 +72,11 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_CLAUDE_ANTHROPIC_REASONING_XHIGH"],
-        "bodyIncludes": ["E2E_CLAUDE_ANTHROPIC_REASONING_XHIGH", "upstream-e2e-ok", "claude-sonnet-4"],
+        "bodyIncludes": [
+          "E2E_CLAUDE_ANTHROPIC_REASONING_XHIGH",
+          "upstream-e2e-ok",
+          "claude-sonnet-4"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

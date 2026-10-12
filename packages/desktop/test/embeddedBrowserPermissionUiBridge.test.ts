@@ -4,8 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const resolveListeners: Array<(event: unknown, payload: unknown) => void> = [];
-const sentPrompts: Array<{ hostWebContentsId: number | undefined; event: Record<string, unknown> }> =
-  [];
+const sentPrompts: Array<{
+  hostWebContentsId: number | undefined;
+  event: Record<string, unknown>;
+}> = [];
 
 vi.mock("electron", () => ({
   ipcMain: {
@@ -19,7 +21,11 @@ vi.mock("electron", () => ({
     fromId: (id: number) => {
       const exists = sentPrompts.some((entry) => entry.hostWebContentsId === id);
       return exists
-        ? { isDestroyed: () => false, send: (channel: string, event: unknown) => sentPrompts.push({ hostWebContentsId: id, event: event as Record<string, unknown> }) }
+        ? {
+            isDestroyed: () => false,
+            send: (channel: string, event: unknown) =>
+              sentPrompts.push({ hostWebContentsId: id, event: event as Record<string, unknown> }),
+          }
         : null;
     },
   },
@@ -46,13 +52,10 @@ vi.mock("electron", () => ({
   },
 }));
 
-const {
-  createEmbeddedBrowserPermissionUiBridge,
-  parseEmbeddedBrowserPermissionResolveRequest,
-} = await import("../src/main/embeddedBrowserPermissionUiBridge.js");
-const { createEmbeddedBrowserSitePermissionStore } = await import(
-  "../src/main/embeddedBrowserSitePermissionStore.js"
-);
+const { createEmbeddedBrowserPermissionUiBridge, parseEmbeddedBrowserPermissionResolveRequest } =
+  await import("../src/main/embeddedBrowserPermissionUiBridge.js");
+const { createEmbeddedBrowserSitePermissionStore } =
+  await import("../src/main/embeddedBrowserSitePermissionStore.js");
 
 function createLogger() {
   return { info: vi.fn(), warn: vi.fn() };
@@ -79,18 +82,24 @@ afterEach(() => {
 
 describe("parseEmbeddedBrowserPermissionResolveRequest", () => {
   it("接受合法决策并规范化", () => {
-    expect(parseEmbeddedBrowserPermissionResolveRequest({
-      requestId: "r1",
-      resolution: { action: "allow-always" },
-    })).toEqual({ requestId: "r1", resolution: { action: "allow-always" } });
-    expect(parseEmbeddedBrowserPermissionResolveRequest({
-      requestId: "r2",
-      resolution: { action: "share-screen", sourceId: "screen:1" },
-    })).toEqual({ requestId: "r2", resolution: { action: "share-screen", sourceId: "screen:1" } });
-    expect(parseEmbeddedBrowserPermissionResolveRequest({
-      requestId: "r3",
-      resolution: { action: "select-device", deviceId: "dev-1" },
-    })).toEqual({ requestId: "r3", resolution: { action: "select-device", deviceId: "dev-1" } });
+    expect(
+      parseEmbeddedBrowserPermissionResolveRequest({
+        requestId: "r1",
+        resolution: { action: "allow-always" },
+      }),
+    ).toEqual({ requestId: "r1", resolution: { action: "allow-always" } });
+    expect(
+      parseEmbeddedBrowserPermissionResolveRequest({
+        requestId: "r2",
+        resolution: { action: "share-screen", sourceId: "screen:1" },
+      }),
+    ).toEqual({ requestId: "r2", resolution: { action: "share-screen", sourceId: "screen:1" } });
+    expect(
+      parseEmbeddedBrowserPermissionResolveRequest({
+        requestId: "r3",
+        resolution: { action: "select-device", deviceId: "dev-1" },
+      }),
+    ).toEqual({ requestId: "r3", resolution: { action: "select-device", deviceId: "dev-1" } });
   });
 
   it.each([
@@ -199,7 +208,8 @@ describe("createEmbeddedBrowserPermissionUiBridge", () => {
     });
 
     // 结算后不再推送更新
-    for (const listener of resolveListeners) listener({}, { requestId: firstRequestId, resolution: { action: "cancel" } });
+    for (const listener of resolveListeners)
+      listener({}, { requestId: firstRequestId, resolution: { action: "cancel" } });
     await expect(picker.result).resolves.toBeNull();
     picker.updateDevices([{ deviceId: "bt-2" }]);
     expect(sentPrompts).toHaveLength(2);
@@ -213,9 +223,11 @@ describe("createEmbeddedBrowserPermissionUiBridge", () => {
     bridge.onDisplayMediaRequest({ origin: "https://example.com" }, callback);
     await vi.waitFor(() => expect(sentPrompts).toHaveLength(1));
     expect(sentPrompts[0]!.event).toMatchObject({ kind: "screen-share" });
-    const screens = (sentPrompts[0]!.event as {
-      screens: Array<{ thumbnailDataUrl: string; kind: string }>;
-    }).screens;
+    const screens = (
+      sentPrompts[0]!.event as {
+        screens: Array<{ thumbnailDataUrl: string; kind: string }>;
+      }
+    ).screens;
     expect(screens[0]!.thumbnailDataUrl).toMatch(/^data:image\/jpeg;base64,/);
     // 源类型按 desktopCapturer id 前缀区分，供 UI 分组
     expect(screens.map((screen) => screen.kind)).toEqual(["screen", "window"]);

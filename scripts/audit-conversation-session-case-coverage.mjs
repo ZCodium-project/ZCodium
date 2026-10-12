@@ -14,8 +14,7 @@ import { inspectConversationSessionFormalAdmission } from "./lib/conversation-se
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function resolveFormalAdmissionRoot() {
-  const override =
-    process.env.ZCODE_CONVERSATION_SESSION_FORMAL_ADMISSION_ROOT?.trim();
+  const override = process.env.ZCODE_CONVERSATION_SESSION_FORMAL_ADMISSION_ROOT?.trim();
   if (!override) {
     return REPO_ROOT;
   }
@@ -35,31 +34,21 @@ function resolveFormalAdmissionRoot() {
 const DOCS = {
   mainCatalog: "docs/conversation-session-case-catalog.md",
   coverageMatrix: "docs/testing/conversation-session-e2e-coverage-matrix.md",
-  environmentFaultCatalog:
-    "docs/testing/conversation-session-environment-fault-catalog.md",
-  faultCoverageMatrix:
-    "docs/testing/conversation-session-fault-e2e-coverage-matrix.md",
+  environmentFaultCatalog: "docs/testing/conversation-session-environment-fault-catalog.md",
+  faultCoverageMatrix: "docs/testing/conversation-session-fault-e2e-coverage-matrix.md",
   decisionBacklog: "docs/testing/conversation-session-decision-backlog.md",
-  decisionE2ERoadmap:
-    "docs/testing/conversation-session-decision-e2e-roadmap.md",
+  decisionE2ERoadmap: "docs/testing/conversation-session-decision-e2e-roadmap.md",
 };
 
-const DECISION_ANSWERS_PATH =
-  "docs/testing/conversation-session-decision-answers.md";
+const DECISION_ANSWERS_PATH = "docs/testing/conversation-session-decision-answers.md";
 
 const GENERATED_MARKDOWN_DOCS = {
-  decisionAnswerTemplate:
-    "docs/testing/conversation-session-next-decision-answer-template.md",
-  decisionAnswersStatus:
-    "docs/testing/conversation-session-decision-answers-status.md",
-  decisionBackfillPlan:
-    "docs/testing/conversation-session-decision-backfill-plan.md",
-  decisionReviewQueue:
-    "docs/testing/conversation-session-decision-review-queue.md",
-  decisionWorkflowBoard:
-    "docs/testing/conversation-session-decision-workflow-board.md",
-  nextDecisionReview:
-    "docs/testing/conversation-session-next-decision-review.md",
+  decisionAnswerTemplate: "docs/testing/conversation-session-next-decision-answer-template.md",
+  decisionAnswersStatus: "docs/testing/conversation-session-decision-answers-status.md",
+  decisionBackfillPlan: "docs/testing/conversation-session-decision-backfill-plan.md",
+  decisionReviewQueue: "docs/testing/conversation-session-decision-review-queue.md",
+  decisionWorkflowBoard: "docs/testing/conversation-session-decision-workflow-board.md",
+  nextDecisionReview: "docs/testing/conversation-session-next-decision-review.md",
 };
 const MAIN_AUTOMATION_SPEC_PATH_PREFIXES = [
   "packages/desktop/test/e2e/",
@@ -132,12 +121,10 @@ const RECOVERY_ISOLATION_PROTOCOL_CASE_IDS = [
   ...buildNumberedIds("W", 1, 5),
   ...buildNumberedIds("X", 1, 3),
 ];
-const EXPECTED_COMPACT_PROTOCOL_IDS = COMPACT_PROTOCOL_CASE_IDS.flatMap(
-  (caseId) => [1, 2, 3, 4].map((index) => `${caseId}.${index}`),
+const EXPECTED_COMPACT_PROTOCOL_IDS = COMPACT_PROTOCOL_CASE_IDS.flatMap((caseId) =>
+  [1, 2, 3, 4].map((index) => `${caseId}.${index}`),
 );
-const EXPECTED_NETWORK_SSE_PROTOCOL_IDS = buildSingleQuestionIds(
-  NETWORK_SSE_PROTOCOL_CASE_IDS,
-);
+const EXPECTED_NETWORK_SSE_PROTOCOL_IDS = buildSingleQuestionIds(NETWORK_SSE_PROTOCOL_CASE_IDS);
 const EXPECTED_RECOVERY_ISOLATION_PROTOCOL_IDS = buildSingleQuestionIds(
   RECOVERY_ISOLATION_PROTOCOL_CASE_IDS,
 );
@@ -245,19 +232,15 @@ const backfillPlanJsonOutput = args.has("--backfill-json");
 const workflowBoardMarkdownOutput = args.has("--workflow-board-md");
 const requireComplete = args.has("--require-complete");
 const [rawDecisionAnswersPath] = readOptionValues(rawArgs, "--answers-path");
-const decisionAnswersPath =
-  rawDecisionAnswersPath?.trim() || DECISION_ANSWERS_PATH;
+const decisionAnswersPath = rawDecisionAnswersPath?.trim() || DECISION_ANSWERS_PATH;
 const usesCustomDecisionAnswersPath =
-  resolve(REPO_ROOT, decisionAnswersPath) !==
-  resolve(REPO_ROOT, DECISION_ANSWERS_PATH);
-const requireBackfillClean =
-  !usesCustomDecisionAnswersPath || args.has("--require-backfill-clean");
-const reviewCaseIds = readOptionValues(rawArgs, "--review-case").flatMap(
-  (value) =>
-    value
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean),
+  resolve(REPO_ROOT, decisionAnswersPath) !== resolve(REPO_ROOT, DECISION_ANSWERS_PATH);
+const requireBackfillClean = !usesCustomDecisionAnswersPath || args.has("--require-backfill-clean");
+const reviewCaseIds = readOptionValues(rawArgs, "--review-case").flatMap((value) =>
+  value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean),
 );
 const reviewLimit = readNumberOption(rawArgs, "--review-limit");
 
@@ -391,10 +374,7 @@ function parseAutomationSpecs(markdown) {
   for (const row of parseMarkdownRows(markdown)) {
     const abbreviation = stripInlineCode(row.cells[0] ?? "");
     const specPath = stripInlineCode(row.cells[1] ?? "");
-    if (
-      !/^[A-Z]{2}$/.test(abbreviation) ||
-      !isMainAutomationSpecPath(specPath)
-    ) {
+    if (!/^[A-Z]{2}$/.test(abbreviation) || !isMainAutomationSpecPath(specPath)) {
       continue;
     }
     specs.set(abbreviation, { abbreviation, line: row.line, path: specPath });
@@ -405,9 +385,7 @@ function parseAutomationSpecs(markdown) {
 function isMainAutomationSpecPath(specPath) {
   // 修复原因：auto compact retry 的稳定证据拆到 core runtime 单测后，
   // 主路径 coverage audit 不能再只承认 desktop E2E 文件。
-  return MAIN_AUTOMATION_SPEC_PATH_PREFIXES.some((prefix) =>
-    specPath.startsWith(prefix),
-  );
+  return MAIN_AUTOMATION_SPEC_PATH_PREFIXES.some((prefix) => specPath.startsWith(prefix));
 }
 
 function parseAutomationCell(value) {
@@ -511,16 +489,10 @@ function buildDecisionAnswerReadiness(reviewQueueCases, decisionAnswerDraft) {
   const pendingQuestionIds = new Set(decisionAnswerDraft.pendingQuestionIds);
   const cases = reviewQueueCases.map((item) => {
     const questionIds = item.unansweredQuestions;
-    const answered = questionIds.filter((questionId) =>
-      answeredQuestionIds.has(questionId),
-    );
-    const pending = questionIds.filter((questionId) =>
-      pendingQuestionIds.has(questionId),
-    );
+    const answered = questionIds.filter((questionId) => answeredQuestionIds.has(questionId));
+    const pending = questionIds.filter((questionId) => pendingQuestionIds.has(questionId));
     const missing = questionIds.filter(
-      (questionId) =>
-        !answeredQuestionIds.has(questionId) &&
-        !pendingQuestionIds.has(questionId),
+      (questionId) => !answeredQuestionIds.has(questionId) && !pendingQuestionIds.has(questionId),
     );
     const status =
       answered.length === questionIds.length
@@ -544,25 +516,18 @@ function buildDecisionAnswerReadiness(reviewQueueCases, decisionAnswerDraft) {
 
   return {
     cases,
-    missingCaseIds: cases
-      .filter((item) => item.status === "missing")
-      .map((item) => item.caseId),
+    missingCaseIds: cases.filter((item) => item.status === "missing").map((item) => item.caseId),
     missingCases: cases.filter((item) => item.status === "missing").length,
-    partialCaseIds: cases
-      .filter((item) => item.status === "partial")
-      .map((item) => item.caseId),
+    partialCaseIds: cases.filter((item) => item.status === "partial").map((item) => item.caseId),
     partialCases: cases.filter((item) => item.status === "partial").length,
     placeholderOnlyCaseIds: cases
       .filter((item) => item.status === "placeholder-only")
       .map((item) => item.caseId),
-    placeholderOnlyCases: cases.filter(
-      (item) => item.status === "placeholder-only",
-    ).length,
+    placeholderOnlyCases: cases.filter((item) => item.status === "placeholder-only").length,
     readyCaseIds: cases
       .filter((item) => item.status === "ready-to-backfill")
       .map((item) => item.caseId),
-    readyCases: cases.filter((item) => item.status === "ready-to-backfill")
-      .length,
+    readyCases: cases.filter((item) => item.status === "ready-to-backfill").length,
     totalCases: cases.length,
   };
 }
@@ -576,10 +541,7 @@ function getDecisionWorkflowNextAction(item) {
         ? `补齐 ${item.missingQuestions.join(", ")}`
         : "补齐";
   }
-  if (
-    item.answerStatus === "ready-to-backfill" &&
-    item.worksheetStatus !== "ready"
-  ) {
+  if (item.answerStatus === "ready-to-backfill" && item.worksheetStatus !== "ready") {
     return "回写 decision worksheet";
   }
   if (
@@ -588,10 +550,7 @@ function getDecisionWorkflowNextAction(item) {
   ) {
     return "回写 catalog / coverage matrix";
   }
-  if (
-    item.sourceStatus === "missing" &&
-    item.roadmapStatus === "ready-to-write"
-  ) {
+  if (item.sourceStatus === "missing" && item.roadmapStatus === "ready-to-write") {
     return `写 E2E：${item.specPath}`;
   }
   if (["failing", "partial"].includes(item.sourceStatus)) {
@@ -622,8 +581,7 @@ function buildDecisionWorkflowBoard(
       const group = getReviewGroup(caseId);
       const answerReadiness = answerReadinessByCase.get(caseId);
       const sourceStatus =
-        getRoadmapSourceStatus(caseId, mainCoverageRows, faultCoverageRows) ||
-        "unknown";
+        getRoadmapSourceStatus(caseId, mainCoverageRows, faultCoverageRows) || "unknown";
       const item = {
         answerStatus: answerReadiness?.status ?? "missing",
         answeredQuestions: answerReadiness?.answeredQuestionIds ?? [],
@@ -657,10 +615,7 @@ function buildDecisionWorkflowBoard(
   // 这里按 Board 明细的业务顺序聚合，避免中文文案字典序变化导致生成文档只因统计表顺序漂移而 stale。
   const nextActionCounts = new Map();
   for (const item of cases) {
-    nextActionCounts.set(
-      item.nextAction,
-      (nextActionCounts.get(item.nextAction) ?? 0) + 1,
-    );
+    nextActionCounts.set(item.nextAction, (nextActionCounts.get(item.nextAction) ?? 0) + 1);
   }
 
   return {
@@ -737,8 +692,7 @@ function enrichWorksheetTarget(target, worksheetQuestionRows) {
 
 function enrichCaseTarget(target, rowMap, columnIndex) {
   const row = rowMap.get(target.caseId);
-  const effectiveColumnIndex =
-    columnIndex === "last" ? (row?.cells.length ?? 1) - 1 : columnIndex;
+  const effectiveColumnIndex = columnIndex === "last" ? (row?.cells.length ?? 1) - 1 : columnIndex;
   const patch = buildMarkdownRowPatch(row, [[effectiveColumnIndex, target.to]]);
   return {
     ...target,
@@ -761,12 +715,7 @@ function enrichE2ETarget(target) {
 }
 
 function toPatchReplacement(target) {
-  if (
-    !target?.path ||
-    !target.expectedLine ||
-    !target.replacementLine ||
-    !target.line
-  ) {
+  if (!target?.path || !target.expectedLine || !target.replacementLine || !target.line) {
     return null;
   }
   return {
@@ -833,9 +782,7 @@ function buildBackfillPatchPlan(readyCases) {
 
   return {
     createOrUpdateCount,
-    files: [...filesByPath.values()].sort((left, right) =>
-      left.path.localeCompare(right.path),
-    ),
+    files: [...filesByPath.values()].sort((left, right) => left.path.localeCompare(right.path)),
     replaceLineCount,
   };
 }
@@ -929,12 +876,7 @@ function buildDecisionSourceTargets(caseId, sourceStatus, targetRows) {
   ];
 }
 
-function buildDecisionRoadmapTarget(
-  caseId,
-  roadmapStatus,
-  sourceStatus,
-  targetRows,
-) {
+function buildDecisionRoadmapTarget(caseId, roadmapStatus, sourceStatus, targetRows) {
   if (
     roadmapStatus !== "blocked-by-product-decision" ||
     !["undefined", "decision-needed"].includes(sourceStatus)
@@ -980,26 +922,17 @@ function buildDecisionBackfillPlan(summary, targetRows) {
       const sourceStatus = workflowItem?.sourceStatus ?? "unknown";
       const roadmapStatus = workflowItem?.roadmapStatus ?? "unknown";
       const specPath = workflowItem?.specPath ?? "";
-      const worksheetTargets = buildDecisionWorksheetTargets(
-        item,
-        answersByQuestionId,
-      ).map((target) =>
-        enrichWorksheetTarget(target, targetRows.worksheetQuestionRows),
+      const worksheetTargets = buildDecisionWorksheetTargets(item, answersByQuestionId).map(
+        (target) => enrichWorksheetTarget(target, targetRows.worksheetQuestionRows),
       );
-      const sourceTargets = buildDecisionSourceTargets(
-        item.caseId,
-        sourceStatus,
-        targetRows,
-      );
+      const sourceTargets = buildDecisionSourceTargets(item.caseId, sourceStatus, targetRows);
       const roadmapTarget = buildDecisionRoadmapTarget(
         item.caseId,
         roadmapStatus,
         sourceStatus,
         targetRows,
       );
-      const e2eTarget = enrichE2ETarget(
-        buildDecisionE2ETarget(item.caseId, specPath),
-      );
+      const e2eTarget = enrichE2ETarget(buildDecisionE2ETarget(item.caseId, specPath));
       return {
         actions: [
           {
@@ -1015,10 +948,7 @@ function buildDecisionBackfillPlan(summary, targetRows) {
             targets: sourceTargets,
           },
           {
-            action: getDecisionBackfillRoadmapAction(
-              roadmapStatus,
-              sourceStatus,
-            ),
+            action: getDecisionBackfillRoadmapAction(roadmapStatus, sourceStatus),
             step: 3,
             target: "decision E2E roadmap",
             targets: roadmapTarget ? [roadmapTarget] : [],
@@ -1036,8 +966,7 @@ function buildDecisionBackfillPlan(summary, targetRows) {
         groupLabel: item.groupLabel,
         questions: item.unansweredQuestionDetails.map((question) => ({
           backfillTarget: question.backfillTarget,
-          productDecision:
-            answersByQuestionId[question.questionId]?.productDecision ?? "",
+          productDecision: answersByQuestionId[question.questionId]?.productDecision ?? "",
           questionId: question.questionId,
           reviewPrompt: question.reviewPrompt,
         })),
@@ -1079,17 +1008,14 @@ function buildDecisionBackfillPlan(summary, targetRows) {
       missingQuestionRows: summary.decisionAnswerDraft.missingQuestions,
       partialCases: summary.decisionAnswerReadiness.partialCases,
       pendingPlaceholders: summary.decisionAnswerDraft.pending,
-      placeholderOnlyCases:
-        summary.decisionAnswerReadiness.placeholderOnlyCases,
+      placeholderOnlyCases: summary.decisionAnswerReadiness.placeholderOnlyCases,
       readyToBackfillCases: readyCases.length,
     },
   };
 }
 
 function formatDecisionBackfillTargetRow(target) {
-  const sourceLabel = target.sourceCaseId
-    ? ` (source ${target.sourceCaseId})`
-    : "";
+  const sourceLabel = target.sourceCaseId ? ` (source ${target.sourceCaseId})` : "";
   return `${target.questionId ?? target.caseId ?? "unknown"} / ${target.rowKind ?? "unknown"}${sourceLabel}`;
 }
 
@@ -1128,16 +1054,11 @@ function parseStatsTableAfterHeading(markdown, heading) {
 
   const rest = markdown.slice(headingIndex + heading.length);
   const nextHeadingIndex = rest.search(/\n##\s+/);
-  const section =
-    nextHeadingIndex >= 0 ? rest.slice(0, nextHeadingIndex) : rest;
+  const section = nextHeadingIndex >= 0 ? rest.slice(0, nextHeadingIndex) : rest;
   const stats = new Map();
 
   for (const row of parseMarkdownRows(section)) {
-    if (
-      row.cells.length < 2 ||
-      row.cells[0] === "范围" ||
-      row.cells[0] === "指标"
-    ) {
+    if (row.cells.length < 2 || row.cells[0] === "范围" || row.cells[0] === "指标") {
       continue;
     }
     const value = normalizeNumber(row.cells[1]);
@@ -1201,24 +1122,18 @@ function getRoadmapSourceStatus(caseId, mainCoverageRows, faultCoverageRows) {
   const faultStatus = faultAliasId
     ? stripInlineCode(faultCoverageRows.get(faultAliasId)?.cells[1] ?? "")
     : stripInlineCode(faultCoverageRows.get(caseId)?.cells[1] ?? "");
-  const mainStatus = stripInlineCode(
-    mainCoverageRows.get(caseId)?.cells[1] ?? "",
-  );
+  const mainStatus = stripInlineCode(mainCoverageRows.get(caseId)?.cells[1] ?? "");
 
   return faultStatus || mainStatus;
 }
 
 function getExpectedRoadmapCaseIds(mainCoverageRows, faultCoverageRows) {
   const mainIds = sortedIds(mainCoverageRows).filter((id) =>
-    ROADMAP_SOURCE_STATUSES.includes(
-      stripInlineCode(mainCoverageRows.get(id)?.cells[1] ?? ""),
-    ),
+    ROADMAP_SOURCE_STATUSES.includes(stripInlineCode(mainCoverageRows.get(id)?.cells[1] ?? "")),
   );
   const faultIds = sortedIds(faultCoverageRows)
     .filter((id) =>
-      ROADMAP_SOURCE_STATUSES.includes(
-        stripInlineCode(faultCoverageRows.get(id)?.cells[1] ?? ""),
-      ),
+      ROADMAP_SOURCE_STATUSES.includes(stripInlineCode(faultCoverageRows.get(id)?.cells[1] ?? "")),
     )
     .map((id) => {
       const compactSource = Object.entries(COMPACT_FAULT_ALIAS_BY_CASE_ID).find(
@@ -1266,9 +1181,9 @@ function buildDecisionReviewQueue(
         priority: group.rank,
         unansweredQuestionDetails: unansweredQuestions.map(
           (questionId) =>
-            questionDetails.find(
-              (question) => question.questionId === questionId,
-            ) ?? { questionId },
+            questionDetails.find((question) => question.questionId === questionId) ?? {
+              questionId,
+            },
         ),
         unansweredQuestionCount: unansweredQuestions.length,
         unansweredQuestions,
@@ -1298,9 +1213,7 @@ function getDecisionReviewQueueScope(summary, errors) {
     const knownItems = new Map(
       summary.decisionReviewQueue.cases.map((item) => [item.caseId, item]),
     );
-    const unknownCaseIds = reviewCaseIds.filter(
-      (caseId) => !knownItems.has(caseId),
-    );
+    const unknownCaseIds = reviewCaseIds.filter((caseId) => !knownItems.has(caseId));
     if (unknownCaseIds.length > 0) {
       errors.push(
         `review queue requested unknown or non-blocked case(s): ${unknownCaseIds.join(", ")}`,
@@ -1309,17 +1222,14 @@ function getDecisionReviewQueueScope(summary, errors) {
     return {
       command: `node scripts/audit-conversation-session-case-coverage.mjs --check --review-queue-md --review-case ${reviewCaseIds.join(",")}`,
       description: `指定 case：${reviewCaseIds.join(", ")}`,
-      items: reviewCaseIds
-        .map((caseId) => knownItems.get(caseId))
-        .filter(Boolean),
+      items: reviewCaseIds.map((caseId) => knownItems.get(caseId)).filter(Boolean),
       title: "Conversation Session Focused Decision Review",
     };
   }
 
   if (reviewNextMarkdownOutput) {
     return {
-      command:
-        "node scripts/audit-conversation-session-case-coverage.mjs --check --review-next-md",
+      command: "node scripts/audit-conversation-session-case-coverage.mjs --check --review-next-md",
       description: `下一批 review：${summary.decisionReviewQueue.nextCaseIds.join(", ") || "none"}`,
       items: summary.decisionReviewQueue.nextCases,
       title: "Conversation Session Next Decision Review",
@@ -1336,8 +1246,7 @@ function getDecisionReviewQueueScope(summary, errors) {
   }
 
   return {
-    command:
-      "node scripts/audit-conversation-session-case-coverage.mjs --check --review-queue-md",
+    command: "node scripts/audit-conversation-session-case-coverage.mjs --check --review-queue-md",
     description: "全部待产品决策 case",
     items: summary.decisionReviewQueue.cases,
     title: "Conversation Session Decision Review Queue",
@@ -1346,8 +1255,7 @@ function getDecisionReviewQueueScope(summary, errors) {
 
 function getFullDecisionReviewQueueScope(summary) {
   return {
-    command:
-      "node scripts/audit-conversation-session-case-coverage.mjs --check --review-queue-md",
+    command: "node scripts/audit-conversation-session-case-coverage.mjs --check --review-queue-md",
     description: "全部待产品决策 case",
     items: summary.decisionReviewQueue.cases,
     title: "Conversation Session Decision Review Queue",
@@ -1356,8 +1264,7 @@ function getFullDecisionReviewQueueScope(summary) {
 
 function getNextDecisionReviewQueueScope(summary) {
   return {
-    command:
-      "node scripts/audit-conversation-session-case-coverage.mjs --check --review-next-md",
+    command: "node scripts/audit-conversation-session-case-coverage.mjs --check --review-next-md",
     description: `下一批 review：${summary.decisionReviewQueue.nextCaseIds.join(", ") || "none"}`,
     items: summary.decisionReviewQueue.nextCases,
     title: "Conversation Session Next Decision Review",
@@ -1379,10 +1286,7 @@ function getDecisionAnswerTemplateScope(summary, errors) {
     const reviewScope = getDecisionReviewQueueScope(summary, errors);
     return {
       ...reviewScope,
-      command: reviewScope.command.replace(
-        "--review-queue-md",
-        "--answer-template-md",
-      ),
+      command: reviewScope.command.replace("--review-queue-md", "--answer-template-md"),
       title: "Conversation Session Decision Answer Template",
     };
   }
@@ -1491,12 +1395,7 @@ function renderDecisionAnswerTemplateMarkdown(summary, scope) {
   ];
 
   for (const item of scope.items) {
-    lines.push(
-      "",
-      `### ${item.caseId}`,
-      "",
-      `- worksheet: \`${item.worksheetKey}\``,
-    );
+    lines.push("", `### ${item.caseId}`, "", `- worksheet: \`${item.worksheetKey}\``);
 
     for (const question of item.unansweredQuestionDetails) {
       lines.push(
@@ -1627,11 +1526,7 @@ function renderDecisionBackfillPlanMarkdown(summary) {
       lines.push(`| ${action.step} | ${action.target} | ${actionText} |`);
     }
 
-    lines.push(
-      "",
-      "| Question | 产品结论 | 需要确认 | 回写目标 |",
-      "| --- | --- | --- | --- |",
-    );
+    lines.push("", "| Question | 产品结论 | 需要确认 | 回写目标 |", "| --- | --- | --- | --- |");
 
     for (const question of item.questions) {
       lines.push(
@@ -1676,12 +1571,7 @@ function renderDecisionBackfillPlanMarkdown(summary) {
     );
   }
 
-  lines.push(
-    "",
-    "## Missing Cases",
-    "",
-    plan.missingCaseIds.join(", ") || "none",
-  );
+  lines.push("", "## Missing Cases", "", plan.missingCaseIds.join(", ") || "none");
 
   return `${lines.join("\n")}\n`;
 }
@@ -1783,9 +1673,7 @@ function renderDecisionWorkflowBoardMarkdown(summary) {
     "| --- | ---: |",
   ];
 
-  const nextActionEntries = Object.entries(
-    summary.decisionWorkflowBoard.nextActionCounts,
-  );
+  const nextActionEntries = Object.entries(summary.decisionWorkflowBoard.nextActionCounts);
   if (nextActionEntries.length === 0) {
     lines.push("| none | 0 |");
   }
@@ -1813,18 +1701,12 @@ function renderDecisionWorkflowBoardMarkdown(summary) {
 function buildGeneratedMarkdownDocs(summary) {
   return [
     {
-      content: renderDecisionReviewQueueMarkdown(
-        summary,
-        getFullDecisionReviewQueueScope(summary),
-      ),
+      content: renderDecisionReviewQueueMarkdown(summary, getFullDecisionReviewQueueScope(summary)),
       key: "decisionReviewQueue",
       path: GENERATED_MARKDOWN_DOCS.decisionReviewQueue,
     },
     {
-      content: renderDecisionReviewQueueMarkdown(
-        summary,
-        getNextDecisionReviewQueueScope(summary),
-      ),
+      content: renderDecisionReviewQueueMarkdown(summary, getNextDecisionReviewQueueScope(summary)),
       key: "nextDecisionReview",
       path: GENERATED_MARKDOWN_DOCS.nextDecisionReview,
     },
@@ -1891,9 +1773,7 @@ function normalizeGeneratedMarkdown(markdown) {
 
 function pushStatMismatch(errors, context, label, expected, actual) {
   if (actual !== expected) {
-    errors.push(
-      `${context} stat "${label}" expected ${expected}, found ${actual ?? "missing"}`,
-    );
+    errors.push(`${context} stat "${label}" expected ${expected}, found ${actual ?? "missing"}`);
   }
 }
 
@@ -1942,9 +1822,7 @@ function parseDecisionProtocol(source, config, errors) {
       );
     }
     if (!reviewPrompt || !candidateAnswer || !backfillTarget) {
-      errors.push(
-        `${id} is missing review prompt, candidate answer, or backfill target`,
-      );
+      errors.push(`${id} is missing review prompt, candidate answer, or backfill target`);
     }
     if (!["answered", "unanswered"].includes(status)) {
       errors.push(
@@ -1955,9 +1833,7 @@ function parseDecisionProtocol(source, config, errors) {
       errors.push(`${id} is answered but has no product decision`);
     }
     if (status === "unanswered" && !isPendingProductDecision(productDecision)) {
-      errors.push(
-        `${id} is unanswered but already has product decision: ${productDecision}`,
-      );
+      errors.push(`${id} is unanswered but already has product decision: ${productDecision}`);
     }
     if (status === "answered" && !isPendingProductDecision(productDecision)) {
       completeQuestionIds.push(id);
@@ -2046,10 +1922,8 @@ async function main() {
   );
 
   const errors = [];
-  const formalAdmission =
-    await inspectConversationSessionFormalAdmission(formalAdmissionRoot);
-  const formalAdmissionAudit =
-    buildFormalAdmissionAuditIntegration(formalAdmission);
+  const formalAdmission = await inspectConversationSessionFormalAdmission(formalAdmissionRoot);
+  const formalAdmissionAudit = buildFormalAdmissionAuditIntegration(formalAdmission);
   errors.push(...formalAdmissionAudit.errors);
   const automationSpecs = parseAutomationSpecs(coverageMatrix);
   const faultAutomationSpecs = parseAutomationSpecs(faultCoverageMatrix);
@@ -2057,18 +1931,9 @@ async function main() {
   const pruningRows = parseRowsById(mainCatalog, /^K\d{2}$/);
   const mainCoverageRows = parseRowsById(coverageMatrix, /^[A-J]\d{2}$/);
   const pruningCoverageRows = parseRowsById(coverageMatrix, /^K\d{2}$/);
-  const environmentProductRows = parseRowsById(
-    environmentFaultCatalog,
-    /^[NSCDLWX]\d{2}$/,
-  );
-  const environmentInfraRows = parseRowsById(
-    environmentFaultCatalog,
-    /^T\d{2}$/,
-  );
-  const faultCoverageRows = parseRowsById(
-    faultCoverageMatrix,
-    /^[NSCDLWX]\d{2}$/,
-  );
+  const environmentProductRows = parseRowsById(environmentFaultCatalog, /^[NSCDLWX]\d{2}$/);
+  const environmentInfraRows = parseRowsById(environmentFaultCatalog, /^T\d{2}$/);
+  const faultCoverageRows = parseRowsById(faultCoverageMatrix, /^[NSCDLWX]\d{2}$/);
   const decisionBacklogRows = parseRowsById(
     decisionBacklog,
     /^(?:F09|G11|G12|N\d{2}|S\d{2}|D\d{2}|L\d{2}|W\d{2}|X\d{2})$/,
@@ -2091,61 +1956,42 @@ async function main() {
   const missingCoverageIds = diffIds(mainIds, coverageIds);
   const extraCoverageIds = diffIds(coverageIds, mainIds);
   if (missingCoverageIds.length > 0) {
-    errors.push(
-      `coverage matrix missing main cases: ${missingCoverageIds.join(", ")}`,
-    );
+    errors.push(`coverage matrix missing main cases: ${missingCoverageIds.join(", ")}`);
   }
   if (extraCoverageIds.length > 0) {
-    errors.push(
-      `coverage matrix has unknown main cases: ${extraCoverageIds.join(", ")}`,
-    );
+    errors.push(`coverage matrix has unknown main cases: ${extraCoverageIds.join(", ")}`);
   }
 
   for (const id of mainIds) {
     const catalogStatus = stripInlineCode(mainCaseRows.get(id)?.cells[5] ?? "");
-    const coverageStatus = stripInlineCode(
-      mainCoverageRows.get(id)?.cells[1] ?? "",
-    );
+    const coverageStatus = stripInlineCode(mainCoverageRows.get(id)?.cells[1] ?? "");
     if (!coverageStatus) {
       continue;
     }
     if (catalogStatus === "undefined" && coverageStatus !== "undefined") {
-      errors.push(
-        `${id} is undefined in catalog but ${coverageStatus} in coverage matrix`,
-      );
+      errors.push(`${id} is undefined in catalog but ${coverageStatus} in coverage matrix`);
     }
     if (catalogStatus === "accepted" && coverageStatus === "undefined") {
-      errors.push(
-        `${id} is accepted in catalog but undefined in coverage matrix`,
-      );
+      errors.push(`${id} is accepted in catalog but undefined in coverage matrix`);
     }
   }
 
-  const coverageEvidenceRows = new Map([
-    ...mainCoverageRows,
-    ...pruningCoverageRows,
-  ]);
+  const coverageEvidenceRows = new Map([...mainCoverageRows, ...pruningCoverageRows]);
   const referencedAutomation = new Set();
   for (const [id, row] of coverageEvidenceRows) {
     const coverageStatus = stripInlineCode(row.cells[1] ?? "");
     const automationIds = parseAutomationCell(row.cells[2] ?? "");
-    const shouldHaveAutomation = ["covered", "failing", "partial"].includes(
-      coverageStatus,
-    );
+    const shouldHaveAutomation = ["covered", "failing", "partial"].includes(coverageStatus);
     if (shouldHaveAutomation && automationIds.length === 0) {
       errors.push(`${id} is ${coverageStatus} but has no automation evidence`);
     }
     if (coverageStatus === "undefined" && automationIds.length > 0) {
-      errors.push(
-        `${id} is undefined but has automation evidence: ${automationIds.join(", ")}`,
-      );
+      errors.push(`${id} is undefined but has automation evidence: ${automationIds.join(", ")}`);
     }
     for (const automationId of automationIds) {
       referencedAutomation.add(automationId);
       if (!automationSpecs.has(automationId)) {
-        errors.push(
-          `${id} references unknown automation abbreviation ${automationId}`,
-        );
+        errors.push(`${id} references unknown automation abbreviation ${automationId}`);
       }
     }
   }
@@ -2175,22 +2021,14 @@ async function main() {
     errors.push(`automation spec file has no it/test declaration: ${path}`);
   }
   for (const { markers, path } of specFilesWithSkipOrOnly) {
-    errors.push(
-      `automation spec file contains skip/only marker(s) ${markers.join(", ")}: ${path}`,
-    );
+    errors.push(`automation spec file contains skip/only marker(s) ${markers.join(", ")}: ${path}`);
   }
 
   const faultReferencedAutomation = new Set();
   const faultCoverageIds = sortedIds(faultCoverageRows);
   const environmentProductIds = sortedIds(environmentProductRows);
-  const missingFaultCoverageIds = diffIds(
-    environmentProductIds,
-    faultCoverageIds,
-  );
-  const extraFaultCoverageIds = diffIds(
-    faultCoverageIds,
-    environmentProductIds,
-  );
+  const missingFaultCoverageIds = diffIds(environmentProductIds, faultCoverageIds);
+  const extraFaultCoverageIds = diffIds(faultCoverageIds, environmentProductIds);
   if (missingFaultCoverageIds.length > 0) {
     errors.push(
       `fault coverage matrix missing product fault cases: ${missingFaultCoverageIds.join(", ")}`,
@@ -2203,30 +2041,18 @@ async function main() {
   }
 
   for (const id of environmentProductIds) {
-    const environmentStatus = stripInlineCode(
-      environmentProductRows.get(id)?.cells.at(-1) ?? "",
-    );
-    const coverageStatus = stripInlineCode(
-      faultCoverageRows.get(id)?.cells[1] ?? "",
-    );
-    const automationIds = parseAutomationCell(
-      faultCoverageRows.get(id)?.cells[2] ?? "",
-    );
+    const environmentStatus = stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "");
+    const coverageStatus = stripInlineCode(faultCoverageRows.get(id)?.cells[1] ?? "");
+    const automationIds = parseAutomationCell(faultCoverageRows.get(id)?.cells[2] ?? "");
     if (!coverageStatus) {
       continue;
     }
-    if (
-      environmentStatus === "decision-needed" &&
-      coverageStatus !== "decision-needed"
-    ) {
+    if (environmentStatus === "decision-needed" && coverageStatus !== "decision-needed") {
       errors.push(
         `${id} is decision-needed in environment catalog but ${coverageStatus} in fault coverage matrix`,
       );
     }
-    if (
-      environmentStatus !== "decision-needed" &&
-      coverageStatus === "decision-needed"
-    ) {
+    if (environmentStatus !== "decision-needed" && coverageStatus === "decision-needed") {
       errors.push(
         `${id} is ${environmentStatus} in environment catalog but still decision-needed in fault coverage matrix`,
       );
@@ -2236,10 +2062,7 @@ async function main() {
         `${id} is decision-needed but has fault automation evidence: ${automationIds.join(", ")}`,
       );
     }
-    if (
-      ["covered", "failing", "partial"].includes(coverageStatus) &&
-      automationIds.length === 0
-    ) {
+    if (["covered", "failing", "partial"].includes(coverageStatus) && automationIds.length === 0) {
       errors.push(
         `${id} is ${coverageStatus} in fault coverage matrix but has no automation evidence`,
       );
@@ -2247,9 +2070,7 @@ async function main() {
     for (const automationId of automationIds) {
       faultReferencedAutomation.add(automationId);
       if (!faultAutomationSpecs.has(automationId)) {
-        errors.push(
-          `${id} references unknown fault automation abbreviation ${automationId}`,
-        );
+        errors.push(`${id} references unknown fault automation abbreviation ${automationId}`);
       }
     }
   }
@@ -2276,9 +2097,7 @@ async function main() {
     errors.push(`fault automation spec file does not exist: ${path}`);
   }
   for (const path of faultSpecFilesWithoutTests) {
-    errors.push(
-      `fault automation spec file has no it/test declaration: ${path}`,
-    );
+    errors.push(`fault automation spec file has no it/test declaration: ${path}`);
   }
   for (const { markers, path } of faultSpecFilesWithSkipOrOnly) {
     errors.push(
@@ -2287,14 +2106,11 @@ async function main() {
   }
 
   const mainUndefinedIds = mainIds.filter(
-    (id) =>
-      stripInlineCode(mainCaseRows.get(id)?.cells[5] ?? "") === "undefined",
+    (id) => stripInlineCode(mainCaseRows.get(id)?.cells[5] ?? "") === "undefined",
   );
   const aliasSourceIds = sortedIds(environmentProductRows)
     .filter((id) => id.startsWith("C"))
-    .map((id) =>
-      stripInlineCode(environmentProductRows.get(id)?.cells[1] ?? ""),
-    );
+    .map((id) => stripInlineCode(environmentProductRows.get(id)?.cells[1] ?? ""));
   const missingAliasSources = diffIds(mainUndefinedIds, aliasSourceIds);
   if (missingAliasSources.length > 0) {
     errors.push(
@@ -2304,13 +2120,11 @@ async function main() {
 
   const environmentAliasRows = aliasSourceIds.length;
   const environmentProductRowCount = environmentProductRows.size;
-  const newExternalProductCases =
-    environmentProductRowCount - environmentAliasRows;
+  const newExternalProductCases = environmentProductRowCount - environmentAliasRows;
   const newExternalDecisionNeededCases = environmentProductIds.filter(
     (id) =>
       !id.startsWith("C") &&
-      stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "") ===
-        "decision-needed",
+      stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "") === "decision-needed",
   ).length;
   const newExternalCoveredCases = faultCoverageIds.filter(
     (id) =>
@@ -2320,27 +2134,18 @@ async function main() {
   const environmentDecisionUniqueIds = sortedIds(environmentProductRows)
     .filter(
       (id) =>
-        stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "") ===
-        "decision-needed",
+        stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "") === "decision-needed",
     )
     .map((id) =>
-      id.startsWith("C")
-        ? stripInlineCode(environmentProductRows.get(id)?.cells[1] ?? "")
-        : id,
+      id.startsWith("C") ? stripInlineCode(environmentProductRows.get(id)?.cells[1] ?? "") : id,
     );
   const expectedDecisionBacklogIds = sortedUnique([
     ...mainUndefinedIds,
     ...environmentDecisionUniqueIds,
   ]);
   const decisionBacklogIds = sortedIds(decisionBacklogRows);
-  const missingDecisionBacklogIds = diffIds(
-    expectedDecisionBacklogIds,
-    decisionBacklogIds,
-  );
-  const extraDecisionBacklogIds = diffIds(
-    decisionBacklogIds,
-    expectedDecisionBacklogIds,
-  );
+  const missingDecisionBacklogIds = diffIds(expectedDecisionBacklogIds, decisionBacklogIds);
+  const extraDecisionBacklogIds = diffIds(decisionBacklogIds, expectedDecisionBacklogIds);
   if (missingDecisionBacklogIds.length > 0) {
     errors.push(
       `decision backlog missing decision-needed cases: ${missingDecisionBacklogIds.join(", ")}`,
@@ -2361,10 +2166,7 @@ async function main() {
     expectedDecisionE2ERoadmapIds,
     decisionE2ERoadmapIds,
   );
-  const extraDecisionE2ERoadmapIds = diffIds(
-    decisionE2ERoadmapIds,
-    expectedDecisionE2ERoadmapIds,
-  );
+  const extraDecisionE2ERoadmapIds = diffIds(decisionE2ERoadmapIds, expectedDecisionE2ERoadmapIds);
   if (missingDecisionE2ERoadmapIds.length > 0) {
     errors.push(
       `decision E2E roadmap missing non-covered cases: ${missingDecisionE2ERoadmapIds.join(", ")}`,
@@ -2382,24 +2184,15 @@ async function main() {
     const assertionSurfaces = stripInlineCode(row.cells[4] ?? "");
     const status = stripInlineCode(row.cells[5] ?? "");
     if (!DECISION_E2E_ROADMAP_STATUSES.includes(status)) {
-      errors.push(
-        `${id} has invalid decision E2E roadmap status ${status || "missing"}`,
-      );
+      errors.push(`${id} has invalid decision E2E roadmap status ${status || "missing"}`);
     }
     if (!specPath || !fixture || !assertionSurfaces) {
       errors.push(
         `${id} is missing decision E2E roadmap spec, fixture/harness, or assertion surfaces`,
       );
     }
-    const sourceStatus = getRoadmapSourceStatus(
-      id,
-      mainCoverageRows,
-      faultCoverageRows,
-    );
-    if (
-      sourceStatus &&
-      !isRoadmapStatusAlignedWithCoverage(status, sourceStatus)
-    ) {
+    const sourceStatus = getRoadmapSourceStatus(id, mainCoverageRows, faultCoverageRows);
+    if (sourceStatus && !isRoadmapStatusAlignedWithCoverage(status, sourceStatus)) {
       errors.push(
         `${id} roadmap status ${status || "missing"} does not match coverage status ${sourceStatus}`,
       );
@@ -2409,10 +2202,7 @@ async function main() {
   const decisionWorksheetRows = new Map();
   const decisionWorksheetCounts = {};
   for (const [index, [key, worksheet]] of decisionWorksheetEntries.entries()) {
-    const worksheetRows = parseRowsById(
-      decisionWorksheetSources[index] ?? "",
-      worksheet.idPattern,
-    );
+    const worksheetRows = parseRowsById(decisionWorksheetSources[index] ?? "", worksheet.idPattern);
     const worksheetIds = sortedIds(worksheetRows);
     decisionWorksheetCounts[key] = worksheetIds.length;
     for (const id of worksheetIds) {
@@ -2420,14 +2210,8 @@ async function main() {
     }
   }
   const decisionWorksheetIds = sortedIds(decisionWorksheetRows);
-  const missingDecisionWorksheetIds = diffIds(
-    expectedDecisionBacklogIds,
-    decisionWorksheetIds,
-  );
-  const extraDecisionWorksheetIds = diffIds(
-    decisionWorksheetIds,
-    expectedDecisionBacklogIds,
-  );
+  const missingDecisionWorksheetIds = diffIds(expectedDecisionBacklogIds, decisionWorksheetIds);
+  const extraDecisionWorksheetIds = diffIds(decisionWorksheetIds, expectedDecisionBacklogIds);
   if (missingDecisionWorksheetIds.length > 0) {
     errors.push(
       `decision worksheets missing decision-needed cases: ${missingDecisionWorksheetIds.join(", ")}`,
@@ -2446,21 +2230,11 @@ async function main() {
       ([worksheetKey]) => worksheetKey === protocol.worksheetKey,
     );
     const worksheetSource = decisionWorksheetSources[worksheetIndex] ?? "";
-    for (const [questionId, row] of parseRowsById(
-      worksheetSource,
-      /^[A-Z]\d{2}\.\d+$/,
-    )) {
+    for (const [questionId, row] of parseRowsById(worksheetSource, /^[A-Z]\d{2}\.\d+$/)) {
       worksheetQuestionRows.set(questionId, row);
     }
-    const protocolSummary = parseDecisionProtocol(
-      worksheetSource,
-      protocol,
-      errors,
-    );
-    const protocolStats = parseStatsTableAfterHeading(
-      worksheetSource,
-      protocol.statsHeading,
-    );
+    const protocolSummary = parseDecisionProtocol(worksheetSource, protocol, errors);
+    const protocolStats = parseStatsTableAfterHeading(worksheetSource, protocol.statsHeading);
     pushStatMismatch(
       errors,
       `${key} decision worksheet`,
@@ -2491,9 +2265,7 @@ async function main() {
     );
     decisionProtocolSummaries[key] = protocolSummary;
   }
-  const decisionProtocolSummaryValues = Object.values(
-    decisionProtocolSummaries,
-  );
+  const decisionProtocolSummaryValues = Object.values(decisionProtocolSummaries);
   const decisionProtocolCaseIds = sortedUnique(
     decisionProtocolSummaryValues.flatMap((protocol) => [
       ...protocol.blockedCaseIds,
@@ -2504,10 +2276,7 @@ async function main() {
     expectedDecisionBacklogIds,
     decisionProtocolCaseIds,
   );
-  const extraDecisionProtocolCaseIds = diffIds(
-    decisionProtocolCaseIds,
-    expectedDecisionBacklogIds,
-  );
+  const extraDecisionProtocolCaseIds = diffIds(decisionProtocolCaseIds, expectedDecisionBacklogIds);
   if (missingDecisionProtocolCaseIds.length > 0) {
     errors.push(
       `decision protocols missing decision-needed cases: ${missingDecisionProtocolCaseIds.join(", ")}`,
@@ -2521,44 +2290,29 @@ async function main() {
 
   const coverageMissingAccepted = mainIds.filter((id) => {
     const catalogStatus = stripInlineCode(mainCaseRows.get(id)?.cells[5] ?? "");
-    const coverageStatus = stripInlineCode(
-      mainCoverageRows.get(id)?.cells[1] ?? "",
-    );
+    const coverageStatus = stripInlineCode(mainCoverageRows.get(id)?.cells[1] ?? "");
     return catalogStatus === "accepted" && coverageStatus !== "covered";
   }).length;
   const faultCoverageMissingAccepted = environmentProductIds.filter((id) => {
-    const environmentStatus = stripInlineCode(
-      environmentProductRows.get(id)?.cells.at(-1) ?? "",
-    );
-    const coverageStatus = stripInlineCode(
-      faultCoverageRows.get(id)?.cells[1] ?? "",
-    );
+    const environmentStatus = stripInlineCode(environmentProductRows.get(id)?.cells.at(-1) ?? "");
+    const coverageStatus = stripInlineCode(faultCoverageRows.get(id)?.cells[1] ?? "");
     return environmentStatus === "accepted" && coverageStatus !== "covered";
   }).length;
   const readyDecisionCaseIds = sortedUnique(
     decisionProtocolSummaryValues.flatMap((protocol) => protocol.readyCaseIds),
   );
   const blockedDecisionCaseIds = sortedUnique(
-    decisionProtocolSummaryValues.flatMap(
-      (protocol) => protocol.blockedCaseIds,
-    ),
+    decisionProtocolSummaryValues.flatMap((protocol) => protocol.blockedCaseIds),
   );
   const unansweredQuestionsByCase = Object.assign(
     {},
-    ...decisionProtocolSummaryValues.map(
-      (protocol) => protocol.unansweredByCase,
-    ),
+    ...decisionProtocolSummaryValues.map((protocol) => protocol.unansweredByCase),
   );
   const questionDetailsByCase = Object.assign(
     {},
-    ...decisionProtocolSummaryValues.map(
-      (protocol) => protocol.questionDetailsByCase,
-    ),
+    ...decisionProtocolSummaryValues.map((protocol) => protocol.questionDetailsByCase),
   );
-  const decisionAnswerDraft = summarizeDecisionAnswerDraft(
-    decisionAnswers,
-    questionDetailsByCase,
-  );
+  const decisionAnswerDraft = summarizeDecisionAnswerDraft(decisionAnswers, questionDetailsByCase);
   decisionAnswerDraft.sourcePath = decisionAnswersPath;
   decisionAnswerDraft.usesCustomPath = usesCustomDecisionAnswersPath;
   if (decisionAnswerDraft.unknownQuestionIds.length > 0) {
@@ -2585,17 +2339,16 @@ async function main() {
     decisionReviewQueue,
     decisionAnswerDraft,
   );
-  const draftReadyNotWorksheetReadyCaseIds =
-    decisionAnswerReadiness.readyCaseIds.filter(
-      (caseId) => !readyDecisionCaseIds.includes(caseId),
-    );
+  const draftReadyNotWorksheetReadyCaseIds = decisionAnswerReadiness.readyCaseIds.filter(
+    (caseId) => !readyDecisionCaseIds.includes(caseId),
+  );
   if (requireBackfillClean && draftReadyNotWorksheetReadyCaseIds.length > 0) {
     errors.push(
       `decision answer draft has ready cases that still need worksheet/source backfill: ${draftReadyNotWorksheetReadyCaseIds.join(", ")}`,
     );
   }
-  const worksheetReadyStillDecisionNeededCaseIds = readyDecisionCaseIds.filter(
-    (caseId) => expectedDecisionBacklogIds.includes(caseId),
+  const worksheetReadyStillDecisionNeededCaseIds = readyDecisionCaseIds.filter((caseId) =>
+    expectedDecisionBacklogIds.includes(caseId),
   );
   if (worksheetReadyStillDecisionNeededCaseIds.length > 0) {
     errors.push(
@@ -2631,9 +2384,7 @@ async function main() {
       referencedAutomationAbbreviations: referencedAutomation.size,
       referencedSpecFilesWithSkipOrOnly: specFilesWithSkipOrOnly.length,
       referencedSpecFilesWithTests:
-        automationSpecs.size -
-        missingSpecFiles.length -
-        specFilesWithoutTests.length,
+        automationSpecs.size - missingSpecFiles.length - specFilesWithoutTests.length,
       undefined: getCount(coverageStatusCounts, "undefined"),
     },
     environment: {
@@ -2665,21 +2416,16 @@ async function main() {
         faultSpecFilesWithoutTests.length,
     },
     decisionBacklog: {
-      appLifecycleFaults: decisionBacklogIds.filter((id) => id.startsWith("L"))
-        .length,
+      appLifecycleFaults: decisionBacklogIds.filter((id) => id.startsWith("L")).length,
       cases: decisionBacklogRows.size,
       compactMainUndefined: mainUndefinedIds.length,
-      crossSessionFaults: decisionBacklogIds.filter((id) => id.startsWith("X"))
-        .length,
+      crossSessionFaults: decisionBacklogIds.filter((id) => id.startsWith("X")).length,
       expected: expectedDecisionBacklogIds.length,
-      filesystemFaults: decisionBacklogIds.filter((id) => id.startsWith("D"))
-        .length,
+      filesystemFaults: decisionBacklogIds.filter((id) => id.startsWith("D")).length,
       missing: missingDecisionBacklogIds,
-      modelApiFaults: decisionBacklogIds.filter((id) => id.startsWith("N"))
-        .length,
+      modelApiFaults: decisionBacklogIds.filter((id) => id.startsWith("N")).length,
       sseFaults: decisionBacklogIds.filter((id) => id.startsWith("S")).length,
-      workspaceToolFaults: decisionBacklogIds.filter((id) => id.startsWith("W"))
-        .length,
+      workspaceToolFaults: decisionBacklogIds.filter((id) => id.startsWith("W")).length,
       extra: extraDecisionBacklogIds,
     },
     decisionE2ERoadmap: {
@@ -2711,10 +2457,7 @@ async function main() {
         (total, protocol) => total + protocol.answered,
         0,
       ),
-      cases: decisionProtocolSummaryValues.reduce(
-        (total, protocol) => total + protocol.cases,
-        0,
-      ),
+      cases: decisionProtocolSummaryValues.reduce((total, protocol) => total + protocol.cases, 0),
       completeQuestions: decisionProtocolSummaryValues.reduce(
         (total, protocol) => total + protocol.completeQuestions,
         0,
@@ -2750,13 +2493,11 @@ async function main() {
       draftReadyCaseIds: decisionAnswerReadiness.readyCaseIds,
       draftReadyCases: decisionAnswerReadiness.readyCases,
       draftReadyNotWorksheetReadyCaseIds,
-      draftReadyNotWorksheetReadyCases:
-        draftReadyNotWorksheetReadyCaseIds.length,
+      draftReadyNotWorksheetReadyCases: draftReadyNotWorksheetReadyCaseIds.length,
       worksheetReadyCaseIds: readyDecisionCaseIds,
       worksheetReadyCases: readyDecisionCaseIds.length,
       worksheetReadyStillDecisionNeededCaseIds,
-      worksheetReadyStillDecisionNeededCases:
-        worksheetReadyStillDecisionNeededCaseIds.length,
+      worksheetReadyStillDecisionNeededCases: worksheetReadyStillDecisionNeededCaseIds.length,
     },
     decisionWorkflowBoard,
     decisionReviewQueue: {
@@ -2766,14 +2507,10 @@ async function main() {
       total: decisionReviewQueue.length,
     },
     networkSseDecisionProtocol: decisionProtocolSummaries.networkSse,
-    recoveryIsolationDecisionProtocol:
-      decisionProtocolSummaries.recoveryIsolation,
+    recoveryIsolationDecisionProtocol: decisionProtocolSummaries.recoveryIsolation,
     uniqueProduct: {
-      covered:
-        getCount(coverageStatusCounts, "covered") + newExternalCoveredCases,
-      decisionNeeded:
-        getCount(mainStatusCounts, "undefined") +
-        newExternalDecisionNeededCases,
+      covered: getCount(coverageStatusCounts, "covered") + newExternalCoveredCases,
+      decisionNeeded: getCount(mainStatusCounts, "undefined") + newExternalDecisionNeededCases,
       total: mainCaseRows.size + newExternalProductCases,
     },
     errors,
@@ -2807,10 +2544,7 @@ async function main() {
     );
   }
 
-  const coverageStats = parseStatsTableAfterHeading(
-    coverageMatrix,
-    "## 当前统计",
-  );
+  const coverageStats = parseStatsTableAfterHeading(coverageMatrix, "## 当前统计");
   pushStatMismatch(
     errors,
     "coverage matrix",
@@ -2917,10 +2651,7 @@ async function main() {
     coverageStats.get("外部故障 infra case"),
   );
 
-  const environmentStats = parseStatsTableAfterHeading(
-    environmentFaultCatalog,
-    "## 当前统计",
-  );
+  const environmentStats = parseStatsTableAfterHeading(environmentFaultCatalog, "## 当前统计");
   pushStatMismatch(
     errors,
     "environment catalog",
@@ -2971,10 +2702,7 @@ async function main() {
     environmentStats.get("infra"),
   );
 
-  const faultCoverageStats = parseStatsTableAfterHeading(
-    faultCoverageMatrix,
-    "## 当前统计",
-  );
+  const faultCoverageStats = parseStatsTableAfterHeading(faultCoverageMatrix, "## 当前统计");
   pushStatMismatch(
     errors,
     "fault coverage matrix",
@@ -3060,10 +2788,7 @@ async function main() {
     faultCoverageStats.get("含 skip/only 的 spec"),
   );
 
-  const decisionBacklogStats = parseStatsTableAfterHeading(
-    decisionBacklog,
-    "## 当前统计",
-  );
+  const decisionBacklogStats = parseStatsTableAfterHeading(decisionBacklog, "## 当前统计");
   pushStatMismatch(
     errors,
     "decision backlog",
@@ -3121,10 +2846,7 @@ async function main() {
     decisionBacklogStats.get("跨 Session 故障隔离"),
   );
 
-  const decisionE2ERoadmapStats = parseStatsTableAfterHeading(
-    decisionE2ERoadmap,
-    "## 当前统计",
-  );
+  const decisionE2ERoadmapStats = parseStatsTableAfterHeading(decisionE2ERoadmap, "## 当前统计");
   pushStatMismatch(
     errors,
     "decision E2E roadmap",
@@ -3176,8 +2898,7 @@ async function main() {
   );
 
   const shouldRenderReviewQueueMarkdown =
-    (reviewQueueMarkdownOutput || reviewNextMarkdownOutput) &&
-    !answerTemplateMarkdownOutput;
+    (reviewQueueMarkdownOutput || reviewNextMarkdownOutput) && !answerTemplateMarkdownOutput;
   const reviewQueueScope = shouldRenderReviewQueueMarkdown
     ? getDecisionReviewQueueScope(summary, errors)
     : null;
@@ -3209,13 +2930,9 @@ async function main() {
   } else if (jsonOutput) {
     console.log(JSON.stringify(summary, null, 2));
   } else if (reviewQueueScope) {
-    process.stdout.write(
-      renderDecisionReviewQueueMarkdown(summary, reviewQueueScope),
-    );
+    process.stdout.write(renderDecisionReviewQueueMarkdown(summary, reviewQueueScope));
   } else if (answerTemplateScope) {
-    process.stdout.write(
-      renderDecisionAnswerTemplateMarkdown(summary, answerTemplateScope),
-    );
+    process.stdout.write(renderDecisionAnswerTemplateMarkdown(summary, answerTemplateScope));
   } else if (answersStatusMarkdownOutput) {
     process.stdout.write(renderDecisionAnswersStatusMarkdown(summary));
   } else if (backfillPlanMarkdownOutput) {

@@ -29,37 +29,42 @@
 ## 一、缺口清单（能力 × 老版实现 × v4 现状）
 
 ### A. 记住上次选择（持久化）— 真缺口
-| 能力 | 老版来源 | v4 现状 |
-|---|---|---|
-| last-model 持久化（全局键 `zcode-last-agent-model`，ZCode-Agent `__global__`、custom per-workspace） | `lib/zcodeModelPreference.ts:15,50,230,289` | ✗ 仅 workspace-default（per-workspace）`useDraftConfigControl.ts:221` |
-| legacy 键迁移（workspace-scoped / path-only → global） | `zcodeModelPreference.ts:246-286` | ✗ |
-| thought-level 持久化 + GLM-5.2 default-max | `zcodeModelPreference.ts:16,327,505-553,571` | ✗ |
-| 启动作种子 + 对目录再校验 | `chat-input-toolbar/modelSelection.ts:609-660` | 部分：草稿回落 workspace-default `V4ComposerToolbar.tsx:146-150`，无全局种子/再校验 |
+
+| 能力                                                                                                 | 老版来源                                       | v4 现状                                                                             |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| last-model 持久化（全局键 `zcode-last-agent-model`，ZCode-Agent `__global__`、custom per-workspace） | `lib/zcodeModelPreference.ts:15,50,230,289`    | ✗ 仅 workspace-default（per-workspace）`useDraftConfigControl.ts:221`               |
+| legacy 键迁移（workspace-scoped / path-only → global）                                               | `zcodeModelPreference.ts:246-286`              | ✗                                                                                   |
+| thought-level 持久化 + GLM-5.2 default-max                                                           | `zcodeModelPreference.ts:16,327,505-553,571`   | ✗                                                                                   |
+| 启动作种子 + 对目录再校验                                                                            | `chat-input-toolbar/modelSelection.ts:609-660` | 部分：草稿回落 workspace-default `V4ComposerToolbar.tsx:146-150`，无全局种子/再校验 |
 
 ### B. 兜底 / 自动定位（fallback）— 真缺口
-| 能力 | 老版来源 | v4 现状 |
-|---|---|---|
-| 当前模型不在可选组 → 退首个可用 / 清空 | `modelSelection.ts:678` + 状态机 `ChatInputToolbar.tsx:1937-2085` + `setTaskVisibleModelListFallback:1923` | ✗ 失效不自愈，显原始 id |
-| 登录后自动选该家首模 | `modelSelection.ts:755`（`resolveLoginProviderFirstModel`）+ `:733` | ✗ |
-| `<synthetic>` 占位 | `modelSelection.ts:350-414` | ✗ synthetic 直显 |
-| entitlement 水合中延迟定位 | `modelSelection.ts:690-697,785` | ✗ |
-| 空 config 降级 | — | 有：`SessionPane.tsx:792-801` + `modelMenuVisible` `V4ComposerToolbar.tsx:338` |
+
+| 能力                                   | 老版来源                                                                                                   | v4 现状                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| 当前模型不在可选组 → 退首个可用 / 清空 | `modelSelection.ts:678` + 状态机 `ChatInputToolbar.tsx:1937-2085` + `setTaskVisibleModelListFallback:1923` | ✗ 失效不自愈，显原始 id                                                        |
+| 登录后自动选该家首模                   | `modelSelection.ts:755`（`resolveLoginProviderFirstModel`）+ `:733`                                        | ✗                                                                              |
+| `<synthetic>` 占位                     | `modelSelection.ts:350-414`                                                                                | ✗ synthetic 直显                                                               |
+| entitlement 水合中延迟定位             | `modelSelection.ts:690-697,785`                                                                            | ✗                                                                              |
+| 空 config 降级                         | —                                                                                                          | 有：`SessionPane.tsx:792-801` + `modelMenuVisible` `V4ComposerToolbar.tsx:338` |
 
 ### C. Coding-plan 列表正确性 — 部分缺口
-| 能力 | 老版来源 | v4 现状 |
-|---|---|---|
-| 建组 + coding-plan 分组/badge | `lib/modelSelectionGroups.ts:810,76,537` | ✅ `buildModelSelectGroups` `V4ComposerToolbar.tsx:215-227` |
-| **entitlement 可见性门控**（未授权不显、start↔coding 互斥） | `modelSelection.ts:830-884` 应用于 `ChatInputToolbar.tsx:1123-1170` | ✗ 只过 `shouldIncludeModelProviderInSelection`；`entitlements` 只喂 start 余额 `V4ComposerToolbar.tsx:129-184` |
-| **连接方式 Select**（Start/Individual/Team/API Key） | `ModelConfigSelect.tsx:365` + `onConnectionValueChange`；选项 `modelSelectionGroups.ts:371-498` | ✗ 未传 `onConnectionValueChange` `V4ComposerToolbar.tsx:375-391` |
-| coding-plan 用量面板 | `chat-input-toolbar/CodingPlanContextUsage.tsx` + `ChatInputToolbar` ~150 行 | ✗（`m5-composer-parity §六` 二期） |
-| context-usage breakdown + cache-hit | `chat-input-toolbar/contextUsage.tsx` | ✗ `SessionUsageState` 缺字段（`m5-composer-parity §六` 一期） |
+
+| 能力                                                        | 老版来源                                                                                        | v4 现状                                                                                                        |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 建组 + coding-plan 分组/badge                               | `lib/modelSelectionGroups.ts:810,76,537`                                                        | ✅ `buildModelSelectGroups` `V4ComposerToolbar.tsx:215-227`                                                    |
+| **entitlement 可见性门控**（未授权不显、start↔coding 互斥） | `modelSelection.ts:830-884` 应用于 `ChatInputToolbar.tsx:1123-1170`                             | ✗ 只过 `shouldIncludeModelProviderInSelection`；`entitlements` 只喂 start 余额 `V4ComposerToolbar.tsx:129-184` |
+| **连接方式 Select**（Start/Individual/Team/API Key）        | `ModelConfigSelect.tsx:365` + `onConnectionValueChange`；选项 `modelSelectionGroups.ts:371-498` | ✗ 未传 `onConnectionValueChange` `V4ComposerToolbar.tsx:375-391`                                               |
+| coding-plan 用量面板                                        | `chat-input-toolbar/CodingPlanContextUsage.tsx` + `ChatInputToolbar` ~150 行                    | ✗（`m5-composer-parity §六` 二期）                                                                             |
+| context-usage breakdown + cache-hit                         | `chat-input-toolbar/contextUsage.tsx`                                                           | ✗ `SessionUsageState` 缺字段（`m5-composer-parity §六` 一期）                                                  |
 
 ### D. CLI 写路径 provider / 凭据解析（C 的地基）— 真缺口
-| 能力 | 老版来源 | v4 现状 |
-|---|---|---|
+
+| 能力                                                   | 老版来源                                                                                    | v4 现状                                                                                        |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | 切模型解析 provider client + 凭据 + 连接方式换 runtime | `chat-input-toolbar/modelChangeActions.ts:462,647,982` + `useToolbarRecoveryModelChange.ts` | ✗ `handlers/model-config.ts:36-37`「凭据未做…只支持同 provider 直切」；仅 `app.setModel` `:64` |
 
 ### E. Polish
+
 - `showManageModelsAction={false}`（`V4ComposerToolbar.tsx:379`）；`isItemLocked={()=>false}`（`:331`）；调试日志 `[v4-toolbar]/[v4-draft-config]/[v4-pane]`；压缩守卫维持死期（如需再议）。
 
 ## 二、分阶段执行计划
@@ -74,6 +79,7 @@
 - **Phase 5（E）**：manage-models、运行中锁、日志清理；压缩守卫留裁决。
 
 ## 三、验收口径
+
 - 每 Phase 带 L1/L2 + e2e，先补 `docs/conversation-session-case-catalog.md` 与 `docs/testing/conversation-session-e2e-coverage-matrix.md` 再写 case。
 - 纪律：`zcode-protocol-v4/` 无桥；新写不调旧协议；协议 additive + 同步 `10-protocol-spec.md`；能删的旧路径标死期并删。
 - 跑 e2e 前：`node scripts/build-desktop-agent-cli.mjs` 重建 CLI bundle；`unset ELECTRON_RUN_AS_NODE`。
@@ -137,6 +143,7 @@ snapshot model identity 不变 -> setThoughtLevel(用户显式值) -> 成功发�
 ```
 
 ## 四、执行进度
+
 - [x] **Phase 4a — entitlement 门控**（`5c14a3927`）：`filterModelProvidersByEntitlement` 纯函数 + V4ComposerToolbar 建组接入 + 7 单测。
 - [x] **Phase 3 — 全局 last-model 持久化**：`seedDraftOptionsFromGlobalPreference`（草稿目录种子，对目录再校验）+ `useDraftConfigControl` 写全局/首发一致性种子 + `SessionPane` 会话中途切也写全局 + 4 单测。
 - [~] **Phase 2 — 兜底/自动定位（slice1+2 完成）**：slice1 触发器显示（`<synthetic>`/不可用模型回落占位「选择模型」，`resolveModelSelectTriggerDisplay`）；slice2 会话态失效模型自愈切首个可用（`resolveV4ModelAutoFallback` 纯函数 8 单测 + 工具条 effect，entitlement 水合排除 + guard 防抖）。**slice3 登录后自动选首模 deferred**（v4 缺 login 事件信号，`resolveLoginProviderFirstModel` 现成，待 login 面 v4 化时接）。
@@ -146,5 +153,6 @@ snapshot model identity 不变 -> setThoughtLevel(用户显式值) -> 成功发�
 - [~] **Phase 5 — polish**：manage-models、运行中锁已完成；模型触发器 identity/显示同源修复已完成，其他 polish 待收尾。
 
 ### 遗留/待跟踪
+
 - Phase 3 已覆盖：草稿选择/会话中途切→写全局；新草稿→种子回放（跨 workspace）。**e2e 待补**（切 workspace 后 ZCode-Agent 模型仍是上次全局选择），先补 case catalog + coverage matrix。
 - Phase 4a 的 team-plan 豁免依赖 `useSettings` 的 `modelProviderFamilySelectedKeys`（存活配置面）；连接方式切换本身归 Phase 4b。

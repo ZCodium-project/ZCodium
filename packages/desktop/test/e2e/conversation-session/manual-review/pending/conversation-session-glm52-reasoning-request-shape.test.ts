@@ -1,7 +1,4 @@
-import {
-  TID_CHAT_MODEL_SELECT_TRIGGER,
-  TID_SETTINGS_BACK_BUTTON,
-} from "@zcode/shared";
+import { TID_CHAT_MODEL_SELECT_TRIGGER, TID_SETTINGS_BACK_BUTTON } from "@zcode/shared";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,

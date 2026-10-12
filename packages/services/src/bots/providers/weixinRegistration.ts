@@ -67,7 +67,10 @@ function readString(record: Record<string, unknown> | null | undefined, key: str
   return typeof value === "string" ? value : "";
 }
 
-function readNumber(record: Record<string, unknown> | null | undefined, key: string): number | null {
+function readNumber(
+  record: Record<string, unknown> | null | undefined,
+  key: string,
+): number | null {
   const value = record?.[key];
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -83,7 +86,10 @@ function unwrapData(payload: unknown): Record<string, unknown> {
   return isRecord(payload.data) ? { ...payload, ...payload.data } : payload;
 }
 
-async function getWeixinRegistrationJson<T>(baseUrl: string, path: string): Promise<T & Record<string, unknown>> {
+async function getWeixinRegistrationJson<T>(
+  baseUrl: string,
+  path: string,
+): Promise<T & Record<string, unknown>> {
   const response = await fetch(`${baseUrl}${WEIXIN_BOT_API_PREFIX}${path}`, {
     method: "GET",
     headers: { "iLink-App-ClientVersion": "1" },
@@ -96,12 +102,16 @@ async function getWeixinRegistrationJson<T>(baseUrl: string, path: string): Prom
   const ret = readNumber(payload, "ret");
   const errcode = readNumber(payload, "errcode");
   if ((ret !== null && ret !== 0) || (errcode !== null && errcode !== 0)) {
-    throw new Error(readString(payload, "errmsg") || `ret=${ret ?? ""} errcode=${errcode ?? ""}`.trim());
+    throw new Error(
+      readString(payload, "errmsg") || `ret=${ret ?? ""} errcode=${errcode ?? ""}`.trim(),
+    );
   }
   return payload;
 }
 
-function normalizeQrStatus(status: unknown): "pending" | "scanned" | "success" | "expired" | "error" {
+function normalizeQrStatus(
+  status: unknown,
+): "pending" | "scanned" | "success" | "expired" | "error" {
   if (typeof status === "number") {
     if (status === 0) return "pending";
     if (status === 1) return "scanned";
@@ -129,9 +139,13 @@ function normalizeQrStatus(status: unknown): "pending" | "scanned" | "success" |
 
 export async function beginWeixinRegistration(): Promise<WeixinRegistrationBeginResult> {
   const baseUrl = getWeixinRegistrationBaseUrl();
-  const payload = await getWeixinRegistrationJson<WeixinQrBeginResponse>(baseUrl, "/get_bot_qrcode?bot_type=3");
+  const payload = await getWeixinRegistrationJson<WeixinQrBeginResponse>(
+    baseUrl,
+    "/get_bot_qrcode?bot_type=3",
+  );
   const qrCode = readString(payload, "qrcode") || readString(payload, "qr_code");
-  const qrUrl = readString(payload, "qrcode_img_content") || readString(payload, "qrcode_url") || qrCode;
+  const qrUrl =
+    readString(payload, "qrcode_img_content") || readString(payload, "qrcode_url") || qrCode;
   if (!qrCode || !qrUrl) {
     throw new Error("Weixin login did not return a QR code.");
   }
@@ -162,7 +176,9 @@ export async function pollWeixinRegistration(
     }
     throw error;
   }
-  const status = normalizeQrStatus(payload.status ?? payload["qrcode_status"] ?? payload["qr_status"]);
+  const status = normalizeQrStatus(
+    payload.status ?? payload["qrcode_status"] ?? payload["qr_status"],
+  );
   if (status === "success") {
     const botToken = readString(payload, "bot_token") || readString(payload, "token");
     if (!botToken) {

@@ -356,9 +356,7 @@ test("权限应答后任务恢复：无无主 stream，终态与恢复后的正�
 
   assertStreamInvariants(h.frames);
   // 恢复后的正文与终态必须落在应答轮次的 stream 上，而不是各自新建。
-  const resumed = h.frames.filter(
-    (frame) => frame.kind === "delivery" && frame.seq >= 3,
-  );
+  const resumed = h.frames.filter((frame) => frame.kind === "delivery" && frame.seq >= 3);
   assert.ok(resumed.length >= 2);
   assert.equal(new Set(resumed.map((frame) => frame.streamId)).size, 1);
   h.provider.dispose();
@@ -380,9 +378,7 @@ test("任务等待期间收到独立命令：该轮次仍被收口，不会被�
     (frame) => frame.kind === "accepted" && frame.inReplyTo === "cmd-status",
   ).streamId;
   assert.ok(
-    h.frames.some(
-      (frame) => frame.kind === "status" && frame.streamId === statusStream,
-    ),
+    h.frames.some((frame) => frame.kind === "status" && frame.streamId === statusStream),
     "独立命令轮次没有被收口，插件侧的流永远不会结束",
   );
 

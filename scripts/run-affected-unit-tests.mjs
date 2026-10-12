@@ -25,8 +25,7 @@ function resolvePnpmCliPath(env) {
   const npmExecPath = env.npm_execpath;
   if (
     npmExecPath &&
-    (npmExecPath.toLowerCase().includes("\\pnpm\\") ||
-      npmExecPath.toLowerCase().includes("/pnpm/"))
+    (npmExecPath.toLowerCase().includes("\\pnpm\\") || npmExecPath.toLowerCase().includes("/pnpm/"))
   ) {
     return npmExecPath;
   }

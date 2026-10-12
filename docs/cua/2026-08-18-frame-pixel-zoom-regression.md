@@ -12,11 +12,11 @@
 轨迹 `model-io-sess_364a4761`（2026-08-19 19:19–19:53，Helper 3.8.1 / producer 0.5.7）连丢三次
 点击，返回体 `resolved_app_ref` 如实记录了投递目标：
 
-| 请求# | 实际收到点击的窗口 | layer | bounds |
-| --- | --- | --- | --- |
-| 18 | `com.electron.lark.iron`（飞书屏幕共享提示层 LarkSSPromptWindow） | 非零 | `[0,0,1512,982]` |
-| 25 | `com.volcengine.corplink.networkextension-wrapper`（飞连网络扩展） | 25 | `[0,0,1512,982]` |
-| 31 | `now.typeless.desktop`（Typeless "Status"） | 1001 | `[381,482,750,500]` |
+| 请求# | 实际收到点击的窗口                                                 | layer | bounds              |
+| ----- | ------------------------------------------------------------------ | ----- | ------------------- |
+| 18    | `com.electron.lark.iron`（飞书屏幕共享提示层 LarkSSPromptWindow）  | 非零  | `[0,0,1512,982]`    |
+| 25    | `com.volcengine.corplink.networkextension-wrapper`（飞连网络扩展） | 25    | `[0,0,1512,982]`    |
+| 31    | `now.typeless.desktop`（Typeless "Status"）                        | 1001  | `[381,482,750,500]` |
 
 三次 `isError=false`。22 个工具调用耗在定位和挪走这些看不见的窗口上。装了飞连的机器上主屏**任意
 一点**都归属到它的包装窗，坐标点击不是偶发出错而是整屏不可用。

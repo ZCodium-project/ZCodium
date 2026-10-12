@@ -33,9 +33,7 @@ export async function waitForForkButtonForAssistantContaining(
     },
     {
       timeout: 30000,
-      timeoutMsg: `assistant 消息没有出现可用 fork 按钮: ${text}; latest=${JSON.stringify(
-        latest,
-      )}`,
+      timeoutMsg: `assistant 消息没有出现可用 fork 按钮: ${text}; latest=${JSON.stringify(latest)}`,
     },
   );
   if (!latest) {
@@ -61,9 +59,7 @@ export function getForkButtonForAssistantContaining(
   return getForkButtonForMessageContaining(TID_CHAT_ASSISTANT_MESSAGE, text);
 }
 
-export function getForkButtonForUserContaining(
-  text: string,
-): Promise<ForkButtonSnapshot | null> {
+export function getForkButtonForUserContaining(text: string): Promise<ForkButtonSnapshot | null> {
   return getForkButtonForMessageContaining(TID_CHAT_USER_MESSAGE, text);
 }
 
@@ -74,9 +70,7 @@ function getForkButtonForMessageContaining(
   return browser.execute(
     (messageTestIdPrefix, forkButtonPrefix, expectedText) => {
       const messages = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${messageTestIdPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${messageTestIdPrefix}-"]`),
       );
       const message = messages.find((element) =>
         element.innerText.replace(/\u00a0/g, " ").includes(expectedText),
@@ -86,9 +80,7 @@ function getForkButtonForMessageContaining(
         return null;
       }
       const button = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(
-          `[data-testid^="${forkButtonPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLButtonElement>(`[data-testid^="${forkButtonPrefix}-"]`),
       ).find((candidate) => candidate.getAttribute("data-message-id") === messageId);
       const testId = button?.getAttribute("data-testid") ?? `${forkButtonPrefix}-${messageId}`;
       return {

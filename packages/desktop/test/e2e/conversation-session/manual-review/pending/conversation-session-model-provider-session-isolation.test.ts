@@ -99,11 +99,7 @@ async function selectExpectedConfig(config: ExpectedConfig) {
   await assertSelectedExpectedConfig(config);
 }
 
-async function sendPromptAndAssertConfig(
-  prompt: string,
-  config: ExpectedConfig,
-  label: string,
-) {
+async function sendPromptAndAssertConfig(prompt: string, config: ExpectedConfig, label: string) {
   const marker = prompt.split(":")[0] ?? prompt;
   await sendPrompt(prompt);
   await waitForComposerText("", `${label} 发送后输入框没有清空`);
@@ -152,9 +148,7 @@ async function assertSelectedExpectedConfig(config: ExpectedConfig) {
     thoughtLabel.text,
     thoughtLabel.title,
   ].map((value) => value.replace(/\s+/g, " ").trim().toLowerCase());
-  if (
-    !currentThoughtCandidates.some((candidate) => acceptedThoughtValues.includes(candidate))
-  ) {
+  if (!currentThoughtCandidates.some((candidate) => acceptedThoughtValues.includes(candidate))) {
     throw new Error(
       `当前思考深度不是期望配置: ${JSON.stringify({
         acceptedThoughtValues,
@@ -189,9 +183,7 @@ async function waitForSessionVisible(sessionId: string, timeoutMsg: string) {
 async function waitForIdleSession(timeoutMsg: string) {
   const snapshot = await waitForChatState(
     (candidate) =>
-      candidate.state === "idle" &&
-      candidate.queueCount === 0 &&
-      Boolean(candidate.sessionId),
+      candidate.state === "idle" && candidate.queueCount === 0 && Boolean(candidate.sessionId),
     timeoutMsg,
     90000,
   );

@@ -24,16 +24,16 @@
 
 ## Quick lookup — match user query to a case
 
-| # | Match keywords | Slots | Canonical §|
-|---|---|---|---|
-| **X1** | financial PDF → Excel analysis / 财报分析 / 10-K → xlsx with formulas + charts | `PDF_PATHS[]`, `COMPANY`, `METRICS[]`, `OUTPUT_XLSX` | §X1 |
-| **X2** | Excel + PDF + Word multi-format deliverable / 多格式产出 / dashboard + report + memo | `INPUT_DATA`, `ANALYSIS_DIMS[]`, `OUTPUT_DIR`, `DOTNET_BUDGET_MIN(default 5)` | §X2 |
-| **X3** | 500k+ row dataset → pivot tables + dashboard + slicers / 大数据透视 / RFM | `INPUT`, `KEY_COLS[]`, `METRICS[]`, `PIVOT_AXES[]`, `SLICERS[]`, `OUTPUT_XLSX` | §X3 |
-| **X4** | 240-page financial report → Excel preserving every table / 复杂金融 PDF→Excel | `PDF_PATH`, `STATEMENTS[]`, `OUTPUT_XLSX` | §X4 |
-| **X5** | multi-year financial analysis / 财务分析 / revenue/margin/growth/segment trends | `COMPANY`, `YEAR_RANGE`, `PDF_PATHS[]`, `METRICS[]`, `OUTPUT_XLSX` | §X5 |
-| **X6** | composite score / index / ranking with stated range / 综合评分 0-100 | `INPUT_XLSX`, `SCORE_COLS[]`, `WEIGHTS[]`, `TARGET_RANGE`, `OUTPUT_XLSX` | §X6 |
-| **X7** | cross-sheet dynamic formulas / Inputs → Summary auto-update / 跨 sheet 引用 | `INPUT_LAYOUT`, `SUMMARY_LAYOUT`, `OUTPUT_XLSX` | §X7 |
-| **X8** | xlsx ↔ csv ↔ json ↔ pdf with print settings / 表格格式转换 / 打印设置 / Superstore | `INPUT_XLSX`, `OUTPUT_FORMATS[]`, `PRINT_SETTINGS`, `OUTPUT_DIR` | §X8 + [Superstore case](superstore-multiformat-conversion-case.md) |
+| #      | Match keywords                                                                       | Slots                                                                          | Canonical §                                                        |
+| ------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| **X1** | financial PDF → Excel analysis / 财报分析 / 10-K → xlsx with formulas + charts       | `PDF_PATHS[]`, `COMPANY`, `METRICS[]`, `OUTPUT_XLSX`                           | §X1                                                                |
+| **X2** | Excel + PDF + Word multi-format deliverable / 多格式产出 / dashboard + report + memo | `INPUT_DATA`, `ANALYSIS_DIMS[]`, `OUTPUT_DIR`, `DOTNET_BUDGET_MIN(default 5)`  | §X2                                                                |
+| **X3** | 500k+ row dataset → pivot tables + dashboard + slicers / 大数据透视 / RFM            | `INPUT`, `KEY_COLS[]`, `METRICS[]`, `PIVOT_AXES[]`, `SLICERS[]`, `OUTPUT_XLSX` | §X3                                                                |
+| **X4** | 240-page financial report → Excel preserving every table / 复杂金融 PDF→Excel        | `PDF_PATH`, `STATEMENTS[]`, `OUTPUT_XLSX`                                      | §X4                                                                |
+| **X5** | multi-year financial analysis / 财务分析 / revenue/margin/growth/segment trends      | `COMPANY`, `YEAR_RANGE`, `PDF_PATHS[]`, `METRICS[]`, `OUTPUT_XLSX`             | §X5                                                                |
+| **X6** | composite score / index / ranking with stated range / 综合评分 0-100                 | `INPUT_XLSX`, `SCORE_COLS[]`, `WEIGHTS[]`, `TARGET_RANGE`, `OUTPUT_XLSX`       | §X6                                                                |
+| **X7** | cross-sheet dynamic formulas / Inputs → Summary auto-update / 跨 sheet 引用          | `INPUT_LAYOUT`, `SUMMARY_LAYOUT`, `OUTPUT_XLSX`                                | §X7                                                                |
+| **X8** | xlsx ↔ csv ↔ json ↔ pdf with print settings / 表格格式转换 / 打印设置 / Superstore   | `INPUT_XLSX`, `OUTPUT_FORMATS[]`, `PRINT_SETTINGS`, `OUTPUT_DIR`               | §X8 + [Superstore case](superstore-multiformat-conversion-case.md) |
 
 ---
 

@@ -161,69 +161,67 @@ export function WebRemoteControlTaskIndex({
     [activeWorkspaceIdentity, result.workspaces],
   );
   const workspaceServiceLookup = useMemo(
-    () =>
-      buildWorkspaceServiceLookup(
-        mutationWorkspaceTargets,
-        baseServices,
-        serviceResolverState,
-      ),
+    () => buildWorkspaceServiceLookup(mutationWorkspaceTargets, baseServices, serviceResolverState),
     [baseServices, mutationWorkspaceTargets, serviceResolverState],
   );
 
-  const loadTasks = useCallback(async (isCancelled: () => boolean = () => false) => {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      for (
-        let attempt = 0;
-        attempt <= WEB_REMOTE_CONTROL_TASK_INDEX_EMPTY_RETRY_MAX_ATTEMPTS;
-        attempt += 1
-      ) {
-        const nextResult = await switcher.listWorkspaces();
-        if (isCancelled()) {
-          return;
-        }
-
-        setResult(nextResult);
-        if (
-          !shouldRetryWebRemoteControlTaskIndexLoad({
-            activeTaskId,
-            attempt,
-            maxAttempts: WEB_REMOTE_CONTROL_TASK_INDEX_EMPTY_RETRY_MAX_ATTEMPTS,
-            taskCount: nextResult.tasks?.length ?? 0,
-          })
+  const loadTasks = useCallback(
+    async (isCancelled: () => boolean = () => false) => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        for (
+          let attempt = 0;
+          attempt <= WEB_REMOTE_CONTROL_TASK_INDEX_EMPTY_RETRY_MAX_ATTEMPTS;
+          attempt += 1
         ) {
-          return;
-        }
+          const nextResult = await switcher.listWorkspaces();
+          if (isCancelled()) {
+            return;
+          }
 
-        // Bugfix: 跨 workspace 切换时 Web Root 会先连上新 bridge，
-        // 但 desktop renderer 的全窗口任务快照可能还在 loading；空快照不是最终事实，短暂重试后再展示空态。
-        logger.debug("[WebRemoteControlTaskIndex] 远控任务索引为空，等待桌面任务快照同步", {
-          activeTaskId,
-          activeWorkspaceIdentity,
-          activeWorkspacePath,
-          attempt,
-        });
-        await waitForWebRemoteControlTaskIndexRetry();
+          setResult(nextResult);
+          if (
+            !shouldRetryWebRemoteControlTaskIndexLoad({
+              activeTaskId,
+              attempt,
+              maxAttempts: WEB_REMOTE_CONTROL_TASK_INDEX_EMPTY_RETRY_MAX_ATTEMPTS,
+              taskCount: nextResult.tasks?.length ?? 0,
+            })
+          ) {
+            return;
+          }
+
+          // Bugfix: 跨 workspace 切换时 Web Root 会先连上新 bridge，
+          // 但 desktop renderer 的全窗口任务快照可能还在 loading；空快照不是最终事实，短暂重试后再展示空态。
+          logger.debug("[WebRemoteControlTaskIndex] 远控任务索引为空，等待桌面任务快照同步", {
+            activeTaskId,
+            activeWorkspaceIdentity,
+            activeWorkspacePath,
+            attempt,
+          });
+          await waitForWebRemoteControlTaskIndexRetry();
+          if (isCancelled()) {
+            return;
+          }
+        }
+      } catch (err) {
         if (isCancelled()) {
           return;
         }
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error("[WebRemoteControlTaskIndex] 加载远程 task 索引失败", {
+          error: message,
+        });
+        setLoadError(message);
+      } finally {
+        if (!isCancelled()) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      if (isCancelled()) {
-        return;
-      }
-      const message = err instanceof Error ? err.message : String(err);
-      logger.error("[WebRemoteControlTaskIndex] 加载远程 task 索引失败", {
-        error: message,
-      });
-      setLoadError(message);
-    } finally {
-      if (!isCancelled()) {
-        setLoading(false);
-      }
-    }
-  }, [activeTaskId, activeWorkspaceIdentity, activeWorkspacePath, switcher]);
+    },
+    [activeTaskId, activeWorkspaceIdentity, activeWorkspacePath, switcher],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -248,10 +246,7 @@ export function WebRemoteControlTaskIndex({
   }, [onWorkspaceGroupKeysChange, workspaceGroupKeys]);
 
   const updateTaskMembership = useCallback(
-    (
-      task: WebRemoteControlTaskTarget,
-      membership: { pinned: boolean; archived: boolean },
-    ) => {
+    (task: WebRemoteControlTaskTarget, membership: { pinned: boolean; archived: boolean }) => {
       setResult((current) =>
         applyWebRemoteControlTaskMembershipUpdate({
           result: current,
@@ -354,12 +349,7 @@ export function WebRemoteControlTaskIndex({
           setMutatingTaskKey((current) => (current === rowKey ? null : current));
         });
     },
-    [
-      intl,
-      pendingArchiveTaskKey,
-      updateTaskMembership,
-      workspaceServiceLookup,
-    ],
+    [intl, pendingArchiveTaskKey, updateTaskMembership, workspaceServiceLookup],
   );
 
   const handleUnarchiveTask = useCallback(
@@ -448,10 +438,7 @@ export function WebRemoteControlTaskIndex({
   );
 
   const renderTaskRow = useCallback(
-    (
-      task: WebRemoteControlTaskTarget,
-      options: { showWorkspaceLabel?: boolean } = {},
-    ) => {
+    (task: WebRemoteControlTaskTarget, options: { showWorkspaceLabel?: boolean } = {}) => {
       const taskWorkspaceKey = resolveWebRemoteControlWorkspaceKey(task);
       return (
         <WebRemoteControlTaskIndexRow
@@ -534,9 +521,7 @@ export function WebRemoteControlTaskIndex({
           <div className="px-2 py-1 text-ui-base text-foreground-subtlest">
             {intl.formatMessage({ id: "taskList.pinnedSection" })}
           </div>
-          <ul className="space-y-0.5">
-            {model.pinnedTasks.map((task) => renderTaskRow(task))}
-          </ul>
+          <ul className="space-y-0.5">{model.pinnedTasks.map((task) => renderTaskRow(task))}</ul>
         </div>
       ) : null}
       {loading && visibleTaskCount === 0 ? (

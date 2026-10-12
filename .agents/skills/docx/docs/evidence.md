@@ -6,8 +6,10 @@ classes and requires you to choose deliberately.
 ## The three truths
 
 ### Content truth
+
 What the document says in readable text order.
 Use for:
+
 - summary
 - retrieval
 - quoting
@@ -15,8 +17,10 @@ Use for:
 - finding a heading by text
 
 ### Structure truth
+
 How Word/OpenXML represents the document.
 Use for:
+
 - styles
 - sections
 - numbering
@@ -31,8 +35,10 @@ implementation; the dotnet `analyze` command is an optional independent confirma
 shot, not the source. See `task-read-structure.md` for the full report contract.
 
 ### Rendered truth
+
 What the user actually sees on pages.
 Use for:
+
 - blank pages
 - cover / TOC / abstract / body layout
 - pagination and page-number issues
@@ -43,16 +49,16 @@ Use for:
 
 ## Default evidence posture by task family
 
-| Task family | Default evidence |
-| --- | --- |
-| READ_CONTENT | content |
-| READ_STRUCTURE | structure |
-| READ_RENDERED | rendered + structure |
-| CREATE_DOCX | source content + optional template structure + rendered acceptance when visual fidelity matters |
-| EDIT_FILL_DOCX | content + structure; add rendered when visual risk exists |
-| APPLY_TEMPLATE | source structure + template structure + output rendered |
-| REPAIR_LAYOUT | rendered -> structure -> rendered again |
-| COMPARE_TWO_DOCX | content + structure + rendered |
+| Task family      | Default evidence                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| READ_CONTENT     | content                                                                                         |
+| READ_STRUCTURE   | structure                                                                                       |
+| READ_RENDERED    | rendered + structure                                                                            |
+| CREATE_DOCX      | source content + optional template structure + rendered acceptance when visual fidelity matters |
+| EDIT_FILL_DOCX   | content + structure; add rendered when visual risk exists                                       |
+| APPLY_TEMPLATE   | source structure + template structure + output rendered                                         |
+| REPAIR_LAYOUT    | rendered -> structure -> rendered again                                                         |
+| COMPARE_TWO_DOCX | content + structure + rendered                                                                  |
 
 ## Rules
 

@@ -44,7 +44,11 @@ export function TicketDetailView({
 
   const submittedLabel = formatSubmittedAt(ticket.created_at, formatMessage);
   // Bugfix: 后端旧数据里可能已经持久化了中文系统摘要；详情页展示时按当前语言重新映射系统事件。
-  const timelineItems = getFeedbackTimelineItems(ticket.events ?? [], ticket.comments, formatMessage);
+  const timelineItems = getFeedbackTimelineItems(
+    ticket.events ?? [],
+    ticket.comments,
+    formatMessage,
+  );
   const latestTimelineItem = timelineItems.at(-1);
   const issueCopyLabel = formatMessage({
     id: issueIdCopied ? "feedback.detail.issueCopied" : "feedback.detail.issueCopy",
@@ -150,10 +154,10 @@ export function TicketDetailView({
             <div className="min-w-0">
               <p className="truncate text-ui-base font-medium text-foreground">
                 {latestTimelineItem
-                  ? latestTimelineItem.summary ??
+                  ? (latestTimelineItem.summary ??
                     (latestTimelineItem.isStaff
                       ? formatMessage({ id: "feedback.timeline.officialReply" })
-                      : formatMessage({ id: "feedback.timeline.yourSupplement" }))
+                      : formatMessage({ id: "feedback.timeline.yourSupplement" })))
                   : formatMessage({ id: "feedback.detail.noActivity" })}
               </p>
               <p className="mt-0.5 truncate text-ui-xs text-foreground-subtle">
@@ -220,7 +224,6 @@ export function TicketDetailView({
           ) : null}
         </section>
       ) : null}
-
     </div>
   );
 }

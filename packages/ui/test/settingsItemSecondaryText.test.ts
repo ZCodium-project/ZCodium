@@ -13,12 +13,9 @@ const itemSources = [
 ];
 
 describe("settings item secondary text", () => {
-  it.each(itemSources)(
-    "uses the secondary item typography in %s",
-    async (path) => {
-      const source = await readFile(new URL(path, import.meta.url), "utf8");
+  it.each(itemSources)("uses the secondary item typography in %s", async (path) => {
+    const source = await readFile(new URL(path, import.meta.url), "utf8");
 
-      expect(source).toContain("text-ui-sm text-foreground-subtle");
-    },
-  );
+    expect(source).toContain("text-ui-sm text-foreground-subtle");
+  });
 });

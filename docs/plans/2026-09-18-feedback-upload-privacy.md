@@ -22,13 +22,13 @@
 
 ## 影响简报
 
-| UI 入口                                         | 草稿 owner / 默认                                      | 提交 / 权威 owner                                            | 模式与不变量                                            |
-| ----------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------- |
+| UI 入口                                         | 草稿 owner / 默认                                               | 提交 / 权威 owner                                            | 模式与不变量                                            |
+| ----------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
 | 帮助菜单、任务菜单、聊天/订阅错误、远程连接失败 | feedbackStore → FeedbackSubmitForm；日志 true（可取消）、图片空 | feedbackSubmissionJob → feedbackService → FeedbackHttpClient | desktop 使用本地服务；mobile unsupported 仍保持现有边界 |
-| 新建反馈 / 功能建议                             | 各自草稿：新反馈默认开启日志，独立功能建议不附带日志                             | 同上                                                         | 用户可编辑描述并检查附件                                |
-| 后台任务恢复                                    | job.formDraft 提交时快照                               | job registry，按 jobId 定位                                  | 不影响其他 job，不重新采集截图                          |
-| 补充工单                                        | 用户手选附件和文本                                     | feedbackService                                              | 不新增自动采集                                          |
-| 本地导出日志                                    | 用户显式导出                                           | desktop exportLogs                                           | 不受反馈来源白名单影响                                  |
+| 新建反馈 / 功能建议                             | 各自草稿：新反馈默认开启日志，独立功能建议不附带日志            | 同上                                                         | 用户可编辑描述并检查附件                                |
+| 后台任务恢复                                    | job.formDraft 提交时快照                                        | job registry，按 jobId 定位                                  | 不影响其他 job，不重新采集截图                          |
+| 补充工单                                        | 用户手选附件和文本                                              | feedbackService                                              | 不新增自动采集                                          |
+| 本地导出日志                                    | 用户显式导出                                                    | desktop exportLogs                                           | 不受反馈来源白名单影响                                  |
 
 必查关系：UI 默认/自动截图 → job.includeLogs → prepareCompactLogArchive → desktop 注入 / services fallback → ZIP → uploadFile；自动上下文 → create/comment HTTP。状态 owner 保持现有分层，无新队列。登录 token/deviceMid 用于既有身份认证，不写入日志归档。
 
@@ -45,16 +45,16 @@ Codegraph 工具当前不可用；以精确源码调用点与 rg 交叉验证上
 
 ## 验收矩阵与 E2E 交接
 
-| Case ID    | 状态/动作                                       | 断言                                                                          | 证据                 |
-| ---------- | ----------------------------------------------- | ----------------------------------------------------------------------------- | -------------------- |
-| FB-PRIV-01 | 新反馈、各自动入口                              | 日志默认开启且可取消、无自动 capture 调用                                                 | UI 测试 + E2E        |
-| FB-PRIV-02 | 默认提交 / 取消后提交 / 恢复后台任务               | 只上传本次选中附件，恢复保留原选择                                            | job/UI 测试 + 服务 mock E2E |
-| FB-PRIV-03 | full/compact/desktop 归档                       | SQLite、配置、rollout、symlink、binary、过期/过大文件不出现                   | 临时目录 + ZIP 解压  |
-| FB-PRIV-04 | 嵌套 JSON/转义字符串/多行私钥/Authorization/URL | 合成 secret 不出现在任何 ZIP entry                                            | shared + ZIP 回归    |
-| FB-PRIV-05 | 诊断含 prompt/messages/tool data                | 正文被移除，事件类型/错误码/计数可用                                          | 文本脱敏测试         |
-| FB-PRIV-06 | 工单创建与补充                                  | title/description 常见凭证清洗；用户 contact 和显式正文意图保留；不带模型列表 | service/UI mock HTTP |
-| FB-PRIV-07 | 本地导出/取消/失败                              | 手动导出兼容；归档失败清理；创建取消不触发附件                                | 既有回归             |
-| FB-PRIV-08 | 桌面/手机、中文/英文                            | 开关含义和提示一致、窄屏可访问；手机 unsupported 不变                         | 共享 UI + E2E        |
+| Case ID    | 状态/动作                                       | 断言                                                                          | 证据                        |
+| ---------- | ----------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------- |
+| FB-PRIV-01 | 新反馈、各自动入口                              | 日志默认开启且可取消、无自动 capture 调用                                     | UI 测试 + E2E               |
+| FB-PRIV-02 | 默认提交 / 取消后提交 / 恢复后台任务            | 只上传本次选中附件，恢复保留原选择                                            | job/UI 测试 + 服务 mock E2E |
+| FB-PRIV-03 | full/compact/desktop 归档                       | SQLite、配置、rollout、symlink、binary、过期/过大文件不出现                   | 临时目录 + ZIP 解压         |
+| FB-PRIV-04 | 嵌套 JSON/转义字符串/多行私钥/Authorization/URL | 合成 secret 不出现在任何 ZIP entry                                            | shared + ZIP 回归           |
+| FB-PRIV-05 | 诊断含 prompt/messages/tool data                | 正文被移除，事件类型/错误码/计数可用                                          | 文本脱敏测试                |
+| FB-PRIV-06 | 工单创建与补充                                  | title/description 常见凭证清洗；用户 contact 和显式正文意图保留；不带模型列表 | service/UI mock HTTP        |
+| FB-PRIV-07 | 本地导出/取消/失败                              | 手动导出兼容；归档失败清理；创建取消不触发附件                                | 既有回归                    |
+| FB-PRIV-08 | 桌面/手机、中文/英文                            | 开关含义和提示一致、窄屏可访问；手机 unsupported 不变                         | 共享 UI + E2E               |
 
 主维度：来源 desktop/fallback、日志 default-on/off/restored、文件文本/二进制/链接/过期/超限、授权新建/后台恢复、语言/视口。剪枝：仓库快照和遥测按用户指示 excluded；不做模型 provider 全笛卡尔积，上传隐私策略与 provider 无关；截图像素自动识别不在范围，通过主动选择与预览提示约束。E2E 使用本地 mock 服务和临时日志目录，不接触真实账户/工单；新增用例仅 manual-review/pending，不自动转正。
 

@@ -68,11 +68,11 @@ packages/ui  resolveAccountProviderInspectionAccess()  accountProviderAccess.ts:
 
 运行时对照（同一份日志）：
 
-| 时段 | 实例代码 | personal 范围权益查询次数 |
-|---|---|---|
-| 15 点 | rebase 前 | 33 |
-| 16 点 | 16:43 前为旧代码 | 17 |
-| 17 点 | rebase 后（17:17 / 17:25 实例） | **0** |
+| 时段  | 实例代码                        | personal 范围权益查询次数 |
+| ----- | ------------------------------- | ------------------------- |
+| 15 点 | rebase 前                       | 33                        |
+| 16 点 | 16:43 前为旧代码                | 17                        |
+| 17 点 | rebase 后（17:17 / 17:25 实例） | **0**                     |
 
 即新实现连"服务端说没套餐"这个事实都没再取回来，直接由 Account Overlay 的 `entitled=false` 收敛成"未连接"。
 
@@ -85,14 +85,14 @@ packages/ui  resolveAccountProviderInspectionAccess()  accountProviderAccess.ts:
 
 `accountAvailability === "pending"` 与 `accountEntitled === true` 的既有分支保持不变，只补回"已登录但服务端明确无订阅"一档：
 
-| accountEntitled | availability | 原因 | 卡片状态 | 文案 | 主按钮 |
-|---|---|---|---|---|---|
-| true | available | — | 按快照 | 现值 | 现值 |
-| false | pending | — | 按快照（待生效可查看） | 现值 | 现值 |
-| false | unavailable | 明确无权益 | **notPurchased** | 未开通，开通后启用 | **订阅** |
-| false | unavailable | 凭据失效 | unavailable | 获取失败 | 重新登录 |
-| false | unavailable | 未登录 / 未连接 | disconnected | 未连接 | 连接 {provider} |
-| false | unknown / 原因缺失 | — | disconnected（现状，向后兼容） | 未连接 | 连接 {provider} |
+| accountEntitled | availability       | 原因            | 卡片状态                       | 文案               | 主按钮          |
+| --------------- | ------------------ | --------------- | ------------------------------ | ------------------ | --------------- |
+| true            | available          | —               | 按快照                         | 现值               | 现值            |
+| false           | pending            | —               | 按快照（待生效可查看）         | 现值               | 现值            |
+| false           | unavailable        | 明确无权益      | **notPurchased**               | 未开通，开通后启用 | **订阅**        |
+| false           | unavailable        | 凭据失效        | unavailable                    | 获取失败           | 重新登录        |
+| false           | unavailable        | 未登录 / 未连接 | disconnected                   | 未连接             | 连接 {provider} |
+| false           | unknown / 原因缺失 | —               | disconnected（现状，向后兼容） | 未连接             | 连接 {provider} |
 
 **边界（必须保持不变）**：
 
@@ -140,11 +140,11 @@ packages/ui  resolveAccountProviderInspectionAccess()  accountProviderAccess.ts:
 
 **触发条件**：登录的是 zai family（`providerFamilyDomain` 落成 zai）**且**账号级派生 key 为空（无套餐导致派生不出，或派生失败）。
 
-| 账号状态 | BigModel 的 reason | Z.AI 的 reason | 本次改动后显示 |
-|---|---|---|---|
-| 未登录 | `not_connected`（resolver 早退，`accountProviderConnectionResolver.ts:111-120`） | 同左（同一早退分支） | 两端"未连接"，无分叉 |
-| 登录 + 派生 key 为空 | `not_connected`（调用点常量） | `auth_failed`（`resolveMissingZaiApiKeyReason` 见 user_info 即判定） | 未连接 vs **获取失败**，分叉 |
-| 登录 + 有 key + 订阅列表为空 | `not_entitled` | `not_entitled` | 两端"未开通"，为本次修复点 |
+| 账号状态                     | BigModel 的 reason                                                               | Z.AI 的 reason                                                       | 本次改动后显示               |
+| ---------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------- |
+| 未登录                       | `not_connected`（resolver 早退，`accountProviderConnectionResolver.ts:111-120`） | 同左（同一早退分支）                                                 | 两端"未连接"，无分叉         |
+| 登录 + 派生 key 为空         | `not_connected`（调用点常量）                                                    | `auth_failed`（`resolveMissingZaiApiKeyReason` 见 user_info 即判定） | 未连接 vs **获取失败**，分叉 |
+| 登录 + 有 key + 订阅列表为空 | `not_entitled`                                                                   | `not_entitled`                                                       | 两端"未开通"，为本次修复点   |
 
 **根因**：`codingPlanProviderAvailability.ts:140-154` 中 zai 传动态判定、bigmodel 传常量；`resolveMissingZaiApiKeyReason`（同文件 :657-662）把"没有派生 key"也报成 `auth_failed`，复用了"凭据被服务端拒绝"的语义。
 

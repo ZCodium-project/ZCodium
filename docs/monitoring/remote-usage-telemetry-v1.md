@@ -74,12 +74,12 @@ Mobile Web -- replayable RPC --> relay/main passthrough --> shared desktop host
 
 触发点：desktop main 处理显式启动或重新配对请求并得到终态时。
 
-| 字段             | 允许值                                         | 说明                                       |
-| ---------------- | ---------------------------------------------- | ------------------------------------------ |
+| 字段             | 允许值                                         | 说明                                               |
+| ---------------- | ---------------------------------------------- | -------------------------------------------------- |
 | `result`         | `success` / `failure` / `cancelled`            | 显式启动或重新配对终态；`cancelled` 仅兼容历史数据 |
-| `workspace_kind` | `local` / `remote`                             | 目标工作区类型                             |
-| `remote_kind`    | `ssh` / `wsl` / `docker` / `server` / 空字符串 | 可由统一 workspace identity 解析时上报     |
-| `error_category` | 见错误分类；非失败为空字符串                   | 低基数失败分类                             |
+| `workspace_kind` | `local` / `remote`                             | 目标工作区类型                                     |
+| `remote_kind`    | `ssh` / `wsl` / `docker` / `server` / 空字符串 | 可由统一 workspace identity 解析时上报             |
+| `error_category` | 见错误分类；非失败为空字符串                   | 低基数失败分类                                     |
 
 自动恢复已有远控运行时不属于显式启动漏斗，不产生本事件。
 当前 Desktop 启动和刷新链路不再弹原生确认，因此只产生 `success` / `failure`；schema 保留
@@ -152,14 +152,14 @@ actor 的查询规则是 `user_id` 非空时使用 `user_id`，否则使用 `dev
 
 ## 状态所有权与实现位置
 
-| 状态 / 事实                 | Owner                                            | 埋点位置                      |
-| --------------------------- | ------------------------------------------------ | ----------------------------- |
-| 远程工作区连接终态          | desktop remote IPC / session manager             | IPC 返回成功或失败前          |
-| Web Remote Control 入口曝光 | desktop renderer                                 | 对话框打开动作                |
-| 显式启动终态                | desktop remote IPC                               | start/reset 请求终态          |
-| relay 配对状态              | WebRemoteControlManager                          | transport 状态迁移            |
+| 状态 / 事实                     | Owner                                            | 埋点位置                      |
+| ------------------------------- | ------------------------------------------------ | ----------------------------- |
+| 远程工作区连接终态              | desktop remote IPC / session manager             | IPC 返回成功或失败前          |
+| Web Remote Control 入口曝光     | desktop renderer                                 | 对话框打开动作                |
+| 显式启动终态                    | desktop remote IPC                               | start/reset 请求终态          |
+| relay 配对状态                  | WebRemoteControlManager                          | transport 状态迁移            |
 | workspace-scope Host attachment | WebRemoteControlManager + shared-host attachment | bridge attachment 终态        |
-| 用户与桌面设备公共字段      | TelemetryCore                                    | 现有 `/event/report` 公共字段 |
+| 用户与桌面设备公共字段          | TelemetryCore                                    | 现有 `/event/report` 公共字段 |
 
 ## Case 规划与剪枝
 

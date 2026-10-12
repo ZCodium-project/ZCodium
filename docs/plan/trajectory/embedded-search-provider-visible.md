@@ -16,11 +16,11 @@ Windows CMD 和 legacy shell fallback 暂时不启用 embedded branch，回到 d
 - Windows 下只在 Git Bash/MSYS/Cygwin 这类 POSIX shell 里注入 embedded search function；遇到 `msys` / `cygwin` / `win32` 时使用 `ARGV0=... "<binary>"` 形式调用，避免依赖 `exec -a`。
 - Windows shell snapshot 会把内部 binary、snapshot 文件、cwd capture 文件等宿主路径转换成 Git Bash 可识别的 `/c/...` 或 `//server/...` 形式，并会过滤 Git Bash 自动生成的 `winpty` aliases。
 - embedded branch 下 provider-visible `tools[]` 不暴露 direct `Glob` / `Grep`。
-- embedded branch 下 Bash description 的 avoid list 不包含 `find` / `grep`，exact 剩余项是 ``cat``, ``head``, ``tail``, ``sed``, ``awk``, or ``echo``。
+- embedded branch 下 Bash description 的 avoid list 不包含 `find` / `grep`，exact 剩余项是 `cat`, `head`, `tail`, `sed`, `awk`, or `echo`。
 - embedded branch 下 Explore prompt 使用：
   - `Use \`find\` via Bash for broad file pattern matching`
   - `Use \`grep\` via Bash for searching file contents with regex`
-- embedded branch 下 Plan prompt 使用 ``find``/Glob, ``grep``/Grep, and Read 查找 patterns/conventions。
+- embedded branch 下 Plan prompt 使用 `find`/Glob, `grep`/Grep, and Read 查找 patterns/conventions。
 - Glob/Grep direct tool description 另有 short/long prompt 分支，按模型选择；它不等同于 embedded search gate。
 - embedded branch 的 provider-visible request 以合同测试为证据；direct branch 的 short Glob/Grep description 由 dedicated contract baseline 单独校验。
 
@@ -57,7 +57,7 @@ Windows CMD 和 legacy shell fallback 暂时不启用 embedded branch，回到 d
 - `AskUserQuestion`：更新 provider-visible input schema。
 - `Bash`：使用 embedded search branch 的短版 description；该分支 avoid list 不包含 `find` / `grep`，timeout 文案使用默认 `120000` 和 max `600000`。运行时 timeout 默认值不在本轮范围内。
 - `Read`：不新增 `pages` 等 ZCode 未支持的 provider-visible 参数，只更新短版 prompt 中 ZCode 已支持能力的文本。
-- `EnterPlanMode`：使用短版 prompt。embedded search branch 中探索工具文案使用 ``find``/Glob、``grep``/Grep、Read。
+- `EnterPlanMode`：使用短版 prompt。embedded search branch 中探索工具文案使用 `find`/Glob、`grep`/Grep、Read。
 - `ExitPlanMode`：保留 ZCode 当前没有 plan file 系统、schema 仍要求模型传 `plan` 参数；在这个边界内使用短版 prompt 结构和语义。
 - `WebFetch`：使用短版 prompt。
 - `WebSearch`：更新 provider-visible input schema。

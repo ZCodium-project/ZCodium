@@ -48,12 +48,9 @@ describe("会话区 插件 MCP Skill 生命周期 E2E / 未安装基线", () => 
     expect(requestRecord).not.toBeNull();
     if (!requestRecord) return;
     // 强证据：模型请求的 tools 数组里不能有 plugin MCP 工具。
-    expect(
-      captureArtifactAdvertisesToolName(
-        requestRecord.requestJson,
-        PLUGIN_MCP_TOOL_NAME,
-      ),
-    ).toBe(false);
+    expect(captureArtifactAdvertisesToolName(requestRecord.requestJson, PLUGIN_MCP_TOOL_NAME)).toBe(
+      false,
+    );
 
     // 软证据：chat 端没有任何该工具的 tool-call block（normal text 轮次）。
     const block = await getToolCallBlockByToolName(PLUGIN_MCP_TOOL_NAME);

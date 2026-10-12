@@ -1,11 +1,5 @@
 /* eslint-disable max-lines -- renderer coverage reporter 集中维护采集、跨 worker 合并和源码报告，避免 coverage map 合同分散。 */
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import {
   createCoverageMap,
@@ -88,12 +82,9 @@ interface E2EUICoverageCollectorOptions {
 }
 
 const COVERAGE_ENV_VALUE = "1";
-const RENDERER_BASELINE_RELATIVE_PATH =
-  "packages/desktop/out/renderer/e2e-coverage-baseline.json";
+const RENDERER_BASELINE_RELATIVE_PATH = "packages/desktop/out/renderer/e2e-coverage-baseline.json";
 
-export function createE2EUICoverageCollector(
-  options: E2EUICoverageCollectorOptions,
-) {
+export function createE2EUICoverageCollector(options: E2EUICoverageCollectorOptions) {
   const enabled = process.env.ZCODE_E2E_COVERAGE === COVERAGE_ENV_VALUE;
   const coverageDir = resolve(options.artifactDir, "coverage");
   const rawDir = resolve(coverageDir, "raw", "renderer");
@@ -146,16 +137,12 @@ export function createE2EUICoverageCollector(
         activeBrowser,
         options.repoRoot,
       );
-      const workerId = sanitizeCoverageFilePart(
-        process.env.ZCODE_E2E_WORKER_ID ?? "worker",
-      );
+      const workerId = sanitizeCoverageFilePart(process.env.ZCODE_E2E_WORKER_ID ?? "worker");
       const workerRawPath = resolve(rawDir, `${workerId}-${process.pid}.json`);
       const mergedCoverage = createCoverageMap({});
       const mergedPageUrls = new Set(pageUrls);
       if (existsSync(workerRawPath)) {
-        const previous = JSON.parse(
-          readFileSync(workerRawPath, "utf-8"),
-        ) as UIRendererRawCoverage;
+        const previous = JSON.parse(readFileSync(workerRawPath, "utf-8")) as UIRendererRawCoverage;
         mergedCoverage.merge(previous.coverage);
         for (const pageUrl of previous.pageUrls) mergedPageUrls.add(pageUrl);
       }
@@ -188,9 +175,7 @@ export function createE2EUICoverageCollector(
       ensureCoverageDir();
       const coverageMap = createCoverageMap({});
       if (existsSync(baselinePath)) {
-        coverageMap.merge(
-          JSON.parse(readFileSync(baselinePath, "utf-8")) as CoverageMapData,
-        );
+        coverageMap.merge(JSON.parse(readFileSync(baselinePath, "utf-8")) as CoverageMapData);
       }
 
       const rawFiles = readdirSync(rawDir)
@@ -206,9 +191,7 @@ export function createE2EUICoverageCollector(
           pageUrls.add(pageUrl);
         }
       }
-      coverageMap.filter((filePath) =>
-        isFirstPartyUISource(filePath, options.repoRoot),
-      );
+      coverageMap.filter((filePath) => isFirstPartyUISource(filePath, options.repoRoot));
       writeJson(rawPath, {
         capturedAt: new Date().toISOString(),
         coverage: coverageMap.toJSON(),
@@ -254,21 +237,14 @@ async function getPuppeteerBrowser(sessionBrowser: WebdriverIO.Browser) {
   return candidate.getPuppeteer();
 }
 
-async function collectInstrumentedCoverage(
-  sessionBrowser: WebdriverIO.Browser,
-  repoRoot: string,
-) {
+async function collectInstrumentedCoverage(sessionBrowser: WebdriverIO.Browser, repoRoot: string) {
   const puppeteer = await getPuppeteerBrowser(sessionBrowser);
-  const pages = (await puppeteer.pages()).filter((page) =>
-    isRendererPageUrl(page.url()),
-  );
+  const pages = (await puppeteer.pages()).filter((page) => isRendererPageUrl(page.url()));
   const coverageMap = createCoverageMap({});
 
   for (const page of pages) {
     const pageCoverage = await page.evaluate(() => {
-      const coverage = (
-        globalThis as typeof globalThis & { __coverage__?: unknown }
-      ).__coverage__;
+      const coverage = (globalThis as typeof globalThis & { __coverage__?: unknown }).__coverage__;
       return coverage ? JSON.parse(JSON.stringify(coverage)) : null;
     });
     if (pageCoverage && typeof pageCoverage === "object") {
@@ -360,9 +336,7 @@ function buildRendererCoverageSummary(params: {
     enabled: true,
     files: {
       coverageFinalJson: coverageTotals ? params.coverageFinalJsonPath : undefined,
-      coverageSummaryJson: coverageTotals
-        ? params.coverageSummaryJsonPath
-        : undefined,
+      coverageSummaryJson: coverageTotals ? params.coverageSummaryJsonPath : undefined,
       htmlIndex: coverageTotals ? params.htmlIndexPath : undefined,
       lcov: coverageTotals ? params.lcovPath : undefined,
       markdown: params.summaryMdPath,
@@ -424,9 +398,7 @@ function renderCoverageMarkdown(summary: UIRendererCoverageSummary) {
 function isRendererPageUrl(url: string) {
   try {
     const parsed = new URL(url);
-    return (
-      parsed.pathname.endsWith("/renderer/index.html")
-    );
+    return parsed.pathname.endsWith("/renderer/index.html");
   } catch {
     return false;
   }
@@ -440,9 +412,7 @@ function isFirstPartyUISource(path: string, repoRoot: string) {
   return (
     isCoverageSourceFile(sourcePath) &&
     !sourcePath.includes("/node_modules/") &&
-    (sourcePath.startsWith(
-      resolve(repoRoot, "packages/ui/src").replaceAll("\\", "/"),
-    ) ||
+    (sourcePath.startsWith(resolve(repoRoot, "packages/ui/src").replaceAll("\\", "/")) ||
       sourcePath.startsWith(
         resolve(repoRoot, "packages/desktop/src/renderer").replaceAll("\\", "/"),
       ))

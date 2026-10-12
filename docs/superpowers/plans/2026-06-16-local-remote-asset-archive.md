@@ -13,6 +13,7 @@
 ### Task 1: Add Regression Tests
 
 **Files:**
+
 - Modify: `packages/server/test/remoteDeploy.test.ts`
 - Modify: `packages/server/test/remoteAssetInstaller.test.ts`
 
@@ -37,6 +38,7 @@ Expected before implementation: the new tests fail because the Node archive help
 ### Task 2: Implement Node Archive Helper
 
 **Files:**
+
 - Create: `packages/server/src/remote/localTarGz.ts`
 
 - [ ] **Step 1: Implement `extractTarGzArchive()`**
@@ -54,6 +56,7 @@ Document that this avoids relying on Windows `System32\tar.exe`, which can be mi
 ### Task 3: Replace Local Tar Calls
 
 **Files:**
+
 - Modify: `packages/server/src/remote/remoteAssetCache.ts`
 - Modify: `packages/server/src/remote/remoteAssetInstaller.ts`
 - Modify: `packages/server/test/remoteDeploy.test.ts`
@@ -73,6 +76,7 @@ Use `createTarGzArchive()` in CDN fixture staging helpers so tests also avoid lo
 ### Task 4: Verify and Commit
 
 **Files:**
+
 - All touched files
 
 - [ ] **Step 1: Run targeted tests**

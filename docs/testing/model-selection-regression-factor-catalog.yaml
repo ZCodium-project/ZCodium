@@ -706,13 +706,7 @@ constraints:
       all:
         - dimension: surface
           in:
-            [
-              chat-draft,
-              chat-existing-session,
-              automation-editor,
-              user-subagent,
-              builtin-subagent,
-            ]
+            [chat-draft, chat-existing-session, automation-editor, user-subagent, builtin-subagent]
         - dimension: provider-source
           in: [zcode-builtin, account-builtin, personal, remote-host-mirror]
     decision: signature-class-representative

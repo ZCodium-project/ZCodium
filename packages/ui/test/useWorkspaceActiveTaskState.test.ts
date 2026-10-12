@@ -30,8 +30,7 @@ vi.mock("@/store/zcodeSessionStore.js", () => ({
     workspaceState.taskListCache?.find((task) => task.taskId === taskId) ??
     null,
   selectWorkspaceZCodeState: () => activeWorkspaceState.current,
-  useZCodeSessionStore: (selector: (state: Record<string, unknown>) => unknown) =>
-    selector({}),
+  useZCodeSessionStore: (selector: (state: Record<string, unknown>) => unknown) => selector({}),
 }));
 
 vi.mock("@/store/taskQueryCacheStore.js", () => ({

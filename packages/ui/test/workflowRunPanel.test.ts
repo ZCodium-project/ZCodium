@@ -164,7 +164,11 @@ describe("workflowRunEventLines", () => {
         {
           sequence: 10,
           type: "import-cache-closed",
-          payload: { instance: { siteId: "ask#2", ordinal: 1 }, cause: "mutating-tool", actorName: "fixer" },
+          payload: {
+            instance: { siteId: "ask#2", ordinal: 1 },
+            cause: "mutating-tool",
+            actorName: "fixer",
+          },
         },
         { sequence: 11, type: "run-settled", payload: { status: "completed" } },
       ],

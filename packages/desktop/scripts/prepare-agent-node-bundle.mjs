@@ -17,7 +17,10 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { runCommand } from "../../../scripts/spawn-command.mjs";
 import { stageAgentBundle } from "./stage-agent-bundle.mjs";
-import { isSharpRequiredByComputerUse, stageSharpIntoBundledAgents } from "./sharp-package-assets.mjs";
+import {
+  isSharpRequiredByComputerUse,
+  stageSharpIntoBundledAgents,
+} from "./sharp-package-assets.mjs";
 import { stageKoffiIntoBundledAgents } from "./koffi-package-assets.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -412,7 +415,9 @@ function stageBundledSkillPack() {
 
 function stageSharpForNodeReplPlugin() {
   if (!isSharpRequiredByComputerUse({ desktopPackageRoot: desktopRoot })) {
-    console.log("[prepare:agent-bundle] Computer Use package does not declare sharp, skip sharp staging");
+    console.log(
+      "[prepare:agent-bundle] Computer Use package does not declare sharp, skip sharp staging",
+    );
     return;
   }
   // `sharp` 仍然外部化——它包含无法内联的 native .node，运行时从**所在包**的 node_modules

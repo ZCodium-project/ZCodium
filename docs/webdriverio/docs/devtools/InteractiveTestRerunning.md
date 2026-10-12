@@ -8,6 +8,7 @@ Watch your tests execute in real-time with live browser previews and automatic s
 After your initial test run completes, click on any test case or suite in the DevTools UI to re-execute it instantly. This eliminates the need to restart your entire test runner or modify your code, dramatically speeding up debugging cycles.
 
 **Key Features:**
+
 - **Real-time visualization** - Automatic screenshot capture after every command (click, toBeExisting, etc.)
 - **Live browser preview** - See your application's current state during test execution
 - **Command timeline** - View detailed logs with timestamps for each action
@@ -18,7 +19,9 @@ After your initial test run completes, click on any test case or suite in the De
 ## Demo
 
 ### 🛠️ Test Rerunner & Snapshot
+
 ![Test Rerunner & Snapshot Demo](/img/devtools/test-rerunner.gif)
 
 ### 🛑 Stop Test Runner
+
 ![Stop Test Runner Demo](/img/devtools/stop-runner.gif)

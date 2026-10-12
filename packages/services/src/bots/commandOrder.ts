@@ -9,8 +9,4 @@ const BOT_POLICY_COMMAND_ORDER = [
   "reply",
 ] as const satisfies readonly (keyof BotCommandPolicy)[];
 
-export const BOT_MENU_COMMAND_ORDER = [
-  "help",
-  ...BOT_POLICY_COMMAND_ORDER,
-  "bind",
-] as const;
+export const BOT_MENU_COMMAND_ORDER = ["help", ...BOT_POLICY_COMMAND_ORDER, "bind"] as const;

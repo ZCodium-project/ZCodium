@@ -236,9 +236,7 @@ describe("BrowserSettingsSection", () => {
     renderSection(true, true);
 
     expect(screen.queryByRole("button", { name: "settings.browser.import.action" })).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "settings.browser.clearCache.action" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "settings.browser.clearCache.action" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "settings.browser.clearAll.action" })).toBeTruthy();
     expect(
       screen.queryByRole("checkbox", { name: "settings.browser.import.adminConsent" }),

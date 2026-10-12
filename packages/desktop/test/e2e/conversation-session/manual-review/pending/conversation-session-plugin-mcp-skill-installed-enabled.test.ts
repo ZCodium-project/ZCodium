@@ -58,12 +58,9 @@ describe("会话区 插件 MCP Skill 生命周期 E2E / 已安装并启用", () 
     expect(requestRecord).not.toBeNull();
     if (!requestRecord) return;
     // 强证据：模型请求的 tools 数组里必须有 plugin MCP 工具。
-    expect(
-      captureArtifactAdvertisesToolName(
-        requestRecord.requestJson,
-        PLUGIN_MCP_TOOL_NAME,
-      ),
-    ).toBe(true);
+    expect(captureArtifactAdvertisesToolName(requestRecord.requestJson, PLUGIN_MCP_TOOL_NAME)).toBe(
+      true,
+    );
 
     // 等 chat 出现 tool-call block；轮询时主动清掉会拦截的弹窗。
     let block = await getToolCallBlockByToolName(PLUGIN_MCP_TOOL_NAME);

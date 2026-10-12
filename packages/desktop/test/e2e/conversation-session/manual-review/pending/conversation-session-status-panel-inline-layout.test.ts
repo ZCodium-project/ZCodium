@@ -1,7 +1,4 @@
-import {
-  TID_CHAT_MESSAGES,
-  TID_CHAT_SUMMARY_PANEL,
-} from "@zcode/shared";
+import { TID_CHAT_MESSAGES, TID_CHAT_SUMMARY_PANEL } from "@zcode/shared";
 import { clearAppData } from "../../../helpers/desktop-app.js";
 import {
   E2E_REPLY_TOKEN,
@@ -46,8 +43,7 @@ describe("会话区 status panel inline layout E2E", () => {
     expect(draftLayout.panelState).toBeNull();
 
     const runId = Date.now();
-    const plainPrompt =
-      `E2E_STATUS_PANEL_EMPTY_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const plainPrompt = `E2E_STATUS_PANEL_EMPTY_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(plainPrompt);
     await waitForComposerText("", "普通首发后输入框没有清空");
     await waitForUserMessageContaining(plainPrompt);
@@ -71,15 +67,13 @@ describe("会话区 status panel inline layout E2E", () => {
     await startNewTask();
     await setElectronWindowSize(WIDE_VIEWPORT.width, WIDE_VIEWPORT.height);
     const goalMarker = `E2E_STATUS_PANEL_GOAL_${runId}`;
-    const goalPrompt =
-      `/goal ${goalMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const goalPrompt = `/goal ${goalMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(goalPrompt);
     await waitForComposerText("", "goal 首发后输入框没有清空");
     await waitForUserMessageContaining(goalMarker);
     await waitForChatState(
       (snapshot) =>
-        snapshot.targetObjective?.includes(goalMarker) === true &&
-        Boolean(snapshot.taskId),
+        snapshot.targetObjective?.includes(goalMarker) === true && Boolean(snapshot.taskId),
       "goal 首发没有形成 status panel 可展示的 target",
       60000,
     );
@@ -174,12 +168,8 @@ interface ChatLayoutSnapshot {
 function getChatLayoutSnapshot(): Promise<ChatLayoutSnapshot> {
   return browser.execute(
     (messagesTestId, summaryPanelTestId, inlineOffsetClass) => {
-      const panel = document.querySelector<HTMLElement>(
-        `[data-testid="${summaryPanelTestId}"]`,
-      );
-      const dock = document.querySelector<HTMLElement>(
-        '[data-chat-composer-region="true"] > div',
-      );
+      const panel = document.querySelector<HTMLElement>(`[data-testid="${summaryPanelTestId}"]`);
+      const dock = document.querySelector<HTMLElement>('[data-chat-composer-region="true"] > div');
       const firstTurnShell = document.querySelector<HTMLElement>(
         `[data-testid="${messagesTestId}"] [data-chat-turn-group-shell="true"]`,
       );
@@ -192,10 +182,8 @@ function getChatLayoutSnapshot(): Promise<ChatLayoutSnapshot> {
         contentTransitionProperty: contentStyle?.transitionProperty ?? "",
         dockClassName: dock?.className ?? "",
         dockTransitionProperty: dockStyle?.transitionProperty ?? "",
-        hasContentInlineOffset:
-          content?.className.includes(inlineOffsetClass) ?? false,
-        hasDockInlineOffset:
-          dock?.className.includes(inlineOffsetClass) ?? false,
+        hasContentInlineOffset: content?.className.includes(inlineOffsetClass) ?? false,
+        hasDockInlineOffset: dock?.className.includes(inlineOffsetClass) ?? false,
         panelState: panel?.dataset.state ?? null,
       };
     },
@@ -208,12 +196,8 @@ function getChatLayoutSnapshot(): Promise<ChatLayoutSnapshot> {
 async function clickSummaryPanelButton(labels: readonly string[]) {
   const clicked = await browser.execute(
     (summaryPanelTestId, candidateLabels) => {
-      const panel = document.querySelector<HTMLElement>(
-        `[data-testid="${summaryPanelTestId}"]`,
-      );
-      const buttons = Array.from(
-        panel?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-      );
+      const panel = document.querySelector<HTMLElement>(`[data-testid="${summaryPanelTestId}"]`);
+      const buttons = Array.from(panel?.querySelectorAll<HTMLButtonElement>("button") ?? []);
       const button = buttons.find((item) =>
         candidateLabels.includes(item.getAttribute("aria-label") ?? ""),
       );

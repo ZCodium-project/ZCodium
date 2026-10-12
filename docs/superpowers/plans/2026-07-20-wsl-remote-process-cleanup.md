@@ -28,12 +28,14 @@
 ### Task 1: Application-Level Remote Host Shutdown Barrier
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/desktopRemoteSessions.ts`
 - Modify: `packages/desktop/src/main/index.ts`
 - Modify: `packages/desktop/test/desktopRemoteSessions.test.ts`
 - Modify: `packages/desktop/test/desktopHostProcess.test.ts`
 
 **Interfaces:**
+
 - Consumes: existing `disposeHostProcessAndWait(child, label, timers, logger, options)`.
 - Produces: `disposeAllAndWaitForAppShutdown(reason: string): Promise<void>` on the remote session manager.
 
@@ -68,10 +70,7 @@ Expected: FAIL because `disposeAllAndWaitForAppShutdown` and the async disposer 
 Extend manager options with:
 
 ```ts
-disposeHostProcessAndWait: (
-  child: ElectronUtilityProcess,
-  label: string,
-) => Promise<void>;
+disposeHostProcessAndWait: (child: ElectronUtilityProcess, label: string) => Promise<void>;
 ```
 
 Implement a single-flight function that rejects pending connects, snapshots unique dedicated/shared/Bot processes, clears lifecycle maps before awaiting, and runs all disposals in parallel:
@@ -117,6 +116,7 @@ git commit -m "fix(desktop): await remote hosts during shutdown"
 ### Task 2: Bounded Host and Remote Server Cleanup Phases
 
 **Files:**
+
 - Modify: `packages/desktop/src/host/index.ts`
 - Modify: `packages/server/src/stdio-lifecycle.ts`
 - Modify: `packages/server/test/stdioLifecycle.test.ts`
@@ -124,6 +124,7 @@ git commit -m "fix(desktop): await remote hosts during shutdown"
 - Create: `packages/desktop/test/hostShutdownPhases.test.ts`
 
 **Interfaces:**
+
 - Produces: `runHostShutdownPhases(phases, options): Promise<HostShutdownResult>`.
 - Consumes later: `RemoteConnection.disposeAndWait()` from Task 3; until then the remote phase may wrap synchronous `dispose()`.
 
@@ -193,6 +194,7 @@ git commit -m "fix(remote): bound every shutdown cleanup phase"
 ### Task 3: Awaitable RemoteConnection and WSL Child Ownership
 
 **Files:**
+
 - Modify: `packages/server/src/remote/backend.ts`
 - Modify: `packages/server/src/remote/connect.ts`
 - Modify: `packages/server/src/remote/wsl-backend.ts`
@@ -202,6 +204,7 @@ git commit -m "fix(remote): bound every shutdown cleanup phase"
 - Modify: `packages/server/test/wslBackend.test.ts`
 
 **Interfaces:**
+
 - Produces: `RemoteConnection.disposeAndWait(): Promise<void>`.
 - Produces: optional `IRemoteBackend.disposeAndWait?(): Promise<void>` while retaining synchronous `dispose()` compatibility.
 
@@ -261,6 +264,7 @@ git commit -m "fix(remote): await WSL server process shutdown"
 ### Task 4: Safe WSL Owner Registry and Orphan Reaper
 
 **Files:**
+
 - Create: `packages/services/src/zcode-agent/remoteAgentOwnerRegistry.ts`
 - Create: `packages/services/test/remoteAgentOwnerRegistry.test.ts`
 - Modify: `packages/services/src/zcode-agent/zcodeAgentProcessManager.ts`
@@ -269,6 +273,7 @@ git commit -m "fix(remote): await WSL server process shutdown"
 - Modify: `packages/server/src/entry-stdio.ts`
 
 **Interfaces:**
+
 - Produces: `RemoteAgentOwnerRegistry` with `registerAgent`, `unregisterAgent`, `reapDeadOwners`, and `dispose`.
 - Consumes: `ZCODE_REMOTE_OWNER_ID`, `ZCODE_REMOTE_OWNER_KIND`, and an owner registry root under `$HOME/.zcode/server/owners`.
 
@@ -310,12 +315,14 @@ git commit -m "fix(remote): reap owned orphan agents safely"
 ### Task 5: Documentation and Full Verification
 
 **Files:**
+
 - Modify: `docs/wsl-remote-workspace-design.md`
 - Modify: `docs/architecture/zcode-code-architecture-overview.md`
 - Modify: `docs/web-remote-control/web-remote-control-architecture.md`
 - Modify: `docs/web-remote-control/task-realtime-sync.md`
 
 **Interfaces:**
+
 - Documents the final lifecycle and verification evidence; no new runtime interface.
 
 - [ ] **Step 1: Update current-fact documentation**

@@ -10,17 +10,17 @@ When writing tests it's only a matter of time before you need to create a "fake"
 In order to validate whether certain function handler are called as part of your component tests, the `@wdio/browser-runner` module exports mocking primitives you can use to test, if these functions have been called. You can import these methods via:
 
 ```js
-import { fn, spyOn } from '@wdio/browser-runner'
+import { fn, spyOn } from "@wdio/browser-runner";
 ```
 
 By importing `fn` you can create a spy function (mock) to track its execution and with `spyOn` track a method on an already created object.
 
 <Tabs
-  defaultValue="mocks"
-  values={[
-    {label: 'Mocks', value: 'mocks'},
-    {label: 'Spies', value: 'spies'}
-  ]
+defaultValue="mocks"
+values={[
+{label: 'Mocks', value: 'mocks'},
+{label: 'Spies', value: 'spies'}
+]
 }>
 <TabItem value="mocks">
 
@@ -61,35 +61,29 @@ describe('LoginForm', () => {
 The full example can be found in the [examples](https://github.com/webdriverio/webdriverio/blob/main/examples/wdio/browser-runner/lit.test.js) directory.
 
 ```js
-import { expect, $ } from '@wdio/globals'
-import { spyOn } from '@wdio/browser-runner'
-import { html, render } from 'lit'
-import { SimpleGreeting } from './components/LitComponent.ts'
+import { expect, $ } from "@wdio/globals";
+import { spyOn } from "@wdio/browser-runner";
+import { html, render } from "lit";
+import { SimpleGreeting } from "./components/LitComponent.ts";
 
-const getQuestionFn = spyOn(SimpleGreeting.prototype, 'getQuestion')
+const getQuestionFn = spyOn(SimpleGreeting.prototype, "getQuestion");
 
-describe('Lit Component testing', () => {
-    it('should render component', async () => {
-        render(
-            html`<simple-greeting name="WebdriverIO" />`,
-            document.body
-        )
+describe("Lit Component testing", () => {
+  it("should render component", async () => {
+    render(html`<simple-greeting name="WebdriverIO" />`, document.body);
 
-        const innerElem = await $('simple-greeting').$('p')
-        expect(await innerElem.getText()).toBe('Hello, WebdriverIO! How are you today?')
-    })
+    const innerElem = await $("simple-greeting").$("p");
+    expect(await innerElem.getText()).toBe("Hello, WebdriverIO! How are you today?");
+  });
 
-    it('should render with mocked component function', async () => {
-        getQuestionFn.mockReturnValue('Does this work?')
-        render(
-            html`<simple-greeting name="WebdriverIO" />`,
-            document.body
-        )
+  it("should render with mocked component function", async () => {
+    getQuestionFn.mockReturnValue("Does this work?");
+    render(html`<simple-greeting name="WebdriverIO" />`, document.body);
 
-        const innerElem = await $('simple-greeting').$('p')
-        expect(await innerElem.getText()).toBe('Hello, WebdriverIO! Does this work?')
-    })
-})
+    const innerElem = await $("simple-greeting").$("p");
+    expect(await innerElem.getText()).toBe("Hello, WebdriverIO! Does this work?");
+  });
+});
 ```
 
 </TabItem>
@@ -110,48 +104,48 @@ There are two ways to mock functions: Either by creating a mock function to use 
 Let's imagine our component is importing a utility method from a file to handle a click.
 
 ```js title=utils.js
-export function handleClick () {
-    // handler implementation
+export function handleClick() {
+  // handler implementation
 }
 ```
 
 In our component the click handler is used as following:
 
 ```ts title=LitComponent.js
-import { handleClick } from './utils.js'
+import { handleClick } from "./utils.js";
 
-@customElement('simple-button')
+@customElement("simple-button")
 export class SimpleButton extends LitElement {
-    render() {
-        return html`<button @click="${handleClick}">Click me!</button>`
-    }
+  render() {
+    return html`<button @click="${handleClick}">Click me!</button>`;
+  }
 }
 ```
 
 To mock the `handleClick` from `utils.js` we can use the `mock` method in our test as following:
 
 ```js title=LitComponent.test.js
-import { expect, $ } from '@wdio/globals'
-import { mock, fn } from '@wdio/browser-runner'
-import { html, render } from 'lit'
+import { expect, $ } from "@wdio/globals";
+import { mock, fn } from "@wdio/browser-runner";
+import { html, render } from "lit";
 
-import { SimpleButton } from './LitComponent.ts'
-import { handleClick } from './utils.js'
+import { SimpleButton } from "./LitComponent.ts";
+import { handleClick } from "./utils.js";
 
 /**
  * mock named export "handleClick" of `utils.ts` file
  */
-mock('./utils.ts', () => ({
-    handleClick: fn()
-}))
+mock("./utils.ts", () => ({
+  handleClick: fn(),
+}));
 
-describe('Simple Button Component Test', () => {
-    it('call click handler', async () => {
-        render(html`<simple-button />`, document.body)
-        await $('simple-button').$('button').click()
-        expect(handleClick).toHaveBeenCalledTimes(1)
-    })
-})
+describe("Simple Button Component Test", () => {
+  it("call click handler", async () => {
+    render(html`<simple-button />`, document.body);
+    await $("simple-button").$("button").click();
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
 ```
 
 ### Mocking Dependencies
@@ -159,15 +153,15 @@ describe('Simple Button Component Test', () => {
 Suppose we have a class that fetches users from our API. The class uses [`axios`](https://github.com/axios/axios) to call the API then returns the data attribute which contains all the users:
 
 ```js title=users.js
-import axios from 'axios';
+import axios from "axios";
 
 class Users {
   static all() {
-    return axios.get('/users.json').then(resp => resp.data)
+    return axios.get("/users.json").then((resp) => resp.data);
   }
 }
 
-export default Users
+export default Users;
 ```
 
 Now, in order to test this method without actually hitting the API (and thus creating slow and fragile tests), we can use the `mock(...)` function to automatically mock the axios module.
@@ -175,33 +169,33 @@ Now, in order to test this method without actually hitting the API (and thus cre
 Once we mock the module we can provide a [`mockResolvedValue`](https://vitest.dev/api/mock.html#mockresolvedvalue) for `.get` that returns the data we want our test to assert against. In effect, we are saying that we want `axios.get('/users.json')` to return a fake response.
 
 ```js title=users.test.js
-import axios from 'axios'; // imports defined mock
-import { mock, fn } from '@wdio/browser-runner'
+import axios from "axios"; // imports defined mock
+import { mock, fn } from "@wdio/browser-runner";
 
-import Users from './users.js'
+import Users from "./users.js";
 
 /**
  * mock default export of `axios` dependency
  */
-mock('axios', () => ({
-    default: {
-        get: fn()
-    }
-}))
+mock("axios", () => ({
+  default: {
+    get: fn(),
+  },
+}));
 
-describe('User API', () => {
-    it('should fetch users', async () => {
-        const users = [{name: 'Bob'}]
-        const resp = {data: users}
-        axios.get.mockResolvedValue(resp)
+describe("User API", () => {
+  it("should fetch users", async () => {
+    const users = [{ name: "Bob" }];
+    const resp = { data: users };
+    axios.get.mockResolvedValue(resp);
 
-        // or you could use the following depending on your use case:
-        // axios.get.mockImplementation(() => Promise.resolve(resp))
+    // or you could use the following depending on your use case:
+    // axios.get.mockImplementation(() => Promise.resolve(resp))
 
-        const data = await Users.all()
-        expect(data).toEqual(users)
-    })
-})
+    const data = await Users.all();
+    expect(data).toEqual(users);
+  });
+});
 ```
 
 ## Partials
@@ -209,38 +203,38 @@ describe('User API', () => {
 Subsets of a module can be mocked and the rest of the module can keep their actual implementation:
 
 ```js title=foo-bar-baz.js
-export const foo = 'foo';
-export const bar = () => 'bar';
-export default () => 'baz';
+export const foo = "foo";
+export const bar = () => "bar";
+export default () => "baz";
 ```
 
 The original module will be passed into the mock factory which you can use to e.g. partially mock a dependency:
 
 ```js
-import { mock, fn } from '@wdio/browser-runner'
-import defaultExport, { bar, foo } from './foo-bar-baz.js';
+import { mock, fn } from "@wdio/browser-runner";
+import defaultExport, { bar, foo } from "./foo-bar-baz.js";
 
-mock('./foo-bar-baz.js', async (originalModule) => {
-    // Mock the default export and named export 'foo'
-    // and propagate named export from the original module
-    return {
-        __esModule: true,
-        ...originalModule,
-        default: fn(() => 'mocked baz'),
-        foo: 'mocked foo',
-    }
-})
+mock("./foo-bar-baz.js", async (originalModule) => {
+  // Mock the default export and named export 'foo'
+  // and propagate named export from the original module
+  return {
+    __esModule: true,
+    ...originalModule,
+    default: fn(() => "mocked baz"),
+    foo: "mocked foo",
+  };
+});
 
-describe('partial mock', () => {
-    it('should do a partial mock', () => {
-        const defaultExportResult = defaultExport();
-        expect(defaultExportResult).toBe('mocked baz');
-        expect(defaultExport).toHaveBeenCalled();
+describe("partial mock", () => {
+  it("should do a partial mock", () => {
+    const defaultExportResult = defaultExport();
+    expect(defaultExportResult).toBe("mocked baz");
+    expect(defaultExport).toHaveBeenCalled();
 
-        expect(foo).toBe('mocked foo');
-        expect(bar()).toBe('bar');
-    })
-})
+    expect(foo).toBe("mocked foo");
+    expect(bar()).toBe("bar");
+  });
+});
 ```
 
 ## Manual Mocks
@@ -264,9 +258,9 @@ Scoped modules (also known as scoped packages) can be mocked by creating a file 
 When a manual mock exists for a given module, WebdriverIO will use that module when explicitly calling `mock('moduleName')`. However, when automock is set to true, the manual mock implementation will be used instead of the automatically created mock, even if `mock('moduleName')` is not called. To opt out of this behavior you will need to explicitly call `unmock('moduleName')` in tests that should use the actual module implementation, e.g.:
 
 ```js
-import { unmock } from '@wdio/browser-runner'
+import { unmock } from "@wdio/browser-runner";
 
-unmock('lodash')
+unmock("lodash");
 ```
 
 ## Hoisting
@@ -274,16 +268,16 @@ unmock('lodash')
 In order to get mocking to work in the browser, WebdriverIO rewrites the test files and hoists the mock calls above everything else (see also [this blog post](https://www.coolcomputerclub.com/posts/jest-hoist-await/) on the hoisting problem in Jest). This limits the way you can pass in variables into the mock resolver, e.g.:
 
 ```js title=component.test.js
-import dep from 'dependency'
-const variable = 'foobar'
+import dep from "dependency";
+const variable = "foobar";
 
 /**
  * ❌ this fails as `dep` and `variable` are not defined inside the mock resolver
  */
-mock('./some/module.ts', () => ({
-    exportA: dep,
-    exportB: variable
-}))
+mock("./some/module.ts", () => ({
+  exportA: dep,
+  exportB: variable,
+}));
 ```
 
 To fix this you have to define all used variables inside the resolver, e.g.:
@@ -292,15 +286,15 @@ To fix this you have to define all used variables inside the resolver, e.g.:
 /**
  * ✔️ this works as all variables are defined within the resolver
  */
-mock('./some/module.ts', async () => {
-    const dep = await import('dependency')
-    const variable = 'foobar'
+mock("./some/module.ts", async () => {
+  const dep = await import("dependency");
+  const variable = "foobar";
 
-    return {
-        exportA: dep,
-        exportB: variable
-    }
-})
+  return {
+    exportA: dep,
+    exportB: variable,
+  };
+});
 ```
 
 ## Requests

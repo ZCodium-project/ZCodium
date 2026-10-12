@@ -55,8 +55,7 @@ describe("会话区 toolcall 错误展示 E2E", () => {
     const staleTool = await waitForRendererStoreToolCall(
       STALE_AGENT_TOOL_CALL_ID,
       (toolCall) =>
-        toolCall.status === "failed" &&
-        toolCall.error?.includes(STALE_ERROR_TEXT) === true,
+        toolCall.status === "failed" && toolCall.error?.includes(STALE_ERROR_TEXT) === true,
       "没有等到 failed Agent 工具卡携带真实 provider 错误",
     );
     expect(staleTool.toolName).toBe("Agent");
@@ -136,11 +135,7 @@ async function waitForRendererStoreToolCall(
   return result;
 }
 
-async function waitForToolBlockStatus(
-  toolCallId: string,
-  status: string,
-  timeout = 60000,
-) {
+async function waitForToolBlockStatus(toolCallId: string, status: string, timeout = 60000) {
   let latestStatus: string | null = null;
   await browser.waitUntil(
     async () => {
@@ -163,8 +158,7 @@ async function readRendererStoreToolCall(toolCallId: string) {
   for (const message of diagnostics.rendererStore.messages) {
     const match = message.toolCalls.find(
       (toolCall) =>
-        toolCall.toolId === toolCallId ||
-        toolCall.toolId?.startsWith(`${toolCallId}:`) === true,
+        toolCall.toolId === toolCallId || toolCall.toolId?.startsWith(`${toolCallId}:`) === true,
     );
     if (match) {
       return match;

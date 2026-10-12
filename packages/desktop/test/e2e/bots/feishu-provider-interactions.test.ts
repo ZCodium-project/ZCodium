@@ -110,16 +110,16 @@ describe("Bot provider interaction E2E", () => {
     );
     const interactionUpdates = requests.filter(
       (request) =>
-        request.method === "POST" &&
-        request.url.includes("/open-apis/interactive/v1/card/update"),
+        request.method === "POST" && request.url.includes("/open-apis/interactive/v1/card/update"),
     );
     expect(interactionPosts).toHaveLength(1);
     expect(interactionUpdates).toHaveLength(0);
-    expect(requests.filter(
-      (request) =>
-        request.method === "PATCH" &&
-        request.url.includes("/open-apis/im/v1/messages/"),
-    )).toHaveLength(0);
+    expect(
+      requests.filter(
+        (request) =>
+          request.method === "PATCH" && request.url.includes("/open-apis/im/v1/messages/"),
+      ),
+    ).toHaveLength(0);
     expect(requests.some((request) => request.method === "DELETE")).toBe(false);
     const nextQuestionJson = JSON.stringify(advanced.replies[0]);
     expect(advanced.replies[0]?.elicitation).toMatchObject({
@@ -181,13 +181,15 @@ describe("Bot provider interaction E2E", () => {
       event: {
         operator: { operator_id: { open_id: "ou_e2e_user" } },
         action: {
-          behaviors: [{
-            type: "callback",
-            value: {
-              command: `/elicitation ${token} approve`,
-              zcodeCardText: "Review this implementation plan.",
+          behaviors: [
+            {
+              type: "callback",
+              value: {
+                command: `/elicitation ${token} approve`,
+                zcodeCardText: "Review this implementation plan.",
+              },
             },
-          }],
+          ],
         },
         context: { card_update_token: "card-update-token-e2e-il" },
       },
@@ -211,22 +213,23 @@ describe("Bot provider interaction E2E", () => {
     expect(messagePosts[2]?.body).not.toContain("完整计划");
 
     const messagePatches = requests.filter(
+      (request) => request.method === "PATCH" && request.url.includes("/open-apis/im/v1/messages/"),
+    );
+    expect(
+      messagePatches.some(
+        (request) => request.body?.includes("交互前的普通输出") && !request.body.includes("运行中"),
+      ),
+    ).toBe(true);
+    const interactionUpdates = requests.filter(
       (request) =>
-        request.method === "PATCH" &&
-        request.url.includes("/open-apis/im/v1/messages/"),
+        request.method === "POST" && request.url.includes("/open-apis/interactive/v1/card/update"),
     );
-    expect(messagePatches.some((request) =>
-      request.body?.includes("交互前的普通输出") &&
-      !request.body.includes("运行中"),
-    )).toBe(true);
-    const interactionUpdates = requests.filter((request) =>
-      request.method === "POST" &&
-      request.url.includes("/open-apis/interactive/v1/card/update"),
-    );
-    expect(interactionUpdates.some((request) =>
-      request.body?.includes("完整计划") &&
-      !request.body.includes('\\"tag\\":\\"button\\"'),
-    )).toBe(true);
+    expect(
+      interactionUpdates.some(
+        (request) =>
+          request.body?.includes("完整计划") && !request.body.includes('\\"tag\\":\\"button\\"'),
+      ),
+    ).toBe(true);
     expect(requests.some((request) => request.method === "DELETE")).toBe(false);
   });
 

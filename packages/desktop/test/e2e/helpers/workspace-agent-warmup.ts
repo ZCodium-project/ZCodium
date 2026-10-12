@@ -93,9 +93,11 @@ export async function openWorkspaceDraftFromSidebar(workspacePath: string): Prom
   );
 
   const isExpanded = await browser.execute((expectedTestId) => {
-    return Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
-      (element) => element.dataset.testid === expectedTestId,
-    )?.getAttribute("aria-expanded") === "true";
+    return (
+      Array.from(document.querySelectorAll<HTMLElement>("[data-testid]"))
+        .find((element) => element.dataset.testid === expectedTestId)
+        ?.getAttribute("aria-expanded") === "true"
+    );
   }, workspaceItemTestId);
   if (isExpanded) {
     // 修复原因：workspace 展开态与 active workspace 是两套状态；renderer reload 后目标行
@@ -104,9 +106,11 @@ export async function openWorkspaceDraftFromSidebar(workspacePath: string): Prom
     await browser.waitUntil(
       () =>
         browser.execute((expectedTestId) => {
-          return Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
-            (element) => element.dataset.testid === expectedTestId,
-          )?.getAttribute("aria-expanded") === "false";
+          return (
+            Array.from(document.querySelectorAll<HTMLElement>("[data-testid]"))
+              .find((element) => element.dataset.testid === expectedTestId)
+              ?.getAttribute("aria-expanded") === "false"
+          );
         }, workspaceItemTestId),
       {
         timeout: 10_000,
@@ -137,12 +141,12 @@ export async function selectTaskOrganizeMode(labels: string[]): Promise<void> {
   await browser.waitUntil(
     () =>
       browser.execute((expectedLabels) => {
-        const trigger = Array.from(
-          document.querySelectorAll<HTMLElement>('[role="tab"]'),
-        ).find((element) => {
-          const text = element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-          return expectedLabels.some((label) => text.includes(label));
-        });
+        const trigger = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]')).find(
+          (element) => {
+            const text = element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+            return expectedLabels.some((label) => text.includes(label));
+          },
+        );
         if (!trigger) return false;
         if (
           trigger.hasAttribute("data-active") ||

@@ -5,17 +5,10 @@ import { createRequire } from "node:module";
 import { dirname } from "node:path";
 
 const requireFromMcpAdapter = createRequire(
-  new URL(
-    "../../../../../../apps/zcode-cli/packages/adapters/package.json",
-    import.meta.url,
-  ),
+  new URL("../../../../../../apps/zcode-cli/packages/adapters/package.json", import.meta.url),
 );
-const { McpServer } = requireFromMcpAdapter(
-  "@modelcontextprotocol/sdk/server/mcp.js",
-);
-const { StdioServerTransport } = requireFromMcpAdapter(
-  "@modelcontextprotocol/sdk/server/stdio.js",
-);
+const { McpServer } = requireFromMcpAdapter("@modelcontextprotocol/sdk/server/mcp.js");
+const { StdioServerTransport } = requireFromMcpAdapter("@modelcontextprotocol/sdk/server/stdio.js");
 const { z } = requireFromMcpAdapter("zod");
 
 const LOOKUP_RESULT_PREFIX = "E2E_PLAN_MCP_LOOKUP_RESULT";

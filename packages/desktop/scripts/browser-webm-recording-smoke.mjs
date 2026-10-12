@@ -63,7 +63,10 @@ async function validatePlayback(root, outputPath) {
     `<!doctype html><video id="video" src="${pathToFileURL(outputPath).href}" muted></video>`,
     "utf8",
   );
-  const validationWindow = new BrowserWindow({ show: false, webPreferences: { backgroundThrottling: false } });
+  const validationWindow = new BrowserWindow({
+    show: false,
+    webPreferences: { backgroundThrottling: false },
+  });
   try {
     await validationWindow.loadFile(validationHtmlPath);
     return await validationWindow.webContents.executeJavaScript(`(async () => {
@@ -245,14 +248,18 @@ async function run() {
       );
     }
     if (playback.litPixelRatio < 0.5) {
-      throw new Error(`recorded frames are mostly black: litPixelRatio=${playback.litPixelRatio.toFixed(4)}`);
+      throw new Error(
+        `recorded frames are mostly black: litPixelRatio=${playback.litPixelRatio.toFixed(4)}`,
+      );
     }
     if (playback.sampledFps < 8) {
       throw new Error(
         `decoded frame rate too low: ${playback.sampledFps.toFixed(1)}fps over ${playback.sampledFrames} frames`,
       );
     }
-    console.log(JSON.stringify({ ok: true, path: outputPath, size: info.size, capturedMs, ...playback }));
+    console.log(
+      JSON.stringify({ ok: true, path: outputPath, size: info.size, capturedMs, ...playback }),
+    );
   } catch (error) {
     exitCode = 1;
     await new Promise((resolve) => process.stderr.write(`${error.stack ?? error}\n`, resolve));

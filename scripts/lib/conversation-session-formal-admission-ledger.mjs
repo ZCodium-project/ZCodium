@@ -1,14 +1,6 @@
-import {
-  diagnostic,
-  isRecord,
-} from "./conversation-session-formal-admission-utils.mjs";
+import { diagnostic, isRecord } from "./conversation-session-formal-admission-utils.mjs";
 
-const REQUEST_METADATA_FIELDS = [
-  "kind",
-  "source",
-  "timingPolicy",
-  "syntheticReason",
-];
+const REQUEST_METADATA_FIELDS = ["kind", "source", "timingPolicy", "syntheticReason"];
 
 export function validateRequestLedger({
   caseFixtures,
@@ -38,9 +30,7 @@ export function validateRequestLedger({
 
   const caseIds = caseFixtures.map((fixture) => fixture.id);
   const caseIdSet = new Set(caseIds);
-  const allowedFixturesById = new Map(
-    caseFixtures.map((fixture) => [fixture.id, fixture]),
-  );
+  const allowedFixturesById = new Map(caseFixtures.map((fixture) => [fixture.id, fixture]));
   for (const providerFile of providerFiles) {
     if (!providerFile.isCanonicalCommon) {
       continue;
@@ -106,9 +96,7 @@ export function validateRequestLedger({
       continue;
     }
     for (const field of REQUEST_METADATA_FIELDS) {
-      const fixtureValue = isRecord(fixture.metadata)
-        ? fixture.metadata[field]
-        : undefined;
+      const fixtureValue = isRecord(fixture.metadata) ? fixture.metadata[field] : undefined;
       if (request[field] !== fixtureValue) {
         reasons.push(
           diagnostic({
@@ -135,11 +123,7 @@ export function validateProviderFixture(
   if (value === undefined) {
     return null;
   }
-  if (
-    !isRecord(value) ||
-    value.version !== 1 ||
-    !Array.isArray(value.fixtures)
-  ) {
+  if (!isRecord(value) || value.version !== 1 || !Array.isArray(value.fixtures)) {
     if (reportShapeError) {
       reasons.push(
         diagnostic({
@@ -193,11 +177,7 @@ export function validateRequestArray(value, subjectPath, specPath, reasons) {
   const requests = [];
   const seenIds = new Set();
   for (const request of value) {
-    if (
-      !isRecord(request) ||
-      typeof request.id !== "string" ||
-      request.id.trim().length === 0
-    ) {
+    if (!isRecord(request) || typeof request.id !== "string" || request.id.trim().length === 0) {
       reasons.push(
         diagnostic({
           code: "INVALID_MANIFEST_SHAPE",
@@ -233,22 +213,15 @@ function isProviderMetadata(value) {
     value.source.trim().length > 0 &&
     typeof value.timingPolicy === "string" &&
     value.timingPolicy.trim().length > 0 &&
-    (value.syntheticReason === undefined ||
-      typeof value.syntheticReason === "string")
+    (value.syntheticReason === undefined || typeof value.syntheticReason === "string")
   );
 }
 
-export function validateSyntheticReasons(
-  requests,
-  subjectPath,
-  specPath,
-  reasons,
-) {
+export function validateSyntheticReasons(requests, subjectPath, specPath, reasons) {
   for (const request of requests) {
     if (
       (request.kind === "synthetic" || request.source === "synthetic") &&
-      (typeof request.syntheticReason !== "string" ||
-        request.syntheticReason.trim().length === 0)
+      (typeof request.syntheticReason !== "string" || request.syntheticReason.trim().length === 0)
     ) {
       reasons.push(
         diagnostic({
@@ -263,8 +236,5 @@ export function validateSyntheticReasons(
 }
 
 function arraysEqual(left, right) {
-  return (
-    left.length === right.length &&
-    left.every((value, index) => value === right[index])
-  );
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }

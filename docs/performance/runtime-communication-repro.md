@@ -31,10 +31,10 @@ All cases in this document use desktop `desktop-continuous`. They must not be us
 
 ## Case Set
 
-| ID | Purpose | Setup | Action | Evidence |
-| --- | --- | --- | --- | --- |
-| PERF01 | Isolate one visible pane under high-frequency stream traffic. | One v4 pane, one session, synthetic recorded-stream fixture with many text/reasoning/tool-input chunks. | Send one prompt and keep the stream open long enough for CPU sampling. | Network artifact with chunk timeline, optional CDP profile, UI remains responsive. |
-| PERF02 | Reproduce visible four-pane runtime fanout with tools and subagents. | Four v4 panes in one workbench, each bound to a different session. | Send four prompts that each trigger an `Agent` tool, a child subagent streamed response, then a streamed parent final response. | Electron window recording, replay artifact with multiple overlapping `/messages` streams, all panes reach final markers. |
+| ID     | Purpose                                                              | Setup                                                                                                   | Action                                                                                                                          | Evidence                                                                                                                 |
+| ------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| PERF01 | Isolate one visible pane under high-frequency stream traffic.        | One v4 pane, one session, synthetic recorded-stream fixture with many text/reasoning/tool-input chunks. | Send one prompt and keep the stream open long enough for CPU sampling.                                                          | Network artifact with chunk timeline, optional CDP profile, UI remains responsive.                                       |
+| PERF02 | Reproduce visible four-pane runtime fanout with tools and subagents. | Four v4 panes in one workbench, each bound to a different session.                                      | Send four prompts that each trigger an `Agent` tool, a child subagent streamed response, then a streamed parent final response. | Electron window recording, replay artifact with multiple overlapping `/messages` streams, all panes reach final markers. |
 
 ## Recording And Profiling
 

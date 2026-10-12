@@ -70,15 +70,15 @@ sendPrompt(taskId, traceId)
 
 ## Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Change | 将 Desktop WSL remote workspace 从“一 workspace 一套 Host/server”调整为“同一窗口、同一 distro、同一 Linux user 共享一套 Host/server”，并补齐 workspace runtime 回收、连接并发控制和退出屏障。 |
-| Primary goal | 多个 WSL workspace 并行使用时，减少重复 UtilityProcess Host、`wsl.exe` 启动和 `zcode-server` 常驻内存，同时保持 workspace、桌面与手机远控边界。 |
-| User-visible surfaces | WSL 连接、远程目录选择、remote workspace tab、关闭 workspace、真实关窗、App 退出、更新安装、Renderer reload、手机 `/remote` attachment。 |
-| Pool scope | 当前产品虽然限制单窗口，pool identity 仍显式包含 `windowWebContentsId`；不跨 Electron 窗口共享。 |
-| Idle policy | 最后一个有效 workspace 引用和 draining task 消失后进入 60 秒 idle TTL；真实关窗、App 退出和更新安装跳过 TTL，立即执行有界回收。 |
-| Existing docs | `docs/wsl-remote-workspace-design.md`、`docs/remote/wsl-remote-realtime-boundary.md`、`docs/superpowers/specs/2026-07-19-wsl-remote-process-cleanup-design.md`、`docs/superpowers/specs/2026-07-13-window-scoped-ssh-remote-host-pooling-design.md`、`docs/architecture/zcode-code-architecture-overview.md`。 |
-| Main code owners | `packages/desktop/src/main/desktopRemoteSessions.ts`、`packages/desktop/src/host/index.ts`、`packages/desktop/src/host/remoteWorkspaceServiceCollection.ts`、`packages/server/src/remote/wsl-backend.ts`、`packages/server/src/remote/connect.ts`、`packages/services/src/zcode-agent/zcodeAgentProcessManager.ts`。 |
+| Field                 | Value                                                                                                                                                                                                                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change                | 将 Desktop WSL remote workspace 从“一 workspace 一套 Host/server”调整为“同一窗口、同一 distro、同一 Linux user 共享一套 Host/server”，并补齐 workspace runtime 回收、连接并发控制和退出屏障。                                                                                                                        |
+| Primary goal          | 多个 WSL workspace 并行使用时，减少重复 UtilityProcess Host、`wsl.exe` 启动和 `zcode-server` 常驻内存，同时保持 workspace、桌面与手机远控边界。                                                                                                                                                                      |
+| User-visible surfaces | WSL 连接、远程目录选择、remote workspace tab、关闭 workspace、真实关窗、App 退出、更新安装、Renderer reload、手机 `/remote` attachment。                                                                                                                                                                             |
+| Pool scope            | 当前产品虽然限制单窗口，pool identity 仍显式包含 `windowWebContentsId`；不跨 Electron 窗口共享。                                                                                                                                                                                                                     |
+| Idle policy           | 最后一个有效 workspace 引用和 draining task 消失后进入 60 秒 idle TTL；真实关窗、App 退出和更新安装跳过 TTL，立即执行有界回收。                                                                                                                                                                                      |
+| Existing docs         | `docs/wsl-remote-workspace-design.md`、`docs/remote/wsl-remote-realtime-boundary.md`、`docs/superpowers/specs/2026-07-19-wsl-remote-process-cleanup-design.md`、`docs/superpowers/specs/2026-07-13-window-scoped-ssh-remote-host-pooling-design.md`、`docs/architecture/zcode-code-architecture-overview.md`。       |
+| Main code owners      | `packages/desktop/src/main/desktopRemoteSessions.ts`、`packages/desktop/src/host/index.ts`、`packages/desktop/src/host/remoteWorkspaceServiceCollection.ts`、`packages/server/src/remote/wsl-backend.ts`、`packages/server/src/remote/connect.ts`、`packages/services/src/zcode-agent/zcodeAgentProcessManager.ts`。 |
 
 ## 背景与已验证事实
 
@@ -177,14 +177,14 @@ workspace Agent 长期留到窗口关闭，形成另一种资源滞留。
 
 ## Clarification Log
 
-| Round | Question | Decision | Boundary fixed |
-| --- | --- | --- | --- |
-| 1 | 是否拆成多份 spec？ | 只写一份综合 spec，在文内描述分阶段实施。 | 一个目标设计、一份验收标准。 |
-| 2 | 最后引用关闭后是否立即释放 Host？ | 零引用后保留 60 秒 idle TTL，前提是生命周期可单点管理且不引入新竞态。 | TTL 由 Main pool entry 唯一持有。 |
-| 3 | TTL 期间 App 退出如何处理？ | App 退出、真实关窗和更新安装立即取消 TTL 并释放。 | owner teardown 优先于缓存。 |
-| 4 | pool 是否跨窗口？ | 不跨窗口；当前单窗口限制进一步降低实现风险。 | key 仍包含 `windowWebContentsId`。 |
-| 5 | 最后 workspace 关闭但 task 仍运行如何处理？ | 保持 runtime draining，task 完成后释放；App 级 teardown 不等待自然完成。 | UI detach 与 runtime owner 生命周期分离。 |
-| 6 | 总体方案 | 采用窗口级 WSL shared pool。 | 不采用仅 quick wins 或 App daemon。 |
+| Round | Question                                    | Decision                                                                 | Boundary fixed                            |
+| ----- | ------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| 1     | 是否拆成多份 spec？                         | 只写一份综合 spec，在文内描述分阶段实施。                                | 一个目标设计、一份验收标准。              |
+| 2     | 最后引用关闭后是否立即释放 Host？           | 零引用后保留 60 秒 idle TTL，前提是生命周期可单点管理且不引入新竞态。    | TTL 由 Main pool entry 唯一持有。         |
+| 3     | TTL 期间 App 退出如何处理？                 | App 退出、真实关窗和更新安装立即取消 TTL 并释放。                        | owner teardown 优先于缓存。               |
+| 4     | pool 是否跨窗口？                           | 不跨窗口；当前单窗口限制进一步降低实现风险。                             | key 仍包含 `windowWebContentsId`。        |
+| 5     | 最后 workspace 关闭但 task 仍运行如何处理？ | 保持 runtime draining，task 完成后释放；App 级 teardown 不等待自然完成。 | UI detach 与 runtime owner 生命周期分离。 |
+| 6     | 总体方案                                    | 采用窗口级 WSL shared pool。                                             | 不采用仅 quick wins 或 App daemon。       |
 
 ## 方案比较
 
@@ -346,13 +346,7 @@ registry 和 Agent release 请求必须同时携带 `workspaceIdentity` 与 `wor
 ### Host pool state
 
 ```ts
-type RemoteWslHostState =
-  | "connecting"
-  | "ready"
-  | "draining"
-  | "idle"
-  | "disposing"
-  | "disposed";
+type RemoteWslHostState = "connecting" | "ready" | "draining" | "idle" | "disposing" | "disposed";
 
 interface RemoteWslHostEntry {
   process: ElectronUtilityProcess;
@@ -873,34 +867,34 @@ pnpm lint
 
 正式实现前后使用相同 server 版本、同一 distro 和同一组 workspace 比较：
 
-| Metric | Expected direction |
-| --- | --- |
-| 同 pool UtilityProcess Host 数 | `N → 1` |
-| 同 pool `zcode-server` 数 | `N → 1` |
-| 同 pool 长驻 `wsl.exe` server launcher 数 | `N → 1` |
-| 第二至第五 workspace attach 时间 | 明显低于首次冷连接，不重复 deploy/server start |
-| 空闲 server RSS | 从 N 份降为 1 份；不规定跨版本绝对阈值 |
-| workspace Agent 数 | 按 active/draining workspace，而不是按 Host 或 conversation |
-| 最后 owner 关闭后的 Host 存活时间 | 60 秒 ± scheduler tolerance；App teardown 为 shutdown deadline 而非 60 秒 |
+| Metric                                    | Expected direction                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| 同 pool UtilityProcess Host 数            | `N → 1`                                                                   |
+| 同 pool `zcode-server` 数                 | `N → 1`                                                                   |
+| 同 pool 长驻 `wsl.exe` server launcher 数 | `N → 1`                                                                   |
+| 第二至第五 workspace attach 时间          | 明显低于首次冷连接，不重复 deploy/server start                            |
+| 空闲 server RSS                           | 从 N 份降为 1 份；不规定跨版本绝对阈值                                    |
+| workspace Agent 数                        | 按 active/draining workspace，而不是按 Host 或 conversation               |
+| 最后 owner 关闭后的 Host 存活时间         | 60 秒 ± scheduler tolerance；App teardown 为 shutdown deadline 而非 60 秒 |
 
 日志需要能重建以下时序：pool create/reuse、Host generation、session attach/detach、workspace draining/release、
 idle timer install/cancel/fire、owner shutdown override、Host exit。
 
 ## 风险与缓解
 
-| Risk | Mitigation |
-| --- | --- |
-| shared Host 崩溃扩大影响面 | 限制为窗口+distro+user；批量通知关联 session；重连按 workspace 独立恢复。 |
-| 旧 timer 误杀复用后的 Host | entry identity + monotonic generation + fire 前重新派生 idle predicates。 |
-| 手工 refcount 漂移 | 优先从 logical/mobile attachment 权威集合派生；若为性能建索引则只允许原子入口更新并做一致性测试。 |
-| 关闭 tab 误杀后台 task | refs=0 且 running 时进入 draining；只有 terminal 后释放。 |
-| draining 永久不结束 | 正常等待 task lifecycle；真实 owner teardown 使用既有有界 shutdown；异常断线随 Host exit 清理。 |
-| shared server 内 workspace 串数据 | 所有隔离 key 使用 `workspaceIdentity` fallback `workspacePath`；端到端多 workspace 测试。 |
-| deploy 首次安装竞争 | unique staging + remote lock + lock 内版本复查。 |
-| discovery 缓存陈旧 | 5 秒短 TTL、主动刷新/失败失效，不缓存 resolved user/home 为全局永久值。 |
-| App 退出被 TTL 延迟 | shutdown 首先取消 timer，立即并行 dispose；TTL 从不进入退出等待预算。 |
-| mobile replayable 污染 desktop | attachment 保留 clientMode/deliveryKind；desktop WSL 明确禁止 relay_bridge。 |
-| Docker 被错误对称化 | 本 spec 明确保持 dedicated，另行确认 container owner 后再设计。 |
+| Risk                              | Mitigation                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| shared Host 崩溃扩大影响面        | 限制为窗口+distro+user；批量通知关联 session；重连按 workspace 独立恢复。                         |
+| 旧 timer 误杀复用后的 Host        | entry identity + monotonic generation + fire 前重新派生 idle predicates。                         |
+| 手工 refcount 漂移                | 优先从 logical/mobile attachment 权威集合派生；若为性能建索引则只允许原子入口更新并做一致性测试。 |
+| 关闭 tab 误杀后台 task            | refs=0 且 running 时进入 draining；只有 terminal 后释放。                                         |
+| draining 永久不结束               | 正常等待 task lifecycle；真实 owner teardown 使用既有有界 shutdown；异常断线随 Host exit 清理。   |
+| shared server 内 workspace 串数据 | 所有隔离 key 使用 `workspaceIdentity` fallback `workspacePath`；端到端多 workspace 测试。         |
+| deploy 首次安装竞争               | unique staging + remote lock + lock 内版本复查。                                                  |
+| discovery 缓存陈旧                | 5 秒短 TTL、主动刷新/失败失效，不缓存 resolved user/home 为全局永久值。                           |
+| App 退出被 TTL 延迟               | shutdown 首先取消 timer，立即并行 dispose；TTL 从不进入退出等待预算。                             |
+| mobile replayable 污染 desktop    | attachment 保留 clientMode/deliveryKind；desktop WSL 明确禁止 relay_bridge。                      |
+| Docker 被错误对称化               | 本 spec 明确保持 dedicated，另行确认 container owner 后再设计。                                   |
 
 ## 验收标准
 

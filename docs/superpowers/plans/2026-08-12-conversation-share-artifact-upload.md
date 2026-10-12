@@ -13,6 +13,7 @@
 ### Task 1: Freeze product and protocol semantics
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-08-10-conversation-share-api-integration-design.md`
 - Modify: `docs/conversation-session-case-catalog.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
@@ -22,6 +23,7 @@ Record source authority, state pruning, upload ordering, integrity, failure beha
 ### Task 2: Add the formal artifact row
 
 **Files:**
+
 - Modify: `packages/shared/src/zcode-protocol-v4/rows.ts`
 - Modify: `packages/shared/src/conversation-share.ts`
 - Test: `packages/shared/test/conversationShareContract.test.ts`
@@ -36,6 +38,7 @@ Write failing schema/live/cold tests, then project completed tool attachments as
 ### Task 3: Build a safe public artifact projection
 
 **Files:**
+
 - Modify: `packages/services/src/conversation-share/conversationSharePublicProjection.ts`
 - Test: `packages/services/test/conversationSharePublicProjection.test.ts`
 
@@ -44,6 +47,7 @@ Write failing tests, then replace local artifact identity/ref with stable public
 ### Task 4: Materialize and upload selected artifacts
 
 **Files:**
+
 - Add: `packages/services/src/conversation-share/conversationShareArtifactSource.ts`
 - Add: `packages/services/test/conversationShareArtifactSource.test.ts`
 - Modify: `packages/services/src/conversation-share/conversationShareService.ts`

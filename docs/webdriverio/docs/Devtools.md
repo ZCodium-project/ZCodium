@@ -30,9 +30,9 @@ Add the service to your WebDriverIO configuration:
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    services: ['devtools'],
-    // ...
+  // ...
+  services: ["devtools"],
+  // ...
 };
 ```
 
@@ -43,13 +43,16 @@ Configure the DevTools service with these options:
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    services: [
-        ['devtools', {
-            port: 3000,      // Port for the devtools UI (default: 3000)
-        }]
+  // ...
+  services: [
+    [
+      "devtools",
+      {
+        port: 3000, // Port for the devtools UI (default: 3000)
+      },
     ],
-    // ...
+  ],
+  // ...
 };
 ```
 

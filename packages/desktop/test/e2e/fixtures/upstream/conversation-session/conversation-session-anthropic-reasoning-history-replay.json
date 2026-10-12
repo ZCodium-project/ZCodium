@@ -69,10 +69,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AR_STANDARD_SIGNATURE_DELTA_SEED"],
-        "bodyIncludes": [
-          "E2E_AR_SIGNATURE_START_THINKING",
-          "e2e-ar-signature-from-start"
-        ],
+        "bodyIncludes": ["E2E_AR_SIGNATURE_START_THINKING", "e2e-ar-signature-from-start"],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
@@ -138,10 +135,7 @@
           "E2E_AR_UNSIGNED_THINKING",
           "E2E_AR_REDACTED_DATA"
         ],
-        "bodyExcludes": [
-          "e2e-ar-native-start-must-not-survive",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["e2e-ar-native-start-must-not-survive", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -177,10 +171,7 @@
           "E2E_AR_REDACTED_DATA",
           "E2E_AR_LIVE_REPLAY_OK"
         ],
-        "bodyExcludes": [
-          "e2e-ar-native-start-must-not-survive",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["e2e-ar-native-start-must-not-survive", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -280,10 +271,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AR_ORPHAN_FOLLOW"],
-        "bodyExcludes": [
-          "E2E_AR_ORPHAN_UNSIGNED_THINKING",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["E2E_AR_ORPHAN_UNSIGNED_THINKING", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -388,15 +376,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_AR_WHITESPACE_SEED",
-          "E2E_AR_WHITESPACE_FOLLOW"
-        ],
-        "bodyIncludes": [
-          "deepseek-v4-flash",
-          "E2E_AR_WHITESPACE_SEED",
-          "E2E_AR_WHITESPACE_FOLLOW"
-        ],
+        "lastUserMessageIncludes": ["E2E_AR_WHITESPACE_SEED", "E2E_AR_WHITESPACE_FOLLOW"],
+        "bodyIncludes": ["deepseek-v4-flash", "E2E_AR_WHITESPACE_SEED", "E2E_AR_WHITESPACE_FOLLOW"],
         "bodyExcludes": [
           "E2E_AR_WHITESPACE_SIGNED",
           "e2e-ar-whitespace-signature",
@@ -510,11 +491,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_AR_RETRY_CANONICAL"],
-        "bodyIncludes": [
-          "E2E_AR_RETRY_SIGNED",
-          "e2e-ar-retry-signature",
-          "E2E_AR_RETRY_REDACTED"
-        ],
+        "bodyIncludes": ["E2E_AR_RETRY_SIGNED", "e2e-ar-retry-signature", "E2E_AR_RETRY_REDACTED"],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

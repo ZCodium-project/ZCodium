@@ -10,49 +10,54 @@ All you need to do is to create a node module that inherits from the `@wdio/repo
 The basic setup should look like:
 
 ```js
-import WDIOReporter from '@wdio/reporter'
+import WDIOReporter from "@wdio/reporter";
 
 export default class CustomReporter extends WDIOReporter {
-    constructor(options) {
-        /*
-         * make reporter to write to the output stream by default
-         */
-        options = Object.assign(options, { stdout: true })
-        super(options)
-    }
+  constructor(options) {
+    /*
+     * make reporter to write to the output stream by default
+     */
+    options = Object.assign(options, { stdout: true });
+    super(options);
+  }
 
-    onTestPass(test) {
-        this.write(`Congratulations! Your test "${test.title}" passed 👏`)
-    }
+  onTestPass(test) {
+    this.write(`Congratulations! Your test "${test.title}" passed 👏`);
+  }
 }
 ```
 
 To use this reporter, all you need to do is assign it to the `reporter` property in your configuration.
 
-
 Your `wdio.conf.js` file should look like this:
 
 ```js
-import CustomReporter from './reporter/my.custom.reporter'
+import CustomReporter from "./reporter/my.custom.reporter";
 
 export const config = {
-    // ...
-    reporters: [
-        /**
-         * use imported reporter class
-         */
-        [CustomReporter, {
-            someOption: 'foobar'
-        }],
-        /**
-         * use absolute path to reporter
-         */
-        ['/path/to/reporter.js', {
-            someOption: 'foobar'
-        }]
+  // ...
+  reporters: [
+    /**
+     * use imported reporter class
+     */
+    [
+      CustomReporter,
+      {
+        someOption: "foobar",
+      },
     ],
-    // ...
-}
+    /**
+     * use absolute path to reporter
+     */
+    [
+      "/path/to/reporter.js",
+      {
+        someOption: "foobar",
+      },
+    ],
+  ],
+  // ...
+};
 ```
 
 You can also publish the reporter to NPM so everyone can use it. Name the package like other reporters `wdio-<reportername>-reporter`, and tag it with keywords like `wdio` or `wdio-reporter`.
@@ -66,22 +71,22 @@ The structure of these payload objects depend on the event, and are unified acro
 The following list contains all possible methods you can add to your reporter class:
 
 ```js
-import WDIOReporter from '@wdio/reporter'
+import WDIOReporter from "@wdio/reporter";
 
 export default class CustomReporter extends WDIOReporter {
-    onRunnerStart() {}
-    onBeforeCommand() {}
-    onAfterCommand() {}
-    onSuiteStart() {}
-    onHookStart() {}
-    onHookEnd() {}
-    onTestStart() {}
-    onTestPass() {}
-    onTestFail() {}
-    onTestSkip() {}
-    onTestEnd() {}
-    onSuiteEnd() {}
-    onRunnerEnd() {}
+  onRunnerStart() {}
+  onBeforeCommand() {}
+  onAfterCommand() {}
+  onSuiteStart() {}
+  onHookStart() {}
+  onHookEnd() {}
+  onTestStart() {}
+  onTestPass() {}
+  onTestFail() {}
+  onTestSkip() {}
+  onTestEnd() {}
+  onSuiteEnd() {}
+  onRunnerEnd() {}
 }
 ```
 
@@ -90,12 +95,12 @@ The method names are pretty self explanatory.
 To print something on a certain event, use the `this.write(...)` method, which is provided by the parent `WDIOReporter` class. It either streams the content to `stdout`, or to a log file (depending on the options of the reporter).
 
 ```js
-import WDIOReporter from '@wdio/reporter'
+import WDIOReporter from "@wdio/reporter";
 
 export default class CustomReporter extends WDIOReporter {
-    onTestPass(test) {
-        this.write(`Congratulations! Your test "${test.title}" passed 👏`)
-    }
+  onTestPass(test) {
+    this.write(`Congratulations! Your test "${test.title}" passed 👏`);
+  }
 }
 ```
 
@@ -110,14 +115,14 @@ If you have implemented a custom reporter that could be useful for the community
 Also, if you run the WDIO testrunner via the `Launcher` interface, you can't apply a custom reporter as function as follows:
 
 ```js
-import Launcher from '@wdio/cli'
+import Launcher from "@wdio/cli";
 
-import CustomReporter from './reporter/my.custom.reporter'
+import CustomReporter from "./reporter/my.custom.reporter";
 
-const launcher = new Launcher('/path/to/config.file.js', {
-    // this will NOT work, because CustomReporter is not serializable
-    reporters: ['dot', CustomReporter]
-})
+const launcher = new Launcher("/path/to/config.file.js", {
+  // this will NOT work, because CustomReporter is not serializable
+  reporters: ["dot", CustomReporter],
+});
 ```
 
 ## Wait Until `isSynchronised`
@@ -167,20 +172,20 @@ This way the runner will wait until all log information are uploaded.
 
 To make reporter easier to consume and discover by the WebdriverIO community, please follow these recommendations:
 
-* Services should use this naming convention: `wdio-*-reporter`
-* Use NPM keywords: `wdio-plugin`, `wdio-reporter`
-* The `main` entry should `export` an instance of the reporter
-* Example reporter: [`@wdio/dot-service`](https://github.com/webdriverio/webdriverio/tree/main/packages/wdio-dot-reporter)
+- Services should use this naming convention: `wdio-*-reporter`
+- Use NPM keywords: `wdio-plugin`, `wdio-reporter`
+- The `main` entry should `export` an instance of the reporter
+- Example reporter: [`@wdio/dot-service`](https://github.com/webdriverio/webdriverio/tree/main/packages/wdio-dot-reporter)
 
 Following the recommended naming pattern allows services to be added by name:
 
 ```js
 // Add wdio-custom-reporter
 export const config = {
-    // ...
-    reporter: ['custom'],
-    // ...
-}
+  // ...
+  reporter: ["custom"],
+  // ...
+};
 ```
 
 ### Add Published Service to WDIO CLI and Docs

@@ -10,9 +10,7 @@ export interface CuaPipFocusRouter {
   removeWindow(windowId: number): void;
 }
 
-export function resolveCuaPipWindowKey(window: {
-  webContents: { id: number };
-}): number {
+export function resolveCuaPipWindowKey(window: { webContents: { id: number } }): number {
   return window.webContents.id;
 }
 

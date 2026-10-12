@@ -66,14 +66,14 @@ Desktop continuous 与 mobile replayable 仍由 attachment 决定；查询不创
 
 ## 验收
 
-| ID | 场景 | 断言 |
-| --- | --- | --- |
-| BGV01 | 显式后台、分两段 barrier 输出 | 退出前看到两段；重复点击复用 tab；无新增模型查询；普通运行不记录成功轮询日志 |
-| BGV02 | 超时转后台、超过 8 KiB、多行输出 | 新尾部可见，旧头部淘汰，完整文件不截断 |
-| BGV03 | 向上滚动、隐藏/激活、任务完成 | 暂停不跳动，回到最新恢复；隐藏无查询；终态保留并停止刷新 |
-| BGV04 | 多 session/workspace、子会话与远程 scope | 请求始终命中冻结 scope，不串输出；外来任务/路径拒绝 |
-| BGV05 | 文件丢失、慢响应、关闭、runtime 退出 | 明确错误且保留上次内容，无重叠/迟到更新，不启动 runtime |
-| BGV06 | 原条目 Stop 后观察详情 | 详情无 Stop；原入口取消后保留终态输出，进程退出 |
+| ID    | 场景                                     | 断言                                                                         |
+| ----- | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| BGV01 | 显式后台、分两段 barrier 输出            | 退出前看到两段；重复点击复用 tab；无新增模型查询；普通运行不记录成功轮询日志 |
+| BGV02 | 超时转后台、超过 8 KiB、多行输出         | 新尾部可见，旧头部淘汰，完整文件不截断                                       |
+| BGV03 | 向上滚动、隐藏/激活、任务完成            | 暂停不跳动，回到最新恢复；隐藏无查询；终态保留并停止刷新                     |
+| BGV04 | 多 session/workspace、子会话与远程 scope | 请求始终命中冻结 scope，不串输出；外来任务/路径拒绝                          |
+| BGV05 | 文件丢失、慢响应、关闭、runtime 退出     | 明确错误且保留上次内容，无重叠/迟到更新，不启动 runtime                      |
+| BGV06 | 原条目 Stop 后观察详情                   | 详情无 Stop；原入口取消后保留终态输出，进程退出                              |
 
 单测覆盖 schema、runtime 授权、adapter 真文件尾读与编码、标签页隔离以及 hook 时序。
 Desktop E2E 使用 case-local provider/file fixtures 与 barrier；2026-09-10 用户确认实时演示后按 promotion 流程转正。
@@ -123,16 +123,16 @@ child query -> live child adapter -> unavailable -> existing ancestor adapter ->
 
 本地报告保存在 `packages/desktop/.e2e-artifacts/`；fixture 用例固定 provider 工具调用，Bash、文件、barrier、进程和 UI 为真实运行。
 
-| 验证 | 结果 / 报告目录 |
-| --- | --- |
-| 新增只读详情，纯输出 UI | 7/7，`desktop-e2e-20260909-121113-619`（含 `background-bash-live.png`） |
-| 运行中提示移至底部 | BGV01 1/1，`desktop-e2e-20260909-122021-611`；断言位于输出区域下方、紧邻截断提示之前，终态后消失 |
-| Bash 直写 / 前台刷新 / TaskOutput | 8/8，`desktop-e2e-20260909-120207-834` |
-| Bash 生命周期筛选回归 | 8/8，`desktop-e2e-20260909-120412-010` |
-| V4 既有后台停止 | 1/1，`desktop-e2e-20260909-120552-318` |
-| 真实 5 GiB | 前后台分别实写：5 GiB 等待 5.5 秒仍存活；追加 1 byte 后 watchdog 终止，进程退出、诊断与单次通知通过 |
-| 跨平台真实查询 | macOS/Linux Node 24.14.0 各 2/2；Windows Git Bash/CMD × 显式/超时后台，Node 24.14.0 与 25.9.0 各 4/4；尾窗淘汰、中文/CRLF/无换行、终态、文件删除通过 |
-| 单测与检查 | adapter/runtime/gateway/service/schema/hook/tab 定向单测通过；typecheck、CLI build、architecture（0 violations）、lint（0 errors，46 条既有 warnings）通过 |
+| 验证                              | 结果 / 报告目录                                                                                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 新增只读详情，纯输出 UI           | 7/7，`desktop-e2e-20260909-121113-619`（含 `background-bash-live.png`）                                                                                    |
+| 运行中提示移至底部                | BGV01 1/1，`desktop-e2e-20260909-122021-611`；断言位于输出区域下方、紧邻截断提示之前，终态后消失                                                           |
+| Bash 直写 / 前台刷新 / TaskOutput | 8/8，`desktop-e2e-20260909-120207-834`                                                                                                                     |
+| Bash 生命周期筛选回归             | 8/8，`desktop-e2e-20260909-120412-010`                                                                                                                     |
+| V4 既有后台停止                   | 1/1，`desktop-e2e-20260909-120552-318`                                                                                                                     |
+| 真实 5 GiB                        | 前后台分别实写：5 GiB 等待 5.5 秒仍存活；追加 1 byte 后 watchdog 终止，进程退出、诊断与单次通知通过                                                        |
+| 跨平台真实查询                    | macOS/Linux Node 24.14.0 各 2/2；Windows Git Bash/CMD × 显式/超时后台，Node 24.14.0 与 25.9.0 各 4/4；尾窗淘汰、中文/CRLF/无换行、终态、文件删除通过       |
+| 单测与检查                        | adapter/runtime/gateway/service/schema/hook/tab 定向单测通过；typecheck、CLI build、architecture（0 violations）、lint（0 errors，46 条既有 warnings）通过 |
 
 Windows 使用测试目录内独立 Node 24.14.0，不切换默认 Node 25；原始平台 JSON 报告在 `.tmp/background-output-{macos,linux,windows24,windows25}.json`。子会话只读查询沿已有 parentID 找现存 owner，不修改 CommandInbox 或停止流程。
 

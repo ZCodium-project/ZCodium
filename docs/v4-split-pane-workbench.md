@@ -122,20 +122,20 @@ V4PaneWorkbench ────┼─→ pane 渲染（先渲染，不阻塞）
 
 ## 实施改动面清单（按落地顺序）
 
-| # | 触点 | 改动 |
-| --- | --- | --- |
-| 1 | `packages/ui/src/v4/paneLayoutStore.ts` | 重写为 v2：二叉分割树 + `panes: Record<paneId, PaneBinding>` + 持久化 v2（`zcode-v4-pane-layout:v2`）与 v1 迁移；删除 `splitPaneForWorkspace` 可见性规则。新 pane id 取树内 `pane-<n>` 最大序号 +1（v1 迁移保留 `split` id） |
-| 2 | `packages/ui/test/v4PaneLayoutStore.test.ts` | 单测重写：树操作/上限/塌缩/v1 迁移/focus 退化/持久化闭环 |
-| 3 | `packages/ui/src/v4/workspaceConnectionRegistry.ts`（新建） | 引用计数 + 30s keep-warm + agentService 换代失效；模式对照 `sessionsIndexRegistry.ts` |
-| 4 | `packages/ui/src/v4/V4ConversationContext.tsx` | 新增 `V4PaneConversationProvider`（注册表租约 + pane 级 `ServiceProvider` 包裹 + `isShellWorkspace` 走上下文 services）；原 `V4ConversationProvider` 保留给手机 `V4ChatPane` |
-| 5 | `packages/ui/src/v4/V4WorkspaceChatArea.tsx` | 重写为递归分割树渲染；`SplitPaneDivider` 泛化（direction 感知 + per-node CSS 变量 `--v4-split-<nodeId>`，拖动仍 rAF 直写零渲染）；per-pane 恢复守卫组件化（`PaneRestoredGuard`） |
-| 6 | `packages/ui/src/v4/SessionPane.tsx` | Esc-stop 与 add-to-chat 监听从「仅 primary」改为「focused pane」（06-ui 分屏规则 4）；新增拆分/关闭/徽标 props 透传 |
-| 7 | `packages/ui/src/v4/ConversationHeader.tsx` | 「分屏/关闭分屏」改「向右拆分/向下拆分/关闭 pane」+ workspace 徽标（非 primary 且 ≠ shell 当前 workspace 时显示，远程加主机标识）；文案进 i18n 两语言 |
-| 8 | `packages/ui/src/v4/workbenchSessionPlacement.ts` / `V4WorkspaceChatArea.tsx` / `app-shell/WorkspaceShellLayout.tsx` | 拖拽、右键分屏和普通点击共享 placement resolver/executor；入口只提供 intent、side、anchor 和完整 workspace scope，叶子达上限且目标无已有归属时禁用 |
-| 9 | subagent child 详情 | 已迁移到 workspace 右侧 tabs，不再进入 split-pane workbench；普通 session「在分屏打开」保持不变 |
-| 10 | `packages/ui/src/v4/index.ts` | 导出面更新（新旧转移函数/类型替换） |
-| 11 | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/v4-bridge.ts` | `createSessionRecord` 的 `workspaceId` 经远程 identity 对偶解析（`buildRemoteWorkspaceIdentity` 家族），补单测——远程 pane draft 首发建会话的前置 |
-| 12 | 历史三条 `conversation-session-v4-split*.test.ts` | 2026-07-13 因显式按钮下线而删除；Task 列表拖拽入口的回归覆盖仍需维护 |
+| #   | 触点                                                                                                                 | 改动                                                                                                                                                                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `packages/ui/src/v4/paneLayoutStore.ts`                                                                              | 重写为 v2：二叉分割树 + `panes: Record<paneId, PaneBinding>` + 持久化 v2（`zcode-v4-pane-layout:v2`）与 v1 迁移；删除 `splitPaneForWorkspace` 可见性规则。新 pane id 取树内 `pane-<n>` 最大序号 +1（v1 迁移保留 `split` id） |
+| 2   | `packages/ui/test/v4PaneLayoutStore.test.ts`                                                                         | 单测重写：树操作/上限/塌缩/v1 迁移/focus 退化/持久化闭环                                                                                                                                                                     |
+| 3   | `packages/ui/src/v4/workspaceConnectionRegistry.ts`（新建）                                                          | 引用计数 + 30s keep-warm + agentService 换代失效；模式对照 `sessionsIndexRegistry.ts`                                                                                                                                        |
+| 4   | `packages/ui/src/v4/V4ConversationContext.tsx`                                                                       | 新增 `V4PaneConversationProvider`（注册表租约 + pane 级 `ServiceProvider` 包裹 + `isShellWorkspace` 走上下文 services）；原 `V4ConversationProvider` 保留给手机 `V4ChatPane`                                                 |
+| 5   | `packages/ui/src/v4/V4WorkspaceChatArea.tsx`                                                                         | 重写为递归分割树渲染；`SplitPaneDivider` 泛化（direction 感知 + per-node CSS 变量 `--v4-split-<nodeId>`，拖动仍 rAF 直写零渲染）；per-pane 恢复守卫组件化（`PaneRestoredGuard`）                                             |
+| 6   | `packages/ui/src/v4/SessionPane.tsx`                                                                                 | Esc-stop 与 add-to-chat 监听从「仅 primary」改为「focused pane」（06-ui 分屏规则 4）；新增拆分/关闭/徽标 props 透传                                                                                                          |
+| 7   | `packages/ui/src/v4/ConversationHeader.tsx`                                                                          | 「分屏/关闭分屏」改「向右拆分/向下拆分/关闭 pane」+ workspace 徽标（非 primary 且 ≠ shell 当前 workspace 时显示，远程加主机标识）；文案进 i18n 两语言                                                                        |
+| 8   | `packages/ui/src/v4/workbenchSessionPlacement.ts` / `V4WorkspaceChatArea.tsx` / `app-shell/WorkspaceShellLayout.tsx` | 拖拽、右键分屏和普通点击共享 placement resolver/executor；入口只提供 intent、side、anchor 和完整 workspace scope，叶子达上限且目标无已有归属时禁用                                                                           |
+| 9   | subagent child 详情                                                                                                  | 已迁移到 workspace 右侧 tabs，不再进入 split-pane workbench；普通 session「在分屏打开」保持不变                                                                                                                              |
+| 10  | `packages/ui/src/v4/index.ts`                                                                                        | 导出面更新（新旧转移函数/类型替换）                                                                                                                                                                                          |
+| 11  | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/v4-bridge.ts`                                                  | `createSessionRecord` 的 `workspaceId` 经远程 identity 对偶解析（`buildRemoteWorkspaceIdentity` 家族），补单测——远程 pane draft 首发建会话的前置                                                                             |
+| 12  | 历史三条 `conversation-session-v4-split*.test.ts`                                                                    | 2026-07-13 因显式按钮下线而删除；Task 列表拖拽入口的回归覆盖仍需维护                                                                                                                                                         |
 
 不动的面：`tabStore`（及其 ~46 个 `activeTabId` 消费者）、`splitPaneEntryContext` 闸门语义、手机 `/remote` 的 `V4ChatPane` 链路、`zcode-protocol-v4` schema、host/services 层（`processesByWorkspaceKey` 分桶已就绪）。
 

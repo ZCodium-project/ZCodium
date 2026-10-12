@@ -8,10 +8,7 @@ import {
   testId,
   type RemoteTarget,
 } from "@zcode/shared";
-import {
-  clickTestIdByDom,
-  waitForWorkspaceApp,
-} from "./desktop-app.js";
+import { clickTestIdByDom, waitForWorkspaceApp } from "./desktop-app.js";
 import { createCustomOpenAIChatCompletionsProvider } from "./custom-openai-provider.js";
 import { selectUpstreamProviderModelById } from "./upstream-provider.js";
 import {
@@ -108,10 +105,7 @@ export async function connectSSHWorkspaceAndSendFirstTurn(options: {
   await clickLastEnabledSSHDialogButton(options.caseMarker);
   await waitForSSHDirectoryStep(options.caseMarker);
   await selectSSHRemoteDirectory(options.workspacePath, options.caseMarker);
-  await waitForWorkspaceApp(
-    options.workspacePath,
-    SSH_WORKSPACE_READY_TIMEOUT_MS,
-  );
+  await waitForWorkspaceApp(options.workspacePath, SSH_WORKSPACE_READY_TIMEOUT_MS);
 
   const tab = await waitForRemoteTab({
     caseMarker: options.caseMarker,
@@ -122,9 +116,7 @@ export async function connectSSHWorkspaceAndSendFirstTurn(options: {
   expect(tab.remoteHost).toBe(options.config.host);
   expect(tab.secretPersistedInTab).toBe(false);
   if (!tab.remoteSessionId) {
-    throw new Error(
-      `${options.caseMarker}: workspace ${options.label} 缺少 remoteSessionId`,
-    );
+    throw new Error(`${options.caseMarker}: workspace ${options.label} 缺少 remoteSessionId`);
   }
 
   await selectUpstreamProviderModelById(SSH_LIFECYCLE_MODEL_ID, {
@@ -155,15 +147,12 @@ export async function connectSSHWorkspaceAndSendFirstTurn(options: {
   );
   const running = await waitForV4ConversationState(
     (snapshot) =>
-      Boolean(snapshot.taskId && snapshot.taskId !== "draft") &&
-      snapshot.state === "streaming",
+      Boolean(snapshot.taskId && snapshot.taskId !== "draft") && snapshot.state === "streaming",
     `${options.caseMarker}: workspace ${options.label} 首发没有进入 streaming`,
     SSH_LIFECYCLE_TURN_TIMEOUT_MS,
   );
   if (!running.taskId) {
-    throw new Error(
-      `${options.caseMarker}: workspace ${options.label} 首发没有 taskId`,
-    );
+    throw new Error(`${options.caseMarker}: workspace ${options.label} 首发没有 taskId`);
   }
 
   await waitForUpstreamRequest(
@@ -172,15 +161,10 @@ export async function connectSSHWorkspaceAndSendFirstTurn(options: {
     SSH_LIFECYCLE_TURN_TIMEOUT_MS,
     { afterIndex: requestStart - 1 },
   );
-  await waitForV4AssistantMessageContaining(
-    task.firstReply,
-    SSH_LIFECYCLE_TURN_TIMEOUT_MS,
-  );
+  await waitForV4AssistantMessageContaining(task.firstReply, SSH_LIFECYCLE_TURN_TIMEOUT_MS);
   await waitForV4ConversationState(
     (snapshot) =>
-      snapshot.taskId === running.taskId &&
-      snapshot.state === "idle" &&
-      snapshot.queueCount === 0,
+      snapshot.taskId === running.taskId && snapshot.state === "idle" && snapshot.queueCount === 0,
     `${options.caseMarker}: workspace ${options.label} 首发没有回到 idle`,
     SSH_LIFECYCLE_TURN_TIMEOUT_MS,
   );
@@ -223,15 +207,10 @@ export async function sendSSHFollowTurn(
     SSH_LIFECYCLE_TURN_TIMEOUT_MS,
     { afterIndex: requestStart - 1 },
   );
-  await waitForV4AssistantMessageContaining(
-    task.followReply,
-    SSH_LIFECYCLE_TURN_TIMEOUT_MS,
-  );
+  await waitForV4AssistantMessageContaining(task.followReply, SSH_LIFECYCLE_TURN_TIMEOUT_MS);
   await waitForV4ConversationState(
     (snapshot) =>
-      snapshot.taskId === task.taskId &&
-      snapshot.state === "idle" &&
-      snapshot.queueCount === 0,
+      snapshot.taskId === task.taskId && snapshot.state === "idle" && snapshot.queueCount === 0,
     `${caseMarker}: workspace ${task.label} 续发没有回到 idle`,
     SSH_LIFECYCLE_TURN_TIMEOUT_MS,
   );
@@ -252,10 +231,7 @@ export async function reconnectSSHWorkspaceThroughUI(options: {
   await clickLastEnabledSSHDialogButton(options.caseMarker);
   await waitForSSHDirectoryStep(options.caseMarker);
   await selectSSHRemoteDirectory(options.workspacePath, options.caseMarker);
-  await waitForWorkspaceApp(
-    options.workspacePath,
-    SSH_WORKSPACE_READY_TIMEOUT_MS,
-  );
+  await waitForWorkspaceApp(options.workspacePath, SSH_WORKSPACE_READY_TIMEOUT_MS);
   const tab = await waitForRemoteTab({
     caseMarker: options.caseMarker,
     expectedIdentity: identity,
@@ -270,21 +246,17 @@ export async function reconnectSSHWorkspaceThroughUI(options: {
   return { identity, remoteSessionId: tab.remoteSessionId };
 }
 
-export async function removeSSHWorkspace(
-  workspacePath: string,
-  caseMarker: string,
-): Promise<void> {
+export async function removeSSHWorkspace(workspacePath: string, caseMarker: string): Promise<void> {
   const workspaceItemId = testId(TID_WORKSPACE_ITEM, workspacePath);
   await browser.waitUntil(
     async () =>
       browser.execute((itemId) => {
-        const item = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === itemId);
+        const item = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+          (candidate) => candidate.dataset.testid === itemId,
+        );
         if (!item) return false;
         const moreButton = Array.from(
-          item.closest("li")?.querySelectorAll<HTMLButtonElement>("button") ??
-            [],
+          item.closest("li")?.querySelectorAll<HTMLButtonElement>("button") ?? [],
         ).find((button) => {
           const label = (button.getAttribute("aria-label") ?? "").toLowerCase();
           return label.includes("more") || label.includes("更多");
@@ -305,9 +277,9 @@ export async function removeSSHWorkspace(
   await browser.waitUntil(
     () =>
       browser.execute((itemId) => {
-        const item = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === itemId);
+        const item = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+          (candidate) => candidate.dataset.testid === itemId,
+        );
         return !item;
       }, workspaceItemId),
     {
@@ -325,10 +297,7 @@ export async function waitForRemoteWorkspaceDisconnected(
     async () => {
       try {
         const snapshot = await readRemoteTabSnapshot(identity);
-        return (
-          snapshot.workspaceIdentity === identity &&
-          snapshot.remoteSessionId === null
-        );
+        return snapshot.workspaceIdentity === identity && snapshot.remoteSessionId === null;
       } catch {
         return false;
       }
@@ -348,12 +317,11 @@ export async function reconnectSSHWorkspace(
   await browser.waitUntil(
     async () =>
       browser.execute((itemId) => {
-        const item = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === itemId);
+        const item = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+          (candidate) => candidate.dataset.testid === itemId,
+        );
         const button = Array.from(
-          item?.closest("li")?.querySelectorAll<HTMLButtonElement>("button") ??
-            [],
+          item?.closest("li")?.querySelectorAll<HTMLButtonElement>("button") ?? [],
         ).find((candidate) => {
           const label = (candidate.getAttribute("aria-label") ?? "").toLowerCase();
           return label.includes("reconnect") || label.includes("重新连接");
@@ -369,9 +337,7 @@ export async function reconnectSSHWorkspace(
   );
 }
 
-export async function listRemoteZCodeServerPids(
-  config: SSHConnectionConfig,
-): Promise<number[]> {
+export async function listRemoteZCodeServerPids(config: SSHConnectionConfig): Promise<number[]> {
   const result = await runSSHCommand(config, "ps -eo pid=,args=");
   if (result.code !== 0) {
     throw new Error(`读取远端 zcode-server PID 失败: ${result.stderr}`);
@@ -402,19 +368,14 @@ export async function stopOwnedSSHServer(
   if (result.code !== 0) {
     throw new Error(`${caseMarker}: 终止远端 zcode-server ${pid} 失败: ${result.stderr}`);
   }
-  await browser.waitUntil(
-    async () => !(await listRemoteZCodeServerPids(config)).includes(pid),
-    {
-      timeout: SSH_WORKSPACE_READY_TIMEOUT_MS,
-      timeoutMsg: `${caseMarker}: 远端 zcode-server ${pid} 没有退出`,
-    },
-  );
+  await browser.waitUntil(async () => !(await listRemoteZCodeServerPids(config)).includes(pid), {
+    timeout: SSH_WORKSPACE_READY_TIMEOUT_MS,
+    timeoutMsg: `${caseMarker}: 远端 zcode-server ${pid} 没有退出`,
+  });
   return pid;
 }
 
-export async function waitForRendererAfterColdRestart(
-  caseMarker: string,
-): Promise<void> {
+export async function waitForRendererAfterColdRestart(caseMarker: string): Promise<void> {
   await browser.waitUntil(
     async () => {
       try {
@@ -446,19 +407,23 @@ export async function readTaskRowInWorkspace(
 ): Promise<void> {
   await browser.waitUntil(
     async () =>
-      browser.execute((taskId, workspaceId) => {
-        const taskRow = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === taskId);
-        const workspaceRow = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-testid]"),
-        ).find((candidate) => candidate.dataset.testid === workspaceId);
-        return Boolean(
-          taskRow &&
+      browser.execute(
+        (taskId, workspaceId) => {
+          const taskRow = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+            (candidate) => candidate.dataset.testid === taskId,
+          );
+          const workspaceRow = Array.from(
+            document.querySelectorAll<HTMLElement>("[data-testid]"),
+          ).find((candidate) => candidate.dataset.testid === workspaceId);
+          return Boolean(
+            taskRow &&
             workspaceRow?.closest("li")?.contains(taskRow) &&
             !taskRow.querySelector('[data-error-indicator="true"]'),
-        );
-      }, testId(TID_TASK_ITEM, task.taskId), testId(TID_WORKSPACE_ITEM, task.workspacePath)),
+          );
+        },
+        testId(TID_TASK_ITEM, task.taskId),
+        testId(TID_WORKSPACE_ITEM, task.workspacePath),
+      ),
     {
       timeout: 30_000,
       timeoutMsg: `${caseMarker}: task ${task.label} 没有恢复到正确 workspace`,
@@ -466,10 +431,7 @@ export async function readTaskRowInWorkspace(
   );
 }
 
-export function buildSSHIdentity(
-  config: SSHConnectionConfig,
-  workspacePath: string,
-): string {
+export function buildSSHIdentity(config: SSHConnectionConfig, workspacePath: string): string {
   const target: RemoteTarget = {
     kind: "ssh",
     host: config.host,
@@ -479,9 +441,7 @@ export function buildSSHIdentity(
   return buildRemoteWorkspaceIdentity(workspacePath, target);
 }
 
-export async function prepareSSHLifecycle(
-  caseMarker: string,
-): Promise<{
+export async function prepareSSHLifecycle(caseMarker: string): Promise<{
   config: SSHRuntimeConfig;
   initialHosts: Array<{ name: string; pid: number }>;
   provider: SSHLifecycleProvider;

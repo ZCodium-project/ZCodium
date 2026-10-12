@@ -88,8 +88,7 @@ describe("会话内 CronUpdate 更新既有定时任务 E2E", () => {
       timeout: 15000,
       timeoutMsg: "创建后没有回到定时任务列表",
     });
-    const originalAutomation =
-      await waitForAutomationRecordByTitle(ORIGINAL_TITLE);
+    const originalAutomation = await waitForAutomationRecordByTitle(ORIGINAL_TITLE);
 
     // 普通 desktop-continuous 会话先查询真实 ID，再对同一条记录执行 patch 更新。
     await startNewV4Draft();
@@ -101,9 +100,7 @@ describe("会话内 CronUpdate 更新既有定时任务 E2E", () => {
     await waitForToolCallBlockByToolName("CronUpdate", 60000);
     await expandAssistantHistoriesWithContent();
     const pendingDiagnostics = await getToolCallDiagnostics(null);
-    const pendingToolNames = pendingDiagnostics.blocks.map(
-      (block) => block.toolName,
-    );
+    const pendingToolNames = pendingDiagnostics.blocks.map((block) => block.toolName);
     expect(pendingToolNames).toContain("CronList");
     expect(pendingToolNames).toContain("CronUpdate");
     expect(pendingToolNames).not.toContain("CronCreate");
@@ -112,9 +109,7 @@ describe("会话内 CronUpdate 更新既有定时任务 E2E", () => {
     await waitForV4TimelineContaining(FINAL_TOKEN, 90000);
     await waitForV4Pane(
       (snapshot) =>
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft" &&
-        !snapshot.canStop,
+        snapshot.sessionId !== null && snapshot.sessionId !== "draft" && !snapshot.canStop,
       "CronUpdate 会话没有完成",
       90000,
     );
@@ -129,9 +124,7 @@ describe("会话内 CronUpdate 更新既有定时任务 E2E", () => {
     expect(cardText).toContain(String(UPDATED_INTERVAL));
     expect(cardText).toContain("10:30");
 
-    const updatedAutomation = readAutomationRecordById(
-      originalAutomation.automationId,
-    );
+    const updatedAutomation = readAutomationRecordById(originalAutomation.automationId);
     expect(updatedAutomation).toMatchObject({
       automationId: originalAutomation.automationId,
       cronExpr: UPDATED_COMPATIBLE_CRON,
@@ -156,15 +149,9 @@ describe("会话内 CronUpdate 更新既有定时任务 E2E", () => {
       timeout: 15000,
       timeoutMsg: "没有跳转到更新后的定时任务详情",
     });
-    expect(await readTestIdValue(TID_AUTOMATION_FORM_TITLE)).toBe(
-      UPDATED_TITLE,
-    );
-    expect(await readTestIdValue(TID_AUTOMATION_FORM_PROMPT)).toBe(
-      UPDATED_PROMPT,
-    );
-    const schedulePreview = await readTestIdText(
-      TID_AUTOMATION_SCHEDULE_PREVIEW,
-    );
+    expect(await readTestIdValue(TID_AUTOMATION_FORM_TITLE)).toBe(UPDATED_TITLE);
+    expect(await readTestIdValue(TID_AUTOMATION_FORM_PROMPT)).toBe(UPDATED_PROMPT);
+    const schedulePreview = await readTestIdText(TID_AUTOMATION_SCHEDULE_PREVIEW);
     expect(schedulePreview).toContain(String(UPDATED_INTERVAL));
     expect(schedulePreview).toContain("10:30");
     await clickTestIdByDom(TID_AUTOMATION_CUSTOM_REPEAT_EDIT, {
@@ -195,9 +182,7 @@ function automationDatabasePath(): string {
   return join(homedir(), ".zcode", "v2", "tasks-index.sqlite");
 }
 
-function readAutomationRecordById(
-  automationId: string,
-): AutomationRecord | null {
+function readAutomationRecordById(automationId: string): AutomationRecord | null {
   // Node 内置 SQLite 目前只提供同步 DatabaseSync；E2E 每次仅做一次只读查询并立即关闭。
   const database = new DatabaseSync(automationDatabasePath(), {
     readOnly: true,
@@ -225,10 +210,7 @@ function readAutomationRecordById(
           prompt: row.prompt,
           ...(row.schedule_rule
             ? {
-                scheduleRule: JSON.parse(row.schedule_rule) as Record<
-                  string,
-                  unknown
-                >,
+                scheduleRule: JSON.parse(row.schedule_rule) as Record<string, unknown>,
               }
             : {}),
           title: row.title,
@@ -239,9 +221,7 @@ function readAutomationRecordById(
   }
 }
 
-async function waitForAutomationRecordByTitle(
-  title: string,
-): Promise<AutomationRecord> {
+async function waitForAutomationRecordByTitle(title: string): Promise<AutomationRecord> {
   let record: AutomationRecord | null = null;
   await browser.waitUntil(
     async () => {
@@ -290,9 +270,7 @@ function countAutomationRecords(): number {
     readOnly: true,
   });
   try {
-    const row = database
-      .prepare("SELECT COUNT(*) AS count FROM automations")
-      .get() as {
+    const row = database.prepare("SELECT COUNT(*) AS count FROM automations").get() as {
       count: number;
     };
     return row.count;
@@ -303,27 +281,23 @@ function countAutomationRecords(): number {
 
 async function readTestIdText(currentTestId: string): Promise<string> {
   return browser.execute((testId) => {
-    const element = document.querySelector<HTMLElement>(
-      `[data-testid="${testId}"]`,
-    );
+    const element = document.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
     return element?.innerText.trim() ?? "";
   }, currentTestId);
 }
 
 async function readTestIdValue(currentTestId: string): Promise<string> {
   return browser.execute((testId) => {
-    const element = document.querySelector<
-      HTMLInputElement | HTMLTextAreaElement
-    >(`[data-testid="${testId}"]`);
+    const element = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+      `[data-testid="${testId}"]`,
+    );
     return element?.value ?? "";
   }, currentTestId);
 }
 
 async function countTextCodeBlocksInCardTurn(): Promise<number> {
   return browser.execute((cardTestId) => {
-    const card = document.querySelector<HTMLElement>(
-      `[data-testid="${cardTestId}"]`,
-    );
+    const card = document.querySelector<HTMLElement>(`[data-testid="${cardTestId}"]`);
     const turn = card?.closest<HTMLElement>("[data-turn-id]");
     return turn?.querySelectorAll('[data-language="text"]').length ?? -1;
   }, TID_CRON_CREATE_CARD);

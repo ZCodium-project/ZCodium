@@ -383,7 +383,7 @@ Workspace-level E2E feature 分组如下：
 | User/Workspace scope UI         | `WPL-001` | 两级配置视图共享 Host 候选；User 不受项目覆盖污染；Workspace inheritance/override 与 A/B 隔离                           |
 | enabled 状态优先级              | `WPL-002` | Workspace 显式 true/false 覆盖 User，缺 key 继承                                                                        |
 | options 深合并                  | `WPL-003` | 按 Plugin/key 合并，未覆盖 User option 保留                                                                             |
-| sensitive/secret                | `WPL-004` | Workspace 可保存并运行；UI/log/provider/mobile artifact 不泄露原值                                                   |
+| sensitive/secret                | `WPL-004` | Workspace 可保存并运行；UI/log/provider/mobile artifact 不泄露原值                                                      |
 | Plugin 全组件直达 runtime       | `WPL-005` | Hook/Skill/Command/Agent/MCP 无 trust/approval 即进入新 Session                                                         |
 | 缺包行为                        | `WPL-006` | 只显示 missing，不自动安装；显式安装后才可运行                                                                          |
 | 配置与包生命周期分离            | `WPL-007` | enable/disable、install/uninstall 互不错误回滚                                                                          |
@@ -521,4 +521,3 @@ Workspace Plugin config loads without Workspace trust
   attachment 不复制 Plugin state，尚未完成真实手机 `/remote` E2E。
 
 实现时不能只修改 Settings UI；必须同时修改 config loader、Plugin discovery、Session startup、protocol/service contract 和 E2E fixture/coverage。
-

@@ -17,13 +17,13 @@ Everything else is plain TypeScript: `await`, `Promise.all`, `for`, `while`, `if
 
 The harness, not the model, supplies the rigor. From that one script it recovers:
 
-| Recovered | How |
-|---|---|
-| types | the script is typechecked by the TypeScript compiler against the facade's `.d.ts` |
-| schemas | every `ask<T>` gets a JSON schema synthesized from `T`; the subagent's answer is validated against it |
-| the dependency graph | a static analysis reads the script once and draws who feeds whom, what runs after what, and where control can go |
-| identity | every facade call is a **site** with a stable id; every execution of it is an **instance** |
-| durability | every instance is journaled; a run resumes by running the same script again with the journal answering for what already happened |
+| Recovered            | How                                                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| types                | the script is typechecked by the TypeScript compiler against the facade's `.d.ts`                                                |
+| schemas              | every `ask<T>` gets a JSON schema synthesized from `T`; the subagent's answer is validated against it                            |
+| the dependency graph | a static analysis reads the script once and draws who feeds whom, what runs after what, and where control can go                 |
+| identity             | every facade call is a **site** with a stable id; every execution of it is an **instance**                                       |
+| durability           | every instance is journaled; a run resumes by running the same script again with the journal answering for what already happened |
 
 Two kinds of task gain the most. The first is wide, structured work: "find the bugs in
 every TypeScript file" is one `files.glob` and one `.map` over it, where the conversational
@@ -112,15 +112,15 @@ A completed run's digest ends in a completion card: artifact tiles and four engi
 figures. A per-run side tab replays the script's own steps as tool cards, and every
 subagent transcript ends in a folded engine epilogue.
 
-| Document | Scope |
-|---|---|
-| `docs/dynamic-workflow/authoring.md` | the facade, `/workflow` and the skill, subagent prompts, compile-time rules, artifacts, `world.run`, the snippet tool, usage accounting |
-| `apps/zcode-cli/packages/dynamic-workflow/docs/analysis.md` | sites, diagnostics, the interpreter, the four graphs, joining runtime instances |
-| `docs/dynamic-workflow/launch.md` | `CreateWorkflow`, the confirmation window, saved workflows and scopes, the hub page, direct launch, CLI/TUI, run introspection tools |
+| Document                                                            | Scope                                                                                                                                     |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/dynamic-workflow/authoring.md`                                | the facade, `/workflow` and the skill, subagent prompts, compile-time rules, artifacts, `world.run`, the snippet tool, usage accounting   |
+| `apps/zcode-cli/packages/dynamic-workflow/docs/analysis.md`         | sites, diagnostics, the interpreter, the four graphs, joining runtime instances                                                           |
+| `docs/dynamic-workflow/launch.md`                                   | `CreateWorkflow`, the confirmation window, saved workflows and scopes, the hub page, direct launch, CLI/TUI, run introspection tools      |
 | `apps/zcode-cli/packages/dynamic-workflow/docs/execution-engine.md` | lowering, the sandbox, the engine core, ask lifecycle, the journal, resume, amend, terminal states, escalation, the fault-matrix test bed |
-| `docs/dynamic-workflow/concurrency.md` | the two bounds, request tickets, the adaptive controller, the model-error policy, tool-side requests |
-| `docs/dynamic-workflow/presentation.md` | the display contract, the timeline model, the live overlay, the run card and run pane |
-| `docs/dynamic-workflow/transcript-and-notifications.md` | notifications, the completion card, the script transcript, the epilogue fold |
+| `docs/dynamic-workflow/concurrency.md`                              | the two bounds, request tickets, the adaptive controller, the model-error policy, tool-side requests                                      |
+| `docs/dynamic-workflow/presentation.md`                             | the display contract, the timeline model, the live overlay, the run card and run pane                                                     |
+| `docs/dynamic-workflow/transcript-and-notifications.md`             | notifications, the completion card, the script transcript, the epilogue fold                                                              |
 
 ## The life of a workflow
 
@@ -164,23 +164,23 @@ Prose uses these words in every component document and in the GUI. Code identifi
 protocol fields, event names and site ids keep their older spellings where the table says
 so.
 
-| Word | Meaning | In code / Chinese UI |
-|---|---|---|
-| **workflow** | the thing the model writes and the user approves: one script and its name | 工作流 |
-| **script** | the TypeScript source; also the timeline lane for the steps the script runs itself (`files.*`, `git.*`, `world.run`) | lane id `workspace`; pill 「脚本」, tab 「脚本步骤」 (Script steps) |
-| **site** | one facade call in the script, the unit of identity: `ask#3`, `actor#1`, `world-read#2`, `report#1`, `artifact#1` | `siteId` |
-| **instance** | one execution of a site, `siteId@ordinal` | `{siteId, ordinal}`; a journal **node** |
-| **step** | an `ask` or world-read site as the graphs draw it | `Step` |
-| **subagent** | the session behind an `agent()` value; it keeps its transcript across asks and answers them one at a time | identifiers `actor*`, `actor#N`, `actor-created`; 子代理. The generic Agent tool's 子智能体 is a different thing |
-| **ask** | one `.ask()` instance: a message to a subagent and the typed result it settles with. Script and engine vocabulary only; every user surface calls it a **task** (任务), so that **question** (问题) stays reserved for an escalation | `ask#N`; display "{n} tasks" / 「{n} 个任务」 |
-| **run** | one execution of one script under one run id | `dwfrun-<uuid>`; noun 实例 (工作流实例, N 个实例), verbs stay 运行 (停止运行, 恢复运行) |
-| **phase** | a named stage the script declares with `phase("…")`; a station on the timeline | 阶段 |
-| **artifact** | on the facade and every user surface: what the script publishes for the user to keep (`artifact.file`, `.markdown`, or a `chart`/`table`/`metrics`/`board` fed by tagged `report` items). At most one is the **primary**, the deliverable the surfaces lead with (`primary: true`; a lone artifact counts). In engine identifiers only: a site's typed output or the script's return value | 产物; the primary is never labelled in the UI |
-| **saved workflow** | a `<name>.dwf.ts` file: a `/* zcode-workflow */` metadata block, then the script | 已保存的工作流 |
-| **scope** | where a saved workflow lives: `project` (`<cwd>/.zcode/workflows/`) or `global` (`~/.zcode/workflows/`); a project workflow hides a global one of the same name | 「项目」 / 「全局」 |
-| **world read** | a journaled call into the workspace: `files.*`, `git.*`, `world.run` | `world-read#N` |
-| **journal** | the durable record of a run: run, subagents, nodes, events | `dwf_run`, `dwf_actor`, `dwf_node`, `dwf_event` |
-| **question** | a subagent's `escalate` call waiting for the main agent | `dwfq-…`; 询问主代理 |
+| Word               | Meaning                                                                                                                                                                                                                                                                                                                                                                                    | In code / Chinese UI                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **workflow**       | the thing the model writes and the user approves: one script and its name                                                                                                                                                                                                                                                                                                                  | 工作流                                                                                                           |
+| **script**         | the TypeScript source; also the timeline lane for the steps the script runs itself (`files.*`, `git.*`, `world.run`)                                                                                                                                                                                                                                                                       | lane id `workspace`; pill 「脚本」, tab 「脚本步骤」 (Script steps)                                              |
+| **site**           | one facade call in the script, the unit of identity: `ask#3`, `actor#1`, `world-read#2`, `report#1`, `artifact#1`                                                                                                                                                                                                                                                                          | `siteId`                                                                                                         |
+| **instance**       | one execution of a site, `siteId@ordinal`                                                                                                                                                                                                                                                                                                                                                  | `{siteId, ordinal}`; a journal **node**                                                                          |
+| **step**           | an `ask` or world-read site as the graphs draw it                                                                                                                                                                                                                                                                                                                                          | `Step`                                                                                                           |
+| **subagent**       | the session behind an `agent()` value; it keeps its transcript across asks and answers them one at a time                                                                                                                                                                                                                                                                                  | identifiers `actor*`, `actor#N`, `actor-created`; 子代理. The generic Agent tool's 子智能体 is a different thing |
+| **ask**            | one `.ask()` instance: a message to a subagent and the typed result it settles with. Script and engine vocabulary only; every user surface calls it a **task** (任务), so that **question** (问题) stays reserved for an escalation                                                                                                                                                        | `ask#N`; display "{n} tasks" / 「{n} 个任务」                                                                    |
+| **run**            | one execution of one script under one run id                                                                                                                                                                                                                                                                                                                                               | `dwfrun-<uuid>`; noun 实例 (工作流实例, N 个实例), verbs stay 运行 (停止运行, 恢复运行)                          |
+| **phase**          | a named stage the script declares with `phase("…")`; a station on the timeline                                                                                                                                                                                                                                                                                                             | 阶段                                                                                                             |
+| **artifact**       | on the facade and every user surface: what the script publishes for the user to keep (`artifact.file`, `.markdown`, or a `chart`/`table`/`metrics`/`board` fed by tagged `report` items). At most one is the **primary**, the deliverable the surfaces lead with (`primary: true`; a lone artifact counts). In engine identifiers only: a site's typed output or the script's return value | 产物; the primary is never labelled in the UI                                                                    |
+| **saved workflow** | a `<name>.dwf.ts` file: a `/* zcode-workflow */` metadata block, then the script                                                                                                                                                                                                                                                                                                           | 已保存的工作流                                                                                                   |
+| **scope**          | where a saved workflow lives: `project` (`<cwd>/.zcode/workflows/`) or `global` (`~/.zcode/workflows/`); a project workflow hides a global one of the same name                                                                                                                                                                                                                            | 「项目」 / 「全局」                                                                                              |
+| **world read**     | a journaled call into the workspace: `files.*`, `git.*`, `world.run`                                                                                                                                                                                                                                                                                                                       | `world-read#N`                                                                                                   |
+| **journal**        | the durable record of a run: run, subagents, nodes, events                                                                                                                                                                                                                                                                                                                                 | `dwf_run`, `dwf_actor`, `dwf_node`, `dwf_event`                                                                  |
+| **question**       | a subagent's `escalate` call waiting for the main agent                                                                                                                                                                                                                                                                                                                                    | `dwfq-…`; 询问主代理                                                                                             |
 
 ## Principles that hold across components
 

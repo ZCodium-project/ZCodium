@@ -219,12 +219,12 @@ listSSHConfigAliases(): Promise<SSHConfigAliasOption[]>;
 
 ## 字段映射规则
 
-| SSH config 字段 | 表单字段 | 说明 |
-| --- | --- | --- |
-| `HostName` | `host` | 若缺失则可回退为 alias 本身 |
-| `Port` | `port` | 保持数字到字符串转换 |
-| `User` | `username` | 直接填入 |
-| `IdentityFile` | `privateKeyPath` | 取首个可用值 |
+| SSH config 字段 | 表单字段         | 说明                        |
+| --------------- | ---------------- | --------------------------- |
+| `HostName`      | `host`           | 若缺失则可回退为 alias 本身 |
+| `Port`          | `port`           | 保持数字到字符串转换        |
+| `User`          | `username`       | 直接填入                    |
+| `IdentityFile`  | `privateKeyPath` | 取首个可用值                |
 
 补充规则：
 

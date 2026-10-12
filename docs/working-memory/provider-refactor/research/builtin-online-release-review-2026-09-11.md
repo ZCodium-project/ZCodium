@@ -90,17 +90,17 @@ Host 管理的 Worker 通过环境变量接收同一 Active 文件路径，自�
 
 ## 5. 已有机制：可保留，但有明确边界
 
-| 环节 | 复核结果 | 本轮处理 |
-| --- | --- | --- |
-| Release 校验 | 严格外壳、schemaVersion、非负安全整数 revision；Provider／Model parser 校验；正则合法性和 CEL 编译已在正式 schema 中 | 直接复用，不复制一套 schema |
-| 原子持久化 | Active 文件锁内比较，临时文件原子替换；Provider 与 Model 整份替换，无跨源拼装 | 保留，增加 URL 下载后的集成覆盖 |
-| 版本比较 | 低版本 stale；同版本同内容 unchanged；同版本不同内容拒绝；启动时同版本缓存冲突回随包 | 保留；内容回滚发更高 revision |
-| LKG／随包 | 能解析的候选取较新；损坏、旧 schema、较低版本可回随包；双候选均无效报错 | 不新增空配置或伪成功兜底 |
-| 环境隔离 | 平台／App 版本／控制面 Endpoint 分路径，revision 含来源路径身份 | CDN URL 仅是该来源本次传输地址，换 URL 不换缓存身份、不清历史 revision |
-| 并发刷新 | 进程内 in-flight 合并，进程间 lease；force 不绕过有效 lease；最终文件锁+revision 防倒退 | 保留。lease 是可过期去重，不是永久排他；增加两阶段慢请求、接管、迟到响应回归 |
-| 退出／Endpoint | 已有下载返回后的 disposed／Endpoint 检查和旧源 dispose | 增加下载正文、提交前和定时器生命周期验证；不声称覆盖所有切换时序 |
-| 变化投影 | Source→Config→Registry 完整发布；Host Account 变更通过协议通知 Worker；Worker 监听 Active | Linux 下已有单测支持；真实桌面／手机、多进程跨平台仍须验收 |
-| Personal／执行 | 在线源属于同一个 Built-in 候选，Personal 优先；已创建 Model 冻结 | 不重写选择、历史或正在运行的模型；后续创建的执行正常解析新配置 |
+| 环节           | 复核结果                                                                                                             | 本轮处理                                                                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Release 校验   | 严格外壳、schemaVersion、非负安全整数 revision；Provider／Model parser 校验；正则合法性和 CEL 编译已在正式 schema 中 | 直接复用，不复制一套 schema                                                  |
+| 原子持久化     | Active 文件锁内比较，临时文件原子替换；Provider 与 Model 整份替换，无跨源拼装                                        | 保留，增加 URL 下载后的集成覆盖                                              |
+| 版本比较       | 低版本 stale；同版本同内容 unchanged；同版本不同内容拒绝；启动时同版本缓存冲突回随包                                 | 保留；内容回滚发更高 revision                                                |
+| LKG／随包      | 能解析的候选取较新；损坏、旧 schema、较低版本可回随包；双候选均无效报错                                              | 不新增空配置或伪成功兜底                                                     |
+| 环境隔离       | 平台／App 版本／控制面 Endpoint 分路径，revision 含来源路径身份                                                      | CDN URL 仅是该来源本次传输地址，换 URL 不换缓存身份、不清历史 revision       |
+| 并发刷新       | 进程内 in-flight 合并，进程间 lease；force 不绕过有效 lease；最终文件锁+revision 防倒退                              | 保留。lease 是可过期去重，不是永久排他；增加两阶段慢请求、接管、迟到响应回归 |
+| 退出／Endpoint | 已有下载返回后的 disposed／Endpoint 检查和旧源 dispose                                                               | 增加下载正文、提交前和定时器生命周期验证；不声称覆盖所有切换时序             |
+| 变化投影       | Source→Config→Registry 完整发布；Host Account 变更通过协议通知 Worker；Worker 监听 Active                            | Linux 下已有单测支持；真实桌面／手机、多进程跨平台仍须验收                   |
+| Personal／执行 | 在线源属于同一个 Built-in 候选，Personal 优先；已创建 Model 冻结                                                     | 不重写选择、历史或正在运行的模型；后续创建的执行正常解析新配置               |
 
 ### 校验能力的限制：不是新发现的“违背设计”
 
@@ -112,13 +112,13 @@ Host 管理的 Worker 通过环境变量接收同一 Active 文件路径，自�
 
 ## 6. 运行验证与局限
 
-| 证据 | 结果 |
-| --- | --- |
-| 生产 client/configs → CDN → 正式 decoder → 本地文件规范化比较 | 成功；旧 Envelope 对同一响应返回 null，见 §2 |
-| 根 Vitest：Services 下载、Provider Node release／runtime、Services config runtime、Provider Registry Service | 5 文件、46 条通过 |
-| CLI `tsx --test packages/cli/tests/provider-runtime-env.test.ts` | 4 条通过 |
-| CLI 自己的 Vitest：`packages/bootstrap/tests/process-provider-registry-runtime.test.ts` | 1 文件、10 条通过 |
-| 临时 Runtime、HTTP、缺规则 Release 复现 | 分别证明 R2、R3 与业务完整性边界；没有修改正式配置或测试 |
+| 证据                                                                                                         | 结果                                                     |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| 生产 client/configs → CDN → 正式 decoder → 本地文件规范化比较                                                | 成功；旧 Envelope 对同一响应返回 null，见 §2             |
+| 根 Vitest：Services 下载、Provider Node release／runtime、Services config runtime、Provider Registry Service | 5 文件、46 条通过                                        |
+| CLI `tsx --test packages/cli/tests/provider-runtime-env.test.ts`                                             | 4 条通过                                                 |
+| CLI 自己的 Vitest：`packages/bootstrap/tests/process-provider-registry-runtime.test.ts`                      | 1 文件、10 条通过                                        |
+| 临时 Runtime、HTTP、缺规则 Release 复现                                                                      | 分别证明 R2、R3 与业务完整性边界；没有修改正式配置或测试 |
 
 根 Vitest 默认未收集 CLI 两个目标文件；随后拆用正确 runner。一次将 bootstrap 的 Vitest 文件交给 node:test 导致 runner 错误，改用 CLI Vitest 后 10 条通过，不归因产品缺陷。总计 60 条现有测试通过；**它们均非新增 URL 链路验收**。
 

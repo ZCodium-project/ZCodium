@@ -37,13 +37,13 @@ flowchart LR
 
 ## 前置条件
 
-| 项 | 要求 |
-|---|---|
-| Docker | 20.10+，启用 BuildKit（默认）；能拉 `node:24-bookworm-slim` 并访问 GitLab、npm registry、`cdn-zcode.z.ai` |
-| 主机工具 | bash、jq、node ≥ 20（运行 `prepare-auth.mjs`）、python3（汇总报告） |
-| GitLab 访问 | 私有仓库需要一个只读 PAT（`read_repository`）；未给 `--token-file` 时脚本依次尝试 `GITLAB_TOKEN` 环境变量 → `glab` 已登录的 PAT → `git credential fill` 取本机已保存的凭据 |
-| ZCode 登录态 | 本机 ZCode 已登录且选好可用 provider/模型；评测容器复用这份凭据 |
-| 被测源码 | ref 必须已包含 `zcode plugins install / disable --all` 子命令（子命令 MR 合入后的 staging，或该 MR 分支） |
+| 项           | 要求                                                                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Docker       | 20.10+，启用 BuildKit（默认）；能拉 `node:24-bookworm-slim` 并访问 GitLab、npm registry、`cdn-zcode.z.ai`                                                                  |
+| 主机工具     | bash、jq、node ≥ 20（运行 `prepare-auth.mjs`）、python3（汇总报告）                                                                                                        |
+| GitLab 访问  | 私有仓库需要一个只读 PAT（`read_repository`）；未给 `--token-file` 时脚本依次尝试 `GITLAB_TOKEN` 环境变量 → `glab` 已登录的 PAT → `git credential fill` 取本机已保存的凭据 |
+| ZCode 登录态 | 本机 ZCode 已登录且选好可用 provider/模型；评测容器复用这份凭据                                                                                                            |
+| 被测源码     | ref 必须已包含 `zcode plugins install / disable --all` 子命令（子命令 MR 合入后的 staging，或该 MR 分支）                                                                  |
 
 ## 第一步：构建镜像
 
@@ -110,17 +110,17 @@ node docker/plugin-eval/bin/prepare-auth.mjs --out ./.zcode-eval-auth \
 }
 ```
 
-| 字段 | 含义 |
-|---|---|
-| `id` | 任务 id，同时是结果子目录名与容器名后缀 |
-| `plugins` | 白名单。裸 name 或 `name@marketplace`；容器会 `disable --all` 后逐个 `enable`，并断言实际启用集合与此完全一致 |
-| `prompt` | 传给 `zcode --prompt` 的任务文本 |
-| `timeoutSeconds` | 单次运行硬超时（默认 900），超时按失败处理 |
-| `expect.skills` | 期望出现在 `tool.updated` 里的 `Skill` 调用（`payload.input.skill`） |
-| `expect.mcpTools` | 期望被调用的 MCP 工具名子串 |
-| `expect.files` | 期望在工作目录里产出的文件（相对路径） |
-| `expect.responseContains` | 最终回复必须包含的字符串 |
-| `xfail` | 写了原因就把失败记为 `xfail`（预期失败），不算套件失败 |
+| 字段                      | 含义                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `id`                      | 任务 id，同时是结果子目录名与容器名后缀                                                                       |
+| `plugins`                 | 白名单。裸 name 或 `name@marketplace`；容器会 `disable --all` 后逐个 `enable`，并断言实际启用集合与此完全一致 |
+| `prompt`                  | 传给 `zcode --prompt` 的任务文本                                                                              |
+| `timeoutSeconds`          | 单次运行硬超时（默认 900），超时按失败处理                                                                    |
+| `expect.skills`           | 期望出现在 `tool.updated` 里的 `Skill` 调用（`payload.input.skill`）                                          |
+| `expect.mcpTools`         | 期望被调用的 MCP 工具名子串                                                                                   |
+| `expect.files`            | 期望在工作目录里产出的文件（相对路径）                                                                        |
+| `expect.responseContains` | 最终回复必须包含的字符串                                                                                      |
+| `xfail`                   | 写了原因就把失败记为 `xfail`（预期失败），不算套件失败                                                        |
 
 同名目录 `<id>.workspace/` 存在时，会只读挂到 `/task/workspace` 并拷进容器的 `/work` 作为模型 cwd，用来放 Excel、PDF 等夹具。
 
@@ -193,26 +193,26 @@ eval-results/
 
 ## 排障
 
-| 现象 | 看哪里 | 常见原因 |
-|---|---|---|
-| 构建卡在 clone / 401 | `build-image.sh` 输出 | 无 PAT 或 PAT 无 `read_repository`；`--token-file` 显式传 |
-| `pnpm install` 拉 git 依赖失败 | builder 阶段日志 | `pnpm-workspace.yaml` catalog 里的 git+https 依赖同样需要 GitLab 凭据 |
-| 容器退出 64 | `container.log` | task.json 缺 `id`/`prompt`，或路径没挂对 |
-| 容器退出 65 | `plugins.json`、`plugins-enable.log` | 白名单里的插件名拼错、同名多市场需要写 `name@marketplace` |
-| 422 / 模型不对 | `stderr.log`、`summary.json.source` | `defaultModelSelection` 不完整，重跑 `prepare-auth.mjs` 显式给 `--model --reasoning` |
-| 全部 401 / auth_failed | `stderr.log` | `ZCODE_EVAL_CREDENTIAL_SECRET` 与生成时不一致，或本机登录态已过期 |
-| `plugin_variable_missing` | `plugins.json` diagnostics | 运行时覆盖了 `ZCODE_BASE_URL` 为空 |
-| skill 没被调用 | `events.jsonl` 中 `tool.updated` | prompt 没点名插件/skill；或插件未在白名单 |
+| 现象                           | 看哪里                               | 常见原因                                                                             |
+| ------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------ |
+| 构建卡在 clone / 401           | `build-image.sh` 输出                | 无 PAT 或 PAT 无 `read_repository`；`--token-file` 显式传                            |
+| `pnpm install` 拉 git 依赖失败 | builder 阶段日志                     | `pnpm-workspace.yaml` catalog 里的 git+https 依赖同样需要 GitLab 凭据                |
+| 容器退出 64                    | `container.log`                      | task.json 缺 `id`/`prompt`，或路径没挂对                                             |
+| 容器退出 65                    | `plugins.json`、`plugins-enable.log` | 白名单里的插件名拼错、同名多市场需要写 `name@marketplace`                            |
+| 422 / 模型不对                 | `stderr.log`、`summary.json.source`  | `defaultModelSelection` 不完整，重跑 `prepare-auth.mjs` 显式给 `--model --reasoning` |
+| 全部 401 / auth_failed         | `stderr.log`                         | `ZCODE_EVAL_CREDENTIAL_SECRET` 与生成时不一致，或本机登录态已过期                    |
+| `plugin_variable_missing`      | `plugins.json` diagnostics           | 运行时覆盖了 `ZCODE_BASE_URL` 为空                                                   |
+| skill 没被调用                 | `events.jsonl` 中 `tool.updated`     | prompt 没点名插件/skill；或插件未在白名单                                            |
 
 ## 验证记录
 
 2026-09-14，macOS arm64 + OrbStack Docker 29，被测源码 `feat-cli-plugins-parity@bf05821832`：
 
-| 步骤 | 结果 |
-|---|---|
-| `build-image.sh --ref feat-cli-plugins-parity` | 成功；pnpm install 约 12 分钟，镜像 427 MB，烘入 23 个插件（CDN 19 + 内置 4），`plugins list --json` 无 error 诊断，121 个 skill |
-| `prepare-auth.mjs --provider ZAPI --model GLM-5.3-Highspeed --reasoning max` | 重加密 23 个凭据值，模型选择写入成功 |
-| `run-suite.sh --jobs 3`（三任务并行） | `finance-budget-variance` pass 22s，`builtin-docx-smoke` pass 38s（smoke.docx 9.4 KB 落盘），`finance-close-recap-mcp` xfail 32s |
+| 步骤                                                                         | 结果                                                                                                                             |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `build-image.sh --ref feat-cli-plugins-parity`                               | 成功；pnpm install 约 12 分钟，镜像 427 MB，烘入 23 个插件（CDN 19 + 内置 4），`plugins list --json` 无 error 诊断，121 个 skill |
+| `prepare-auth.mjs --provider ZAPI --model GLM-5.3-Highspeed --reasoning max` | 重加密 23 个凭据值，模型选择写入成功                                                                                             |
+| `run-suite.sh --jobs 3`（三任务并行）                                        | `finance-budget-variance` pass 22s，`builtin-docx-smoke` pass 38s（smoke.docx 9.4 KB 落盘），`finance-close-recap-mcp` xfail 32s |
 
 xfail 任务的模型回复明确说明 MCP 行情工具不可用并停止，没有用 Bash / curl 绕过；`toolCalls` 只有 Skill 与 Agent，无 MCP 工具，与「官方 MCP 在 headless 不可用」的已知限制一致。
 

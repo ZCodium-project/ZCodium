@@ -3,9 +3,7 @@
 // 证据层 L3：running 中入队 → stop → queue 原样保留并显示暂停提示；正常发送按钮
 // 打开 modal 后执行 keep/clear；idle 继续按 FIFO 到空；running 继续只武装、不抢占。
 // 语料来源：manual-review/pending 的 stop-held-queue（B02-B04）/ interrupted-actions 语义移植。
-import {
-  clearAppData,
-} from "../helpers/desktop-app.js";
+import { clearAppData } from "../helpers/desktop-app.js";
 import {
   clickV4PausedQueueResume,
   clickV4QueueItemSendNow,
@@ -38,11 +36,7 @@ async function setupHeldQueue(queueTexts: string[]) {
     await waitForV4QueueCount(i + 1, 30000);
   }
   await clickV4Stop();
-  await waitForV4Pane(
-    (s) => !s.canStop,
-    "stop 后没有退出 running（canStop 仍在）",
-    30000,
-  );
+  await waitForV4Pane((s) => !s.canStop, "stop 后没有退出 running（canStop 仍在）", 30000);
 }
 
 describe("v4 catalog B 组：stop 后暂停队列、发送确认与继续消费", () => {
@@ -52,10 +46,7 @@ describe("v4 catalog B 组：stop 后暂停队列、发送确认与继续消费"
   });
 
   it("B02/B04：stop 后 queue 原样保留、autoDrain=false，并显示暂停提示", async () => {
-    await setupHeldQueue([
-      "E2E_V4_HELD_Q1 排队的第一条",
-      "E2E_V4_HELD_Q2 排队的第二条",
-    ]);
+    await setupHeldQueue(["E2E_V4_HELD_Q1 排队的第一条", "E2E_V4_HELD_Q2 排队的第二条"]);
 
     // queue=2 原样保留（不被 stop 丢弃）
     const items = await getV4QueueItems();
@@ -67,11 +58,7 @@ describe("v4 catalog B 组：stop 后暂停队列、发送确认与继续消费"
     await browser.pause(3000);
     const after = await getV4QueueItems();
     expect(after).toHaveLength(2);
-    const snapshot = await waitForV4Pane(
-      () => true,
-      "读取快照失败",
-      5000,
-    );
+    const snapshot = await waitForV4Pane(() => true, "读取快照失败", 5000);
     expect(snapshot.timelineText).not.toContain("V4_HELD_Q1_REPLY");
 
     await waitForV4PausedQueueBanner(15000);
@@ -99,8 +86,7 @@ describe("v4 catalog B 组：stop 后暂停队列、发送确认与继续消费"
 
     // queue 清空后暂停提示与确认 modal 都退出。
     await browser.waitUntil(
-      async () =>
-        !(await hasV4PausedQueueBanner()) && !(await hasV4PausedQueueSendDialog()),
+      async () => !(await hasV4PausedQueueBanner()) && !(await hasV4PausedQueueSendDialog()),
       { timeout: 15000, timeoutMsg: "queue 清空后暂停提示或确认 modal 仍然存在" },
     );
     // 被清空的 Q1 不应被消费
@@ -109,10 +95,7 @@ describe("v4 catalog B 组：stop 后暂停队列、发送确认与继续消费"
   });
 
   it("B14：idle 暂停队列点继续后按 Q1/Q2 FIFO 自动消费到空", async () => {
-    await setupHeldQueue([
-      "E2E_V4_HELD_Q1 排队的第一条",
-      "E2E_V4_HELD_Q2 排队的第二条",
-    ]);
+    await setupHeldQueue(["E2E_V4_HELD_Q1 排队的第一条", "E2E_V4_HELD_Q2 排队的第二条"]);
     await waitForV4PausedQueueBanner(15000);
 
     await clickV4PausedQueueResume();

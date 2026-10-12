@@ -13,6 +13,7 @@
 ### Task 1: Add Root Startup Render Gate Tests
 
 **Files:**
+
 - Modify: `packages/ui/test/rootUpdateReadyOverlay.test.ts`
 
 - [ ] **Step 1: Write the failing tests**
@@ -55,6 +56,7 @@ Expected: the Web startup gate test fails because `Root.tsx` still calls `should
 ### Task 2: Gate Root Startup Render Block By Desktop
 
 **Files:**
+
 - Modify: `packages/ui/src/Root.tsx`
 
 - [ ] **Step 1: Write minimal implementation**
@@ -62,12 +64,13 @@ Expected: the Web startup gate test fails because `Root.tsx` still calls `should
 Short-circuit the startup render gate before calling `shouldBlockRootRender(...)`:
 
 ```ts
-const isStartupRenderBlocked = Boolean(isDesktop) && shouldBlockRootRender({
-  isResolvingStartupAuthState,
-  isRestoring,
-  isBootstrappingInitialWorkspace: isBootstrappingInitialWorkspace ||
-    isCreatingFallbackWorkspace,
-});
+const isStartupRenderBlocked =
+  Boolean(isDesktop) &&
+  shouldBlockRootRender({
+    isResolvingStartupAuthState,
+    isRestoring,
+    isBootstrappingInitialWorkspace: isBootstrappingInitialWorkspace || isCreatingFallbackWorkspace,
+  });
 ```
 
 Keep `RootStartupLoading` inside the existing blocked branch without a nested Web check.
@@ -92,6 +95,7 @@ Expected: both commands exit 0.
 ### Task 3: Keep Mobile Web Loading Continuous Until Workspace Renders
 
 **Files:**
+
 - Modify: `packages/ui/src/root/types.ts`
 - Modify: `packages/ui/src/Root.tsx`
 - Modify: `packages/web/src/main.tsx`

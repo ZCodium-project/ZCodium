@@ -10,25 +10,25 @@ import TabItem from '@theme/TabItem';
 
 WebdriverIO provides image comparisons on screens, elements or a full-page for
 
--   🖥️ Desktop browsers (Chrome / Firefox / Safari / Microsoft Edge)
--   📱 Mobile / Tablet browsers (Chrome on Android emulators / Safari on iOS Simulators / Simulators / real devices) via Appium
--   📱 Native Apps (Android emulators / iOS Simulators / real devices) via Appium (🌟 **NEW** 🌟)
--   📳 Hybrid apps via Appium
+- 🖥️ Desktop browsers (Chrome / Firefox / Safari / Microsoft Edge)
+- 📱 Mobile / Tablet browsers (Chrome on Android emulators / Safari on iOS Simulators / Simulators / real devices) via Appium
+- 📱 Native Apps (Android emulators / iOS Simulators / real devices) via Appium (🌟 **NEW** 🌟)
+- 📳 Hybrid apps via Appium
 
 through the [`@wdio/visual-service`](https://www.npmjs.com/package/@wdio/visual-service) which is a lightweight WebdriverIO service.
 
 This allows you to:
 
--   save or compare **screens/elements/full-page** screens against a baseline
--   automatically **create a baseline** when no baseline is there
--   **block out custom regions** and even **automatically exclude** a status and or toolbars (mobile only) during a comparison
--   increase the element dimensions screenshots
--   **hide text** during website comparison to:
-    -   **improve stability** and prevent font rendering flakiness
-    -   only focus on the **layout** of a website
--   use **different comparison methods** and a set of **additional matchers** for better readable tests
--   verify how your website will **support tabbing with your keyboard)**, see also [Tabbing through a website](#tabbing-through-a-website)
--   and much more, see the [service](./visual-testing/service-options) and [method](./visual-testing/method-options) options
+- save or compare **screens/elements/full-page** screens against a baseline
+- automatically **create a baseline** when no baseline is there
+- **block out custom regions** and even **automatically exclude** a status and or toolbars (mobile only) during a comparison
+- increase the element dimensions screenshots
+- **hide text** during website comparison to:
+  - **improve stability** and prevent font rendering flakiness
+  - only focus on the **layout** of a website
+- use **different comparison methods** and a set of **additional matchers** for better readable tests
+- verify how your website will **support tabbing with your keyboard)**, see also [Tabbing through a website](#tabbing-through-a-website)
+- and much more, see the [service](./visual-testing/service-options) and [method](./visual-testing/method-options) options
 
 The service is a lightweight module to retrieve the needed data and screenshots for all browsers/devices. The comparison power comes from [ResembleJS](https://github.com/Huddle/Resemble.js). If you want to compare images online you can check the [online tool](http://rsmbl.github.io/Resemble.js/).
 
@@ -55,24 +55,24 @@ import path from "node:path";
 
 // wdio.conf.ts
 export const config = {
-    // ...
-    // =====
-    // Setup
-    // =====
-    services: [
-        [
-            "visual",
-            {
-                // Some options, see the docs for more
-                baselineFolder: path.join(process.cwd(), "tests", "baseline"),
-                formatImageName: "{tag}-{logName}-{width}x{height}",
-                screenshotPath: path.join(process.cwd(), "tmp"),
-                savePerInstance: true,
-                // ... more options
-            },
-        ],
+  // ...
+  // =====
+  // Setup
+  // =====
+  services: [
+    [
+      "visual",
+      {
+        // Some options, see the docs for more
+        baselineFolder: path.join(process.cwd(), "tests", "baseline"),
+        formatImageName: "{tag}-{logName}-{width}x{height}",
+        screenshotPath: path.join(process.cwd(), "tmp"),
+        savePerInstance: true,
+        // ... more options
+      },
     ],
-    // ...
+  ],
+  // ...
 };
 ```
 
@@ -81,6 +81,7 @@ More service options can be found [here](/docs/visual-testing/service-options).
 Once set up in your WebdriverIO configuration, you can go ahead and add visual assertions to [your tests](/docs/visual-testing/writing-tests).
 
 ### Capabilities
+
 To use the Visual Testing module, **you don’t need to add any extra options to your capabilities**. However, in some cases, you may want to add additional metadata to your visual tests, such as a `logName`.
 
 The `logName` allows you to assign a custom name to each capability, which can then be included in the image filenames. This is particularly useful for distinguishing screenshots taken across different browsers, devices, or configurations.
@@ -128,23 +129,21 @@ export const config = {
 ```
 
 #### How it works
-1. Setting Up the `logName`:
 
-    - In the `capabilities` section, assign a unique `logName` to each browser or device. For example, `chrome-mac-15` identifies tests running on Chrome on macOS version 15.
+1. Setting Up the `logName`:
+   - In the `capabilities` section, assign a unique `logName` to each browser or device. For example, `chrome-mac-15` identifies tests running on Chrome on macOS version 15.
 
 2. Custom Image Naming:
+   - The `formatImageName` option integrates the `logName` into the screenshot filenames. For example, if the `tag` is homepage and the resolution is `1920x1080`, the resulting filename might look like this:
 
-    - The `formatImageName` option integrates the `logName` into the screenshot filenames. For example, if the `tag` is homepage and the resolution is `1920x1080`, the resulting filename might look like this:
-
-        `homepage-chrome-mac-15-1920x1080.png`
+     `homepage-chrome-mac-15-1920x1080.png`
 
 3. Benefits of Custom Naming:
-
-    - Distinguishing between screenshots from different browsers or devices becomes much easier, especially when managing baselines and debugging discrepancies.
+   - Distinguishing between screenshots from different browsers or devices becomes much easier, especially when managing baselines and debugging discrepancies.
 
 4. Note on Defaults:
 
-    -If `logName` is not set in the capabilities, the `formatImageName` option will show it as an empty string in the filenames (`homepage--15-1920x1080.png`)
+   -If `logName` is not set in the capabilities, the `formatImageName` option will show it as an empty string in the filenames (`homepage--15-1920x1080.png`)
 
 ### WebdriverIO MultiRemote
 
@@ -156,32 +155,32 @@ capabilities as you can see below. This will make sure that each screenshot will
 ```js
 // wdio.conf.js
 export const config = {
-    capabilities: {
-        chromeBrowserOne: {
-            capabilities: {
-                browserName: "chrome",
-                "goog:chromeOptions": {
-                    args: ["disable-infobars"],
-                },
-                // THIS!!!
-                "wdio-ics:options": {
-                    logName: "chrome-latest-one",
-                },
-            },
+  capabilities: {
+    chromeBrowserOne: {
+      capabilities: {
+        browserName: "chrome",
+        "goog:chromeOptions": {
+          args: ["disable-infobars"],
         },
-        chromeBrowserTwo: {
-            capabilities: {
-                browserName: "chrome",
-                "goog:chromeOptions": {
-                    args: ["disable-infobars"],
-                },
-                // THIS!!!
-                "wdio-ics:options": {
-                    logName: "chrome-latest-two",
-                },
-            },
+        // THIS!!!
+        "wdio-ics:options": {
+          logName: "chrome-latest-one",
         },
+      },
     },
+    chromeBrowserTwo: {
+      capabilities: {
+        browserName: "chrome",
+        "goog:chromeOptions": {
+          args: ["disable-infobars"],
+        },
+        // THIS!!!
+        "wdio-ics:options": {
+          logName: "chrome-latest-two",
+        },
+      },
+    },
+  },
 };
 ```
 
@@ -194,14 +193,14 @@ import { remote } from "webdriverio";
 import VisualService from "@wdio/visual-service";
 
 let visualService = new VisualService({
-    autoSaveBaseline: true,
+  autoSaveBaseline: true,
 });
 
 const browser = await remote({
-    logLevel: "silent",
-    capabilities: {
-        browserName: "chrome",
-    },
+  logLevel: "silent",
+  capabilities: {
+    browserName: "chrome",
+  },
 });
 
 // "Start" the service to add the custom commands to the `browser`
@@ -260,8 +259,8 @@ This is an example of how the tabbing works on our [guinea pig website](https://
 
 Update the baseline images through the command line by adding the argument `--update-visual-baseline`. This will
 
--   automatically copy the actual take screenshot and put it in the baseline folder
--   if there are differences it will let the test pass because the baseline has been updated
+- automatically copy the actual take screenshot and put it in the baseline folder
+- if there are differences it will let the test pass because the baseline has been updated
 
 **Usage:**
 
@@ -286,42 +285,44 @@ When running logs info/debug mode you will see the following logs added
 This module includes TypeScript support, allowing you to benefit from auto-completion, type safety, and improved developer experience when using the Visual Testing service.
 
 ### Step 1: Add Type Definitions
+
 To ensure TypeScript recognizes the module types, add the following entry to the types field in your tsconfig.json:
 
 ```json
 {
-    "compilerOptions": {
-        "types": ["@wdio/visual-service"]
-    }
+  "compilerOptions": {
+    "types": ["@wdio/visual-service"]
+  }
 }
 ```
 
 ### Step 2: Enable Type Safety for Service Options
+
 To enforce type checking on the service options, update your WebdriverIO configuration:
 
 ```ts
 // wdio.conf.ts
-import { join } from 'node:path';
+import { join } from "node:path";
 // Import the type definition
-import type { VisualServiceOptions } from '@wdio/visual-service';
+import type { VisualServiceOptions } from "@wdio/visual-service";
 
 export const config = {
-    // ...
-    // =====
-    // Setup
-    // =====
-    services: [
-        [
-            "visual",
-            {
-                // Service options
-                baselineFolder: join(process.cwd(), './__snapshots__/'),
-                formatImageName: '{tag}-{logName}-{width}x{height}',
-                screenshotPath: join(process.cwd(), '.tmp/'),
-            } satisfies VisualServiceOptions, // Ensures type safety
-        ],
+  // ...
+  // =====
+  // Setup
+  // =====
+  services: [
+    [
+      "visual",
+      {
+        // Service options
+        baselineFolder: join(process.cwd(), "./__snapshots__/"),
+        formatImageName: "{tag}-{logName}-{width}x{height}",
+        screenshotPath: join(process.cwd(), ".tmp/"),
+      } satisfies VisualServiceOptions, // Ensures type safety
     ],
-    // ...
+  ],
+  // ...
 };
 ```
 

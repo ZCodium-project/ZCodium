@@ -106,14 +106,10 @@ describe("gitCommandProvider timeout cleanup", () => {
 
     await vi.advanceTimersByTimeAsync(15);
 
-    expect(spawnMock).toHaveBeenCalledWith(
-      "taskkill",
-      ["/PID", "24680", "/T", "/F"],
-      {
-        stdio: "ignore",
-        windowsHide: true,
-      },
-    );
+    expect(spawnMock).toHaveBeenCalledWith("taskkill", ["/PID", "24680", "/T", "/F"], {
+      stdio: "ignore",
+      windowsHide: true,
+    });
 
     taskkillChild.emit("close", 0, null);
     await vi.advanceTimersByTimeAsync(5);

@@ -78,11 +78,7 @@ const getResolvedCodeTheme = (theme?: BundledTheme): BundledTheme => {
   return "github-light";
 };
 
-const getCodeTokensCacheKey = (
-  code: string,
-  language: BundledLanguage,
-  theme: BundledTheme,
-) => {
+const getCodeTokensCacheKey = (code: string, language: BundledLanguage, theme: BundledTheme) => {
   const start = code.slice(0, 100);
   const end = code.length > 100 ? code.slice(-100) : "";
   return `${theme}:${language}:${code.length}:${start}:${end}`;

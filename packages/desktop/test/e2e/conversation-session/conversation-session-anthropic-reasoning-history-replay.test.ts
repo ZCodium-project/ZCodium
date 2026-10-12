@@ -3,10 +3,7 @@ import type {
   E2ENetworkCaptureArtifact,
   E2ENetworkCaptureRecord,
 } from "../helpers/network-capture-proxy.js";
-import {
-  clearAppData,
-  waitForDefaultWorkspaceReady,
-} from "../helpers/desktop-app.js";
+import { clearAppData, waitForDefaultWorkspaceReady } from "../helpers/desktop-app.js";
 import { E2E_NETWORK_CAPTURE_REDACTION_VALUE } from "../helpers/e2e-network-capture-redaction.js";
 import {
   UPSTREAM_MODEL,
@@ -102,13 +99,8 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
 
     const standardPrompt = `${STANDARD_SEED}_${runId}`;
     await sendAndWaitForReply(standardPrompt, STANDARD_REPLY);
-    const standardRequest = (
-      await waitForCompletedRequests(standardPrompt, 1)
-    )[0]!;
-    expectRequestContains(standardRequest, [
-      FALLBACK_THINKING,
-      FALLBACK_SIGNATURE,
-    ]);
+    const standardRequest = (await waitForCompletedRequests(standardPrompt, 1))[0]!;
+    expectRequestContains(standardRequest, [FALLBACK_THINKING, FALLBACK_SIGNATURE]);
 
     const nativePrompt = `${NATIVE_SEED}_${runId}`;
     await sendAndWaitForReply(nativePrompt, NATIVE_REPLY);
@@ -135,9 +127,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     ]);
     expectRequestExcludes(liveRequest, [NATIVE_START_SIGNATURE]);
 
-    const sessionId = await requireCurrentSessionId(
-      "signature replay 多轮没有绑定真实 session",
-    );
+    const sessionId = await requireCurrentSessionId("signature replay 多轮没有绑定真实 session");
     await reloadAppAndRestoreV4Session(sessionId);
 
     const coldPrompt = `${COLD_REPLAY}_${runId}`;
@@ -158,9 +148,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     await selectSecondaryModel();
     const crossModelPrompt = `${CROSS_MODEL}_${runId}`;
     await sendAndWaitForReply(crossModelPrompt, CROSS_MODEL_REPLY);
-    const crossModelRequest = (
-      await waitForCompletedRequests(crossModelPrompt, 1)
-    )[0]!;
+    const crossModelRequest = (await waitForCompletedRequests(crossModelPrompt, 1))[0]!;
     expect(readModel(crossModelRequest)).toBe(UPSTREAM_SECONDARY_MODEL);
     expectRequestContains(crossModelRequest, [
       FALLBACK_REPLY,
@@ -193,9 +181,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     await sendAndWaitForIdle(orphanSeedPrompt);
     const orphanFollowPrompt = `${ORPHAN_FOLLOW}_${runId}`;
     await sendAndWaitForReply(orphanFollowPrompt, ORPHAN_REPLY);
-    const orphanRequest = (
-      await waitForCompletedRequests(orphanFollowPrompt, 1)
-    )[0]!;
+    const orphanRequest = (await waitForCompletedRequests(orphanFollowPrompt, 1))[0]!;
     expect(readModel(orphanRequest)).toBe(UPSTREAM_MODEL);
     expectRequestExcludes(orphanRequest, [ORPHAN_THINKING]);
     expect(assistantMessages(orphanRequest)).toHaveLength(0);
@@ -207,9 +193,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     await selectSecondaryModel();
     const emptyFollowPrompt = `${EMPTY_FOLLOW}_${runId}`;
     await sendAndWaitForReply(emptyFollowPrompt, EMPTY_REPLY);
-    const emptyRequest = (
-      await waitForCompletedRequests(emptyFollowPrompt, 1)
-    )[0]!;
+    const emptyRequest = (await waitForCompletedRequests(emptyFollowPrompt, 1))[0]!;
     expect(readModel(emptyRequest)).toBe(UPSTREAM_SECONDARY_MODEL);
     expectRequestExcludes(emptyRequest, [EMPTY_THINKING, EMPTY_SIGNATURE]);
     expect(assistantMessages(emptyRequest)).toEqual([
@@ -227,14 +211,9 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     await selectPrimaryModel();
     const whitespaceFollowPrompt = `${WHITESPACE_FOLLOW}_${runId}`;
     await sendAndWaitForReply(whitespaceFollowPrompt, WHITESPACE_REPLY);
-    const whitespaceRequest = (
-      await waitForCompletedRequests(whitespaceFollowPrompt, 1)
-    )[0]!;
+    const whitespaceRequest = (await waitForCompletedRequests(whitespaceFollowPrompt, 1))[0]!;
     expect(readModel(whitespaceRequest)).toBe(UPSTREAM_MODEL);
-    expectRequestExcludes(whitespaceRequest, [
-      WHITESPACE_THINKING,
-      WHITESPACE_SIGNATURE,
-    ]);
+    expectRequestExcludes(whitespaceRequest, [WHITESPACE_THINKING, WHITESPACE_SIGNATURE]);
     expect(assistantMessages(whitespaceRequest)).toHaveLength(0);
     const users = userMessages(whitespaceRequest);
     expect(users).toHaveLength(1);
@@ -268,10 +247,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
       RETRY_UNSIGNED_THINKING,
       RETRY_REDACTED_DATA,
     ]);
-    expectRequestContains(httpAttempts[1]!, [
-      RETRY_UNSIGNED_THINKING,
-      RETRY_SEED_REPLY,
-    ]);
+    expectRequestContains(httpAttempts[1]!, [RETRY_UNSIGNED_THINKING, RETRY_SEED_REPLY]);
     expectRequestExcludes(httpAttempts[1]!, [
       RETRY_SIGNED_THINKING,
       RETRY_SIGNATURE,
@@ -280,9 +256,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
 
     const canonicalPrompt = `${RETRY_CANONICAL}_${runId}`;
     await sendAndWaitForReply(canonicalPrompt, RETRY_CANONICAL_REPLY);
-    const canonicalRequest = (
-      await waitForCompletedRequests(canonicalPrompt, 1)
-    )[0]!;
+    const canonicalRequest = (await waitForCompletedRequests(canonicalPrompt, 1))[0]!;
     expectRequestContains(canonicalRequest, [
       RETRY_SIGNED_THINKING,
       RETRY_SIGNATURE,
@@ -294,29 +268,16 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     const sseAttempts = await waitForCompletedRequests(sseRetryPrompt, 2);
     expectAttemptTrajectory(
       sseAttempts,
-      [
-        "anthropic-reasoning-sse-signature-400",
-        "anthropic-reasoning-sse-signature-retry-success",
-      ],
+      ["anthropic-reasoning-sse-signature-400", "anthropic-reasoning-sse-signature-retry-success"],
       [200, 200],
     );
     expectRequestContains(sseAttempts[1]!, [RETRY_UNSIGNED_THINKING]);
-    expectRequestExcludes(sseAttempts[1]!, [
-      RETRY_SIGNATURE,
-      RETRY_REDACTED_DATA,
-    ]);
+    expectRequestExcludes(sseAttempts[1]!, [RETRY_SIGNATURE, RETRY_REDACTED_DATA]);
 
     const unrelatedPrompt = `${UNRELATED_400}_${runId}`;
     await sendAndWaitForIdle(unrelatedPrompt);
-    const unrelatedAttempts = await waitForStableRequestCount(
-      unrelatedPrompt,
-      1,
-    );
-    expectAttemptTrajectory(
-      unrelatedAttempts,
-      ["anthropic-reasoning-unrelated-400"],
-      [400],
-    );
+    const unrelatedAttempts = await waitForStableRequestCount(unrelatedPrompt, 1);
+    expectAttemptTrajectory(unrelatedAttempts, ["anthropic-reasoning-unrelated-400"], [400]);
 
     const doublePrompt = `${DOUBLE_400}_${runId}`;
     await sendAndWaitForIdle(doublePrompt);
@@ -351,10 +312,7 @@ describe("Anthropic Messages reasoning 历史回放与签名修复 E2E", () => {
     const noChangePrompt = `${NO_CHANGE_400}_${runId}`;
     await sendAndWaitForIdle(noChangePrompt);
     const noChangeAttempts = await waitForStableRequestCount(noChangePrompt, 1);
-    expectRequestContains(noChangeAttempts[0]!, [
-      UNSIGNED_SEED_REPLY,
-      UNSIGNED_ONLY_THINKING,
-    ]);
+    expectRequestContains(noChangeAttempts[0]!, [UNSIGNED_SEED_REPLY, UNSIGNED_ONLY_THINKING]);
     expectAttemptTrajectory(
       noChangeAttempts,
       ["anthropic-reasoning-no-change-signature-400"],
@@ -396,9 +354,7 @@ async function waitForIdle(timeoutMsg: string) {
 async function requireCurrentSessionId(timeoutMsg: string) {
   const snapshot = await waitForV4Pane(
     (candidate) =>
-      !candidate.canStop &&
-      candidate.sessionId !== null &&
-      candidate.sessionId !== "draft",
+      !candidate.canStop && candidate.sessionId !== null && candidate.sessionId !== "draft",
     timeoutMsg,
     30_000,
   );
@@ -433,8 +389,7 @@ async function reloadAppAndRestoreV4Session(sessionId: string) {
           .filter((target) => isRendererUrl(target.url()))
           .at(-1);
         const targetId = rendererTarget
-          ? ((rendererTarget as unknown as { _targetId?: string })._targetId ??
-            null)
+          ? ((rendererTarget as unknown as { _targetId?: string })._targetId ?? null)
           : null;
         if (!targetId) return false;
         await browser.switchToWindow(targetId);
@@ -476,9 +431,7 @@ async function waitForCompletedRequests(
       matched = (await readCaptureArtifact()).filter(
         (record) =>
           isModelRequest(record) &&
-          readLatestUserMessageText(record.requestJson).includes(
-            latestUserMarker,
-          ) &&
+          readLatestUserMessageText(record.requestJson).includes(latestUserMarker) &&
           record.status !== "pending" &&
           record.statusCode !== undefined,
       );
@@ -492,10 +445,7 @@ async function waitForCompletedRequests(
   return matched;
 }
 
-async function waitForStableRequestCount(
-  latestUserMarker: string,
-  expectedCount: number,
-) {
+async function waitForStableRequestCount(latestUserMarker: string, expectedCount: number) {
   await waitForCompletedRequests(latestUserMarker, expectedCount);
   await browser.pause(750);
   const matched = (await readCaptureArtifact()).filter(
@@ -513,9 +463,7 @@ async function readCaptureArtifact(): Promise<E2ENetworkCaptureRecord[]> {
     throw new Error("reasoning E2E 没有配置 E2E_PROVIDER_CAPTURE_PATH");
   }
   try {
-    const artifact = JSON.parse(
-      await readFile(capturePath, "utf-8"),
-    ) as E2ENetworkCaptureArtifact;
+    const artifact = JSON.parse(await readFile(capturePath, "utf-8")) as E2ENetworkCaptureArtifact;
     return artifact.records;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
@@ -528,8 +476,7 @@ async function readCaptureArtifact(): Promise<E2ENetworkCaptureRecord[]> {
 function isModelRequest(record: E2ENetworkCaptureRecord) {
   return (
     record.method === "POST" &&
-    (record.path.includes("/messages") ||
-      record.path.includes("/chat/completions")) &&
+    (record.path.includes("/messages") || record.path.includes("/chat/completions")) &&
     !JSON.stringify(record.requestJson).includes("Generate a concise title")
   );
 }
@@ -563,43 +510,31 @@ function readMessages(value: unknown): Array<Record<string, unknown>> {
   const messages = (value as { messages?: unknown }).messages;
   return Array.isArray(messages)
     ? messages.filter((message): message is Record<string, unknown> =>
-        Boolean(
-          message && typeof message === "object" && !Array.isArray(message),
-        ),
+        Boolean(message && typeof message === "object" && !Array.isArray(message)),
       )
     : [];
 }
 
 function assistantMessages(record: E2ENetworkCaptureRecord) {
-  return readMessages(record.requestJson).filter(
-    (message) => message.role === "assistant",
-  );
+  return readMessages(record.requestJson).filter((message) => message.role === "assistant");
 }
 
 function userMessages(record: E2ENetworkCaptureRecord) {
-  return readMessages(record.requestJson).filter(
-    (message) => message.role === "user",
-  );
+  return readMessages(record.requestJson).filter((message) => message.role === "user");
 }
 
 function readModel(record: E2ENetworkCaptureRecord) {
-  if (!record.requestJson || typeof record.requestJson !== "object")
-    return undefined;
+  if (!record.requestJson || typeof record.requestJson !== "object") return undefined;
   return (record.requestJson as { model?: unknown }).model;
 }
 
-function expectRequestContains(
-  record: E2ENetworkCaptureRecord,
-  expected: string[],
-) {
+function expectRequestContains(record: E2ENetworkCaptureRecord, expected: string[]) {
   const body = JSON.stringify(record.requestJson);
   for (const marker of expected) {
     // capture artifact 会在落盘前统一脱敏 signature；I70/I72 仍验证 reasoning 与签名字段
     // 同时存在，只能按脱敏占位符断言，不能再读取真实签名字符串。
     expect(body).toContain(
-      isAnthropicReasoningSignature(marker)
-        ? E2E_NETWORK_CAPTURE_REDACTION_VALUE
-        : marker,
+      isAnthropicReasoningSignature(marker) ? E2E_NETWORK_CAPTURE_REDACTION_VALUE : marker,
     );
   }
 }
@@ -608,10 +543,7 @@ function isAnthropicReasoningSignature(value: string): boolean {
   return value.startsWith("e2e-ar-") && value.includes("signature");
 }
 
-function expectRequestExcludes(
-  record: E2ENetworkCaptureRecord,
-  excluded: string[],
-) {
+function expectRequestExcludes(record: E2ENetworkCaptureRecord, excluded: string[]) {
   const body = JSON.stringify(record.requestJson);
   for (const marker of excluded) expect(body).not.toContain(marker);
 }
@@ -621,19 +553,11 @@ function expectAttemptTrajectory(
   expectedFixtureIds: string[],
   expectedStatusCodes: number[],
 ) {
-  expect(records.map((record) => record.replay?.fixtureId)).toEqual(
-    expectedFixtureIds,
-  );
-  expect(records.map((record) => record.statusCode)).toEqual(
-    expectedStatusCodes,
-  );
-  const requestIds = records.map(
-    (record) => record.requestHeaders["x-request-id"],
-  );
+  expect(records.map((record) => record.replay?.fixtureId)).toEqual(expectedFixtureIds);
+  expect(records.map((record) => record.statusCode)).toEqual(expectedStatusCodes);
+  const requestIds = records.map((record) => record.requestHeaders["x-request-id"]);
   expect(
-    requestIds.every(
-      (requestId) => typeof requestId === "string" && requestId.length > 0,
-    ),
+    requestIds.every((requestId) => typeof requestId === "string" && requestId.length > 0),
   ).toBe(true);
   expect(new Set(requestIds).size).toBe(records.length);
 }

@@ -114,13 +114,8 @@ describe("CHL05/CHL07/CHL08/P08 ChatLoading、终态与手动折叠滚动权", (
     );
     await waitForLiveTailContaining("CHAT_LOADING_LINE_31");
     const detachedBeforeTerminal = await detachTimelineWithUpwardWheel();
-    if (
-      detachedBeforeTerminal.following !== false ||
-      detachedBeforeTerminal.bottomGap <= 48
-    ) {
-      throw new Error(
-        `CHL08 用户上滚没有先进入离底态: ${JSON.stringify(detachedBeforeTerminal)}`,
-      );
+    if (detachedBeforeTerminal.following !== false || detachedBeforeTerminal.bottomGap <= 48) {
+      throw new Error(`CHL08 用户上滚没有先进入离底态: ${JSON.stringify(detachedBeforeTerminal)}`);
     }
 
     await waitForV4TimelineContaining("CHAT_LOADING_LINE_36", 45000);
@@ -161,32 +156,18 @@ interface TimelineScrollState {
 
 async function readTimelineScrollState(): Promise<TimelineScrollState | null> {
   return browser.execute(() => {
-    const timeline = document.querySelector<HTMLElement>(
-      '[data-testid="v4-timeline"]',
-    );
+    const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
     if (!timeline) return null;
     const historyStateElements = Array.from(
       document.querySelectorAll<HTMLElement>("[data-history-open]"),
     );
     const historyState = historyStateElements.at(-1)?.dataset.historyOpen;
     return {
-      backToBottomVisible: Boolean(
-        document.querySelector('[data-testid="v4-timeline-bottom"]'),
-      ),
-      bottomGap: Math.max(
-        0,
-        timeline.scrollHeight - timeline.clientHeight - timeline.scrollTop,
-      ),
+      backToBottomVisible: Boolean(document.querySelector('[data-testid="v4-timeline-bottom"]')),
+      bottomGap: Math.max(0, timeline.scrollHeight - timeline.clientHeight - timeline.scrollTop),
       following: timeline.dataset.following === "true",
-      hasLiveTail: Boolean(
-        document.querySelector('[data-v4-running-live-tail="true"]'),
-      ),
-      historyOpen:
-        historyState === "true"
-          ? true
-          : historyState === "false"
-            ? false
-            : null,
+      hasLiveTail: Boolean(document.querySelector('[data-v4-running-live-tail="true"]')),
+      historyOpen: historyState === "true" ? true : historyState === "false" ? false : null,
       scrollHeight: timeline.scrollHeight,
       scrollTop: timeline.scrollTop,
     };
@@ -197,9 +178,7 @@ async function waitForLiveTailContaining(marker: string): Promise<void> {
   await browser.waitUntil(
     async () =>
       browser.execute((expectedMarker) => {
-        const liveTail = document.querySelector<HTMLElement>(
-          '[data-v4-running-live-tail="true"]',
-        );
+        const liveTail = document.querySelector<HTMLElement>('[data-v4-running-live-tail="true"]');
         return liveTail?.textContent?.includes(expectedMarker) === true;
       }, marker),
     {
@@ -216,8 +195,7 @@ async function waitForTerminalScrollState(
   await browser.waitUntil(
     async () => {
       const state = await readTimelineScrollState();
-      if (!state || state.hasLiveTail || state.historyOpen !== false)
-        return false;
+      if (!state || state.hasLiveTail || state.historyOpen !== false) return false;
       return expected === "following"
         ? state.following && state.bottomGap <= 48 && !state.backToBottomVisible
         : !state.following && state.bottomGap > 48 && state.backToBottomVisible;
@@ -235,9 +213,7 @@ async function waitForTerminalScrollState(
 
 async function detachTimelineWithUpwardWheel(): Promise<TimelineScrollState> {
   await browser.execute(() => {
-    const timeline = document.querySelector<HTMLElement>(
-      '[data-testid="v4-timeline"]',
-    );
+    const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
     if (!timeline) throw new Error("找不到 v4 timeline");
     // 先触发真实 wheel capture 语义，再改变浏览器滚动位置；这能覆盖 scroll 事件
     // 尚未派发、terminal commit 已经到达的用户意图竞态。
@@ -269,23 +245,16 @@ async function detachTimelineWithUpwardWheel(): Promise<TimelineScrollState> {
 
 async function positionLatestHistoryTriggerForDetachedToggle(): Promise<void> {
   const positioned = await browser.execute(() => {
-    const timeline = document.querySelector<HTMLElement>(
-      '[data-testid="v4-timeline"]',
-    );
+    const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
     const trigger = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '[data-testid^="chat-assistant-history-trigger-"]',
-      ),
+      document.querySelectorAll<HTMLElement>('[data-testid^="chat-assistant-history-trigger-"]'),
     ).at(-1);
     if (!timeline || !trigger) return false;
 
     const timelineRect = timeline.getBoundingClientRect();
     const triggerRect = trigger.getBoundingClientRect();
     const targetTop = timelineRect.top + Math.min(120, timeline.clientHeight / 4);
-    const nextScrollTop = Math.max(
-      0,
-      timeline.scrollTop + triggerRect.top - targetTop,
-    );
+    const nextScrollTop = Math.max(0, timeline.scrollTop + triggerRect.top - targetTop);
     timeline.dispatchEvent(
       new WheelEvent("wheel", {
         bubbles: true,
@@ -304,9 +273,7 @@ async function positionLatestHistoryTriggerForDetachedToggle(): Promise<void> {
   await browser.waitUntil(
     async () =>
       browser.execute(() => {
-        const timeline = document.querySelector<HTMLElement>(
-          '[data-testid="v4-timeline"]',
-        );
+        const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
         const trigger = Array.from(
           document.querySelectorAll<HTMLElement>(
             '[data-testid^="chat-assistant-history-trigger-"]',
@@ -317,10 +284,7 @@ async function positionLatestHistoryTriggerForDetachedToggle(): Promise<void> {
         }
         const timelineRect = timeline.getBoundingClientRect();
         const triggerRect = trigger.getBoundingClientRect();
-        return (
-          triggerRect.top >= timelineRect.top &&
-          triggerRect.bottom <= timelineRect.bottom
-        );
+        return triggerRect.top >= timelineRect.top && triggerRect.bottom <= timelineRect.bottom;
       }),
     {
       timeout: 5000,
@@ -342,96 +306,79 @@ async function assertAssistantHistoryToggleStability(
 function probeLatestAssistantHistoryToggle(
   targetOpen: boolean,
 ): Promise<AssistantHistoryToggleProbe> {
-  return browser.executeAsync(
-    (shouldOpen, done) => {
-      const timeline = document.querySelector<HTMLElement>(
-        '[data-testid="v4-timeline"]',
-      );
-      const trigger = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '[data-testid^="chat-assistant-history-trigger-"]',
-        ),
-      ).at(-1);
-      const collapsible = trigger?.closest<HTMLElement>(
-        '[data-slot="collapsible"]',
-      );
-      const content = collapsible?.querySelector<HTMLElement>(
-        '[data-slot="collapsible-content"]',
-      );
-      const next = content?.nextElementSibling as HTMLElement | null;
-      if (!timeline || !trigger || !content || !next) {
-        done({
-          error: "toggle-elements-missing",
-          samples: [],
-          targetOpen: shouldOpen,
-        });
+  return browser.executeAsync((shouldOpen, done) => {
+    const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
+    const trigger = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-testid^="chat-assistant-history-trigger-"]'),
+    ).at(-1);
+    const collapsible = trigger?.closest<HTMLElement>('[data-slot="collapsible"]');
+    const content = collapsible?.querySelector<HTMLElement>('[data-slot="collapsible-content"]');
+    const next = content?.nextElementSibling as HTMLElement | null;
+    if (!timeline || !trigger || !content || !next) {
+      done({
+        error: "toggle-elements-missing",
+        samples: [],
+        targetOpen: shouldOpen,
+      });
+      return;
+    }
+
+    const samples: AssistantHistoryToggleSample[] = [];
+    const readSample = (): AssistantHistoryToggleSample => {
+      const contentStyle = window.getComputedStyle(content);
+      return {
+        backToBottomVisible: Boolean(document.querySelector('[data-testid="v4-timeline-bottom"]')),
+        bottomGap: Math.max(0, timeline.scrollHeight - timeline.clientHeight - timeline.scrollTop),
+        contentDisplay: contentStyle.display,
+        contentHeight: content.getBoundingClientRect().height,
+        contentHidden: content.hasAttribute("hidden"),
+        following: timeline.dataset.following === "true",
+        historyOpen: trigger.dataset.historyOpen === "true",
+        nextTop: next.getBoundingClientRect().top,
+        scrollTop: timeline.scrollTop,
+        time: performance.now(),
+        triggerTop: trigger.getBoundingClientRect().top,
+      };
+    };
+
+    samples.push(readSample());
+    if ((trigger.dataset.historyOpen === "true") === shouldOpen) {
+      done({
+        error: "toggle-already-at-target",
+        samples,
+        targetOpen: shouldOpen,
+      });
+      return;
+    }
+
+    trigger.click();
+    const startedAt = performance.now();
+    const sampleAnimation = () => {
+      const current = readSample();
+      samples.push(current);
+      const elapsed = performance.now() - startedAt;
+      const settled = shouldOpen
+        ? current.historyOpen &&
+          !current.contentHidden &&
+          current.contentDisplay !== "none" &&
+          current.contentHeight > 0
+        : !current.historyOpen && (current.contentHidden || current.contentDisplay === "none");
+      if (elapsed >= 450 && settled) {
+        done({ samples, targetOpen: shouldOpen });
         return;
       }
-
-      const samples: AssistantHistoryToggleSample[] = [];
-      const readSample = (): AssistantHistoryToggleSample => {
-        const contentStyle = window.getComputedStyle(content);
-        return {
-          backToBottomVisible: Boolean(
-            document.querySelector('[data-testid="v4-timeline-bottom"]'),
-          ),
-          bottomGap: Math.max(
-            0,
-            timeline.scrollHeight - timeline.clientHeight - timeline.scrollTop,
-          ),
-          contentDisplay: contentStyle.display,
-          contentHeight: content.getBoundingClientRect().height,
-          contentHidden: content.hasAttribute("hidden"),
-          following: timeline.dataset.following === "true",
-          historyOpen: trigger.dataset.historyOpen === "true",
-          nextTop: next.getBoundingClientRect().top,
-          scrollTop: timeline.scrollTop,
-          time: performance.now(),
-          triggerTop: trigger.getBoundingClientRect().top,
-        };
-      };
-
-      samples.push(readSample());
-      if ((trigger.dataset.historyOpen === "true") === shouldOpen) {
+      if (elapsed >= 1200) {
         done({
-          error: "toggle-already-at-target",
+          error: "toggle-animation-not-settled",
           samples,
           targetOpen: shouldOpen,
         });
         return;
       }
-
-      trigger.click();
-      const startedAt = performance.now();
-      const sampleAnimation = () => {
-        const current = readSample();
-        samples.push(current);
-        const elapsed = performance.now() - startedAt;
-        const settled = shouldOpen
-          ? current.historyOpen &&
-            !current.contentHidden &&
-            current.contentDisplay !== "none" &&
-            current.contentHeight > 0
-          : !current.historyOpen &&
-            (current.contentHidden || current.contentDisplay === "none");
-        if (elapsed >= 450 && settled) {
-          done({ samples, targetOpen: shouldOpen });
-          return;
-        }
-        if (elapsed >= 1200) {
-          done({
-            error: "toggle-animation-not-settled",
-            samples,
-            targetOpen: shouldOpen,
-          });
-          return;
-        }
-        requestAnimationFrame(sampleAnimation);
-      };
       requestAnimationFrame(sampleAnimation);
-    },
-    targetOpen,
-  ) as Promise<AssistantHistoryToggleProbe>;
+    };
+    requestAnimationFrame(sampleAnimation);
+  }, targetOpen) as Promise<AssistantHistoryToggleProbe>;
 }
 
 function assertAssistantHistoryToggleProbe(
@@ -439,16 +386,12 @@ function assertAssistantHistoryToggleProbe(
   ownership: "following" | "detached",
 ): void {
   if (probe.error || probe.samples.length < 10) {
-    throw new Error(
-      `P08 折叠采样不完整: ${JSON.stringify({ ownership, probe })}`,
-    );
+    throw new Error(`P08 折叠采样不完整: ${JSON.stringify({ ownership, probe })}`);
   }
   const samples = probe.samples;
   const finalSample = samples.at(-1)!;
   if (finalSample.historyOpen !== probe.targetOpen) {
-    throw new Error(
-      `P08 折叠终态不正确: ${JSON.stringify({ ownership, probe })}`,
-    );
+    throw new Error(`P08 折叠终态不正确: ${JSON.stringify({ ownership, probe })}`);
   }
 
   assertMonotonicToggleValues(
@@ -469,10 +412,7 @@ function assertAssistantHistoryToggleProbe(
   );
   if (ownership === "following") {
     const invalidOwnership = samples.filter(
-      (sample) =>
-        !sample.following ||
-        sample.bottomGap > 48 ||
-        sample.backToBottomVisible,
+      (sample) => !sample.following || sample.bottomGap > 48 || sample.backToBottomVisible,
     );
     if (invalidOwnership.length > 0) {
       throw new Error(
@@ -481,10 +421,7 @@ function assertAssistantHistoryToggleProbe(
     }
   } else {
     const invalidOwnership = samples.filter(
-      (sample) =>
-        sample.following ||
-        sample.bottomGap <= 48 ||
-        !sample.backToBottomVisible,
+      (sample) => sample.following || sample.bottomGap <= 48 || !sample.backToBottomVisible,
     );
     const scrollTopRange =
       Math.max(...samples.map((sample) => sample.scrollTop)) -
@@ -507,10 +444,8 @@ function assertAssistantHistoryToggleProbe(
     const firstHiddenIndex = samples.findIndex(
       (sample) => sample.contentHidden || sample.contentDisplay === "none",
     );
-    const lastVisible =
-      firstHiddenIndex <= 0 ? undefined : samples[firstHiddenIndex - 1];
-    const firstHidden =
-      firstHiddenIndex < 0 ? undefined : samples[firstHiddenIndex];
+    const lastVisible = firstHiddenIndex <= 0 ? undefined : samples[firstHiddenIndex - 1];
+    const firstHidden = firstHiddenIndex < 0 ? undefined : samples[firstHiddenIndex];
     const finalGapJump =
       lastVisible?.nextTop === null ||
       lastVisible?.nextTop === undefined ||
@@ -542,19 +477,14 @@ function assertMonotonicToggleValues(
     return reversed ? [{ index, previous, value }] : [];
   });
   if (reversals.length > 0) {
-    throw new Error(
-      `P08 ${ownership} ${label} 动画方向反转: ${JSON.stringify(reversals)}`,
-    );
+    throw new Error(`P08 ${ownership} ${label} 动画方向反转: ${JSON.stringify(reversals)}`);
   }
 }
 
 async function installChatLoadingLayoutProbe() {
   await browser.execute(() => {
     const existing = window.__zcodeChatLoadingLayoutProbe;
-    if (
-      existing?.animationFrameId !== null &&
-      existing?.animationFrameId !== undefined
-    ) {
+    if (existing?.animationFrameId !== null && existing?.animationFrameId !== undefined) {
       window.cancelAnimationFrame(existing.animationFrameId);
     }
 
@@ -570,22 +500,12 @@ async function installChatLoadingLayoutProbe() {
     window.__zcodeChatLoadingLayoutProbe = probe;
 
     const readSample = (): ChatLoadingLayoutSample | null => {
-      const timeline = document.querySelector<HTMLElement>(
-        '[data-testid="v4-timeline"]',
-      );
+      const timeline = document.querySelector<HTMLElement>('[data-testid="v4-timeline"]');
       if (!timeline) return null;
-      const liveTail = document.querySelector<HTMLElement>(
-        '[data-v4-running-live-tail="true"]',
-      );
-      const slot = document.querySelector<HTMLElement>(
-        '[data-zcode-chat-loading-slot="true"]',
-      );
-      const loading = document.querySelector<HTMLElement>(
-        '[data-testid="chat-loading"]',
-      );
-      const dock = document.querySelector<HTMLElement>(
-        '[data-v4-composer-dock="true"]',
-      );
+      const liveTail = document.querySelector<HTMLElement>('[data-v4-running-live-tail="true"]');
+      const slot = document.querySelector<HTMLElement>('[data-zcode-chat-loading-slot="true"]');
+      const loading = document.querySelector<HTMLElement>('[data-testid="chat-loading"]');
+      const dock = document.querySelector<HTMLElement>('[data-v4-composer-dock="true"]');
       const historyStateElements = Array.from(
         document.querySelectorAll<HTMLElement>("[data-history-open]"),
       );
@@ -599,29 +519,22 @@ async function installChatLoadingLayoutProbe() {
         timeline.scrollHeight - timeline.clientHeight - timeline.scrollTop,
       );
       return {
-        backToBottomVisible: Boolean(
-          document.querySelector('[data-testid="v4-timeline-bottom"]'),
-        ),
+        backToBottomVisible: Boolean(document.querySelector('[data-testid="v4-timeline-bottom"]')),
         bottomGap,
         clientHeight: timeline.clientHeight,
         dockTop: dockRect?.top ?? null,
         following: timeline.dataset.following === "true",
         hasLiveTail: liveTail !== null,
-        historyOpen:
-          historyState === "true"
-            ? true
-            : historyState === "false"
-              ? false
-              : null,
+        historyOpen: historyState === "true" ? true : historyState === "false" ? false : null,
         liveHeight: liveRect?.height ?? null,
         loadingTop: loadingRect?.top ?? null,
         loadingVisible: Boolean(
           loading &&
-            loadingRect &&
-            loadingRect.width > 0 &&
-            loadingRect.height > 0 &&
-            window.getComputedStyle(loading).display !== "none" &&
-            window.getComputedStyle(loading).visibility !== "hidden",
+          loadingRect &&
+          loadingRect.width > 0 &&
+          loadingRect.height > 0 &&
+          window.getComputedStyle(loading).display !== "none" &&
+          window.getComputedStyle(loading).visibility !== "hidden",
         ),
         scrollHeight: timeline.scrollHeight,
         scrollTop: timeline.scrollTop,
@@ -641,9 +554,7 @@ async function installChatLoadingLayoutProbe() {
 
     let observedLiveTail: HTMLElement | null = null;
     const attachLiveTailObserver = () => {
-      const liveTail = document.querySelector<HTMLElement>(
-        '[data-v4-running-live-tail="true"]',
-      );
+      const liveTail = document.querySelector<HTMLElement>('[data-v4-running-live-tail="true"]');
       if (liveTail === observedLiveTail) return;
       probe.liveTailObserver?.disconnect();
       probe.liveTailObserver = null;
@@ -705,10 +616,7 @@ async function stopChatLoadingLayoutProbe(): Promise<ChatLoadingLayoutProbeResul
   });
 }
 
-function analyzeChatLoadingLayout({
-  resizeSamples,
-  samples,
-}: ChatLoadingLayoutProbeResult) {
+function analyzeChatLoadingLayout({ resizeSamples, samples }: ChatLoadingLayoutProbeResult) {
   const flickers: Array<{
     at: number;
     growthPx: number;
@@ -729,12 +637,7 @@ function analyzeChatLoadingLayout({
   for (let index = 1; index < resizeSamples.length; index += 1) {
     const previous = resizeSamples[index - 1];
     const current = resizeSamples[index];
-    if (
-      !previous ||
-      !current ||
-      previous.liveHeight === null ||
-      current.liveHeight === null
-    ) {
+    if (!previous || !current || previous.liveHeight === null || current.liveHeight === null) {
       continue;
     }
     const growthPx = current.liveHeight - previous.liveHeight;
@@ -747,8 +650,7 @@ function analyzeChatLoadingLayout({
         ),
         following: previous.following,
         growthPx,
-        overflowing:
-          previous.scrollHeight > previous.clientHeight + REAL_LINE_GROWTH_PX,
+        overflowing: previous.scrollHeight > previous.clientHeight + REAL_LINE_GROWTH_PX,
         scrollDeltaPx: current.scrollTop - previous.scrollTop,
         slotDeltaPx:
           previous.slotTop === null || current.slotTop === null
@@ -787,22 +689,16 @@ function analyzeChatLoadingLayout({
   return {
     flickers,
     growths,
-    loadingVisibleSamples: samples.filter((sample) => sample.loadingVisible)
-      .length,
+    loadingVisibleSamples: samples.filter((sample) => sample.loadingVisible).length,
     overflowGrowthCount,
   };
 }
 
-function analyzeTerminalScrollOwnership({
-  samples,
-}: ChatLoadingLayoutProbeResult) {
-  const detachedStart = samples.findIndex(
-    (sample) => !sample.following && sample.bottomGap > 48,
-  );
+function analyzeTerminalScrollOwnership({ samples }: ChatLoadingLayoutProbeResult) {
+  const detachedStart = samples.findIndex((sample) => !sample.following && sample.bottomGap > 48);
   // 修复原因：第二轮探针安装后、第二条消息开始前会先采到上一轮正确的
   // FOLLOWING 终态；CHL08 的所有权窗口只能从本轮首次用户离底开始计算。
-  const ownershipSamples =
-    detachedStart < 0 ? [] : samples.slice(detachedStart);
+  const ownershipSamples = detachedStart < 0 ? [] : samples.slice(detachedStart);
   const terminalSamples = ownershipSamples.filter(
     (sample) => !sample.hasLiveTail && sample.historyOpen === false,
   );

@@ -82,12 +82,12 @@ sequenceDiagram
 - Website 的 /invite、/invite/accept、/invite/unavailable 与 /referrals/unavailable 是实际邀请业务，不属于被移除的奖励主页，保持原语义；仅旧 /{cn|en}/referrals 根页面返回 404。
 - 升级、领取、营销上报、任务/session、手机 replayable 与桌面 continuous 均不改变。用户数据/奖励仍归服务端，页面展示状态归 Website，登录续接归窗口 Provider。
 
-| 验收项 | 设置/动作 | 断言/证据 |
-| --- | --- | --- |
-| REW-13 | 三环境、cn/en、明暗构造并校验 URL | 仅 rewards 精确路径；旧路径、相似路径、旧配置拒绝/不读取，单测 |
-| REW-14 | 安装 bridge 后分别派发新旧事件 | 旧事件不更新状态，新事件生效；分区只使用新名称，单测/桌面 E2E |
-| REW-15 | 登录菜单及营销按钮打开 | Gift + 邀请好友 [奖励] / Refer a friend [Rewards]；rewards 路由、鉴权、语言主题与单次上报正常，真实 Electron E2E |
-| REW-16 | Website 普通/embedded 新旧主页与邀请页 | 新页 200、旧主页 404；邀请路由不变，中英明暗与 390/900/1440px，无横向溢出，浏览器测试 |
+| 验收项 | 设置/动作                              | 断言/证据                                                                                                        |
+| ------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| REW-13 | 三环境、cn/en、明暗构造并校验 URL      | 仅 rewards 精确路径；旧路径、相似路径、旧配置拒绝/不读取，单测                                                   |
+| REW-14 | 安装 bridge 后分别派发新旧事件         | 旧事件不更新状态，新事件生效；分区只使用新名称，单测/桌面 E2E                                                    |
+| REW-15 | 登录菜单及营销按钮打开                 | Gift + 邀请好友 [奖励] / Refer a friend [Rewards]；rewards 路由、鉴权、语言主题与单次上报正常，真实 Electron E2E |
+| REW-16 | Website 普通/embedded 新旧主页与邀请页 | 新页 200、旧主页 404；邀请路由不变，中英明暗与 390/900/1440px，无横向溢出，浏览器测试                            |
 
 以上用例已按用户决定 accepted；迁移/旧版本兼容组合 pruned，不增加迁移测试。沿用 REF-01…12 的原登录/桥接隔离用例 ID；初始新增 E2E 保持 pending，2026-09-16 转正决定见下文，不使用 Docker。图谱保留稳定 capability ID，增加 Rewards 别名及营销入口关系；codegraph 不可用，采用二层静态调用核对，不声称完整索引扫描。
 
@@ -97,32 +97,32 @@ window.zcodeBridge 提供 getTheme/onThemeChange、getLang/onLangChange、getAut
 
 ## 影响面（静态核对）
 
-| 层级 | 入口/共享实现 | 归属/约束 |
-| --- | --- | --- |
-| must-inspect | WorkspaceSidebar 头像菜单、Root | Rewards 打开独立于 Coding Plan inventory |
-| must-inspect | 网页外壳、Rewards Provider | 复用展示控件，鉴权和回传分开 |
-| must-inspect | desktop will-attach-webview、preload、分区清理 | 可信页面限定桥权限，不扩散到普通浏览器 |
-| should-inspect | CodingPlanEmbeddedWebviewDialog | 购买导航、关闭、刷新与回传保持原行为 |
-| invariant-only | 手机远控、任务流 | 不改变 runtime、队列、workspace identity |
-| evidence-only | UI 单测、Electron WebView E2E、website 单测 | 断言设置、动作和结果，不以静态样例代表服务端联调 |
+| 层级           | 入口/共享实现                                  | 归属/约束                                        |
+| -------------- | ---------------------------------------------- | ------------------------------------------------ |
+| must-inspect   | WorkspaceSidebar 头像菜单、Root                | Rewards 打开独立于 Coding Plan inventory         |
+| must-inspect   | 网页外壳、Rewards Provider                     | 复用展示控件，鉴权和回传分开                     |
+| must-inspect   | desktop will-attach-webview、preload、分区清理 | 可信页面限定桥权限，不扩散到普通浏览器           |
+| should-inspect | CodingPlanEmbeddedWebviewDialog                | 购买导航、关闭、刷新与回传保持原行为             |
+| invariant-only | 手机远控、任务流                               | 不改变 runtime、队列、workspace identity         |
+| evidence-only  | UI 单测、Electron WebView E2E、website 单测    | 断言设置、动作和结果，不以静态样例代表服务端联调 |
 
 codegraph 不可用，以上是源码静态核对而非完整调用图扫描；语义图已补 Rewards 节点及购买壳展示复用、远控边界关系。
 
 ## 验收与交接
 
-| Case | 设置与动作 | 断言 |
-| --- | --- | --- |
-| REF-01 | cn/en、三环境、明暗构建 URL | 域名、精确路径、embedded/theme 正确 |
-| REF-02 | 菜单点击、重复打开、关闭 | 升级下方入口；独立容器；原任务不变 |
-| REF-03 | bridge 先/后就绪，切主题 | 快照可读、通知一次、无页面重载、退订有效 |
-| REF-04 | 切语言 | 路由替换并保留 theme/embedded，不携带 token |
-| REF-05 | 注入/切账号/关闭/异步迟到 | 清旧值、只保留当前渠道、旧注入不生效 |
-| REF-06 | 外域、相似路径、恶意 URL | 无桥/无凭据注入 |
-| REF-07 | 加载失败、刷新、重开 | 可恢复且旧事件不串入新页面 |
-| REF-08 | 普通网页/手机 | 无 bridge 不崩溃；不转交 App token |
-| REF-09 | 回归 Coding Plan | 原购买桥与完成刷新不变 |
-| REF-10 | 明暗主题下滚动邀请页 | WebView 左右边界与窗口一致；页面可滚动，顶部导航位置不变 |
-| REF-11 | Banner / 独立弹窗下发 navigate rewards | 打开既有邀请页，每次 confirm 只上报一次，不触发领取 |
+| Case   | 设置与动作                                 | 断言                                                                           |
+| ------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| REF-01 | cn/en、三环境、明暗构建 URL                | 域名、精确路径、embedded/theme 正确                                            |
+| REF-02 | 菜单点击、重复打开、关闭                   | 升级下方入口；独立容器；原任务不变                                             |
+| REF-03 | bridge 先/后就绪，切主题                   | 快照可读、通知一次、无页面重载、退订有效                                       |
+| REF-04 | 切语言                                     | 路由替换并保留 theme/embedded，不携带 token                                    |
+| REF-05 | 注入/切账号/关闭/异步迟到                  | 清旧值、只保留当前渠道、旧注入不生效                                           |
+| REF-06 | 外域、相似路径、恶意 URL                   | 无桥/无凭据注入                                                                |
+| REF-07 | 加载失败、刷新、重开                       | 可恢复且旧事件不串入新页面                                                     |
+| REF-08 | 普通网页/手机                              | 无 bridge 不崩溃；不转交 App token                                             |
+| REF-09 | 回归 Coding Plan                           | 原购买桥与完成刷新不变                                                         |
+| REF-10 | 明暗主题下滚动邀请页                       | WebView 左右边界与窗口一致；页面可滚动，顶部导航位置不变                       |
+| REF-11 | Banner / 独立弹窗下发 navigate rewards     | 打开既有邀请页，每次 confirm 只上报一次，不触发领取                            |
 | REF-12 | 未登录导航后成功、取消、失败、替换登录尝试 | 同 ID 且 user 就绪才续接；取消/失败/替换后不因其他登录补跳；Web 外链只打开一次 |
 
 2026-09-16 用户确认转正：3 条 Rewards E2E 移至 `packages/desktop/test/e2e/ui-shell/marketing-touch-rewards.test.ts`，纳入默认 spec 扫描，不使用 Docker。标准 promotion dry run 不支持 ui-shell，沿用营销领域手动迁移。正式运行由 runner 在构建前启动隔离网页 fixture 并配置随机 loopback origin，不依赖手动启动 localhost:3000；fixture 只实现网页侧 bridge 消费协议和长页滚动，不替代真实 Website 业务或视觉验收。保留之前真实 Website 联调证据，真实服务端验签、部署和发奖不在本用例范围。

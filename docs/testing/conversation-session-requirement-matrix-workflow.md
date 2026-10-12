@@ -35,15 +35,15 @@ running 时 queue 里某条消息可以点立即发送
 
 维度只收会改变产品结果或断言的因素。常见维度包括：
 
-| 类型 | 示例 |
-| --- | --- |
-| 产品状态 | `session.phase`、`queue.length`、`queue.autoDrain`、`goal`、`compact.origin` |
-| 输入事件 | send text、`/goal`、`/compact`、stop、edit、fork、queue send-now |
-| 目标对象 | latest turn、old turn、assistant message、user query、queue item |
-| 入口 surface | composer、turn actions、queue actions、toolbar、goal control |
-| 运行形态 | text streaming、tool call、compact pending、goal verification |
-| 配置/环境 | model/provider/thought、desktop continuous、web remote replayable、Docker replay |
-| 证据层 | UI、runtime/store、protocol、network/SSE、files、logs |
+| 类型         | 示例                                                                             |
+| ------------ | -------------------------------------------------------------------------------- |
+| 产品状态     | `session.phase`、`queue.length`、`queue.autoDrain`、`goal`、`compact.origin`     |
+| 输入事件     | send text、`/goal`、`/compact`、stop、edit、fork、queue send-now                 |
+| 目标对象     | latest turn、old turn、assistant message、user query、queue item                 |
+| 入口 surface | composer、turn actions、queue actions、toolbar、goal control                     |
+| 运行形态     | text streaming、tool call、compact pending、goal verification                    |
+| 配置/环境    | model/provider/thought、desktop continuous、web remote replayable、Docker replay |
+| 证据层       | UI、runtime/store、protocol、network/SSE、files、logs                            |
 
 如果一个维度被不变量完全吞掉，不做全排列，但必须记录剪枝理由和代表 case。
 
@@ -57,13 +57,13 @@ state -> candidate -> guard -> effect -> case
 
 先做相关维度的笛卡尔积，再按 guard 和不变量剪枝。每个候选组合必须归入一个状态：
 
-| 状态 | 含义 |
-| --- | --- |
-| `accepted` | 产品语义明确，能写 setup/action/assert |
-| `undefined` | 真实可能发生，但产品语义未确认 |
-| `pruned` | 被 guard 或不变量明确剪掉 |
-| `ignored` | 存在但当前版本不覆盖，需要写清范围原因 |
-| `bug-candidate` | 当前实现疑似违反已确认协议 |
+| 状态            | 含义                                   |
+| --------------- | -------------------------------------- |
+| `accepted`      | 产品语义明确，能写 setup/action/assert |
+| `undefined`     | 真实可能发生，但产品语义未确认         |
+| `pruned`        | 被 guard 或不变量明确剪掉              |
+| `ignored`       | 存在但当前版本不覆盖，需要写清范围原因 |
+| `bug-candidate` | 当前实现疑似违反已确认协议             |
 
 Agent 每次只拿小批量问题和用户确认，避免一次丢出巨大矩阵。问题要包含候选答案和影响面，用户回答后再回写文档。
 

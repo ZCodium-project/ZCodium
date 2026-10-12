@@ -14,9 +14,7 @@ const TASK_PATH_ITEM_INDEX = 6;
 const TASK_LOG_PATH_ITEM_INDEX = 7;
 const PROVIDER_CONFIG_ITEM_INDEX = 8;
 
-function renderMenu(
-  overrides: Partial<React.ComponentProps<typeof TaskActionMenuContent>> = {},
-) {
+function renderMenu(overrides: Partial<React.ComponentProps<typeof TaskActionMenuContent>> = {}) {
   const itemStates: Array<{ disabled?: boolean }> = [];
 
   const html = renderToStaticMarkup(

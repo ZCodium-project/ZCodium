@@ -117,20 +117,20 @@ Provider-visible payload：
 
 ### New files
 
-| File                                                                                                                                | Responsibility                                                                  |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `docs/subagent-respond-to-coordinator.md`                                                                                           | 产品语义、状态边界、非目标和验收标准的 source-of-truth spec                     |
-| `apps/zcode-cli/packages/contracts/src/tools/respond-to-coordinator.ts`                                                             | tool input/runtime output schema 和常量                                         |
-| `apps/zcode-cli/packages/contracts/src/interfaces/coordinator-response.port.ts`                                                     | child tool 到父 runtime 的窄端口                                                |
-| `apps/zcode-cli/packages/core/src/tool/handlers/respond-to-coordinator.ts`                                                          | provider-visible tool metadata、handler 和 model result formatting              |
-| `apps/zcode-cli/packages/core/src/subagent/coordinator-response.ts`                                                                 | 绑定 authoritative child identity，并把结构化回复提交给 parent enqueue callback |
-| `apps/zcode-cli/packages/core/src/runtime/methods/subagent-messages.ts`                                                             | parent command enqueue、XML formatting、persistence                             |
-| `apps/zcode-cli/packages/core/src/runtime/methods/runtime-command-active-loop.ts`                                                   | active loop 对允许 command 类型的统一 intake                                    |
-| `apps/zcode-cli/packages/contracts/tests/respond-to-coordinator.test.ts`                                                            | schema 边界测试                                                                 |
-| `apps/zcode-cli/packages/core/tests/runtime-tool-allowlist.test.ts`                                                                 | Explore/custom child 最终 built-in allowlist 投影测试                           |
-| `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-respond-to-coordinator.test.ts`                       | 独立 formal BG25 replay spec，使用正常 context window                         |
-| `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-subagent-respond-to-coordinator.json`        | BG25 case-local provider replay fixture                                         |
-| `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-subagent-respond-to-coordinator.json`           | BG25 replay manifest                                                            |
+| File                                                                                                                         | Responsibility                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `docs/subagent-respond-to-coordinator.md`                                                                                    | 产品语义、状态边界、非目标和验收标准的 source-of-truth spec                     |
+| `apps/zcode-cli/packages/contracts/src/tools/respond-to-coordinator.ts`                                                      | tool input/runtime output schema 和常量                                         |
+| `apps/zcode-cli/packages/contracts/src/interfaces/coordinator-response.port.ts`                                              | child tool 到父 runtime 的窄端口                                                |
+| `apps/zcode-cli/packages/core/src/tool/handlers/respond-to-coordinator.ts`                                                   | provider-visible tool metadata、handler 和 model result formatting              |
+| `apps/zcode-cli/packages/core/src/subagent/coordinator-response.ts`                                                          | 绑定 authoritative child identity，并把结构化回复提交给 parent enqueue callback |
+| `apps/zcode-cli/packages/core/src/runtime/methods/subagent-messages.ts`                                                      | parent command enqueue、XML formatting、persistence                             |
+| `apps/zcode-cli/packages/core/src/runtime/methods/runtime-command-active-loop.ts`                                            | active loop 对允许 command 类型的统一 intake                                    |
+| `apps/zcode-cli/packages/contracts/tests/respond-to-coordinator.test.ts`                                                     | schema 边界测试                                                                 |
+| `apps/zcode-cli/packages/core/tests/runtime-tool-allowlist.test.ts`                                                          | Explore/custom child 最终 built-in allowlist 投影测试                           |
+| `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-respond-to-coordinator.test.ts`                | 独立 formal BG25 replay spec，使用正常 context window                           |
+| `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-subagent-respond-to-coordinator.json` | BG25 case-local provider replay fixture                                         |
+| `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-subagent-respond-to-coordinator.json`    | BG25 replay manifest                                                            |
 
 ### Modified files
 
@@ -140,7 +140,7 @@ Provider-visible payload：
 | `docs/conversation-session-case-catalog.md`                                    | 新增 BG25 accepted case                                                           |
 | `docs/testing/conversation-session-background-e2e-coverage-matrix.md`          | 增加 response channel 维度和 planned/covered 状态                                 |
 | `docs/testing/conversation-session-e2e-coverage-matrix.md`                     | 登记 BG25                                                                         |
-| 历史差异审计文档（已删除）                                        | 标记为 ZCode narrow extension，不误报为完整 Agent Teams 能力                      |
+| 历史差异审计文档（已删除）                                                     | 标记为 ZCode narrow extension，不误报为完整 Agent Teams 能力                      |
 | `apps/zcode-cli/packages/contracts/src/tools/index.ts`                         | 导出 tool contract                                                                |
 | `apps/zcode-cli/packages/contracts/src/index.ts`                               | 导出 coordinator port                                                             |
 | `apps/zcode-cli/packages/contracts/src/interfaces/session-store.port.ts`       | 增加 `subagent_message` synthetic source                                          |

@@ -24,7 +24,7 @@ describe("Settings usage provider tabs", () => {
 
     expect(pluginStoreSource).toContain("export function SegmentPill");
     expect(usageTabsSource).toContain("<SegmentPill");
-    expect(usageTabsSource).toContain('active={visibleActiveTab === item.id}');
+    expect(usageTabsSource).toContain("active={visibleActiveTab === item.id}");
     expect(usageTabsSource).toContain("onClick={() => onTabChange(item.id)}");
     expect(usageTabsSource).toContain('className="flex items-center gap-1.5"');
     expect(usageTabsSource).not.toContain("TabsList");

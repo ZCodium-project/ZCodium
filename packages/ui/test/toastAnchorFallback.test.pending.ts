@@ -3,10 +3,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  AnchoredToastStack,
-  type ToastItem,
-} from "@/components/ui/toast.js";
+import { AnchoredToastStack, type ToastItem } from "@/components/ui/toast.js";
 
 function createItem(id: number, message: string): ToastItem {
   return {
@@ -59,8 +56,7 @@ describe("AnchoredToastStack", () => {
   it("falls back to viewport center when the anchor unmounts", async () => {
     const anchor = document.createElement("main");
     anchor.id = "automations-main-toast-anchor";
-    anchor.getBoundingClientRect = () =>
-      ({ left: 240, width: 960 }) as DOMRect;
+    anchor.getBoundingClientRect = () => ({ left: 240, width: 960 }) as DOMRect;
     document.body.appendChild(anchor);
 
     const { container } = render(

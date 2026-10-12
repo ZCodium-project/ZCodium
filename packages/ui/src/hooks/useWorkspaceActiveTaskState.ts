@@ -28,10 +28,7 @@ function areTaskMetaJsonFieldsEqual(left: unknown, right: unknown) {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
-function areResolvedTaskMetasEqual(
-  left: ZCodeTaskMeta | null,
-  right: ZCodeTaskMeta | null,
-) {
+function areResolvedTaskMetasEqual(left: ZCodeTaskMeta | null, right: ZCodeTaskMeta | null) {
   if (left === right) {
     return true;
   }
@@ -65,9 +62,7 @@ function areResolvedTaskMetasEqual(
   );
 }
 
-export function useStableResolvedActiveTaskMeta(
-  taskMeta: ZCodeTaskMeta | null,
-) {
+export function useStableResolvedActiveTaskMeta(taskMeta: ZCodeTaskMeta | null) {
   const stableTaskMetaRef = useRef<ZCodeTaskMeta | null>(null);
   const stableTaskMeta = stableTaskMetaRef.current;
   // stream chunk 只更新消息流时，active task meta 经列表/乐观层重新合成后可能字段相同但引用变了。
@@ -93,13 +88,15 @@ export function useWorkspaceActiveTaskState({
     if (!activeTaskId) {
       return null;
     }
-    return state.taskMetaByEntityKey[
-      buildTaskEntityKey({
-        taskId: activeTaskId,
-        workspacePath: workspaceAbsPath,
-        workspaceIdentity,
-      })
-    ] ?? null;
+    return (
+      state.taskMetaByEntityKey[
+        buildTaskEntityKey({
+          taskId: activeTaskId,
+          workspacePath: workspaceAbsPath,
+          workspaceIdentity,
+        })
+      ] ?? null
+    );
   });
   const activeTaskMeta = useMemo(() => {
     if (!activeTaskId) {
@@ -113,10 +110,10 @@ export function useWorkspaceActiveTaskState({
     // 重启恢复后 raw snapshot meta 可能先进入 workspace store，而 sqlite/list
     // query cache 里保留着 titleOverridden 的手动标题。Header 必须按同一套 title authority
     // 合并两边，否则当前 task 会看起来被还原成生成标题或首条 query。
-    return mergeTaskMetaCandidates(
-      getTaskMeta(workspaceState, activeTaskId),
-      activeTaskQueryMeta,
-    ) ?? null;
+    return (
+      mergeTaskMetaCandidates(getTaskMeta(workspaceState, activeTaskId), activeTaskQueryMeta) ??
+      null
+    );
   }, [activeTaskId, activeTaskQueryMeta, workspaceState]);
 
   const activeTaskSnapshotMeta = useActiveTaskSnapshotMeta(
@@ -153,11 +150,7 @@ export function useWorkspaceActiveTaskState({
     activeTaskProvider,
     workspaceIdentity,
   );
-  const taskSessionFile = useTaskSessionFilePath(
-    workspaceAbsPath,
-    activeTaskId,
-    workspaceIdentity,
-  );
+  const taskSessionFile = useTaskSessionFilePath(workspaceAbsPath, activeTaskId, workspaceIdentity);
 
   return {
     activeTaskMeta,

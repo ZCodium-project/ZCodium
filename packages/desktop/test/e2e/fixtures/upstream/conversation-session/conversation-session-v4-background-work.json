@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_V4_BGWORK"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_V4_BGWORK"]
       },
       "response": {
         "statusCode": 200,

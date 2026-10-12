@@ -8,7 +8,9 @@ import {
 
 const providerId = BUILTIN_MODEL_PROVIDER_IDS.bigmodelStartPlan;
 
-function createView(overrides: Partial<ManualClaimPlanStartUsingTarget> = {}): ProviderSettingsView {
+function createView(
+  overrides: Partial<ManualClaimPlanStartUsingTarget> = {},
+): ProviderSettingsView {
   const provider = {
     providerId,
     executable: overrides.providerExecutable ?? true,

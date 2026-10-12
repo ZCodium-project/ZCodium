@@ -13,6 +13,7 @@
 ### Task 1: Add V2 File Names And Repo Metadata
 
 **Files:**
+
 - Modify: `packages/services/src/bots/config.ts`
 - Modify: `packages/services/src/bots/repo.ts`
 - Modify: `packages/services/src/bots/modelCacheRepo.ts`
@@ -100,38 +101,38 @@ describe("BotsRepo", () => {
 Extend `packages/services/test/botsModelCacheRepo.test.ts` with a failing test:
 
 ```ts
-  it("reads legacy bots-model-cache.json but writes bots-model-cache.v2.json", async () => {
-    const dataDir = join(tempDir!, ".zcode", "v2");
-    writeFileSync(
-      join(dataDir, "bots-model-cache.json"),
-      `${JSON.stringify({
-        version: 1,
-        modelProviders: {
-          updatedAt: 1,
-          providers: [],
-        },
-        workspaceConfigOptions: {},
-      })}\n`,
-    );
-
-    const repo = new BotsModelCacheRepo();
-    await expect(repo.read()).resolves.toMatchObject({
-      version: 2,
-      source: {
-        cacheUpdatedAt: 1,
+it("reads legacy bots-model-cache.json but writes bots-model-cache.v2.json", async () => {
+  const dataDir = join(tempDir!, ".zcode", "v2");
+  writeFileSync(
+    join(dataDir, "bots-model-cache.json"),
+    `${JSON.stringify({
+      version: 1,
+      modelProviders: {
+        updatedAt: 1,
+        providers: [],
       },
-    });
-
-    await repo.write({
-      version: 2,
-      updatedAt: 2,
-      providers: [],
       workspaceConfigOptions: {},
-    });
+    })}\n`,
+  );
 
-    expect(existsSync(join(dataDir, "bots-model-cache.json"))).toBe(true);
-    expect(existsSync(join(dataDir, "bots-model-cache.v2.json"))).toBe(true);
+  const repo = new BotsModelCacheRepo();
+  await expect(repo.read()).resolves.toMatchObject({
+    version: 2,
+    source: {
+      cacheUpdatedAt: 1,
+    },
   });
+
+  await repo.write({
+    version: 2,
+    updatedAt: 2,
+    providers: [],
+    workspaceConfigOptions: {},
+  });
+
+  expect(existsSync(join(dataDir, "bots-model-cache.json"))).toBe(true);
+  expect(existsSync(join(dataDir, "bots-model-cache.v2.json"))).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Run tests to confirm failure**
@@ -220,6 +221,7 @@ Expected: PASS.
 ### Task 2: Add Pure Provider/Model Migration Helpers
 
 **Files:**
+
 - Create: `packages/services/src/bots/storageMigration.ts`
 - Test: `packages/services/test/botsStorageMigration.test.ts`
 
@@ -229,11 +231,21 @@ Create `packages/services/test/botsStorageMigration.test.ts` with cases for dire
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { createModelProviderModelConfig, encodeCustomModelValue, type BotsStateFile, type ModelProviderConfig } from "@zcode/shared";
+import {
+  createModelProviderModelConfig,
+  encodeCustomModelValue,
+  type BotsStateFile,
+  type ModelProviderConfig,
+} from "@zcode/shared";
 import { createDefaultBotsModelCache } from "../src/bots/modelCacheRepo.js";
 import { migrateBotsModelCacheToV2, migrateBotsStateToV2 } from "../src/bots/storageMigration.js";
 
-function provider(params: { id: string; name: string; models: string[]; apiKey?: string }): ModelProviderConfig {
+function provider(params: {
+  id: string;
+  name: string;
+  models: string[];
+  apiKey?: string;
+}): ModelProviderConfig {
   return {
     id: params.id,
     name: params.name,
@@ -273,7 +285,9 @@ function stateWithModel(model: string): BotsStateFile {
 
 describe("bot storage migration", () => {
   it("keeps draft model when provider id and model still exist", () => {
-    const providers = [provider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] })];
+    const providers = [
+      provider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] }),
+    ];
 
     expect(
       migrateBotsStateToV2({
@@ -288,9 +302,13 @@ describe("bot storage migration", () => {
   it("remaps draft model by legacy provider name and model id when unique", () => {
     const legacyCache = {
       ...createDefaultBotsModelCache(),
-      providers: [provider({ id: "old-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] })],
+      providers: [
+        provider({ id: "old-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] }),
+      ],
     };
-    const providers = [provider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] })];
+    const providers = [
+      provider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] }),
+    ];
 
     expect(
       migrateBotsStateToV2({
@@ -321,7 +339,14 @@ describe("bot storage migration", () => {
   it("writes v2 model cache from authoritative providers without real api keys", () => {
     const result = migrateBotsModelCacheToV2({
       legacyCache: createDefaultBotsModelCache(),
-      providers: [provider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"], apiKey: "secret" })],
+      providers: [
+        provider({
+          id: "new-provider",
+          name: "DeepSeek",
+          models: ["deepseek-v4-flash"],
+          apiKey: "secret",
+        }),
+      ],
       nowMs: 2,
     });
 
@@ -362,9 +387,7 @@ import {
   type BotDraftOptions,
   type ModelProviderConfig,
 } from "@zcode/shared";
-import {
-  type BotsModelCacheFile,
-} from "./modelCacheRepo.js";
+import { type BotsModelCacheFile } from "./modelCacheRepo.js";
 
 const BOT_MODEL_CACHE_API_KEY_PLACEHOLDER = "__zcode_cached_api_key_present__";
 
@@ -400,19 +423,21 @@ function migrateDraftModel(params: {
   }
   const custom = decodeCustomModelValue(params.value);
   if (!custom?.providerId || !custom.modelName) {
-    return findUniqueProviderByModel(params.providers, params.value)
-      ? params.value
-      : undefined;
+    return findUniqueProviderByModel(params.providers, params.value) ? params.value : undefined;
   }
   const directProvider = params.providers.find((provider) => provider.id === custom.providerId);
   if (directProvider && providerHasModel(directProvider, custom.modelName)) {
     return encodeCustomModelValue(custom.providerId, custom.modelName);
   }
-  const legacyProviderName = params.legacyCache.providers.find((provider) => provider.id === custom.providerId)?.name;
+  const legacyProviderName = params.legacyCache.providers.find(
+    (provider) => provider.id === custom.providerId,
+  )?.name;
   const remappedProvider = legacyProviderName
     ? findUniqueProviderByNameAndModel(params.providers, legacyProviderName, custom.modelName)
     : findUniqueProviderByModel(params.providers, custom.modelName);
-  return remappedProvider ? encodeCustomModelValue(remappedProvider.id, custom.modelName) : undefined;
+  return remappedProvider
+    ? encodeCustomModelValue(remappedProvider.id, custom.modelName)
+    : undefined;
 }
 ```
 
@@ -436,6 +461,7 @@ Expected: PASS.
 ### Task 3: Wire Migration Into Bot Service Hydration
 
 **Files:**
+
 - Modify: `packages/services/src/bots/botsService.ts`
 - Modify: `packages/services/test/botsService.fixtures.ts`
 - Test: `packages/services/test/botsService.config.test.ts`
@@ -463,8 +489,16 @@ it("migrates bot draft model to current config provider before /model", async ()
       },
     },
   });
-  const legacyProvider = createTestProvider({ id: "old-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] });
-  const currentProvider = createTestProvider({ id: "new-provider", name: "DeepSeek", models: ["deepseek-v4-flash"] });
+  const legacyProvider = createTestProvider({
+    id: "old-provider",
+    name: "DeepSeek",
+    models: ["deepseek-v4-flash"],
+  });
+  const currentProvider = createTestProvider({
+    id: "new-provider",
+    name: "DeepSeek",
+    models: ["deepseek-v4-flash"],
+  });
   const modelCacheRepo = createMemoryModelCacheRepo({
     version: 2,
     updatedAt: 1,
@@ -574,6 +608,7 @@ Expected: PASS.
 ### Task 4: Update Existing Tests And Docs
 
 **Files:**
+
 - Modify: `packages/services/test/botsService.fixtures.ts`
 - Modify: `packages/services/test/botsModelCacheRepo.test.ts`
 - Modify: `docs/bots.md`
@@ -638,6 +673,7 @@ Expected: PASS.
 ### Task 5: Full Verification And Commit
 
 **Files:**
+
 - Verify all modified files
 
 - [ ] **Step 1: Inspect git diff**

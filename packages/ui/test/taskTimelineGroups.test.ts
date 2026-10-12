@@ -31,27 +31,28 @@ describe("taskTimelineGroups", () => {
   const now = localTimestamp(2026, 5, 21, 10, 0);
 
   it("优先按相对日、周、月生成 timeline 分组", () => {
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 21, 9, 0), now, "zh-CN"),
-    ).toEqual({ kind: "today" });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 20, 23, 59), now, "zh-CN"),
-    ).toEqual({ kind: "yesterday" });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 18, 8, 0), now, "zh-CN"),
-    ).toEqual({ kind: "daysAgo", daysAgo: 3 });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 17, 8, 0), now, "zh-CN"),
-    ).toEqual({ kind: "lastWeek" });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 1, 8, 0), now, "zh-CN"),
-    ).toEqual({ kind: "thisMonth" });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 4, 30, 8, 0), now, "zh-CN"),
-    ).toEqual({ kind: "lastMonth" });
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 3, 31, 8, 0), now, "zh-CN"),
-    ).toEqual({ kind: "older" });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 21, 9, 0), now, "zh-CN")).toEqual({
+      kind: "today",
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 20, 23, 59), now, "zh-CN")).toEqual({
+      kind: "yesterday",
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 18, 8, 0), now, "zh-CN")).toEqual({
+      kind: "daysAgo",
+      daysAgo: 3,
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 17, 8, 0), now, "zh-CN")).toEqual({
+      kind: "lastWeek",
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 1, 8, 0), now, "zh-CN")).toEqual({
+      kind: "thisMonth",
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 4, 30, 8, 0), now, "zh-CN")).toEqual({
+      kind: "lastMonth",
+    });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 3, 31, 8, 0), now, "zh-CN")).toEqual({
+      kind: "older",
+    });
   });
 
   it("按当前排序字段选择创建或更新时间分组", () => {
@@ -78,8 +79,8 @@ describe("taskTimelineGroups", () => {
   });
 
   it("英文 locale 使用周日作为自然周起点", () => {
-    expect(
-      resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 17, 8, 0), now, "en-US"),
-    ).toEqual({ kind: "thisWeek" });
+    expect(resolveTaskTimelineGroupKey(localTimestamp(2026, 5, 17, 8, 0), now, "en-US")).toEqual({
+      kind: "thisWeek",
+    });
   });
 });

@@ -47,12 +47,12 @@ fake local settings/providers + legacy auth_token
 
 ## 状态组合与剪枝
 
-| 组合 | 处理 | 原因 |
-| --- | --- | --- |
-| 本地 mode/selectedKey 冲突 + 无 active OAuth | 保留 | I32～I34 的最小产品语义 |
-| 本地迁移 + Z.AI OAuth 恢复成功 | 剪枝 | OAuth 恢复刷新已有 `rootOAuthCallbackHandling.test.ts` 覆盖 |
-| 本地迁移 + 真实 Z.AI 网络成功/失败/超时 | 剪枝 | 与 selectedKey 迁移算法无关，且会引入外部不确定性 |
-| BigModel Team 完整/畸形 identity | 保留 | 分别对应 I33/I34 的核心边界 |
+| 组合                                         | 处理 | 原因                                                        |
+| -------------------------------------------- | ---- | ----------------------------------------------------------- |
+| 本地 mode/selectedKey 冲突 + 无 active OAuth | 保留 | I32～I34 的最小产品语义                                     |
+| 本地迁移 + Z.AI OAuth 恢复成功               | 剪枝 | OAuth 恢复刷新已有 `rootOAuthCallbackHandling.test.ts` 覆盖 |
+| 本地迁移 + 真实 Z.AI 网络成功/失败/超时      | 剪枝 | 与 selectedKey 迁移算法无关，且会引入外部不确定性           |
+| BigModel Team 完整/畸形 identity             | 保留 | 分别对应 I33/I34 的核心边界                                 |
 
 ## 代码与测试范围
 

@@ -181,10 +181,7 @@ describe("desktopNetworkPolicy", () => {
 
   it("builds a fixed-server proxy config from the explicit setting", () => {
     expect(
-      buildElectronProxyConfig(
-        "127.0.0.1:7890",
-        " localhost, 127.0.0.1 ,.example.com ",
-      ),
+      buildElectronProxyConfig("127.0.0.1:7890", " localhost, 127.0.0.1 ,.example.com "),
     ).toEqual({
       mode: "fixed_servers",
       proxyBypassRules: "localhost,127.0.0.1,.example.com",
@@ -248,10 +245,7 @@ describe("desktopNetworkPolicy", () => {
 
     expect(proc).not.toBeNull();
     expect(
-      certificateChainMatchesCustomCa(
-        { data: trustedPem, issuerCert: null },
-        trustedFingerprints,
-      ),
+      certificateChainMatchesCustomCa({ data: trustedPem, issuerCert: null }, trustedFingerprints),
     ).toBe(true);
     expect(
       certificateChainMatchesCustomCa(
@@ -286,9 +280,7 @@ function createSessionStub(options: { setProxyError?: Error } = {}) {
   };
 }
 
-type VerifyRequest = Parameters<
-  NonNullable<Parameters<Session["setCertificateVerifyProc"]>[0]>
->[0];
+type VerifyRequest = Parameters<NonNullable<Parameters<Session["setCertificateVerifyProc"]>[0]>>[0];
 
 /** 构造一条「Chromium 已判定证书不受信」的校验请求，用于驱动 verifyProc 的拒绝分支。 */
 function buildVerifyRequest(certPem: string): VerifyRequest {

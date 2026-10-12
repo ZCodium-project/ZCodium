@@ -28,8 +28,7 @@ describe("fork 后 Side Pane 空态 manual review", () => {
     await waitForV4Fork();
 
     const parent = await waitForV4Pane(
-      (snapshot) =>
-        Boolean(snapshot.sessionId && snapshot.sessionId !== "draft"),
+      (snapshot) => Boolean(snapshot.sessionId && snapshot.sessionId !== "draft"),
       "SSC22 parent session 没有建立",
     );
     const parentSessionId = parent.sessionId;
@@ -58,9 +57,7 @@ describe("fork 后 Side Pane 空态 manual review", () => {
     expect(child.sessionId).not.toBe(parentSessionId);
 
     await expandSidePane();
-    await waitForOpenTabLauncher(
-      "fork child 没有可见 tab 时未显示启动页，Side Pane 仍为空白",
-    );
+    await waitForOpenTabLauncher("fork child 没有可见 tab 时未显示启动页，Side Pane 仍为空白");
     const childSidePane = await readOpenSidePaneState();
     expect(childSidePane.launcherVisible).toBe(true);
     expect(childSidePane.visibleTabIds).toEqual([]);
@@ -71,9 +68,7 @@ describe("fork 后 Side Pane 空态 manual review", () => {
     const restoredSideChat = await waitForSelectionSidePane();
     expect(restoredSideChat.tabId).toBe(parentSideChat.tabId);
     expect(restoredSideChat.childSessionId).toBe(parentSideChat.childSessionId);
-    expect(await readComposerText(restoredSideChat.paneTestId)).toBe(
-      SIDE_DRAFT,
-    );
+    expect(await readComposerText(restoredSideChat.paneTestId)).toBe(SIDE_DRAFT);
   });
 });
 
@@ -93,18 +88,16 @@ async function expandSidePane(): Promise<void> {
   }
   await browser.waitUntil(
     async () =>
-      browser.execute(() =>
-        Boolean(document.querySelector("button svg.lucide-panel-right-close")),
-      ),
+      browser.execute(() => Boolean(document.querySelector("button svg.lucide-panel-right-close"))),
     { timeout: 15000, timeoutMsg: "Side Pane 没有展开" },
   );
 }
 
 async function waitForOpenTabLauncher(timeoutMsg: string): Promise<void> {
-  await browser.waitUntil(
-    async () => (await readOpenSidePaneState()).launcherVisible,
-    { timeout: 15000, timeoutMsg },
-  );
+  await browser.waitUntil(async () => (await readOpenSidePaneState()).launcherVisible, {
+    timeout: 15000,
+    timeoutMsg,
+  });
 }
 
 async function clickOpenTabItem(itemId: string): Promise<void> {
@@ -139,16 +132,12 @@ async function readOpenSidePaneState(): Promise<{
     return {
       launcherVisible: Boolean(launcher && isVisible(launcher)),
       openItemIds: Array.from(
-        document.querySelectorAll<HTMLElement>(
-          "[data-side-pane-open-tab-item]",
-        ),
+        document.querySelectorAll<HTMLElement>("[data-side-pane-open-tab-item]"),
       )
         .filter(isVisible)
         .map((element) => element.dataset.sidePaneOpenTabItem ?? "")
         .filter(Boolean),
-      visibleTabIds: Array.from(
-        document.querySelectorAll<HTMLElement>("[data-side-pane-tab-id]"),
-      )
+      visibleTabIds: Array.from(document.querySelectorAll<HTMLElement>("[data-side-pane-tab-id]"))
         .filter(isVisible)
         .map((element) => element.dataset.sidePaneTabId ?? "")
         .filter(Boolean),
@@ -175,9 +164,7 @@ async function waitForSelectionSidePane(): Promise<{
         const tabId = tab?.dataset.sidePaneTabId;
         if (!tabId) return null;
         const paneTestId = `${panePrefix}-${tabId}`;
-        const pane = document.querySelector<HTMLElement>(
-          `[data-testid="${paneTestId}"]`,
-        );
+        const pane = document.querySelector<HTMLElement>(`[data-testid="${paneTestId}"]`);
         const childSessionId = pane?.dataset.sessionId;
         return childSessionId ? { childSessionId, paneTestId, tabId } : null;
       }, TID_V4_SESSION_PANE);
@@ -189,20 +176,13 @@ async function waitForSelectionSidePane(): Promise<{
   return result;
 }
 
-async function setComposerText(
-  paneTestId: string,
-  text: string,
-): Promise<void> {
+async function setComposerText(paneTestId: string, text: string): Promise<void> {
   await browser.waitUntil(
     async () =>
       browser.execute(
         (nextPaneTestId, inputTestId, nextText) => {
-          const pane = document.querySelector<HTMLElement>(
-            `[data-testid="${nextPaneTestId}"]`,
-          );
-          const input = pane?.querySelector<HTMLElement>(
-            `[data-testid="${inputTestId}"]`,
-          );
+          const pane = document.querySelector<HTMLElement>(`[data-testid="${nextPaneTestId}"]`);
+          const input = pane?.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
           const bridge = (
             input as
               | (HTMLElement & {
@@ -228,12 +208,8 @@ async function setComposerText(
 async function readComposerText(paneTestId: string): Promise<string | null> {
   return browser.execute(
     (nextPaneTestId, inputTestId) => {
-      const pane = document.querySelector<HTMLElement>(
-        `[data-testid="${nextPaneTestId}"]`,
-      );
-      const input = pane?.querySelector<HTMLElement>(
-        `[data-testid="${inputTestId}"]`,
-      );
+      const pane = document.querySelector<HTMLElement>(`[data-testid="${nextPaneTestId}"]`);
+      const input = pane?.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
       return (
         (
           input as

@@ -81,7 +81,9 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
     expect(await runInGuest("window.__permissionState('camera')")).toBe("denied");
 
     // ── 场景二：确认条 → 不允许（本次拒绝，不记忆：二次请求重新弹）
-    await runInGuest("window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })");
+    await runInGuest(
+      "window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
+    );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_DENY);
     await browser.waitUntil(
@@ -89,14 +91,18 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
       { timeout: 15_000, timeoutMsg: "点「不允许」后 getUserMedia 应被拒绝" },
     );
     // 不记忆：二次请求确认条重新出现
-    await runInGuest("window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })");
+    await runInGuest(
+      "window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
+    );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_DENY);
 
     // ── 场景三：确认条 → 访问此网站时允许（持久）
     await navigateTo(allowServer.origin);
     expect(await runInGuest("window.__permissionState('camera')")).toBe("denied");
-    await runInGuest("window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })");
+    await runInGuest(
+      "window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
+    );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_ALLOW_ALWAYS);
     // 允许后 permissions.query 变为 granted；无摄像头设备时 getUserMedia 是 NotFoundError（权限已过）
@@ -105,7 +111,9 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
       { timeout: 15_000, timeoutMsg: "「访问此网站时允许」后 permissions.query 应为 granted" },
     );
     // 二次请求不再弹确认条
-    await runInGuest("window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })");
+    await runInGuest(
+      "window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
+    );
     await browser.waitUntil(
       async () => {
         const result = await runInGuest("window.__mediaResult2");
@@ -114,7 +122,6 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
       { timeout: 15_000, timeoutMsg: "允许后二次 getUserMedia 应完成（ok 或无设备）" },
     );
     expect(await countPermissionPrompts()).toBe(0);
-
   });
 });
 
@@ -147,7 +154,8 @@ async function readBrowserGuestWebContentsId(): Promise<number> {
       ),
     );
     const visible = webviews.findLast(
-      (element) => element.getBoundingClientRect().width > 0 && element.getBoundingClientRect().height > 0,
+      (element) =>
+        element.getBoundingClientRect().width > 0 && element.getBoundingClientRect().height > 0,
     );
     const webview = visible ?? webviews.at(-1);
     return webview?.getWebContentsId?.() ?? null;

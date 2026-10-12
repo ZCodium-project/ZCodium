@@ -19,7 +19,9 @@ describe("ImagePreviewContent", () => {
     expect(html).toContain("flex h-full min-h-0 items-center justify-center");
     expect(html).toContain("p-10");
     expect(html).toContain("[background-color:var(--color-background)]");
-    expect(html).toContain("[background-image:linear-gradient(45deg,var(--color-surface)_25%,transparent_25%)");
+    expect(html).toContain(
+      "[background-image:linear-gradient(45deg,var(--color-surface)_25%,transparent_25%)",
+    );
     expect(html).toContain("[background-position:0_0,0_4px,4px_-4px,-4px_0]");
     expect(html).toContain("[background-size:8px_8px]");
     expect(html).toContain("h-auto max-h-full w-auto max-w-full");

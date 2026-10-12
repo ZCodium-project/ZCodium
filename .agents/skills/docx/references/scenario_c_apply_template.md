@@ -3,6 +3,7 @@
 ## When to Use
 
 Use Scenario C when:
+
 - The user has an existing document and wants to apply a different visual style
 - The user wants to rebrand a document (new fonts, colors, heading styles)
 - The user provides a template DOCX and wants its look applied to a content document
@@ -28,25 +29,25 @@ Do NOT use when: the user wants to edit content (→ Scenario B) or create from 
 
 ## What Gets Copied from Template
 
-| Part | File | Description |
-|------|------|-------------|
-| Styles | `word/styles.xml` | All style definitions (paragraph, character, table, numbering) |
-| Theme | `word/theme/theme1.xml` | Color scheme, font scheme, format scheme |
-| Numbering | `word/numbering.xml` | List and numbering definitions |
-| Headers | `word/header*.xml` | Header content and formatting |
-| Footers | `word/footer*.xml` | Footer content and formatting |
-| Section props | `w:sectPr` | Margins, page size, orientation, columns |
+| Part          | File                    | Description                                                    |
+| ------------- | ----------------------- | -------------------------------------------------------------- |
+| Styles        | `word/styles.xml`       | All style definitions (paragraph, character, table, numbering) |
+| Theme         | `word/theme/theme1.xml` | Color scheme, font scheme, format scheme                       |
+| Numbering     | `word/numbering.xml`    | List and numbering definitions                                 |
+| Headers       | `word/header*.xml`      | Header content and formatting                                  |
+| Footers       | `word/footer*.xml`      | Footer content and formatting                                  |
+| Section props | `w:sectPr`              | Margins, page size, orientation, columns                       |
 
 ## What Does NOT Get Copied
 
-| Part | Reason |
-|------|--------|
-| Document content | Paragraphs, tables, images stay from source |
-| Comments | Belong to source document's review history |
-| Tracked changes | Belong to source document's revision history |
-| Custom XML parts | Application-specific data, not visual |
-| Document properties | Title, author, dates belong to source |
-| Glossary document | Template's building blocks are not transferred |
+| Part                | Reason                                         |
+| ------------------- | ---------------------------------------------- |
+| Document content    | Paragraphs, tables, images stay from source    |
+| Comments            | Belong to source document's review history     |
+| Tracked changes     | Belong to source document's revision history   |
+| Custom XML parts    | Application-specific data, not visual          |
+| Document properties | Title, author, dates belong to source          |
+| Glossary document   | Template's building blocks are not transferred |
 
 ---
 
@@ -64,6 +65,7 @@ scripts/docx_preview.sh template.docx
 ```
 
 Identify these zones in the template:
+
 ```
 Zone A: Front matter (cover page, declaration, abstract, TOC)
         → These are KEPT from template, never replaced
@@ -80,10 +82,12 @@ Zone D: Final sectPr
 Search the template's document.xml for anchor text that marks the start and end of example content:
 
 **Start anchor patterns** (first paragraph of example body):
+
 - "第1章", "第一章", "Chapter 1", "1 Introduction", "绪论"
 - The first paragraph with a Heading1-equivalent style after TOC
 
 **End anchor patterns** (last paragraph before back matter):
+
 - "参考文献", "References", "致谢", "Acknowledgments"
 - The last paragraph before appendices or final sectPr
 
@@ -100,6 +104,7 @@ for i, element in enumerate(template_body_elements):
 ```
 
 **CRITICAL**: Verify the range by printing what's inside:
+
 ```
 Template elements [0..replace_start-1]: front matter (KEEP)
 Template elements [replace_start..replace_end]: example content (REPLACE)
@@ -112,12 +117,12 @@ If replace_start or replace_end cannot be found, DO NOT proceed. Ask the user to
 
 Now that you know the structure:
 
-| Observation | Decision |
-|-------------|----------|
-| Template has ≤30 paragraphs, no cover/TOC | **C-1: Overlay** (pure style template) |
-| Template has >100 paragraphs with cover/TOC/example sections | **C-2: Base-Replace** |
-| Template paragraph count ≈ user document | **C-1: Overlay** (similar structure) |
-| Template paragraph count >> user document (e.g., 263 vs 134) | **C-2: Base-Replace** |
+| Observation                                                  | Decision                               |
+| ------------------------------------------------------------ | -------------------------------------- |
+| Template has ≤30 paragraphs, no cover/TOC                    | **C-1: Overlay** (pure style template) |
+| Template has >100 paragraphs with cover/TOC/example sections | **C-2: Base-Replace**                  |
+| Template paragraph count ≈ user document                     | **C-1: Overlay** (similar structure)   |
+| Template paragraph count >> user document (e.g., 263 vs 134) | **C-2: Base-Replace**                  |
 
 ### Step 4: For Base-Replace, execute the replacement
 
@@ -160,6 +165,7 @@ $CLI analyze --input template.docx --styles-only
 ```
 
 **Critical distinction**: `w:styleId` vs `w:name`:
+
 ```xml
 <!-- styleId="1" but name="heading 1" -->
 <w:style w:type="paragraph" w:styleId="1">
@@ -171,18 +177,23 @@ $CLI analyze --input template.docx --styles-only
 The `w:styleId` attribute is what `<w:pStyle w:val="..."/>` references. The `w:name` attribute is the human-readable display name. **They can be completely different.** Many CJK templates use numeric styleIds (`1`, `2`, `3`, `a`, `a0`) instead of English names.
 
 ### Tier 1: Exact StyleId Match
+
 If source uses `Heading1` and template defines `Heading1` as a styleId, map directly. No action needed.
 
 ### Tier 2: Name-Based Match
+
 If no exact styleId match, try matching by `w:name` attribute:
+
 - Source `Heading1` (name="heading 1") → Template styleId `1` (name="heading 1")
 - Match is case-insensitive on the name value
 
 Within the same type, also try matching by:
+
 - Built-in style ID (Word's internal ID, e.g., heading 1 = built-in ID 1)
 - Style type (paragraph → paragraph, character → character, table → table)
 
 ### Tier 3: Manual Mapping
+
 For renamed or custom styles, provide an explicit mapping:
 
 ```json
@@ -203,19 +214,20 @@ For renamed or custom styles, provide an explicit mapping:
 
 ### Common Non-Standard StyleId Patterns
 
-| Template Origin | StyleId Pattern | Example |
-|----------------|-----------------|---------|
-| Chinese Word (default) | Numeric/alphabetic | `1`, `2`, `3`, `a`, `a0` |
-| English Word (default) | English names | `Heading1`, `Normal`, `Title` |
-| Google Docs export | Prefixed | `Subtitle`, `NormalWeb` |
-| WPS Office | Mixed | `1`, `Heading1`, custom names |
-| Academic templates | Custom | `ThesisHeading1`, `ThesisBody` |
+| Template Origin        | StyleId Pattern    | Example                        |
+| ---------------------- | ------------------ | ------------------------------ |
+| Chinese Word (default) | Numeric/alphabetic | `1`, `2`, `3`, `a`, `a0`       |
+| English Word (default) | English names      | `Heading1`, `Normal`, `Title`  |
+| Google Docs export     | Prefixed           | `Subtitle`, `NormalWeb`        |
+| WPS Office             | Mixed              | `1`, `Heading1`, custom names  |
+| Academic templates     | Custom             | `ThesisHeading1`, `ThesisBody` |
 
 ### Building the Mapping Table
 
 Follow this algorithm:
 
 1. **List source styleIds** actually used in `document.xml` (not all defined in `styles.xml`):
+
    ```python
    # Pseudocode: find all unique pStyle values in source document.xml
    used_styles = set()
@@ -232,6 +244,7 @@ Follow this algorithm:
    - Fallback: map to template's default paragraph style (usually `Normal` or `a`)
 
 3. **Validate the mapping** — every source styleId must map to an existing template styleId:
+
    ```
    ✓ Heading1 → 1 (name match: "heading 1")
    ✓ Heading2 → 2 (name match: "heading 2")
@@ -248,7 +261,9 @@ Follow this algorithm:
    ```
 
 ### Unmapped Styles
+
 Styles in the source document that have no match in the template are logged as warnings:
+
 ```
 WARNING: Style 'CustomCallout' has no mapping in template. Content will fall back to 'a' (Normal).
 ```
@@ -270,6 +285,7 @@ When using the template as a base document (C-2 strategy), the template's `style
 When copying content from source to template, apply these rules to EACH paragraph and run:
 
 **REMOVE from `<w:rPr>`:**
+
 - `<w:rFonts w:ascii="..." w:hAnsi="..."/>` — Latin font overrides (EXCEPT: keep `w:eastAsia`)
 - `<w:sz>`, `<w:szCs>` — font size (let style control)
 - `<w:color>` — text color
@@ -280,11 +296,13 @@ When copying content from source to template, apply these rules to EACH paragrap
 - `<w:spacing>` — character spacing
 
 **KEEP in `<w:rPr>`:**
+
 - `<w:rFonts w:eastAsia="宋体"/>` — CJK font declaration (MUST keep, or Chinese text renders wrong)
 - `<w:rFonts w:eastAsia="华文中宋"/>` — same reason
 - Anything inside `<w:drawing>` — image references (handle separately via rId remapping)
 
 **REMOVE from `<w:pPr>`:**
+
 - `<w:pBdr>` — paragraph borders
 - `<w:shd>` — paragraph shading
 - `<w:spacing>` — line/paragraph spacing (let style control)
@@ -293,12 +311,14 @@ When copying content from source to template, apply these rules to EACH paragrap
 - `<w:rPr>` inside pPr — default run formatting for the paragraph
 
 **KEEP in `<w:pPr>`:**
+
 - `<w:pStyle>` — style reference (after mapping to template's styleId)
 - `<w:sectPr>` — section properties (if intentionally inserting section breaks)
 - `<w:numPr>` — numbering reference (after mapping numId to template's numbering)
 
 **Table cells (`<w:tc>`):**
 Apply the same rPr/pPr cleanup to every paragraph inside every cell. Also:
+
 - Keep `<w:tcPr>` structural properties (column span, row span, width)
 - Remove `<w:tcPr><w:shd>` (cell shading — let table style control)
 
@@ -309,11 +329,13 @@ Apply the same rPr/pPr cleanup to every paragraph inside every cell. Also:
 When copying parts (headers, footers, images) from the template into the source package, relationship IDs (`r:id`) may collide.
 
 **Problem**:
+
 - Source has `rId7` → `image1.png`
 - Template has `rId7` → `header1.xml`
 - Copying template's `rId7` overwrites source's image reference
 
 **Solution**:
+
 1. Scan source's `document.xml.rels` for all existing `rId` values
 2. Find the maximum numeric ID (e.g., `rId12`)
 3. Remap all template relationship IDs starting from `rId13`
@@ -340,6 +362,7 @@ When the source document contains external hyperlinks (e.g., URLs in references 
 ```
 
 The corresponding text in document.xml references this rId:
+
 ```xml
 <w:hyperlink r:id="rId15">
   <w:r><w:t>https://example.com/paper</w:t></w:r>
@@ -347,6 +370,7 @@ The corresponding text in document.xml references this rId:
 ```
 
 **Merging steps:**
+
 1. Scan source document.xml for all `<w:hyperlink r:id="...">` elements
 2. For each, find the corresponding relationship in source's rels file
 3. Check if template already has a relationship with the same Target URL
@@ -366,14 +390,14 @@ After template application, the output document **MUST** pass `business-rules.xs
 
 ### What business-rules.xsd Checks
 
-| Rule | What It Validates |
-|------|-------------------|
-| Template styles exist | All styles referenced by content paragraphs are defined in `styles.xml` |
-| Margins match | Page margins match template specification |
-| Fonts correct | `w:docDefaults` fonts match template's font scheme |
-| Heading hierarchy | Heading levels are sequential (no H1 → H3 without H2) |
-| Required styles present | `Normal`, `Heading1`-`Heading3`, `TableGrid` exist |
-| Page size | Matches template's declared page size |
+| Rule                    | What It Validates                                                       |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Template styles exist   | All styles referenced by content paragraphs are defined in `styles.xml` |
+| Margins match           | Page margins match template specification                               |
+| Fonts correct           | `w:docDefaults` fonts match template's font scheme                      |
+| Heading hierarchy       | Heading levels are sequential (no H1 → H3 without H2)                   |
+| Required styles present | `Normal`, `Heading1`-`Heading3`, `TableGrid` exist                      |
+| Page size               | Matches template's declared page size                                   |
 
 ### Handling Failures
 
@@ -384,6 +408,7 @@ GATE-CHECK FAILED:
 ```
 
 Fix each failure:
+
 1. **Missing style**: Add the style definition to `styles.xml`, or remap the paragraph to an existing style
 2. **Margin mismatch**: Update `w:sectPr` margins to match template
 3. **Font mismatch**: Update `w:docDefaults` to match template font scheme
@@ -402,6 +427,7 @@ Re-validate after every fix until gate-check passes.
 **Symptom**: Lists appear as plain paragraphs (no bullets/numbers).
 
 **Fix**:
+
 - Map source numbering IDs to template numbering IDs
 - Update all `w:numId` references in document content
 - Or merge source numbering definitions into template's `numbering.xml`
@@ -421,6 +447,7 @@ Re-validate after every fix until gate-check passes.
 **Symptom**: All sections get the same margins/orientation, breaking landscape pages.
 
 **Fix**:
+
 - Only apply template section properties to the final `w:sectPr` in `w:body`
 - Preserve intermediate `w:sectPr` elements (inside `w:pPr`) from the source
 - Or apply template properties to all sections but preserve orientation overrides
@@ -430,6 +457,7 @@ Re-validate after every fix until gate-check passes.
 **Problem**: Template specifies fonts not available on the target system.
 
 **Fix**: Either embed fonts in the DOCX (`word/fonts/`) or use web-safe alternatives:
+
 - Calibri → available on Windows/Mac/Office online
 - Arial → universal fallback
 - Times New Roman → universal serif fallback

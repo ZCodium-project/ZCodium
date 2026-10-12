@@ -28,16 +28,21 @@ describe("BigModel Coding Plan 升级页个人套餐售罄 E2E", () => {
     await clickTestIdByDom(testId(TID_MODEL_PROVIDER_NAV_ITEM, "preset:builtin:bigmodel"));
     const selectMode = async (key: string) => {
       // 设置分区切换是异步渲染；等可见 trigger 再用真实指针展开 Radix 菜单。
-      await browser.waitUntil(async () => {
-        const triggers = await $$(`[data-testid="${TID_MODEL_PROVIDER_CONNECTION_MODE_TRIGGER}"]`);
-        for (const trigger of triggers) {
-          if (await trigger.isDisplayed()) {
-            await trigger.click();
-            return true;
+      await browser.waitUntil(
+        async () => {
+          const triggers = await $$(
+            `[data-testid="${TID_MODEL_PROVIDER_CONNECTION_MODE_TRIGGER}"]`,
+          );
+          for (const trigger of triggers) {
+            if (await trigger.isDisplayed()) {
+              await trigger.click();
+              return true;
+            }
           }
-        }
-        return false;
-      }, { timeout: 15000, timeoutMsg: "没有可见的连接方式选择器" });
+          return false;
+        },
+        { timeout: 15000, timeoutMsg: "没有可见的连接方式选择器" },
+      );
       await clickTestIdByDom(testId(TID_MODEL_PROVIDER_CONNECTION_MODE_ITEM, key));
     };
     await selectMode("preset:builtin:bigmodel");

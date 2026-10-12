@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type {
-  GitRepositorySummary,
-  ZCodeTaskChangeSummary,
-} from "@zcode/shared";
+import type { GitRepositorySummary, ZCodeTaskChangeSummary } from "@zcode/shared";
 import type { GitBranchCommitPreviewFile } from "@/git-branch-switcher/display.js";
 import {
   filterCommitPreviewFilesByCurrentSession,
@@ -26,9 +23,7 @@ function createGitSummary(): GitRepositorySummary {
   };
 }
 
-function createChange(
-  workspaceRelativePath: string,
-): GitBranchCommitPreviewFile {
+function createChange(workspaceRelativePath: string): GitBranchCommitPreviewFile {
   return {
     stagePath: `/repo/packages/app/${workspaceRelativePath}`,
     repoRelativePath: `packages/app/${workspaceRelativePath}`,
@@ -67,9 +62,7 @@ describe("current session commit file scope", () => {
       workspacePath: "/repo/packages/app",
     });
 
-    expect(filtered.map((file) => file.workspaceRelativePath)).toEqual([
-      "session.txt",
-    ]);
+    expect(filtered.map((file) => file.workspaceRelativePath)).toEqual(["session.txt"]);
   });
 
   it("matches workspace-relative summary paths against repo-relative files", () => {

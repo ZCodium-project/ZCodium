@@ -14,14 +14,14 @@
 
 1. provider-visible 层：默认不向模型暴露 `Glob` / `Grep` direct tools。
 2. Bash prompt：默认不再提示避免用 Bash 直接跑 `find` / `grep`。
-3. Plan prompt：默认使用 ``find``/Glob, ``grep``/Grep, and Read。
+3. Plan prompt：默认使用 `find`/Glob, `grep`/Grep, and Read。
 4. runtime 层：当前临时不注入 embedded search `find()` / `grep()` prelude，先依赖用户本地 `find` / `grep`。
 
 ## Embedded search branch 目标行为
 
 - embedded search gate 默认开启；本地 agent 入口等非默认场景可关闭。
 - gate 开启且 Bash 可用时：
-  - main system broad exploration guidance 使用 ``find`` / ``grep`` via Bash tool。
+  - main system broad exploration guidance 使用 `find` / `grep` via Bash tool。
   - Explore prompt 使用 Bash 下的 `find` / `grep` 指引。
   - Bash prompt 的 avoid list 不再要求避开 `find` / `grep`。
   - Bash 初始化时注入 `find` / `grep` function，由 embedded search backend 执行（bundled 形态下分发到 `bfs` / `ugrep`）。
@@ -88,7 +88,7 @@
    - 使用 `Use \`grep\` via Bash for searching file contents with regex`。
    - Explore allowlist 不包含 direct `Glob` / `Grep`。
 4. Plan prompt 默认走 embedded 分支。
-   - 使用 ``find``, ``grep``, and Read 查找 patterns/conventions。
+   - 使用 `find`, `grep`, and Read 查找 patterns/conventions。
 5. Agent tool description 默认不列出 direct search tools。
    - Explore description 不能写 `(Tools: Glob, Grep, Read, Bash, WebFetch, WebSearch, TodoWrite)`。
 6. Main system guidance 默认不输出 Agent/Explore session guidance。
@@ -309,8 +309,7 @@ export function evaluateEmbeddedSearchBranchCapability(
   context: EmbeddedSearchBranchCapabilityContext,
 ): EmbeddedSearchBranchCapabilityDecision {
   const resolvedContext = resolveCapabilityContext(context);
-  const branchEnabled =
-    context.embeddedSearchBranchEnabled ?? ENABLE_EMBEDDED_SEARCH_BRANCH;
+  const branchEnabled = context.embeddedSearchBranchEnabled ?? ENABLE_EMBEDDED_SEARCH_BRANCH;
 
   if (!branchEnabled) {
     return {
@@ -465,7 +464,7 @@ apps/zcode-cli/packages/core/src/tool/handlers/bash-prompt.ts
 
 目标：
 
-- embedded branch exact 合同：avoid list 不包含 `find` / `grep`，只保留 ``cat``, ``head``, ``tail``, ``sed``, ``awk``, or ``echo``。
+- embedded branch exact 合同：avoid list 不包含 `find` / `grep`，只保留 `cat`, `head`, `tail`, `sed`, `awk`, or `echo`。
 - direct branch 保留当前“避免 Bash 跑 find/grep/cat/head/tail/sed/awk/echo”的 ZCode 规则。
 
 建议接口：
@@ -487,7 +486,7 @@ export function buildBashPrompt(options: BuildBashPromptOptions = {}): string {
 验收点：
 
 - 对默认 embedded branch，Bash prompt 不再劝模型避开 `find` / `grep`。
-- 对默认 embedded branch，Bash prompt 的 avoid list exact 包含 ``cat``, ``head``, ``tail``, ``sed``, ``awk``, or ``echo``。
+- 对默认 embedded branch，Bash prompt 的 avoid list exact 包含 `cat`, `head`, `tail`, `sed`, `awk`, or `echo`。
 - direct branch 不受影响。
 
 ### 2.3 修改 main Agent tool description
@@ -562,7 +561,7 @@ apps/zcode-cli/packages/core/src/tool/handlers/plan-mode-prompts.ts
 
 目标：
 
-- embedded branch：让 Plan prompt 使用 ``find``, ``grep``, and Read 查找 patterns/conventions。
+- embedded branch：让 Plan prompt 使用 `find`, `grep`, and Read 查找 patterns/conventions。
 - direct branch：继续使用 `${GLOB_TOOL_NAME}` / `${GREP_TOOL_NAME}`。
 
 验收点：
@@ -599,7 +598,7 @@ apps/zcode-cli/packages/core/src/context/dynamic-sections.ts
 目标：
 
 - 如果当前 session guidance 仍然会构造 broad exploration fallback，则 embedded branch exact 使用以下字符串：
-  - ``find`` or ``grep`` via the Bash tool
+  - `find` or `grep` via the Bash tool
 - direct branch exact 使用：
   - the Glob or Grep
 
@@ -622,13 +621,13 @@ apps/zcode-cli/packages/core/tests/context-builder.test.ts
 - 默认 embedded branch：
   - `tools[].name` 不包含 `Glob` / `Grep`。
   - Bash prompt 不包含“avoid find/grep”。
-  - Bash prompt 的 avoid list exact 包含 ``cat``, ``head``, ``tail``, ``sed``, ``awk``, or ``echo``，不包含 `find` / `grep`。
+  - Bash prompt 的 avoid list exact 包含 `cat`, `head`, `tail`, `sed`, `awk`, or `echo`，不包含 `find` / `grep`。
   - main `# Using your tools` dedicated-tool 列表不包含 Glob/Grep。
-  - main session fallback 包含 ``find`` or ``grep`` via the Bash tool。
+  - main session fallback 包含 `find` or `grep` via the Bash tool。
   - Explore guidance exact 包含 `Use \`find\` via Bash for broad file pattern matching`。
   - Explore guidance exact 包含 `Use \`grep\` via Bash for searching file contents with regex`。
   - Explore Bash read-only 列表包含 `find, grep`。
-  - Plan prompt 包含 ``find``, ``grep``, and Read。
+  - Plan prompt 包含 `find`, `grep`, and Read。
   - Agent tool description 不包含 `Tools: Glob, Grep`。
 - direct branch：
   - `tools[].name` 包含 `Glob` / `Grep`。
@@ -1116,13 +1115,13 @@ apps/zcode-cli/packages/core/tests/tool-contracts.test.ts
 - model `claude-opus-4-8-cc`：
   - tools 不含 `Glob` / `Grep`。
   - Bash description 不劝避 `find` / `grep`。
-  - Bash description 的 embedded avoid list exact 是 ``cat``, ``head``, ``tail``, ``sed``, ``awk``, or ``echo``，不包含 `find` / `grep`。
+  - Bash description 的 embedded avoid list exact 是 `cat`, `head`, `tail`, `sed`, `awk`, or `echo`，不包含 `find` / `grep`。
   - main system dedicated-tool guidance 不含 Glob/Grep。
-  - session fallback 是 ``find`` or ``grep`` via the Bash tool。
+  - session fallback 是 `find` or `grep` via the Bash tool。
   - Agent description 不泄漏 `Tools: Glob, Grep`。
   - Explore prompt exact 使用 Bash `find` / `grep` 两行。
   - Explore allowed tools 不含 `Glob` / `Grep`。
-  - Plan prompt 使用 ``find``, ``grep``, and Read。
+  - Plan prompt 使用 `find`, `grep`, and Read。
 - global flag disabled：
   - direct Glob/Grep 仍可出现。
   - Glob/Grep description/schema 的 direct branch 测试保持当前约束。

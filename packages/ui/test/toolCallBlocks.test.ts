@@ -146,7 +146,9 @@ describe("ToolCallBlock agent routing", () => {
     expect(html).toContain(">MCP<");
     expect(html).toContain("Get environment");
     expect(html).toContain('class="text-foreground-subtle">Firebase</span>');
-    expect(html).not.toContain('class="text-foreground-subtlest">·</span><span class="text-foreground-subtle">Firebase</span>');
+    expect(html).not.toContain(
+      'class="text-foreground-subtlest">·</span><span class="text-foreground-subtle">Firebase</span>',
+    );
     expect(html).not.toMatch(/class="[^"]*(?:border|bg-background-alt)[^"]*">Firebase<\/span>/u);
     expect(html).not.toContain("Plugin:firebase:firebase");
     expect(html).not.toContain("Firebase get environment");
@@ -330,9 +332,7 @@ describe("ToolCallBlock agent routing", () => {
 
     const summary = screen.getByTestId("tool-summary-trigger-call-mcp-failed");
     expect(
-      Array.from(summary.querySelectorAll("span")).filter(
-        (element) => element.textContent === "·",
-      ),
+      Array.from(summary.querySelectorAll("span")).filter((element) => element.textContent === "·"),
     ).toHaveLength(2);
     fireEvent.click(summary);
     const detail = screen.getByTestId("mcp-expanded-content");

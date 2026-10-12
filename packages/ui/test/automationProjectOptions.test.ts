@@ -91,9 +91,7 @@ describe("automation project boundaries", () => {
       ),
     ).toBe(true);
     expect(
-      isRemoteAutomationWorkspace(
-        workspaceTab({ id: "local", workspacePath: "/repo/local" }),
-      ),
+      isRemoteAutomationWorkspace(workspaceTab({ id: "local", workspacePath: "/repo/local" })),
     ).toBe(false);
   });
 });

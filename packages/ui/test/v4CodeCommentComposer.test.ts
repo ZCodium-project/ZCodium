@@ -115,10 +115,7 @@ function renderHarness(props: Parameters<typeof Harness>[0]): Root {
   return root;
 }
 
-function comment(
-  workspaceIdentity: string,
-  value: string,
-): CodeCommentPayload {
+function comment(workspaceIdentity: string, value: string): CodeCommentPayload {
   return {
     id: "same-id",
     workspacePath: "/source",
@@ -208,9 +205,7 @@ describe("V4 code comment composer context", () => {
     });
 
     expect(latestApi?.contexts).toHaveLength(0);
-    expect(onContextRemoved).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "same-id" }),
-    );
+    expect(onContextRemoved).toHaveBeenCalledWith(expect.objectContaining({ id: "same-id" }));
 
     act(() => root.unmount());
   });
@@ -265,9 +260,7 @@ describe("V4 composer prompt contexts", () => {
     expect(serialized.indexOf("# Web page elements:")).toBeGreaterThan(
       serialized.indexOf("# Code comments:"),
     );
-    expect(
-      serialized.indexOf("# Presentation element comments:"),
-    ).toBeGreaterThan(
+    expect(serialized.indexOf("# Presentation element comments:")).toBeGreaterThan(
       serialized.indexOf("# Web page elements:"),
     );
     expect(

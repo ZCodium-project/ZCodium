@@ -596,7 +596,9 @@ describe("v4 conversation workflowRunArtifacts query", () => {
       primary: true as const,
     };
     expect(workflowRunArtifactSchema.parse(artifact)).toEqual(artifact);
-    expect(workflowRunArtifactSchema.safeParse({ ...artifact, primary: false }).success).toBe(false);
+    expect(workflowRunArtifactSchema.safeParse({ ...artifact, primary: false }).success).toBe(
+      false,
+    );
     expect(
       workflowRunArtifactSchema.safeParse({ ...artifact, versions: [version({ primary: false })] })
         .success,
@@ -847,9 +849,9 @@ describe("workflowRuns[].actors/nodes 的 phaseName 状态键", () => {
       workflowRunActorSchema.safeParse({ ...actor, phaseName: "x".repeat(limit + 1) }).success,
     ).toBe(false);
     expect(workflowRunActorSchema.safeParse({ ...actor, phaseName: "" }).success).toBe(false);
-    expect(
-      workflowRunNodeSchema.safeParse({ ...node, phaseName: "x".repeat(limit) }).success,
-    ).toBe(true);
+    expect(workflowRunNodeSchema.safeParse({ ...node, phaseName: "x".repeat(limit) }).success).toBe(
+      true,
+    );
     expect(
       workflowRunNodeSchema.safeParse({ ...node, phaseName: "x".repeat(limit + 1) }).success,
     ).toBe(false);

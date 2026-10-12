@@ -24,18 +24,18 @@ runtime projection 与下游 skill/command/MCP adapter 是否能完整兼容。
 
 固定 10 个样本如下：
 
-| 插件 | source 形态 | skills | commands | MCP |
-| --- | --- | ---: | ---: | --- |
-| `appwrite` | repo root | 11 | 2 | `.mcp.json` |
-| `aws-agents-for-devsecops` | `git-subdir` | 13 | 9 | `.mcp.json` |
-| `bigdata-com` | `git-subdir` | 1 | 27 | `.mcp.json` |
-| `cloudflare` | repo root | 11 | 2 | `.mcp.json` |
-| `confidence` | repo root | 11 | 5 | `.mcp.json` |
-| `convex` | repo root + manifest paths | 2 | 1 | `.mcp.json` |
-| `dominodatalab` | repo root | 23 | 4 | `.mcp.json` |
-| `fiftyone` | repo root | 16 | 2 | `.mcp.json` |
-| `legalzoom` | `git-subdir` | 1 | 1 | `.mcp.json` |
-| `logfire` | `git-subdir` | 3 | 4 | `.mcp.json` / `mcp.json` |
+| 插件                       | source 形态                | skills | commands | MCP                      |
+| -------------------------- | -------------------------- | -----: | -------: | ------------------------ |
+| `appwrite`                 | repo root                  |     11 |        2 | `.mcp.json`              |
+| `aws-agents-for-devsecops` | `git-subdir`               |     13 |        9 | `.mcp.json`              |
+| `bigdata-com`              | `git-subdir`               |      1 |       27 | `.mcp.json`              |
+| `cloudflare`               | repo root                  |     11 |        2 | `.mcp.json`              |
+| `confidence`               | repo root                  |     11 |        5 | `.mcp.json`              |
+| `convex`                   | repo root + manifest paths |      2 |        1 | `.mcp.json`              |
+| `dominodatalab`            | repo root                  |     23 |        4 | `.mcp.json`              |
+| `fiftyone`                 | repo root                  |     16 |        2 | `.mcp.json`              |
+| `legalzoom`                | `git-subdir`               |      1 |        1 | `.mcp.json`              |
+| `logfire`                  | `git-subdir`               |      3 |        4 | `.mcp.json` / `mcp.json` |
 
 候补样本：`mercadopago`、`nimble`、`notion`。
 
@@ -92,7 +92,7 @@ Claude 插件规范里 manifest `skills` 的数组项指向「技能目录本身
 - 信任边界：插件内容不可信，plugin-scope 扫描**一律不跟随符号链接**（含 Windows
   junction）——根自身、子目录候选、`SKILL.md` 文件三个粒度全部拒绝链接，目录级
   逃逸（`skills/evil-link -> ../../outside`）与文件级逃逸（`SKILL.md -> ~/.aws/
-  credentials`）同标准封堵；拒绝链接即无逃逸，不依赖判定链接指向（无跨盘符
+credentials`）同标准封堵；拒绝链接即无逃逸，不依赖判定链接指向（无跨盘符
   `relative` 谓词，无平台分支）。组件枚举（`collectSkillComponents`）对插件根
   无条件适用同一规则，不依赖 manifest 是否解析成功。词法防线（`resolveInside`
   拒绝绝对路径与 `..` 穿越）继续生效。用户级技能根（`~/.zcode/skills` 的

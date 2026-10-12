@@ -76,13 +76,7 @@ export async function loadPerformanceTrends(
   const containerRows = toContainerTrendRows(containerLines, runStartTime);
   return {
     containerCpu: [
-      toSeries(
-        "Container",
-        "%",
-        "var(--chart-cyan)",
-        containerRows,
-        (row) => row.cpuPercent,
-      ),
+      toSeries("Container", "%", "var(--chart-cyan)", containerRows, (row) => row.cpuPercent),
     ],
     containerMemory: [
       toSeries(
@@ -120,9 +114,7 @@ async function loadContainerSamples(summary: E2EReportSummary, summaryUrl: strin
 
 function toProcessTrendRows(lines: ProcessSampleLine[], firstTime: number) {
   const rows = lines
-    .filter((line): line is ProcessSampleLine & { capturedAt: string } =>
-      Boolean(line.capturedAt),
-    )
+    .filter((line): line is ProcessSampleLine & { capturedAt: string } => Boolean(line.capturedAt))
     .sort((left, right) => Date.parse(left.capturedAt) - Date.parse(right.capturedAt));
   return rows.map((line) => {
     const cpuByType = new Map<string, number>();
@@ -172,18 +164,12 @@ function toContainerTrendRows(lines: ContainerSampleLine[], firstTime: number) {
 function buildProcessSeries(rows: ProcessTrendRow[], metric: "cpu" | "memory") {
   const typeNames = [
     ...new Set(
-      rows.flatMap((row) =>
-        [...(metric === "cpu" ? row.cpuByType : row.memoryByType).keys()],
-      ),
+      rows.flatMap((row) => [...(metric === "cpu" ? row.cpuByType : row.memoryByType).keys()]),
     ),
   ].sort();
   const unit = metric === "cpu" ? "%" : "MB";
-  const totalSeries = toSeries(
-    "Total",
-    unit,
-    processColorAt(0),
-    rows,
-    (row) => (metric === "cpu" ? row.totalCpu : row.totalMemoryMb),
+  const totalSeries = toSeries("Total", unit, processColorAt(0), rows, (row) =>
+    metric === "cpu" ? row.totalCpu : row.totalMemoryMb,
   );
   const typeSeries = typeNames.map((type, index) =>
     toSeries(
@@ -191,8 +177,7 @@ function buildProcessSeries(rows: ProcessTrendRow[], metric: "cpu" | "memory") {
       unit,
       processColorAt(index + 1),
       rows,
-      (row) =>
-        (metric === "cpu" ? row.cpuByType : row.memoryByType).get(type) ?? 0,
+      (row) => (metric === "cpu" ? row.cpuByType : row.memoryByType).get(type) ?? 0,
     ),
   );
   return [totalSeries, ...typeSeries];
@@ -202,9 +187,7 @@ function processColorAt(index: number) {
   return PROCESS_COLORS[index % PROCESS_COLORS.length] ?? "var(--chart-blue)";
 }
 
-function toSeries<
-  T extends { capturedAt: string; elapsedSeconds: number; label: string },
->(
+function toSeries<T extends { capturedAt: string; elapsedSeconds: number; label: string }>(
   label: string,
   unit: string,
   color: string,

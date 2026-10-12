@@ -3,10 +3,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  CRON_DEFAULT_GROUP_ID,
-  OFF_PEAK_DEFAULT_GROUP_ID,
-} from "@zcode/shared";
+import { CRON_DEFAULT_GROUP_ID, OFF_PEAK_DEFAULT_GROUP_ID } from "@zcode/shared";
 import { getTaskGroupDisplayTitle } from "@/workspace-grouped-tasks/group-title.js";
 import enUS from "@/i18n/locales/en-US.js";
 import zhCN from "@/i18n/locales/zh-CN.js";
@@ -23,18 +20,13 @@ describe("off-peak 系统分组 id 与标题", () => {
 
   it("getTaskGroupDisplayTitle 本地化两个系统分组并透传普通分组标题", () => {
     const titles = { cron: "定时任务", offPeak: "闲时任务" };
+    expect(getTaskGroupDisplayTitle({ id: CRON_DEFAULT_GROUP_ID, title: "cron" }, titles)).toBe(
+      "定时任务",
+    );
     expect(
-      getTaskGroupDisplayTitle({ id: CRON_DEFAULT_GROUP_ID, title: "cron" }, titles),
-    ).toBe("定时任务");
-    expect(
-      getTaskGroupDisplayTitle(
-        { id: OFF_PEAK_DEFAULT_GROUP_ID, title: "off-peak" },
-        titles,
-      ),
+      getTaskGroupDisplayTitle({ id: OFF_PEAK_DEFAULT_GROUP_ID, title: "off-peak" }, titles),
     ).toBe("闲时任务");
-    expect(
-      getTaskGroupDisplayTitle({ id: "custom", title: "My Group" }, titles),
-    ).toBe("My Group");
+    expect(getTaskGroupDisplayTitle({ id: "custom", title: "My Group" }, titles)).toBe("My Group");
   });
 
   it("侧栏组标题的 i18n key 在两个语言包都存在", () => {
@@ -45,9 +37,7 @@ describe("off-peak 系统分组 id 与标题", () => {
 
 describe("grouped UI 收敛接线（源码断言）", () => {
   it("GroupItem 用 isSystemGroup 统一裁剪改名/解散，标题走本地化", () => {
-    const source = readSource(
-      "packages/ui/src/workspace-grouped-tasks/group-item.tsx",
-    );
+    const source = readSource("packages/ui/src/workspace-grouped-tasks/group-item.tsx");
     expect(source).toContain("OFF_PEAK_DEFAULT_GROUP_ID");
     expect(source).toContain("const isSystemGroup = isCronGroup || isOffPeakGroup;");
     expect(source).not.toContain("{isCronGroup ? null : (");
@@ -56,9 +46,7 @@ describe("grouped UI 收敛接线（源码断言）", () => {
   });
 
   it("sticky header 对系统分组裁剪解散项（修掉 cron 存量缺口）", () => {
-    const source = readSource(
-      "packages/ui/src/workspace-grouped-tasks/sticky-group-header.tsx",
-    );
+    const source = readSource("packages/ui/src/workspace-grouped-tasks/sticky-group-header.tsx");
     expect(source).toContain("OFF_PEAK_DEFAULT_GROUP_ID");
     expect(source).toContain("isSystemGroup ? null : (");
   });

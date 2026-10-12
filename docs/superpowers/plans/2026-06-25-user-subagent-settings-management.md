@@ -349,7 +349,10 @@ Parser 要接受 runtime 当前 loose parser 能接受的格式。P0 不支持�
 
 ```ts
 export interface SubagentMarkdownDiagnostic {
-  code: "agent_missing_frontmatter" | "agent_missing_required_frontmatter" | "agent_invalid_frontmatter";
+  code:
+    | "agent_missing_frontmatter"
+    | "agent_missing_required_frontmatter"
+    | "agent_invalid_frontmatter";
   message: string;
   path: string;
 }

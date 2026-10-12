@@ -181,8 +181,8 @@ async function runFunctionalEffects() {
       logger: PROBE_LOGGER,
     });
     snapshot.offPeakMessage = await rejectionMessage(() =>
-    offPeakClient.getTakeNumberAvailability(),
-  );
+      offPeakClient.getTakeNumberAvailability(),
+    );
     snapshot.offPeakRejected = Boolean(snapshot.offPeakMessage);
     snapshot.offPeakFetchCalls = offPeakFetchCalls;
 

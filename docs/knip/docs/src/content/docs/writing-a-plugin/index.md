@@ -181,11 +181,11 @@ configuration object and return it to Knip:
 Here's an example from the Mocha plugin:
 
 ```ts
-const entry = ['**/test/*.{js,cjs,mjs}'];
+const entry = ["**/test/*.{js,cjs,mjs}"];
 
-const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+const resolveConfig: ResolveConfig<MochaConfig> = (localConfig) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
-  return entryPatterns.map(id => toEntry(id));
+  return entryPatterns.map((id) => toEntry(id));
 };
 
 export default {
@@ -218,15 +218,15 @@ Here's an example `astro.config.ts` configuration file with a Starlight
 integration:
 
 ```ts
-import starlight from '@astrojs/starlight';
-import { defineConfig } from 'astro/config';
+import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [
     starlight({
       components: {
-        Head: './src/components/Head.astro',
-        Footer: './src/components/Footer.astro',
+        Head: "./src/components/Head.astro",
+        Footer: "./src/components/Footer.astro",
       },
     }),
   ],
@@ -241,7 +241,7 @@ In the Astro plugin, there's no way to access this object containing
 `components` to add the component files as entry files if we were to try:
 
 ```ts
-const resolveConfig: ResolveConfig<AstroConfig> = async config => {
+const resolveConfig: ResolveConfig<AstroConfig> = async (config) => {
   console.log(config); //  ¯\_(ツ)_/¯
 };
 ```
@@ -258,34 +258,34 @@ Anyway, let's dive in. Here's how we're adding the Starlight `components` paths
 to the default `production` file patterns:
 
 ```ts
-import type { Program } from 'oxc-parser';
+import type { Program } from "oxc-parser";
 import {
   findCallArg,
   getDefaultImportName,
   getImportMap,
   getPropertyValues,
-} from '../../typescript/ast-helpers.ts';
+} from "../../typescript/ast-helpers.ts";
 
-const title = 'Astro';
+const title = "Astro";
 
 const production = [
-  'src/pages/**/*.{astro,mdx,js,ts}',
-  'src/content/**/*.mdx',
-  'src/middleware.{js,ts}',
-  'src/actions/index.{js,ts}',
+  "src/pages/**/*.{astro,mdx,js,ts}",
+  "src/content/**/*.mdx",
+  "src/middleware.{js,ts}",
+  "src/actions/index.{js,ts}",
 ];
 
 const getComponentPaths = (program: Program) => {
   const importMap = getImportMap(program);
-  const importName = getDefaultImportName(importMap, '@astrojs/starlight');
+  const importName = getDefaultImportName(importMap, "@astrojs/starlight");
   if (!importName) return new Set<string>();
   const starlightConfig = findCallArg(program, importName);
-  return getPropertyValues(starlightConfig, 'components');
+  return getPropertyValues(starlightConfig, "components");
 };
 
 const resolveFromAST: ResolveFromAST = (program: Program) => {
   const componentPaths = getComponentPaths(program);
-  return [...production, ...componentPaths].map(id => toProductionEntry(id));
+  return [...production, ...componentPaths].map((id) => toProductionEntry(id));
 };
 
 const plugin: Plugin = {
@@ -305,8 +305,8 @@ If there is no configuration file to parse or there is a need for customization,
 use `resolve`:
 
 ```ts
-const resolve: Resolve = async options => {
-  return toDependency('troublesome', { optional: true });
+const resolve: Resolve = async (options) => {
+  return toDependency("troublesome", { optional: true });
 };
 ```
 

@@ -15,13 +15,13 @@
 
 ## 2. 决策记录（brainstorm 结论）
 
-| 决策点 | 结论 |
-|---|---|
-| tab 模型 | **共享同一 tab 池**：agent 与 human 操作同一批 tab，互相可见可操作 |
-| agent 寻址 | **新建为主 + 可枚举寻址**（`browsers→tabs→tab` 对象图）：`open` 新建，`list()`/`tab(id)` 枚举并按 id 操作 |
-| 架构方案 | **方案 A**：单一组件 + 通用 tabId 管理器，human 走新 IPC 直连、agent 走协议反向请求，双入口汇到同一 `BrowserViewManager`+WebContentsView |
-| tab 类型 | 合并成一种 `BrowserSidePaneTab`，**新增 `origin?: "human" \| "agent"`（本次就做，UI 来源标记）** |
-| 登录态 | **接受 agent 复用 human 登录态**：所有 WebContentsView 共用 `persist:zcode-embedded-browser` 分区 |
+| 决策点     | 结论                                                                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| tab 模型   | **共享同一 tab 池**：agent 与 human 操作同一批 tab，互相可见可操作                                                                       |
+| agent 寻址 | **新建为主 + 可枚举寻址**（`browsers→tabs→tab` 对象图）：`open` 新建，`list()`/`tab(id)` 枚举并按 id 操作                                |
+| 架构方案   | **方案 A**：单一组件 + 通用 tabId 管理器，human 走新 IPC 直连、agent 走协议反向请求，双入口汇到同一 `BrowserViewManager`+WebContentsView |
+| tab 类型   | 合并成一种 `BrowserSidePaneTab`，**新增 `origin?: "human" \| "agent"`（本次就做，UI 来源标记）**                                         |
+| 登录态     | **接受 agent 复用 human 登录态**：所有 WebContentsView 共用 `persist:zcode-embedded-browser` 分区                                        |
 
 ## 3. 架构总览（方案 A：双入口汇到同一底座）
 

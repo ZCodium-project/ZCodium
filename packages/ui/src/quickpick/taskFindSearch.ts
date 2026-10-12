@@ -62,7 +62,7 @@ export function getTaskFindState(
 
   return {
     matches,
-    activeTaskId: currentIndex === -1 ? null : matches[currentIndex]?.task.taskId ?? null,
+    activeTaskId: currentIndex === -1 ? null : (matches[currentIndex]?.task.taskId ?? null),
     currentIndex,
     total: matches.length,
   };

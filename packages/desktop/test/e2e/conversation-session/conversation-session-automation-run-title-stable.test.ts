@@ -83,10 +83,7 @@ describe("automation run keeps the first-input session title", () => {
       timeoutMsg: "定时任务创建按钮不可点击",
     });
 
-    const initialCardText = await waitForAutomationCardText(
-      AUTOMATION_TITLE,
-      "已运行 0 次",
-    );
+    const initialCardText = await waitForAutomationCardText(AUTOMATION_TITLE, "已运行 0 次");
     expect(initialCardText).toContain("下次运行");
     expect(initialCardText).not.toMatch(/已运行\s*0\s*\/\s*\d+\s*次/);
     await clickAutomationCardByTitle(AUTOMATION_TITLE);
@@ -113,10 +110,7 @@ describe("automation run keeps the first-input session title", () => {
     // automation 执行轮只能读取任务定义；写工具必须在发给 provider 前被 turn-scoped
     // denylist 移除，避免任务在运行时自改、自删或递归创建新任务。
     const runRequest = { lastUserMessageIncludes: [RUN_PROMPT] };
-    await waitForUpstreamRequest(
-      runRequest,
-      "没有捕获到定时任务立即运行的 provider 请求",
-    );
+    await waitForUpstreamRequest(runRequest, "没有捕获到定时任务立即运行的 provider 请求");
     const runToolNames = await getUpstreamRequestToolNames(runRequest);
     expect(runToolNames).toContain("CronList");
     expect(runToolNames).not.toContain("CronCreate");
@@ -135,10 +129,7 @@ describe("automation run keeps the first-input session title", () => {
     await clickTestIdByDom(TID_AUTOMATIONS_OPEN, {
       timeoutMsg: "执行完成后无法返回定时任务列表",
     });
-    const dispatchedCardText = await waitForAutomationCardText(
-      AUTOMATION_TITLE,
-      "已运行 1 次",
-    );
+    const dispatchedCardText = await waitForAutomationCardText(AUTOMATION_TITLE, "已运行 1 次");
     expect(dispatchedCardText).toContain("下次运行");
     expect(dispatchedCardText).not.toMatch(/已运行\s*1\s*\/\s*\d+\s*次/);
   });
@@ -240,13 +231,9 @@ async function clickAutomationCardByTitle(title: string): Promise<void> {
       const result = await browser.execute(
         (cardTestId, expectedTitle) => {
           const cards = Array.from(
-            document.querySelectorAll<HTMLElement>(
-              `[data-testid="${cardTestId}"]`,
-            ),
+            document.querySelectorAll<HTMLElement>(`[data-testid="${cardTestId}"]`),
           );
-          const target = cards.find((card) =>
-            card.innerText.includes(expectedTitle),
-          );
+          const target = cards.find((card) => card.innerText.includes(expectedTitle));
           target?.click();
           return {
             clicked: Boolean(target),
@@ -299,13 +286,9 @@ async function waitForTaskItemContaining(title: string): Promise<string> {
         (baseTestId, expectedTitle) => {
           const prefix = `${baseTestId}-`;
           const items = Array.from(
-            document.querySelectorAll<HTMLElement>(
-              `[data-testid^="${prefix}"]`,
-            ),
+            document.querySelectorAll<HTMLElement>(`[data-testid^="${prefix}"]`),
           );
-          const target = items.find((item) =>
-            item.innerText.includes(expectedTitle),
-          );
+          const target = items.find((item) => item.innerText.includes(expectedTitle));
           return {
             taskId: target?.dataset.testid?.slice(prefix.length) ?? null,
             titles: items.map((item) => item.innerText),
@@ -330,23 +313,16 @@ async function waitForTaskItemContaining(title: string): Promise<string> {
 
 async function expectHeaderTitle(expectedTitle: string): Promise<void> {
   const actual = await browser.execute((titleTestId) => {
-    const header = document.querySelector<HTMLElement>(
-      `[data-testid="${titleTestId}"]`,
-    );
+    const header = document.querySelector<HTMLElement>(`[data-testid="${titleTestId}"]`);
     return header?.getAttribute("title") ?? header?.innerText.trim() ?? null;
   }, TID_WORKSPACE_TITLE);
   expect(actual).toBe(expectedTitle);
 }
 
-async function expectTaskItemTitle(
-  taskId: string,
-  expectedTitle: string,
-): Promise<void> {
+async function expectTaskItemTitle(taskId: string, expectedTitle: string): Promise<void> {
   const actual = await browser.execute(
     (taskItemTestId) => {
-      const item = document.querySelector<HTMLElement>(
-        `[data-testid="${taskItemTestId}"]`,
-      );
+      const item = document.querySelector<HTMLElement>(`[data-testid="${taskItemTestId}"]`);
       return item?.innerText ?? null;
     },
     testId(TID_TASK_ITEM, taskId),

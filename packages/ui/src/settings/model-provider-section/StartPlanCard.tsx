@@ -61,9 +61,7 @@ export function StartPlanCard({
             </div>
             {actions ? <div className="max-sm:[&>button]:w-full">{actions}</div> : null}
           </div>
-          <p className="max-w-2xl text-ui-base leading-5 text-foreground-subtle">
-            {description}
-          </p>
+          <p className="max-w-2xl text-ui-base leading-5 text-foreground-subtle">{description}</p>
         </div>
       </div>
     </div>
@@ -128,8 +126,9 @@ function formatHeroGrantUnits(value: number, locale: string): string {
       minimumFractionDigits: 0,
     })
       .format(value)
-      .replace(/\b(thousand|million|billion|trillion)\b/g, (unit) =>
-        unit.slice(0, 1).toUpperCase() + unit.slice(1),
+      .replace(
+        /\b(thousand|million|billion|trillion)\b/g,
+        (unit) => unit.slice(0, 1).toUpperCase() + unit.slice(1),
       );
   }
   return formatCompactTokenNumber(locale, value);

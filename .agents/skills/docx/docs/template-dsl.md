@@ -6,6 +6,7 @@ manifests.
 ## Anchor forms
 
 Recommended anchors:
+
 - `@@FIELD:name@@`
 - `@@FIELD:date@@`
 - `@@BLOCK:intro@@`
@@ -23,6 +24,7 @@ Recommended anchors:
 ## Template manifest
 
 A template manifest is a JSON description of:
+
 - template mode
 - required sections
 - expected style IDs

@@ -36,6 +36,7 @@ SQLite/账本继续拥有唯一迁移事实；Host/UI 只观察阶段。下方�
 ## 本次 hotfix 范围裁决
 
 2026-09-14 用户在讨论 Host 初始化改动规模后，确认先按会话库范围继续：
+
 - 本次：会话库 `db.sqlite` 的 SQL 优化、锁等待、启动通知、业务请求门禁和 loading。
 - 后续：[Host tasks-index 初始化可观测性](./host-tasks-index-startup-followup.md)。本次不改它的初始化线程、事务或服务发布顺序。
 - 20 GB 性能测量、Windows/macOS 真机验证和发布灰度仍单独记录，不以隔离小库测试代替。
@@ -148,15 +149,15 @@ SQLite/账本继续拥有唯一迁移事实；Host/UI 只观察阶段。下方�
 
 代码已落地，按用户要求进入独立分支提交与草稿 MR；E2E 和发布验收未完成前不标记 Todo 完成。
 
-| 层次 | 已有证据 | 限制 |
-| --- | --- | --- |
-| 旧/新 SQL 差分 | `optimized-migrations.test.ts` 16 个用例；完整行与 JSON 字节、账本、回滚、未知字段、自定义 trigger；EXPLAIN 验证 part 单次扫描与候选会话索引查询 | 隔离小库；不代表 20 GB 峰值内存或耗时 |
-| 迁移协调 | `async-migration-startup.test.ts` 4 个用例，真实写锁保持 5.1 秒；同/异库、超预算与错误回滚 | 大库及操作系统差异未测 |
-| 原有存储回归 | `session-store.test.ts` 44 个用例含重复双进程启动；旧 Selection/Reasoning/Provider 迁移与旧版实际 Reader 的 5 文件 52 个用例通过 | 回退证据使用冻结旧 Reader，未运行完整旧版本 GUI |
-| 崩溃恢复 | `migration-crash-recovery.test.ts` 2 个真实子进程用例；COMMIT 前 SIGKILL 后重迁，COMMIT 后通知丢失不重迁 | 当前 Linux |
-| 状态通知与日志 | `bootstrap/tests/storage-startup.test.ts` 1 个用例；真实 Writable flush 屏障、严格 schema、attempt/databaseId/sequence 与诊断同源 | 状态日志按阶段产生，无逐行 SQL 日志 |
-| Host 与 UI | 最新聚焦 6 文件 59 个用例通过：协议请求计时、进程管理、门禁、hook 换代/手机观察、Root 远控订阅边界 | 手机真实 relay/SSH/WSL/Docker 尚待回归 |
-| E2E | pending 新增 `conversation-session-database-startup.test.ts`，真实旧库+写锁+页面刷新+释放后核对数据 | 正在验证，尚未晋级正式覆盖 |
+| 层次           | 已有证据                                                                                                                                         | 限制                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| 旧/新 SQL 差分 | `optimized-migrations.test.ts` 16 个用例；完整行与 JSON 字节、账本、回滚、未知字段、自定义 trigger；EXPLAIN 验证 part 单次扫描与候选会话索引查询 | 隔离小库；不代表 20 GB 峰值内存或耗时           |
+| 迁移协调       | `async-migration-startup.test.ts` 4 个用例，真实写锁保持 5.1 秒；同/异库、超预算与错误回滚                                                       | 大库及操作系统差异未测                          |
+| 原有存储回归   | `session-store.test.ts` 44 个用例含重复双进程启动；旧 Selection/Reasoning/Provider 迁移与旧版实际 Reader 的 5 文件 52 个用例通过                 | 回退证据使用冻结旧 Reader，未运行完整旧版本 GUI |
+| 崩溃恢复       | `migration-crash-recovery.test.ts` 2 个真实子进程用例；COMMIT 前 SIGKILL 后重迁，COMMIT 后通知丢失不重迁                                         | 当前 Linux                                      |
+| 状态通知与日志 | `bootstrap/tests/storage-startup.test.ts` 1 个用例；真实 Writable flush 屏障、严格 schema、attempt/databaseId/sequence 与诊断同源                | 状态日志按阶段产生，无逐行 SQL 日志             |
+| Host 与 UI     | 最新聚焦 6 文件 59 个用例通过：协议请求计时、进程管理、门禁、hook 换代/手机观察、Root 远控订阅边界                                               | 手机真实 relay/SSH/WSL/Docker 尚待回归          |
+| E2E            | pending 新增 `conversation-session-database-startup.test.ts`，真实旧库+写锁+页面刷新+释放后核对数据                                              | 正在验证，尚未晋级正式覆盖                      |
 
 执行预算：内置新版 Agent 首通知 30 秒；SQLite 外部写锁总等待 60 分钟，单次 native busy 25ms，异步退避 10–200ms；长 SQL 不加自动超时杀进程，10 分钟显示耗时提示。业务期恢复原 5 秒 busy timeout，普通 RPC 原 timeout 不变。自定义旧 Agent 仍兼容旧路径；收到合法启动帧后启用新等待语义。
 

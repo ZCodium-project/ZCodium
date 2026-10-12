@@ -29,7 +29,12 @@ function validFile(records: unknown[]): Record<string, unknown> {
 describe("workspaceHookTrustStoreFileSchema", () => {
   it("接受合法完整记录", () => {
     const result = parseWorkspaceHookTrustStoreContent(
-      JSON.stringify(validFile([validRecord(), validRecord({ workspaceIdentity: "/repo/other", hookDeclarationDigest: OTHER_DIGEST })])),
+      JSON.stringify(
+        validFile([
+          validRecord(),
+          validRecord({ workspaceIdentity: "/repo/other", hookDeclarationDigest: OTHER_DIGEST }),
+        ]),
+      ),
     );
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
@@ -47,12 +52,15 @@ describe("workspaceHookTrustStoreFileSchema", () => {
   });
 
   it("拒绝 records 非数组", () => {
-    expect(workspaceHookTrustStoreFileSchema.safeParse({ ...validFile([]), records: "nope" }).success).toBe(false);
+    expect(
+      workspaceHookTrustStoreFileSchema.safeParse({ ...validFile([]), records: "nope" }).success,
+    ).toBe(false);
   });
 
   it("拒绝未知顶层字段", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse({ ...validFile([validRecord()]), extra: 1 }).success,
+      workspaceHookTrustStoreFileSchema.safeParse({ ...validFile([validRecord()]), extra: 1 })
+        .success,
     ).toBe(false);
   });
 
@@ -68,42 +76,51 @@ describe("workspaceHookTrustStoreFileSchema", () => {
       "hookDeclarationDigest",
     ]) {
       const { [key]: _removed, ...record } = validRecord();
-      expect(workspaceHookTrustStoreFileSchema.safeParse(validFile([record])).success, key).toBe(false);
+      expect(workspaceHookTrustStoreFileSchema.safeParse(validFile([record])).success, key).toBe(
+        false,
+      );
     }
   });
 
   it("拒绝非法 decision / digestAlgorithm", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ decision: "maybe" })])).success,
+      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ decision: "maybe" })]))
+        .success,
     ).toBe(false);
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ digestAlgorithm: "md5" })])).success,
+      workspaceHookTrustStoreFileSchema.safeParse(
+        validFile([validRecord({ digestAlgorithm: "md5" })]),
+      ).success,
     ).toBe(false);
   });
 
   it("拒绝非法 grantedAt 时间戳", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ grantedAt: "yesterday" })])).success,
+      workspaceHookTrustStoreFileSchema.safeParse(
+        validFile([validRecord({ grantedAt: "yesterday" })]),
+      ).success,
     ).toBe(false);
   });
 
   it("拒绝非 64 位 hex digest", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ hookDeclarationDigest: "xyz" })])).success,
+      workspaceHookTrustStoreFileSchema.safeParse(
+        validFile([validRecord({ hookDeclarationDigest: "xyz" })]),
+      ).success,
     ).toBe(false);
   });
 
   it("拒绝未知 record 字段", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ surprise: true })])).success,
+      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord({ surprise: true })]))
+        .success,
     ).toBe(false);
   });
 
   it("拒绝重复的 workspaceIdentity + digest key", () => {
     expect(
-      workspaceHookTrustStoreFileSchema.safeParse(
-        validFile([validRecord(), validRecord()]),
-      ).success,
+      workspaceHookTrustStoreFileSchema.safeParse(validFile([validRecord(), validRecord()]))
+        .success,
     ).toBe(false);
   });
 

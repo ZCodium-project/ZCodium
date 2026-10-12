@@ -134,12 +134,12 @@ conversation-session/<case>.test.ts   canonical formal target 成为当前文件
 
 录制时可以全量 capture；转成 fixture 时只把必要请求纳入合同。
 
-| 分类 | 含义 | 处理 |
-| --- | --- | --- |
-| `main` | case 核心断言依赖的请求，例如 edit rerun、compact summary、goal verifier | 放入 case-local fixture |
-| `common` | 多个 case 稳定需要的辅助请求，例如标题生成 | 放入 common fixture |
-| `ignore` | capture 中出现但不属于测试合同的请求 | 不进入 case-local fixture，必要时在 manifest 说明 |
-| `synthetic` | 真实 capture 不稳定或不能构造的时序/故障，例如慢流、断流、429 | 放入 case-local fixture，并写 `syntheticReason` |
+| 分类        | 含义                                                                     | 处理                                              |
+| ----------- | ------------------------------------------------------------------------ | ------------------------------------------------- |
+| `main`      | case 核心断言依赖的请求，例如 edit rerun、compact summary、goal verifier | 放入 case-local fixture                           |
+| `common`    | 多个 case 稳定需要的辅助请求，例如标题生成                               | 放入 common fixture                               |
+| `ignore`    | capture 中出现但不属于测试合同的请求                                     | 不进入 case-local fixture，必要时在 manifest 说明 |
+| `synthetic` | 真实 capture 不稳定或不能构造的时序/故障，例如慢流、断流、429            | 放入 case-local fixture，并写 `syntheticReason`   |
 
 工具可以基于 marker、path、prompt 内容和请求顺序自动建议分类，但产品语义由开发者 review。
 
@@ -147,12 +147,12 @@ conversation-session/<case>.test.ts   canonical formal target 成为当前文件
 
 不同 case 使用不同回放策略，避免所有测试都被慢流拖慢，也避免性能 case 被一次性 body 回放冲掉价值。
 
-| 策略 | 适用场景 |
-| --- | --- |
-| `fast-text` | 普通功能断言，快速返回即可 |
-| `controlled-stream` | stop、queue、interrupted 等需要稳定 streaming 窗口的 case |
-| `recorded-stream` | 性能、Markdown 渲染、流式节奏相关 case，需要保留真实 `responseEvents` / `responseChunkTimeline` |
-| `fault-stream` | 断流、半包、socket destroy 等故障注入 |
+| 策略                | 适用场景                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| `fast-text`         | 普通功能断言，快速返回即可                                                                      |
+| `controlled-stream` | stop、queue、interrupted 等需要稳定 streaming 窗口的 case                                       |
+| `recorded-stream`   | 性能、Markdown 渲染、流式节奏相关 case，需要保留真实 `responseEvents` / `responseChunkTimeline` |
+| `fault-stream`      | 断流、半包、socket destroy 等故障注入                                                           |
 
 synthetic 的 controlled/fault stream 必须说明原因。典型例子：真实模型太快，无法稳定覆盖 stop window。
 

@@ -10,13 +10,13 @@ projection、topic event log、subscription、CommandInbox LRU 和 active runtim
 CLI session store 位于 `~/.zcode/cli/db/db.sqlite`。迁移入口是
 `apps/zcode-cli/packages/adapters/src/storage/session-store/migrations.ts`，当前迁移到 `0018`：
 
-| 迁移 | 当前作用 |
-| --- | --- |
-| `0014_message_part_sequence` | 为 message/part 建立稳定顺序 |
+| 迁移                                            | 当前作用                                   |
+| ----------------------------------------------- | ------------------------------------------ |
+| `0014_message_part_sequence`                    | 为 message/part 建立稳定顺序               |
 | `0015_message_part_sequence_backfill_and_guard` | 修复空 sequence，并用 trigger 保证后续写入 |
-| `0016_session_input_ledger` | 新增 durable input lifecycle ledger |
-| `0017_session_input_start_now_delivery` | 将 `startNow` 纳入输入 admission 账本 |
-| `0018_session_input_failed_status` | 区分 accepted 后运行时启动失败的终态 |
+| `0016_session_input_ledger`                     | 新增 durable input lifecycle ledger        |
+| `0017_session_input_start_now_delivery`         | 将 `startNow` 纳入输入 admission 账本      |
+| `0018_session_input_failed_status`              | 区分 accepted 后运行时启动失败的终态       |
 
 message/part 仍采用索引列加 JSON data 的 additive 演进。可选锚点缺失时读侧宽容兼容；需要查询、唯一性
 或事务约束的结构才通过 append-only migration 增加。

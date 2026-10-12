@@ -38,12 +38,14 @@ describe("docker detect", () => {
       ].join("\n"),
     );
 
-    expect(containers).toEqual([{
-      id: "931b148d01e8",
-      image: "ubuntu:24.04",
-      name: "zcode-ssh-linux-amd64",
-      state: "running",
-      status: "Up 2 minutes",
-    }]);
+    expect(containers).toEqual([
+      {
+        id: "931b148d01e8",
+        image: "ubuntu:24.04",
+        name: "zcode-ssh-linux-amd64",
+        state: "running",
+        status: "Up 2 minutes",
+      },
+    ]);
   });
 });

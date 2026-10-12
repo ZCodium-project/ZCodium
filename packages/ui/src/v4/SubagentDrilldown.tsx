@@ -5,10 +5,7 @@
 // - 展示：不虚拟化，只取窗口最近 N 条 assistant 文本输出；工具调用由 Agent 摘要/子工具列表表达；
 // - 只读：不下发 onFork/onRetry/onEdit，行内动作面不出现。
 import { memo, useEffect, useMemo, useState } from "react";
-import {
-  TID_V4_SUBAGENT_DRILLDOWN,
-  testId,
-} from "@zcode/shared";
+import { TID_V4_SUBAGENT_DRILLDOWN, testId } from "@zcode/shared";
 import type { ConversationRow } from "@zcode/shared/zcode-protocol-v4";
 import { ConversationRowView } from "@/v4/ConversationRowView.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
@@ -57,9 +54,7 @@ export const SubagentDrilldown = memo(function SubagentDrilldown({
   const sourceRows = state.snapshot?.rows.window ?? [];
   const rows = sourceRows.filter(isSubagentOutputRow);
   const visibleRows =
-    rows.length > SUBAGENT_DRILLDOWN_MAX_ROWS
-      ? rows.slice(-SUBAGENT_DRILLDOWN_MAX_ROWS)
-      : rows;
+    rows.length > SUBAGENT_DRILLDOWN_MAX_ROWS ? rows.slice(-SUBAGENT_DRILLDOWN_MAX_ROWS) : rows;
   const hiddenCount = rows.length - visibleRows.length;
   const statusText =
     state.status === "connecting"
@@ -92,9 +87,7 @@ export const SubagentDrilldown = memo(function SubagentDrilldown({
           {intl.formatMessage({ id: "chat.toolCall.agent.output" })}
         </h4>
         {statusText ? (
-          <span className="min-w-0 truncate text-ui-sm text-foreground-subtle">
-            {statusText}
-          </span>
+          <span className="min-w-0 truncate text-ui-sm text-foreground-subtle">{statusText}</span>
         ) : null}
       </div>
       {visibleRows.length === 0 ? (
@@ -114,11 +107,7 @@ export const SubagentDrilldown = memo(function SubagentDrilldown({
             </div>
           ) : null}
           {visibleRows.map((row) => (
-            <ConversationRowView
-              key={row.rowId}
-              row={row}
-              context={drilldownContext}
-            />
+            <ConversationRowView key={row.rowId} row={row} context={drilldownContext} />
           ))}
         </div>
       )}

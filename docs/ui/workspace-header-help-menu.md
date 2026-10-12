@@ -15,6 +15,7 @@ Workspace header action 区在终端按钮左侧提供轻量帮助菜单，作�
 菜单分为两组，不显示分组标题，仅桌面端在两组之间放一条分隔线。
 
 第一组从上到下：
+
 1. 产品文档：打开 `https://zcode.z.ai/docs`。
 2. 用户社群：走 `IPlatformService.openCommunity()`。
 3. 问题上报：打开内置反馈表单，保持 `type=bug`、`module=其它`、`includeLogs=true` 和截图行为。

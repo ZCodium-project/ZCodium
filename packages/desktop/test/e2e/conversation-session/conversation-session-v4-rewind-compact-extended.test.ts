@@ -32,10 +32,7 @@ describe("PV4-18/PV4-19 compact-covered extended rewind", () => {
     const filename = await pasteV4ComposerImageAttachment("pv4-18-rewind.png");
 
     await sendV4Prompt("E2E_PV4_18_ATTACHMENT_ORIGINAL 带图片的原问题");
-    await waitForV4TimelineContaining(
-      "PV4_18_ATTACHMENT_ORIGINAL_REPLY",
-      60000,
-    );
+    await waitForV4TimelineContaining("PV4_18_ATTACHMENT_ORIGINAL_REPLY", 60000);
     const sessionId = (await getV4PaneSnapshot()).sessionId;
     await compactAndWait();
 
@@ -45,13 +42,9 @@ describe("PV4-18/PV4-19 compact-covered extended rewind", () => {
 
     const finalSnapshot = await getV4PaneSnapshot();
     expect(finalSnapshot.sessionId).toBe(sessionId);
-    expect(finalSnapshot.timelineText).not.toContain(
-      "PV4_18_ATTACHMENT_ORIGINAL_REPLY",
-    );
+    expect(finalSnapshot.timelineText).not.toContain("PV4_18_ATTACHMENT_ORIGINAL_REPLY");
     expect(await waitForV4RowAttachments()).toContain(filename);
-    const capture = await waitForUpstreamNetworkCapture(
-      "E2E_PV4_18_ATTACHMENT_EDITED",
-    );
+    const capture = await waitForUpstreamNetworkCapture("E2E_PV4_18_ATTACHMENT_EDITED");
     const requestText = JSON.stringify(capture.requestJson);
     expect(requestText).toMatch(/image|base64|data:image/i);
     expect(requestText).not.toContain("PV4_18_ATTACHMENT_ORIGINAL_REPLY");
@@ -104,20 +97,16 @@ async function compactAndWait() {
     timeoutMsg: "PV4 compact composer 没有出现",
   });
   await clickV4Send();
-  await browser.waitUntil(
-    async () => (await compactSuccessMarkerCount()) === before + 1,
-    { timeout: 90000, timeoutMsg: "PV4 compact success marker 数量没有增加" },
-  );
+  await browser.waitUntil(async () => (await compactSuccessMarkerCount()) === before + 1, {
+    timeout: 90000,
+    timeoutMsg: "PV4 compact success marker 数量没有增加",
+  });
 }
 
 function compactSuccessMarkerCount(): Promise<number> {
   return browser.execute(
     (rowPrefix) =>
-      Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${rowPrefix}-"]`,
-        ),
-      ).filter(
+      Array.from(document.querySelectorAll<HTMLElement>(`[data-testid^="${rowPrefix}-"]`)).filter(
         (row) =>
           row.dataset.rowKind === "timelineMarker" &&
           row.dataset.markerType === "compact" &&

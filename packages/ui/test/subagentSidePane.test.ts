@@ -88,14 +88,14 @@ describe("subagent side pane tabs", () => {
       { ...context, sessionId: null },
       { ...context, onOpenSubagentSession: undefined },
     ]) {
-    expect(
-      openSubagentSessionFromSummary({
-        childSessionId: "child-session",
-        context: blockedContext,
-        subagentType: "Explore",
-        title: "Explore project structure",
-      }),
-    ).toBe(false);
+      expect(
+        openSubagentSessionFromSummary({
+          childSessionId: "child-session",
+          context: blockedContext,
+          subagentType: "Explore",
+          title: "Explore project structure",
+        }),
+      ).toBe(false);
     }
     expect(
       openSubagentSessionFromSummary({

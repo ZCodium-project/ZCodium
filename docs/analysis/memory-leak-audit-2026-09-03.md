@@ -100,36 +100,36 @@
 
 ### 其余中危
 
-| 位置 | 问题 |
-| --- | --- |
-| `host/windowRemoteConnectionRegistry.ts:390-411` | 远端意外断开后 `handleConnectionClosed` 不调 `disposeEntry`，整套 ServiceCollection/SSH backend 持到用户关 tab |
-| `host/index.ts:791-840, 552-578`、`host/cronRunLifecycle.ts:40-58` | cron/off-peak 终态订阅只在 `inputId === traceId` 时释放；session 删除、agent 崩溃、并发 prompt 覆盖 inputId 都永不命中；manual run 额外一个 60s SQLite 心跳 interval |
-| `main/browserView/browserPlaywrightLocatorExecutor.ts:1114-1155` 等 | 每条 CDP 命令 `Page.createIsolatedWorld` 新建 V8 context 并全量重注入 Playwright runtime，SPA 不导航则持续累积（guest renderer 内存） |
-| `main/browserView/electronBrowserWebmRecorder.ts:286` | 每次录屏 `session.fromPartition(随机名)`，Electron partition 无销毁 API |
-| `main/cuaPermissionDragPanel.ts:128-183`、`desktopCuaPermissionIpc.ts:194-222` | `destroy()` 后迟到的 `show()` 重建 BrowserWindow + 150ms interval，无人再销毁 |
-| `main/appTelemetryRuntime.ts:34,85` | `rendererContexts` 按 webContents.id 只增不删 |
-| `main/desktopHostProcess.ts:695-731` | reload-respawn 时旧 host exit 回调按共享 key 反注册，误删新 host（正确性缺陷） |
-| `bots/botRemoteWorkspaceBridge.ts:56, 208-244, 268-276` | `runtimeServicesByWorkspaceKey` 断连/重连都不失效，pending 永不 settle，dispose 直接 clear 不 resolve |
-| `ui/v4/conversationProjectionStore.ts:696-704` + `shared/zcode-protocol-v4/apply.ts:78-83` | live 期间 `rows.window` 只增不减，每条 delta 全数组拷贝 + O(N) findIndex；`loadAllOlder`（`:1018-1150`）宽屏时把全量历史合入 window |
-| `ui/store/zcodeSessionStore.ts` + `tabStore.ts:346` | `workspaces[workspaceKey]` 桶全仓无删除路径；`remoteTimelineTaskStore`/`remotePinnedTaskStore` 有 `clearWorkspace` 但无调用者 |
-| `ui/store/taskQueryCacheStore.ts:472`、`hooks/useWorkspaceTaskLists.ts:320-322` | queryKey 含 `limit::version`，每次 bump/展开更多都新增 key 不删旧 |
-| `ui/v4/windowControllerTaskListRegistry.ts:78, 218-228` | `queryCache` 以含搜索词的 key 缓存整份结果，搜索框每次击键 +1 |
-| `ui/feedback/feedbackSubmissionJob.ts:115, 410` | 失败的 job 永不删，持有截图 base64 ×2 |
-| `ui/v4/telemetry/ConversationTelemetryAttachment.tsx:222-240` | `useMemo` 内做 acquire 副作用，被丢弃的渲染无对应 release，refCount 永远 >0，supervisor 无法释放 |
-| `ui/terminal/sidePaneTerminalSessionRegistry.ts:58` | 常驻 xterm 实例无上限，detached 状态 PTY 输出仍写 scrollback（设计如此，但持续吃内存） |
-| `rpc/src/channelServer.ts:224-248, 270-277` | 未注册 channel 的 `pendingRequests`（含参数）超时不删；远端 host 不注册 `cuaPermissionService` 等 channel 时每次调用 +1 |
-| `rpc/src/channelClient.ts:151-178` + `proxy-channel.ts:131-132` | 事件 handler 在创建时即注册，Proxy 每次访问 `service.onXxx` 都新建；同时有「取消订阅后再订阅收不到事件」的正确性 bug |
-| `rpc/src/ipc.ts:119-145` | `IPCServer.disposables` 每连接只增不减（当前无生产调用方，潜伏） |
-| `web/src/main.tsx:1865-1881, 2200-2232` + `client/src/websocket.ts:102-105` | Web 端 bridge 切换时 ChannelClient 无句柄 dispose，in-flight RPC 永不 settle；桌面端同类问题已修（`messageport.ts:19-24` 注释），web 未同步 |
-| `rpc/src/remote.ts:294-321` + `persistent-protocol.ts:151-162, 274-285` | 重连不关旧 socket、可并发多条重连链、失败后两个 interval 仍跑（当前无生产调用方） |
-| `shared/zcode-protocol-v4/wire-assembler.ts:146, 465-491` | `settledByRoute` tombstone 无上限，调用方从不 `discard()` |
-| `cli adapters/src/exec/node-execution-adapter-base.ts:32` | `backgroundTasks` 永不删除，每条持完整 stdout（30K–150K 字符）+ AbortController |
-| `cli core/src/runtime-task/registry.ts:97-137` | 终态 subagent/Workflow 保留完整 `output` + `prompt`；`removeRuntimeBackgroundTask` 对 `Agent` 返回 undefined 所以 `local_agent` 永不移除 |
-| `cli core/src/tool/executor/background-tasks.ts:311, 250-301` | 每后台任务一个 1s `setInterval`，emit 失败无限重试；`ToolExecutorImpl` 无 dispose，session 关闭时可钉住整个 runtime |
-| `cli core/src/tool/executor/impl.ts:57` + `handlers/read.ts:366` 等 | `readFileState` 存全文，key = path+offset+limit，只在 compact 时清 |
-| `cli bootstrap/src/zcode-protocol-v4/persistent-command-index.ts:41,97` | `sessions` 在 close/去激活时不清理，注释所述 LRU 不存在 |
-| `cli v4-gateway.ts:1955-1960` | `disposeSession` 传 `clearCommandInbox: false`，每个关闭的 session 留下 512 条 ack 桶 |
-| `cli server-operations.ts:1861` + `session-residency.ts:79` | `legacyStreamSubscribed` 置位后永不清除（无 unsubscribe RPC），桌面端仍走此路径（`services/.../zcodeTaskServiceAdapter.ts:3306`），命中即整个 record 永不去激活，叠加 CLI-H1 成为持续增长 |
+| 位置                                                                                       | 问题                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host/windowRemoteConnectionRegistry.ts:390-411`                                           | 远端意外断开后 `handleConnectionClosed` 不调 `disposeEntry`，整套 ServiceCollection/SSH backend 持到用户关 tab                                                                            |
+| `host/index.ts:791-840, 552-578`、`host/cronRunLifecycle.ts:40-58`                         | cron/off-peak 终态订阅只在 `inputId === traceId` 时释放；session 删除、agent 崩溃、并发 prompt 覆盖 inputId 都永不命中；manual run 额外一个 60s SQLite 心跳 interval                      |
+| `main/browserView/browserPlaywrightLocatorExecutor.ts:1114-1155` 等                        | 每条 CDP 命令 `Page.createIsolatedWorld` 新建 V8 context 并全量重注入 Playwright runtime，SPA 不导航则持续累积（guest renderer 内存）                                                     |
+| `main/browserView/electronBrowserWebmRecorder.ts:286`                                      | 每次录屏 `session.fromPartition(随机名)`，Electron partition 无销毁 API                                                                                                                   |
+| `main/cuaPermissionDragPanel.ts:128-183`、`desktopCuaPermissionIpc.ts:194-222`             | `destroy()` 后迟到的 `show()` 重建 BrowserWindow + 150ms interval，无人再销毁                                                                                                             |
+| `main/appTelemetryRuntime.ts:34,85`                                                        | `rendererContexts` 按 webContents.id 只增不删                                                                                                                                             |
+| `main/desktopHostProcess.ts:695-731`                                                       | reload-respawn 时旧 host exit 回调按共享 key 反注册，误删新 host（正确性缺陷）                                                                                                            |
+| `bots/botRemoteWorkspaceBridge.ts:56, 208-244, 268-276`                                    | `runtimeServicesByWorkspaceKey` 断连/重连都不失效，pending 永不 settle，dispose 直接 clear 不 resolve                                                                                     |
+| `ui/v4/conversationProjectionStore.ts:696-704` + `shared/zcode-protocol-v4/apply.ts:78-83` | live 期间 `rows.window` 只增不减，每条 delta 全数组拷贝 + O(N) findIndex；`loadAllOlder`（`:1018-1150`）宽屏时把全量历史合入 window                                                       |
+| `ui/store/zcodeSessionStore.ts` + `tabStore.ts:346`                                        | `workspaces[workspaceKey]` 桶全仓无删除路径；`remoteTimelineTaskStore`/`remotePinnedTaskStore` 有 `clearWorkspace` 但无调用者                                                             |
+| `ui/store/taskQueryCacheStore.ts:472`、`hooks/useWorkspaceTaskLists.ts:320-322`            | queryKey 含 `limit::version`，每次 bump/展开更多都新增 key 不删旧                                                                                                                         |
+| `ui/v4/windowControllerTaskListRegistry.ts:78, 218-228`                                    | `queryCache` 以含搜索词的 key 缓存整份结果，搜索框每次击键 +1                                                                                                                             |
+| `ui/feedback/feedbackSubmissionJob.ts:115, 410`                                            | 失败的 job 永不删，持有截图 base64 ×2                                                                                                                                                     |
+| `ui/v4/telemetry/ConversationTelemetryAttachment.tsx:222-240`                              | `useMemo` 内做 acquire 副作用，被丢弃的渲染无对应 release，refCount 永远 >0，supervisor 无法释放                                                                                          |
+| `ui/terminal/sidePaneTerminalSessionRegistry.ts:58`                                        | 常驻 xterm 实例无上限，detached 状态 PTY 输出仍写 scrollback（设计如此，但持续吃内存）                                                                                                    |
+| `rpc/src/channelServer.ts:224-248, 270-277`                                                | 未注册 channel 的 `pendingRequests`（含参数）超时不删；远端 host 不注册 `cuaPermissionService` 等 channel 时每次调用 +1                                                                   |
+| `rpc/src/channelClient.ts:151-178` + `proxy-channel.ts:131-132`                            | 事件 handler 在创建时即注册，Proxy 每次访问 `service.onXxx` 都新建；同时有「取消订阅后再订阅收不到事件」的正确性 bug                                                                      |
+| `rpc/src/ipc.ts:119-145`                                                                   | `IPCServer.disposables` 每连接只增不减（当前无生产调用方，潜伏）                                                                                                                          |
+| `web/src/main.tsx:1865-1881, 2200-2232` + `client/src/websocket.ts:102-105`                | Web 端 bridge 切换时 ChannelClient 无句柄 dispose，in-flight RPC 永不 settle；桌面端同类问题已修（`messageport.ts:19-24` 注释），web 未同步                                               |
+| `rpc/src/remote.ts:294-321` + `persistent-protocol.ts:151-162, 274-285`                    | 重连不关旧 socket、可并发多条重连链、失败后两个 interval 仍跑（当前无生产调用方）                                                                                                         |
+| `shared/zcode-protocol-v4/wire-assembler.ts:146, 465-491`                                  | `settledByRoute` tombstone 无上限，调用方从不 `discard()`                                                                                                                                 |
+| `cli adapters/src/exec/node-execution-adapter-base.ts:32`                                  | `backgroundTasks` 永不删除，每条持完整 stdout（30K–150K 字符）+ AbortController                                                                                                           |
+| `cli core/src/runtime-task/registry.ts:97-137`                                             | 终态 subagent/Workflow 保留完整 `output` + `prompt`；`removeRuntimeBackgroundTask` 对 `Agent` 返回 undefined 所以 `local_agent` 永不移除                                                  |
+| `cli core/src/tool/executor/background-tasks.ts:311, 250-301`                              | 每后台任务一个 1s `setInterval`，emit 失败无限重试；`ToolExecutorImpl` 无 dispose，session 关闭时可钉住整个 runtime                                                                       |
+| `cli core/src/tool/executor/impl.ts:57` + `handlers/read.ts:366` 等                        | `readFileState` 存全文，key = path+offset+limit，只在 compact 时清                                                                                                                        |
+| `cli bootstrap/src/zcode-protocol-v4/persistent-command-index.ts:41,97`                    | `sessions` 在 close/去激活时不清理，注释所述 LRU 不存在                                                                                                                                   |
+| `cli v4-gateway.ts:1955-1960`                                                              | `disposeSession` 传 `clearCommandInbox: false`，每个关闭的 session 留下 512 条 ack 桶                                                                                                     |
+| `cli server-operations.ts:1861` + `session-residency.ts:79`                                | `legacyStreamSubscribed` 置位后永不清除（无 unsubscribe RPC），桌面端仍走此路径（`services/.../zcodeTaskServiceAdapter.ts:3306`），命中即整个 record 永不去激活，叠加 CLI-H1 成为持续增长 |
 
 ## 三、低危（摘要）
 

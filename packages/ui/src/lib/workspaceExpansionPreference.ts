@@ -26,7 +26,8 @@ function normalizeWorkspaceExpansionState(value: unknown): WorkspaceExpansionSta
 
   return Object.fromEntries(
     Object.entries(value).filter(
-      (entry): entry is [string, boolean] => typeof entry[0] === "string" && typeof entry[1] === "boolean",
+      (entry): entry is [string, boolean] =>
+        typeof entry[0] === "string" && typeof entry[1] === "boolean",
     ),
   );
 }
@@ -79,7 +80,5 @@ export function resolveExpandedWorkspacePaths(
   workspacePaths: readonly string[],
   expansionState: WorkspaceExpansionState,
 ): Set<string> {
-  return new Set(
-    workspacePaths.filter((workspacePath) => expansionState[workspacePath] !== false),
-  );
+  return new Set(workspacePaths.filter((workspacePath) => expansionState[workspacePath] !== false));
 }

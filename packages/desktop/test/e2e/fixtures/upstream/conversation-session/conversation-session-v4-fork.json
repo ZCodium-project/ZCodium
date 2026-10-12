@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_V4_FORK_PARENT"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_V4_FORK_PARENT"]
       },
       "response": {
         "statusCode": 200,

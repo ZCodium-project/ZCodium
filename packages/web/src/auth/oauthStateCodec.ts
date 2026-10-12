@@ -2,7 +2,11 @@ import { DEFAULT_ZCODE_ENDPOINT_ORIGIN } from "@zcode/shared";
 
 const PRODUCTION_WEB_REMOTE_ORIGIN = DEFAULT_ZCODE_ENDPOINT_ORIGIN;
 const WEB_REMOTE_PATHS = new Set(["/web-remote", "/web-remote/"]);
-const WEB_CALLBACK_PATHS = new Set(["/web-remote/callback", "/cn/share/callback", "/share/callback"]);
+const WEB_CALLBACK_PATHS = new Set([
+  "/web-remote/callback",
+  "/cn/share/callback",
+  "/share/callback",
+]);
 const SHARE_PATH_PATTERN = /^\/(?:cn\/share|share)\/[A-Za-z0-9._~-]{1,512}$/u;
 const APP_RETURN_QUERY_ALLOWLIST = new Set(["remoteControlToken", "relayOrigin"]);
 const PRIVATE_DEV_RETURN_TO_PATTERN =

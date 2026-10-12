@@ -69,8 +69,11 @@ export const useWorkspaceHookReviewStore = create<WorkspaceHookReviewState>((set
         // reviewFlowId 并从 1 重计；跨 flow（cross_flow）必须服从 canonical snapshot 的
         // 最新投递，否则旧 Runtime 的高 generation 会永久挡住新权威请求。同 flow 则严格
         // 要求 generation 单调，replay/conflict/stale 不得覆盖当前 binding。
-        if (verdict === "same_flow_stale" || verdict === "same_flow_replay" ||
-          verdict === "same_flow_conflict") {
+        if (
+          verdict === "same_flow_stale" ||
+          verdict === "same_flow_replay" ||
+          verdict === "same_flow_conflict"
+        ) {
           return state;
         }
       }
@@ -105,11 +108,7 @@ export function findWorkspaceHookReviewBinding(
     .sort((left, right) => right.request.createdAt - left.request.createdAt)[0];
 }
 
-const TRUSTABLE_WORKSPACE_HOOK_STATES = new Set([
-  "pending_trust",
-  "revoked",
-  "stale_digest",
-]);
+const TRUSTABLE_WORKSPACE_HOOK_STATES = new Set(["pending_trust", "revoked", "stale_digest"]);
 
 /**
  * 查找能授权指定静态 Settings 行的精确 immutable review binding。

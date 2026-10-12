@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_INTERRUPTED_PREP_ONE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_COMPACT_INTERRUPTED_PREP_ONE"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_INTERRUPTED_PREP_ONE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_COMPACT_INTERRUPTED_PREP_ONE"]
       },
       "response": {
         "statusCode": 200,
@@ -53,11 +46,9 @@
         "bodyIncludes": [
           "Read {{e2eRuntimeRoot}}/shared/readonly-tool.txt",
           "E2E_COMPACT_INTERRUPTED_PREP_TWO"
-      ],
-      "bodyExcludes": [
-        "Generate a concise title"
-      ]
-    },
+        ],
+        "bodyExcludes": ["Generate a concise title"]
+      },
       "response": {
         "statusCode": 200,
         "statusMessage": "OK",
@@ -81,14 +72,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_INTERRUPTED_PREP_TWO",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_INTERRUPTED_PREP_TWO", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -113,17 +98,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_SLOW_STREAM",
-          "E2E_COMPACT_INTERRUPTED_RUNNING"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_COMPACT_INTERRUPTED_RUNNING"
-        ]
+        "bodyIncludes": ["E2E_SLOW_STREAM", "E2E_COMPACT_INTERRUPTED_RUNNING"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_COMPACT_INTERRUPTED_RUNNING"]
       },
       "response": {
         "statusCode": 200,
@@ -195,19 +172,17 @@
         "syntheticReason": "手动 compact 的核心断言是允许在 interrupted 且 queue=0 时执行并完成 marker。"
       },
       "maxMatches": 1,
-    "match": {
-      "method": "POST",
-      "pathIncludes": "/messages",
-      "bodyIncludes": [
-        "CRITICAL: Respond with TEXT ONLY",
-        "E2E_COMPACT_INTERRUPTED_PREP_ONE",
-        "E2E_COMPACT_INTERRUPTED_PREP_TWO",
-        "\"stream\":true"
-      ],
-      "bodyExcludes": [
-        "Generate a concise title"
-      ]
-    },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": [
+          "CRITICAL: Respond with TEXT ONLY",
+          "E2E_COMPACT_INTERRUPTED_PREP_ONE",
+          "E2E_COMPACT_INTERRUPTED_PREP_TWO",
+          "\"stream\":true"
+        ],
+        "bodyExcludes": ["Generate a concise title"]
+      },
       "response": {
         "statusCode": 200,
         "statusMessage": "OK",
@@ -233,16 +208,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_SLOW_STREAM"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_SLOW_STREAM"
-        ]
+        "bodyIncludes": ["E2E_SLOW_STREAM"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_SLOW_STREAM"]
       },
       "response": {
         "statusCode": 200,

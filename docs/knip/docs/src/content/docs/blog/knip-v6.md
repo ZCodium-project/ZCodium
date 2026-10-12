@@ -70,7 +70,7 @@ Trust me, I could look at this chart all day long! The same numbers in a table:
 
 ```ts
 export namespace MyNamespace {
-  export const myName = 'knip'; // we were ignored in v5,
+  export const myName = "knip"; // we were ignored in v5,
   export type MyType = string; // yet in v6 we are included
 }
 ```

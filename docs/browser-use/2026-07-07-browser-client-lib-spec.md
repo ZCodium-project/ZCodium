@@ -25,26 +25,28 @@ export function setupBrowserRuntime(opts: {
   agent.browsers = new BrowsersFacade(opts.execute);
 }
 ```
+
 ```ts
 // facade.ts
 class BrowsersFacade {
   constructor(private execute: ExecuteFn) {}
-  async open(url?: string): Promise<Browser>;   // 若 url，先 navigate
-  get default(): Browser;                        // 返回当前（单 tab P0）
+  async open(url?: string): Promise<Browser>; // 若 url，先 navigate
+  get default(): Browser; // 返回当前（单 tab P0）
 }
 class Browser {
-  async navigate(url): Promise<BrowserCommandResult>;  // {method:"navigate",url}
+  async navigate(url): Promise<BrowserCommandResult>; // {method:"navigate",url}
   async getState(): Promise<BrowserCommandResult>;
-  async screenshot(): Promise<BrowserCommandResult>;   // {method:"screenshot"} → {image:{base64}}
+  async screenshot(): Promise<BrowserCommandResult>; // {method:"screenshot"} → {image:{base64}}
   // P0 骨架保留、throw NotImplemented：
-  async snapshot(): Promise<never>;   // T8
+  async snapshot(): Promise<never>; // T8
   async click(): Promise<never>;
   async type(): Promise<never>;
-  get playwright(): never;  // getter throw（结构先占位，逃生舱 T10）
+  get playwright(): never; // getter throw（结构先占位，逃生舱 T10）
   get cua(): never;
   get dom_cua(): never;
 }
 ```
+
 - 每方法：构造 `BrowserCommand` → `await execute(cmd)` → 返回 `BrowserCommandResult`（`ok:false` 时不 throw，让模型读 error；仅未实现的 snapshot/click/... throw NotImplemented，让未支持方法显式抛错）。
 - 库纯 TS，外部效果全经注入的 `execute`（I/O 边界收敛）。
 
@@ -52,9 +54,10 @@ class Browser {
 
 - `getSession(context)` 构造 session 时：若 `context.browserControlPort` 存在，注入 globals：
   ```ts
-  const execute = (command) => context.browserControlPort!.execute({ sessionId: context.sessionId, command });
+  const execute = (command) =>
+    context.browserControlPort!.execute({ sessionId: context.sessionId, command });
   const globals = {};
-  setupBrowserRuntime({ globals, execute });   // globals.agent.browsers 就位
+  setupBrowserRuntime({ globals, execute }); // globals.agent.browsers 就位
   new NodeReplSession({ injectedGlobals: { agent: globals.agent, setupBrowserRuntime } });
   ```
   即 REPL 里 `agent.browsers` **开箱可用**（无需模型手动 import）。同时也注入 `setupBrowserRuntime`（供高级用法与 bootstrap 文档中的显式初始化写法）。
@@ -64,12 +67,14 @@ class Browser {
 ## 4. P0 验收（端到端，真机）
 
 `ZCODE_BROWSER_USE=1`(或临时在 desktop 装配无条件启用 includeNodeRepl + browserControlPort) 起 desktop → agent 会话里模型：
+
 ```js
 const b = await agent.browsers.open("https://example.com");
 nodeRepl.write(JSON.stringify(await b.getState()));
 const shot = await b.screenshot();
 nodeRepl.write("shot bytes: " + (shot.image ? shot.image.base64.length : "none"));
 ```
+
 断言：main 日志见 WebContentsView 创建 + CDP attach + Page.captureScreenshot；REPL 返回非空 base64；getState.url === example.com。
 
 ## 5. 开关（P0 最小）

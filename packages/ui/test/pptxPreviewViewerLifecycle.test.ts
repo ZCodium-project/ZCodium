@@ -1,13 +1,5 @@
 // @vitest-environment jsdom
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -159,11 +151,10 @@ describe("PptxPreviewViewer lifecycle", () => {
       bounds: { x: 100, y: 240, width: 400, height: 80 },
       zIndex: 2,
     };
-    const previewDocument = createDocument(
-      "Quarterly plan",
-      Promise.resolve(),
-      [firstElement, secondElement],
-    );
+    const previewDocument = createDocument("Quarterly plan", Promise.resolve(), [
+      firstElement,
+      secondElement,
+    ]);
     h.open.mockResolvedValue(previewDocument);
 
     const view = render(
@@ -179,9 +170,7 @@ describe("PptxPreviewViewer lifecycle", () => {
     );
 
     expect(await screen.findByText("Quarterly plan")).toBeTruthy();
-    const rendererMount = previewDocument.renderPage.mock.calls[0]?.[1] as
-      | HTMLElement
-      | undefined;
+    const rendererMount = previewDocument.renderPage.mock.calls[0]?.[1] as HTMLElement | undefined;
     expect(rendererMount?.dataset.zcodePptxRenderSurface).toBe("true");
     expect(rendererMount?.childElementCount).toBe(1);
 
@@ -189,17 +178,11 @@ describe("PptxPreviewViewer lifecycle", () => {
     fireEvent.click(screen.getByRole("button", { name: firstElement.text }));
     fireEvent.click(screen.getByRole("button", { name: secondElement.text }));
     expect(
-      screen
-        .getByRole("button", { name: secondElement.text })
-        .getAttribute("aria-pressed"),
+      screen.getByRole("button", { name: secondElement.text }).getAttribute("aria-pressed"),
     ).toBe("true");
 
-    fireEvent.click(
-      screen.getByRole("button", { name: labels.exitElementSelection }),
-    );
-    expect(
-      document.querySelector('[data-pptx-element-selection-overlay="true"]'),
-    ).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: labels.exitElementSelection }));
+    expect(document.querySelector('[data-pptx-element-selection-overlay="true"]')).toBeNull();
     expect(rendererMount?.isConnected).toBe(true);
 
     expect(() => view.unmount()).not.toThrow();
@@ -268,9 +251,7 @@ describe("PptxPreviewViewer lifecycle", () => {
         sourceTitle: "deck.pptx",
       },
     };
-    const view = render(
-      createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(1) }),
-    );
+    const view = render(createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(1) }));
     expect(await screen.findByText("document-1")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: labels.nextPage }));
@@ -281,16 +262,12 @@ describe("PptxPreviewViewer lifecycle", () => {
     expect((screen.getByLabelText(labels.pageInput) as HTMLInputElement).value).toBe("2");
     expect(screen.getByText("125%")).toBeTruthy();
 
-    view.rerender(
-      createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(2) }),
-    );
+    view.rerender(createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(2) }));
     expect(await screen.findByText("document-2")).toBeTruthy();
     expect(screen.getByRole("button", { name: labels.selectElement })).toBeTruthy();
     expect((screen.getByLabelText(labels.pageInput) as HTMLInputElement).value).toBe("1");
     expect(screen.getByText("100%")).toBeTruthy();
-    expect(
-      document.querySelector('[data-pptx-element-selection-overlay="true"]'),
-    ).toBeNull();
+    expect(document.querySelector('[data-pptx-element-selection-overlay="true"]')).toBeNull();
   });
 
   it("文件重载后忽略旧 generation 才完成的元素引用", async () => {
@@ -318,22 +295,16 @@ describe("PptxPreviewViewer lifecycle", () => {
         sourceTitle: "deck.pptx",
       },
     };
-    const view = render(
-      createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(1) }),
-    );
+    const view = render(createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(1) }));
     expect(await screen.findByText("document-1")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: labels.selectElement }));
     fireEvent.click(screen.getByRole("button", { name: element.text }));
     const actionBar = await screen.findByRole("toolbar", { name: labels.aiEdit });
     fireEvent.click(within(actionBar).getByText(labels.aiEdit).closest("button")!);
-    fireEvent.click(
-      within(actionBar).getByText(labels.addToConversation).closest("button")!,
-    );
+    fireEvent.click(within(actionBar).getByText(labels.addToConversation).closest("button")!);
     await waitFor(() => expect(h.createReference).toHaveBeenCalledTimes(1));
 
-    view.rerender(
-      createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(2) }),
-    );
+    view.rerender(createElement(PptxPreviewViewer, { ...props, data: new ArrayBuffer(2) }));
     expect(await screen.findByText("document-2")).toBeTruthy();
     await act(async () => {
       pendingReference.resolve({ id: "stale-reference" });
@@ -362,9 +333,7 @@ describe("PptxPreviewViewer lifecycle", () => {
       sourceFingerprint: `sha256:${"a".repeat(64)}`,
       capturedAt: 1,
     };
-    h.open.mockResolvedValue(
-      createDocument("document", Promise.resolve(), [element]),
-    );
+    h.open.mockResolvedValue(createDocument("document", Promise.resolve(), [element]));
     h.createReference.mockResolvedValue(reference);
 
     render(
@@ -409,32 +378,21 @@ describe("PptxPreviewViewer lifecycle", () => {
     expect(h.createReference).not.toHaveBeenCalled();
     expect(h.dispatchReference).not.toHaveBeenCalled();
 
-    const instructionInput = within(actionBar).getByPlaceholderText(
-      labels.commentPlaceholder,
-    );
+    const instructionInput = within(actionBar).getByPlaceholderText(labels.commentPlaceholder);
     expect(instructionInput.tagName).toBe("TEXTAREA");
     expect(within(actionBar).queryByText(labels.aiEdit)).toBeNull();
     fireEvent.change(instructionInput, {
       target: { value: "  Make the title more concise  " },
     });
-    fireEvent.click(
-      within(actionBar).getByText(labels.cancelAiEdit).closest("button")!,
-    );
+    fireEvent.click(within(actionBar).getByText(labels.cancelAiEdit).closest("button")!);
     expect(h.createReference).not.toHaveBeenCalled();
     expect(h.dispatchReference).not.toHaveBeenCalled();
 
-    fireEvent.click(
-      within(actionBar).getByText(labels.aiEdit).closest("button")!,
-    );
-    fireEvent.change(
-      within(actionBar).getByPlaceholderText(labels.commentPlaceholder),
-      { target: { value: "  Make the title more concise  " } },
-    );
-    fireEvent.click(
-      within(actionBar)
-        .getByText(labels.addToConversation)
-        .closest("button")!,
-    );
+    fireEvent.click(within(actionBar).getByText(labels.aiEdit).closest("button")!);
+    fireEvent.change(within(actionBar).getByPlaceholderText(labels.commentPlaceholder), {
+      target: { value: "  Make the title more concise  " },
+    });
+    fireEvent.click(within(actionBar).getByText(labels.addToConversation).closest("button")!);
     await waitFor(() =>
       expect(h.createReference).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -449,9 +407,7 @@ describe("PptxPreviewViewer lifecycle", () => {
 
     fireEvent.keyDown(actionBar, { key: "Escape" });
     expect(actionBar.isConnected).toBe(false);
-    expect(
-      screen.getByRole("button", { name: labels.selectElement }),
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: labels.selectElement })).toBeTruthy();
   });
 
   it("评论草稿吞掉方向键，Esc 只回退草稿而不退出元素选择", async () => {
@@ -465,9 +421,7 @@ describe("PptxPreviewViewer lifecycle", () => {
       bounds: { x: 100, y: 80, width: 400, height: 120 },
       zIndex: 1,
     };
-    h.open.mockResolvedValue(
-      createDocument("document", Promise.resolve(), [element], 3),
-    );
+    h.open.mockResolvedValue(createDocument("document", Promise.resolve(), [element], 3));
 
     render(
       createElement(PptxPreviewViewer, {
@@ -487,17 +441,11 @@ describe("PptxPreviewViewer lifecycle", () => {
     const actionBar = await screen.findByRole("toolbar", {
       name: labels.aiEdit,
     });
-    fireEvent.click(
-      within(actionBar).getAllByRole("button", { hidden: true })[0]!,
-    );
+    fireEvent.click(within(actionBar).getAllByRole("button", { hidden: true })[0]!);
 
-    const textarea = within(actionBar).getByPlaceholderText(
-      labels.commentPlaceholder,
-    );
+    const textarea = within(actionBar).getByPlaceholderText(labels.commentPlaceholder);
     fireEvent.change(textarea, { target: { value: "Make it shorter" } });
-    const pageInput = screen.getByLabelText(
-      labels.pageInput,
-    ) as HTMLInputElement;
+    const pageInput = screen.getByLabelText(labels.pageInput) as HTMLInputElement;
     expect(pageInput.value).toBe("1");
 
     // 回归：Textarea 经 Portal 渲染但仍在 React 树内冒泡；方向键曾翻页并连带清空未提交评论。
@@ -505,28 +453,21 @@ describe("PptxPreviewViewer lifecycle", () => {
     fireEvent.keyDown(textarea, { key: "ArrowLeft" });
     expect(pageInput.value).toBe("1");
     expect(
-      (
-        within(actionBar).getByPlaceholderText(
-          labels.commentPlaceholder,
-        ) as HTMLTextAreaElement
-      ).value,
+      (within(actionBar).getByPlaceholderText(labels.commentPlaceholder) as HTMLTextAreaElement)
+        .value,
     ).toBe("Make it shorter");
 
     // 回归：编辑评论时 Esc 只丢弃草稿回到 AI 编辑条，不直接退出元素选择模式。
     fireEvent.keyDown(textarea, { key: "Escape" });
     expect(actionBar.isConnected).toBe(true);
     expect(within(actionBar).getByText(labels.aiEdit)).toBeTruthy();
-    expect(
-      within(actionBar).queryByPlaceholderText(labels.commentPlaceholder),
-    ).toBeNull();
+    expect(within(actionBar).queryByPlaceholderText(labels.commentPlaceholder)).toBeNull();
     expect(h.createReference).not.toHaveBeenCalled();
     expect(h.dispatchReference).not.toHaveBeenCalled();
 
     fireEvent.keyDown(actionBar, { key: "Escape" });
     expect(actionBar.isConnected).toBe(false);
-    expect(
-      screen.getByRole("button", { name: labels.selectElement }),
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: labels.selectElement })).toBeTruthy();
   });
 
   it("输入法组合态下 Esc 只取消候选词，不丢弃评论草稿", async () => {
@@ -540,9 +481,7 @@ describe("PptxPreviewViewer lifecycle", () => {
       bounds: { x: 100, y: 80, width: 400, height: 120 },
       zIndex: 1,
     };
-    h.open.mockResolvedValue(
-      createDocument("document", Promise.resolve(), [element]),
-    );
+    h.open.mockResolvedValue(createDocument("document", Promise.resolve(), [element]));
 
     render(
       createElement(PptxPreviewViewer, {
@@ -562,13 +501,9 @@ describe("PptxPreviewViewer lifecycle", () => {
     const actionBar = await screen.findByRole("toolbar", {
       name: labels.aiEdit,
     });
-    fireEvent.click(
-      within(actionBar).getAllByRole("button", { hidden: true })[0]!,
-    );
+    fireEvent.click(within(actionBar).getAllByRole("button", { hidden: true })[0]!);
 
-    const textarea = within(actionBar).getByPlaceholderText(
-      labels.commentPlaceholder,
-    );
+    const textarea = within(actionBar).getByPlaceholderText(labels.commentPlaceholder);
     fireEvent.change(textarea, { target: { value: "标题" } });
 
     const draftValue = () =>
@@ -619,22 +554,19 @@ describe("PptxPreviewViewer lifecycle", () => {
       rowIndex: 0,
       cellIndex: 0,
     };
-    const previewDocument = createDocument(
-      "Quarterly plan",
-      Promise.resolve(),
-      [textElement, tableCellElement],
-    );
+    const previewDocument = createDocument("Quarterly plan", Promise.resolve(), [
+      textElement,
+      tableCellElement,
+    ]);
     const navigate = vi.fn();
-    previewDocument.renderPage.mockImplementation(
-      (_pageIndex: number, container: HTMLElement) => {
-        const link = document.createElement("a");
-        link.href = "https://example.com";
-        link.textContent = "Quarterly plan";
-        link.addEventListener("click", navigate);
-        container.append(link);
-        return { ready: Promise.resolve(), dispose: vi.fn() };
-      },
-    );
+    previewDocument.renderPage.mockImplementation((_pageIndex: number, container: HTMLElement) => {
+      const link = document.createElement("a");
+      link.href = "https://example.com";
+      link.textContent = "Quarterly plan";
+      link.addEventListener("click", navigate);
+      container.append(link);
+      return { ready: Promise.resolve(), dispose: vi.fn() };
+    });
     h.open.mockResolvedValue(previewDocument);
 
     render(
@@ -652,10 +584,7 @@ describe("PptxPreviewViewer lifecycle", () => {
     const renderedText = await screen.findByText("Quarterly plan");
     const renderSurface = renderedText.parentElement;
     expect(renderSurface).not.toBeNull();
-    vi.spyOn(
-      renderSurface as HTMLElement,
-      "getBoundingClientRect",
-    ).mockReturnValue({
+    vi.spyOn(renderSurface as HTMLElement, "getBoundingClientRect").mockReturnValue({
       x: 0,
       y: 0,
       left: 0,
@@ -698,13 +627,9 @@ describe("PptxPreviewViewer lifecycle", () => {
       clientX: 650,
       clientY: 100,
     });
+    expect(screen.getByRole("button", { name: tableCellElement.text })).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: tableCellElement.text }),
-    ).toBeTruthy();
-    expect(
-      screen
-        .getByRole("button", { name: tableCellElement.text })
-        .getAttribute("aria-pressed"),
+      screen.getByRole("button", { name: tableCellElement.text }).getAttribute("aria-pressed"),
     ).toBe("true");
     expect(renderSurface?.classList.contains("pointer-events-auto")).toBe(true);
   });
@@ -721,9 +646,7 @@ describe("PptxPreviewViewer lifecycle", () => {
       zIndex: 1,
     };
     const data = new ArrayBuffer(1);
-    h.open.mockResolvedValue(
-      createDocument("document", Promise.resolve(), [element], 3),
-    );
+    h.open.mockResolvedValue(createDocument("document", Promise.resolve(), [element], 3));
     const view = render(
       createElement(PptxPreviewViewer, {
         data,
@@ -790,9 +713,7 @@ describe("PptxPreviewViewer lifecycle", () => {
   });
 
   it("文件 fingerprint 已变化但页码存在时仍定位并 toast", async () => {
-    h.open.mockResolvedValue(
-      createDocument("document", Promise.resolve(), [], 2),
-    );
+    h.open.mockResolvedValue(createDocument("document", Promise.resolve(), [], 2));
 
     render(
       createElement(PptxPreviewViewer, {

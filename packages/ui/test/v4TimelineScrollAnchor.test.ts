@@ -23,11 +23,11 @@ import {
   timelineWheelScrollIntent,
 } from "@/v4/timelineScrollAnchor.js";
 
-const metrics = (
-  scrollTop: number,
-  viewportHeight: number,
-  contentHeight: number,
-) => ({ scrollTop, viewportHeight, contentHeight });
+const metrics = (scrollTop: number, viewportHeight: number, contentHeight: number) => ({
+  scrollTop,
+  viewportHeight,
+  contentHeight,
+});
 
 describe("timelineScrollAnchor", () => {
   it("distanceToBottom：正常滚动区间与内容不足一屏（不为负）", () => {
@@ -39,12 +39,8 @@ describe("timelineScrollAnchor", () => {
 
   it("isAtBottom：容差内视为在底（亚像素/最后一行 padding）", () => {
     expect(isAtBottom(metrics(1400, 600, 2000))).toBe(true);
-    expect(
-      isAtBottom(metrics(1400 - BOTTOM_ANCHOR_EPSILON_PX, 600, 2000)),
-    ).toBe(true);
-    expect(
-      isAtBottom(metrics(1400 - BOTTOM_ANCHOR_EPSILON_PX - 1, 600, 2000)),
-    ).toBe(false);
+    expect(isAtBottom(metrics(1400 - BOTTOM_ANCHOR_EPSILON_PX, 600, 2000))).toBe(true);
+    expect(isAtBottom(metrics(1400 - BOTTOM_ANCHOR_EPSILON_PX - 1, 600, 2000))).toBe(false);
     // 内容不足一屏恒为在底
     expect(isAtBottom(metrics(0, 600, 300))).toBe(true);
   });

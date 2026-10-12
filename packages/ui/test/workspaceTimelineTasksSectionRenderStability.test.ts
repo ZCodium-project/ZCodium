@@ -51,8 +51,7 @@ const {
 }));
 
 vi.mock("@/components/ui/context-menu.js", () => ({
-  ContextMenu: ({ children }: { children?: ReactNode }) =>
-    createElement("div", null, children),
+  ContextMenu: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   ContextMenuTrigger: ({ children }: { children?: ReactNode }) => children,
 }));
 
@@ -65,11 +64,8 @@ vi.mock("@/hooks/useGlobalTaskList.js", () => ({
 }));
 
 vi.mock("@/hooks/useLocalWorkspaceScopes.js", () => ({
-  useLocalWorkspaceScopes: ({
+  useLocalWorkspaceScopes: ({ workspaceTabs }: { workspaceTabs: WorkspaceTabState[] }) =>
     workspaceTabs,
-  }: {
-    workspaceTabs: WorkspaceTabState[];
-  }) => workspaceTabs,
 }));
 
 vi.mock("@/hooks/useWorkspaceServices.js", () => ({
@@ -121,9 +117,7 @@ vi.mock("@/store/remotePinnedTaskStore.js", () => ({
   },
 }));
 
-function useRemoteTimelineTaskStore(
-  selector: (state: typeof remoteTimelineState) => unknown,
-) {
+function useRemoteTimelineTaskStore(selector: (state: typeof remoteTimelineState) => unknown) {
   return selector(remoteTimelineState);
 }
 
@@ -255,14 +249,11 @@ describe("WorkspaceTimelineTasksSection render stability", () => {
     stableBaseServices.zcodeTaskService.setTaskUnread.mockReset();
     delete (globalThis as { document?: unknown }).document;
     delete (globalThis as { window?: unknown }).window;
-    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-      .IS_REACT_ACT_ENVIRONMENT;
+    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
   });
 
   it("keeps MemoTaskItem action props stable during unrelated parent rerenders", async () => {
-    const { WorkspaceTimelineTasksSection } = await import(
-      "@/WorkspaceTimelineTasksSection.js"
-    );
+    const { WorkspaceTimelineTasksSection } = await import("@/WorkspaceTimelineTasksSection.js");
     const root: Root = createRoot(installMinimalDom());
     const workspaceTabs = [createWorkspaceTab()];
     const task = createTask();
@@ -295,22 +286,12 @@ describe("WorkspaceTimelineTasksSection render stability", () => {
     const initialProps = capturedTaskItemProps[0];
     const rerenderedProps = capturedTaskItemProps[1];
     expect(rerenderedProps?.onSelectTask).toBe(initialProps?.onSelectTask);
-    expect(rerenderedProps?.onArchiveTaskInline).toBe(
-      initialProps?.onArchiveTaskInline,
-    );
-    expect(rerenderedProps?.onTogglePinTask).toBe(
-      initialProps?.onTogglePinTask,
-    );
-    expect(rerenderedProps?.onStartRenameTask).toBe(
-      initialProps?.onStartRenameTask,
-    );
+    expect(rerenderedProps?.onArchiveTaskInline).toBe(initialProps?.onArchiveTaskInline);
+    expect(rerenderedProps?.onTogglePinTask).toBe(initialProps?.onTogglePinTask);
+    expect(rerenderedProps?.onStartRenameTask).toBe(initialProps?.onStartRenameTask);
     expect(rerenderedProps?.onArchiveTask).toBe(initialProps?.onArchiveTask);
-    expect(rerenderedProps?.onMarkTaskAsUnread).toBe(
-      initialProps?.onMarkTaskAsUnread,
-    );
-    expect(rerenderedProps?.onOpenTaskContextMenu).toBe(
-      initialProps?.onOpenTaskContextMenu,
-    );
+    expect(rerenderedProps?.onMarkTaskAsUnread).toBe(initialProps?.onMarkTaskAsUnread);
+    expect(rerenderedProps?.onOpenTaskContextMenu).toBe(initialProps?.onOpenTaskContextMenu);
     expect(initialProps?.variant).toBe("timeline");
 
     act(() => {
@@ -319,9 +300,7 @@ describe("WorkspaceTimelineTasksSection render stability", () => {
   });
 
   it("forwards the single-line row variant for conversation sections", async () => {
-    const { WorkspaceTimelineTasksSection } = await import(
-      "@/WorkspaceTimelineTasksSection.js"
-    );
+    const { WorkspaceTimelineTasksSection } = await import("@/WorkspaceTimelineTasksSection.js");
     const root: Root = createRoot(installMinimalDom());
     globalTaskListResult.items = [createTask()];
     globalTaskListResult.total = 1;

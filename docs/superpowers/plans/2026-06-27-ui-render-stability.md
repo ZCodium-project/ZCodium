@@ -25,10 +25,12 @@
 ### Task 1: TaskList row action stability
 
 **Files:**
+
 - Modify: `packages/ui/src/TaskList.tsx`
 - Test: `packages/ui/test/taskListRenderStability.test.ts`
 
 **Interfaces:**
+
 - Produces stable props for `MemoTaskItem`: `onArchiveTaskInline`, `onCancelArchiveConfirm`, `onTogglePinTask`, `onStartRenameTask`, `onArchiveTask`, `onMarkTaskAsUnread`.
 
 - [ ] Add a failing test that re-renders `TaskList` with changed local state inputs while task data is unchanged, then asserts unchanged row action props keep reference identity.
@@ -39,10 +41,12 @@
 ### Task 2: TaskListItem menu and hover content deferral
 
 **Files:**
+
 - Modify: `packages/ui/src/TaskListItem.tsx`
 - Test: `packages/ui/test/taskListItemHoverActions.test.ts`
 
 **Interfaces:**
+
 - Keeps the current `TaskListItemContextMenu` open-only rendering behavior covered by a focused test.
 - Keeps `loadTaskPaths` and `loadProviderConfig` tied to the open state.
 - Defers hover-only archive tooltip/action content until the row is hovered or already confirming archive.
@@ -56,10 +60,12 @@
 ### Task 3: Workspace shell stable reset/callback props
 
 **Files:**
+
 - Modify: `packages/ui/src/app-shell/WorkspaceShellLayout.tsx`
 - Test: existing render-stability tests or a focused new test if the component boundary can be isolated cheaply.
 
 **Interfaces:**
+
 - Stabilizes `resetKeys` arrays and render callback props passed to boundaries and mobile shell.
 
 - [ ] Memoize reset key arrays by their semantic values.
@@ -69,12 +75,14 @@
 ### Task 4: Chat composer and toolbar stable props
 
 **Files:**
+
 - Inspect/modify: `packages/ui/src/ChatView.tsx`
 - Inspect/modify: `packages/ui/src/ChatView/ChatViewComposer.tsx`
 - Inspect/modify: `packages/ui/src/ChatView/ChatPromptEditor.tsx`
 - Inspect/modify: related toolbar controls if they own the unstable props.
 
 **Interfaces:**
+
 - Stabilizes equivalent `attachmentAction`, submit control, `initialConfig`, and toolbar callbacks where they cross memoized component boundaries.
 
 - [ ] Add or extend a focused render-stability test if an existing composer test can isolate the boundary.
@@ -84,6 +92,7 @@
 ### Task 5: Final verification
 
 **Files:**
+
 - All changed code and docs.
 
 - [ ] Run targeted tests for the changed UI files.

@@ -450,9 +450,7 @@ describe("grouped 视图流式稳定性", () => {
 
       for (let tick = 1; tick <= 4; tick += 1) {
         await act(async () => {
-          root.render(
-            createElement(ServiceProvider, { services }, createElement(Probe, { tick })),
-          );
+          root.render(createElement(ServiceProvider, { services }, createElement(Probe, { tick })));
           controller.emitActivityFrame();
           await flushMicrotasks();
         });

@@ -42,7 +42,7 @@ background wake 同理：model-only user 不是 real-user-starter（`isRealUserT
 
 **为什么设计还没真正解决。** 设计 §「Queue Drain」/「Background Bash」主张 drain/wake 必须拆新 `productTurnId`，方向正确。但**设计只声明了 cause edge 和 turn edge，没有给出「当多个 productTurn 共享一个 runtimeTurnId 时，如何把线性事件流里的 AssistantSegment 分配给哪个 productTurn」的规则**。A2 与 A1 同 turnId、同 runtime turn，resolver 凭什么把 A2 判给 T2？唯一可用的判据是 `eventSeq`：drain/wake 的 UserIntent 的 eventSeq 之后、同 runtimeTurn 内的 assistant segment 归新 productTurn。这条规则是 Case A 的核心，却在文档里缺失。
 
-**建议改法。** 把这条切分规则写成一等 invariant：*在同一 runtimeTurnId 内，productTurn 边界由 trigger 类 UserIntent（drain / model-only continuation / background wake）的 eventSeq 划定；边界之后、下一个边界之前的所有 AssistantSegment / WorkActivity 归该 productTurn*。并要求 live 与 cold 都只经这条规则（即 live 也要在 drain 处产出 productTurn 边界，不能只追加 userInput row）。
+**建议改法。** 把这条切分规则写成一等 invariant：_在同一 runtimeTurnId 内，productTurn 边界由 trigger 类 UserIntent（drain / model-only continuation / background wake）的 eventSeq 划定；边界之后、下一个边界之前的所有 AssistantSegment / WorkActivity 归该 productTurn_。并要求 live 与 cold 都只经这条规则（即 live 也要在 drain 处产出 productTurn 边界，不能只追加 userInput row）。
 
 ### F3 —【Critical，命中 Q5/Q2】实体身份无法从持久化事实推导：rowId 是易失计数器，UserIntent（尤其 drained/model-only）根本没有 messageId → 输入守恒 invariant 无法 keying
 
@@ -58,7 +58,7 @@ background wake 同理：model-only user 不是 real-user-starter（`isRealUserT
 
 **为什么会错位。** (a) 同一 iteration 的 retry 会带**新的 verificationId** → 生成**第二个 marker**（设计 §「Goal Verify」：`verificationId` 只能是 alias）；(b) 无 anchor → 事件迟到或 trace turnId ≠ 被验证 assistant 的 turnId 时，marker 落到错误轮次尾部（设计 Case C）；(c) 新 target 的 iteration 从 1 重置，单靠 iteration 会跨 target 撞号。存储文档 §「更新规则」已经把身份定为 `targetId + goalIteration`，契约里 `GoalVerificationTimelinePart` 也有 `targetId/goalIteration/anchorMessageId`——**设计是对的，是当前 reducer 落后于契约**。
 
-**建议改法。** resolver 里 goal verify 身份必须是 `targetId + goalIteration`，`verificationId` 降为单次 attempt alias；placement 必须走 `anchor = anchorAssistantMessageId || anchorTurnId || explicit fallback`（设计 §「Goal Verify」）。并把这条写成守恒：*同一 targetId+iteration 只有一个 boundary entity*。
+**建议改法。** resolver 里 goal verify 身份必须是 `targetId + goalIteration`，`verificationId` 降为单次 attempt alias；placement 必须走 `anchor = anchorAssistantMessageId || anchorTurnId || explicit fallback`（设计 §「Goal Verify」）。并把这条写成守恒：_同一 targetId+iteration 只有一个 boundary entity_。
 
 ### F5 —【Major，命中 Q4】sequence NULL 不来自主 runtime/fork 路径（已核实），来自尚未定位的旁路；且 on-conflict 语义会把 NULL 行「再保存即漂到队尾」
 
@@ -142,6 +142,7 @@ constraint graph 反而是最不该先重的一层（F6）：排序骨架近乎�
 现状：A09/E06/E08/F07/H08 missing、E10 failing、G01–G04 partial。resolver 专项还需新增（先落 L1/L2 golden，再挑代表性 L4）：
 
 **L1/L2 golden（reducer/materializer，归 `LC`/新增缩写）：**
+
 - **QD-node**：queue drain 两轮 → productTurn 切分 golden：A1 属 T1、A2 属 T2 且都可见；断言 **live≡cold 的 productTurn 结构一致**（F2/F10）。
 - **GV-identity**：同 targetId 同 iteration 的 verifier retry（两 verificationId）→ 单一 boundary（F4）；跨 target iteration 重置不撞号。
 - **GV-late-anchor**：`TargetCompletionVerification` 迟到到下一轮 start 之后 → 按 anchor 落回原 turn tail（Case C；现 `P03` 只覆盖「marker 先于 final assistant 到达」）。
@@ -150,6 +151,7 @@ constraint graph 反而是最不该先重的一层（F6）：排序骨架近乎�
 - **coverage 守恒扩项**：`eventsCoverTranscript` footprint 增加 goalVerifyCount / modelChangeCount 且改为**顺序敏感等价**（F1，`807-941`）。
 
 **L4 代表性：**
+
 - **BG-wake-turn**：background completion → model-only wake 建独立 productTurn、A2 归属它、无 user 气泡（现 `BG05` 只断「无 notification 气泡」）。
 - **multi-segment**：一轮 A1.1 + tool + A1.2 → 一个 ProductTurn 两个 AssistantSegment 全保留，fork/retry 只挂最后一段（现 `E10` failing、`FM` 覆盖 fork，但缺 node 断言）。
 - **modelChange stateOnly**：若产品裁 modelChange 为 stateOnly，断言它不进 rows.window、不影响 turn count / 虚拟滚动（F8）。
@@ -160,15 +162,15 @@ constraint graph 反而是最不该先重的一层（F6）：排序骨架近乎�
 
 ## 附：评审读取的代码/文档锚点
 
-| 层 | 路径 |
-| --- | --- |
-| 设计文档 | `docs/v4-refactor/15-timeline-resolver-design.md` |
-| 投影 reducer | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/product-projection.ts` |
-| 冷恢复反合成 | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/transcript-hydration.ts` |
-| message/part 仓库 | `apps/zcode-cli/packages/adapters/src/storage/session-store/repositories/messages.ts` |
-| 迁移 0014 | `apps/zcode-cli/packages/adapters/src/storage/session-store/migrations.ts` |
-| drain/turn 运行时 | `apps/zcode-cli/packages/core/src/runtime/methods/steering.ts`、`turn-loop.ts`、`turn.ts` |
-| fork copy | `apps/zcode-cli/packages/core/src/runtime/methods/workspace-checkpoints.ts`、`session-fork.ts`、`message-persistence.ts` |
-| 存储契约 | `docs/chat/conversation-transcript-storage.md` |
-| case catalog | `docs/conversation-session-case-catalog.md` |
-| coverage matrix | `docs/testing/conversation-session-e2e-coverage-matrix.md` |
+| 层                | 路径                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 设计文档          | `docs/v4-refactor/15-timeline-resolver-design.md`                                                                        |
+| 投影 reducer      | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/product-projection.ts`                                          |
+| 冷恢复反合成      | `apps/zcode-cli/packages/bootstrap/src/zcode-protocol-v4/transcript-hydration.ts`                                        |
+| message/part 仓库 | `apps/zcode-cli/packages/adapters/src/storage/session-store/repositories/messages.ts`                                    |
+| 迁移 0014         | `apps/zcode-cli/packages/adapters/src/storage/session-store/migrations.ts`                                               |
+| drain/turn 运行时 | `apps/zcode-cli/packages/core/src/runtime/methods/steering.ts`、`turn-loop.ts`、`turn.ts`                                |
+| fork copy         | `apps/zcode-cli/packages/core/src/runtime/methods/workspace-checkpoints.ts`、`session-fork.ts`、`message-persistence.ts` |
+| 存储契约          | `docs/chat/conversation-transcript-storage.md`                                                                           |
+| case catalog      | `docs/conversation-session-case-catalog.md`                                                                              |
+| coverage matrix   | `docs/testing/conversation-session-e2e-coverage-matrix.md`                                                               |

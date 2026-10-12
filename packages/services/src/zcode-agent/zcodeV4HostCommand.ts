@@ -67,17 +67,13 @@ export function createHostCommandEnvelope<T extends CommandType>(
     );
   }
   if (ROW_TARGETING_COMMANDS.has(input.type) && !input.baseLogEpoch) {
-    throw new Error(
-      `command ${input.type} 是 row target 命令，必须携带 baseLogEpoch`,
-    );
+    throw new Error(`command ${input.type} 是 row target 命令，必须携带 baseLogEpoch`);
   }
   return {
     commandId: input.commandId ?? uuidv7(),
     clientId: input.clientId ?? hostV4ClientId,
     sessionId: input.sessionId,
-    ...(input.baseRevision !== undefined
-      ? { baseRevision: input.baseRevision }
-      : {}),
+    ...(input.baseRevision !== undefined ? { baseRevision: input.baseRevision } : {}),
     ...(input.baseLogEpoch ? { baseLogEpoch: input.baseLogEpoch } : {}),
     type: input.type,
     payload: input.payload,

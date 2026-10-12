@@ -293,9 +293,8 @@ describe("resourceManagerWindow", () => {
 
   it("linux 上 Electron 单核口径的 CPU 会除以逻辑核数；其它平台原样", async () => {
     // 归一化函数已提升为资源管理器 UI 与 ARMS 资源遥测共用，断言跟随实现搬到共用模块。
-    const { normalizeElectronCpuToMachinePercent } = await import(
-      "../src/main/electronCpuNormalization.js"
-    );
+    const { normalizeElectronCpuToMachinePercent } =
+      await import("../src/main/electronCpuNormalization.js");
     expect(
       normalizeElectronCpuToMachinePercent(40, { platform: "linux", logicalCpuCount: 8 }),
     ).toBe(5);

@@ -71,9 +71,7 @@ describe("conversation share route", () => {
     const source = readFileSync("packages/web/src/share/ConversationShareLandingPage.tsx", "utf8");
     // Bug 根因一：横幅原本是 ShareContentRail 的直接子元素，没套 ShareContentInset，
     // 缺了 px-4 / @md:px-6，比上方时间行和下方正文都宽出一截。
-    expect(source).toMatch(
-      /showContinueHelp \? \(\s*(?:\/\/[^\n]*\n\s*)*<ShareContentInset>/u,
-    );
+    expect(source).toMatch(/showContinueHelp \? \(\s*(?:\/\/[^\n]*\n\s*)*<ShareContentInset>/u);
     // Bug 根因二：站点首页本身就是下载入口，/download 这个 path 是 404。
     expect(source).toContain('const ZCODE_DOWNLOAD_URL = "https://zcode.z.ai"');
     expect(source).not.toContain("zcode.z.ai/download");

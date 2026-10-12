@@ -147,11 +147,7 @@ vi.mock("@extend-ai/react-docx", () => ({
 }));
 
 vi.mock("@/components/ui/pptx-preview-viewer.js", () => ({
-  PptxPreviewViewer: ({
-    onOpenBrowserUrl,
-  }: {
-    onOpenBrowserUrl?: (url: string) => void;
-  }) =>
+  PptxPreviewViewer: ({ onOpenBrowserUrl }: { onOpenBrowserUrl?: (url: string) => void }) =>
     createElement("div", {
       "data-pptx-open-url-handler": String(Boolean(onOpenBrowserUrl)),
     }),
@@ -378,7 +374,7 @@ describe("Office file preview", () => {
       expect(view.container.querySelector("section")?.textContent).toBe("Rendered DOCX");
     });
 
-    expect(view.container.querySelector('a[href]')).not.toBeNull();
+    expect(view.container.querySelector("a[href]")).not.toBeNull();
     expect(view.container.querySelector('a[href^="javascript:"]')).toBeNull();
     expect(view.container.querySelector('a[href="https://example.com/document"]')).not.toBeNull();
     fireEvent.click(view.container.querySelector('a[href="https://example.com/document"]')!);

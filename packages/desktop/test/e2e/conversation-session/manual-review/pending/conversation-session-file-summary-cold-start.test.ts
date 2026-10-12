@@ -95,9 +95,7 @@ async function waitForFileSummary(expectExpanded = false): Promise<FileSummarySn
     async () => {
       latest = await readFileSummary();
       return Boolean(
-        latest &&
-          latest.expanded === expectExpanded &&
-          (!expectExpanded || latest.pathVisible),
+        latest && latest.expanded === expectExpanded && (!expectExpanded || latest.pathVisible),
       );
     },
     {
@@ -131,9 +129,9 @@ function readFileSummary(): Promise<FileSummarySnapshot | null> {
       // 匹配相对路径；详情行的 title 保留完整路径，正好能证明明细查询已返回目标文件。
       pathVisible: Boolean(
         card &&
-          Array.from(card.querySelectorAll<HTMLElement>("[title]")).some((element) =>
-            (element.getAttribute("title") ?? "").endsWith(relativePath),
-          ),
+        Array.from(card.querySelectorAll<HTMLElement>("[title]")).some((element) =>
+          (element.getAttribute("title") ?? "").endsWith(relativePath),
+        ),
       ),
     };
   }, RELATIVE_PATH);

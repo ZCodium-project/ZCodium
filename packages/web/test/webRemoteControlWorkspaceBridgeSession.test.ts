@@ -30,9 +30,9 @@ describe("registerWebRemoteControlWorkspaceBridgeServices", () => {
 
     const state = useRemoteWorkspaceSessionStore.getState();
     expect(state.sessionsById["remote-session-1"]?.services).toBe(services);
-    expect(
-      state.sessionIdByWorkspaceIdentity["remote:docker:container:/root"],
-    ).toBe("remote-session-1");
+    expect(state.sessionIdByWorkspaceIdentity["remote:docker:container:/root"]).toBe(
+      "remote-session-1",
+    );
     expect(state.sessionIdByWorkspacePath["/root"]).toBe("remote-session-1");
 
     registration.dispose();
@@ -100,9 +100,9 @@ describe("registerWebRemoteControlWorkspaceBridgeServices", () => {
     const state = useRemoteWorkspaceSessionStore.getState();
     expect(state.sessionsById["remote-session-1"]).toBeUndefined();
     expect(state.sessionsById["remote-session-2"]?.services).toBe(secondServices);
-    expect(
-      state.sessionIdByWorkspaceIdentity["remote:docker:container:/root"],
-    ).toBe("remote-session-2");
+    expect(state.sessionIdByWorkspaceIdentity["remote:docker:container:/root"]).toBe(
+      "remote-session-2",
+    );
     expect(state.sessionIdByWorkspacePath["/root"]).toBe("remote-session-2");
   });
 
@@ -137,9 +137,7 @@ describe("registerWebRemoteControlWorkspaceBridgeServices", () => {
 
     const state = useRemoteWorkspaceSessionStore.getState();
     expect(state.sessionsById["remote-session-1"]?.services).toBe(secondServices);
-    expect(state.sessionIdByWorkspaceIdentity["remote:ssh:host:/root"]).toBe(
-      "remote-session-1",
-    );
+    expect(state.sessionIdByWorkspaceIdentity["remote:ssh:host:/root"]).toBe("remote-session-1");
     expect(state.sessionIdByWorkspacePath["/root"]).toBe("remote-session-1");
   });
 });

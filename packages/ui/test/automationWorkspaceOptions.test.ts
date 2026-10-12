@@ -111,14 +111,10 @@ describe("automation workspace options", () => {
       }),
     ).toBe("remote:ssh:b:/repo");
     expect(
-      reconcileAutomationWorkspaceSelectionKey(
-        options,
-        "/repo/first",
-        {
-          workspacePath: "/repo",
-          workspaceIdentity: "remote:ssh:b:/repo",
-        },
-      ),
+      reconcileAutomationWorkspaceSelectionKey(options, "/repo/first", {
+        workspacePath: "/repo",
+        workspaceIdentity: "remote:ssh:b:/repo",
+      }),
     ).toBe("/repo/first");
   });
 });

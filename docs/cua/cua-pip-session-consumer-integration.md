@@ -41,12 +41,12 @@ legacy group fallback.
 
 ## Lifecycle mapping
 
-| Sideband fact | Producer event |
-| --- | --- |
-| `turn-started` | `TurnStarted` with the original sequence and event id |
-| `turn-completed` | `TurnEnded(outcome=completed)` |
-| `turn-failed` | `TurnEnded(outcome=failed)` |
-| `session-closed` | `SessionClosed` |
+| Sideband fact    | Producer event                                        |
+| ---------------- | ----------------------------------------------------- |
+| `turn-started`   | `TurnStarted` with the original sequence and event id |
+| `turn-completed` | `TurnEnded(outcome=completed)`                        |
+| `turn-failed`    | `TurnEnded(outcome=failed)`                           |
+| `session-closed` | `SessionClosed`                                       |
 
 Tool scheduled/started events continue to drive the Windows operation indicator,
 but do not define PiP lifecycle. ZCode never manufactures a green badge from
@@ -54,15 +54,15 @@ connection loss or controller state.
 
 ## Verification catalog
 
-| ID | Scenario | Expected |
-| --- | --- | --- |
-| PIP-C01 | renderer repeats the same active task | one IPC fact only |
-| PIP-C02 | background window changes task | Main map changes; producer focus does not |
-| PIP-C03 | foreground switches A -> B | old host gets null, new host gets B, revisions increase |
-| PIP-C04 | completed / failed / closed sideband | exact typed producer event and original ordering fields |
-| PIP-C05 | protocol/runtime mismatch | Auto-PiP disabled, one diagnostic, no raw fallback |
-| PIP-C06 | web remote or remote authority | no presentation client/helper creation |
-| PIP-C07 | source audit | no PiP NDJSON parser, raw group method names, or session env key |
+| ID      | Scenario                              | Expected                                                         |
+| ------- | ------------------------------------- | ---------------------------------------------------------------- |
+| PIP-C01 | renderer repeats the same active task | one IPC fact only                                                |
+| PIP-C02 | background window changes task        | Main map changes; producer focus does not                        |
+| PIP-C03 | foreground switches A -> B            | old host gets null, new host gets B, revisions increase          |
+| PIP-C04 | completed / failed / closed sideband  | exact typed producer event and original ordering fields          |
+| PIP-C05 | protocol/runtime mismatch             | Auto-PiP disabled, one diagnostic, no raw fallback               |
+| PIP-C06 | web remote or remote authority        | no presentation client/helper creation                           |
+| PIP-C07 | source audit                          | no PiP NDJSON parser, raw group method names, or session env key |
 
 This catalog is intentionally separate from the conversation formal matrix: the
 facts are desktop-local presentation sideband and never enter conversation state.

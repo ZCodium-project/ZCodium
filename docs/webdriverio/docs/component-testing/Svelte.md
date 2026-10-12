@@ -12,12 +12,15 @@ To setup WebdriverIO within your Svelte project, follow the [instructions](/docs
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    runner: ['browser', {
-        preset: 'svelte'
-    }],
-    // ...
-}
+  // ...
+  runner: [
+    "browser",
+    {
+      preset: "svelte",
+    },
+  ],
+  // ...
+};
 ```
 
 :::info
@@ -44,13 +47,13 @@ Given you have the following Svelte component:
 
 ```html title="./components/Component.svelte"
 <script>
-    export let name
+  export let name;
 
-    let buttonText = 'Button'
+  let buttonText = "Button";
 
-    function handleClick() {
-      buttonText = 'Button Clicked'
-    }
+  function handleClick() {
+    buttonText = "Button Clicked";
+  }
 </script>
 
 <h1>Hello {name}!</h1>
@@ -60,23 +63,22 @@ Given you have the following Svelte component:
 In your test use the `render` method from `@testing-library/svelte` to attach the component to the test page. To interact with the component we recommend to use WebdriverIO commands as they behave more close to actual user interactions, e.g.:
 
 ```ts title="svelte.test.js"
-import expect from 'expect'
+import expect from "expect";
 
-import { render, fireEvent, screen } from '@testing-library/svelte'
-import '@testing-library/jest-dom'
+import { render, fireEvent, screen } from "@testing-library/svelte";
+import "@testing-library/jest-dom";
 
-import Component from './components/Component.svelte'
+import Component from "./components/Component.svelte";
 
-describe('Svelte Component Testing', () => {
-    it('changes button text on click', async () => {
-        render(Component, { name: 'World' })
-        const button = await $('button')
-        await expect(button).toHaveText('Button')
-        await button.click()
-        await expect(button).toHaveText('Button Clicked')
-    })
-})
+describe("Svelte Component Testing", () => {
+  it("changes button text on click", async () => {
+    render(Component, { name: "World" });
+    const button = await $("button");
+    await expect(button).toHaveText("Button");
+    await button.click();
+    await expect(button).toHaveText("Button Clicked");
+  });
+});
 ```
 
 You can find a full example of a WebdriverIO component test suite for Svelte in our [example repository](https://github.com/webdriverio/component-testing-examples/tree/main/svelte-typescript-vite).
-

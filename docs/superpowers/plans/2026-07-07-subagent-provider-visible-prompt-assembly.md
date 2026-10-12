@@ -116,10 +116,12 @@
 ### Task 1: Add Provider-Visible Prompt Assembly Tests
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/tests/subagent-prompt-assembly.test.ts`
 - Modify: `apps/zcode-cli/packages/core/tests/subagent-explore.test.ts`
 
 **Interfaces:**
+
 - Consumes:
   - `AgentRuntime` from `apps/zcode-cli/packages/core/src/runtime.ts`
   - `createSessionId`, `ModelRole`, `ModelRefSource`, `modelMessageContentToText` from `@zcode/contracts`
@@ -280,16 +282,22 @@ describe("subagent provider-visible prompt assembly", () => {
     expect(systems[2]).toContain("Notes:");
     expect(systems[2]).toContain("Agent threads always have their cwd reset between bash calls");
     expect(systems[2]).toContain("the parent agent reads your text output");
-    expect(systems[3]).toContain("Here is useful information about the environment you are running in:");
+    expect(systems[3]).toContain(
+      "Here is useful information about the environment you are running in:",
+    );
     expect(systems[3]).toContain("Working directory: /Users/dev/Desktop/Z/z-code/apps/zcode-cli");
     expect(systems[3]).toContain("Is directory a git repo: Yes");
     expect(systems[3]).toContain("Platform: darwin");
     expect(systems[3]).toContain("Shell: Git Bash");
     expect(systems[3]).toContain("OS Version: Darwin 24.3.0");
-    expect(systems[3]).toContain("You are powered by the model named anthropic/claude-haiku-4-5-20251001-cc.");
+    expect(systems[3]).toContain(
+      "You are powered by the model named anthropic/claude-haiku-4-5-20251001-cc.",
+    );
 
     const text = allMessageText(childRequests[0]);
-    expect(text).not.toContain("You help the user with software engineering work in the current workspace.");
+    expect(text).not.toContain(
+      "You help the user with software engineering work in the current workspace.",
+    );
     expect(text).not.toContain("# claudeMd");
     expect(text).not.toContain("# user_instructions");
     expect(text).not.toContain("Project context:");
@@ -302,90 +310,90 @@ describe("subagent provider-visible prompt assembly", () => {
 Add this test in the same `describe` block:
 
 ```ts
-  it("adds common notes and environment context to general-purpose child prompts", async () => {
-    const sessionId = createSessionId("subagent-prompt-general-purpose");
-    const eventStore = createTestSessionEventStore();
-    const childRequests: any[] = [];
-    let parentCallCount = 0;
+it("adds common notes and environment context to general-purpose child prompts", async () => {
+  const sessionId = createSessionId("subagent-prompt-general-purpose");
+  const eventStore = createTestSessionEventStore();
+  const childRequests: any[] = [];
+  let parentCallCount = 0;
 
-    const runtime = new AgentRuntime(
-      sessionId,
-      {
-        mode: "build",
-        modelRef: createMainModelRef(),
-        workingDirectory: "/repo",
-        currentDate: "2026-06-04",
-        envInfo: {
-          cwd: "/repo",
-          platform: "darwin",
-          shell: "zsh",
-          osVersion: "Darwin 24.3.0",
-          nodeVersion: "24.14.0",
-          isGitRepository: true,
-        },
+  const runtime = new AgentRuntime(
+    sessionId,
+    {
+      mode: "build",
+      modelRef: createMainModelRef(),
+      workingDirectory: "/repo",
+      currentDate: "2026-06-04",
+      envInfo: {
+        cwd: "/repo",
+        platform: "darwin",
+        shell: "zsh",
+        osVersion: "Darwin 24.3.0",
+        nodeVersion: "24.14.0",
+        isGitRepository: true,
       },
-      {
-        eventStore,
-        modelAdapter: {
-          resolveConnection() {
-            return {
-              baseURL: "https://api.example.test/anthropic",
-              providerId: "anthropic",
-              providerKind: "anthropic",
-            };
-          },
-          async generateText(request: any) {
-            const toolNames = (request.tools ?? []).map((tool: any) => tool.name);
-            if (toolNames.includes("Agent")) {
-              parentCallCount++;
-              if (parentCallCount === 1) {
-                return {
-                  finishReason: "tool-calls",
-                  model: request.model,
-                  text: "",
-                  toolCalls: [
-                    {
-                      id: "call_general",
-                      name: "Agent",
-                      input: {
-                        description: "Research runtime",
-                        prompt: "Research how child runtimes are created.",
-                      },
-                    },
-                  ],
-                  usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-                };
-              }
+    },
+    {
+      eventStore,
+      modelAdapter: {
+        resolveConnection() {
+          return {
+            baseURL: "https://api.example.test/anthropic",
+            providerId: "anthropic",
+            providerKind: "anthropic",
+          };
+        },
+        async generateText(request: any) {
+          const toolNames = (request.tools ?? []).map((tool: any) => tool.name);
+          if (toolNames.includes("Agent")) {
+            parentCallCount++;
+            if (parentCallCount === 1) {
               return {
-                finishReason: "stop",
+                finishReason: "tool-calls",
                 model: request.model,
-                text: "parent used general result",
-                usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
+                text: "",
+                toolCalls: [
+                  {
+                    id: "call_general",
+                    name: "Agent",
+                    input: {
+                      description: "Research runtime",
+                      prompt: "Research how child runtimes are created.",
+                    },
+                  },
+                ],
+                usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
               };
             }
-            childRequests.push(request);
             return {
               finishReason: "stop",
               model: request.model,
-              text: "General-purpose agent found the runtime path.",
-              usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
+              text: "parent used general result",
+              usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
             };
-          },
-        } as never,
-      },
-    );
+          }
+          childRequests.push(request);
+          return {
+            finishReason: "stop",
+            model: request.model,
+            text: "General-purpose agent found the runtime path.",
+            usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
+          };
+        },
+      } as never,
+    },
+  );
 
-    await runtime.executeTurn("Use a general-purpose agent for this question");
+  await runtime.executeTurn("Use a general-purpose agent for this question");
 
-    const systems = systemContents(childRequests[0]);
-    expect(systems).toHaveLength(4);
-    expect(systems[0]).toBe("You are ZCode, an interactive coding agent");
-    expect(systems[1]).toContain("You are an agent for ZCode");
-    expect(systems[1]).toContain("the caller will relay this to the user");
-    expect(systems[1]).not.toContain("Agent threads always have their cwd reset");
-    expect(systems[2]).toContain("Agent threads always have their cwd reset between bash calls");
-    expect(systems[3]).toContain("Working directory: /repo");
-  });
+  const systems = systemContents(childRequests[0]);
+  expect(systems).toHaveLength(4);
+  expect(systems[0]).toBe("You are ZCode, an interactive coding agent");
+  expect(systems[1]).toContain("You are an agent for ZCode");
+  expect(systems[1]).toContain("the caller will relay this to the user");
+  expect(systems[1]).not.toContain("Agent threads always have their cwd reset");
+  expect(systems[2]).toContain("Agent threads always have their cwd reset between bash calls");
+  expect(systems[3]).toContain("Working directory: /repo");
+});
 ```
 
 - [ ] **Step 5: Add custom profile prompt test**
@@ -393,101 +401,101 @@ Add this test in the same `describe` block:
 Add this test:
 
 ```ts
-  it("adds common notes and environment context to custom child prompts", async () => {
-    const sessionId = createSessionId("subagent-prompt-custom");
-    const eventStore = createTestSessionEventStore();
-    const childRequests: any[] = [];
-    let parentCallCount = 0;
+it("adds common notes and environment context to custom child prompts", async () => {
+  const sessionId = createSessionId("subagent-prompt-custom");
+  const eventStore = createTestSessionEventStore();
+  const childRequests: any[] = [];
+  let parentCallCount = 0;
 
-    const runtime = new AgentRuntime(
-      sessionId,
-      {
-        mode: "build",
-        modelRef: createMainModelRef(),
-        workingDirectory: "/repo",
-        currentDate: "2026-06-04",
-        envInfo: {
-          cwd: "/repo",
-          platform: "darwin",
-          shell: "zsh",
-          osVersion: "Darwin 24.3.0",
-          nodeVersion: "24.14.0",
-          isGitRepository: false,
-        },
-        subagents: {
-          profiles: [
-            {
-              name: "code-researcher",
-              description: "Research code paths.",
-              color: "blue",
-              source: "user",
-              systemPrompt: "You are a focused code researcher. Return concise findings.",
-              tools: ["Read", "Grep", "Glob"],
-            },
-          ],
-        },
+  const runtime = new AgentRuntime(
+    sessionId,
+    {
+      mode: "build",
+      modelRef: createMainModelRef(),
+      workingDirectory: "/repo",
+      currentDate: "2026-06-04",
+      envInfo: {
+        cwd: "/repo",
+        platform: "darwin",
+        shell: "zsh",
+        osVersion: "Darwin 24.3.0",
+        nodeVersion: "24.14.0",
+        isGitRepository: false,
       },
-      {
-        eventStore,
-        modelAdapter: {
-          resolveConnection() {
-            return {
-              baseURL: "https://api.example.test/anthropic",
-              providerId: "anthropic",
-              providerKind: "anthropic",
-            };
+      subagents: {
+        profiles: [
+          {
+            name: "code-researcher",
+            description: "Research code paths.",
+            color: "blue",
+            source: "user",
+            systemPrompt: "You are a focused code researcher. Return concise findings.",
+            tools: ["Read", "Grep", "Glob"],
           },
-          async generateText(request: any) {
-            const toolNames = (request.tools ?? []).map((tool: any) => tool.name);
-            if (toolNames.includes("Agent")) {
-              parentCallCount++;
-              if (parentCallCount === 1) {
-                return {
-                  finishReason: "tool-calls",
-                  model: request.model,
-                  text: "",
-                  toolCalls: [
-                    {
-                      id: "call_custom",
-                      name: "Agent",
-                      input: {
-                        description: "Research custom",
-                        prompt: "Research the custom profile path.",
-                        subagent_type: "code-researcher",
-                      },
-                    },
-                  ],
-                  usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-                };
-              }
+        ],
+      },
+    },
+    {
+      eventStore,
+      modelAdapter: {
+        resolveConnection() {
+          return {
+            baseURL: "https://api.example.test/anthropic",
+            providerId: "anthropic",
+            providerKind: "anthropic",
+          };
+        },
+        async generateText(request: any) {
+          const toolNames = (request.tools ?? []).map((tool: any) => tool.name);
+          if (toolNames.includes("Agent")) {
+            parentCallCount++;
+            if (parentCallCount === 1) {
               return {
-                finishReason: "stop",
+                finishReason: "tool-calls",
                 model: request.model,
-                text: "parent used custom result",
-                usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
+                text: "",
+                toolCalls: [
+                  {
+                    id: "call_custom",
+                    name: "Agent",
+                    input: {
+                      description: "Research custom",
+                      prompt: "Research the custom profile path.",
+                      subagent_type: "code-researcher",
+                    },
+                  },
+                ],
+                usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
               };
             }
-            childRequests.push(request);
             return {
               finishReason: "stop",
               model: request.model,
-              text: "Custom agent found the runtime path.",
-              usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
+              text: "parent used custom result",
+              usage: { inputTokens: 2, outputTokens: 3, totalTokens: 5 },
             };
-          },
-        } as never,
-      },
-    );
+          }
+          childRequests.push(request);
+          return {
+            finishReason: "stop",
+            model: request.model,
+            text: "Custom agent found the runtime path.",
+            usage: { inputTokens: 3, outputTokens: 4, totalTokens: 7 },
+          };
+        },
+      } as never,
+    },
+  );
 
-    await runtime.executeTurn("Use the custom researcher agent for this question");
+  await runtime.executeTurn("Use the custom researcher agent for this question");
 
-    const systems = systemContents(childRequests[0]);
-    expect(systems).toHaveLength(4);
-    expect(systems[0]).toBe("You are ZCode, an interactive coding agent");
-    expect(systems[1]).toBe("You are a focused code researcher. Return concise findings.");
-    expect(systems[2]).toContain("Notes:");
-    expect(systems[3]).toContain("Is directory a git repo: No");
-  });
+  const systems = systemContents(childRequests[0]);
+  expect(systems).toHaveLength(4);
+  expect(systems[0]).toBe("You are ZCode, an interactive coding agent");
+  expect(systems[1]).toBe("You are a focused code researcher. Return concise findings.");
+  expect(systems[2]).toContain("Notes:");
+  expect(systems[3]).toContain("Is directory a git repo: No");
+});
 ```
 
 - [ ] **Step 6: Update existing Explore test expectation**
@@ -527,6 +535,7 @@ Expected before implementation:
 ## Phase 2: Shared Subagent Prompt Pieces
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/context/sections/env-info.ts`
 - Create: `apps/zcode-cli/packages/core/src/subagent/system-prompt.ts`
 - Modify: `apps/zcode-cli/packages/core/src/subagent/explore.ts`
@@ -534,6 +543,7 @@ Expected before implementation:
 - Modify: `apps/zcode-cli/packages/core/src/runtime/deps.ts`
 
 **Interfaces:**
+
 - Consumes:
   - `EnvInfo` from `@zcode/contracts`
   - `isEnvInfoGitRepository(info: EnvInfo): boolean` from `apps/zcode-cli/packages/core/src/context/sections/env-info.ts`
@@ -550,8 +560,10 @@ Replace the private helper:
 
 ```ts
 function isGitRepository(info: EnvInfo): boolean {
-  return info.isGitRepository ??
-    (info.gitStatus !== undefined ? info.gitStatus !== "not_repo" : Boolean(info.gitBranch));
+  return (
+    info.isGitRepository ??
+    (info.gitStatus !== undefined ? info.gitStatus !== "not_repo" : Boolean(info.gitBranch))
+  );
 }
 ```
 
@@ -559,8 +571,10 @@ with:
 
 ```ts
 export function isEnvInfoGitRepository(info: EnvInfo): boolean {
-  return info.isGitRepository ??
-    (info.gitStatus !== undefined ? info.gitStatus !== "not_repo" : Boolean(info.gitBranch));
+  return (
+    info.isGitRepository ??
+    (info.gitStatus !== undefined ? info.gitStatus !== "not_repo" : Boolean(info.gitBranch))
+  );
 }
 ```
 
@@ -604,7 +618,9 @@ export function buildSubagentCommonNotes(): string {
   ].join("\n");
 }
 
-export function buildSubagentEnvironmentContext(options: SubagentEnvironmentContextOptions): string {
+export function buildSubagentEnvironmentContext(
+  options: SubagentEnvironmentContextOptions,
+): string {
   const { envInfo } = options;
   const modelLine = envInfo.currentModel
     ? [`You are powered by the model named ${envInfo.currentModel}.`]
@@ -620,8 +636,7 @@ export function buildSubagentEnvironmentContext(options: SubagentEnvironmentCont
     `OS Version: ${envInfo.osVersion}`,
     "</env>",
     ...modelLine,
-  ]
-    .join("\n");
+  ].join("\n");
 }
 ```
 
@@ -636,9 +651,7 @@ Important boundary:
 In `apps/zcode-cli/packages/core/src/subagent/explore.ts`, rename `buildExploreSystemPrompt` to `buildExploreAgentPrompt` or keep the exported name with updated semantics if broader call sites are easier. Preferred:
 
 ```ts
-export function buildExploreAgentPrompt(options: {
-  embeddedSearchEnabled?: boolean;
-}): string {
+export function buildExploreAgentPrompt(options: { embeddedSearchEnabled?: boolean }): string {
   const searchGuidelines = options.embeddedSearchEnabled
     ? [
         "- Use `find` via Bash for broad file pattern matching",
@@ -715,7 +728,10 @@ In `apps/zcode-cli/packages/core/src/runtime/deps.ts`, export/import:
 
 ```ts
 export { buildExploreAgentPrompt, EXPLORE_AGENT_TYPE } from "../subagent/explore.js";
-export { buildSubagentCommonNotes, buildSubagentEnvironmentContext } from "../subagent/system-prompt.js";
+export {
+  buildSubagentCommonNotes,
+  buildSubagentEnvironmentContext,
+} from "../subagent/system-prompt.js";
 ```
 
 If `deps.ts` currently exports `buildExploreSystemPrompt`, replace that export only after all call sites have moved.
@@ -740,6 +756,7 @@ Expected after Task 2 only:
 ### Task 3: Let Child Runtime Select Its Own Context Builder
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/subagent/context-builder.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/types.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/context.ts`
@@ -747,6 +764,7 @@ Expected after Task 2 only:
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
 
 **Interfaces:**
+
 - Consumes:
   - `ContextBuildResult`, `ContextSection`, `ContextBuilderConfig` from context package
   - `buildSubagentCommonNotes(...)`
@@ -840,7 +858,7 @@ subagentContext: {
 Keep the existing `baseChildEnvInfo` source order:
 
 ```ts
-this.contextSourceSnapshot?.envInfo ?? this.config.envInfo ?? fallbackUnknownEnvInfo
+this.contextSourceSnapshot?.envInfo ?? this.config.envInfo ?? fallbackUnknownEnvInfo;
 ```
 
 Keep the existing shell override from `getSessionShellEnvironment(this)` before adding `currentModel`. This mirrors the main context path where `createContextBuilderFromSnapshot(...)` derives provider-visible env info from the current context snapshot and appends `currentModel: formatModelRef(this.defaultModelRef)`.
@@ -872,9 +890,11 @@ Expected:
 ### Task 4: Document The Narrow Prompt Assembly Alignment
 
 **Files:**
+
 - Modify: 历史差异审计文档（已删除）
 
 **Interfaces:**
+
 - Consumes:
   - Implementation result from Tasks 2-3.
 - Produces:
@@ -927,9 +947,11 @@ Expected:
 ### Task 5: Final Validation Checklist
 
 **Files:**
+
 - No code files; validation only.
 
 **Interfaces:**
+
 - Consumes:
   - All previous tasks.
 - Produces:
@@ -1002,11 +1024,13 @@ system[3] contains Working directory / git repo / Platform / Shell / OS Version 
 ### Task 6: Add And Run Foreground Desktop E2E
 
 **Files:**
+
 - Modify: `docs/conversation-session-case-catalog.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 - Create or Modify: `packages/desktop/test/e2e/conversation-session/conversation-session-subagent-prompt-assembly.test.ts`
 
 **Interfaces:**
+
 - Consumes:
   - Prompt assembly implementation from Tasks 2-3.
   - Existing desktop WDIO helpers under `packages/desktop/test/e2e/helpers/`.

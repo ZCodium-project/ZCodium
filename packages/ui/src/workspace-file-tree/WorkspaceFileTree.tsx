@@ -125,9 +125,7 @@ export function WorkspaceFileTree({
     enableWorkspaceFeatures: !temporaryExternalDirectory,
   });
   const { installedEditors } = useInstalledFileTreeEditors();
-  const isRemoteWorkspaceFileTree = Boolean(
-    workspaceRemoteSessionId || workspaceIdentity,
-  );
+  const isRemoteWorkspaceFileTree = Boolean(workspaceRemoteSessionId || workspaceIdentity);
   const { remoteTarget } = useWorkspaceOpenInEditorTarget({
     workspacePath,
     workspaceIdentity,
@@ -144,13 +142,9 @@ export function WorkspaceFileTree({
           }).availableEditors,
     [installedEditors, isRemoteWorkspaceFileTree, remoteTarget],
   );
-  const wslFileManagerEditor = resolveWorkspaceFileManagerEditor(
-    availableEditors,
-    remoteTarget,
-  );
+  const wslFileManagerEditor = resolveWorkspaceFileManagerEditor(availableEditors, remoteTarget);
   const canOpenInFileManager =
-    Boolean(wslFileManagerEditor) ||
-    (canOpenLocalFileManager && !isRemoteWorkspaceFileTree);
+    Boolean(wslFileManagerEditor) || (canOpenLocalFileManager && !isRemoteWorkspaceFileTree);
   const hasFileSearchQuery = fileSearchQuery.trim().length > 0;
   const searchIndex = useWorkspaceFileSearchIndex({
     workspacePath,
@@ -177,9 +171,7 @@ export function WorkspaceFileTree({
   const visibleRows = useMemo(() => {
     if (hasFileSearchQuery) {
       return showChangedOnly
-        ? searchRows.filter((row) =>
-            getWorkspaceFileGitStatus(treeData.gitStatusByPath, row.path),
-          )
+        ? searchRows.filter((row) => getWorkspaceFileGitStatus(treeData.gitStatusByPath, row.path))
         : searchRows;
     }
     return filterWorkspaceFileTreeRows({
@@ -235,13 +227,9 @@ export function WorkspaceFileTree({
     }
     lastNonBlockingRootErrorRef.current = errorMessage;
     // Bugfix: 根目录已有缓存时，刷新失败只能作为非阻塞提示；阻塞错误页会把保留的旧文件树隐藏掉。
-    toast(
-      `${intl.formatMessage({ id: "workspaceFileTree.readFailed" })}: ${errorMessage}`,
-    );
+    toast(`${intl.formatMessage({ id: "workspaceFileTree.readFailed" })}: ${errorMessage}`);
   }, [intl, rootError, rootLoaded]);
-  const gitStatusLabelByStatus = useMemo<
-    Record<WorkspaceFileGitStatus, string>
-  >(
+  const gitStatusLabelByStatus = useMemo<Record<WorkspaceFileGitStatus, string>>(
     () => ({
       added: intl.formatMessage({ id: "git.kind.added" }),
       deleted: intl.formatMessage({ id: "git.kind.deleted" }),
@@ -282,8 +270,7 @@ export function WorkspaceFileTree({
     return {
       WebkitMaskImage:
         "linear-gradient(to bottom, black 0px, black calc(100% - 32px), transparent 100%)",
-      maskImage:
-        "linear-gradient(to bottom, black 0px, black calc(100% - 32px), transparent 100%)",
+      maskImage: "linear-gradient(to bottom, black 0px, black calc(100% - 32px), transparent 100%)",
       WebkitMaskRepeat: "no-repeat",
       maskRepeat: "no-repeat",
       WebkitMaskSize: "100% 100%",
@@ -297,17 +284,11 @@ export function WorkspaceFileTree({
 
   useEffect(() => {
     const previewPath = revealPath?.trim() || activePreviewPath?.trim();
-    if (
-      !previewPath ||
-      !isWorkspaceFilePathInside(workspacePath, previewPath)
-    ) {
+    if (!previewPath || !isWorkspaceFilePathInside(workspacePath, previewPath)) {
       return;
     }
     let disposed = false;
-    const ancestorDirectories = getWorkspaceFileAncestorDirectories(
-      workspacePath,
-      previewPath,
-    );
+    const ancestorDirectories = getWorkspaceFileAncestorDirectories(workspacePath, previewPath);
     const directoryPathsToExpand = revealPath?.trim()
       ? [...ancestorDirectories, previewPath]
       : ancestorDirectories;
@@ -347,10 +328,7 @@ export function WorkspaceFileTree({
     if (
       !isWorkspaceFilePathInside(workspacePath, previewPath) ||
       !pendingActivePreviewRevealPathRef.current ||
-      !areWorkspaceFilePathsEqual(
-        pendingActivePreviewRevealPathRef.current,
-        previewPath,
-      )
+      !areWorkspaceFilePathsEqual(pendingActivePreviewRevealPathRef.current, previewPath)
     ) {
       return;
     }
@@ -361,13 +339,7 @@ export function WorkspaceFileTree({
       rowVirtualizer.scrollToIndex(activeRowIndex, { align: "auto" });
       pendingActivePreviewRevealPathRef.current = null;
     }
-  }, [
-    activePreviewPath,
-    revealPath,
-    rowVirtualizer,
-    visibleRows,
-    workspacePath,
-  ]);
+  }, [activePreviewPath, revealPath, rowVirtualizer, visibleRows, workspacePath]);
 
   useEffect(() => {
     const revealDirectoryPath = pendingSearchDirectoryRevealPathRef.current;
@@ -398,8 +370,7 @@ export function WorkspaceFileTree({
       );
       const hasOverflow = scrollNode.scrollHeight > scrollNode.clientHeight + 1;
       const isAtBottom =
-        scrollNode.scrollTop + scrollNode.clientHeight >=
-        scrollNode.scrollHeight - 1;
+        scrollNode.scrollTop + scrollNode.clientHeight >= scrollNode.scrollHeight - 1;
       setHasScrollableFileTree(hasOverflow);
       setShowScrollBottomMask(hasOverflow && !isAtBottom);
     };
@@ -598,25 +569,15 @@ export function WorkspaceFileTree({
         }
         return;
       }
-      if (
-        event.key === "ArrowLeft" &&
-        row.type === "directory" &&
-        row.expanded
-      ) {
+      if (event.key === "ArrowLeft" && row.type === "directory" && row.expanded) {
         event.preventDefault();
         handleToggleDirectory(row);
       }
     },
-    [
-      handleDirectoryAction,
-      handleOpenPreview,
-      handleToggleDirectory,
-      hasFileSearchQuery,
-    ],
+    [handleDirectoryAction, handleOpenPreview, handleToggleDirectory, hasFileSearchQuery],
   );
 
-  const hasActiveFileTreeFilter =
-    fileSearchQuery.trim().length > 0 || showChangedOnly;
+  const hasActiveFileTreeFilter = fileSearchQuery.trim().length > 0 || showChangedOnly;
   const virtualItems = rowVirtualizer.getVirtualItems();
   const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
   const stickyFolderItems = useWorkspaceFileTreeStickyFolders({
@@ -757,9 +718,7 @@ export function WorkspaceFileTree({
             </Button>
           </ControlHintTooltip>
         ) : null}
-        <ControlHintTooltip
-          title={intl.formatMessage({ id: "workspaceFileTree.refresh" })}
-        >
+        <ControlHintTooltip title={intl.formatMessage({ id: "workspaceFileTree.refresh" })}>
           <Button
             type="button"
             variant="ghost"
@@ -770,9 +729,7 @@ export function WorkspaceFileTree({
             disabled={treeData.refreshingLoadedDirectories}
             onClick={handleRefresh}
           >
-            <RefreshCw
-              className={cn("size-3.5", refreshInProgress && "animate-spin")}
-            />
+            <RefreshCw className={cn("size-3.5", refreshInProgress && "animate-spin")} />
           </Button>
         </ControlHintTooltip>
       </div>
@@ -802,8 +759,7 @@ export function WorkspaceFileTree({
           <WorkspaceFileTreeList
             rootError={hasFileSearchQuery ? searchIndexError : blockingRootError}
             showInitialLoading={
-              showInitialLoading ||
-              (hasFileSearchQuery && searchIndexLoading && !searchIndexLoaded)
+              showInitialLoading || (hasFileSearchQuery && searchIndexLoading && !searchIndexLoaded)
             }
             rows={visibleRows}
             virtualItems={virtualItems}

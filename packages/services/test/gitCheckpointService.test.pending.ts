@@ -88,96 +88,108 @@ afterEach(() => {
 });
 
 describeIfGit("gitCheckpointService", () => {
-  it("creates workspace-scoped checkpoints, diffs them, and restores files without touching staged state", async () => {
-    const { dataBaseDir, repoPath, workspacePath } = createRepo();
-    const service = createGitCheckpointService({
-      store: new GitCheckpointStore({ rootDir: join(repoPath, ".zcode-test-checkpoints") }),
-    });
+  it(
+    "creates workspace-scoped checkpoints, diffs them, and restores files without touching staged state",
+    async () => {
+      const { dataBaseDir, repoPath, workspacePath } = createRepo();
+      const service = createGitCheckpointService({
+        store: new GitCheckpointStore({ rootDir: join(repoPath, ".zcode-test-checkpoints") }),
+      });
 
-    const base = await service.createCheckpoint({ workspacePath });
+      const base = await service.createCheckpoint({ workspacePath });
 
-    writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed\n");
-    rmSync(join(workspacePath, "delete-me.txt"));
-    runGit(repoPath, ["mv", "packages/app/rename-me.txt", "packages/app/renamed.txt"]);
-    writeFileSync(join(workspacePath, "new-file.txt"), "new file\n");
-    writeFileSync(join(workspacePath, "stage-me.txt"), "stage changed\n");
-    writeFileSync(join(repoPath, "packages", "other", "skip.txt"), "skip changed\n");
-    runGit(repoPath, ["add", "packages/app/stage-me.txt"]);
+      writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed\n");
+      rmSync(join(workspacePath, "delete-me.txt"));
+      runGit(repoPath, ["mv", "packages/app/rename-me.txt", "packages/app/renamed.txt"]);
+      writeFileSync(join(workspacePath, "new-file.txt"), "new file\n");
+      writeFileSync(join(workspacePath, "stage-me.txt"), "stage changed\n");
+      writeFileSync(join(repoPath, "packages", "other", "skip.txt"), "skip changed\n");
+      runGit(repoPath, ["add", "packages/app/stage-me.txt"]);
 
-    const stagedBeforeRestore = runGit(repoPath, ["diff", "--cached", "--name-only"]);
-    const changed = await service.createCheckpoint({ workspacePath });
-    const diff = await service.diffCheckpoints({
-      workspacePath,
-      fromCheckpointId: base.checkpointId,
-      toCheckpointId: changed.checkpointId,
-    });
-
-    expect(diff.files.map((file) => `${file.kind}:${file.workspaceRelativePath}`).sort()).toEqual([
-      "added:new-file.txt",
-      "deleted:delete-me.txt",
-      "modified:stage-me.txt",
-      "modified:tracked.txt",
-      "renamed:renamed.txt",
-    ]);
-    expect(diff.files.some((file) => file.repoRelativePath.includes("packages/other"))).toBe(false);
-
-    const restoreResult = await service.restoreBetweenCheckpoints({
-      workspacePath,
-      fromCheckpointId: changed.checkpointId,
-      toCheckpointId: base.checkpointId,
-    });
-
-    expect(restoreResult.success).toBe(true);
-    expect(readFileSync(join(workspacePath, "tracked.txt"), "utf-8")).toBe("line 1\nline 2\n");
-    expect(readFileSync(join(workspacePath, "delete-me.txt"), "utf-8")).toBe("delete me\n");
-    expect(() => readFileSync(join(workspacePath, "new-file.txt"), "utf-8")).toThrow();
-    expect(() => readFileSync(join(workspacePath, "renamed.txt"), "utf-8")).toThrow();
-    expect(readFileSync(join(workspacePath, "rename-me.txt"), "utf-8")).toBe("rename me\n");
-    expect(readFileSync(join(repoPath, "packages", "other", "skip.txt"), "utf-8")).toBe(
-      "skip changed\n",
-    );
-    expect(runGit(repoPath, ["diff", "--cached", "--name-only"])).toBe(stagedBeforeRestore);
-    expect(readdirSync(join(dataBaseDir, ".zcode", "git-checkpoint-index"))).toEqual([]);
-  }, GIT_INTEGRATION_TEST_TIMEOUT_MS);
-
-  it("returns conflicts when affected files drift away from the declared fromCheckpoint and supports force restore", async () => {
-    const { repoPath, workspacePath } = createRepo();
-    const service = createGitCheckpointService({
-      store: new GitCheckpointStore({ rootDir: join(repoPath, ".zcode-test-checkpoints") }),
-    });
-
-    const base = await service.createCheckpoint({ workspacePath });
-    writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed\n");
-    const changed = await service.createCheckpoint({ workspacePath });
-
-    writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed again\n");
-
-    const conflicted = await service.restoreBetweenCheckpoints({
-      workspacePath,
-      fromCheckpointId: changed.checkpointId,
-      toCheckpointId: base.checkpointId,
-    });
-    expect(conflicted.success).toBe(false);
-    expect(conflicted.conflicts?.map((conflict) => conflict.workspaceRelativePath)).toEqual([
-      "tracked.txt",
-    ]);
-
-    const forced = await service.restoreBetweenCheckpoints({
-      workspacePath,
-      fromCheckpointId: changed.checkpointId,
-      toCheckpointId: base.checkpointId,
-      force: true,
-    });
-    expect(forced.success).toBe(true);
-    expect(readFileSync(join(workspacePath, "tracked.txt"), "utf-8")).toBe("line 1\nline 2\n");
-
-    await service.deleteCheckpoint({ workspacePath, checkpointId: changed.checkpointId });
-    await expect(
-      service.diffCheckpoints({
+      const stagedBeforeRestore = runGit(repoPath, ["diff", "--cached", "--name-only"]);
+      const changed = await service.createCheckpoint({ workspacePath });
+      const diff = await service.diffCheckpoints({
         workspacePath,
         fromCheckpointId: base.checkpointId,
         toCheckpointId: changed.checkpointId,
-      }),
-    ).rejects.toThrow(`Checkpoint does not exist: ${changed.checkpointId}`);
-  }, GIT_INTEGRATION_TEST_TIMEOUT_MS);
+      });
+
+      expect(diff.files.map((file) => `${file.kind}:${file.workspaceRelativePath}`).sort()).toEqual(
+        [
+          "added:new-file.txt",
+          "deleted:delete-me.txt",
+          "modified:stage-me.txt",
+          "modified:tracked.txt",
+          "renamed:renamed.txt",
+        ],
+      );
+      expect(diff.files.some((file) => file.repoRelativePath.includes("packages/other"))).toBe(
+        false,
+      );
+
+      const restoreResult = await service.restoreBetweenCheckpoints({
+        workspacePath,
+        fromCheckpointId: changed.checkpointId,
+        toCheckpointId: base.checkpointId,
+      });
+
+      expect(restoreResult.success).toBe(true);
+      expect(readFileSync(join(workspacePath, "tracked.txt"), "utf-8")).toBe("line 1\nline 2\n");
+      expect(readFileSync(join(workspacePath, "delete-me.txt"), "utf-8")).toBe("delete me\n");
+      expect(() => readFileSync(join(workspacePath, "new-file.txt"), "utf-8")).toThrow();
+      expect(() => readFileSync(join(workspacePath, "renamed.txt"), "utf-8")).toThrow();
+      expect(readFileSync(join(workspacePath, "rename-me.txt"), "utf-8")).toBe("rename me\n");
+      expect(readFileSync(join(repoPath, "packages", "other", "skip.txt"), "utf-8")).toBe(
+        "skip changed\n",
+      );
+      expect(runGit(repoPath, ["diff", "--cached", "--name-only"])).toBe(stagedBeforeRestore);
+      expect(readdirSync(join(dataBaseDir, ".zcode", "git-checkpoint-index"))).toEqual([]);
+    },
+    GIT_INTEGRATION_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "returns conflicts when affected files drift away from the declared fromCheckpoint and supports force restore",
+    async () => {
+      const { repoPath, workspacePath } = createRepo();
+      const service = createGitCheckpointService({
+        store: new GitCheckpointStore({ rootDir: join(repoPath, ".zcode-test-checkpoints") }),
+      });
+
+      const base = await service.createCheckpoint({ workspacePath });
+      writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed\n");
+      const changed = await service.createCheckpoint({ workspacePath });
+
+      writeFileSync(join(workspacePath, "tracked.txt"), "line 1\nline 2 changed again\n");
+
+      const conflicted = await service.restoreBetweenCheckpoints({
+        workspacePath,
+        fromCheckpointId: changed.checkpointId,
+        toCheckpointId: base.checkpointId,
+      });
+      expect(conflicted.success).toBe(false);
+      expect(conflicted.conflicts?.map((conflict) => conflict.workspaceRelativePath)).toEqual([
+        "tracked.txt",
+      ]);
+
+      const forced = await service.restoreBetweenCheckpoints({
+        workspacePath,
+        fromCheckpointId: changed.checkpointId,
+        toCheckpointId: base.checkpointId,
+        force: true,
+      });
+      expect(forced.success).toBe(true);
+      expect(readFileSync(join(workspacePath, "tracked.txt"), "utf-8")).toBe("line 1\nline 2\n");
+
+      await service.deleteCheckpoint({ workspacePath, checkpointId: changed.checkpointId });
+      await expect(
+        service.diffCheckpoints({
+          workspacePath,
+          fromCheckpointId: base.checkpointId,
+          toCheckpointId: changed.checkpointId,
+        }),
+      ).rejects.toThrow(`Checkpoint does not exist: ${changed.checkpointId}`);
+    },
+    GIT_INTEGRATION_TEST_TIMEOUT_MS,
+  );
 });

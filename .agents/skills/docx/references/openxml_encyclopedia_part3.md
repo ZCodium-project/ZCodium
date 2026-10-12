@@ -1,7 +1,9 @@
 # OpenXML SDK C# Code Encyclopedia
+
 Complete, heavily commented C# code patterns for DocumentFormat.OpenXml 3.x / .NET 8+ / C# 12.
 
 **Namespace aliases used throughout:**
+
 ```csharp
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -13,6 +15,7 @@ using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 ```
 
 **EMU conversion reference** (used throughout image/shape code):
+
 ```
 1 inch  = 914400 EMU
 1 cm    = 360000 EMU
@@ -242,7 +245,7 @@ stylesPart.Styles.Save();
 // TOC \t "TOC1,1,TOC2,2,TOC3,3" \h \z
 ```
 
-**Tab leader options:** `TabStopLeaderCharValues.Dot` (........), `TabStopLeaderCharValues.Dash` (--------), `TabStopLeaderCharValues.Underscore` (________), `TabStopLeaderCharValues.MiddleDot` (·······).
+**Tab leader options:** `TabStopLeaderCharValues.Dot` (........), `TabStopLeaderCharValues.Dash` (--------), `TabStopLeaderCharValues.Underscore` (**\_\_\_\_**), `TabStopLeaderCharValues.MiddleDot` (·······).
 
 ### 1.7 Mini TOC for a Section
 
@@ -492,12 +495,14 @@ sectPr.Append(new EndnoteProperties(
 ### 3.1 SimpleField vs Complex Field Architecture
 
 **SimpleField** — single element, easier to write but less control:
+
 ```csharp
 // <w:fldSimple w:instr=" PAGE "><w:r><w:t>1</w:t></w:r></w:fldSimple>
 new SimpleField(new Run(new Text("1"))) { Instruction = " PAGE " }
 ```
 
 **Complex Field (Begin/Separate/End)** — full control over each field component:
+
 ```csharp
 // <w:r><w:fldChar w:fldCharType="begin"/></w:r>
 // <w:r><w:instrText> PAGE </w:instrText></w:r>
@@ -512,6 +517,7 @@ new Run(new FieldChar { FieldCharType = FieldCharValues.End }),
 ```
 
 **Key differences:**
+
 - `SimpleField` is one `w:fldSimple` element containing one `w:r`
 - Complex field uses `FieldChar` with `FieldCharValues.Begin/Separate/End` to delimit regions
 - `FieldCode` is `w:instrText` — contains the field instruction string
@@ -521,6 +527,7 @@ new Run(new FieldChar { FieldCharType = FieldCharValues.End }),
 ### 3.2 PAGE, NUMPAGES, DATE, TIME
 
 **PAGE — current page number:**
+
 ```csharp
 // SimpleField version
 new SimpleField(new Run(new Text("1"))) { Instruction = " PAGE " }
@@ -537,6 +544,7 @@ new Paragraph(
 ```
 
 **NUMPAGES — total page count:**
+
 ```csharp
 new Paragraph(
     new Run(new FieldChar { FieldCharType = FieldCharValues.Begin }),
@@ -549,6 +557,7 @@ new Paragraph(
 ```
 
 **DATE — current date with format switch:**
+
 ```csharp
 // DATE with custom format: \@ "yyyy-MM-dd"
 // The \@ switch specifies the date picture
@@ -568,6 +577,7 @@ new Run(new FieldCode(" DATE \\@ \"d/M/yyyy\" \\* MERGEFORMAT ") { Space = Space
 ```
 
 **TIME — current time:**
+
 ```csharp
 new Paragraph(
     new Run(new FieldChar { FieldCharType = FieldCharValues.Begin }),
@@ -613,6 +623,7 @@ new Paragraph(
 ```
 
 **Set document properties programmatically:**
+
 ```csharp
 // Set core properties via PackageProperties (OfficePackage)
 var package = doc.ExtendedFilePropertiesPart?.Properties;
@@ -1496,12 +1507,12 @@ private static int GetNextCommentId(WordprocessingDocument doc)
 
 **The 4 files at a glance:**
 
-| File | Part Class | Content | Key Attributes |
-|------|-----------|---------|----------------|
-| `comments.xml` | `WordprocessingCommentsPart` | Comment text | `w:id`, `w:author`, `w:date`, `w:initials` |
-| `commentsExtended.xml` | `WordprocessingCommentsExPart` | W15 extensions | `w15:paraId`, `w15:done` |
-| `commentsIds.xml` | `WordprocessingCommentsIdsPart` | Persistent IDs | `w16cid:paraId`, `w16cid:durableId` |
-| `commentsExtensible.xml` | `WordprocessingCommentsExtensiblePart` | W16 extensible | `w16cex:durableId`, `w16cex:dateUtc` |
+| File                     | Part Class                             | Content        | Key Attributes                             |
+| ------------------------ | -------------------------------------- | -------------- | ------------------------------------------ |
+| `comments.xml`           | `WordprocessingCommentsPart`           | Comment text   | `w:id`, `w:author`, `w:date`, `w:initials` |
+| `commentsExtended.xml`   | `WordprocessingCommentsExPart`         | W15 extensions | `w15:paraId`, `w15:done`                   |
+| `commentsIds.xml`        | `WordprocessingCommentsIdsPart`        | Persistent IDs | `w16cid:paraId`, `w16cid:durableId`        |
+| `commentsExtensible.xml` | `WordprocessingCommentsExtensiblePart` | W16 extensible | `w16cex:durableId`, `w16cex:dateUtc`       |
 
 ### 5.2 Comment Reply (Threaded Comments)
 
@@ -2232,6 +2243,7 @@ var shapeDrawing = new Drawing(
 ```
 
 **Preset shape types (`A.ShapeTypeValues`):**
+
 - `Rectangle`, `RoundedRectangle`, `Ellipse`, `Triangle`, `RightTriangle`
 - `Parallelogram`, `Trapezoid`, `Pentagon`, `Hexagon`, `Octagon`
 - `Star4`, `Star5`, `Star6`, `Star8`, `Star10`, `Star12`
@@ -2962,16 +2974,16 @@ numbering.Append(bulletNumInstance);
 
 **Common bullet characters:**
 
-| Symbol | Character | Unicode | Common Font |
-|--------|-----------|---------|-------------|
-| ● Filled circle | Bullet | U+2022 | Symbol |
-| ○ Empty circle | White circle | U+25CB | Arial |
-| ■ Filled square | Black square | U+25A0 | Arial |
-| □ Empty square | White square | U+25A1 | Arial |
-| ➢ Right arrow | Right arrow | U+27A2 | Wingdings |
-| ✓ Checkmark | Check mark | U+2713 | Wingdings |
-| ✗ Cross | Ballot X | U+2717 | Wingdings |
-| ▶ Play | Right triangle | U+25B6 | Arial |
+| Symbol          | Character      | Unicode | Common Font |
+| --------------- | -------------- | ------- | ----------- |
+| ● Filled circle | Bullet         | U+2022  | Symbol      |
+| ○ Empty circle  | White circle   | U+25CB  | Arial       |
+| ■ Filled square | Black square   | U+25A0  | Arial       |
+| □ Empty square  | White square   | U+25A1  | Arial       |
+| ➢ Right arrow   | Right arrow    | U+27A2  | Wingdings   |
+| ✓ Checkmark     | Check mark     | U+2713  | Wingdings   |
+| ✗ Cross         | Ballot X       | U+2717  | Wingdings   |
+| ▶ Play          | Right triangle | U+25B6  | Arial       |
 
 ### 9.4 Restart Numbering at Specific Point
 
@@ -3026,7 +3038,7 @@ var freshNumInstance = new NumberingInstance(
 
 ### 9.6 Link Numbering to Heading Styles (Outline Numbering)
 
-```句话说，link numbering to heading styles so that Heading1 starts a new numbering sequence, Heading2 is a sub-item, etc.
+````句话说，link numbering to heading styles so that Heading1 starts a new numbering sequence, Heading2 is a sub-item, etc.
 
 ```csharp
 // This links styles to numbering levels automatically via StyleLink
@@ -3089,7 +3101,7 @@ var heading2Para = new Paragraph(
     new ParagraphProperties(new ParagraphStyleId { Val = "Heading2" }),
     new Run(new Text("Background"))  // Automatically gets "1.1" prefix
 );
-```
+````
 
 ### 9.7 NumberingFormat Values Reference
 
@@ -3364,18 +3376,22 @@ public static void ProtectDocument(
 When building complex elements, remember these ordering rules:
 
 ### Run Elements Order (inside RunProperties):
+
 `RunFonts` → `Bold`/`Italic` → `Color` → `FontSize` → `Underline` → `VerticalTextAlignment` → `Emphasis` → (any other)
 
 ### Paragraph Elements Order (inside ParagraphProperties):
+
 `ParagraphStyleId` → `KeepNext` → `KeepLines` → `PageBreakBefore` → `FrameProperties` → `WidowControl` → `NumPr` → `Indentation` → `SpacingBetweenLines` → `Justification` → `SectionProperties`
 
 ### Table Properties Order:
+
 `TableWidth` → `TextDirection` → `Borders` → `Shading` → `TableLayout` → `TableCellMarginDefault`
 
 ### SectionProperties Order:
+
 `FootnotePr` → `EndnotePr` → `Type` → `PageSize` → `PageMargin` → `PaperSource` → `PageBorders` → `LineNumberRestart` → `PageNumberFormat` → `TitlePage` → `TextDirection`
 
 ---
 
-*Generated for DocumentFormat.OpenXml 3.x / .NET 8+ / C# 12*
-*Last updated: 2026-03-22*
+_Generated for DocumentFormat.OpenXml 3.x / .NET 8+ / C# 12_
+_Last updated: 2026-03-22_

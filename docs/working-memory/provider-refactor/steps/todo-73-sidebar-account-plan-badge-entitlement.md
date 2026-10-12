@@ -68,12 +68,12 @@ Team 标签的数据为空，即使 Team Provider.entitled = true
 
 模式：planning；层级：presentation / validation。范围限账号套餐标签及其共用 hook 的必要调整。
 
-| 入口／优先级 | 共享实现与数据 | 本次边界 |
-| --- | --- | --- |
-| 头像标签，must-inspect | `WorkspaceSidebarFooter` → `useWorkspaceSidebarFooterUsageSummaryState` → `resolveSidebarFooterProfilePlanBadge` | 改为独立读取个人／团队事实，保留现有样式与国际化 |
-| Footer 额度与升级，must-inspect | 同一 UsageSummary hook、`teamSources`、`currentUsageSource` | Team 查询不依赖个人权益；组织／项目来源不退化成个人来源 |
-| Provider Settings 套餐卡，should-inspect | Account Access helper、enterprise pricing hook | 保持现有账户与套餐卡行为，不全局放宽 helper |
-| Desktop／Web／手机／远程，invariant-only | 已有 hooks、服务注入与 Family 边界 | 复用当前账号事实来源，不新增 runtime 或直连平台 API；不改任务 continuous/replayable 链路 |
+| 入口／优先级                             | 共享实现与数据                                                                                                   | 本次边界                                                                                 |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 头像标签，must-inspect                   | `WorkspaceSidebarFooter` → `useWorkspaceSidebarFooterUsageSummaryState` → `resolveSidebarFooterProfilePlanBadge` | 改为独立读取个人／团队事实，保留现有样式与国际化                                         |
+| Footer 额度与升级，must-inspect          | 同一 UsageSummary hook、`teamSources`、`currentUsageSource`                                                      | Team 查询不依赖个人权益；组织／项目来源不退化成个人来源                                  |
+| Provider Settings 套餐卡，should-inspect | Account Access helper、enterprise pricing hook                                                                   | 保持现有账户与套餐卡行为，不全局放宽 helper                                              |
+| Desktop／Web／手机／远程，invariant-only | 已有 hooks、服务注入与 Family 边界                                                                               | 复用当前账号事实来源，不新增 runtime 或直连平台 API；不改任务 continuous/replayable 链路 |
 
 权威事实来自账号服务，经 Account Overlay / ProviderSettingsView 投影；等级和价格保留各自已有服务与缓存。
 标签没有 Composer 草稿、默认模型继承、提交命令或持久化落点。不同入口共享数据，不共享所有显示条件。
@@ -100,15 +100,15 @@ Graph drift / proposed delta：`capability.plan-entitlements` 应补充 Footer �
 
 已确认维度仅为 Family、个人／团队权益、加载／刷新状态；不展开模型、reasoning、任务队列的无关组合。
 
-| Case | 设置与动作 | 预期与证据 |
-| --- | --- | --- |
-| 73-01 | BigModel 个人 false、团队 true；冷启动侧栏 | 显示 Team；组件／hook 回归 + E2E + Air |
-| 73-02 | Z.ai 同样只有团队权益 | 显示 Team；组件／hook 回归 |
-| 73-03 | 有个人等级，分别搭配有／无团队权益 | 均优先显示个人等级；已有规则回归 |
-| 73-04 | 两者均无权益，或只有 Start Plan | 不伪造个人等级／Team；单测 |
-| 73-05 | 从有 Team 的 Family 切到另一无权益 Family，或退出登录 | 不残留旧 Team 标签；组件测试 |
-| 73-06 | 个人查询加载、Provider View 未 Ready／失败，再恢复；团队权益单独变化 | 不把未知当作确定无权益，恢复后按最新事实显示，不依赖刷新整个页面 |
-| 73-07 | 只有 Team 时打开 Footer 额度／升级入口；pricing 失败 | 成功时保留正确组织／项目；失败沿用既有错误处理，不抹掉已确认的 Team 身份 |
+| Case  | 设置与动作                                                           | 预期与证据                                                               |
+| ----- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 73-01 | BigModel 个人 false、团队 true；冷启动侧栏                           | 显示 Team；组件／hook 回归 + E2E + Air                                   |
+| 73-02 | Z.ai 同样只有团队权益                                                | 显示 Team；组件／hook 回归                                               |
+| 73-03 | 有个人等级，分别搭配有／无团队权益                                   | 均优先显示个人等级；已有规则回归                                         |
+| 73-04 | 两者均无权益，或只有 Start Plan                                      | 不伪造个人等级／Team；单测                                               |
+| 73-05 | 从有 Team 的 Family 切到另一无权益 Family，或退出登录                | 不残留旧 Team 标签；组件测试                                             |
+| 73-06 | 个人查询加载、Provider View 未 Ready／失败，再恢复；团队权益单独变化 | 不把未知当作确定无权益，恢复后按最新事实显示，不依赖刷新整个页面         |
+| 73-07 | 只有 Team 时打开 Footer 额度／升级入口；pricing 失败                 | 成功时保留正确组织／项目；失败沿用既有错误处理，不抹掉已确认的 Team 身份 |
 
 剪枝：无模型请求，不新增 provider replay fixture；不变更 Session/Submission，不扩展对话状态空间。
 E2E 在现有账号／Provider fixture 基础上控制权益返回，等待可观测状态，不用固定 sleep。

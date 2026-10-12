@@ -301,8 +301,7 @@ function renderComposerElement(
   submissionReady = true,
 ) {
   const scopeId = sessionId ?? V4_DRAFT_SCOPE_ROOT;
-  let ownedDraft =
-    composerDraft ??
+  let ownedDraft = composerDraft ??
     readV4ComposerDraft("/workspace", undefined, scopeId) ?? {
       text: "",
       updatedAt: 0,
@@ -596,7 +595,10 @@ describe("ConversationComposer prompt history", () => {
   it("迟到的发送成功不能清除等待期间产生的新正文", async () => {
     let resolveSend!: () => void;
     const onSendText = vi.fn(
-      () => new Promise<void>((resolve) => { resolveSend = resolve; }),
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSend = resolve;
+        }),
     );
     const { root } = renderComposer(onSendText);
     const submit = chatPromptEditorProps.at(-1)!.onSubmit as (text: string) => boolean;

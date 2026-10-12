@@ -35,21 +35,13 @@ export interface ConversationHeaderProps {
  * pane chrome：不占布局高度，只在右上角悬浮拆分/关闭入口。
  * 保留 title data 节点，供 E2E 读取投影但不恢复旧横条。
  */
-function ConversationHeaderImpl({
-  title,
-  onClosePane,
-  workspaceBadge,
-}: ConversationHeaderProps) {
+function ConversationHeaderImpl({ title, onClosePane, workspaceBadge }: ConversationHeaderProps) {
   const { intl } = useZCodeIntl();
   const hasFloatingActions = Boolean(workspaceBadge) || Boolean(onClosePane);
 
   return (
     <>
-      <span
-        data-testid={TID_V4_SESSION_TITLE}
-        data-title={title}
-        className="sr-only"
-      />
+      <span data-testid={TID_V4_SESSION_TITLE} data-title={title} className="sr-only" />
       {hasFloatingActions ? (
         <div
           data-v4-pane-actions="floating"
@@ -64,9 +56,7 @@ function ConversationHeaderImpl({
             >
               <span className="truncate">{workspaceBadge.label}</span>
               {workspaceBadge.remote ? (
-                <span className="shrink-0">
-                  {intl.formatMessage({ id: "v4Pane.remote" })}
-                </span>
+                <span className="shrink-0">{intl.formatMessage({ id: "v4Pane.remote" })}</span>
               ) : null}
             </span>
           ) : null}

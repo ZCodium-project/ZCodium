@@ -4,10 +4,7 @@
  * 审计版不随同步购买漏斗埋点模块；这里只保留 Off-Peak 首页导航需要的纯判断，
  * 从零实现同语义的 plan state 推导（不再携带任何上报上下文）。
  */
-import {
-  BUILTIN_MODEL_PROVIDER_IDS,
-  type UsageEntitlementSnapshot,
-} from "@zcode/shared";
+import { BUILTIN_MODEL_PROVIDER_IDS, type UsageEntitlementSnapshot } from "@zcode/shared";
 import type { ProviderSettingsView } from "@zcode/services";
 
 export type CodingPlanEntryPlanStatus = "no_plan" | "start_plan" | "coding_plan" | "unknown";

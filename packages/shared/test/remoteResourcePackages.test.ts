@@ -39,15 +39,7 @@ describe("remote resource packages", () => {
       normalizeRemoteResourcePackageSelection({
         selectedPackageIds: ["glm"],
       }),
-    ).toEqual([
-      "server-bundle",
-      "node-runtime",
-      "node-pty",
-      "glm",
-      "bfs",
-      "ripgrep",
-      "ugrep",
-    ]);
+    ).toEqual(["server-bundle", "node-runtime", "node-pty", "glm", "bfs", "ripgrep", "ugrep"]);
   });
 
   it("ignores legacy third-party resource package selections", () => {
@@ -72,15 +64,7 @@ describe("remote resource packages", () => {
       normalizeRemoteResourcePackageSelection({
         selectedPackageIds: [retiredProxyRuntimePackageId],
       }),
-    ).toEqual([
-      "server-bundle",
-      "node-runtime",
-      "node-pty",
-      "glm",
-      "bfs",
-      "ripgrep",
-      "ugrep",
-    ]);
+    ).toEqual(["server-bundle", "node-runtime", "node-pty", "glm", "bfs", "ripgrep", "ugrep"]);
   });
 
   it("Linux remote 使用 native-search 三工具，Darwin 保留 legacy ripgrep", () => {

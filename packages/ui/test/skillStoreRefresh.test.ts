@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ISkillsService } from "@zcode/services";
-import {
-  ZCODE_AGENT_PROVIDER,
-  type SkillSummary,
-  type SkillsListResult,
-} from "@zcode/shared";
+import { ZCODE_AGENT_PROVIDER, type SkillSummary, type SkillsListResult } from "@zcode/shared";
 import { refreshSharedSkillStoreForWorkspace } from "@/lib/skillStoreRefresh.js";
 import { useSkillStore } from "@/store/skillStore.js";
 

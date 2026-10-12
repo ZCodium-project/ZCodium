@@ -259,7 +259,6 @@ describe("WorkspaceSidebar Web remote mobile layout", () => {
   });
 
   it("归档视图打开后将关闭按钮的 tooltip label 切换为 Close", async () => {
-
     render(await createSidebarElement());
     const archiveButton = screen.getByRole("button", {
       name: "workspaceSidebar.toggleArchivedTasks",
@@ -271,7 +270,6 @@ describe("WorkspaceSidebar Web remote mobile layout", () => {
   });
 
   it("places plugins immediately after automations on the desktop home sidebar", async () => {
-
     render(await createSidebarElement({ webRemoteControlWorkspaceSwitcher: undefined }));
     const automationsButton = screen.getByRole("button", {
       name: "workspace.openScheduledSettings",

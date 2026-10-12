@@ -203,10 +203,7 @@ export function markHighspeedTurnMetricsPersisted(
   if (changed) publishChange();
 }
 
-export function markHighspeedCardAutoShared(
-  cardId: string,
-  autoSharedAt = Date.now(),
-): void {
+export function markHighspeedCardAutoShared(cardId: string, autoSharedAt = Date.now()): void {
   let changed = false;
   records = records.map((record) => {
     if (record.card.cardId !== cardId || record.autoSharedAt !== undefined) return record;
@@ -376,9 +373,7 @@ export function aggregateHighspeedCardMetrics(cardId: string): HighspeedShareMet
   const regularDurationSeconds = records.reduce(
     (total, record) =>
       total +
-      (record.metrics.regularTps > 0
-        ? record.metrics.outputTokens / record.metrics.regularTps
-        : 0),
+      (record.metrics.regularTps > 0 ? record.metrics.outputTokens / record.metrics.regularTps : 0),
     0,
   );
   const hasRealTiming =
@@ -416,9 +411,7 @@ export function aggregateHighspeedCardMetrics(cardId: string): HighspeedShareMet
       : {}),
     savedDurationMs,
     regularTps:
-      regularDurationSeconds > 0
-        ? Number((outputTokens / regularDurationSeconds).toFixed(3))
-        : 0,
+      regularDurationSeconds > 0 ? Number((outputTokens / regularDurationSeconds).toFixed(3)) : 0,
     highspeedTps,
   };
 }

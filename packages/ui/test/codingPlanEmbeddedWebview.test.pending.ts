@@ -332,10 +332,7 @@ describe("coding plan embedded webview bridge", () => {
   });
 
   it("loads the zcode JWT credential key for both website providers", () => {
-    expect(getCodingPlanCredentialKeys("zai")).toEqual([
-      "oauth:zai:access_token",
-      "zcodejwttoken",
-    ]);
+    expect(getCodingPlanCredentialKeys("zai")).toEqual(["oauth:zai:access_token", "zcodejwttoken"]);
     expect(getCodingPlanCredentialKeys("bigmodel")).toEqual([
       "oauth:bigmodel:access_token",
       "zcodejwttoken",
@@ -409,7 +406,9 @@ describe("coding plan embedded webview bridge", () => {
     expect(source).not.toContain("useCodingPlanBillingDiscount");
     expect(source).toContain("<EmbeddedWebsiteHeader");
     expect(source).toContain("onClose={() => onOpenChange(false)}");
-    expect(readFileSync(resolve("packages/ui/src/components/EmbeddedWebsiteHeader.tsx"), "utf8")).toContain("common.close");
+    expect(
+      readFileSync(resolve("packages/ui/src/components/EmbeddedWebsiteHeader.tsx"), "utf8"),
+    ).toContain("common.close");
     expect(source).toContain("webviewCleanupRef");
     expect(source).toContain("injectAuthRef");
     expect(source).toContain("createCodingPlanCredentialClearScript");
@@ -437,7 +436,10 @@ describe("coding plan embedded webview bridge", () => {
     expect(source).toContain('addEventListener("did-stop-loading"');
     expect(source).toContain('addEventListener("did-navigate"');
     expect(source).toContain('addEventListener("did-navigate-in-page"');
-    const header = readFileSync(resolve("packages/ui/src/components/EmbeddedWebsiteHeader.tsx"), "utf8");
+    const header = readFileSync(
+      resolve("packages/ui/src/components/EmbeddedWebsiteHeader.tsx"),
+      "utf8",
+    );
     expect(source).toContain("onBack={handleGoBack}");
     expect(source).toContain("onForward={handleGoForward}");
     expect(source).toContain("onReload={handleReloadWebview}");

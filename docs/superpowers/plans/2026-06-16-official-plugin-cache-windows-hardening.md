@@ -52,6 +52,7 @@
 ### 任务 1：先锁住 adapter 发现流程的 tmp/lock 污染回归
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/adapters/tests/plugins.test.ts`
 - 修改：`apps/zcode-cli/packages/adapters/src/plugins/index.ts`
 
@@ -60,42 +61,42 @@
 在 `apps/zcode-cli/packages/adapters/tests/plugins.test.ts` 的 `describe("NodePluginAdapter", () => { ... })` 内追加：
 
 ```ts
-  it("ignores official cache work directories left by interrupted seed attempts", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "zcode-plugin-official-cache-workdirs-"));
-    const storageRoot = join(dir, "plugins");
-    const cacheRoot = join(storageRoot, "cache", "zcode-plugins-official", "document-skills");
-    const temporaryVersionRoot = join(cacheRoot, "0.1.0.tmp-1234-1700000000000");
-    const lockRoot = join(cacheRoot, "0.1.0.seed-lock");
+it("ignores official cache work directories left by interrupted seed attempts", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "zcode-plugin-official-cache-workdirs-"));
+  const storageRoot = join(dir, "plugins");
+  const cacheRoot = join(storageRoot, "cache", "zcode-plugins-official", "document-skills");
+  const temporaryVersionRoot = join(cacheRoot, "0.1.0.tmp-1234-1700000000000");
+  const lockRoot = join(cacheRoot, "0.1.0.seed-lock");
 
-    try {
-      await writePluginManifest(temporaryVersionRoot, {
-        name: "document-skills",
-        skills: "skills",
-        version: "0.1.0",
-      });
-      await mkdir(join(temporaryVersionRoot, "skills", "docx"), { recursive: true });
-      await writeFile(join(temporaryVersionRoot, "skills", "docx", "SKILL.md"), "# docx");
-      await mkdir(lockRoot, { recursive: true });
+  try {
+    await writePluginManifest(temporaryVersionRoot, {
+      name: "document-skills",
+      skills: "skills",
+      version: "0.1.0",
+    });
+    await mkdir(join(temporaryVersionRoot, "skills", "docx"), { recursive: true });
+    await writeFile(join(temporaryVersionRoot, "skills", "docx", "SKILL.md"), "# docx");
+    await mkdir(lockRoot, { recursive: true });
 
-      const outcome = await createNodePluginAdapter({ storageRoot }).discoverPlugins({
-        config: {
-          dirs: [],
-          enabled: true,
-          enabledPlugins: {},
-          options: {},
-        },
-        env: {},
-        storageRoot,
-        workingDirectory: dir,
-      });
+    const outcome = await createNodePluginAdapter({ storageRoot }).discoverPlugins({
+      config: {
+        dirs: [],
+        enabled: true,
+        enabledPlugins: {},
+        options: {},
+      },
+      env: {},
+      storageRoot,
+      workingDirectory: dir,
+    });
 
-      expect(outcome.plugins).toEqual([]);
-      expect(outcome.skillRoots).toEqual([]);
-      expect(outcome.diagnostics).toEqual([]);
-    } finally {
-      await rm(dir, { force: true, recursive: true });
-    }
-  });
+    expect(outcome.plugins).toEqual([]);
+    expect(outcome.skillRoots).toEqual([]);
+    expect(outcome.diagnostics).toEqual([]);
+  } finally {
+    await rm(dir, { force: true, recursive: true });
+  }
+});
 ```
 
 - [ ] **步骤 2：运行测试，确认它先失败**
@@ -123,12 +124,12 @@ function isOfficialCacheWorkDirectoryName(name: string): boolean {
 把 `scanOfficialCache()` 内层循环改成：
 
 ```ts
-      for (const versionEntry of readdirSync(pluginDir, { withFileTypes: true })) {
-        // Bugfix：Windows official plugin seed 失败后可能残留 0.1.0.tmp-* 或
-        // 0.1.0.seed-lock；discovery 必须忽略这些工作目录，避免把未完成替换当真实版本加载。
-        if (isOfficialCacheWorkDirectoryName(versionEntry.name)) continue;
-        if (versionEntry.isDirectory()) roots.push(join(pluginDir, versionEntry.name));
-      }
+for (const versionEntry of readdirSync(pluginDir, { withFileTypes: true })) {
+  // Bugfix：Windows official plugin seed 失败后可能残留 0.1.0.tmp-* 或
+  // 0.1.0.seed-lock；discovery 必须忽略这些工作目录，避免把未完成替换当真实版本加载。
+  if (isOfficialCacheWorkDirectoryName(versionEntry.name)) continue;
+  if (versionEntry.isDirectory()) roots.push(join(pluginDir, versionEntry.name));
+}
 ```
 
 - [ ] **步骤 4：运行 adapter 测试，确认通过**
@@ -146,6 +147,7 @@ pnpm --dir apps/zcode-cli --filter @zcode/adapters exec vitest run tests/plugins
 ### 任务 2：Bootstrap 新增官方插件缓存文件系统辅助模块
 
 **文件：**
+
 - 新增：`apps/zcode-cli/packages/bootstrap/src/app/official-plugin-cache-fs.ts`
 - 新增：`apps/zcode-cli/packages/bootstrap/tests/official-plugin-cache-fs.test.ts`
 
@@ -173,9 +175,13 @@ describe("official plugin cache fs helpers", () => {
         true,
       );
     }
-    expect(isTransientOfficialPluginCacheFsError(Object.assign(new Error("missing"), {
-      code: "ENOENT",
-    }))).toBe(false);
+    expect(
+      isTransientOfficialPluginCacheFsError(
+        Object.assign(new Error("missing"), {
+          code: "ENOENT",
+        }),
+      ),
+    ).toBe(false);
   });
 
   it("retries transient file-system errors with bounded attempts", () => {
@@ -268,14 +274,7 @@ pnpm --dir apps/zcode-cli --filter @zcode/bootstrap exec vitest run tests/offici
 创建 `apps/zcode-cli/packages/bootstrap/src/app/official-plugin-cache-fs.ts`：
 
 ```ts
-import {
-  mkdirSync,
-  readdirSync,
-  renameSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 
 const TRANSIENT_OFFICIAL_PLUGIN_CACHE_ERROR_CODES = new Set([
@@ -310,10 +309,7 @@ export function isTransientOfficialPluginCacheFsError(error: unknown): boolean {
   return TRANSIENT_OFFICIAL_PLUGIN_CACHE_ERROR_CODES.has(code);
 }
 
-export function retryOfficialPluginCacheFs<T>(
-  operation: () => T,
-  options: RetryOptions = {},
-): T {
+export function retryOfficialPluginCacheFs<T>(operation: () => T, options: RetryOptions = {}): T {
   const attempts = options.attempts ?? DEFAULT_RETRY_ATTEMPTS;
   const delayMs = options.delayMs ?? DEFAULT_RETRY_DELAY_MS;
   let lastError: unknown;
@@ -471,6 +467,7 @@ pnpm --dir apps/zcode-cli --filter @zcode/bootstrap exec vitest run tests/offici
 ### 任务 3：Bootstrap seed 写入端增加 lock、陈旧目录清理和重试
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/bootstrap/src/app/bundled-plugins.ts`
 - 修改：`apps/zcode-cli/packages/bootstrap/tests/plugins.test.ts`
 
@@ -485,38 +482,38 @@ import { mkdir, mkdtemp, readFile, rm, stat, utimes, writeFile } from "node:fs/p
 在 `describe("ZCode plugins", () => { ... })` 内追加：
 
 ```ts
-  it("cleans stale official plugin seed work directories before reseeding", async () => {
-    const root = await mkdtemp(join(tmpdir(), "zcode-bootstrap-stale-plugin-tmp-"));
-    const entryRoot = join(root, "resources", "glm");
-    const pluginStorageRoot = join(root, "plugins");
-    const staleTmpRoot = join(
-      pluginStorageRoot,
-      "cache",
-      "zcode-plugins-official",
-      "document-skills",
-      "0.1.0.tmp-1234-1700000000000",
-    );
-    const targetRoot = join(pluginStorageRoot, OFFICIAL_DOCUMENT_SKILLS_PLUGIN_CACHE_PATH);
-    const originalEntrypoint = process.argv[1];
-    const oldDate = new Date(Date.now() - 10 * 60_000);
+it("cleans stale official plugin seed work directories before reseeding", async () => {
+  const root = await mkdtemp(join(tmpdir(), "zcode-bootstrap-stale-plugin-tmp-"));
+  const entryRoot = join(root, "resources", "glm");
+  const pluginStorageRoot = join(root, "plugins");
+  const staleTmpRoot = join(
+    pluginStorageRoot,
+    "cache",
+    "zcode-plugins-official",
+    "document-skills",
+    "0.1.0.tmp-1234-1700000000000",
+  );
+  const targetRoot = join(pluginStorageRoot, OFFICIAL_DOCUMENT_SKILLS_PLUGIN_CACHE_PATH);
+  const originalEntrypoint = process.argv[1];
+  const oldDate = new Date(Date.now() - 10 * 60_000);
 
-    try {
-      await writeTestFile(join(entryRoot, "zcode.cjs"), "");
-      await writePackagedPluginFixture(entryRoot, "document-skills-plugin", "document-skills");
-      await writeTestFile(join(staleTmpRoot, ".zcode-plugin", "plugin.json"), "{}");
-      await utimes(staleTmpRoot, oldDate, oldDate);
+  try {
+    await writeTestFile(join(entryRoot, "zcode.cjs"), "");
+    await writePackagedPluginFixture(entryRoot, "document-skills-plugin", "document-skills");
+    await writeTestFile(join(staleTmpRoot, ".zcode-plugin", "plugin.json"), "{}");
+    await utimes(staleTmpRoot, oldDate, oldDate);
 
-      process.argv[1] = join(entryRoot, "zcode.cjs");
-      resolveOfficialPluginRoots({ storageRoot: pluginStorageRoot });
+    process.argv[1] = join(entryRoot, "zcode.cjs");
+    resolveOfficialPluginRoots({ storageRoot: pluginStorageRoot });
 
-      expect(existsSync(staleTmpRoot)).toBe(false);
-      expect(existsSync(join(targetRoot, ".zcode-plugin", "plugin.json"))).toBe(true);
-      expect(existsSync(join(targetRoot, "skills", "demo", "SKILL.md"))).toBe(true);
-    } finally {
-      process.argv[1] = originalEntrypoint;
-      await rm(root, { force: true, recursive: true });
-    }
-  });
+    expect(existsSync(staleTmpRoot)).toBe(false);
+    expect(existsSync(join(targetRoot, ".zcode-plugin", "plugin.json"))).toBe(true);
+    expect(existsSync(join(targetRoot, "skills", "demo", "SKILL.md"))).toBe(true);
+  } finally {
+    process.argv[1] = originalEntrypoint;
+    await rm(root, { force: true, recursive: true });
+  }
+});
 ```
 
 - [ ] **步骤 2：运行 bootstrap plugins 测试，确认新测试先失败**
@@ -557,49 +554,49 @@ import {
 把 `for (const plugin of source.plugins) { ... }` 中生成 tmp 和写文件的主体改成以下形态：
 
 ```ts
-  for (const plugin of source.plugins) {
-    const targetRoot = officialPluginCacheRoot(input.storageRoot, plugin.definition);
-    if (isSeedReady(targetRoot, plugin)) continue;
+for (const plugin of source.plugins) {
+  const targetRoot = officialPluginCacheRoot(input.storageRoot, plugin.definition);
+  if (isSeedReady(targetRoot, plugin)) continue;
 
-    withOfficialPluginSeedLock(targetRoot, () => {
-      cleanupStaleOfficialPluginWorkDirectories(dirname(targetRoot), basename(targetRoot));
-      if (isSeedReady(targetRoot, plugin)) return;
+  withOfficialPluginSeedLock(targetRoot, () => {
+    cleanupStaleOfficialPluginWorkDirectories(dirname(targetRoot), basename(targetRoot));
+    if (isSeedReady(targetRoot, plugin)) return;
 
-      const temporaryRoot = `${targetRoot}.tmp-${process.pid}-${Date.now()}`;
-      removeOfficialPluginCacheDirectory(temporaryRoot);
-      mkdirSync(temporaryRoot, { recursive: true });
+    const temporaryRoot = `${targetRoot}.tmp-${process.pid}-${Date.now()}`;
+    removeOfficialPluginCacheDirectory(temporaryRoot);
+    mkdirSync(temporaryRoot, { recursive: true });
 
-      try {
-        for (const file of plugin.files) {
-          const bytes = readSeedFileBytes(source, plugin, file);
-          if (hashBytes(bytes) !== file.sha256) {
-            throw new Error(
-              `Bundled plugin asset hash mismatch: ${plugin.definition.name}/${file.path}`,
-            );
-          }
-          const outputPath = join(temporaryRoot, ...file.path.split("/"));
-          mkdirSync(dirname(outputPath), { recursive: true });
-          writeFileSync(outputPath, bytes);
-          chmodSync(outputPath, modeForSeedFile(file.path, file.mode));
+    try {
+      for (const file of plugin.files) {
+        const bytes = readSeedFileBytes(source, plugin, file);
+        if (hashBytes(bytes) !== file.sha256) {
+          throw new Error(
+            `Bundled plugin asset hash mismatch: ${plugin.definition.name}/${file.path}`,
+          );
         }
-
-        writeFileSync(
-          join(temporaryRoot, SEED_MARKER_FILE),
-          JSON.stringify(seedMarker(source, plugin), null, 2),
-        );
-        replaceSeedRoot(temporaryRoot, targetRoot, plugin);
-        writeOfficialPluginRuntimeManifest({
-          pluginName: plugin.definition.name,
-          rootPath: targetRoot,
-        });
-      } catch (error) {
-        // Bugfix：Windows 上 seed 替换失败后，tmp 目录本身也可能被 Defender/EDR 或子进程
-        // 短暂占用；这里使用 bounded retry 清理，避免 0.1.0.tmp-* 在后续启动污染 discovery。
-        removeOfficialPluginCacheDirectory(temporaryRoot);
-        throw error;
+        const outputPath = join(temporaryRoot, ...file.path.split("/"));
+        mkdirSync(dirname(outputPath), { recursive: true });
+        writeFileSync(outputPath, bytes);
+        chmodSync(outputPath, modeForSeedFile(file.path, file.mode));
       }
-    });
-  }
+
+      writeFileSync(
+        join(temporaryRoot, SEED_MARKER_FILE),
+        JSON.stringify(seedMarker(source, plugin), null, 2),
+      );
+      replaceSeedRoot(temporaryRoot, targetRoot, plugin);
+      writeOfficialPluginRuntimeManifest({
+        pluginName: plugin.definition.name,
+        rootPath: targetRoot,
+      });
+    } catch (error) {
+      // Bugfix：Windows 上 seed 替换失败后，tmp 目录本身也可能被 Defender/EDR 或子进程
+      // 短暂占用；这里使用 bounded retry 清理，避免 0.1.0.tmp-* 在后续启动污染 discovery。
+      removeOfficialPluginCacheDirectory(temporaryRoot);
+      throw error;
+    }
+  });
+}
 ```
 
 新增 `isSeedReady()`，替代原来 loop 顶部的 inline manifest rewrite 判断：
@@ -644,9 +641,7 @@ function replaceSeedRoot(
 把 `isDirectoryReplaceRace()` 的错误码扩展为：
 
 ```ts
-    ["EBUSY", "EEXIST", "ENOTEMPTY", "EPERM"].includes(
-      String((error as NodeJS.ErrnoException).code),
-    )
+["EBUSY", "EEXIST", "ENOTEMPTY", "EPERM"].includes(String((error as NodeJS.ErrnoException).code));
 ```
 
 - [ ] **步骤 6：运行 bootstrap plugins 测试，确认通过**
@@ -664,6 +659,7 @@ pnpm --dir apps/zcode-cli --filter @zcode/bootstrap exec vitest run tests/plugin
 ### 任务 4：Runtime manifest 重写使用带重试的原子写
 
 **文件：**
+
 - 修改：`apps/zcode-cli/packages/bootstrap/src/app/official-plugin-runtime.ts`
 - 修改：`apps/zcode-cli/packages/bootstrap/tests/official-plugin-cache-fs.test.ts`
 
@@ -684,20 +680,20 @@ pnpm --dir apps/zcode-cli --filter @zcode/bootstrap exec vitest run tests/plugin
 追加测试：
 
 ```ts
-  it("writes text files atomically without leaving temporary files on success", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "zcode-official-plugin-atomic-write-"));
-    const filePath = join(dir, "plugin.json");
+it("writes text files atomically without leaving temporary files on success", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "zcode-official-plugin-atomic-write-"));
+  const filePath = join(dir, "plugin.json");
 
-    try {
-      writeTextFileAtomicallyWithRetry(filePath, "{\"name\":\"document-skills\"}\n");
+  try {
+    writeTextFileAtomicallyWithRetry(filePath, '{"name":"document-skills"}\n');
 
-      expect(await readFile(filePath, "utf8")).toBe("{\"name\":\"document-skills\"}\n");
-      const entries = await import("node:fs/promises").then(({ readdir }) => readdir(dir));
-      expect(entries.filter((entry) => entry.startsWith(".tmp-"))).toEqual([]);
-    } finally {
-      await rm(dir, { force: true, recursive: true });
-    }
-  });
+    expect(await readFile(filePath, "utf8")).toBe('{"name":"document-skills"}\n');
+    const entries = await import("node:fs/promises").then(({ readdir }) => readdir(dir));
+    expect(entries.filter((entry) => entry.startsWith(".tmp-"))).toEqual([]);
+  } finally {
+    await rm(dir, { force: true, recursive: true });
+  }
+});
 ```
 
 - [ ] **步骤 2：运行辅助模块测试**
@@ -729,13 +725,13 @@ import { writeTextFileAtomicallyWithRetry } from "./official-plugin-cache-fs.js"
 把文件末尾的 `writeTextFileAtomically()` 删除，并把调用点：
 
 ```ts
-  writeTextFileAtomically(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+writeTextFileAtomically(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 ```
 
 替换为：
 
 ```ts
-  writeTextFileAtomicallyWithRetry(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+writeTextFileAtomicallyWithRetry(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 ```
 
 - [ ] **步骤 4：运行 bootstrap plugins 测试确认 runtime rewrite 未回归**
@@ -753,6 +749,7 @@ pnpm --dir apps/zcode-cli --filter @zcode/bootstrap exec vitest run tests/plugin
 ### 任务 5：记录 bugfix 文档
 
 **文件：**
+
 - 新增：`docs/official-plugin-cache-windows-hardening.md`
 
 - [ ] **步骤 1：写 bugfix 轨迹文档**
@@ -812,6 +809,7 @@ rg -n "$PLACEHOLDER_PATTERN" docs/official-plugin-cache-windows-hardening.md
 ### 任务 6：完整验证并提交
 
 **文件：**
+
 - 验证任务 1-5 修改到的所有文件。
 
 - [ ] **步骤 1：运行 adapter 定向测试**

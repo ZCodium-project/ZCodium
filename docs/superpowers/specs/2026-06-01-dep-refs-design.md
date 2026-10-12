@@ -13,12 +13,14 @@
 ## 目标 / 非目标
 
 **目标：**
+
 - 给 `<file>:<exportName>`，列出所有引用位置（含文件、行、列、代码片段）
 - 列某文件的所有 export（删文件前的清单）
 - JSON 输出，让 agent 能用 Read/jq 消费
 - 区分普通引用和 re-export
 
 **非目标：**
+
 - 不取代 `dependency-graph.mjs`（文件级）和 `knip`（unused 检测）
 - 不处理 dynamic `import()` 或字符串引用
 - 不做全量预生成图（按需查询足矣）
@@ -30,6 +32,7 @@
 新文件 `scripts/dep-refs.mjs`（预估 ~200 行，基于 `ts-morph`）。不修改 `dependency-graph.mjs`。
 
 `package.json` 新增 script：
+
 ```json
 "dep:refs": "node scripts/dep-refs.mjs"
 ```
@@ -106,10 +109,19 @@ Exports (4):
     "line": 12
   },
   "references": [
-    { "file": "packages/services/src/node.ts", "line": 42, "col": 8, "snippet": "const session = await createBotSession(opts)" }
+    {
+      "file": "packages/services/src/node.ts",
+      "line": 42,
+      "col": 8,
+      "snippet": "const session = await createBotSession(opts)"
+    }
   ],
   "reExports": [
-    { "file": "packages/services/src/index.ts", "line": 5, "snippet": "export { createBotSession } from './bots/botsService'" }
+    {
+      "file": "packages/services/src/index.ts",
+      "line": 5,
+      "snippet": "export { createBotSession } from './bots/botsService'"
+    }
   ],
   "notes": ["Static analysis only. Dynamic import() and string-based usage not detected."]
 }
@@ -130,6 +142,7 @@ Exports (4):
 ### 扫描范围
 
 默认加载所有 workspace 源码 + 测试：
+
 - `packages/*/src/**/*.{ts,tsx,mts,cts}`
 - `packages/*/test/**/*.{ts,tsx}`
 - `apps/*/src/**/*.{ts,tsx,mts,cts}`
@@ -141,29 +154,29 @@ Exports (4):
 
 ### 关键实现要点（ts-morph API）
 
-| 步骤 | API |
-|---|---|
-| 创建 Project | `new Project({ tsConfigFilePath: 'tsconfig.base.json', skipAddingFilesFromTsConfig: true })` |
-| 显式加载源文件 | `project.addSourceFilesAtPaths(globs)` |
-| 找指定 export | `sourceFile.getExportedDeclarations().get(name)` → `Declaration[]`（同名多重载会返回多个） |
-| 找引用 | 对每个 declaration 拿到一个 `Identifier`（`getNameNode()` 或类似），调用 `identifier.findReferences()` |
-| 区分 re-export | 遍历每个引用节点，向上找父节点：在 `ExportDeclaration` / `ExportSpecifier` 下 → 归入 reExports；否则 references |
-| 跳过 declaration 自身 | 引用结果里会包含 declaration 位置，按 file+line 过滤掉 |
-| 列 exports | `sourceFile.getExportedDeclarations()` 遍历整个 Map |
-| kind 推断 | declaration 的 `getKindName()`：`FunctionDeclaration` → function、`VariableDeclaration` → const、`TypeAliasDeclaration` → type、`InterfaceDeclaration` → interface、`ClassDeclaration` → class |
+| 步骤                  | API                                                                                                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 创建 Project          | `new Project({ tsConfigFilePath: 'tsconfig.base.json', skipAddingFilesFromTsConfig: true })`                                                                                                   |
+| 显式加载源文件        | `project.addSourceFilesAtPaths(globs)`                                                                                                                                                         |
+| 找指定 export         | `sourceFile.getExportedDeclarations().get(name)` → `Declaration[]`（同名多重载会返回多个）                                                                                                     |
+| 找引用                | 对每个 declaration 拿到一个 `Identifier`（`getNameNode()` 或类似），调用 `identifier.findReferences()`                                                                                         |
+| 区分 re-export        | 遍历每个引用节点，向上找父节点：在 `ExportDeclaration` / `ExportSpecifier` 下 → 归入 reExports；否则 references                                                                                |
+| 跳过 declaration 自身 | 引用结果里会包含 declaration 位置，按 file+line 过滤掉                                                                                                                                         |
+| 列 exports            | `sourceFile.getExportedDeclarations()` 遍历整个 Map                                                                                                                                            |
+| kind 推断             | declaration 的 `getKindName()`：`FunctionDeclaration` → function、`VariableDeclaration` → const、`TypeAliasDeclaration` → type、`InterfaceDeclaration` → interface、`ClassDeclaration` → class |
 
 ### 边界处理
 
-| 情况 | 行为 |
-|---|---|
-| `export *` | ✅ getExportedDeclarations 自动穿透 |
-| `import { foo as bar }` 别名 | ✅ findReferences 跟踪 alias |
-| type-only import vs value import | ✅ 全找到 |
-| 多重 re-export 链 (a → b → c) | ✅ findReferences 穿透 |
-| 同名重载（多个 declaration） | 合并所有 declaration 的引用，去重 |
-| 文件不存在 / symbol 不存在 | 退出码 1，stderr 给清晰错误 |
-| dynamic `import()` 字符串路径 | ❌ 不检测，输出 notes 提示 |
-| 命令行未提供 symbol | 提示用 `--list-exports` 先看 |
+| 情况                             | 行为                                |
+| -------------------------------- | ----------------------------------- |
+| `export *`                       | ✅ getExportedDeclarations 自动穿透 |
+| `import { foo as bar }` 别名     | ✅ findReferences 跟踪 alias        |
+| type-only import vs value import | ✅ 全找到                           |
+| 多重 re-export 链 (a → b → c)    | ✅ findReferences 穿透              |
+| 同名重载（多个 declaration）     | 合并所有 declaration 的引用，去重   |
+| 文件不存在 / symbol 不存在       | 退出码 1，stderr 给清晰错误         |
+| dynamic `import()` 字符串路径    | ❌ 不检测，输出 notes 提示          |
+| 命令行未提供 symbol              | 提示用 `--list-exports` 先看        |
 
 ### 性能
 

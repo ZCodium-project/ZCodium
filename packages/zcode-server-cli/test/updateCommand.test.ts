@@ -24,9 +24,9 @@ describe("runUpdateCommand cleanup errors", () => {
       .mockResolvedValueOnce({ status: "ready", runningTaskCount: 0 })
       .mockResolvedValueOnce({ status: "blocked", runningTaskCount: 1 });
 
-    await expect(
-      runUpdateCommand([], {}, false, layout, vi.fn()),
-    ).rejects.toThrow("Running tasks require --force for update");
+    await expect(runUpdateCommand([], {}, false, layout, vi.fn())).rejects.toThrow(
+      "Running tasks require --force for update",
+    );
     expect(discard).toHaveBeenCalledTimes(1);
   });
 
@@ -34,11 +34,13 @@ describe("runUpdateCommand cleanup errors", () => {
     const discard = vi.fn().mockRejectedValue(new Error("release directory could not be removed"));
     prepareOnlineUpdate.mockResolvedValue({ status: "prepared", version: "4.0.0", discard });
     requestControl.mockResolvedValue({ status: "ready", runningTaskCount: 0 });
-    const applyUpdate = vi.fn().mockRejectedValue(new Error("Running tasks require --force for update"));
+    const applyUpdate = vi
+      .fn()
+      .mockRejectedValue(new Error("Running tasks require --force for update"));
 
-    await expect(
-      runUpdateCommand([], {}, false, layout, applyUpdate),
-    ).rejects.toThrow("Running tasks require --force for update");
+    await expect(runUpdateCommand([], {}, false, layout, applyUpdate)).rejects.toThrow(
+      "Running tasks require --force for update",
+    );
     expect(discard).toHaveBeenCalledTimes(1);
   });
 
@@ -49,9 +51,9 @@ describe("runUpdateCommand cleanup errors", () => {
       .mockResolvedValueOnce({ status: "ready", runningTaskCount: 0 })
       .mockRejectedValueOnce(new Error("control socket unavailable"));
 
-    await expect(
-      runUpdateCommand([], {}, false, layout, vi.fn()),
-    ).rejects.toThrow("control socket unavailable");
+    await expect(runUpdateCommand([], {}, false, layout, vi.fn())).rejects.toThrow(
+      "control socket unavailable",
+    );
     expect(discard).toHaveBeenCalledTimes(1);
   });
 });

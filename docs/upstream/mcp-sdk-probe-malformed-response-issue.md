@@ -34,14 +34,14 @@ Content-Type: application/json
 
 `id: null` does not pass `JSONRPCMessageSchema` (a JSON-RPC error response must carry a request id of type string/number). The transport-level schema parse failure is caught by `normalizeReply`, which has no better bucket for it than the network-error branch, so the probe outcome becomes a hard failure: `SdkError(EraNegotiationFailed, "Version negotiation probe failed: ...")`.
 
-This server is clearly not a modern server: a malformed envelope can never be a *recognized modern error* (those are well-formed per spec). It is a legacy server with a non-conforming error response — exactly the population the dual-era fallback exists for. With this behavior, `auto` mode cannot connect to it at all; users must know to pin `protocolVersion: "legacy"` by hand.
+This server is clearly not a modern server: a malformed envelope can never be a _recognized modern error_ (those are well-formed per spec). It is a legacy server with a non-conforming error response — exactly the population the dual-era fallback exists for. With this behavior, `auto` mode cannot connect to it at all; users must know to pin `protocolVersion: "legacy"` by hand.
 
 **Why the asymmetry is wrong.**
 
 - 4xx + the same unparseable body → `classifyHttpError` → `parseJsonRpcErrorBody` → parse failure is not modern evidence → legacy fallback (when available).
 - 200 + the same unparseable body → transport send/parse error → `normalizeReply` network-error branch → hard `EraNegotiationFailed`, no fallback.
 
-The only difference is the status code, and 200-with-garbage is *stronger* evidence of "not a modern server" than 404-with-garbage: a modern server must return a schema-valid response or a recognized modern error to `server/discover`. A body that cannot even be parsed as a JSON-RPC message cannot be a recognized modern error.
+The only difference is the status code, and 200-with-garbage is _stronger_ evidence of "not a modern server" than 404-with-garbage: a modern server must return a schema-valid response or a recognized modern error to `server/discover`. A body that cannot even be parsed as a JSON-RPC message cannot be a recognized modern error.
 
 **Suggested fix.** Inside the probe window, classify schema-parse failures of the `server/discover` send/reply separately from genuine transport failures: introduce a distinct probe outcome (e.g. `malformed-response`) and treat it as legacy evidence when a legacy fallback is available — mirroring the existing `classifyHttpError` → `parseJsonRpcErrorBody` degradation path for 4xx. Genuine network conditions (connect errors, timeouts, TLS failures, connection reset before any byte) should keep failing the probe as they do today; only "we got an HTTP response but its body is not a valid JSON-RPC message" changes bucket.
 

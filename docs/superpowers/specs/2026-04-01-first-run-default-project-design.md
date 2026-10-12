@@ -53,11 +53,11 @@ Desktop 在 main 进程启动时读取 settings：
 
 ## 涉及文件
 
-| 文件 | 改动 |
-|------|------|
-| `packages/services/src/file/fileService.ts` | 实现 backing workspace 路径与幂等创建 |
-| `packages/shared/src/protocol.ts` | 增加 `WorkspacePurpose` 与 persisted descriptor |
-| `packages/desktop/src/main/startupWorkspace.ts` | 启动时解析恢复会话/conversation fallback |
-| `packages/desktop/src/main/index.ts` | 接入启动兜底逻辑 |
+| 文件                                            | 改动                                            |
+| ----------------------------------------------- | ----------------------------------------------- |
+| `packages/services/src/file/fileService.ts`     | 实现 backing workspace 路径与幂等创建           |
+| `packages/shared/src/protocol.ts`               | 增加 `WorkspacePurpose` 与 persisted descriptor |
+| `packages/desktop/src/main/startupWorkspace.ts` | 启动时解析恢复会话/conversation fallback        |
+| `packages/desktop/src/main/index.ts`            | 接入启动兜底逻辑                                |
 
 完整当前设计见 [2026-07-10-non-project-conversation-workspace-design.md](./2026-07-10-non-project-conversation-workspace-design.md)。

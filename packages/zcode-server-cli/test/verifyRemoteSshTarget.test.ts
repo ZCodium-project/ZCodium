@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { dockerPlatformForTarget, resolveVerificationTarget } from "../scripts/verify-remote-ssh-target.mjs";
+import {
+  dockerPlatformForTarget,
+  resolveVerificationTarget,
+} from "../scripts/verify-remote-ssh-target.mjs";
 
 describe("remote SSH verification target", () => {
   it("follows the host architecture when no target is provided", () => {
@@ -8,7 +11,9 @@ describe("remote SSH verification target", () => {
   });
 
   it("rejects unsupported host and Darwin targets", () => {
-    expect(() => resolveVerificationTarget(undefined, "ia32")).toThrow(/Unsupported host architecture/);
+    expect(() => resolveVerificationTarget(undefined, "ia32")).toThrow(
+      /Unsupported host architecture/,
+    );
     expect(() => resolveVerificationTarget("darwin-arm64", "arm64")).toThrow(/Linux target/);
   });
 

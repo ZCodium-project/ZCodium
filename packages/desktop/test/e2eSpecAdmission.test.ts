@@ -9,9 +9,9 @@ import {
 describe("desktop E2E environment-gated formal spec admission", () => {
   it("excludes real SSH specs from default runs without complete credentials", () => {
     expect(hasRequiredSshE2EEnvironment({})).toBe(false);
-    expect(
-      resolveEnvironmentGatedFormalSpecExcludes({ env: {}, targeted: false }),
-    ).toContain("./test/e2e/conversation-session/conversation-session-ssh-remote*.test.ts");
+    expect(resolveEnvironmentGatedFormalSpecExcludes({ env: {}, targeted: false })).toContain(
+      "./test/e2e/conversation-session/conversation-session-ssh-remote*.test.ts",
+    );
   });
 
   it("keeps explicit SSH runs fail-closed and admits configured default runs", () => {

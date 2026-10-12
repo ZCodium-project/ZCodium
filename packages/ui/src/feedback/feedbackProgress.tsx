@@ -59,9 +59,7 @@ export function FeedbackProgress({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 text-ui-base text-foreground-subtle">
-        <span className="font-medium">
-          {formatMessage({ id: "feedback.progress.title" })}
-        </span>
+        <span className="font-medium">{formatMessage({ id: "feedback.progress.title" })}</span>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-foreground-subtle">
           <span>{formatMessage({ id: "feedback.progress.currentHandler" })}</span>
           <span className="font-medium text-foreground">{assigneeLabel}</span>

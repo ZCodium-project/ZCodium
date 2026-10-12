@@ -29,10 +29,10 @@ helper 明确返回隔离 HOME 下的 `.zcode`。只恢复调用点而遗留 `zc
 
 ## 验收
 
-| Case | 条件 | 期望 |
-| --- | --- | --- |
-| STORAGE-ROLLBACK-001 | 任意 Desktop 运行形态启动 Host | 不注入 storage profile、精确 storage root 或 `ZCODE_HOME` |
-| STORAGE-ROLLBACK-002 | 用户配置 App 自定义 `dataBaseDir` | App 数据按既有逻辑迁移；CLI 用户资源仍从 `~/.zcode` 读取 |
-| STORAGE-ROLLBACK-003 | Stable/Preview/源码开发访问同一用户资源 | session、plugins、agents、commands、skills 均沿用 `~/.zcode` |
-| STORAGE-ROLLBACK-004 | 打开含 `.zcode` 配置的 workspace | 项目级 agents、commands、skills 路径不变 |
+| Case                 | 条件                                        | 期望                                                                                                       |
+| -------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| STORAGE-ROLLBACK-001 | 任意 Desktop 运行形态启动 Host              | 不注入 storage profile、精确 storage root 或 `ZCODE_HOME`                                                  |
+| STORAGE-ROLLBACK-002 | 用户配置 App 自定义 `dataBaseDir`           | App 数据按既有逻辑迁移；CLI 用户资源仍从 `~/.zcode` 读取                                                   |
+| STORAGE-ROLLBACK-003 | Stable/Preview/源码开发访问同一用户资源     | session、plugins、agents、commands、skills 均沿用 `~/.zcode`                                               |
+| STORAGE-ROLLBACK-004 | 打开含 `.zcode` 配置的 workspace            | 项目级 agents、commands、skills 路径不变                                                                   |
 | STORAGE-ROLLBACK-005 | 构建 bundled Agent CLI 并执行仓库 typecheck | adapters 不再引用已删除的 storage profile 模块；E2E helper 固定解析隔离 HOME 下的 `.zcode`；两项检查均通过 |

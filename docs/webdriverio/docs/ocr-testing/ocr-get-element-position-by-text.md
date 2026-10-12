@@ -51,8 +51,8 @@ result = {
 
 ### `text`
 
--   **Type:** `string`
--   **Mandatory:** yes
+- **Type:** `string`
+- **Mandatory:** yes
 
 The text you want to search for to click on.
 
@@ -64,9 +64,9 @@ await browser.ocrGetElementPositionByText({ text: "WebdriverIO" });
 
 ### `contrast`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** `0.25`
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** `0.25`
 
 The higher the contrast, the darker the image and vice versa. This can help to find text in an image. It accepts values between `-1` and `1`.
 
@@ -74,15 +74,15 @@ The higher the contrast, the darker the image and vice versa. This can help to f
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    contrast: 0.5,
+  text: "WebdriverIO",
+  contrast: 0.5,
 });
 ```
 
 ### `haystack`
 
--   **Type:** `number`
--   **Mandatory:** `WebdriverIO.Element | ChainablePromiseElement | Rectangle`
+- **Type:** `number`
+- **Mandatory:** `WebdriverIO.Element | ChainablePromiseElement | Rectangle`
 
 This is the search area in the screen where the OCR needs to look for text. This can be an element or a rectangle containing `x`, `y`, `width` and `height`
 
@@ -90,33 +90,33 @@ This is the search area in the screen where the OCR needs to look for text. This
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    haystack: $("elementSelector"),
+  text: "WebdriverIO",
+  haystack: $("elementSelector"),
 });
 
 // OR
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    haystack: await $("elementSelector"),
+  text: "WebdriverIO",
+  haystack: await $("elementSelector"),
 });
 
 // OR
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    haystack: {
-        x: 10,
-        y: 50,
-        width: 300,
-        height: 75,
-    },
+  text: "WebdriverIO",
+  haystack: {
+    x: 10,
+    y: 50,
+    width: 300,
+    height: 75,
+  },
 });
 ```
 
 ### `language`
 
--   **Type:** `string`
--   **Mandatory:** No
--   **Default:** `eng`
+- **Type:** `string`
+- **Mandatory:** No
+- **Default:** `eng`
 
 The language that Tesseract will recognize. More info can be found [here](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions) and the supported languages can be found [here](https://github.com/webdriverio/visual-testing/blob/main/packages/ocr-service/src/utils/constants.ts).
 
@@ -125,9 +125,9 @@ The language that Tesseract will recognize. More info can be found [here](https:
 ```js
 import { SUPPORTED_OCR_LANGUAGES } from "@wdio/ocr-service";
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    // Use Dutch as a language
-    language: SUPPORTED_OCR_LANGUAGES.DUTCH,
+  text: "WebdriverIO",
+  // Use Dutch as a language
+  language: SUPPORTED_OCR_LANGUAGES.DUTCH,
 });
 ```
 
@@ -137,9 +137,9 @@ You can alter the fuzzy logic to find text with the following options. This migh
 
 #### `fuzzyFindOptions.distance`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** 100
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** 100
 
 Determines how close the match must be to the fuzzy location (specified by location). An exact letter match which is distance characters away from the fuzzy location would score as a complete mismatch. A distance of 0 requires the match to be at the exact location specified. A distance of 1000 would require a perfect match to be within 800 characters of the location to be found using a threshold of 0.8.
 
@@ -147,18 +147,18 @@ Determines how close the match must be to the fuzzy location (specified by locat
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        distance: 20,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    distance: 20,
+  },
 });
 ```
 
 #### `fuzzyFindOptions.location`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** 0
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** 0
 
 Determines approximately where in the text is the pattern expected to be found.
 
@@ -166,18 +166,18 @@ Determines approximately where in the text is the pattern expected to be found.
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        location: 20,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    location: 20,
+  },
 });
 ```
 
 #### `fuzzyFindOptions.threshold`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** 0.6
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** 0.6
 
 At what point does the matching algorithm give up. A threshold of 0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything.
 
@@ -185,18 +185,18 @@ At what point does the matching algorithm give up. A threshold of 0 requires a p
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        threshold: 0.8,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    threshold: 0.8,
+  },
 });
 ```
 
 #### `fuzzyFindOptions.isCaseSensitive`
 
--   **Type:** `boolean`
--   **Mandatory:** no
--   **Default:** false
+- **Type:** `boolean`
+- **Mandatory:** no
+- **Default:** false
 
 Whether the search should be case sensitive.
 
@@ -204,18 +204,18 @@ Whether the search should be case sensitive.
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        isCaseSensitive: true,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    isCaseSensitive: true,
+  },
 });
 ```
 
 #### `fuzzyFindOptions.minMatchCharLength`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** 2
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** 2
 
 Only the matches whose length exceeds this value will be returned. (For instance, if you want to ignore single character matches in the result, set it to 2)
 
@@ -223,18 +223,18 @@ Only the matches whose length exceeds this value will be returned. (For instance
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        minMatchCharLength: 5,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    minMatchCharLength: 5,
+  },
 });
 ```
 
 #### `fuzzyFindOptions.findAllMatches`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** false
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** false
 
 When `true`, the matching function will continue to the end of a search pattern even if a perfect match has already been located in the string.
 
@@ -242,9 +242,9 @@ When `true`, the matching function will continue to the end of a search pattern 
 
 ```js
 await browser.ocrGetElementPositionByText({
-    text: "WebdriverIO",
-    fuzzyFindOptions: {
-        findAllMatches: 100,
-    },
+  text: "WebdriverIO",
+  fuzzyFindOptions: {
+    findAllMatches: 100,
+  },
 });
 ```

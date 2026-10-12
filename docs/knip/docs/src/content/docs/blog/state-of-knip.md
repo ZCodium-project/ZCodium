@@ -48,7 +48,7 @@ configuration:
 
 ```ts title="next.config.ts"
 const nextConfig = {
-  pageExtensions: ['page.tsx'],
+  pageExtensions: ["page.tsx"],
 };
 
 export default nextConfig;
@@ -68,7 +68,7 @@ corner:
 
 ```ts title="next.config.ts"
 const nextConfig = {
-  pageExtensions: ['page.tsx'],
+  pageExtensions: ["page.tsx"],
   env: {
     BASE_URL: process.env.BASE_URL.toLowerCase(),
   },

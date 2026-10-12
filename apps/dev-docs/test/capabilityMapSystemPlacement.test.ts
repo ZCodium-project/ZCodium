@@ -38,10 +38,7 @@ describe("能力图顶层区域布局", () => {
     });
     expect(positions.get(ENGINEERING_INFRASTRUCTURE_SYSTEM_ID)).toEqual({
       x: 134,
-      y:
-        CAPABILITY_MAP_ROOT_PADDING +
-        220 +
-        CAPABILITY_MAP_SYSTEM_GAP,
+      y: CAPABILITY_MAP_ROOT_PADDING + 220 + CAPABILITY_MAP_SYSTEM_GAP,
     });
   });
 });

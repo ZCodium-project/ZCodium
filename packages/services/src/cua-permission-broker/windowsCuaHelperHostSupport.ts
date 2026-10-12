@@ -61,10 +61,8 @@ export const defaultChildProcess: WindowsCuaChildProcessAdapter = {
 };
 
 export const defaultSocketPathFactory = mintBrokerSocketPath;
-export const defaultHealthProbe = (
-  socketPath: string,
-  timeoutMs: number,
-): Promise<HelperHealth> => probeHelperHealth(socketPath, { timeoutMs });
+export const defaultHealthProbe = (socketPath: string, timeoutMs: number): Promise<HelperHealth> =>
+  probeHelperHealth(socketPath, { timeoutMs });
 
 export class WindowsCuaChildLifecycle {
   constructor(private readonly logger: ServiceLogger) {}

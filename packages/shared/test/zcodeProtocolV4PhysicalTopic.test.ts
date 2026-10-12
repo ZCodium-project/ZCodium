@@ -172,7 +172,10 @@ describe("V4 三 topic physical schema 与真实 envelope", () => {
     const validDelivery = completeWire("delivery", conversation, 1, "recovery");
     expect(conversationTopicWireFrameSchema.parse(validDelivery).deliveryKind).toBe("recovery");
     const { deliveryKind: _deliveryKind, ...missingDeliveryKind } = validDelivery;
-    for (const invalidDelivery of [missingDeliveryKind, { ...validDelivery, deliveryKind: "guessed" }]) {
+    for (const invalidDelivery of [
+      missingDeliveryKind,
+      { ...validDelivery, deliveryKind: "guessed" },
+    ]) {
       const ownedCandidate = conversationTopicWireCandidateSchema.parse(invalidDelivery);
       expect(
         new TopicWireFrameAssembler(conversationTopicFrameSchema).accept(ownedCandidate),
@@ -210,11 +213,9 @@ describe("V4 三 topic physical schema 与真实 envelope", () => {
     ];
     for (const candidate of routeableInvalid) {
       const outer = conversationTopicWireCandidateSchema.parse(candidate);
-      expect(
-        new TopicWireFrameAssembler(conversationTopicFrameSchema).accept(outer),
-      ).toMatchObject([
-        { kind: "fault", fault: { reasonCode: "proto.frameAssemblyMetadataMismatch" } },
-      ]);
+      expect(new TopicWireFrameAssembler(conversationTopicFrameSchema).accept(outer)).toMatchObject(
+        [{ kind: "fault", fault: { reasonCode: "proto.frameAssemblyMetadataMismatch" } }],
+      );
     }
   });
 
@@ -389,11 +390,14 @@ describe("TopicWireFrameAssembler incremental 原子状态机", () => {
       assembler.accept(completeWire("logical-recovery", recoveryFrame, 2, "recovery"), 1),
     ).toEqual([{ kind: "complete", frame: recoveryFrame, deliveryKind: "recovery" }]);
 
-    const mismatched = fragmentedWire(conversationFrame("mixed".repeat(100)), "logical-mixed-kind", 2, 3);
+    const mismatched = fragmentedWire(
+      conversationFrame("mixed".repeat(100)),
+      "logical-mixed-kind",
+      2,
+      3,
+    );
     expect(assembler.accept(mismatched[0]!, 2)).toEqual([]);
-    expect(
-      assembler.accept({ ...mismatched[1]!, deliveryKind: "recovery" }, 3),
-    ).toMatchObject([
+    expect(assembler.accept({ ...mismatched[1]!, deliveryKind: "recovery" }, 3)).toMatchObject([
       { kind: "fault", fault: { reasonCode: "proto.frameAssemblyMetadataMismatch" } },
     ]);
   });

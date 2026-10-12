@@ -24,22 +24,10 @@ export function consumeV4ComposerDraftWorkspaceTransferRequest(
     return false;
   }
   const matches =
-    getWorkspaceKey(
-      pendingRequest.sourceWorkspacePath,
-      pendingRequest.sourceWorkspaceIdentity,
-    ) ===
-      getWorkspaceKey(
-        transition.sourceWorkspacePath,
-        transition.sourceWorkspaceIdentity,
-      ) &&
-    getWorkspaceKey(
-      pendingRequest.targetWorkspacePath,
-      pendingRequest.targetWorkspaceIdentity,
-    ) ===
-      getWorkspaceKey(
-        transition.targetWorkspacePath,
-        transition.targetWorkspaceIdentity,
-      );
+    getWorkspaceKey(pendingRequest.sourceWorkspacePath, pendingRequest.sourceWorkspaceIdentity) ===
+      getWorkspaceKey(transition.sourceWorkspacePath, transition.sourceWorkspaceIdentity) &&
+    getWorkspaceKey(pendingRequest.targetWorkspacePath, pendingRequest.targetWorkspaceIdentity) ===
+      getWorkspaceKey(transition.targetWorkspacePath, transition.targetWorkspaceIdentity);
   if (matches) {
     pendingRequest = null;
   }

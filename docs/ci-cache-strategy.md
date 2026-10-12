@@ -7,11 +7,11 @@
 
 实测（pipeline #260842，MR !1954，2026-08-13），多个 job 的耗时被 GitLab cache 归档/解压吃掉：
 
-| Job | 总耗时 | restore_cache | archive_cache | 占比 |
-| --- | --- | --- | --- | --- |
-| `build:desktop:app` | 670s | 173s | 474s | 97% |
-| `build:remote:assets` | 939s | 271s | 611s | 94% |
-| `build:linux:arm64` / `x64` | 340s / 356s | 26s | 89s | ~34% |
+| Job                         | 总耗时      | restore_cache | archive_cache | 占比 |
+| --------------------------- | ----------- | ------------- | ------------- | ---- |
+| `build:desktop:app`         | 670s        | 173s          | 474s          | 97%  |
+| `build:remote:assets`       | 939s        | 271s          | 611s          | 94%  |
+| `build:linux:arm64` / `x64` | 340s / 356s | 26s           | 89s           | ~34% |
 
 根因链：
 
@@ -49,14 +49,14 @@ GitLab cache 打包 node 依赖             GIT_CLEAN_FLAGS 排除 + 工作区�
 
 ## 3. 改动清单
 
-| 文件 | 改动 |
-| --- | --- |
-| `.gitlab/ci/00-workflow.yml` | 删除 `.ci:npm-cache` / `.ci:npm-cache:pull` 模板；`GIT_CLEAN_FLAGS` 追加 `-e packages/desktop/mock-cdn/` |
-| `.gitlab/ci/30-build.yml` | `build:desktop:app`、`.build:linux:template`、`build:remote:assets`（两条 cache）、macos/cua-helper/web-remote-control/windows 模板的 cache 引用全部删除 |
-| `.gitlab/ci/remote-assets-cache-key.txt` | 删除（cache key 汇总机制废弃） |
-| `scripts/ci/ci-lint-pipeline.mjs` | 新增守卫（规则见 §4） |
-| `scripts/test/ci-lint-pipeline.test.mjs` | 守卫单测（node:test） |
-| `docs/desktop-ci-cd.md` | 同步 00-workflow.yml 的描述（移除"npm/pnpm 缓存模板"） |
+| 文件                                     | 改动                                                                                                                                                     |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.gitlab/ci/00-workflow.yml`             | 删除 `.ci:npm-cache` / `.ci:npm-cache:pull` 模板；`GIT_CLEAN_FLAGS` 追加 `-e packages/desktop/mock-cdn/`                                                 |
+| `.gitlab/ci/30-build.yml`                | `build:desktop:app`、`.build:linux:template`、`build:remote:assets`（两条 cache）、macos/cua-helper/web-remote-control/windows 模板的 cache 引用全部删除 |
+| `.gitlab/ci/remote-assets-cache-key.txt` | 删除（cache key 汇总机制废弃）                                                                                                                           |
+| `scripts/ci/ci-lint-pipeline.mjs`        | 新增守卫（规则见 §4）                                                                                                                                    |
+| `scripts/test/ci-lint-pipeline.test.mjs` | 守卫单测（node:test）                                                                                                                                    |
+| `docs/desktop-ci-cd.md`                  | 同步 00-workflow.yml 的描述（移除"npm/pnpm 缓存模板"）                                                                                                   |
 
 ## 4. 防回归守卫规则
 
@@ -69,6 +69,7 @@ GitLab cache 打包 node 依赖             GIT_CLEAN_FLAGS 排除 + 工作区�
   `.pnpm-store/`、`.npm-cache/`、`packages/desktop/mock-cdn/`（工作区持久化的前提，防止误删导致缓存全失效）。
 
 若未来需要为某个目录恢复 GitLab cache，判定标准（满足全部才允许，且必须先更新本文与守卫）：
+
 1. 该目录会被 `get_sources` 的 git clean 清掉（无法靠工作区持久化）；且
 2. 重新获取的代价显著高于归档/解压代价；且
 3. 已配置共享缓存服务器（否则 cache 永远只在本机，归档必然白干）。
@@ -83,9 +84,9 @@ GitLab cache 打包 node 依赖             GIT_CLEAN_FLAGS 排除 + 工作区�
 
 ## 6. 预期效果
 
-| Job | 改动前 | 改动后 |
-| --- | --- | --- |
-| `build:desktop:app` | 11m10s | ~25s |
-| `build:remote:assets` | 15m39s | ~60s |
-| `build:linux:arm64` / `x64` | 5m41s / 5m57s | ~4m05s / ~4m20s |
-| 流水线整体（MR） | ~34min | ~23min（关键路径为 `build:windows:arm64` 22.5min） |
+| Job                         | 改动前        | 改动后                                             |
+| --------------------------- | ------------- | -------------------------------------------------- |
+| `build:desktop:app`         | 11m10s        | ~25s                                               |
+| `build:remote:assets`       | 15m39s        | ~60s                                               |
+| `build:linux:arm64` / `x64` | 5m41s / 5m57s | ~4m05s / ~4m20s                                    |
+| 流水线整体（MR）            | ~34min        | ~23min（关键路径为 `build:windows:arm64` 22.5min） |

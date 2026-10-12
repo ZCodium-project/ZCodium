@@ -31,10 +31,7 @@ function loadProject(scope) {
   });
 
   const globs = scope
-    ? [
-        `${scope.replace(/\/$/, "")}/**/*.{ts,tsx,mts,cts}`,
-        ...EXCLUDE_GLOBS,
-      ]
+    ? [`${scope.replace(/\/$/, "")}/**/*.{ts,tsx,mts,cts}`, ...EXCLUDE_GLOBS]
     : DEFAULT_GLOBS;
 
   const added = project.addSourceFilesAtPaths(globs);
@@ -46,7 +43,9 @@ function resolveSourceFile(project, filePath) {
   const absolute = path.resolve(ROOT, filePath);
   const sourceFile = project.getSourceFile(absolute);
   if (!sourceFile) {
-    throw new Error(`源文件未加载到 project: ${filePath}\n  - 确认路径是否正确\n  - 如使用了 --scope，检查文件是否在范围内`);
+    throw new Error(
+      `源文件未加载到 project: ${filePath}\n  - 确认路径是否正确\n  - 如使用了 --scope，检查文件是否在范围内`,
+    );
   }
   return sourceFile;
 }
@@ -54,13 +53,20 @@ function resolveSourceFile(project, filePath) {
 function kindLabel(declaration) {
   const kind = declaration.getKindName();
   switch (kind) {
-    case "FunctionDeclaration": return "function";
-    case "ClassDeclaration": return "class";
-    case "InterfaceDeclaration": return "interface";
-    case "TypeAliasDeclaration": return "type";
-    case "EnumDeclaration": return "enum";
-    case "VariableDeclaration": return "const";
-    default: return kind.replace(/Declaration$/, "").toLowerCase();
+    case "FunctionDeclaration":
+      return "function";
+    case "ClassDeclaration":
+      return "class";
+    case "InterfaceDeclaration":
+      return "interface";
+    case "TypeAliasDeclaration":
+      return "type";
+    case "EnumDeclaration":
+      return "enum";
+    case "VariableDeclaration":
+      return "const";
+    default:
+      return kind.replace(/Declaration$/, "").toLowerCase();
   }
 }
 
@@ -94,9 +100,7 @@ function printListExports(result) {
   const nameWidth = Math.max(...result.exports.map((r) => r.name.length));
   const kindWidth = Math.max(...result.exports.map((r) => r.kind.length));
   for (const row of result.exports) {
-    console.log(
-      `  ${row.name.padEnd(nameWidth)}  ${row.kind.padEnd(kindWidth)}  line ${row.line}`,
-    );
+    console.log(`  ${row.name.padEnd(nameWidth)}  ${row.kind.padEnd(kindWidth)}  line ${row.line}`);
   }
 }
 
@@ -207,7 +211,9 @@ function findReferencesForExport(project, filePath, exportName) {
     reExportSeen.add(key);
     reExportsUnique.push(ref);
   }
-  reExportsUnique.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file)));
+  reExportsUnique.sort((a, b) =>
+    a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file),
+  );
 
   return {
     symbol,
@@ -284,10 +290,10 @@ function printHelp() {
 
 function parseArgs(argv) {
   const options = {
-    target: null,        // "file:name" for refs query, "file" for list-exports
-    mode: "refs",        // "refs" | "list-exports"
+    target: null, // "file:name" for refs query, "file" for list-exports
+    mode: "refs", // "refs" | "list-exports"
     json: false,
-    scope: null,         // glob string, null = default
+    scope: null, // glob string, null = default
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -328,7 +334,9 @@ function parseArgs(argv) {
   }
 
   if (options.target === null) {
-    throw new Error("缺少目标参数。用法: pnpm dep:refs <file>:<exportName> 或 pnpm dep:refs --list-exports <file>");
+    throw new Error(
+      "缺少目标参数。用法: pnpm dep:refs <file>:<exportName> 或 pnpm dep:refs --list-exports <file>",
+    );
   }
 
   if (options.mode === "refs" && !options.target.includes(":")) {

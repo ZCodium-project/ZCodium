@@ -16,18 +16,13 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_FILE_COMPACT_CONTINUITY"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_FILE_COMPACT_CONTINUITY"],
         "bodyIncludes": [
           "E2E_PLAN_FILE_COMPACT_CONTINUITY",
           "E2E_PLAN_FILE_COMPACT_ENTER_PLAN",
           "E2E_PLAN_FILE_COMPACT_EXIT_PLAN"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -55,10 +50,7 @@
           "E2E_PLAN_FILE_COMPACT_EXIT_PLAN",
           "toolu_e2e_plan_file_compact_enter_plan_mode"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -89,10 +81,7 @@
           "User has approved your plan",
           "E2E_PLAN_FILE_COMPACT_PLAN_BODY"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -117,17 +106,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_FILE_COMPACT_CHECKPOINT"
-        ],
-        "bodyIncludes": [
-          "E2E_PLAN_FILE_COMPACT_CHECKPOINT",
-          "E2E_PLAN_FILE_COMPACT_PLAN_BODY"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "lastUserMessageIncludes": ["E2E_PLAN_FILE_COMPACT_CHECKPOINT"],
+        "bodyIncludes": ["E2E_PLAN_FILE_COMPACT_CHECKPOINT", "E2E_PLAN_FILE_COMPACT_PLAN_BODY"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -158,9 +139,7 @@
           "E2E_PLAN_FILE_COMPACT_CHECKPOINT",
           "\"stream\":true"
         ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -187,9 +166,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_PLAN_FILE_COMPACT_AFTER"
-        ],
+        "lastUserMessageIncludes": ["E2E_PLAN_FILE_COMPACT_AFTER"],
         "bodyIncludes": [
           "E2E_PLAN_FILE_COMPACT_AFTER",
           "A plan file exists from plan mode at:",
@@ -198,10 +175,7 @@
           "E2E_PLAN_FILE_COMPACT_PLAN_BODY",
           "If this plan is relevant to the current work and not already complete, continue working on it."
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

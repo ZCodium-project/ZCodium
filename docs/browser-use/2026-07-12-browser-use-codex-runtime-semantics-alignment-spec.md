@@ -6,9 +6,9 @@
 
 ## 1. 需求与澄清记录
 
-| 轮次 | 问题 | 用户结论 | 固定边界 |
-| --- | --- | --- | --- |
-| 1 | URL 冲突与全部中优先级行为应如何取舍 | 严格按第 2 节冻结语义实现 | 以第 2 节冻结的动态文档、运行时黑盒和可观察命令行为为裁决，不以上游 Playwright 或 ZCode 既有 UX 为裁决 |
+| 轮次 | 问题                                 | 用户结论                  | 固定边界                                                                                               |
+| ---- | ------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1    | URL 冲突与全部中优先级行为应如何取舍 | 严格按第 2 节冻结语义实现 | 以第 2 节冻结的动态文档、运行时黑盒和可观察命令行为为裁决，不以上游 Playwright 或 ZCode 既有 UX 为裁决 |
 
 本轮包含：
 
@@ -35,13 +35,13 @@
 
 ### 2.2 CUA / DOM CUA
 
-| API | 冻结语义 | ZCode 实现要求 |
-| --- | --- | --- |
-| `cua.drag({path, keys})` | 非空 path；按原始点序列移动，首点按下、末点释放 | 协议保留完整 path，不再只取首尾并重新插值 |
+| API                                          | 冻结语义                                                               | ZCode 实现要求                                                                                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cua.drag({path, keys})`                     | 非空 path；按原始点序列移动，首点按下、末点释放                        | 协议保留完整 path，不再只取首尾并重新插值                                                                                                          |
 | `cua.scroll({x,y,scrollX,scrollY,keypress})` | 鼠标先移到 `(x,y)`，再用 `Input.synthesizeScrollGesture` 按 delta 滚动 | 锚点、delta 和 modifier 不丢失；Electron `<webview>` guest 使用等价的 CDP `mouseWheel` transport，规避 Chromium 146 静默不执行 synthesized gesture |
-| `cua.move({x,y,keys})` | 鼠标移动携带 modifiers | 保留 keys |
-| `cua.keypress({keys})` | keys 表示组合键；依次 keyDown，末键 down/up，再逆序释放 | 不再只给末键附一个 bitmask |
-| `dom_cua.scroll({node_id?,x,y})` | 有 node 时在节点中心执行 delta scroll；无 node 时在 viewport 中心执行 | 不再把 node scroll 降级为 `scrollIntoView` |
+| `cua.move({x,y,keys})`                       | 鼠标移动携带 modifiers                                                 | 保留 keys                                                                                                                                          |
+| `cua.keypress({keys})`                       | keys 表示组合键；依次 keyDown，末键 down/up，再逆序释放                | 不再只给末键附一个 bitmask                                                                                                                         |
+| `dom_cua.scroll({node_id?,x,y})`             | 有 node 时在节点中心执行 delta scroll；无 node 时在 viewport 中心执行  | 不再把 node scroll 降级为 `scrollIntoView`                                                                                                         |
 
 IAB 动态 API 不暴露 CUA/DOM CUA `downloadMedia`。这两个 helper 在静态 manifest 中是
 `unsupportedByDefaultIn: ["iab"]` 且 `documented: false`；IAB 不能用普通 click 伪造成功。
@@ -63,51 +63,51 @@ IAB 动态 API 不暴露 CUA/DOM CUA `downloadMedia`。这两个 helper 在静�
 
 ## 3. 领域、状态所有者与跨端边界
 
-| 领域 | 状态所有者 | 本轮作用 |
-| --- | --- | --- |
-| Agent Browser facade | `apps/zcode-cli/packages/core` | 参数校验、动态对象图、命令映射 |
-| 严格协议 | `packages/shared/src/browser-use` | 完整表达 path、scroll anchor/delta、keypress |
-| IAB 执行 | `packages/desktop/src/main/browserView` | CDP trusted input、isolated world、下载动作 |
-| 插件文档 | `apps/zcode-cli/packages/browser-use-plugin` | URL、正则、networkidle、expectNavigation 和有效 API 指引 |
-| shared-host 路由 | host/services/main 既有 context | 不改变 `workspaceIdentity`、`remoteSessionId`、`clientMode` |
+| 领域                 | 状态所有者                                   | 本轮作用                                                    |
+| -------------------- | -------------------------------------------- | ----------------------------------------------------------- |
+| Agent Browser facade | `apps/zcode-cli/packages/core`               | 参数校验、动态对象图、命令映射                              |
+| 严格协议             | `packages/shared/src/browser-use`            | 完整表达 path、scroll anchor/delta、keypress                |
+| IAB 执行             | `packages/desktop/src/main/browserView`      | CDP trusted input、isolated world、下载动作                 |
+| 插件文档             | `apps/zcode-cli/packages/browser-use-plugin` | URL、正则、networkidle、expectNavigation 和有效 API 指引    |
+| shared-host 路由     | host/services/main 既有 context              | 不改变 `workspaceIdentity`、`remoteSessionId`、`clientMode` |
 
 不为手机端新增 runtime。`desktop-continuous` 与 `web-remote-replayable` 都通过同一 shared-host
 BrowserControl 链路执行相同 browser command；本轮命令不引入 task stream/snapshot/replay 语义。
 
 ## 4. 状态组合与剪枝
 
-| 组合 | 分类 | 理由 |
-| --- | --- | --- |
-| IAB + http/https/about:blank | accepted | 导航 allowlist |
-| IAB + file/其它 about/javascript/data | accepted rejection | backend action 前拒绝 |
-| CUA drag 1 点/多点 + modifiers | accepted | 只要求 path 非空并保留全部点 |
-| CUA scroll + 非零 anchor/delta/modifiers | accepted | 防止参数被静默丢弃 |
-| DOM scroll + node/no-node | accepted | 分别使用 node center / viewport center |
-| IAB CUA/DOM downloadMedia | pruned from API | IAB 动态隐藏 |
-| IAB Locator downloadMedia + 有/无 URL | accepted | 有 URL 触发下载；无 URL 明确失败 |
-| networkidle | accepted rejection | backend 明确 unsupported |
-| expectNavigation + URL | accepted | URL waiter 可证明目标导航 |
-| expectNavigation + 无 URL + 旧页已 load | accepted current behavior | 保持第 2.3 节语义，不升级成 upstream Playwright |
-| desktop/mobile × 每个输入方法 | pairwise | 两端复用同一 host executor；保留一条 context schema/bridge 回归即可 |
-| macOS/Windows/Linux × 每个普通键 | pairwise | OS 差异只扩展 `ControlOrMeta` 和代表性 modifier 组合 |
+| 组合                                     | 分类                      | 理由                                                                |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------- |
+| IAB + http/https/about:blank             | accepted                  | 导航 allowlist                                                      |
+| IAB + file/其它 about/javascript/data    | accepted rejection        | backend action 前拒绝                                               |
+| CUA drag 1 点/多点 + modifiers           | accepted                  | 只要求 path 非空并保留全部点                                        |
+| CUA scroll + 非零 anchor/delta/modifiers | accepted                  | 防止参数被静默丢弃                                                  |
+| DOM scroll + node/no-node                | accepted                  | 分别使用 node center / viewport center                              |
+| IAB CUA/DOM downloadMedia                | pruned from API           | IAB 动态隐藏                                                        |
+| IAB Locator downloadMedia + 有/无 URL    | accepted                  | 有 URL 触发下载；无 URL 明确失败                                    |
+| networkidle                              | accepted rejection        | backend 明确 unsupported                                            |
+| expectNavigation + URL                   | accepted                  | URL waiter 可证明目标导航                                           |
+| expectNavigation + 无 URL + 旧页已 load  | accepted current behavior | 保持第 2.3 节语义，不升级成 upstream Playwright                     |
+| desktop/mobile × 每个输入方法            | pairwise                  | 两端复用同一 host executor；保留一条 context schema/bridge 回归即可 |
+| macOS/Windows/Linux × 每个普通键         | pairwise                  | OS 差异只扩展 `ControlOrMeta` 和代表性 modifier 组合                |
 
 ## 5. 验收案例
 
-| Case | Setup | Action | 断言 | 证据 |
-| --- | --- | --- | --- | --- |
-| BCP-142 | 任意 IAB | 导航多种 scheme | 仅 http/https/about:blank 通过；其它 scheme 不调用 `loadURL` | executor unit |
-| BCP-143 | CUA tab | drag 3+ path points | CDP 按原顺序发送全部点，首点 pressed、末点 released | core + executor unit |
-| BCP-144 | CUA tab | anchor scroll + modifiers | mouse move 到 anchor；scroll gesture 的距离与 delta 方向符合第 2.2 节合同 | core + executor unit |
-| BCP-145 | CUA/DOM CUA | key combination | modifier 分别 down/up，末键处于正确 modifier 状态 | core + executor unit |
-| BCP-146 | DOM CUA | node/no-node scroll | node center 或 viewport center执行 delta scroll | executor unit |
-| BCP-147 | IAB effective manifest | 读取 CUA/DOM CUA | `downloadMedia` 不在对象图和有效文档 | manifest/facade docs unit |
-| BCP-148 | locator 指向 media/link | `downloadMedia()` | isolated world 创建临时 download anchor；无 URL 报错 | locator executor unit |
-| BCP-149 | Playwright helper | element info/screenshot | helper 从默认文档隐藏；DOM 逻辑在 isolated world 执行 | manifest + executor unit |
-| BCP-150 | Browser skill | `getByRole` name | guidance 与 `TextMatcher` 都允许 string/RegExp，跨 Realm RegExp 可用 | plugin contract + runtime unit |
-| BCP-151 | load wait | networkidle | 明确的 unsupported 错误 | executor unit |
-| BCP-152 | loaded page | `expectNavigation` 有/无 URL | 有 URL 先 wait 后 action；无 URL 保持第 2.3 节 loaded-state 行为 | facade unit |
-| BCP-153 | shared host context | 新输入命令经 bridge | workspace/clientMode/remoteSession context 不变，strict schema 拒绝丢字段/非法形状 | shared + bridge unit |
-| BCP-154 | Electron `<webview>` guest | CUA/DOM CUA anchor scroll | 使用真实 `mouseWheel` 输入，保留 anchor、delta、modifier；不调用在 Chromium 146 guest 中静默无效的 synthesized gesture | executor unit + Electron runtime |
+| Case    | Setup                      | Action                       | 断言                                                                                                                   | 证据                             |
+| ------- | -------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| BCP-142 | 任意 IAB                   | 导航多种 scheme              | 仅 http/https/about:blank 通过；其它 scheme 不调用 `loadURL`                                                           | executor unit                    |
+| BCP-143 | CUA tab                    | drag 3+ path points          | CDP 按原顺序发送全部点，首点 pressed、末点 released                                                                    | core + executor unit             |
+| BCP-144 | CUA tab                    | anchor scroll + modifiers    | mouse move 到 anchor；scroll gesture 的距离与 delta 方向符合第 2.2 节合同                                              | core + executor unit             |
+| BCP-145 | CUA/DOM CUA                | key combination              | modifier 分别 down/up，末键处于正确 modifier 状态                                                                      | core + executor unit             |
+| BCP-146 | DOM CUA                    | node/no-node scroll          | node center 或 viewport center执行 delta scroll                                                                        | executor unit                    |
+| BCP-147 | IAB effective manifest     | 读取 CUA/DOM CUA             | `downloadMedia` 不在对象图和有效文档                                                                                   | manifest/facade docs unit        |
+| BCP-148 | locator 指向 media/link    | `downloadMedia()`            | isolated world 创建临时 download anchor；无 URL 报错                                                                   | locator executor unit            |
+| BCP-149 | Playwright helper          | element info/screenshot      | helper 从默认文档隐藏；DOM 逻辑在 isolated world 执行                                                                  | manifest + executor unit         |
+| BCP-150 | Browser skill              | `getByRole` name             | guidance 与 `TextMatcher` 都允许 string/RegExp，跨 Realm RegExp 可用                                                   | plugin contract + runtime unit   |
+| BCP-151 | load wait                  | networkidle                  | 明确的 unsupported 错误                                                                                                | executor unit                    |
+| BCP-152 | loaded page                | `expectNavigation` 有/无 URL | 有 URL 先 wait 后 action；无 URL 保持第 2.3 节 loaded-state 行为                                                       | facade unit                      |
+| BCP-153 | shared host context        | 新输入命令经 bridge          | workspace/clientMode/remoteSession context 不变，strict schema 拒绝丢字段/非法形状                                     | shared + bridge unit             |
+| BCP-154 | Electron `<webview>` guest | CUA/DOM CUA anchor scroll    | 使用真实 `mouseWheel` 输入，保留 anchor、delta、modifier；不调用在 Chromium 146 guest 中静默无效的 synthesized gesture | executor unit + Electron runtime |
 
 ## 6. 完成条件
 

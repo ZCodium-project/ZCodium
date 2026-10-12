@@ -51,9 +51,7 @@ export function mapSessionSummaryToTaskMeta(
       ? previous.title
       : summary.title || previous?.title || "";
   const titleOverridden =
-    summaryTitleIsCustom || previous?.titleOverridden === true
-      ? true
-      : undefined;
+    summaryTitleIsCustom || previous?.titleOverridden === true ? true : undefined;
   return attachTaskListRowActivity(
     {
       taskId: summary.sessionId,
@@ -61,19 +59,13 @@ export function mapSessionSummaryToTaskMeta(
       title,
       ...(titleOverridden ? { titleOverridden } : {}),
       workspacePath: options.workspacePath,
-      ...(options.workspaceIdentity
-        ? { workspaceIdentity: options.workspaceIdentity }
-        : {}),
+      ...(options.workspaceIdentity ? { workspaceIdentity: options.workspaceIdentity } : {}),
       createdAt: summary.createdAt || previous?.createdAt || 0,
       updatedAt: summary.lastActivityAt || previous?.updatedAt || 0,
       mode: previous?.mode ?? "default",
       ...(previous?.model ? { model: previous.model } : {}),
-      ...(summary.parentSessionId
-        ? { forkedFromTaskId: summary.parentSessionId }
-        : {}),
-      ...(previous?.provider
-        ? { provider: previous.provider as ZCodeProvider }
-        : {}),
+      ...(summary.parentSessionId ? { forkedFromTaskId: summary.parentSessionId } : {}),
+      ...(previous?.provider ? { provider: previous.provider as ZCodeProvider } : {}),
       ...(status ? { status } : {}),
       ...(summary.pendingInteraction
         ? {

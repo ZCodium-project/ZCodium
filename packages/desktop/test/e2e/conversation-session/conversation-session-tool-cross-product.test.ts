@@ -65,10 +65,7 @@ describe("会话区工具叉乘 E2E", () => {
 
       await runToolCaseWithCleanup(toolCase, "compact", async (context) => {
         await sendV4Prompt("/compact");
-        await waitForV4ComposerText(
-          "",
-          `${toolCase.toolName}: /compact 后输入框没有清空`,
-        );
+        await waitForV4ComposerText("", `${toolCase.toolName}: /compact 后输入框没有清空`);
         await waitForUpstreamRequest(
           {
             includes: compactHistoryMarkers(toolCase, context.marker),
@@ -76,10 +73,7 @@ describe("会话区工具叉乘 E2E", () => {
           `${toolCase.toolName}: compact 请求没有包含工具历史 marker`,
           90000,
         );
-        await waitForV4CompactMarker(
-          { origin: "manual", status: "success" },
-          90000,
-        );
+        await waitForV4CompactMarker({ origin: "manual", status: "success" }, 90000);
         await waitForV4ConversationState(
           (snapshot) => snapshot.state === "idle",
           `${toolCase.toolName}: compact 后没有退出运行态`,
@@ -128,10 +122,7 @@ describe("会话区工具叉乘 E2E", () => {
         await sendV4Prompt(
           `/goal ${objective}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
         );
-        await waitForV4ComposerText(
-          "",
-          `${toolCase.toolName}: /goal 后输入框没有清空`,
-        );
+        await waitForV4ComposerText("", `${toolCase.toolName}: /goal 后输入框没有清空`);
         await waitForUpstreamRequest(
           {
             includes: goalHistoryMarkers(toolCase, context.marker, objective),
@@ -174,13 +165,10 @@ function readSelectedToolCrossProductCases() {
       .filter(Boolean),
   );
   const cases = TOOL_CROSS_PRODUCT_CASES.filter(
-    (toolCase) =>
-      selected.has(toolCase.toolName) || selected.has(toolCase.markerName),
+    (toolCase) => selected.has(toolCase.toolName) || selected.has(toolCase.markerName),
   );
   if (cases.length === 0) {
-    throw new Error(
-      `ZCODE_E2E_TOOL_CROSS_PRODUCT_ONLY did not match any tool: ${configured}`,
-    );
+    throw new Error(`ZCODE_E2E_TOOL_CROSS_PRODUCT_ONLY did not match any tool: ${configured}`);
   }
   return cases;
 }
@@ -188,11 +176,7 @@ function readSelectedToolCrossProductCases() {
 async function runToolCaseWithCleanup(
   toolCase: ToolCrossProductCase,
   scenario: ToolCrossProductScenario,
-  action: (context: {
-    marker: string;
-    prompt: string;
-    runId: string;
-  }) => Promise<void>,
+  action: (context: { marker: string; prompt: string; runId: string }) => Promise<void>,
 ) {
   const runId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   try {
@@ -200,10 +184,9 @@ async function runToolCaseWithCleanup(
     await action(context);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `${scenario}/${toolCase.toolName} 工具叉乘 case 失败: ${message}`,
-      { cause: error },
-    );
+    throw new Error(`${scenario}/${toolCase.toolName} 工具叉乘 case 失败: ${message}`, {
+      cause: error,
+    });
   } finally {
     await stopIfBusy();
     await cleanupToolCrossProductFixtures();
@@ -222,10 +205,7 @@ async function runCompletedToolTurn(
   const marker = markerForToolCase(toolCase);
   const prompt = buildToolCrossProductPrompt(toolCase, scenario, runId);
   await sendV4Prompt(prompt);
-  await waitForV4ComposerText(
-    "",
-    `${toolCase.toolName}: 首发工具 prompt 后输入框没有清空`,
-  );
+  await waitForV4ComposerText("", `${toolCase.toolName}: 首发工具 prompt 后输入框没有清空`);
   await waitForV4UserMessageContaining(prompt);
   await waitForUpstreamRequest(
     {
@@ -265,9 +245,7 @@ async function waitForToolTurnIdle(toolCase: ToolCrossProductCase) {
       });
       return (
         snapshot.state === "idle" &&
-        latestAssistantMessages.some((message) =>
-          message.includes(E2E_REPLY_TOKEN),
-        )
+        latestAssistantMessages.some((message) => message.includes(E2E_REPLY_TOKEN))
       );
     },
     {
@@ -285,18 +263,13 @@ async function expectToolBlockVisible(toolCase: ToolCrossProductCase) {
   expect(block.toolName).toBe(toolCase.toolName);
 }
 
-async function expectToolHistoryVisibleOrProviderBacked(
-  toolCase: ToolCrossProductCase,
-) {
+async function expectToolHistoryVisibleOrProviderBacked(toolCase: ToolCrossProductCase) {
   if (toolCase.historyAssertion !== "providerRequest") {
     await expectToolBlockVisible(toolCase);
   }
 }
 
-async function waitForProviderBackedToolHistory(
-  toolCase: ToolCrossProductCase,
-  marker: string,
-) {
+async function waitForProviderBackedToolHistory(toolCase: ToolCrossProductCase, marker: string) {
   if (!toolCase.providerHistoryMarker) {
     throw new Error(`${toolCase.toolName}: provider history assertion 缺少 marker`);
   }
@@ -314,23 +287,15 @@ function compactHistoryMarkers(toolCase: ToolCrossProductCase, marker: string) {
   return [
     COMPACT_REQUEST_SENTINEL,
     marker,
-    ...(toolCase.providerHistoryMarker
-      ? [toolCase.providerHistoryMarker]
-      : []),
+    ...(toolCase.providerHistoryMarker ? [toolCase.providerHistoryMarker] : []),
   ];
 }
 
-function goalHistoryMarkers(
-  toolCase: ToolCrossProductCase,
-  marker: string,
-  objective: string,
-) {
+function goalHistoryMarkers(toolCase: ToolCrossProductCase, marker: string, objective: string) {
   return [
     objective,
     marker,
-    ...(toolCase.providerHistoryMarker
-      ? [toolCase.providerHistoryMarker]
-      : []),
+    ...(toolCase.providerHistoryMarker ? [toolCase.providerHistoryMarker] : []),
   ];
 }
 
@@ -343,10 +308,7 @@ async function assertForkProviderHistory(
   }
   const probe = `${FORK_PROBE_PREFIX}_${toolCase.markerName}_${context.runId}`;
   await sendV4Prompt(`${probe}: Reply with exactly "${E2E_REPLY_TOKEN}".`);
-  await waitForV4ComposerText(
-    "",
-    `${toolCase.toolName}: fork history probe 后输入框没有清空`,
-  );
+  await waitForV4ComposerText("", `${toolCase.toolName}: fork history probe 后输入框没有清空`);
   const request = await waitForUpstreamNetworkCapture(probe);
   expect(request.statusCode).toBe(200);
   assertForkRequestHasToolHistory(request.requestJson, toolCase.toolName);
@@ -361,10 +323,7 @@ async function assertForkProviderHistory(
   );
 }
 
-function assertForkRequestHasToolHistory(
-  requestJson: unknown,
-  toolName: string,
-) {
+function assertForkRequestHasToolHistory(requestJson: unknown, toolName: string) {
   if (!requestJson || typeof requestJson !== "object") {
     throw new Error(`${toolName}: fork provider 请求不是 JSON object`);
   }
@@ -376,16 +335,13 @@ function assertForkRequestHasToolHistory(
     if (!message || typeof message !== "object") return [];
     const content = (message as { content?: unknown }).content;
     return Array.isArray(content)
-      ? content.filter(
-          (block): block is Record<string, unknown> =>
-            Boolean(block && typeof block === "object"),
+      ? content.filter((block): block is Record<string, unknown> =>
+          Boolean(block && typeof block === "object"),
         )
       : [];
   });
   const toolUseIds = blocks
-    .filter(
-      (block) => block.type === "tool_use" && block.name === toolName,
-    )
+    .filter((block) => block.type === "tool_use" && block.name === toolName)
     .map((block) => block.id)
     .filter((id): id is string => typeof id === "string");
   expect(toolUseIds.length).toBeGreaterThan(0);

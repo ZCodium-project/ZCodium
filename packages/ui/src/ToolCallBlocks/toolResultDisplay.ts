@@ -91,8 +91,7 @@ const WORKFLOW_DISPLAY_PARSERS_BY_KIND: Record<
   (value: Record<string, unknown>) => ToolResultDisplay | undefined
 > = {
   get_workflow_run: (value) => parseWorkflowDisplay(toolCallGetWorkflowRunDisplaySchema, value),
-  list_workflow_runs: (value) =>
-    parseWorkflowDisplay(toolCallListWorkflowRunsDisplaySchema, value),
+  list_workflow_runs: (value) => parseWorkflowDisplay(toolCallListWorkflowRunsDisplaySchema, value),
   eval_workflow_snippet: (value) =>
     parseWorkflowDisplay(toolCallEvalWorkflowSnippetDisplaySchema, value),
   saved_workflow_list: (value) =>

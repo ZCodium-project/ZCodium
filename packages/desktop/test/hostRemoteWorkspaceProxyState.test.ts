@@ -21,16 +21,9 @@ describe("createHostRemoteWorkspaceProxyState", () => {
     expect(
       state.ensureWorkspaceSubscription(workspaceA, () => ({ dispose: workspaceADispose })),
     ).toBe(true);
-    expect(
-      state.ensureWorkspaceSubscription(workspaceA, () => ({ dispose: vi.fn() })),
-    ).toBe(false);
+    expect(state.ensureWorkspaceSubscription(workspaceA, () => ({ dispose: vi.fn() }))).toBe(false);
     state.ensureWorkspaceSubscription(workspaceB, () => ({ dispose: workspaceBDispose }));
-    state.trackTaskReady(
-      "task-a",
-      workspaceA,
-      () => ({ dispose: readyADispose }),
-      vi.fn(),
-    );
+    state.trackTaskReady("task-a", workspaceA, () => ({ dispose: readyADispose }), vi.fn());
 
     state.clearWorkspace(workspaceA);
 
@@ -39,9 +32,7 @@ describe("createHostRemoteWorkspaceProxyState", () => {
     expect(workspaceADispose).toHaveBeenCalledOnce();
     expect(readyADispose).toHaveBeenCalledOnce();
     expect(workspaceBDispose).not.toHaveBeenCalled();
-    expect(
-      state.ensureWorkspaceSubscription(workspaceA, () => ({ dispose: vi.fn() })),
-    ).toBe(true);
+    expect(state.ensureWorkspaceSubscription(workspaceA, () => ({ dispose: vi.fn() }))).toBe(true);
   });
 
   it("disposes a ready subscription when ready fires synchronously during registration", () => {

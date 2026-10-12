@@ -96,10 +96,7 @@ export function WebRemoteControlMobileShell({
     taskId: string,
     targetWorkspaceIdentity?: string,
   ) => void;
-  onStartDraftInWorkspace?: (
-    targetWorkspacePath: string,
-    targetWorkspaceIdentity?: string,
-  ) => void;
+  onStartDraftInWorkspace?: (targetWorkspacePath: string, targetWorkspaceIdentity?: string) => void;
   renderChatHeader: (options: { onBackHome: () => void }) => ReactNode;
   chatContent: ReactNode;
   chatOverlay?: ReactNode;
@@ -196,22 +193,15 @@ export function WebRemoteControlMobileShell({
     // Bugfix: 手机端“新建任务/分叉”会自动切到新 task，但之前只有点任务列表项才会上报 mobileViewState。
     // 这样桌面端会继续认为手机还在旧 task，导致新 task 列表刷新滞后。
     // 这里在 activeTaskId 变化时立即同步，确保跨端选中态和任务列表收敛一致。
-    void switcher
-      .updateMobileViewState(workspaceKey, activeTaskId ?? undefined)
-      .catch((error) => {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.warn("[WebRemoteControlMobileShell] 同步 mobileViewState 失败", {
-          error: message,
-          workspaceKey,
-          taskId: activeTaskId ?? null,
-        });
+    void switcher.updateMobileViewState(workspaceKey, activeTaskId ?? undefined).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.warn("[WebRemoteControlMobileShell] 同步 mobileViewState 失败", {
+        error: message,
+        workspaceKey,
+        taskId: activeTaskId ?? null,
       });
-  }, [
-    activeTaskId,
-    activeWorkspaceIdentity,
-    activeWorkspacePath,
-    switcher,
-  ]);
+    });
+  }, [activeTaskId, activeWorkspaceIdentity, activeWorkspacePath, switcher]);
 
   // Bugfix: 移动端聊天/侧栏都是 flex 子树，默认 min-width:auto 会按长消息的
   // min-content 宽度撑开抽屉；窄屏随后从左侧裁掉正文。沿整条宽度链显式允许收缩，
@@ -261,9 +251,7 @@ export function WebRemoteControlMobileShell({
             <main
               className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
               aria-hidden={shouldInertChatSurface ? true : undefined}
-              data-mobile-chat-surface={
-                shouldInertChatSurface ? "inert" : undefined
-              }
+              data-mobile-chat-surface={shouldInertChatSurface ? "inert" : undefined}
               inert={shouldInertChatSurface ? true : undefined}
             >
               {/* Bugfix: 手机侧栏打开时底部 composer 会被抽屉覆盖。

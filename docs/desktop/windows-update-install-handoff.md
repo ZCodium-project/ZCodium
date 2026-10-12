@@ -69,6 +69,7 @@ Main 进程不能在调用 `quitAndInstall()` 前按整个安装目录杀进程�
     -> 保留原 .lnk / 固定身份
     -> 若继承的目标失效，则原位修复 .lnk
   ```
+
 - 覆盖更新时，开始菜单和桌面快捷方式先由 electron-builder 的 `KeepShortcuts` 机制保留。
   ZCode 的 `customInstall` 必须读取已有 `.lnk` 的目标：目标已经等于本次 `$appExe` 时原样保留，
   不得再次调用 `CreateShortCut`；目标不同、为空或无法读取时才原位修复为 `$appExe`。修复原因

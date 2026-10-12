@@ -33,9 +33,9 @@ result = "VS docs API Blog Contribute Community Sponsor v8 *Engishy CV} Q OQ G a
 
 ### `contrast`
 
--   **Type:** `number`
--   **Mandatory:** no
--   **Default:** `0.25`
+- **Type:** `number`
+- **Mandatory:** no
+- **Default:** `0.25`
 
 The higher the contrast, the darker the image and vice versa. This can help to find text in an image. It accepts values between `-1` and `1`.
 
@@ -47,8 +47,8 @@ await browser.ocrGetText({ contrast: 0.5 });
 
 ### `haystack`
 
--   **Type:** `number`
--   **Mandatory:** `WebdriverIO.Element | ChainablePromiseElement | Rectangle`
+- **Type:** `number`
+- **Mandatory:** `WebdriverIO.Element | ChainablePromiseElement | Rectangle`
 
 This is the search area in the screen where the OCR needs to look for text. This can be an element or a rectangle containing `x`, `y`, `width` and `height`
 
@@ -62,20 +62,20 @@ await browser.ocrGetText({ haystack: await $("elementSelector") });
 
 // OR
 await browser.ocrGetText({
-    haystack: {
-        x: 10,
-        y: 50,
-        width: 300,
-        height: 75,
-    },
+  haystack: {
+    x: 10,
+    y: 50,
+    width: 300,
+    height: 75,
+  },
 });
 ```
 
 ### `language`
 
--   **Type:** `string`
--   **Mandatory:** No
--   **Default:** `eng`
+- **Type:** `string`
+- **Mandatory:** No
+- **Default:** `eng`
 
 The language that Tesseract will recognize. More info can be found [here](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions) and the supported languages can be found [here](https://github.com/webdriverio/visual-testing/blob/main/packages/ocr-service/src/utils/constants.ts).
 
@@ -84,7 +84,7 @@ The language that Tesseract will recognize. More info can be found [here](https:
 ```js
 import { SUPPORTED_OCR_LANGUAGES } from "@wdio/ocr-service";
 await browser.ocrGetText({
-    // Use Dutch as a language
-    language: SUPPORTED_OCR_LANGUAGES.DUTCH,
+  // Use Dutch as a language
+  language: SUPPORTED_OCR_LANGUAGES.DUTCH,
 });
 ```

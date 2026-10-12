@@ -72,14 +72,10 @@ describe("markdown table sticky scrollbar lifecycle", () => {
     expect(source).toContain(
       'data-markdown-table-virtual-scroll-visible={virtualScrollbarVisible ? "true" : "false"}',
     );
-    expect(source).toContain(
-      'data-markdown-table-virtual-scroll-sticky={',
-    );
+    expect(source).toContain("data-markdown-table-virtual-scroll-sticky={");
     expect(source).toContain('data-markdown-table-frame=""');
     expect(source).not.toContain("{virtualScrollbarVisible ? (");
-    expect(source).toContain(
-      "}, [virtualScrollbarSticky, virtualScrollbarVisible]);",
-    );
+    expect(source).toContain("}, [virtualScrollbarSticky, virtualScrollbarVisible]);");
     expect(source).toContain("resizeObserver?.observe(observedDock)");
     expect(source).toContain("new MutationObserver(syncDockObservation)");
     expect(source).toContain("readMarkdownTableBackToBottomClearance(root)");

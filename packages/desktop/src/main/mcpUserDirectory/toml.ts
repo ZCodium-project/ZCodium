@@ -82,8 +82,10 @@ function parseTomlInlineTable(input: string): Record<string, unknown> | null {
 function parseTomlValue(value: string): unknown {
   const normalized = value.trim();
 
-  if ((normalized.startsWith('"') && normalized.endsWith('"')) ||
-      (normalized.startsWith("'") && normalized.endsWith("'"))) {
+  if (
+    (normalized.startsWith('"') && normalized.endsWith('"')) ||
+    (normalized.startsWith("'") && normalized.endsWith("'"))
+  ) {
     return normalized.slice(1, -1);
   }
 

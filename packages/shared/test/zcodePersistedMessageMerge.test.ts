@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  coalesceConsecutiveZCodeAssistants,
-  type ZCodePersistedMessage,
-} from "../src/index.js";
+import { coalesceConsecutiveZCodeAssistants, type ZCodePersistedMessage } from "../src/index.js";
 
-function userMessage(
-  overrides: Partial<ZCodePersistedMessage> = {},
-): ZCodePersistedMessage {
+function userMessage(overrides: Partial<ZCodePersistedMessage> = {}): ZCodePersistedMessage {
   return {
     role: "user",
     content: "hello",
@@ -15,9 +10,7 @@ function userMessage(
   };
 }
 
-function assistantMessage(
-  overrides: Partial<ZCodePersistedMessage> = {},
-): ZCodePersistedMessage {
+function assistantMessage(overrides: Partial<ZCodePersistedMessage> = {}): ZCodePersistedMessage {
   return {
     role: "assistant",
     content: "ok",
@@ -64,11 +57,7 @@ describe("coalesceConsecutiveZCodeAssistants", () => {
       ],
     });
 
-    const result = coalesceConsecutiveZCodeAssistants([
-      userMessage(),
-      first,
-      next,
-    ]);
+    const result = coalesceConsecutiveZCodeAssistants([userMessage(), first, next]);
 
     expect(result).toHaveLength(2);
     const merged = result[1]!;
@@ -204,9 +193,7 @@ describe("coalesceConsecutiveZCodeAssistants", () => {
     ];
     const result = coalesceConsecutiveZCodeAssistants(input);
     expect(result).toHaveLength(4);
-    expect(
-      result.map((m) => ({ role: m.role, turnIndex: m.turnIndex })),
-    ).toEqual([
+    expect(result.map((m) => ({ role: m.role, turnIndex: m.turnIndex }))).toEqual([
       { role: "user", turnIndex: 0 },
       { role: "assistant", turnIndex: 0 },
       { role: "user", turnIndex: 1 },

@@ -48,13 +48,21 @@ describe("Core-local TaskActivityTracker", () => {
     lifecycle.fire({
       ...targetA,
       workspaceKey: targetA.workspaceIdentity,
-      runtimeIdentity: { generation: 1, identity: "runtime-a", workspaceKey: targetA.workspaceIdentity },
+      runtimeIdentity: {
+        generation: 1,
+        identity: "runtime-a",
+        workspaceKey: targetA.workspaceIdentity,
+      },
       state: "available",
     });
     lifecycle.fire({
       ...targetB,
       workspaceKey: targetB.workspaceIdentity,
-      runtimeIdentity: { generation: 1, identity: "runtime-b", workspaceKey: targetB.workspaceIdentity },
+      runtimeIdentity: {
+        generation: 1,
+        identity: "runtime-b",
+        workspaceKey: targetB.workspaceIdentity,
+      },
       state: "available",
     });
 
@@ -69,7 +77,11 @@ describe("Core-local TaskActivityTracker", () => {
     lifecycle.fire({
       ...targetB,
       workspaceKey: targetB.workspaceIdentity,
-      runtimeIdentity: { generation: 1, identity: "runtime-b", workspaceKey: targetB.workspaceIdentity },
+      runtimeIdentity: {
+        generation: 1,
+        identity: "runtime-b",
+        workspaceKey: targetB.workspaceIdentity,
+      },
       state: "unavailable",
     });
     expect(tracker.readRunningTaskCount()).toBe(0);

@@ -35,9 +35,7 @@ export interface PresentationGroupTextEntryInput {
   bounds: { x: number; y: number; w: number; h: number };
 }
 
-function toBounds(
-  node: PresentationElementNodeInput,
-): PresentationElementBounds {
+function toBounds(node: PresentationElementNodeInput): PresentationElementBounds {
   return {
     x: node.position.x,
     y: node.position.y,
@@ -54,12 +52,7 @@ function buildTableCellElements(
   node: PresentationElementNodeInput,
   base: Omit<PresentationPageElement, "bounds" | "nodeType">,
 ): PresentationPageElement[] {
-  if (
-    !node.columns ||
-    !node.rows ||
-    node.columns.length === 0 ||
-    node.rows.length === 0
-  ) {
+  if (!node.columns || !node.rows || node.columns.length === 0 || node.rows.length === 0) {
     return [];
   }
   const columnTotal = sum(node.columns);
@@ -68,9 +61,7 @@ function buildTableCellElements(
     return [];
   }
 
-  const columnOffsets = node.columns.map((_, index) =>
-    sum(node.columns?.slice(0, index) ?? []),
-  );
+  const columnOffsets = node.columns.map((_, index) => sum(node.columns?.slice(0, index) ?? []));
   const rowOffsets = node.rows.map((_, index) =>
     sum(node.rows?.slice(0, index).map((row) => row.height) ?? []),
   );
@@ -91,13 +82,10 @@ function buildTableCellElements(
       columnIndex += gridSpan;
       const rowSpan = Math.max(1, cell.rowSpan || 1);
       const cellWidth = sum(
-        node.columns?.slice(startColumnIndex, startColumnIndex + gridSpan) ??
-          [],
+        node.columns?.slice(startColumnIndex, startColumnIndex + gridSpan) ?? [],
       );
       const cellHeight = sum(
-        node.rows
-          ?.slice(rowIndex, rowIndex + rowSpan)
-          .map((item) => item.height) ?? [],
+        node.rows?.slice(rowIndex, rowIndex + rowSpan).map((item) => item.height) ?? [],
       );
       return [
         {
@@ -109,11 +97,8 @@ function buildTableCellElements(
           bounds: {
             x:
               node.position.x +
-              ((columnOffsets[startColumnIndex] ?? 0) / columnTotal) *
-                node.size.w,
-            y:
-              node.position.y +
-              ((rowOffsets[rowIndex] ?? 0) / rowTotal) * node.size.h,
+              ((columnOffsets[startColumnIndex] ?? 0) / columnTotal) * node.size.w,
+            y: node.position.y + ((rowOffsets[rowIndex] ?? 0) / rowTotal) * node.size.h,
             width: (cellWidth / columnTotal) * node.size.w,
             height: (cellHeight / rowTotal) * node.size.h,
           },
@@ -133,10 +118,7 @@ export function buildPresentationPageElements(options: {
     if (node.nodeType === "group" || node.nodeType === "unknown") {
       return [];
     }
-    const nodeType = node.nodeType as Exclude<
-      PresentationElementNodeType,
-      "table-cell"
-    >;
+    const nodeType = node.nodeType as Exclude<PresentationElementNodeType, "table-cell">;
     const base = {
       slideIndex: options.slideIndex,
       slidePart: options.slidePart,
@@ -147,15 +129,11 @@ export function buildPresentationPageElements(options: {
       zIndex,
       ...(node.text ? { text: node.text } : {}),
     } satisfies PresentationPageElement;
-    return node.nodeType === "table"
-      ? [base, ...buildTableCellElements(node, base)]
-      : [base];
+    return node.nodeType === "table" ? [base, ...buildTableCellElements(node, base)] : [base];
   });
 
   const directIds = new Set(
-    options.nodes
-      .filter((node) => node.nodeType !== "group")
-      .map((node) => node.id),
+    options.nodes.filter((node) => node.nodeType !== "group").map((node) => node.id),
   );
   const groupTextElements = options.groupTextEntries.flatMap((entry) => {
     if (directIds.has(entry.nodeId)) {
@@ -166,14 +144,10 @@ export function buildPresentationPageElements(options: {
     // buildTextIndex 的真实路径是 slides/{slide}/nodes/{groupId}/children/...；
     // 兼容旧测试/调用方的首段 groupId，避免所有组内文本都错误落到 zIndex 0。
     const groupId =
-      (nodesSegmentIndex >= 0
-        ? pathSegments[nodesSegmentIndex + 1]
-        : undefined) ?? pathSegments[0];
+      (nodesSegmentIndex >= 0 ? pathSegments[nodesSegmentIndex + 1] : undefined) ?? pathSegments[0];
     const zIndex = Math.max(
       0,
-      options.nodes.findIndex(
-        (node) => node.nodeType === "group" && node.id === groupId,
-      ),
+      options.nodes.findIndex((node) => node.nodeType === "group" && node.id === groupId),
     );
     return [
       {
@@ -198,10 +172,7 @@ export function buildPresentationPageElements(options: {
   return [...directElements, ...groupTextElements];
 }
 
-function containsPoint(
-  bounds: PresentationElementBounds,
-  point: { x: number; y: number },
-) {
+function containsPoint(bounds: PresentationElementBounds, point: { x: number; y: number }) {
   return (
     point.x >= bounds.x &&
     point.y >= bounds.y &&
@@ -214,14 +185,11 @@ export function hitTestPresentationElement(
   elements: readonly PresentationPageElement[],
   point: { x: number; y: number },
 ): PresentationPageElement | null {
-  const matches = elements.filter((element) =>
-    containsPoint(element.bounds, point),
-  );
+  const matches = elements.filter((element) => containsPoint(element.bounds, point));
   return (
     matches.sort((left, right) => {
       const cellPriority =
-        Number(right.nodeType === "table-cell") -
-        Number(left.nodeType === "table-cell");
+        Number(right.nodeType === "table-cell") - Number(left.nodeType === "table-cell");
       return cellPriority || right.zIndex - left.zIndex;
     })[0] ?? null
   );

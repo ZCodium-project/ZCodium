@@ -160,9 +160,7 @@ export function createCustomCaCertificateVerifyProcFromFile(
   }
 
   try {
-    const trustedFingerprints = readCustomCaFingerprintsFromPem(
-      readFileSync(trimmed, "utf8"),
-    );
+    const trustedFingerprints = readCustomCaFingerprintsFromPem(readFileSync(trimmed, "utf8"));
     if (trustedFingerprints.size === 0) {
       logger.warn(`[desktop-network] custom CA file contains no certificates: ${trimmed}`);
       return null;
@@ -203,7 +201,8 @@ export function createCustomCaCertificateVerifyProc(
 
 export function readCustomCaFingerprintsFromPem(pem: string): Set<string> {
   const fingerprints = new Set<string>();
-  const certBlocks = pem.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g) ?? [];
+  const certBlocks =
+    pem.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g) ?? [];
 
   for (const block of certBlocks) {
     fingerprints.add(normalizeFingerprint(new X509Certificate(block).fingerprint256));
@@ -243,9 +242,7 @@ function normalizeProxyRules(value: string | undefined): string | undefined {
   const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
   try {
     const url = new URL(candidate);
-    const auth = url.username
-      ? `${url.username}${url.password ? `:${url.password}` : ""}@`
-      : "";
+    const auth = url.username ? `${url.username}${url.password ? `:${url.password}` : ""}@` : "";
     return `${url.protocol}//${auth}${url.host}`;
   } catch {
     return undefined;

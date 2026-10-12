@@ -163,10 +163,10 @@ zcodium --help      # or run directly: node bin/zcode.mjs --help
 
 Join the community for discussions and feedback:
 
-| Discord | QQ group |
-| --- | --- |
+| Discord                                                                              | QQ group                                                                        |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
 | <img src="docs/community/discord-qr.png" alt="Discord invite QR code" width="220" /> | <img src="docs/community/qq-group-qr.jpg" alt="QQ group QR code" width="220" /> |
-| https://discord.gg/HeDkhY9nV | Group ID: 344502652 |
+| https://discord.gg/HeDkhY9nV                                                         | Group ID: 344502652                                                             |
 
 ## Disclaimer
 
@@ -184,10 +184,10 @@ This repository is community-driven open source and is not affiliated with any e
 
 ZCode is an AI coding workspace with desktop, browser, and terminal interfaces. This repository contains the clients, backend services, shared UI, and Agent CLI and runtime source code.
 
-| Interface                    | Purpose                                                                                   | Development command            |
-| ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------ |
-| Desktop                      | Electron desktop application                                                              | `pnpm dev:desktop`             |
-| Web / ZCode CLI distribution | Terminal and browser workspace; packages the TUI, Web client, backend, and Agent together | `pnpm dev:web`                 |
+| Interface                    | Purpose                                                                                     | Development command            |
+| ---------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------ |
+| Desktop                      | Electron desktop application                                                                | `pnpm dev:desktop`             |
+| Web / ZCode CLI distribution | Terminal and browser workspace; packages the TUI, Web client, backend, and Agent together   | `pnpm dev:web`                 |
 | Agent CLI                    | The `zcodium` terminal interface, which also provides the Agent runtime for Desktop and Web | `pnpm --filter @zcode/cli dev` |
 
 ## Setup

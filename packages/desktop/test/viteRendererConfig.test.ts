@@ -32,31 +32,32 @@ describe("desktop renderer Vite dependency aliases", () => {
   // Windows 跳过：环境配置差异导致断言失败，需要 CI 环境统一配置
   const isWindows = process.platform === "win32";
 
-  (isWindows ? it.skip : it)("injects the selected ZCode endpoint origin into renderer env", async () => {
-    vi.stubEnv("ZCODE_ENV", "test");
-    vi.stubEnv("ZCODE_BASE_URL", "");
-    const desktopRoot = resolve(import.meta.dirname, "..");
-    const configFile = resolve(desktopRoot, "vite.config.ts");
-    const result = await loadConfigFromFile(
-      {
-        command: "build",
-        mode: "production",
-        isPreview: false,
-        isSsrBuild: false,
-      },
-      configFile,
-      desktopRoot,
-      "silent",
-    );
+  (isWindows ? it.skip : it)(
+    "injects the selected ZCode endpoint origin into renderer env",
+    async () => {
+      vi.stubEnv("ZCODE_ENV", "test");
+      vi.stubEnv("ZCODE_BASE_URL", "");
+      const desktopRoot = resolve(import.meta.dirname, "..");
+      const configFile = resolve(desktopRoot, "vite.config.ts");
+      const result = await loadConfigFromFile(
+        {
+          command: "build",
+          mode: "production",
+          isPreview: false,
+          isSsrBuild: false,
+        },
+        configFile,
+        desktopRoot,
+        "silent",
+      );
 
-    expect(result?.config.define).toMatchObject({
-      "import.meta.env.VITE_ZCODE_BASE_URL": JSON.stringify("https://zcode.z.ai"),
-      "import.meta.env.VITE_ZCODE_ENDPOINT_ORIGIN": JSON.stringify(
-        "https://zcode.z.ai",
-      ),
-      __ZCODE_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(false),
-    });
-  });
+      expect(result?.config.define).toMatchObject({
+        "import.meta.env.VITE_ZCODE_BASE_URL": JSON.stringify("https://zcode.z.ai"),
+        "import.meta.env.VITE_ZCODE_ENDPOINT_ORIGIN": JSON.stringify("https://zcode.z.ai"),
+        __ZCODE_LOCAL_DEVELOPMENT_RUNTIME__: JSON.stringify(false),
+      });
+    },
+  );
 
   it("marks non-production renderer builds as local development runtime", async () => {
     vi.stubEnv("ZCODE_ENV", "production");

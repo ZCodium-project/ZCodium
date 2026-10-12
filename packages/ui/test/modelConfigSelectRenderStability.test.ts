@@ -43,13 +43,11 @@ vi.mock("@/ControlHintTooltip.js", () => ({
 }));
 
 vi.mock("@/chat-input-toolbar/RollingToolbarLabel.js", () => ({
-  RollingToolbarLabel: ({ label }: { label: string }) =>
-    createElement("span", null, label),
+  RollingToolbarLabel: ({ label }: { label: string }) => createElement("span", null, label),
 }));
 
 vi.mock("@/components/ui/dropdown-menu.js", () => ({
-  DropdownMenu: ({ children }: { children?: ReactNode }) =>
-    createElement("div", null, children),
+  DropdownMenu: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   DropdownMenuContent: ({ children, ...props }: { children?: ReactNode }) => {
     dropdownContentCalls.push(props);
     return createElement("div", props, children);
@@ -65,18 +63,12 @@ vi.mock("@/components/ui/dropdown-menu.js", () => ({
     return createElement("div", props, children);
   },
   DropdownMenuSeparator: () => createElement("hr"),
-  DropdownMenuSub: ({ children }: { children?: ReactNode }) =>
-    createElement("div", null, children),
+  DropdownMenuSub: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   DropdownMenuSubContent: ({ children, ...props }: { children?: ReactNode }) => {
     subContentCalls.push(props);
     return createElement("div", props, children);
   },
-  DropdownMenuSubTrigger: ({
-    children,
-    ...props
-  }: {
-    children?: ReactNode;
-  }) => {
+  DropdownMenuSubTrigger: ({ children, ...props }: { children?: ReactNode }) => {
     subTriggerCalls.push(props);
     return createElement("div", props, children);
   },
@@ -85,14 +77,11 @@ vi.mock("@/components/ui/dropdown-menu.js", () => ({
 }));
 
 vi.mock("@/components/ui/tooltip.js", () => ({
-  Tooltip: ({ children }: { children?: ReactNode }) =>
-    createElement("span", null, children),
-  TooltipContent: ({ children }: { children?: ReactNode }) =>
-    createElement("span", null, children),
+  Tooltip: ({ children }: { children?: ReactNode }) => createElement("span", null, children),
+  TooltipContent: ({ children }: { children?: ReactNode }) => createElement("span", null, children),
   TooltipProvider: ({ children }: { children?: ReactNode }) =>
     createElement("span", null, children),
-  TooltipTrigger: ({ children }: { children?: ReactNode }) =>
-    createElement("span", null, children),
+  TooltipTrigger: ({ children }: { children?: ReactNode }) => createElement("span", null, children),
 }));
 
 function createMinimalElement(ownerDocument: Document, tagName = "div") {
@@ -185,8 +174,7 @@ describe("ModelConfigSelect render stability", () => {
     subTriggerCalls.length = 0;
     delete (globalThis as { document?: unknown }).document;
     delete (globalThis as { window?: unknown }).window;
-    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-      .IS_REACT_ACT_ENVIRONMENT;
+    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
   });
 
   it("defers model menu item rendering until the dropdown is open", async () => {

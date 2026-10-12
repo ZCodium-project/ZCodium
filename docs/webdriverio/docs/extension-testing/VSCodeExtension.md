@@ -29,25 +29,27 @@ To use the service you need to add `vscode` to your list of services, optionally
 ```js
 // wdio.conf.ts
 export const config = {
-    outputDir: 'trace',
-    // ...
-    capabilities: [{
-        browserName: 'vscode',
-        browserVersion: '1.71.0', // "insiders" or "stable" for latest VSCode version
-        'wdio:vscodeOptions': {
-            extensionPath: __dirname,
-            userSettings: {
-                "editor.fontSize": 14
-            }
-        }
-    }],
-    services: ['vscode'],
-    /**
-     * optionally you can define the path WebdriverIO stores all
-     * VSCode and Chromedriver binaries, e.g.:
-     * services: [['vscode', { cachePath: __dirname }]]
-     */
-    // ...
+  outputDir: "trace",
+  // ...
+  capabilities: [
+    {
+      browserName: "vscode",
+      browserVersion: "1.71.0", // "insiders" or "stable" for latest VSCode version
+      "wdio:vscodeOptions": {
+        extensionPath: __dirname,
+        userSettings: {
+          "editor.fontSize": 14,
+        },
+      },
+    },
+  ],
+  services: ["vscode"],
+  /**
+   * optionally you can define the path WebdriverIO stores all
+   * VSCode and Chromedriver binaries, e.g.:
+   * services: [['vscode', { cachePath: __dirname }]]
+   */
+  // ...
 };
 ```
 
@@ -56,16 +58,18 @@ If you define `wdio:vscodeOptions` with any other `browserName` but `vscode`, e.
 ```js
 // wdio.conf.ts
 export const config = {
-    outputDir: 'trace',
-    // ...
-    capabilities: [{
-        browserName: 'chrome',
-        'wdio:vscodeOptions': {
-            extensionPath: __dirname
-        }
-    }],
-    services: ['vscode'],
-    // ...
+  outputDir: "trace",
+  // ...
+  capabilities: [
+    {
+      browserName: "chrome",
+      "wdio:vscodeOptions": {
+        extensionPath: __dirname,
+      },
+    },
+  ],
+  services: ["vscode"],
+  // ...
 };
 ```
 
@@ -77,17 +81,17 @@ In your `tsconfig.json` make sure to add `wdio-vscode-service` to your list of t
 
 ```json
 {
-    "compilerOptions": {
-        "types": [
-            "node",
-            "webdriverio/async",
-            "@wdio/mocha-framework",
-            "expect-webdriverio",
-            "wdio-vscode-service"
-        ],
-        "target": "es2020",
-        "moduleResolution": "node16"
-    }
+  "compilerOptions": {
+    "types": [
+      "node",
+      "webdriverio/async",
+      "@wdio/mocha-framework",
+      "expect-webdriverio",
+      "wdio-vscode-service"
+    ],
+    "target": "es2020",
+    "moduleResolution": "node16"
+  }
 }
 ```
 
@@ -96,13 +100,14 @@ In your `tsconfig.json` make sure to add `wdio-vscode-service` to your list of t
 You can then use the `getWorkbench` method to access the page objects for the locators matching your desired VSCode version:
 
 ```ts
-describe('WDIO VSCode Service', () => {
-    it('should be able to load VSCode', async () => {
-        const workbench = await browser.getWorkbench()
-        expect(await workbench.getTitleBar().getTitle())
-            .toBe('[Extension Development Host] - README.md - wdio-vscode-service - Visual Studio Code')
-    })
-})
+describe("WDIO VSCode Service", () => {
+  it("should be able to load VSCode", async () => {
+    const workbench = await browser.getWorkbench();
+    expect(await workbench.getTitleBar().getTitle()).toBe(
+      "[Extension Development Host] - README.md - wdio-vscode-service - Visual Studio Code",
+    );
+  });
+});
 ```
 
 From there you can access all page objects by using the right page object methods. Find out more about all available page objects and their methods in the [page object docs](https://webdriverio-community.github.io/wdio-vscode-service/).
@@ -112,13 +117,17 @@ From there you can access all page objects by using the right page object method
 If you like to execute certain automation through the [VSCode API](https://code.visualstudio.com/api/references/vscode-api) you can do that by running remote commands via the custom `executeWorkbench` command. This command allows to remote execute code from your test inside the VSCode environment and enables to access the VSCode API. You can pass arbitrary paramaters into the function which will then be propagated into the function. The `vscode` object will be always passed in as first argument following the outer function parameters. Note that you can not access variables outside of the function scoped as the callback is executed remotely. Here is an example:
 
 ```ts
-const workbench = await browser.getWorkbench()
-await browser.executeWorkbench((vscode, param1, param2) => {
-    vscode.window.showInformationMessage(`I am an ${param1} ${param2}!`)
-}, 'API', 'call')
+const workbench = await browser.getWorkbench();
+await browser.executeWorkbench(
+  (vscode, param1, param2) => {
+    vscode.window.showInformationMessage(`I am an ${param1} ${param2}!`);
+  },
+  "API",
+  "call",
+);
 
-const notifs = await workbench.getNotifications()
-console.log(await notifs[0].getMessage()) // outputs: "I am an API call!"
+const notifs = await workbench.getNotifications();
+console.log(await notifs[0].getMessage()); // outputs: "I am an API call!"
 ```
 
 For the full page object documentation, check out the [docs](https://webdriverio-community.github.io/wdio-vscode-service/modules.html). You can find various usage examples in this [project's test suite](https://github.com/webdriverio-community/wdio-vscode-service/blob/main/test/specs).

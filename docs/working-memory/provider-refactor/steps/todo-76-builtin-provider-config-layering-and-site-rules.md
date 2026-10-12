@@ -88,17 +88,17 @@ Research 文档只记录证据。
 
 实现前逐项确认以下字段的基线、是否允许 Site 覆盖及默认策略：
 
-| 字段 | 先取的基线 | Site 是否可覆盖 | 未确认时 |
-| --- | --- | --- | --- |
-| `contextWindow` | Model | 可以 | 使用已知 Model 值 |
-| `maxOutputTokens.max` | Model | 可以 | 使用已知上限 |
-| `reasoningLevel.values` | Model | 可以 | 保守，不新增档位 |
-| `reasoningLevel.map` | Model + API Schema | 可以 | 无可靠映射则不可用 |
-| `maxOutputTokens.map` | API Schema | 可以 | 无可靠映射则不可用 |
-| `support_pdf` | Model | 可以 | 不声明支持 |
-| `supportsToolCall` | Model/API | 可以 | 不能关闭 ZCode 必需能力 |
-| `supportsJsonSchemaOutput` | Model/API | 可以 | 未确认不声明支持 |
-| 搜索/系统消息能力 | API 基线 | 可以 | 未确认不声明支持 |
+| 字段                       | 先取的基线         | Site 是否可覆盖 | 未确认时                |
+| -------------------------- | ------------------ | --------------- | ----------------------- |
+| `contextWindow`            | Model              | 可以            | 使用已知 Model 值       |
+| `maxOutputTokens.max`      | Model              | 可以            | 使用已知上限            |
+| `reasoningLevel.values`    | Model              | 可以            | 保守，不新增档位        |
+| `reasoningLevel.map`       | Model + API Schema | 可以            | 无可靠映射则不可用      |
+| `maxOutputTokens.map`      | API Schema         | 可以            | 无可靠映射则不可用      |
+| `support_pdf`              | Model              | 可以            | 不声明支持              |
+| `supportsToolCall`         | Model/API          | 可以            | 不能关闭 ZCode 必需能力 |
+| `supportsJsonSchemaOutput` | Model/API          | 可以            | 未确认不声明支持        |
+| 搜索/系统消息能力          | API 基线           | 可以            | 未确认不声明支持        |
 
 “可以覆盖”表示配置能力，不表示每个站点都必须写一份覆盖；没有覆盖时继续使用前层基线。
 

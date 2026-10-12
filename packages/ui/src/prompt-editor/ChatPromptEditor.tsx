@@ -342,9 +342,9 @@ export function ChatPromptEditor({
       disabled={disabled}
       submitDisabled={submitDisabled}
       allowSubmitWhenEmpty={allowSubmitWhenEmpty}
-          enterSubmits={enterSubmits}
-          onSubmit={handleEditorSubmit}
-          onModifiedSubmit={onModifiedSubmit}
+      enterSubmits={enterSubmits}
+      onSubmit={handleEditorSubmit}
+      onModifiedSubmit={onModifiedSubmit}
       onChange={handleTextChange}
       onFocus={onFocus}
       triggerPanelContainer={resolvedTriggerPanelContainer}

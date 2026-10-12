@@ -11,12 +11,7 @@ import type {
 } from "@zcode/shared";
 import type { IMcpSyncService } from "@zcode/services";
 import { Button } from "@/components/ui/button.js";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog.js";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { formatRemoteSkillSyncTarget } from "@/settings/RemoteSkillSyncDialog.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
@@ -58,9 +53,7 @@ export function buildRemoteMcpSyncRows(
 export function resolveDefaultRemoteMcpSyncSelection(
   rows: readonly RemoteMcpSyncRow[],
 ): Set<string> {
-  return new Set(
-    rows.filter((row) => !row.exists).map((row) => row.candidate.id),
-  );
+  return new Set(rows.filter((row) => !row.exists).map((row) => row.candidate.id));
 }
 
 export function filterRemoteMcpSyncRows(
@@ -171,10 +164,7 @@ export function RemoteMcpSyncTargetRow({
   return (
     <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <p className="min-w-0 break-words font-mono text-ui-base text-foreground-subtle">
-        {intl.formatMessage(
-          { id: "settings.mcp.remoteSync.target" },
-          { target: targetLabel },
-        )}
+        {intl.formatMessage({ id: "settings.mcp.remoteSync.target" }, { target: targetLabel })}
       </p>
       {showExistingFilter ? (
         <div className="shrink-0">
@@ -203,8 +193,7 @@ export function RemoteMcpSyncBulkSelectionCheckbox({
   const inputRef = useRef<HTMLInputElement>(null);
   const disabled = totalSelectable === 0;
   const checked = totalSelectable > 0 && selectedCount >= totalSelectable;
-  const indeterminate =
-    totalSelectable > 0 && selectedCount > 0 && selectedCount < totalSelectable;
+  const indeterminate = totalSelectable > 0 && selectedCount > 0 && selectedCount < totalSelectable;
 
   useEffect(() => {
     if (inputRef.current) {
@@ -283,9 +272,7 @@ export function RemoteMcpSyncSelectionList({
               className="mt-1 size-4"
               checked={selected}
               disabled={row.exists}
-              onChange={(event) =>
-                onToggle(row.candidate.id, event.currentTarget.checked)
-              }
+              onChange={(event) => onToggle(row.candidate.id, event.currentTarget.checked)}
             />
             <span
               className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-foreground-subtle"
@@ -321,11 +308,7 @@ export function RemoteMcpSyncSelectionList({
   );
 }
 
-function RemoteMcpSyncResultList({
-  result,
-}: {
-  result: McpSyncImportResult | null;
-}) {
+function RemoteMcpSyncResultList({ result }: { result: McpSyncImportResult | null }) {
   const { intl } = useZCodeIntl();
   const items = result?.results ?? [];
 
@@ -346,13 +329,9 @@ function RemoteMcpSyncResultList({
             className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-3"
           >
             <div className="min-w-0">
-              <div className="truncate text-ui-base font-medium text-foreground">
-                {item.name}
-              </div>
+              <div className="truncate text-ui-base font-medium text-foreground">{item.name}</div>
               {item.error ? (
-                <div className="mt-0.5 break-words text-ui-base text-destructive">
-                  {item.error}
-                </div>
+                <div className="mt-0.5 break-words text-ui-base text-destructive">{item.error}</div>
               ) : item.path ? (
                 <div className="mt-0.5 truncate font-mono text-ui-xs text-foreground-subtlest">
                   {item.path}
@@ -414,10 +393,7 @@ export function RemoteMcpSyncDialog(props: RemoteMcpSyncDialogProps) {
         if (cancelled) {
           return;
         }
-        const nextRows = buildRemoteMcpSyncRows(
-          localResult.candidates,
-          remoteResult.statuses,
-        );
+        const nextRows = buildRemoteMcpSyncRows(localResult.candidates, remoteResult.statuses);
         setLocalHomeDir(localResult.localHomeDir);
         setRows(nextRows);
         setSelectedIds(resolveDefaultRemoteMcpSyncSelection(nextRows));
@@ -565,11 +541,7 @@ export function RemoteMcpSyncDialog(props: RemoteMcpSyncDialogProps) {
             <RemoteMcpSyncSelectionList
               rows={visibleRows}
               selectedIds={selectedIds}
-              emptyMessageId={
-                rows.length > 0
-                  ? "settings.mcp.remoteSync.filteredEmpty"
-                  : undefined
-              }
+              emptyMessageId={rows.length > 0 ? "settings.mcp.remoteSync.filteredEmpty" : undefined}
               onToggle={toggleMcp}
             />
           ) : null}
@@ -579,9 +551,7 @@ export function RemoteMcpSyncDialog(props: RemoteMcpSyncDialogProps) {
               {intl.formatMessage({ id: "settings.mcp.remoteSync.syncing" })}
             </div>
           ) : null}
-          {step === "complete" ? (
-            <RemoteMcpSyncResultList result={importResult} />
-          ) : null}
+          {step === "complete" ? <RemoteMcpSyncResultList result={importResult} /> : null}
         </div>
 
         <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">

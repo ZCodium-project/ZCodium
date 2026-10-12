@@ -18,9 +18,7 @@ import {
   setInputValueByTestIdDom,
   waitForDefaultWorkspaceReady,
 } from "../../../helpers/desktop-app.js";
-import {
-  waitForUpstreamRequest,
-} from "../../../helpers/conversation-session-network.js";
+import { waitForUpstreamRequest } from "../../../helpers/conversation-session-network.js";
 import {
   assertToolCallNotFailedByToolCallId,
   waitForSuccessfulToolCallByToolCallId,
@@ -118,10 +116,7 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     await waitForUpstreamRequest(
       {
         includes: [PROMPT_MARKER, "E2E_BROWSER_FIXTURE_URL:", TOOL_NAME],
-        excludes: [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY",
-        ],
+        excludes: ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
       },
       "首轮请求没有暴露 Browser Use Node REPL 工具或 fixture marker",
       60000,
@@ -143,11 +138,7 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
           FIXTURE_TITLE,
           "Submit",
         ],
-        excludes: [
-          SUBMITTED_TEXT,
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY",
-        ],
+        excludes: [SUBMITTED_TEXT, "Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
       },
       "Browser bootstrap/goto/domSnapshot 没有真实进入 provider continuation",
       90000,
@@ -175,16 +166,8 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     );
     await waitForUpstreamRequest(
       {
-        includes: [
-          PROMPT_MARKER,
-          ACTION_TOOL_CALL_ID,
-          ACTIONABILITY_RESULT_MARKER,
-          SUBMITTED_TEXT,
-        ],
-        excludes: [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY",
-        ],
+        includes: [PROMPT_MARKER, ACTION_TOOL_CALL_ID, ACTIONABILITY_RESULT_MARKER, SUBMITTED_TEXT],
+        excludes: ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
       },
       "Browser locator fill/click/screenshot 结果没有进入 provider continuation",
       90000,
@@ -242,26 +225,14 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     await startNewV4Draft();
     const backgroundSurface = await readBrowserSurfaceSnapshot();
     expect(backgroundSurface.browserPaneVisible).toBe(false);
-    expect(
-      backgroundSurface.webviews.some(
-        (item) => item.id === originalWebContentsId,
-      ),
-    ).toBe(true);
-    const backgroundGuest = await waitForGuestSnapshot(
-      originalWebContentsId as number,
-    );
+    expect(backgroundSurface.webviews.some((item) => item.id === originalWebContentsId)).toBe(true);
+    const backgroundGuest = await waitForGuestSnapshot(originalWebContentsId as number);
     expect(backgroundGuest.status).toBe(SUBMITTED_TEXT);
 
     await selectV4TaskById(taskId, 30000);
     const restoredSurface = await waitForActiveBrowserSurface();
-    expect(
-      restoredSurface.webviews.some(
-        (item) => item.id === originalWebContentsId,
-      ),
-    ).toBe(true);
-    const restoredGuest = await waitForGuestSnapshot(
-      originalWebContentsId as number,
-    );
+    expect(restoredSurface.webviews.some((item) => item.id === originalWebContentsId)).toBe(true);
+    const restoredGuest = await waitForGuestSnapshot(originalWebContentsId as number);
     expect(restoredGuest.url).toBe(fixtureUrl);
     expect(restoredGuest.status).toBe(SUBMITTED_TEXT);
 
@@ -271,20 +242,15 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     expect(invalidDraft.heightInput).toBe("2161");
     expect(invalidDraft.heightAriaInvalid).toBe("true");
     expect(invalidDraft.appliedHeight).toBe(667);
-    const invalidGuest = await waitForGuestSnapshot(
-      originalWebContentsId as number,
-    );
+    const invalidGuest = await waitForGuestSnapshot(originalWebContentsId as number);
     expect(invalidGuest.height).toBe(667);
 
     await setInputValueByTestIdDom(TID_BROWSER_RESPONSIVE_HEIGHT_INPUT, "1200");
     await waitForResponsiveSize(380, 1200);
-    const resizedGuest = await waitForGuestSnapshot(
-      originalWebContentsId as number,
-      {
-        height: 1200,
-        width: 380,
-      },
-    );
+    const resizedGuest = await waitForGuestSnapshot(originalWebContentsId as number, {
+      height: 1200,
+      width: 380,
+    });
     expect(resizedGuest.devicePixelRatio).toBe(1);
 
     await clickTestIdByWebDriver(TID_BROWSER_RESPONSIVE_ZOOM_SELECT);
@@ -299,22 +265,16 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     for (const zoomLevel of [2, -2]) {
       await setDesktopZoomLevel(zoomLevel);
       const zoomSurface = await waitForDesktopZoomSurface(zoomLevel);
-      const zoomGuest = await waitForGuestSnapshot(
-        originalWebContentsId as number,
-        {
-          height: 1200,
-          width: 380,
-        },
-      );
+      const zoomGuest = await waitForGuestSnapshot(originalWebContentsId as number, {
+        height: 1200,
+        width: 380,
+      });
       expect(zoomGuest.devicePixelRatio).toBe(1);
       expect(zoomGuest.zoomFactor).toBeCloseTo(1, 4);
       expect(zoomSurface.responsiveWidth).toBe(380);
       expect(zoomSurface.responsiveHeight).toBe(1200);
       expect(zoomSurface.zoomValue?.replace("%", "")).toBe("50");
-      expect(zoomSurface.webviews[0]?.compositorScale).toBeCloseTo(
-        Math.pow(1.1, zoomLevel),
-        4,
-      );
+      expect(zoomSurface.webviews[0]?.compositorScale).toBeCloseTo(Math.pow(1.1, zoomLevel), 4);
       expect(zoomSurface.webviews[0]?.layoutScale).toBeCloseTo(
         zoomLevel < 0 ? 1 / Math.pow(1.1, zoomLevel) : 1,
         4,
@@ -327,10 +287,7 @@ describe("Browser Use Desktop IAB 全链 E2E", () => {
     await waitForRendererAfterReloadSession();
     await waitForDefaultWorkspaceReady(60000);
     await selectV4TaskById(taskId, 60000);
-    const imagesAfterColdRestore = await waitForConversationImageFacts(
-      3,
-      60000,
-    );
+    const imagesAfterColdRestore = await waitForConversationImageFacts(3, 60000);
     expect(imagesAfterColdRestore).toEqual(imagesBeforeSwitch);
   });
 });
@@ -440,20 +397,14 @@ async function readBrowserSurfaceSnapshot(): Promise<BrowserSurfaceSnapshot> {
           rect.height > 0
         );
       };
-      const viewport = document.querySelector<HTMLElement>(
-        `[data-testid="${viewportTestId}"]`,
-      );
+      const viewport = document.querySelector<HTMLElement>(`[data-testid="${viewportTestId}"]`);
       const scaledFrame = document.querySelector<HTMLElement>(
         `[data-testid="${scaledFrameTestId}"]`,
       );
-      const zoom = document.querySelector<HTMLElement>(
-        `[data-testid="${zoomTestId}"]`,
-      );
+      const zoom = document.querySelector<HTMLElement>(`[data-testid="${zoomTestId}"]`);
       const scaledFrameRect = scaledFrame?.getBoundingClientRect() ?? null;
       const webviews = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid="${webviewTestId}"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid="${webviewTestId}"]`),
       ).map((element) => {
         const webview = element as HTMLElement & {
           getWebContentsId?: () => number;
@@ -479,21 +430,15 @@ async function readBrowserSurfaceSnapshot(): Promise<BrowserSurfaceSnapshot> {
         // “webview 可见但 pane 不可见”的假失败。responsive viewport 是当前
         // Browser surface 的真实可见容器，也能区分任务切换后的 collapsed 状态。
         browserPaneVisible: isVisible(viewport),
-        responsiveHeight:
-          Number(viewport?.dataset.responsiveHeight ?? "") || null,
-        responsiveScale:
-          Number(viewport?.dataset.responsiveScale ?? "") || null,
-        responsiveWidth:
-          Number(viewport?.dataset.responsiveWidth ?? "") || null,
+        responsiveHeight: Number(viewport?.dataset.responsiveHeight ?? "") || null,
+        responsiveScale: Number(viewport?.dataset.responsiveScale ?? "") || null,
+        responsiveWidth: Number(viewport?.dataset.responsiveWidth ?? "") || null,
         scaledFrame: scaledFrameRect
           ? { height: scaledFrameRect.height, width: scaledFrameRect.width }
           : null,
-        warningCount: document.querySelectorAll(
-          '[data-browser-resize-warning="visible"]',
-        ).length,
+        warningCount: document.querySelectorAll('[data-browser-resize-warning="visible"]').length,
         webviews,
-        zoomValue:
-          zoom?.getAttribute("data-value") ?? zoom?.textContent?.trim() ?? null,
+        zoomValue: zoom?.getAttribute("data-value") ?? zoom?.textContent?.trim() ?? null,
       };
     },
     TID_BROWSER_RESPONSIVE_VIEWPORT,
@@ -593,25 +538,17 @@ async function waitForGuestFocusedInput(
     latest = await browser.electron.execute((electron, targetId) => {
       const guest = electron.webContents.fromId(targetId);
       if (!guest || guest.isDestroyed()) return "";
-      return guest.executeJavaScript(
-        "document.activeElement?.id ?? ''",
-      ) as Promise<string>;
+      return guest.executeJavaScript("document.activeElement?.id ?? ''") as Promise<string>;
     }, webContentsId);
     if (latest === expectedId) return latest;
-    await new Promise<void>((resolveDelay) =>
-      setTimeout(resolveDelay, 100),
-    );
+    await new Promise<void>((resolveDelay) => setTimeout(resolveDelay, 100));
   }
-  throw new Error(
-    `guest 输入焦点没有收敛到 ${expectedId}: ${latest}`,
-  );
+  throw new Error(`guest 输入焦点没有收敛到 ${expectedId}: ${latest}`);
 }
 
 function readV4ComposerSnapshot() {
   return browser.execute((inputTestId) => {
-    const element = document.querySelector<HTMLElement>(
-      `[data-testid="${inputTestId}"]`,
-    );
+    const element = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
     const bridge = (
       element as
         | (HTMLElement & {
@@ -624,9 +561,7 @@ function readV4ComposerSnapshot() {
     )?.__zcodeLexicalInputE2E;
     return {
       focused: Boolean(
-        element &&
-        document.activeElement &&
-        element.contains(document.activeElement),
+        element && document.activeElement && element.contains(document.activeElement),
       ),
       text: bridge?.getText() ?? null,
     };
@@ -638,9 +573,7 @@ async function focusEmptyV4Composer(timeout = 10000) {
   await browser.waitUntil(
     async () => {
       latest = await browser.execute((inputTestId) => {
-        const element = document.querySelector<HTMLElement>(
-          `[data-testid="${inputTestId}"]`,
-        );
+        const element = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
         const bridge = (
           element as
             | (HTMLElement & {
@@ -654,9 +587,7 @@ async function focusEmptyV4Composer(timeout = 10000) {
         bridge?.focus();
         return {
           focused: Boolean(
-            element &&
-            document.activeElement &&
-            element.contains(document.activeElement),
+            element && document.activeElement && element.contains(document.activeElement),
           ),
           text: bridge?.getText() ?? null,
         };
@@ -681,10 +612,7 @@ interface ConversationImageFact {
   width: number;
 }
 
-async function waitForConversationImageFacts(
-  expectedCount: number,
-  timeout = 30000,
-) {
+async function waitForConversationImageFacts(expectedCount: number, timeout = 30000) {
   let latest: ConversationImageFact[] = [];
   let diagnostic = "not-read";
   try {
@@ -705,22 +633,17 @@ async function waitForConversationImageFacts(
                 return (result >>> 0).toString(16).padStart(8, "0");
               };
               const workGroupTrigger = Array.from(
-                timeline?.querySelectorAll<HTMLButtonElement>(
-                  'button[aria-expanded="false"]',
-                ) ?? [],
+                timeline?.querySelectorAll<HTMLButtonElement>('button[aria-expanded="false"]') ??
+                  [],
               ).find((button) => {
                 const text = button.innerText.replace(/\u00a0/g, " ").trim();
-                return (
-                  text.startsWith("Worked for") || text.startsWith("已工作")
-                );
+                return text.startsWith("Worked for") || text.startsWith("已工作");
               });
               workGroupTrigger?.click();
               const actionRow = Array.from(
                 timeline?.querySelectorAll<HTMLElement>("[data-row-id]") ?? [],
               ).find((row) =>
-                (row.innerText.replace(/\u00a0/g, " ").trim() ?? "").includes(
-                  actionTitle,
-                ),
+                (row.innerText.replace(/\u00a0/g, " ").trim() ?? "").includes(actionTitle),
               );
               const collapsedTrigger = Array.from(
                 actionRow?.querySelectorAll<HTMLElement>(
@@ -734,10 +657,8 @@ async function waitForConversationImageFacts(
                 ) ?? [],
               ).map((image) => {
                 const row = image.closest<HTMLElement>("[data-row-id]");
-                const rowText =
-                  row?.innerText.replace(/\u00a0/g, " ").trim() ?? "";
-                const mimeType =
-                  /^data:([^;,]+);base64,/iu.exec(image.src)?.[1] ?? "";
+                const rowText = row?.innerText.replace(/\u00a0/g, " ").trim() ?? "";
+                const mimeType = /^data:([^;,]+);base64,/iu.exec(image.src)?.[1] ?? "";
                 return {
                   bytes: image.src.length,
                   hash: hash(image.src),
@@ -757,8 +678,7 @@ async function waitForConversationImageFacts(
                   imageSources: Array.from(document.images)
                     .map((image) => image.src.slice(0, 80))
                     .slice(-8),
-                  rowCount:
-                    timeline?.querySelectorAll("[data-row-id]").length ?? 0,
+                  rowCount: timeline?.querySelectorAll("[data-row-id]").length ?? 0,
                   timelineFound: Boolean(timeline),
                   timelineTail: timeline?.innerText.slice(-800) ?? "",
                   workGroupTriggerFound: Boolean(workGroupTrigger),
@@ -785,8 +705,7 @@ async function waitForConversationImageFacts(
               image.width > 0 &&
               image.height > 0,
           ) &&
-          latest.filter((image) => image.kind === "explicit").length ===
-            expectedCount - 1 &&
+          latest.filter((image) => image.kind === "explicit").length === expectedCount - 1 &&
           latest.filter((image) => image.kind === "turn-end").length === 1
         );
       },
@@ -807,27 +726,19 @@ async function waitForConversationImageFacts(
 async function assertBrowserUseImageGalleryPreview() {
   const opened = await browser.execute(
     (timelineTestId, actionTitle) => {
-      const timeline = document.querySelector<HTMLElement>(
-        `[data-testid="${timelineTestId}"]`,
-      );
+      const timeline = document.querySelector<HTMLElement>(`[data-testid="${timelineTestId}"]`);
       const actionRow = Array.from(
         timeline?.querySelectorAll<HTMLElement>("[data-row-id]") ?? [],
       ).find((row) => row.innerText.includes(actionTitle));
-      const gallery = actionRow?.querySelector<HTMLElement>(
-        "[data-node-repl-image-gallery]",
-      );
+      const gallery = actionRow?.querySelector<HTMLElement>("[data-node-repl-image-gallery]");
       const buttons = Array.from(
-        gallery?.querySelectorAll<HTMLButtonElement>(
-          "[data-image-thumbnail-trigger]",
-        ) ?? [],
+        gallery?.querySelectorAll<HTMLButtonElement>("[data-image-thumbnail-trigger]") ?? [],
       );
       const button = buttons[1];
       button?.click();
       return {
         count: buttons.length,
-        horizontalOverflow: Boolean(
-          gallery && gallery.scrollWidth > gallery.clientWidth + 1,
-        ),
+        horizontalOverflow: Boolean(gallery && gallery.scrollWidth > gallery.clientWidth + 1),
         opened: Boolean(button),
       };
     },
@@ -842,18 +753,14 @@ async function assertBrowserUseImageGalleryPreview() {
   await browser.waitUntil(
     async () =>
       browser.execute(() =>
-        Boolean(
-          document.querySelector('[data-testid="node-repl-image-lightbox"]'),
-        ),
+        Boolean(document.querySelector('[data-testid="node-repl-image-lightbox"]')),
       ),
     { timeout: 10000, timeoutMsg: "Node REPL 图片大图预览没有打开" },
   );
   const initialAlt = await browser.execute(
     () =>
       document
-        .querySelector<HTMLImageElement>(
-          '[data-testid="node-repl-image-lightbox-image"]',
-        )
+        .querySelector<HTMLImageElement>('[data-testid="node-repl-image-lightbox-image"]')
         ?.getAttribute("alt") ?? "",
   );
   expect(initialAlt).toMatch(/2$/u);
@@ -861,19 +768,14 @@ async function assertBrowserUseImageGalleryPreview() {
   const nextAlt = await browser.execute(
     () =>
       document
-        .querySelector<HTMLImageElement>(
-          '[data-testid="node-repl-image-lightbox-image"]',
-        )
+        .querySelector<HTMLImageElement>('[data-testid="node-repl-image-lightbox-image"]')
         ?.getAttribute("alt") ?? "",
   );
   expect(nextAlt).toMatch(/1$/u);
   await browser.keys("Escape");
   await browser.waitUntil(
     async () =>
-      browser.execute(
-        () =>
-          !document.querySelector('[data-testid="node-repl-image-lightbox"]'),
-      ),
+      browser.execute(() => !document.querySelector('[data-testid="node-repl-image-lightbox"]')),
     { timeout: 10000, timeoutMsg: "Node REPL 图片大图预览没有被 Escape 关闭" },
   );
 }
@@ -896,12 +798,8 @@ async function waitForResizeWarning() {
 function readResponsiveDraftSnapshot() {
   return browser.execute(
     (heightTestId, viewportTestId) => {
-      const input = document.querySelector<HTMLInputElement>(
-        `[data-testid="${heightTestId}"]`,
-      );
-      const viewport = document.querySelector<HTMLElement>(
-        `[data-testid="${viewportTestId}"]`,
-      );
+      const input = document.querySelector<HTMLInputElement>(`[data-testid="${heightTestId}"]`);
+      const viewport = document.querySelector<HTMLElement>(`[data-testid="${viewportTestId}"]`);
       return {
         appliedHeight: Number(viewport?.dataset.responsiveHeight ?? "") || null,
         heightAriaInvalid: input?.getAttribute("aria-invalid") ?? null,
@@ -918,9 +816,7 @@ async function waitForResponsiveSize(width: number, height: number) {
   await browser.waitUntil(
     async () => {
       latest = await readBrowserSurfaceSnapshot();
-      return (
-        latest.responsiveWidth === width && latest.responsiveHeight === height
-      );
+      return latest.responsiveWidth === width && latest.responsiveHeight === height;
     },
     {
       timeout: 30000,
@@ -935,9 +831,7 @@ async function waitForZoomValue(expected: string) {
   await browser.waitUntil(
     async () => {
       latest = await readBrowserSurfaceSnapshot();
-      return (
-        latest.zoomValue === expected || latest.zoomValue === `${expected}%`
-      );
+      return latest.zoomValue === expected || latest.zoomValue === `${expected}%`;
     },
     {
       timeout: 10000,
@@ -961,14 +855,11 @@ async function setDesktopZoomLevel(zoomLevel: number) {
       if (candidates.length !== 1) {
         return {
           applied: false,
-          candidateUrls: candidates.map((candidate) =>
-            candidate.webContents.getURL(),
-          ),
+          candidateUrls: candidates.map((candidate) => candidate.webContents.getURL()),
         };
       }
       const target = candidates[0];
-      if (!target || target.isDestroyed())
-        return { applied: false, candidateUrls: [] };
+      if (!target || target.isDestroyed()) return { applied: false, candidateUrls: [] };
       target.webContents.setZoomFactor(Math.pow(1.1, nextZoomLevel));
       target.webContents.send(channel, { zoomLevel: nextZoomLevel });
       target.focus();
@@ -992,8 +883,7 @@ async function waitForDesktopZoomSurface(zoomLevel: number) {
       latest = await readBrowserSurfaceSnapshot();
       return latest.webviews.some(
         (webview) =>
-          webview.compositorScale !== null &&
-          Math.abs(webview.compositorScale - expected) < 0.0001,
+          webview.compositorScale !== null && Math.abs(webview.compositorScale - expected) < 0.0001,
       );
     },
     {
@@ -1013,17 +903,14 @@ async function waitForRendererAfterReloadSession() {
           .targets()
           .filter((target) => {
             try {
-              return new URL(target.url()).pathname.endsWith(
-                "/renderer/index.html",
-              );
+              return new URL(target.url()).pathname.endsWith("/renderer/index.html");
             } catch {
               return false;
             }
           })
           .at(-1);
         const targetId = rendererTarget
-          ? ((rendererTarget as unknown as { _targetId?: string })._targetId ??
-            null)
+          ? ((rendererTarget as unknown as { _targetId?: string })._targetId ?? null)
           : null;
         if (!targetId) return false;
         await browser.switchToWindow(targetId);
@@ -1083,12 +970,7 @@ async function waitForPermissionAndApproveOnce(expectedTitle: string) {
           allowOnceCount,
           count: listboxes.length,
           text: listboxes
-            .map(
-              (element) =>
-                element.parentElement?.innerText
-                  .replace(/\u00a0/g, " ")
-                  .trim() ?? "",
-            )
+            .map((element) => element.parentElement?.innerText.replace(/\u00a0/g, " ").trim() ?? "")
             .join("\n"),
         };
       });

@@ -230,10 +230,9 @@ describe("content horizontal scrolling", () => {
   });
 
   it("renders large Git change card diffs from patch input", () => {
-    const beforeContent = Array.from(
-      { length: 1_300 },
-      (_, index) => `line-${index + 1}`,
-    ).join("\n");
+    const beforeContent = Array.from({ length: 1_300 }, (_, index) => `line-${index + 1}`).join(
+      "\n",
+    );
     const afterContent = beforeContent.replace("line-10", "line-10 changed");
 
     const html = renderToStaticMarkup(
@@ -261,20 +260,12 @@ describe("content horizontal scrolling", () => {
   });
 
   it("renders expensive Git patch fallbacks as lightweight text", () => {
-    const afterLines = Array.from(
-      { length: 1_300 },
-      (_, index) => `+  "line-${index + 1}": true,`,
-    );
+    const afterLines = Array.from({ length: 1_300 }, (_, index) => `+  "line-${index + 1}": true,`);
 
     const html = renderToStaticMarkup(
       createGitChangeCardElement({
         availability: "patch",
-        patch: [
-          "--- /dev/null",
-          "+++ b/demo.json",
-          "@@ -0,0 +1,1300 @@",
-          ...afterLines,
-        ].join("\n"),
+        patch: ["--- /dev/null", "+++ b/demo.json", "@@ -0,0 +1,1300 @@", ...afterLines].join("\n"),
         beforeContent: "",
         afterContent: afterLines.map((line) => line.slice(1)).join("\n"),
         path: "/workspace/demo.json",
@@ -303,9 +294,7 @@ describe("content horizontal scrolling", () => {
     );
 
     expect(html).toContain("data-lightweight-diff-scroll-content");
-    expect(html).toContain(
-      "min-w-full font-mono leading-relaxed text-foreground w-max",
-    );
+    expect(html).toContain("min-w-full font-mono leading-relaxed text-foreground w-max");
     expect(html).toContain("flex min-w-full w-full");
     expect(html).not.toContain("flex min-w-full w-max");
   });

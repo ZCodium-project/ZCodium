@@ -3,10 +3,8 @@ import { dirname, join } from "node:path";
 import { DEFAULT_WORKSPACE } from "./desktop-app.js";
 
 export const PERMISSION_HOOK_RACE_MARKER = "E2E_PERMISSION_HOOK_RACE";
-export const PERMISSION_HOOK_RACE_FINAL_MARKER =
-  "E2E_PERMISSION_HOOK_RACE_DONE";
-export const PERMISSION_HOOK_RACE_RESULT_CONTENT =
-  "E2E_PERMISSION_HOOK_RACE_RESULT\n";
+export const PERMISSION_HOOK_RACE_FINAL_MARKER = "E2E_PERMISSION_HOOK_RACE_DONE";
+export const PERMISSION_HOOK_RACE_RESULT_CONTENT = "E2E_PERMISSION_HOOK_RACE_RESULT\n";
 
 // Bug 根因：阻塞时长必须显著大于 spec 的终态等待窗口（60s），否则旧时序
 // （hook 决出/超时后才注册 broker 应答通道）会以“慢通过”而不是失败暴露回归。
@@ -16,16 +14,12 @@ const BLOCKING_HOOK_TIMEOUT_MS = 130000;
 const WORKSPACE_ZCODE_DIR = join(DEFAULT_WORKSPACE, ".zcode");
 const USER_CONFIG_DIR = join(dirname(DEFAULT_WORKSPACE), ".zcode", "cli");
 const CONFIG_PATH = join(USER_CONFIG_DIR, "config.json");
-const BLOCKER_PATH = join(
-  WORKSPACE_ZCODE_DIR,
-  "permission-hook-race-blocker.mjs",
-);
+const BLOCKER_PATH = join(WORKSPACE_ZCODE_DIR, "permission-hook-race-blocker.mjs");
 const TRACE_PATH = join(WORKSPACE_ZCODE_DIR, "permission-hook-race-trace.jsonl");
 
 let originalConfig: string | null = null;
 
-export interface PermissionHookRaceTraceRecord
-  extends Record<string, unknown> {
+export interface PermissionHookRaceTraceRecord extends Record<string, unknown> {
   phase?: string;
   hook_event_name?: string;
   tool_name?: string;
@@ -35,15 +29,11 @@ export async function installPermissionHookRaceFixture(): Promise<void> {
   await mkdir(WORKSPACE_ZCODE_DIR, { recursive: true });
   await mkdir(USER_CONFIG_DIR, { recursive: true });
   await rm(TRACE_PATH, { force: true });
-  originalConfig = await readFile(CONFIG_PATH, "utf8").catch(
-    (error: unknown) => {
-      if (isMissingFileError(error)) return null;
-      throw error;
-    },
-  );
-  const existing = originalConfig
-    ? (JSON.parse(originalConfig) as Record<string, unknown>)
-    : {};
+  originalConfig = await readFile(CONFIG_PATH, "utf8").catch((error: unknown) => {
+    if (isMissingFileError(error)) return null;
+    throw error;
+  });
+  const existing = originalConfig ? (JSON.parse(originalConfig) as Record<string, unknown>) : {};
   await writeFile(BLOCKER_PATH, BLOCKER_SOURCE, "utf8");
 
   await writeFile(
@@ -91,9 +81,7 @@ export async function restorePermissionHookRaceFixture(): Promise<void> {
   await rm(TRACE_PATH, { force: true });
 }
 
-export async function readPermissionHookRaceTrace(): Promise<
-  PermissionHookRaceTraceRecord[]
-> {
+export async function readPermissionHookRaceTrace(): Promise<PermissionHookRaceTraceRecord[]> {
   try {
     return (await readFile(TRACE_PATH, "utf8"))
       .split("\n")
@@ -105,9 +93,7 @@ export async function readPermissionHookRaceTrace(): Promise<
   }
 }
 
-export async function waitForBlockingHookStarted(
-  timeout = 30000,
-): Promise<void> {
+export async function waitForBlockingHookStarted(timeout = 30000): Promise<void> {
   await browser.waitUntil(
     async () => {
       const records = await readPermissionHookRaceTrace();
@@ -127,12 +113,7 @@ export async function waitForBlockingHookStarted(
 }
 
 function isMissingFileError(error: unknown): boolean {
-  return Boolean(
-    error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT",
-  );
+  return Boolean(error && typeof error === "object" && "code" in error && error.code === "ENOENT");
 }
 
 // 事故场景复刻：hook 收到 PermissionRequest 输入后立即记录 started，然后

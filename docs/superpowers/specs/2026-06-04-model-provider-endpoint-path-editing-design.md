@@ -117,4 +117,3 @@ Verification after implementation:
 - Targeted Vitest tests for provider draft save and model provider UI rendering.
 - `pnpm typecheck`
 - `pnpm lint`
-

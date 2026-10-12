@@ -11,12 +11,12 @@ Windows 开发机上 `pnpm test` 曾大面积失败（56 文件 / 161 用例）�
 
 rebase 到最新 staging 后全量单测 **9 失败 / 12444 通过**，无崩溃。剩余构成：
 
-| 类别 | 数量 | 说明 |
-| --- | --- | --- |
-| Windows 进程树回收残余 | 3 | `zcodeAgentProcessManager`；lifecycle fixtures 工作已把该项从 8 修到 3 |
-| staging 存量漂移（任何平台都挂） | 3 | settings MCP/skill/subagent scope badge 的 `formatCanonicalPluginName` 断言；`a9263f3d03` 从列表组件移除该调用但未同步测试，需业务定性 |
-| 跨平台漂移 | 2 | `feedbackHttpClient`、`stdioDesktopPresentationSurface`（见下） |
-| flaky（负载超时） | 1 | `appUsagePanel`，单独运行通过 |
+| 类别                             | 数量 | 说明                                                                                                                                   |
+| -------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows 进程树回收残余           | 3    | `zcodeAgentProcessManager`；lifecycle fixtures 工作已把该项从 8 修到 3                                                                 |
+| staging 存量漂移（任何平台都挂） | 3    | settings MCP/skill/subagent scope badge 的 `formatCanonicalPluginName` 断言；`a9263f3d03` 从列表组件移除该调用但未同步测试，需业务定性 |
+| 跨平台漂移                       | 2    | `feedbackHttpClient`、`stdioDesktopPresentationSurface`（见下）                                                                        |
+| flaky（负载超时）                | 1    | `appUsagePanel`，单独运行通过                                                                                                          |
 
 rebase 附带处理：staging 的 CUA 单包合并（broker 51 文件并入 `@zcode/zcode-cua`）
 移除了 `launchSocketPath` / `reservedTransport`（rendezvous `.pending` 让渡机制），
@@ -25,15 +25,15 @@ rebase 附带处理：staging 的 CUA 单包合并（broker 51 文件并入 `@zc
 
 ## 环境事实（先读这一节）
 
-| 事实 | 影响 |
-| --- | --- |
-| 仓库 `core.autocrlf=true`，工作区文本为 CRLF | 所有"读源码断言片段"的测试必须换行归一化 |
-| Git Bash 把 `/usr/bin`（GNU tar 1.35）注入 PATH 最前 | GNU tar 把归档参数里的 `C:` 当远程主机；`zip`/`ditto` 等 macOS/Linux 命令缺失 |
-| Windows 真实用户 PATH 中 System32 靠前（bsdtar） | 产品在用户机上用的是 bsdtar；测试环境需在 vitest.setup.ts 恢复同序 |
-| NTFS 不保留 POSIX exec 位（0o111 恒 0） | exec 位断言仅在 POSIX 宿主生效 |
-| Windows 无法删除任何进程 cwd 所在目录；持打开句柄期间 rename 同一目标 EPERM | 子进程生命周期类测试的 teardown 顺序有硬约束 |
-| `node:fs` globSync 在 Windows 返回反斜杠路径 | glob 结果必须归一化后再做前缀过滤 |
-| 产品 control endpoint 在 Windows 使用 `\\\\.\\pipe\\...` named pipe | IPC 测试必须按平台构造 endpoint，禁止因 POSIX socket fixture 在 Windows 报 EACCES 而跳过产品链路 |
+| 事实                                                                        | 影响                                                                                             |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 仓库 `core.autocrlf=true`，工作区文本为 CRLF                                | 所有"读源码断言片段"的测试必须换行归一化                                                         |
+| Git Bash 把 `/usr/bin`（GNU tar 1.35）注入 PATH 最前                        | GNU tar 把归档参数里的 `C:` 当远程主机；`zip`/`ditto` 等 macOS/Linux 命令缺失                    |
+| Windows 真实用户 PATH 中 System32 靠前（bsdtar）                            | 产品在用户机上用的是 bsdtar；测试环境需在 vitest.setup.ts 恢复同序                               |
+| NTFS 不保留 POSIX exec 位（0o111 恒 0）                                     | exec 位断言仅在 POSIX 宿主生效                                                                   |
+| Windows 无法删除任何进程 cwd 所在目录；持打开句柄期间 rename 同一目标 EPERM | 子进程生命周期类测试的 teardown 顺序有硬约束                                                     |
+| `node:fs` globSync 在 Windows 返回反斜杠路径                                | glob 结果必须归一化后再做前缀过滤                                                                |
+| 产品 control endpoint 在 Windows 使用 `\\\\.\\pipe\\...` named pipe         | IPC 测试必须按平台构造 endpoint，禁止因 POSIX socket fixture 在 Windows 报 EACCES 而跳过产品链路 |
 
 ## 已修复的 8 类根因与规则
 

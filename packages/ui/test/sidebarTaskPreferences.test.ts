@@ -43,10 +43,7 @@ describe("sidebarTaskPreferences", () => {
   it("持久化并恢复 timeline 和排序设置", () => {
     const storage = createStorageMock();
 
-    persistSidebarTaskPreferences(
-      { organizeBy: "chronological", sortBy: "created" },
-      storage,
-    );
+    persistSidebarTaskPreferences({ organizeBy: "chronological", sortBy: "created" }, storage);
 
     expect(readSidebarTaskPreferences(storage)).toEqual({
       organizeBy: "chronological",

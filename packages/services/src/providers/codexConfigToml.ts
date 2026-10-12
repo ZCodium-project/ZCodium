@@ -141,11 +141,7 @@ function rewriteHttpHeadersAsInlineTable(options: {
 
   providerTableEnd = getTomlTableEndIndex(nextLines, providerHeaderIndex);
   if (providerTableEnd < nextLines.length && nextLines[providerTableEnd - 1] !== "") {
-    nextLines = [
-      ...nextLines.slice(0, providerTableEnd),
-      "",
-      ...nextLines.slice(providerTableEnd),
-    ];
+    nextLines = [...nextLines.slice(0, providerTableEnd), "", ...nextLines.slice(providerTableEnd)];
   }
 
   return nextLines.join("\n");
@@ -182,9 +178,7 @@ function stripNestedQueryParamHttpHeaders(providerConfig: Record<string, unknown
 }
 
 export function stringifyCodexConfigToml(config: Record<string, unknown>): string {
-  const modelProviders = isObjectRecord(config.model_providers)
-    ? config.model_providers
-    : null;
+  const modelProviders = isObjectRecord(config.model_providers) ? config.model_providers : null;
 
   if (!modelProviders) {
     return stringifyToml(config);

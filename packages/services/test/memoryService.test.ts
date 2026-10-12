@@ -1,13 +1,4 @@
-import {
-  mkdir,
-  mkdtemp,
-  rm,
-  symlink,
-  truncate,
-  unlink,
-  utimes,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, truncate, unlink, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,16 +24,12 @@ import { PROJECT_MEMORY_FILE_CHANGED_ERROR_CODE } from "../src/memory/memory.js"
 import { getZCodeDataRootDir, setDataBaseDir } from "../src/paths.js";
 
 let tempDir: string;
-const actualFs =
-  await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+const actualFs = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
 
 function createNotFoundError(path: string): NodeJS.ErrnoException {
-  return Object.assign(
-    new Error(`ENOENT: no such file or directory, lstat '${path}'`),
-    {
-      code: "ENOENT",
-    },
-  );
+  return Object.assign(new Error(`ENOENT: no such file or directory, lstat '${path}'`), {
+    code: "ENOENT",
+  });
 }
 
 function projectsRoot(): string {
@@ -94,36 +81,11 @@ describe("memoryService Project Memory catalog", () => {
   it("只列出非空 workspace，并稳定排序 index 与事实文件", async () => {
     const older = new Date("2026-01-01T00:00:00.000Z");
     const newer = new Date("2026-02-01T00:00:00.000Z");
-    await writeMemoryFile(
-      "older-project-1111111111111111",
-      "MEMORY.md",
-      "older index",
-      older,
-    );
-    await writeMemoryFile(
-      "newer-project-2222222222222222",
-      "z-last.md",
-      "last",
-      newer,
-    );
-    await writeMemoryFile(
-      "newer-project-2222222222222222",
-      "a-first.md",
-      "first",
-      newer,
-    );
-    await writeMemoryFile(
-      "newer-project-2222222222222222",
-      "MEMORY.md",
-      "newer index",
-      newer,
-    );
-    await writeMemoryFile(
-      "newer-project-2222222222222222",
-      "ignored.MD",
-      "ignored",
-      newer,
-    );
+    await writeMemoryFile("older-project-1111111111111111", "MEMORY.md", "older index", older);
+    await writeMemoryFile("newer-project-2222222222222222", "z-last.md", "last", newer);
+    await writeMemoryFile("newer-project-2222222222222222", "a-first.md", "first", newer);
+    await writeMemoryFile("newer-project-2222222222222222", "MEMORY.md", "newer index", newer);
+    await writeMemoryFile("newer-project-2222222222222222", "ignored.MD", "ignored", newer);
     await mkdir(workspaceMemoryRoot("empty-project-3333333333333333"), {
       recursive: true,
     });
@@ -141,10 +103,7 @@ describe("memoryService Project Memory catalog", () => {
         {
           name: "MEMORY.md",
           kind: "index",
-          path: join(
-            workspaceMemoryRoot("newer-project-2222222222222222"),
-            "MEMORY.md",
-          ),
+          path: join(workspaceMemoryRoot("newer-project-2222222222222222"), "MEMORY.md"),
         },
         { name: "a-first.md", kind: "item" },
         { name: "z-last.md", kind: "item" },
@@ -157,21 +116,14 @@ describe("memoryService Project Memory catalog", () => {
     const workspaceId = "removed-memory-root-3333333333333333";
     await writeMemoryFile(workspaceId, "MEMORY.md", "temporary index");
     fsMocks.readdir.mockImplementationOnce(actualFs.readdir);
-    fsMocks.readdir.mockRejectedValueOnce(
-      createNotFoundError(workspaceMemoryRoot(workspaceId)),
-    );
+    fsMocks.readdir.mockRejectedValueOnce(createNotFoundError(workspaceMemoryRoot(workspaceId)));
 
-    await expect(createMemoryService().listProjectMemories()).resolves.toEqual(
-      [],
-    );
+    await expect(createMemoryService().listProjectMemories()).resolves.toEqual([]);
   });
 
   it("扫描期间事实文件消失时跳过该文件并保留其余 catalog", async () => {
     const workspaceId = "removed-fact-3333333333333333";
-    const removedFilePath = join(
-      workspaceMemoryRoot(workspaceId),
-      "removed.md",
-    );
+    const removedFilePath = join(workspaceMemoryRoot(workspaceId), "removed.md");
     await writeMemoryFile(workspaceId, "MEMORY.md", "remaining index");
     await writeMemoryFile(workspaceId, "removed.md", "temporary fact");
     fsMocks.lstat.mockImplementation(async (path, options) => {
@@ -181,9 +133,7 @@ describe("memoryService Project Memory catalog", () => {
       return actualFs.lstat(path, options);
     });
 
-    await expect(
-      createMemoryService().listProjectMemories(),
-    ).resolves.toMatchObject([
+    await expect(createMemoryService().listProjectMemories()).resolves.toMatchObject([
       {
         id: workspaceId,
         files: [{ name: "MEMORY.md", kind: "index" }],
@@ -202,11 +152,7 @@ describe("memoryService Project Memory catalog", () => {
       "# Raw Memory",
       "",
     ].join("\n");
-    await writeMemoryFile(
-      "exact-project-4444444444444444",
-      "exact-content.md",
-      content,
-    );
+    await writeMemoryFile("exact-project-4444444444444444", "exact-content.md", content);
 
     await expect(
       createMemoryService().readProjectMemoryFile({
@@ -245,15 +191,10 @@ describe("memoryService Project Memory catalog", () => {
       const externalMemoryRoot = join(externalWorkspace, "memory");
       await writeMemoryFile(workspaceId, fileName, "inside");
       await mkdir(externalMemoryRoot, { recursive: true });
-      await writeFile(
-        join(externalMemoryRoot, fileName),
-        "OUTSIDE_SECRET",
-        "utf-8",
-      );
+      await writeFile(join(externalMemoryRoot, fileName), "OUTSIDE_SECRET", "utf-8");
       fsMocks.open.mockImplementationOnce(async (path, flags, mode) => {
         const target = swapTarget === "workspace" ? workspaceRoot : memoryRoot;
-        const externalTarget =
-          swapTarget === "workspace" ? externalWorkspace : externalMemoryRoot;
+        const externalTarget = swapTarget === "workspace" ? externalWorkspace : externalMemoryRoot;
         await actualFs.rename(target, `${target}.original`);
         await actualFs.symlink(
           externalTarget,
@@ -285,16 +226,12 @@ describe("memoryService Project Memory catalog", () => {
     });
 
     const service = createMemoryService();
-    await expect(
-      service.readProjectMemoryFile({ workspaceId, fileName }),
-    ).rejects.toMatchObject({
+    await expect(service.readProjectMemoryFile({ workspaceId, fileName })).rejects.toMatchObject({
       code: PROJECT_MEMORY_FILE_CHANGED_ERROR_CODE,
       message: "Project Memory file changed during preview: fact.md",
     });
     await expect(actualFs.readFile(filePath, "utf-8")).resolves.toBe("after");
-    await expect(
-      service.readProjectMemoryFile({ workspaceId, fileName }),
-    ).resolves.toMatchObject({
+    await expect(service.readProjectMemoryFile({ workspaceId, fileName })).resolves.toMatchObject({
       content: "after",
     });
   });
@@ -311,12 +248,7 @@ describe("memoryService Project Memory catalog", () => {
       const handle = await actualFs.open(path, flags, mode);
       return {
         stat: handle.stat.bind(handle),
-        read: async (
-          buffer: Buffer,
-          offset: number,
-          length: number,
-          position: number,
-        ) => {
+        read: async (buffer: Buffer, offset: number, length: number, position: number) => {
           await writeFile(filePath, "after!", "utf-8");
           return handle.read(buffer, offset, length, position);
         },
@@ -385,11 +317,7 @@ describe("memoryService Project Memory catalog", () => {
 
   it("读取时要求磁盘目录项名称与请求名称大小写完全一致", async () => {
     const workspaceId = "case-sensitive-project-6666666666666666";
-    await writeMemoryFile(
-      workspaceId,
-      "SECRET.MD",
-      "excluded uppercase extension",
-    );
+    await writeMemoryFile(workspaceId, "SECRET.MD", "excluded uppercase extension");
 
     const service = createMemoryService();
     await expect(service.listProjectMemories()).resolves.toEqual([]);
@@ -401,11 +329,7 @@ describe("memoryService Project Memory catalog", () => {
   it("不跟随 workspace symlink", async () => {
     const externalWorkspace = join(tempDir, "external-project");
     await mkdir(join(externalWorkspace, "memory"), { recursive: true });
-    await writeFile(
-      join(externalWorkspace, "memory", "secret.md"),
-      "external secret",
-      "utf-8",
-    );
+    await writeFile(join(externalWorkspace, "memory", "secret.md"), "external secret", "utf-8");
     await mkdir(projectsRoot(), { recursive: true });
     await symlink(
       externalWorkspace,
@@ -453,15 +377,11 @@ describe("memoryService Project Memory catalog", () => {
     const fileName = "deleted.md";
     await writeMemoryFile(workspaceId, fileName, "temporary");
     const service = createMemoryService();
-    await expect(service.listProjectMemories()).resolves.toMatchObject([
-      { id: workspaceId },
-    ]);
+    await expect(service.listProjectMemories()).resolves.toMatchObject([{ id: workspaceId }]);
 
     await unlink(join(workspaceMemoryRoot(workspaceId), fileName));
 
-    await expect(
-      service.readProjectMemoryFile({ workspaceId, fileName }),
-    ).rejects.toMatchObject({
+    await expect(service.readProjectMemoryFile({ workspaceId, fileName })).rejects.toMatchObject({
       code: "ENOENT",
     });
   });

@@ -99,8 +99,6 @@ describe("RemoteConnectionFields placeholder", () => {
 
     expect(html).toContain("未检测到运行中容器");
     expect(html).toContain('placeholder="输入容器名或 ID，例如 my-container"');
-    expect(html).toContain(
-      "如果运行中的容器列表不完整，可以手动输入容器名或 ID 连接。",
-    );
+    expect(html).toContain("如果运行中的容器列表不完整，可以手动输入容器名或 ID 连接。");
   });
 });

@@ -7,11 +7,11 @@ Automated testing on mobile native apps and desktop sites can be particularly ch
 
 The following custom commands will be provided and added to the `browser/driver` object so you will get the right toolset to do your job.
 
--   [`await browser.ocrGetText`](./ocr-get-text.md)
--   [`await browser.ocrGetElementPositionByText`](./ocr-get-element-position-by-text.md)
--   [`await browser.ocrWaitForTextDisplayed`](./ocr-wait-for-text-displayed.md)
--   [`await browser.ocrClickOnText`](./ocr-click-on-text.md)
--   [`await browser.ocrSetValue`](./ocr-set-value.md)
+- [`await browser.ocrGetText`](./ocr-get-text.md)
+- [`await browser.ocrGetElementPositionByText`](./ocr-get-element-position-by-text.md)
+- [`await browser.ocrWaitForTextDisplayed`](./ocr-wait-for-text-displayed.md)
+- [`await browser.ocrClickOnText`](./ocr-click-on-text.md)
+- [`await browser.ocrSetValue`](./ocr-set-value.md)
 
 ### How does it work
 

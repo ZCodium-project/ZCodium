@@ -16,14 +16,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "e2e-attachment-wire-padding.txt",
-          "E2E_ATTACHMENT_WIRE_CONTEXT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["e2e-attachment-wire-padding.txt", "E2E_ATTACHMENT_WIRE_CONTEXT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

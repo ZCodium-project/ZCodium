@@ -6,12 +6,12 @@
 
 输入框左侧 `+` 打开与输入框等宽的 Popover，复用 MentionPanel 和候选行组件。
 
-| 顺序 | 分类 | 内容与选择行为                                                                           |
-| ---- | ---- | ---------------------------------------------------------------------------------------- |
+| 顺序 | 分类 | 内容与选择行为                                                                                                                                                                                           |
+| ---- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | 添加 | 附件调用既有 attachmentAction；目标仅在新会话空输入时出现，插入与 `/goal` 相同的命令标签；工作流紧随目标之后，任意会话空输入且 CLI slash catalog 含 `workflow` 时出现，插入与 `/workflow` 相同的命令标签 |
-| 2    | 插件 | 与空 `@` 使用同一 catalog、排序和 enabled 过滤；冲突项仍禁选                             |
-| 3    | 文件 | 当前 workspace，文件优先、同类按相对路径排序，空查询最多 10 项                           |
-| 4    | 会话 | 当前 workspace，updatedAt 降序、createdAt 降序、标题排序；不扩展到 `#` 的跨项目范围      |
+| 2    | 插件 | 与空 `@` 使用同一 catalog、排序和 enabled 过滤；冲突项仍禁选                                                                                                                                             |
+| 3    | 文件 | 当前 workspace，文件优先、同类按相对路径排序，空查询最多 10 项                                                                                                                                           |
+| 4    | 会话 | 当前 workspace，updatedAt 降序、createdAt 降序、标题排序；不扩展到 `#` 的跨项目范围                                                                                                                      |
 
 文件、会话无候选且没有加载/错误状态时隐藏分类。插件保留空态。画板不加入本菜单。
 新草稿读 workspace 当前插件 catalog，已有 session 读 session-owned catalog，沿用 `@` 的生命周期。
@@ -104,4 +104,3 @@ CLI listProtocolSlashCommands
 插入 `/workflow`）；`promptMentionNode.test.ts`（图标节点）；
 `apps/zcode-cli/packages/bootstrap/tests/protocol-slash-commands.test.ts`（catalog 顺序）；
 Electron pending 用例 PLUS05。
-

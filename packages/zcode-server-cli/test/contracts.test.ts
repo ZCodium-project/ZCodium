@@ -15,8 +15,11 @@ describe("R2 control contract", () => {
       false,
     );
     expect(
-      controlRequestSchema.safeParse({ id: "1", command: "confirm-uninstall", confirmation: "DELETE" })
-        .success,
+      controlRequestSchema.safeParse({
+        id: "1",
+        command: "confirm-uninstall",
+        confirmation: "DELETE",
+      }).success,
     ).toBe(true);
   });
 
@@ -38,28 +41,41 @@ describe("R2 control contract", () => {
   });
 
   it("rejects release versions that could escape the releases directory", () => {
-    expect(releaseManifestSchema.safeParse({ version: "../escape", releaseDir: "/tmp/release" }).success).toBe(false);
-    expect(releaseCatalogSchema.safeParse({
-      schemaVersion: 1,
-      releases: [{ version: "3.8.0/evil", target: "linux-x64", archiveUrl: "https://example.test/release.tar.gz", archiveSha256: "a".repeat(64) }],
-    }).success).toBe(false);
+    expect(
+      releaseManifestSchema.safeParse({ version: "../escape", releaseDir: "/tmp/release" }).success,
+    ).toBe(false);
+    expect(
+      releaseCatalogSchema.safeParse({
+        schemaVersion: 1,
+        releases: [
+          {
+            version: "3.8.0/evil",
+            target: "linux-x64",
+            archiveUrl: "https://example.test/release.tar.gz",
+            archiveSha256: "a".repeat(64),
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 
   it("builds a complete stopped snapshot for offline CLI fallbacks", () => {
     const status = createStoppedServerStatus("3.8.0", { serviceRegistered: true, now: 42 });
-    expect(status).toEqual(expect.objectContaining({
-      state: "stopped",
-      pid: null,
-      port: null,
-      host: null,
-      version: "3.8.0",
-      generation: 0,
-      startedAt: null,
-      lastExitReason: null,
-      serviceRegistered: true,
-      runningTaskCount: 0,
-      updatedAt: 42,
-    }));
+    expect(status).toEqual(
+      expect.objectContaining({
+        state: "stopped",
+        pid: null,
+        port: null,
+        host: null,
+        version: "3.8.0",
+        generation: 0,
+        startedAt: null,
+        lastExitReason: null,
+        serviceRegistered: true,
+        runningTaskCount: 0,
+        updatedAt: 42,
+      }),
+    );
     expect(serverStatusSchema.parse(status)).toEqual(status);
   });
 });

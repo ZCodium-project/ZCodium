@@ -115,9 +115,7 @@ function workbenchBinding(binding: PaneBinding): WorkbenchSessionBinding | null 
         workspaceScope: binding.workspaceScope,
         sessionId: binding.sessionId,
         ...(binding.readOnly ? { readOnly: true } : {}),
-        ...(binding.restoredUnvalidated
-          ? { restoredUnvalidated: true }
-          : {}),
+        ...(binding.restoredUnvalidated ? { restoredUnvalidated: true } : {}),
       }
     : null;
 }
@@ -308,8 +306,7 @@ export function confirmRestoredWorkbenchGroupPane(
     if (!group.primaryBinding.restoredUnvalidated) {
       return group;
     }
-    const { restoredUnvalidated: _restored, ...primaryBinding } =
-      group.primaryBinding;
+    const { restoredUnvalidated: _restored, ...primaryBinding } = group.primaryBinding;
     return { ...group, primaryBinding };
   }
   const binding = group.panes[paneId];
@@ -642,10 +639,7 @@ export function persistWorkbenchGroups(snapshot: WorkbenchGroupSnapshot): void {
   try {
     const groups = Object.fromEntries(
       Object.entries(snapshot.groups).map(([groupId, group]) => {
-        const {
-          restoredUnvalidated: _primaryRestored,
-          ...primaryBinding
-        } = group.primaryBinding;
+        const { restoredUnvalidated: _primaryRestored, ...primaryBinding } = group.primaryBinding;
         const panes = Object.fromEntries(
           Object.entries(group.panes).map(([paneId, binding]) => {
             const { restoredUnvalidated: _restored, ...persisted } = binding;

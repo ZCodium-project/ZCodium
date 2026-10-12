@@ -9,38 +9,37 @@ Here is a code snippet from sample wdio.conf.ts.
 
 ```ts title=wdio.conf.ts
 export const config: WebdriverIO.Config = {
-    // ...
-    protocol: 'https',
-    hostname: 'yourseleniumgridhost.yourdomain.com',
-    port: 443,
-    path: '/wd/hub',
-    // ...
-
-}
+  // ...
+  protocol: "https",
+  hostname: "yourseleniumgridhost.yourdomain.com",
+  port: 443,
+  path: "/wd/hub",
+  // ...
+};
 ```
+
 You need to provide the appropriate values for the protocol, hostname, port, and path based on your Selenium Grid setup.
 If you are running Selenium Grid on the same machine as your test scripts, here are some typical options:
 
 ```ts title=wdio.conf.ts
 export const config: WebdriverIO.Config = {
-    // ...
-    protocol: 'http',
-    hostname: 'localhost',
-    port: 4444,
-    path: '/wd/hub',
-    // ...
-
-}
+  // ...
+  protocol: "http",
+  hostname: "localhost",
+  port: 4444,
+  path: "/wd/hub",
+  // ...
+};
 ```
 
 ### Basic authentication with protected Selenium Grid
 
-It is highly recommended to secure your Selenium Grid. If you have a protected Selenium Grid that requires authentication, you can pass authentication headers via options. 
+It is highly recommended to secure your Selenium Grid. If you have a protected Selenium Grid that requires authentication, you can pass authentication headers via options.
 Please refer to the [headers](https://webdriver.io/docs/configuration/#headers) section in the documentation for more information.
 
 ### Timeout configurations with dynamic Selenium Grid
 
-When using a dynamic Selenium Grid where browser pods are spun up on demand, session creation may face a cold start. In such cases, it is advised to increase the session creation timeouts. The default value in the options is 120 seconds, but you can increase it if your grid takes more time to create a new session. 
+When using a dynamic Selenium Grid where browser pods are spun up on demand, session creation may face a cold start. In such cases, it is advised to increase the session creation timeouts. The default value in the options is 120 seconds, but you can increase it if your grid takes more time to create a new session.
 
 ```ts
 connectionRetryTimeout: 180000,
@@ -60,18 +59,20 @@ For Chromium-based browsers, you can refer to the [Download file](https://webdri
 
 ```ts title=wdio.conf.ts
 export const config: WebdriverIO.Config = {
-    // ...
-    protocol: 'https',
-    hostname: 'yourseleniumgridhost.yourdomain.com',
-    port: 443,
-    path: '/wd/hub',
-    // ...
-    capabilities: [{
-        browserName: 'chrome',
-        'se:downloadsEnabled': true
-    }],
-    //...
-}
+  // ...
+  protocol: "https",
+  hostname: "yourseleniumgridhost.yourdomain.com",
+  port: 443,
+  path: "/wd/hub",
+  // ...
+  capabilities: [
+    {
+      browserName: "chrome",
+      "se:downloadsEnabled": true,
+    },
+  ],
+  //...
+};
 ```
 
 ### File upload with remote Selenium Grid
@@ -82,9 +83,8 @@ To upload a file to a web app in the remote browser, you first need to upload th
 
 There are a few more operations that you can perform with Selenium Grid. The instructions for Selenium Standalone should work fine with Selenium Grid as well. Please refer to the [Selenium Standalone](https://webdriver.io/docs/api/selenium/) documentation for available options.
 
-
 ### Selenium Grid Official documentation
 
-For more information on Selenium Grid, you can refer to the official Selenium Grid [documentation](https://www.selenium.dev/documentation/grid/). 
+For more information on Selenium Grid, you can refer to the official Selenium Grid [documentation](https://www.selenium.dev/documentation/grid/).
 
 If you wish to run Selenium Grid in Docker, Docker compose or Kubernetes, please refer to the Selenium-Docker [GitHub repository](https://github.com/SeleniumHQ/docker-selenium).

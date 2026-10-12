@@ -161,9 +161,7 @@ async function finishPluginOptionStabilityProbe() {
 
 function getComposerText() {
   return browser.execute((inputTestId) => {
-    const input = document.querySelector<LexicalInputE2EElement>(
-      `[data-testid="${inputTestId}"]`,
-    );
+    const input = document.querySelector<LexicalInputE2EElement>(`[data-testid="${inputTestId}"]`);
     return input?.__zcodeLexicalInputE2E?.getText() ?? "";
   }, TID_V4_COMPOSER_INPUT);
 }
@@ -183,85 +181,86 @@ async function setChatInputFileMentionState() {
     },
   );
 
-  const result = (await browser.execute(
-    (inputTestId) => {
-      try {
-        const fileMentionPath = "src/option-right-repro.ts";
-        const fileMentionMarkdown =
-          "[option-right-repro.ts](src/option-right-repro.ts)";
-        const stateJson = JSON.stringify({
-          root: {
-            children: [
-              {
-                children: [
-                  {
-                    category: "files",
-                    data: {
-                      kind: "file",
-                      path: fileMentionPath,
-                      relativePath: fileMentionPath,
-                      scope: "workspace",
-                    },
-                    description: "",
-                    detail: 0,
-                    format: 0,
-                    mentionId: "e2e-option-right-file",
-                    mode: "token",
-                    markdown: fileMentionMarkdown,
-                    style: "",
-                    text: "option-right-repro.ts",
-                    type: "prompt-mention",
-                    value: fileMentionPath,
-                    version: 1,
+  const result = (await browser.execute((inputTestId) => {
+    try {
+      const fileMentionPath = "src/option-right-repro.ts";
+      const fileMentionMarkdown = "[option-right-repro.ts](src/option-right-repro.ts)";
+      const stateJson = JSON.stringify({
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  category: "files",
+                  data: {
+                    kind: "file",
+                    path: fileMentionPath,
+                    relativePath: fileMentionPath,
+                    scope: "workspace",
                   },
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: "normal",
-                    style: "",
-                    text: " ",
-                    type: "text",
-                    version: 1,
-                  },
-                ],
-                direction: null,
-                format: "",
-                indent: 0,
-                type: "paragraph",
-                version: 1,
-              },
-            ],
-            direction: null,
-            format: "",
-            indent: 0,
-            type: "root",
-            version: 1,
-          },
-        });
+                  description: "",
+                  detail: 0,
+                  format: 0,
+                  mentionId: "e2e-option-right-file",
+                  mode: "token",
+                  markdown: fileMentionMarkdown,
+                  style: "",
+                  text: "option-right-repro.ts",
+                  type: "prompt-mention",
+                  value: fileMentionPath,
+                  version: 1,
+                },
+                {
+                  detail: 0,
+                  format: 0,
+                  mode: "normal",
+                  style: "",
+                  text: " ",
+                  type: "text",
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: "",
+              indent: 0,
+              type: "paragraph",
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: "",
+          indent: 0,
+          type: "root",
+          version: 1,
+        },
+      });
 
-        const input = document.querySelector<LexicalInputE2EElement>(
-          `[data-testid="${inputTestId}"]`,
-        );
-        const bridge = input?.__zcodeLexicalInputE2E;
-        if (!input || !bridge) {
-          return { ok: false, reason: "bridge-missing" };
-        }
-        bridge.setEditorStateJson(stateJson);
-        bridge.focus();
-        return {
-          mentionCount: input.querySelectorAll("[data-mention-id]").length,
-          ok: bridge.getText().includes(fileMentionMarkdown),
-          text: bridge.getText(),
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          reason: error instanceof Error ? error.message : String(error),
-        };
+      const input = document.querySelector<LexicalInputE2EElement>(
+        `[data-testid="${inputTestId}"]`,
+      );
+      const bridge = input?.__zcodeLexicalInputE2E;
+      if (!input || !bridge) {
+        return { ok: false, reason: "bridge-missing" };
       }
-    },
-    TID_V4_COMPOSER_INPUT,
-  )) as { mentionCount?: number; ok: boolean; reason?: string; text?: string };
+      bridge.setEditorStateJson(stateJson);
+      bridge.focus();
+      return {
+        mentionCount: input.querySelectorAll("[data-mention-id]").length,
+        ok: bridge.getText().includes(fileMentionMarkdown),
+        text: bridge.getText(),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        reason: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }, TID_V4_COMPOSER_INPUT)) as {
+    mentionCount?: number;
+    ok: boolean;
+    reason?: string;
+    text?: string;
+  };
 
   if (!result.ok || result.mentionCount !== 1) {
     throw new Error(`failed to seed file mention: ${JSON.stringify(result)}`);
@@ -269,34 +268,25 @@ async function setChatInputFileMentionState() {
 }
 
 async function placeSelectionBeforeFileMention() {
-  const result = (await browser.execute(
-    (inputTestId) => {
-      const input = document.querySelector<HTMLElement>(
-        `[data-testid="${inputTestId}"]`,
-      );
-      const mention = input?.querySelector<HTMLElement>(
-        `[data-mention-id="e2e-option-right-file"]`,
-      );
-      if (!input || !mention) {
-        return { ok: false, reason: "mention-missing" };
-      }
+  const result = (await browser.execute((inputTestId) => {
+    const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
+    const mention = input?.querySelector<HTMLElement>(`[data-mention-id="e2e-option-right-file"]`);
+    if (!input || !mention) {
+      return { ok: false, reason: "mention-missing" };
+    }
 
-      input.focus();
-      const range = document.createRange();
-      range.setStartBefore(mention);
-      range.collapse(true);
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-      return { ok: true };
-    },
-    TID_V4_COMPOSER_INPUT,
-  )) as { ok: boolean; reason?: string };
+    input.focus();
+    const range = document.createRange();
+    range.setStartBefore(mention);
+    range.collapse(true);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    return { ok: true };
+  }, TID_V4_COMPOSER_INPUT)) as { ok: boolean; reason?: string };
 
   if (!result.ok) {
-    throw new Error(
-      `failed to place selection before mention: ${JSON.stringify(result)}`,
-    );
+    throw new Error(`failed to place selection before mention: ${JSON.stringify(result)}`);
   }
 }
 
@@ -320,9 +310,7 @@ function getMentionNavigationSnapshot() {
   return browser.execute((inputTestId) => {
     // 修复原因：v4 硬切后 Lexical bridge 挂在 composer v4 testid 上，
     // 继续查 legacy chat-input 会把“节点不存在”误报成键盘导航回归。
-    const input = document.querySelector<LexicalInputE2EElement>(
-      `[data-testid="${inputTestId}"]`,
-    );
+    const input = document.querySelector<LexicalInputE2EElement>(`[data-testid="${inputTestId}"]`);
     const selection = window.getSelection();
     return {
       bridgeText: input?.__zcodeLexicalInputE2E?.getText() ?? "",

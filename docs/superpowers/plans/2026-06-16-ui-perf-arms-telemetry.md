@@ -30,22 +30,23 @@
 
 ## 文件结构
 
-| 文件 | 职责 |
-|------|------|
-| `packages/ui/src/lib/uiPerfArmsTelemetry.ts` | **新建**:单例 reporter + 常量 + 4 个 report 函数 + 流式停顿 per-task 状态 |
-| `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts` | **新建**:单测 |
-| `packages/ui/src/Root.tsx` | 注入/清理 reporter |
-| `packages/desktop/src/renderer/src/main.tsx` | 首屏起点+终点上报 |
-| `packages/ui/src/hooks/useZCodeChat.ts` | 镜像首token/耗时到 ARMS |
-| `packages/ui/src/hooks/taskStreamEventHandlers.ts` | chunk 到达调用停顿追踪 |
-| `packages/ui/src/hooks/taskStreamEventTerminalHandlers.ts` | 终态清理停顿状态 |
-| `docs/monitoring/performance-monitoring.md` | 新增 ui_perf 一节 |
+| 文件                                                       | 职责                                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `packages/ui/src/lib/uiPerfArmsTelemetry.ts`               | **新建**:单例 reporter + 常量 + 4 个 report 函数 + 流式停顿 per-task 状态 |
+| `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts`          | **新建**:单测                                                             |
+| `packages/ui/src/Root.tsx`                                 | 注入/清理 reporter                                                        |
+| `packages/desktop/src/renderer/src/main.tsx`               | 首屏起点+终点上报                                                         |
+| `packages/ui/src/hooks/useZCodeChat.ts`                    | 镜像首token/耗时到 ARMS                                                   |
+| `packages/ui/src/hooks/taskStreamEventHandlers.ts`         | chunk 到达调用停顿追踪                                                    |
+| `packages/ui/src/hooks/taskStreamEventTerminalHandlers.ts` | 终态清理停顿状态                                                          |
+| `docs/monitoring/performance-monitoring.md`                | 新增 ui_perf 一节                                                         |
 
 ---
 
 ## Task 1: 新建 uiPerfArmsTelemetry 模块(reporter + 常量 + 首屏/首token/耗时上报)
 
 **Files:**
+
 - Create: `packages/ui/src/lib/uiPerfArmsTelemetry.ts`
 - Test: `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts`
 
@@ -241,7 +242,11 @@ export function recordStreamChunkArrival(
     name: UI_PERF_EVENT_STREAM_STALL,
     group: UI_PERF_ARMS_GROUP,
     value: Math.round(gapMs),
-    properties: { stall_ms: Math.round(gapMs), waiting_tool: options?.waitingTool ?? false, talk_id: taskId },
+    properties: {
+      stall_ms: Math.round(gapMs),
+      waiting_tool: options?.waitingTool ?? false,
+      talk_id: taskId,
+    },
   });
 }
 
@@ -269,6 +274,7 @@ git commit -m "feat(ui-perf): 新增 UI 性能 ARMS 上报封装模块"
 ## Task 2: 流式停顿追踪单测
 
 **Files:**
+
 - Test: `packages/ui/src/lib/uiPerfArmsTelemetry.test.ts`(追加)
 
 - [ ] **Step 1: 追加失败测试**
@@ -302,7 +308,10 @@ describe("stream stall", () => {
     const reporter = makeReporter();
     setUiPerfArmsReporter(reporter);
     recordStreamChunkArrival("t1", { now: 1000 });
-    recordStreamChunkArrival("t1", { now: 1000 + STREAM_STALL_REPORT_THRESHOLD_MS + 500, waitingTool: true });
+    recordStreamChunkArrival("t1", {
+      now: 1000 + STREAM_STALL_REPORT_THRESHOLD_MS + 500,
+      waitingTool: true,
+    });
     expect(reporter.calls).toHaveLength(1);
     expect(reporter.calls[0]).toMatchObject({
       name: "perf_ui_stream_stall",
@@ -339,6 +348,7 @@ git commit -m "test(ui-perf): 覆盖流式停顿追踪逻辑"
 ## Task 3: 在 Root.tsx 注入 reporter
 
 **Files:**
+
 - Modify: `packages/ui/src/Root.tsx:73`(import)、`:150-157`(useEffect)
 
 - [ ] **Step 1: 加 import**
@@ -354,15 +364,15 @@ import { setUiPerfArmsReporter } from "@/lib/uiPerfArmsTelemetry.js";
 将 `Root.tsx:150-157` 的 useEffect 改为:
 
 ```typescript
-  useEffect(() => {
-    // 既有 reporter 注入保持不变
-    setMcpStorePlatform(platform);
-    setUiPerfArmsReporter(platform);
-    return () => {
-      setMcpStorePlatform(null);
-      setUiPerfArmsReporter(null);
-    };
-  }, [platform]);
+useEffect(() => {
+  // 既有 reporter 注入保持不变
+  setMcpStorePlatform(platform);
+  setUiPerfArmsReporter(platform);
+  return () => {
+    setMcpStorePlatform(null);
+    setUiPerfArmsReporter(null);
+  };
+}, [platform]);
 ```
 
 - [ ] **Step 3: 类型检查**
@@ -382,6 +392,7 @@ git commit -m "feat(ui-perf): Root 注入 UI 性能 ARMS reporter"
 ## Task 4: 镜像首token/消息耗时到 ARMS
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/useZCodeChat.ts:16`(import 区)、`:589-600`(reportAppTelemetryEvent 之后)
 
 - [ ] **Step 1: 加 import**
@@ -397,26 +408,26 @@ import { reportUiFirstToken, reportUiMessageComplete } from "@/lib/uiPerfArmsTel
 在 `useZCodeChat.ts` 的 `reportPromptCompletionTelemetry` 内,现有 `await reportAppTelemetryEvent(...)`(行 589-600)调用**之后**、回调结束前,追加:
 
 ```typescript
-      // 镜像到 ARMS(group=ui_perf):不改动上面的 /report 链路,只额外双发。
-      const detail = completionTelemetry.eventExtraDetail;
-      const ttft = Number(detail.time_to_first_token);
-      if (Number.isFinite(ttft)) {
-        reportUiFirstToken({
-          ttftMs: ttft,
-          model: detail.model_name || undefined,
-          talkId: completionTelemetry.taskId,
-          messageId: completionTelemetry.messageId,
-        });
-      }
-      const durationMs = Number(detail.duration_ms);
-      if (Number.isFinite(durationMs)) {
-        reportUiMessageComplete({
-          durationMs,
-          result: detail.status ?? statusToReport,
-          talkId: completionTelemetry.taskId,
-          messageId: completionTelemetry.messageId,
-        });
-      }
+// 镜像到 ARMS(group=ui_perf):不改动上面的 /report 链路,只额外双发。
+const detail = completionTelemetry.eventExtraDetail;
+const ttft = Number(detail.time_to_first_token);
+if (Number.isFinite(ttft)) {
+  reportUiFirstToken({
+    ttftMs: ttft,
+    model: detail.model_name || undefined,
+    talkId: completionTelemetry.taskId,
+    messageId: completionTelemetry.messageId,
+  });
+}
+const durationMs = Number(detail.duration_ms);
+if (Number.isFinite(durationMs)) {
+  reportUiMessageComplete({
+    durationMs,
+    result: detail.status ?? statusToReport,
+    talkId: completionTelemetry.taskId,
+    messageId: completionTelemetry.messageId,
+  });
+}
 ```
 
 > `eventExtraDetail` 各字段为 `string`(见 `messageTelemetry.ts:634-650`),用 `Number()` 转回数值。`model_name`/`status` 已是 string。
@@ -443,6 +454,7 @@ git commit -m "feat(ui-perf): 镜像首token/消息耗时到 ARMS"
 ## Task 5: chunk 到达时追踪流式停顿
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/taskStreamEventHandlers.ts:12`(import 区附近)、`agent_message_chunk` case(~821)、`agent_thought_chunk` case(~927)
 
 - [ ] **Step 1: 加 import**
@@ -458,7 +470,7 @@ import { recordStreamChunkArrival } from "@/lib/uiPerfArmsTelemetry.js";
 在 `taskStreamEventHandlers.ts` 的 `case "agent_message_chunk":` 块内、已有 `recordPromptFirstToken(taskId);`(行 ~865)旁,追加:
 
 ```typescript
-        recordStreamChunkArrival(taskId, { waitingTool: false });
+recordStreamChunkArrival(taskId, { waitingTool: false });
 ```
 
 - [ ] **Step 3: 在 agent_thought_chunk case 调用**
@@ -466,7 +478,7 @@ import { recordStreamChunkArrival } from "@/lib/uiPerfArmsTelemetry.js";
 在 `case "agent_thought_chunk":` 块(行 ~927)内,与 message_chunk 对称地追加同一行:
 
 ```typescript
-        recordStreamChunkArrival(taskId, { waitingTool: false });
+recordStreamChunkArrival(taskId, { waitingTool: false });
 ```
 
 > 说明:正文/思考 chunk 到达即视为"流仍在推进"。`tool_call`/`tool_call_update` 期间没有正文 chunk 是预期行为;停顿事件的 `waiting_tool` 在本期固定为 `false`(纯 chunk 间隔),区分等工具的根因留待后续(spec 未来项)。本期先采到真实停顿分布。
@@ -488,6 +500,7 @@ git commit -m "feat(ui-perf): chunk 到达追踪流式停顿"
 ## Task 6: 终态清理停顿追踪状态
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/taskStreamEventTerminalHandlers.ts`(import 区 + `handleTaskCompleteEvent`:110 / `handleTaskErrorEvent`:340)
 
 - [ ] **Step 1: 加 import**
@@ -503,7 +516,7 @@ import { clearStreamStallTracking } from "@/lib/uiPerfArmsTelemetry.js";
 在 `handleTaskCompleteEvent` 内,已有 `reportPromptCompletionTelemetry(taskId, "success", promptFinishedAt, event.usage);`(行 251)之后追加:
 
 ```typescript
-  clearStreamStallTracking(taskId);
+clearStreamStallTracking(taskId);
 ```
 
 - [ ] **Step 3: 在 task_error 清理**
@@ -511,7 +524,7 @@ import { clearStreamStallTracking } from "@/lib/uiPerfArmsTelemetry.js";
 在 `handleTaskErrorEvent` 内,函数末尾(`reportPromptCompletionTelemetry(taskId, "fail", Date.now());` 行 469 之后)追加:
 
 ```typescript
-  clearStreamStallTracking(taskId);
+clearStreamStallTracking(taskId);
 ```
 
 > `user_interrupt` 分支(行 420)与 `fail` 共在 `handleTaskErrorEvent` 内,行 469 的清理覆盖正常错误路径;若 `user_interrupt` 提前 return,则在其 `return` 前也追加同一行 `clearStreamStallTracking(taskId);`。实现时确认 420 是否 return:若 return,则在 420 后补一行。
@@ -533,6 +546,7 @@ git commit -m "feat(ui-perf): 消息终态清理流式停顿追踪"
 ## Task 7: 首屏耗时上报(main.tsx)
 
 **Files:**
+
 - Modify: `packages/desktop/src/renderer/src/main.tsx`(模块顶部 + 模块尾部监听)
 
 - [ ] **Step 1: 模块顶部记起点**
@@ -584,6 +598,7 @@ git commit -m "feat(ui-perf): 上报首屏可交互耗时"
 ## Task 8: 更新监控文档
 
 **Files:**
+
 - Modify: `docs/monitoring/performance-monitoring.md`
 
 - [ ] **Step 1: 新增 ui_perf 一节**
@@ -597,12 +612,12 @@ renderer(UI)侧埋点,经 `reportArmsCustomEvent` → IPC → `armsRum.sendCusto
 
 ### 事件一览
 
-| 事件 | `value` | 来源 | 关键 properties |
-|------|---------|------|-----------------|
-| `perf_ui_first_screen` | 首屏耗时 ms | renderer 模块加载 → `zcode-react-startup-ready`(React commit) | `phase`(可选) |
-| `perf_ui_first_token` | 首 token 延迟 ms | 镜像 `message_completion` 的 `time_to_first_token` | `model` / `talk_id` / `message_id` |
-| `perf_ui_message_complete` | 消息端到端耗时 ms | 镜像 `message_completion` 的 `duration_ms` | `result` / `talk_id` / `message_id` |
-| `perf_ui_stream_stall` | 真实停顿时长 ms | 流式相邻正文 chunk 间隔 > 3000ms | `stall_ms` / `waiting_tool` / `talk_id` |
+| 事件                       | `value`           | 来源                                                          | 关键 properties                         |
+| -------------------------- | ----------------- | ------------------------------------------------------------- | --------------------------------------- |
+| `perf_ui_first_screen`     | 首屏耗时 ms       | renderer 模块加载 → `zcode-react-startup-ready`(React commit) | `phase`(可选)                           |
+| `perf_ui_first_token`      | 首 token 延迟 ms  | 镜像 `message_completion` 的 `time_to_first_token`            | `model` / `talk_id` / `message_id`      |
+| `perf_ui_message_complete` | 消息端到端耗时 ms | 镜像 `message_completion` 的 `duration_ms`                    | `result` / `talk_id` / `message_id`     |
+| `perf_ui_stream_stall`     | 真实停顿时长 ms   | 流式相邻正文 chunk 间隔 > 3000ms                              | `stall_ms` / `waiting_tool` / `talk_id` |
 
 ### 说明与边界
 
@@ -640,6 +655,7 @@ Expected: 无类型错误;全部测试 PASS。
 - [ ] **Step 2: 本地构建验证(开发包,`arms_env=local`)**
 
 参考 `docs/monitoring/performance-monitoring.md` 本地验证 checklist:
+
 - 启动应用 → main 日志 `[arms] beforeReport` 出现 `custom:perf_ui_first_screen`。
 - 发一条消息并完成 → 出现 `custom:perf_ui_first_token`、`custom:perf_ui_message_complete`。
 - 用慢模型或断点制造 >3s chunk 间隔 → 出现 `custom:perf_ui_stream_stall`,value 为真实间隔。

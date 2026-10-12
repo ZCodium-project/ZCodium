@@ -235,6 +235,7 @@ export class SessionFileChangeTracker {
   /** 截断到指定轮次（含），删除之后的所有记录 */
   truncateAfterTurn(turnIndex: number): void {
     this.turns = this.turns.filter((t) => t.turnIndex <= turnIndex);
-    this.currentTurnIndex = this.turns.length > 0 ? this.turns[this.turns.length - 1]!.turnIndex : -1;
+    this.currentTurnIndex =
+      this.turns.length > 0 ? this.turns[this.turns.length - 1]!.turnIndex : -1;
   }
 }

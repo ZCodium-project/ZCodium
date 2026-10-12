@@ -70,10 +70,12 @@
 ### Task 1：写功能 spec
 
 **文件：**
+
 - 新建 `docs/subagents-built-in-model-overrides.md`
 - 修改 `docs/ui/subagents-built-in-model-badge.md`
 
 **产出接口：**
+
 - 明确 `BuiltInSubagentName = "general-purpose" | "Explore"`。
 - 明确 `builtInModelOverrides` 存储在现有 subagent state 文件里。
 - 明确内置 agent 只开放模型覆盖。
@@ -182,6 +184,7 @@ git commit -m "docs: specify built-in subagent model overrides"
 ### Task 2：补共享类型与 service 接口
 
 **文件：**
+
 - 修改 `packages/shared/src/subagents-types.ts`
 - 修改 `packages/services/src/subagents/subagents.ts`
 
@@ -242,14 +245,17 @@ pnpm typecheck
 ### Task 3：实现 service state 读写
 
 **文件：**
+
 - 修改 `packages/services/src/subagents/subagentsService.ts`
 - 修改 `packages/services/test/subagentsService.test.ts`
 
 **消费接口：**
+
 - `BuiltInSubagentModelOverrides`
 - `BuiltInSubagentModelOverrideParams`
 
 **产出接口：**
+
 - `createSubagentsService().setBuiltInModelOverride(...)`
 - `list()` 返回 built-in agent 的 `model`、`defaultModel`、`modelOverride`
 
@@ -258,65 +264,65 @@ pnpm typecheck
 在 `packages/services/test/subagentsService.test.ts` 的 `describe("createSubagentsService", ...)` 中加入：
 
 ```ts
-  it("persists model overrides for built-in subagents without making them editable", async () => {
-    const home = await makeTempHome();
-    const workspacePath = join(home, "workspace");
-    const service = createSubagentsService({ homeDir: home, isDesktopRuntime: true });
+it("persists model overrides for built-in subagents without making them editable", async () => {
+  const home = await makeTempHome();
+  const workspacePath = join(home, "workspace");
+  const service = createSubagentsService({ homeDir: home, isDesktopRuntime: true });
 
-    await service.setBuiltInModelOverride({
-      agentName: "general-purpose",
-      model: "custom:custom-openai:gpt-5.4",
-    });
-    await service.setBuiltInModelOverride({
-      agentName: "Explore",
-      model: "custom:custom-openai:glm-5.2",
-    });
-
-    const result = await service.list({
-      workspacePath,
-      provider: "glm",
-      mode: "settingsUserOnly",
-    });
-
-    expect(result.agents.find((agent) => agent.name === "general-purpose")).toMatchObject({
-      model: "custom:custom-openai:gpt-5.4",
-      modelOverride: "custom:custom-openai:gpt-5.4",
-      readOnly: true,
-    });
-    expect(result.agents.find((agent) => agent.name === "Explore")).toMatchObject({
-      defaultModel: "lite",
-      model: "custom:custom-openai:glm-5.2",
-      modelOverride: "custom:custom-openai:glm-5.2",
-      readOnly: true,
-    });
+  await service.setBuiltInModelOverride({
+    agentName: "general-purpose",
+    model: "custom:custom-openai:gpt-5.4",
+  });
+  await service.setBuiltInModelOverride({
+    agentName: "Explore",
+    model: "custom:custom-openai:glm-5.2",
   });
 
-  it("clears a built-in subagent model override and restores the built-in default", async () => {
-    const home = await makeTempHome();
-    const workspacePath = join(home, "workspace");
-    const service = createSubagentsService({ homeDir: home, isDesktopRuntime: true });
-
-    await service.setBuiltInModelOverride({
-      agentName: "Explore",
-      model: "custom:custom-openai:glm-5.2",
-    });
-    await service.setBuiltInModelOverride({
-      agentName: "Explore",
-      model: undefined,
-    });
-
-    const result = await service.list({
-      workspacePath,
-      provider: "glm",
-      mode: "settingsUserOnly",
-    });
-
-    expect(result.agents.find((agent) => agent.name === "Explore")).toMatchObject({
-      model: undefined,
-      modelOverride: undefined,
-      readOnly: true,
-    });
+  const result = await service.list({
+    workspacePath,
+    provider: "glm",
+    mode: "settingsUserOnly",
   });
+
+  expect(result.agents.find((agent) => agent.name === "general-purpose")).toMatchObject({
+    model: "custom:custom-openai:gpt-5.4",
+    modelOverride: "custom:custom-openai:gpt-5.4",
+    readOnly: true,
+  });
+  expect(result.agents.find((agent) => agent.name === "Explore")).toMatchObject({
+    defaultModel: "lite",
+    model: "custom:custom-openai:glm-5.2",
+    modelOverride: "custom:custom-openai:glm-5.2",
+    readOnly: true,
+  });
+});
+
+it("clears a built-in subagent model override and restores the built-in default", async () => {
+  const home = await makeTempHome();
+  const workspacePath = join(home, "workspace");
+  const service = createSubagentsService({ homeDir: home, isDesktopRuntime: true });
+
+  await service.setBuiltInModelOverride({
+    agentName: "Explore",
+    model: "custom:custom-openai:glm-5.2",
+  });
+  await service.setBuiltInModelOverride({
+    agentName: "Explore",
+    model: undefined,
+  });
+
+  const result = await service.list({
+    workspacePath,
+    provider: "glm",
+    mode: "settingsUserOnly",
+  });
+
+  expect(result.agents.find((agent) => agent.name === "Explore")).toMatchObject({
+    model: undefined,
+    modelOverride: undefined,
+    readOnly: true,
+  });
+});
 ```
 
 - [ ] **Step 2：确认测试失败**
@@ -378,7 +384,9 @@ return {
 在文件底部已有工具函数附近加入：
 
 ```ts
-function normalizeBuiltInModelOverrides(input: Record<string, unknown>): BuiltInSubagentModelOverrides {
+function normalizeBuiltInModelOverrides(
+  input: Record<string, unknown>,
+): BuiltInSubagentModelOverrides {
   const result: BuiltInSubagentModelOverrides = {};
   const generalPurpose = scalarModel(input["general-purpose"]);
   const explore = scalarModel(input.Explore);
@@ -513,6 +521,7 @@ git commit -m "feat(subagents): persist built-in model overrides"
 ### Task 4：启动时读取 built-in overrides
 
 **文件：**
+
 - 修改 `apps/zcode-cli/packages/bootstrap/src/subagents.ts`
 - 修改 `apps/zcode-cli/packages/bootstrap/src/app/create-app.ts`
 - 修改 `apps/zcode-cli/packages/bootstrap/src/app/runtime-config.ts`
@@ -614,7 +623,10 @@ function readAgentState(storageRoot: string): {
 } {
   try {
     const raw = readFileSync(join(storageRoot, "v2", "agents-state.json"), "utf8");
-    const parsed = JSON.parse(raw) as { builtInModelOverrides?: unknown; disabledAgentIds?: unknown };
+    const parsed = JSON.parse(raw) as {
+      builtInModelOverrides?: unknown;
+      disabledAgentIds?: unknown;
+    };
     return {
       builtInModelOverrides: isRecord(parsed.builtInModelOverrides)
         ? normalizeBuiltInModelOverrides(parsed.builtInModelOverrides)
@@ -632,7 +644,9 @@ function readAgentState(storageRoot: string): {
   }
 }
 
-function normalizeBuiltInModelOverrides(input: Record<string, unknown>): BuiltInSubagentModelOverrides {
+function normalizeBuiltInModelOverrides(
+  input: Record<string, unknown>,
+): BuiltInSubagentModelOverrides {
   const result: BuiltInSubagentModelOverrides = {};
   const generalPurpose = scalarModel(input["general-purpose"]);
   const explore = scalarModel(input.Explore);
@@ -714,6 +728,7 @@ pnpm --filter @zcode/bootstrap test -- --run tests/subagents.test.ts
 ### Task 5：内置 profile 应用模型覆盖
 
 **文件：**
+
 - 修改 `apps/zcode-cli/packages/core/src/subagent/profile.ts`
 - 修改 `apps/zcode-cli/packages/core/src/subagent/runner.ts`
 - 修改 `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
@@ -1022,6 +1037,7 @@ pnpm --filter @zcode/core test -- --run tests/subagent-profile.test.ts tests/sub
 ### Task 6：修正 Explore allowed tools 的 effective model 边界
 
 **文件：**
+
 - 修改 `apps/zcode-cli/packages/core/src/subagent/runner.ts`
 - 修改 `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
 - 修改 `apps/zcode-cli/packages/core/tests/subagent-explore.test.ts`
@@ -1156,7 +1172,8 @@ function resolveEffectiveSubagentModelRef(input: {
         input.profileModel === undefined &&
         input.agentType === EXPLORE_AGENT_TYPE));
   const selected =
-    concreteModelRef ?? (useLite ? (input.liteModelRef ?? input.defaultModelRef) : input.defaultModelRef);
+    concreteModelRef ??
+    (useLite ? (input.liteModelRef ?? input.defaultModelRef) : input.defaultModelRef);
   return {
     modelRef: {
       ...selected,
@@ -1201,11 +1218,11 @@ function resolveAllowedTools(
 ): readonly string[] {
   const profileTools =
     profile.name === EXPLORE_AGENT_TYPE
-      ? options.getAllowedTools?.({
+      ? (options.getAllowedTools?.({
           agentType: request?.agentType ?? profile.name,
           model: resolveRequestedModel(request?.model, profile.model),
           profile,
-        }) ?? getExploreAllowedTools(options)
+        }) ?? getExploreAllowedTools(options))
       : profile.tools;
   const baseTools = [...(profileTools ?? [])];
   const disallowed = new Set(profile.disallowedTools ?? []);
@@ -1267,11 +1284,13 @@ git commit -m "feat(agent): apply built-in subagent model overrides"
 ### Task 7：给内置 subagent 增加模型控件
 
 **文件：**
+
 - 修改 `packages/ui/src/settings/SubagentsSection.tsx`
 - 修改 `packages/ui/test/subagentsSection.test.ts`
 - 修改现有 i18n 文件
 
 **消费接口：**
+
 - `AgentSummary.defaultModel`
 - `AgentSummary.modelOverride`
 - `subagentsService.setBuiltInModelOverride(...)`
@@ -1412,7 +1431,11 @@ function BuiltInModelControl({
   const { intl } = useZCodeIntl();
   const defaultValue = getBuiltInDefaultModelValue(agent);
   const defaultLabel = intl.formatMessage({ id: "settings.subagents.model.builtInDefault" });
-  const groups = createBuiltInSubagentModelSelectGroups(defaultLabel, defaultValue, modelSelectGroups);
+  const groups = createBuiltInSubagentModelSelectGroups(
+    defaultLabel,
+    defaultValue,
+    modelSelectGroups,
+  );
   const value = getBuiltInModelValue(agent);
   const label = resolveSubagentModelLabel(defaultLabel, groups, value);
 
@@ -1454,17 +1477,19 @@ onManageModels?: () => void;
 在 badges 区域渲染：
 
 ```tsx
-{canConfigureBuiltInModel(agent) ? (
-  <BuiltInModelControl
-    agent={agent}
-    disabled={isOperating}
-    modelSelectGroups={modelSelectGroups}
-    onChange={onBuiltInModelChange}
-    onManageModels={onManageModels}
-  />
-) : showModelBadge ? (
-  <AgentBadge>{modelLabel}</AgentBadge>
-) : null}
+{
+  canConfigureBuiltInModel(agent) ? (
+    <BuiltInModelControl
+      agent={agent}
+      disabled={isOperating}
+      modelSelectGroups={modelSelectGroups}
+      onChange={onBuiltInModelChange}
+      onManageModels={onManageModels}
+    />
+  ) : showModelBadge ? (
+    <AgentBadge>{modelLabel}</AgentBadge>
+  ) : null;
+}
 ```
 
 保留 edit/delete/switch 的 `editable` guard，不要让 built-in 进入完整编辑表单。
@@ -1540,6 +1565,7 @@ git commit -m "feat(ui): configure built-in subagent models"
 ### Task 8：端到端验证
 
 **文件：**
+
 - 不计划修改代码。若验证暴露问题，只改对应失败链路文件。
 
 - [ ] **Step 1：跑 targeted tests**
@@ -1635,6 +1661,7 @@ pnpm lint
 - `Explore` allowed tools 已按 effective child model 计算。
 
 验证：
+
 - `pnpm --filter @zcode/services test -- --run test/subagentsService.test.ts`
 - `pnpm --filter @zcode/bootstrap test -- --run tests/subagents.test.ts`
 - `pnpm --filter @zcode/core test -- --run tests/subagent-profile.test.ts tests/subagent-explore.test.ts`

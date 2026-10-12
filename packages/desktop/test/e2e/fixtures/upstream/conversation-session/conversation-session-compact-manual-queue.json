@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_PREP_ONE"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_COMPACT_PREP_ONE"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_PREP_ONE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_COMPACT_PREP_ONE"]
       },
       "response": {
         "statusCode": 200,
@@ -50,14 +43,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_PREP_TWO",
-          "E2E_READONLY_TOOL_FILE_CONTENT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_PREP_TWO", "E2E_READONLY_TOOL_FILE_CONTENT"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -88,10 +75,7 @@
           "Do NOT call any tools",
           "\"stream\":true"
         ],
-        "bodyExcludes": [
-          "E2E_AUTO_COMPACT",
-          "E2E_AUTO_ACTIONS"
-        ]
+        "bodyExcludes": ["E2E_AUTO_COMPACT", "E2E_AUTO_ACTIONS"]
       },
       "response": {
         "statusCode": 200,
@@ -118,16 +102,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_QUEUE_HELD"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_COMPACT_QUEUE_HELD"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_QUEUE_HELD"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_COMPACT_QUEUE_HELD"]
       },
       "response": {
         "statusCode": 200,
@@ -152,16 +129,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS"
-        ]
+        "bodyIncludes": ["E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_COMPACT_QUEUE_APPEND_AFTER_SUCCESS"]
       },
       "response": {
         "statusCode": 200,

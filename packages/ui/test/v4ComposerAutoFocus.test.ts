@@ -14,23 +14,17 @@ describe("resolveComposerAutoFocus", () => {
 
   it("skips when the pane is not focused (autoFocusEnabled=false)", () => {
     // 竖切后台 pane：新建任务/切会话不应抢走焦点。
-    expect(
-      resolveComposerAutoFocus({ ...base, autoFocusEnabled: false }),
-    ).toBe("skip");
+    expect(resolveComposerAutoFocus({ ...base, autoFocusEnabled: false })).toBe("skip");
   });
 
   it("skips on mobile viewport even when enabled and editable", () => {
     // 自动聚焦会弹出软键盘，移动端不自动聚焦。
-    expect(
-      resolveComposerAutoFocus({ ...base, isMobileViewport: true }),
-    ).toBe("skip");
+    expect(resolveComposerAutoFocus({ ...base, isMobileViewport: true })).toBe("skip");
   });
 
   it("defers while the composer is disabled (session connecting)", () => {
     // 切到连接中会话时 disabled，先暂存意图，待可编辑再兑现。
-    expect(resolveComposerAutoFocus({ ...base, disabled: true })).toBe(
-      "defer",
-    );
+    expect(resolveComposerAutoFocus({ ...base, disabled: true })).toBe("defer");
   });
 
   it("skip takes precedence over defer (unfocused + disabled → skip)", () => {

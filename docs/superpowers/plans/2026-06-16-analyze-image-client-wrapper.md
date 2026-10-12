@@ -53,6 +53,7 @@
 ### Task 1: 新增 AnalyzeImage contracts
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/contracts/src/tools/analyze-image.ts`
 - Modify: `apps/zcode-cli/packages/contracts/src/tools/index.ts`
 - Test: `apps/zcode-cli/packages/contracts/tests/analyze-image.test.ts`
@@ -88,14 +89,12 @@ describe("analyze-image contracts", () => {
     expect(isAnalyzeImageCapableBaseURL(baseURL)).toBe(true);
   });
 
-  it.each([
-    undefined,
-    "",
-    "https://api.openai.com/v1",
-    "https://example.test/anthropic",
-  ])("denies AnalyzeImage-incapable host %s", (baseURL) => {
-    expect(isAnalyzeImageCapableBaseURL(baseURL)).toBe(false);
-  });
+  it.each([undefined, "", "https://api.openai.com/v1", "https://example.test/anthropic"])(
+    "denies AnalyzeImage-incapable host %s",
+    (baseURL) => {
+      expect(isAnalyzeImageCapableBaseURL(baseURL)).toBe(false);
+    },
+  );
 
   it("maps prompt to provider-native args", () => {
     expect(
@@ -131,11 +130,7 @@ const ANALYZE_IMAGE_CAPABLE_BASE_HOSTS = ["bigmodel.cn", "z.ai", "z.ai"];
 
 export const AnalyzeImageInputSchema = z
   .object({
-    image_path: z
-      .string()
-      .trim()
-      .min(1)
-      .describe("Local image file path to analyze"),
+    image_path: z.string().trim().min(1).describe("Local image file path to analyze"),
     prompt: z
       .string()
       .trim()
@@ -221,7 +216,8 @@ export const ANALYZE_IMAGE_TOOL_CONTRACT: ToolContractDeclaration = {
   outputSchema: AnalyzeImageOutputJsonSchema,
   permission: {
     permission: "read",
-    reason: "AnalyzeImage reads a local image file and sends it to an internal provider-native image analysis request",
+    reason:
+      "AnalyzeImage reads a local image file and sends it to an internal provider-native image analysis request",
     riskLevel: "low",
     sideEffectScope: "network",
     needsApproval: false,
@@ -284,6 +280,7 @@ git commit -m "feat(zcode-cli): add analyze image tool contract"
 ### Task 2: 新增 core AnalyzeImage tool handler
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/tool/handlers/analyze-image-support.ts`
 - Create: `apps/zcode-cli/packages/core/src/tool/handlers/analyze-image.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/index.ts`
@@ -541,8 +538,7 @@ export function supportsProviderNativeAnalyzeImage(
   connection: Pick<ModelConnectionInfo, "baseURL" | "providerKind">,
 ): boolean {
   return (
-    connection.providerKind === "anthropic" &&
-    isAnalyzeImageCapableBaseURL(connection.baseURL)
+    connection.providerKind === "anthropic" && isAnalyzeImageCapableBaseURL(connection.baseURL)
   );
 }
 
@@ -861,11 +857,11 @@ import { supportsProviderNativeAnalyzeImage } from "../../tool/handlers/analyze-
 Replace the filter body with:
 
 ```ts
-  return tools.filter((tool) => {
-    if (tool.name === "WebSearch") return shouldExposeWebSearch.call(this);
-    if (tool.name === "AnalyzeImage") return shouldExposeAnalyzeImage.call(this);
-    return true;
-  });
+return tools.filter((tool) => {
+  if (tool.name === "WebSearch") return shouldExposeWebSearch.call(this);
+  if (tool.name === "AnalyzeImage") return shouldExposeAnalyzeImage.call(this);
+  return true;
+});
 ```
 
 Add:
@@ -904,7 +900,9 @@ expect(
         providerKind: "anthropic",
       }),
     },
-  }).getTools().some((tool) => tool.name === "AnalyzeImage"),
+  })
+    .getTools()
+    .some((tool) => tool.name === "AnalyzeImage"),
 ).toBe(false);
 ```
 
@@ -928,6 +926,7 @@ git commit -m "feat(zcode-cli): add AnalyzeImage client wrapper"
 ### Task 3: Adapter 投影 provider-native analyze_image
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/adapters/src/model/tool-transform.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/model/anthropic-stream-compat.ts`
 - Test: `apps/zcode-cli/packages/adapters/tests/websearch.test.ts`
@@ -1148,7 +1147,9 @@ export function createAnthropicCompatFetch(baseFetch: ProviderFetch): ProviderFe
 Add request rewrite helpers:
 
 ```ts
-function rewriteAnthropicAnalyzeImageRequest(init: RequestInit | undefined): RequestInit | undefined {
+function rewriteAnthropicAnalyzeImageRequest(
+  init: RequestInit | undefined,
+): RequestInit | undefined {
   if (typeof init?.body !== "string") return init;
   const parsed = safeParseRecord(init.body);
   if (!parsed || !Array.isArray(parsed.tools)) return init;
@@ -1255,6 +1256,7 @@ git commit -m "feat(zcode-cli): route analyze image through provider-native side
 ### Task 4: Provider anomaly 与损坏 tool input 回归
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/adapters/tests/registry.test.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/model/anthropic-stream-compat.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/model/streaming-tool-call-assembler.ts`
@@ -1293,7 +1295,7 @@ it("drops malformed provider-injected analyze_image input before tool input norm
       sseFrame("content_block_delta", {
         type: "content_block_delta",
         index: 0,
-        delta: { type: "input_json_delta", partial_json: "{\"" },
+        delta: { type: "input_json_delta", partial_json: '{"' },
       }),
       sseFrame("content_block_stop", { type: "content_block_stop", index: 0 }),
     ]),
@@ -1375,6 +1377,7 @@ git commit -m "fix(zcode-cli): isolate unauthorized analyze_image provider tool 
 ### Task 5: 端到端 provider-visible 验收
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/analyze-image.test.ts`
 - Modify: `apps/zcode-cli/packages/adapters/tests/runner.test.ts`
 - Optional generated evidence: local model-io debug JSONL, not committed
@@ -1476,14 +1479,14 @@ git commit -m "test(zcode-cli): verify AnalyzeImage provider-visible request bod
 
 ## 风险与处理
 
-| 风险 | 影响 | 处理 |
-| --- | --- | --- |
-| AI SDK 不支持任意 Anthropic provider-defined tool | `tool({ type: "provider", id: "anthropic.analyze_image" })` 会被 prepare-tools 丢弃 | 使用 `analyze_image` sentinel function tool，并在 `createAnthropicCompatFetch` 出站 body rewrite 为 provider-native tool |
-| provider 在主 turn 未授权注入 `server_tool_use analyze_image` | 产生损坏 tool input，可能继续污染 Bash 或普通工具调度 | 在 Anthropic SSE compat 层按 provider anomaly suppress 未授权 `analyze_image` block 和匹配 `tool_result` |
-| handler 隐式选择历史图片 | 容易选错 prompt attachment / Read result / MCP artifact | v1 只支持显式 `image_path`，后续若要支持 attachment id，先新增独立 spec |
-| 非支持 provider 暴露 AnalyzeImage | 主模型会调用不可执行工具 | enable 逻辑对齐 WebSearch：`providerKind === "anthropic"` 且 baseURL allowlist |
-| Windows 路径与工作目录 | 相对路径解析错误 | 使用 `path.isAbsolute` + `path.resolve(context.workingDirectory, input.image_path)`；文件读取仍经 `FileSystemPort` |
-| 生产日志刷爆 | 高频 streaming delta 写入 info | 所有逐 chunk 诊断只用 adapter/core 现有 debug 日志；provider anomaly 只在 suppress 起点打一条 warn |
+| 风险                                                          | 影响                                                                                | 处理                                                                                                                     |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| AI SDK 不支持任意 Anthropic provider-defined tool             | `tool({ type: "provider", id: "anthropic.analyze_image" })` 会被 prepare-tools 丢弃 | 使用 `analyze_image` sentinel function tool，并在 `createAnthropicCompatFetch` 出站 body rewrite 为 provider-native tool |
+| provider 在主 turn 未授权注入 `server_tool_use analyze_image` | 产生损坏 tool input，可能继续污染 Bash 或普通工具调度                               | 在 Anthropic SSE compat 层按 provider anomaly suppress 未授权 `analyze_image` block 和匹配 `tool_result`                 |
+| handler 隐式选择历史图片                                      | 容易选错 prompt attachment / Read result / MCP artifact                             | v1 只支持显式 `image_path`，后续若要支持 attachment id，先新增独立 spec                                                  |
+| 非支持 provider 暴露 AnalyzeImage                             | 主模型会调用不可执行工具                                                            | enable 逻辑对齐 WebSearch：`providerKind === "anthropic"` 且 baseURL allowlist                                           |
+| Windows 路径与工作目录                                        | 相对路径解析错误                                                                    | 使用 `path.isAbsolute` + `path.resolve(context.workingDirectory, input.image_path)`；文件读取仍经 `FileSystemPort`       |
+| 生产日志刷爆                                                  | 高频 streaming delta 写入 info                                                      | 所有逐 chunk 诊断只用 adapter/core 现有 debug 日志；provider anomaly 只在 suppress 起点打一条 warn                       |
 
 ## Self-Review
 

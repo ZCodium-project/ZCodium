@@ -102,29 +102,29 @@ purchase_funnel_id
 
 字段：
 
-| 字段 | 含义 | 值 |
-| --- | --- | --- |
-| `eventText` | 实际点击文本 | `升级`、`订阅`、`个人套餐`、`团队套餐`，英文界面取对应英文 |
-| `upgrade_source` | 点击位置 | 见下表 |
-| `entry_plan_status` | 进入购买漏斗时的套餐状态 | `no_plan` / `start_plan` / `coding_plan` / `unknown` |
-| `entry_plan_level` | 进入购买漏斗时的套餐级别 | 后端/权益快照原值；无法获取时为 `""` |
-| `entry_plan_list` | 进入购买漏斗时用户已有的套餐列表 | `start_plan__{planId}`、`coding_plan__personal_{tier}`、`coding_plan__team_{tier}`，逗号拼接 |
-| `purchase_audience` | 购买对象 | `personal` / `team`；尚未选择时为 `""` |
-| `provider_family` | Provider | `bigmodel` / `zai` / `unknown` |
-| `channel` | 渠道 | `MaaS` / `Z_AI` / `""` |
+| 字段                | 含义                             | 值                                                                                           |
+| ------------------- | -------------------------------- | -------------------------------------------------------------------------------------------- |
+| `eventText`         | 实际点击文本                     | `升级`、`订阅`、`个人套餐`、`团队套餐`，英文界面取对应英文                                   |
+| `upgrade_source`    | 点击位置                         | 见下表                                                                                       |
+| `entry_plan_status` | 进入购买漏斗时的套餐状态         | `no_plan` / `start_plan` / `coding_plan` / `unknown`                                         |
+| `entry_plan_level`  | 进入购买漏斗时的套餐级别         | 后端/权益快照原值；无法获取时为 `""`                                                         |
+| `entry_plan_list`   | 进入购买漏斗时用户已有的套餐列表 | `start_plan__{planId}`、`coding_plan__personal_{tier}`、`coding_plan__team_{tier}`，逗号拼接 |
+| `purchase_audience` | 购买对象                         | `personal` / `team`；尚未选择时为 `""`                                                       |
+| `provider_family`   | Provider                         | `bigmodel` / `zai` / `unknown`                                                               |
+| `channel`           | 渠道                             | `MaaS` / `Z_AI` / `""`                                                                       |
 
 入口枚举：
 
-| `eventRegion` | `upgrade_source` | 位置 | 当前代码 |
-| --- | --- | --- | --- |
-| `app.profile` | `profile_menu` | 用户头像菜单 Upgrade | `WorkspaceSidebar.tsx`、`SettingsPage.tsx` |
-| `app.session` | `session_quota_alert` | Session 配额提醒中的 Upgrade | `ChatView.tsx` |
-| `app.session` | `session_token_usage` | 输入框 Token 用量区域 Upgrade | `ChatInputToolbar.tsx` |
-| `app.session` | `session_idle_time` | New task 首页与 Automations 闲时任务资格提示中的 Upgrade | `OffPeakNewTaskEntry.tsx`、`AutomationsSection.tsx` |
-| `app.setting` | `setting_plan_card` | 模型设置页 Coding Plan Upgrade/Subscribe | `StatusCards.tsx` |
-| `app.setting` | `setting_start_plan_card` | 模型设置页当前链接方式为 Start Plan 的 Upgrade/Subscribe | `StatusCards.tsx` |
-| `app.setting` | `setting_personal_plan_banner` | 模型设置页个人套餐入口 | `Detail.tsx` |
-| `app.setting` | `setting_team_plan_banner` | 模型设置页团队套餐入口 | `Detail.tsx` |
+| `eventRegion` | `upgrade_source`               | 位置                                                     | 当前代码                                            |
+| ------------- | ------------------------------ | -------------------------------------------------------- | --------------------------------------------------- |
+| `app.profile` | `profile_menu`                 | 用户头像菜单 Upgrade                                     | `WorkspaceSidebar.tsx`、`SettingsPage.tsx`          |
+| `app.session` | `session_quota_alert`          | Session 配额提醒中的 Upgrade                             | `ChatView.tsx`                                      |
+| `app.session` | `session_token_usage`          | 输入框 Token 用量区域 Upgrade                            | `ChatInputToolbar.tsx`                              |
+| `app.session` | `session_idle_time`            | New task 首页与 Automations 闲时任务资格提示中的 Upgrade | `OffPeakNewTaskEntry.tsx`、`AutomationsSection.tsx` |
+| `app.setting` | `setting_plan_card`            | 模型设置页 Coding Plan Upgrade/Subscribe                 | `StatusCards.tsx`                                   |
+| `app.setting` | `setting_start_plan_card`      | 模型设置页当前链接方式为 Start Plan 的 Upgrade/Subscribe | `StatusCards.tsx`                                   |
+| `app.setting` | `setting_personal_plan_banner` | 模型设置页个人套餐入口                                   | `Detail.tsx`                                        |
+| `app.setting` | `setting_team_plan_banner`     | 模型设置页团队套餐入口                                   | `Detail.tsx`                                        |
 
 V4 conversation 使用同一事件契约，但入口由 V4 session quota banner 承载。banner 必须真实可见，
 并保留 dismiss、提交阻断和 entitlement refresh；只有购买面板确认打开后才开始 funnel。Web/手机
@@ -132,10 +132,10 @@ V4 conversation 使用同一事件契约，但入口由 V4 session quota banner 
 
 场景由事实字段组合表达，不单独上报推断型场景字段：
 
-| 场景 | 字段组合 |
-| --- | --- |
-| Start Plan 升级 | `entry_plan_status=start_plan` |
-| 首次购买 Coding Plan | `entry_plan_status=no_plan` |
+| 场景                  | 字段组合                                                   |
+| --------------------- | ---------------------------------------------------------- |
+| Start Plan 升级       | `entry_plan_status=start_plan`                             |
+| 首次购买 Coding Plan  | `entry_plan_status=no_plan`                                |
 | 已有 Coding Plan 升级 | `entry_plan_status=coding_plan`，并携带 `entry_plan_level` |
 
 代码取值：
@@ -193,16 +193,16 @@ V4 conversation 使用同一事件契约，但入口由 V4 session quota banner 
 
 字段：
 
-| 字段 | 含义 | 值 |
-| --- | --- | --- |
-| `eventText` | 产品卡片实际按钮文本 | `选择套餐` / `订阅` / `升级`，英文界面取对应英文 |
-| `purchase_audience` | 产品类型 | `personal` / `team` |
-| `provider_family` | Provider | `bigmodel` / `zai` / `unknown` |
-| `channel` | 渠道 | `MaaS` / `Z_AI` / `""` |
-| `product_group_id` | 产品组稳定 key | 代码中的 plan group key |
-| `product_id` | 具体 SKU | 本阶段还未选周期，写 `""` |
-| `product_name` | 产品名 | 如 `GLM Coding Pro` |
-| `plan_tier` | 套餐档位 | `lite` / `pro` / `max` / `team_standard` / `team_advanced` / `unknown` |
+| 字段                | 含义                 | 值                                                                     |
+| ------------------- | -------------------- | ---------------------------------------------------------------------- |
+| `eventText`         | 产品卡片实际按钮文本 | `选择套餐` / `订阅` / `升级`，英文界面取对应英文                       |
+| `purchase_audience` | 产品类型             | `personal` / `team`                                                    |
+| `provider_family`   | Provider             | `bigmodel` / `zai` / `unknown`                                         |
+| `channel`           | 渠道                 | `MaaS` / `Z_AI` / `""`                                                 |
+| `product_group_id`  | 产品组稳定 key       | 代码中的 plan group key                                                |
+| `product_id`        | 具体 SKU             | 本阶段还未选周期，写 `""`                                              |
+| `product_name`      | 产品名               | 如 `GLM Coding Pro`                                                    |
+| `plan_tier`         | 套餐档位             | `lite` / `pro` / `max` / `team_standard` / `team_advanced` / `unknown` |
 
 触发规则：
 
@@ -277,19 +277,19 @@ V4 conversation 使用同一事件契约，但入口由 V4 session quota banner 
 
 字段：
 
-| 字段 | 含义 | 值 |
-| --- | --- | --- |
-| `eventText` | 实际点击文本 | 个人为 `订阅` / `升级`；团队为 `继续支付`；英文界面取对应英文 |
-| `product_id` | 最终 SKU | 直接使用当前选中商品的 `selectedProduct.productId` |
-| `product_name` | 产品及周期名 | 与支付事件保持一致 |
-| `plan_tier` | 套餐档位 | 与产品选择事件一致 |
-| `billing_period` | 周期 | `month` / `quarter` / `year` / `unknown` |
-| `purchase_method` | 购买方式 | `continuous` / `one_time` / `unknown` |
-| `payment_method` | 支付方式 | `alipay` / `paypal` / `stripe` / `unknown` / `""` |
-| `seat_count` | 团队席位 | 个人为 `""` |
-| `duration_months` | 一次性采购时长 | 非一次性采购为 `""` |
-| `currency` | 币种 | `CNY` / `USD` / 后端值 / `""` |
-| `amount` | 当前展示金额 | 纯数字字符串 |
+| 字段              | 含义           | 值                                                            |
+| ----------------- | -------------- | ------------------------------------------------------------- |
+| `eventText`       | 实际点击文本   | 个人为 `订阅` / `升级`；团队为 `继续支付`；英文界面取对应英文 |
+| `product_id`      | 最终 SKU       | 直接使用当前选中商品的 `selectedProduct.productId`            |
+| `product_name`    | 产品及周期名   | 与支付事件保持一致                                            |
+| `plan_tier`       | 套餐档位       | 与产品选择事件一致                                            |
+| `billing_period`  | 周期           | `month` / `quarter` / `year` / `unknown`                      |
+| `purchase_method` | 购买方式       | `continuous` / `one_time` / `unknown`                         |
+| `payment_method`  | 支付方式       | `alipay` / `paypal` / `stripe` / `unknown` / `""`             |
+| `seat_count`      | 团队席位       | 个人为 `""`                                                   |
+| `duration_months` | 一次性采购时长 | 非一次性采购为 `""`                                           |
+| `currency`        | 币种           | `CNY` / `USD` / 后端值 / `""`                                 |
+| `amount`          | 当前展示金额   | 纯数字字符串                                                  |
 
 触发规则：
 
@@ -301,10 +301,10 @@ V4 conversation 使用同一事件契约，但入口由 V4 session quota banner 
 
 ## 6. 渠道差异
 
-| Provider | `provider_family` | `channel` | 产品 | 支付 |
-| --- | --- | --- | --- | --- |
-| BigModel | `bigmodel` | `MaaS` | 个人和团队 | 当前为支付宝 |
-| Z.ai | `zai` | `Z_AI` | 当前仅个人 | PayPal/Stripe 在支付确认阶段确定 |
+| Provider | `provider_family` | `channel` | 产品       | 支付                             |
+| -------- | ----------------- | --------- | ---------- | -------------------------------- |
+| BigModel | `bigmodel`        | `MaaS`    | 个人和团队 | 当前为支付宝                     |
+| Z.ai     | `zai`             | `Z_AI`    | 当前仅个人 | PayPal/Stripe 在支付确认阶段确定 |
 
 映射只根据 `providerId`，不根据语言、币种或域名猜测。
 
@@ -343,13 +343,13 @@ packages/ui/src/lib/codingPlanFunnelTelemetry.ts
 
 ### 7.3 入口接线
 
-| 场景 | 代码 |
-| --- | --- |
-| 左下角头像菜单 | `WorkspaceSidebar.tsx`、`SettingsPage.tsx` |
-| Session 配额提醒 | `ChatView.tsx` |
-| Token 用量 Upgrade | `ChatInputToolbar.tsx` |
-| Settings Upgrade/Subscribe/个人/团队入口 | `StatusCards.tsx`、`CodingPlanStatusActions.tsx`、`Detail.tsx` |
-| 产品和周期选择 | 官网 webview 页（原 `CodingPlanPurchasePanel.tsx` 已于 2026-09 删除，App 侧不再有产品和周期选择的原生交互） |
+| 场景                                     | 代码                                                                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 左下角头像菜单                           | `WorkspaceSidebar.tsx`、`SettingsPage.tsx`                                                                  |
+| Session 配额提醒                         | `ChatView.tsx`                                                                                              |
+| Token 用量 Upgrade                       | `ChatInputToolbar.tsx`                                                                                      |
+| Settings Upgrade/Subscribe/个人/团队入口 | `StatusCards.tsx`、`CodingPlanStatusActions.tsx`、`Detail.tsx`                                              |
+| 产品和周期选择                           | 官网 webview 页（原 `CodingPlanPurchasePanel.tsx` 已于 2026-09 删除，App 侧不再有产品和周期选择的原生交互） |
 
 跨页面跳转需要扩展 `packages/ui/src/lib/settingsNavigation.ts`，携带：
 

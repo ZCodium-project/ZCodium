@@ -4996,7 +4996,12 @@ nodes:
     kind: "capability"
     label: "Bot group and topic collaboration"
     aliases: ["群聊机器人", "话题续接", "ReplyToChannel", "渠道提及", "Bot 历史附件"]
-    docs: ["docs/bots-feishu-group-collaboration.md", "docs/bots-topic-input-materials.md", "docs/testing/bots-e2e-coverage-matrix.md"]
+    docs:
+      [
+        "docs/bots-feishu-group-collaboration.md",
+        "docs/bots-topic-input-materials.md",
+        "docs/testing/bots-e2e-coverage-matrix.md",
+      ]
     codeSeeds:
       - file: "packages/services/src/bots/botsService.ts"
         symbol: "createBotsService"

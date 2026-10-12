@@ -3,6 +3,7 @@
 ## How to Use This Guide
 
 Search by the **SYMPTOM** you observe, not the technical concept. Each entry follows:
+
 - **Symptom** — what you see or what the user reports
 - **Diagnosis** — how to confirm the root cause
 - **Fix** — exact steps, commands, or code
@@ -19,11 +20,13 @@ Search by the **SYMPTOM** you observe, not the technical concept. Each entry fol
 **Diagnosis:** The `pStyle` values in `document.xml` don't match the `styleId` values in `styles.xml`.
 
 Common mismatches:
+
 - Source uses `Heading1` but template defines the style as `1` (Chinese templates often use numeric styleIds)
 - Source uses `heading1` (lowercase) but template has `Heading1` (case-sensitive!)
 - `pStyle` references a style that simply doesn't exist in the output's `styles.xml`
 
 Check with:
+
 ```bash
 # List all pStyle values used in the document
 $CLI analyze --input output.docx | grep -i "pStyle"
@@ -66,6 +69,7 @@ foreach (var para in body.Descendants<Paragraph>())
 **Diagnosis:** Element ordering is wrong. OpenXML is strict about child element order.
 
 Common violations:
+
 - `pPr` must come before runs in `w:p`
 - `tblPr` must come before `tblGrid` in `w:tbl`
 - `rPr` must come before `t`/`br`/`tab` in `w:r`
@@ -84,11 +88,13 @@ $CLI validate --input doc.docx --xsd assets/xsd/wml-subset.xsd
 ```
 
 **Fix:**
+
 ```bash
 $CLI fix-order --input doc.docx
 ```
 
 If auto-fix doesn't resolve it, unpack and inspect manually:
+
 ```bash
 $CLI unpack --input doc.docx --output unpacked/
 # Check word/document.xml for ordering issues
@@ -134,6 +140,7 @@ foreach (var rPr in body.Descendants<RunProperties>())
 ```
 
 Also strip these common direct formatting overrides:
+
 - `w:sz` / `w:szCs` (font size)
 - `w:color` (text color)
 - `w:b` / `w:i` when they contradict the style
@@ -165,6 +172,7 @@ var allElements = body.ChildElements.ToList();
 ```
 
 In Python with lxml:
+
 ```python
 # WRONG
 elements = body.findall('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p')
@@ -193,6 +201,7 @@ ls unpacked/word/media/
 ```
 
 **Fix:**
+
 1. Check source rels for image file paths
 2. Copy media files from source to output
 3. Add/update relationships in output rels
@@ -225,6 +234,7 @@ foreach (var drawing in body.Descendants<Drawing>())
 **Symptom:** Table of contents shows the template's example entries (e.g., "第1章 绪论...1") instead of actual headings. Or clicking "Update Table" in Word does nothing.
 
 **Diagnosis:**
+
 - **Stale entries (normal):** TOC entries are static text cached inside the field. They don't auto-update until the user explicitly updates in Word.
 - **Update Table fails:** The SDT wrapper or field code structure is damaged. The TOC in real templates is a mixed structure: SDT block + field code + static entries.
 
@@ -234,6 +244,7 @@ $CLI analyze --input output.docx | grep -i "sdt\|toc"
 ```
 
 **Fix:**
+
 - **If entries are just stale:** This is expected behavior. The user must right-click TOC, then "Update Field" in Word. Or enable auto-update:
   ```csharp
   // See FieldAndTocSamples.EnableUpdateFieldsOnOpen()
@@ -472,6 +483,7 @@ foreach (var del in body.Descendants<DeletedRun>().ToList())
 ```
 
 Or disable tracking in settings:
+
 ```csharp
 var settings = settingsPart.Settings;
 var trackChanges = settings.GetFirstChild<TrackChanges>();

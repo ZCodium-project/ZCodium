@@ -48,10 +48,7 @@ describe("v4 catalog E09：fork 使用编辑后的 active branch", () => {
     expect(await clickFirstV4Fork()).toBe(true);
 
     const child = await waitForV4Pane(
-      (s) =>
-        s.sessionId !== null &&
-        s.sessionId !== "draft" &&
-        s.sessionId !== parentSessionId,
+      (s) => s.sessionId !== null && s.sessionId !== "draft" && s.sessionId !== parentSessionId,
       "fork 后 pane 没有切到 child session",
       60000,
     );

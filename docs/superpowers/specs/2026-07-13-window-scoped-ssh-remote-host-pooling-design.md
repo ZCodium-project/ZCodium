@@ -2,13 +2,13 @@
 
 ## Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Change | 将 Desktop SSH remote workspace 从“一 workspace 一 Remote Host”调整为“同一 Electron 窗口内，同一 SSH 连接配置共享一个 Remote Host”。 |
-| User-visible surfaces | SSH 连接、远程目录选择、远程 workspace tab、断线与重连、Renderer reload、手机 `/remote` 进入 SSH workspace。 |
-| Existing docs | `docs/architecture/zcode-code-architecture-overview.md`、`docs/architecture/message-flow.md`、`docs/remote-workspace-session-unified-settings.md`、`docs/ssh-remote-app-global-state-authority.md`、`docs/web-remote-control/web-remote-control-architecture.md`、`docs/web-remote-control/task-realtime-sync.md`、`docs/web-remote-control-task-command-queue.md`、`docs/remote/desktop-remote-session-renderer-reattach.md`。 |
-| Existing code owners | `packages/desktop/src/main/desktopRemoteSessions.ts`、`packages/desktop/src/main/desktopHostProcess.ts`、`packages/desktop/src/host/index.ts`、`packages/desktop/src/renderer/src/main.tsx`、`packages/ui/src/store/remoteWorkspaceSessionStore.ts`、`packages/ui/src/root/useRemoteWorkspaceHistory.ts`、`packages/ui/src/root/useRemoteWorkspaceTabLifecycle.ts`。 |
-| Out of scope | WSL/Docker Host 共享、跨 Electron 窗口共享、SSH Profile 数据模型、Host 级断开 UI、远端常驻 Daemon、App 冷启动自动重连。 |
+| Field                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change                | 将 Desktop SSH remote workspace 从“一 workspace 一 Remote Host”调整为“同一 Electron 窗口内，同一 SSH 连接配置共享一个 Remote Host”。                                                                                                                                                                                                                                                                                            |
+| User-visible surfaces | SSH 连接、远程目录选择、远程 workspace tab、断线与重连、Renderer reload、手机 `/remote` 进入 SSH workspace。                                                                                                                                                                                                                                                                                                                    |
+| Existing docs         | `docs/architecture/zcode-code-architecture-overview.md`、`docs/architecture/message-flow.md`、`docs/remote-workspace-session-unified-settings.md`、`docs/ssh-remote-app-global-state-authority.md`、`docs/web-remote-control/web-remote-control-architecture.md`、`docs/web-remote-control/task-realtime-sync.md`、`docs/web-remote-control-task-command-queue.md`、`docs/remote/desktop-remote-session-renderer-reattach.md`。 |
+| Existing code owners  | `packages/desktop/src/main/desktopRemoteSessions.ts`、`packages/desktop/src/main/desktopHostProcess.ts`、`packages/desktop/src/host/index.ts`、`packages/desktop/src/renderer/src/main.tsx`、`packages/ui/src/store/remoteWorkspaceSessionStore.ts`、`packages/ui/src/root/useRemoteWorkspaceHistory.ts`、`packages/ui/src/root/useRemoteWorkspaceTabLifecycle.ts`。                                                            |
+| Out of scope          | WSL/Docker Host 共享、跨 Electron 窗口共享、SSH Profile 数据模型、Host 级断开 UI、远端常驻 Daemon、App 冷启动自动重连。                                                                                                                                                                                                                                                                                                         |
 
 ## 背景与当前问题
 
@@ -61,91 +61,91 @@ Main 的 Host/session 生命周期和 MessagePort 路由，而不是重写远端
 
 ## Clarification Log
 
-| Round | Question | User answer | Boundary fixed | Follow-up needed |
-| --- | --- | --- | --- | --- |
-| 1 | Host 共享范围是窗口内还是 App 全局？ | 同一 Electron 窗口内。 | 不跨窗口共享。 | no |
-| 2 | 最后一个 workspace 关闭后是否销毁 Host？ | 缓存到窗口关闭。 | ready Host 允许零 workspace 绑定。 | no |
-| 3 | 显式断开共享 SSH 配置是否影响全部 workspace？ | 接受全部断开。 | Host 级 dispose 会关闭全部关联 session。 | no |
-| 4 | 是否引入独立 SSH Profile ID？ | 不引入，使用标准化连接字段。 | 本期不修改配置和凭据数据模型。 | no |
-| 5 | `remoteSessionId` 是 Host 级还是 workspace 级？ | 每个 workspace 保持独立 `remoteSessionId`。 | 新增内部 Host 共享维度，不重定义现有 session 语义。 | no |
-| 6 | Host 断线后重连一个 workspace 是否恢复同组其他 workspace？ | 自动恢复同窗口内同配置、仍打开的全部 workspace。 | 重连按 Host 组编排。 | no |
-| 7 | Host ready 后某个 workspace 初始化失败是否回滚全部？ | 不回滚，按 workspace 独立成功或失败。 | Transport failure 与 workspace initialization failure 分层处理。 | no |
-| 8 | 是否同时共享 WSL/Docker Host？ | 仅 SSH。 | WSL/Docker 保持现状。 | no |
-| 9 | 本期是否新增 Host 级断开 UI？ | 不新增。 | 仅窗口关闭、内部 dispose 或异常断线销毁 Host。 | no |
-| 10 | 精简后的 Host pool/pending connect/attached session 三事实源模型是否接受？ | 接受。 | 删除可派生的反向索引和重复 key。 | no |
+| Round | Question                                                                   | User answer                                      | Boundary fixed                                                   | Follow-up needed |
+| ----- | -------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- | ---------------- |
+| 1     | Host 共享范围是窗口内还是 App 全局？                                       | 同一 Electron 窗口内。                           | 不跨窗口共享。                                                   | no               |
+| 2     | 最后一个 workspace 关闭后是否销毁 Host？                                   | 缓存到窗口关闭。                                 | ready Host 允许零 workspace 绑定。                               | no               |
+| 3     | 显式断开共享 SSH 配置是否影响全部 workspace？                              | 接受全部断开。                                   | Host 级 dispose 会关闭全部关联 session。                         | no               |
+| 4     | 是否引入独立 SSH Profile ID？                                              | 不引入，使用标准化连接字段。                     | 本期不修改配置和凭据数据模型。                                   | no               |
+| 5     | `remoteSessionId` 是 Host 级还是 workspace 级？                            | 每个 workspace 保持独立 `remoteSessionId`。      | 新增内部 Host 共享维度，不重定义现有 session 语义。              | no               |
+| 6     | Host 断线后重连一个 workspace 是否恢复同组其他 workspace？                 | 自动恢复同窗口内同配置、仍打开的全部 workspace。 | 重连按 Host 组编排。                                             | no               |
+| 7     | Host ready 后某个 workspace 初始化失败是否回滚全部？                       | 不回滚，按 workspace 独立成功或失败。            | Transport failure 与 workspace initialization failure 分层处理。 | no               |
+| 8     | 是否同时共享 WSL/Docker Host？                                             | 仅 SSH。                                         | WSL/Docker 保持现状。                                            | no               |
+| 9     | 本期是否新增 Host 级断开 UI？                                              | 不新增。                                         | 仅窗口关闭、内部 dispose 或异常断线销毁 Host。                   | no               |
+| 10    | 精简后的 Host pool/pending connect/attached session 三事实源模型是否接受？ | 接受。                                           | 删除可派生的反向索引和重复 key。                                 | no               |
 
 ## Boundary Decisions
 
-| Boundary | Decision | Includes | Excludes / prunes | Source |
-| --- | --- | --- | --- | --- |
-| 共享范围 | `(windowWebContentsId, remoteHostKey)` 唯一确定一个 SSH Host。 | 同窗口同配置 workspace。 | 跨窗口 Host。 | user |
-| Host 生命周期 | ready Host 缓存到窗口关闭。 | 零 workspace 的 idle Host。 | last-session-close dispose。 | user |
-| Session 身份 | `remoteSessionId` 继续按 workspace 独立。 | 独立 RPC port、缓存和 mobile route。 | Host 级共享 session ID。 | user |
-| Workspace 隔离 | `workspaceKey = workspaceIdentity?.trim() || workspacePath`。 | Agent/provider/task/cache 隔离。 | 仅按 `workspacePath` 匹配。 | project invariant |
-| 重连 | 一个 workspace 发起后恢复同组仍打开 workspace。 | 一次 Host 建连，多 workspace attachment。 | 逐个手工重连。 | user |
-| 部分失败 | Host ready 后按 workspace 独立。 | Provider/path/Agent 初始化错误。 | 任一失败整体回滚 Host。 | user |
-| Remote kind | 仅 SSH 进入 Host pool。 | SSH password/private-key/agent auth。 | WSL/Docker。 | user |
-| UI | 不新增 Host 级断开入口。 | 现有 workspace/tab 行为。 | 新 UI 和样式。 | user |
-| 持久化 | Host pool 纯内存。 | 现有 remote workspace history。 | Host/Profile schema migration。 | design |
-| 协议 | 只调整 Desktop 内部 channel/platform 消息。 | Main ↔ Host、Renderer ↔ Main。 | `@zcode/protocol`。 | architecture |
+| Boundary       | Decision                                                       | Includes                                  | Excludes / prunes               | Source                           |
+| -------------- | -------------------------------------------------------------- | ----------------------------------------- | ------------------------------- | -------------------------------- | --------------------------- | ----------------- |
+| 共享范围       | `(windowWebContentsId, remoteHostKey)` 唯一确定一个 SSH Host。 | 同窗口同配置 workspace。                  | 跨窗口 Host。                   | user                             |
+| Host 生命周期  | ready Host 缓存到窗口关闭。                                    | 零 workspace 的 idle Host。               | last-session-close dispose。    | user                             |
+| Session 身份   | `remoteSessionId` 继续按 workspace 独立。                      | 独立 RPC port、缓存和 mobile route。      | Host 级共享 session ID。        | user                             |
+| Workspace 隔离 | `workspaceKey = workspaceIdentity?.trim()                      |                                           | workspacePath`。                | Agent/provider/task/cache 隔离。 | 仅按 `workspacePath` 匹配。 | project invariant |
+| 重连           | 一个 workspace 发起后恢复同组仍打开 workspace。                | 一次 Host 建连，多 workspace attachment。 | 逐个手工重连。                  | user                             |
+| 部分失败       | Host ready 后按 workspace 独立。                               | Provider/path/Agent 初始化错误。          | 任一失败整体回滚 Host。         | user                             |
+| Remote kind    | 仅 SSH 进入 Host pool。                                        | SSH password/private-key/agent auth。     | WSL/Docker。                    | user                             |
+| UI             | 不新增 Host 级断开入口。                                       | 现有 workspace/tab 行为。                 | 新 UI 和样式。                  | user                             |
+| 持久化         | Host pool 纯内存。                                             | 现有 remote workspace history。           | Host/Profile schema migration。 | design                           |
+| 协议           | 只调整 Desktop 内部 channel/platform 消息。                    | Main ↔ Host、Renderer ↔ Main。            | `@zcode/protocol`。             | architecture                     |
 
 ## Domain Scope
 
-| Domain | Include? | Why it can change behavior | Primary sources |
-| --- | --- | --- | --- |
-| Architecture/process boundary | yes | Main、Remote Host、Renderer MessagePort 与远端 server 的进程所有权发生变化。 | `docs/architecture/zcode-code-architecture-overview.md`、`docs/architecture/message-flow.md` |
-| Workspace identity/remote runtime | yes | Host 共享不能削弱 `workspaceIdentity/workspaceKey` 隔离。 | `docs/remote-workspace-session-unified-settings.md`、`docs/ssh-remote-app-global-state-authority.md` |
-| Mobile remote/replayable realtime | yes | 多个逻辑 session 将 attach 到同一进程，必须保留 mobile replayable 边界。 | `docs/web-remote-control/web-remote-control-architecture.md`、`docs/web-remote-control/task-realtime-sync.md` |
-| Model/provider/runtime config | yes | Registry 内容同源，但远端 applied revision 仍按 workspaceKey。 | `docs/ssh-remote-app-global-state-authority.md` |
-| Queue/task command | limited | 不改变 queue 语义，只验证 owner/lease 和 command 路由不跨 workspace。 | `docs/web-remote-control-task-command-queue.md` |
-| Persistence/index/snapshot | limited | Host pool 不持久化，现有 workspace history 保持兼容。 | `docs/remote-workspace-session-unified-settings.md` |
-| Conversation/session behavior | no | 不修改 session 消息、compact、fork、goal、queue 或 snapshot 内容。 | existing protocol docs |
-| UI shell/theme/locale | no | 不新增 UI。 | user decision |
+| Domain                            | Include? | Why it can change behavior                                                   | Primary sources                                                                                               |
+| --------------------------------- | -------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Architecture/process boundary     | yes      | Main、Remote Host、Renderer MessagePort 与远端 server 的进程所有权发生变化。 | `docs/architecture/zcode-code-architecture-overview.md`、`docs/architecture/message-flow.md`                  |
+| Workspace identity/remote runtime | yes      | Host 共享不能削弱 `workspaceIdentity/workspaceKey` 隔离。                    | `docs/remote-workspace-session-unified-settings.md`、`docs/ssh-remote-app-global-state-authority.md`          |
+| Mobile remote/replayable realtime | yes      | 多个逻辑 session 将 attach 到同一进程，必须保留 mobile replayable 边界。     | `docs/web-remote-control/web-remote-control-architecture.md`、`docs/web-remote-control/task-realtime-sync.md` |
+| Model/provider/runtime config     | yes      | Registry 内容同源，但远端 applied revision 仍按 workspaceKey。               | `docs/ssh-remote-app-global-state-authority.md`                                                               |
+| Queue/task command                | limited  | 不改变 queue 语义，只验证 owner/lease 和 command 路由不跨 workspace。        | `docs/web-remote-control-task-command-queue.md`                                                               |
+| Persistence/index/snapshot        | limited  | Host pool 不持久化，现有 workspace history 保持兼容。                        | `docs/remote-workspace-session-unified-settings.md`                                                           |
+| Conversation/session behavior     | no       | 不修改 session 消息、compact、fork、goal、queue 或 snapshot 内容。           | existing protocol docs                                                                                        |
+| UI shell/theme/locale             | no       | 不新增 UI。                                                                  | user decision                                                                                                 |
 
 ## High-Risk Cross-Products
 
-| Cross-product | Candidate risk | Handling |
-| --- | --- | --- |
-| Host pool × workspace identity | 同一路径不同 SSH 主机串用 services。 | `remoteHostKey` 只决定进程复用；每次调用继续携带 workspaceIdentity。 |
-| Host pool × Renderer reload | 一个 Host 重挂多个 session 时覆盖 renderer store。 | 每个 session 独立 MessagePort 和 remoteSessionId。 |
-| Host pool × mobile replayable | 手机通过 session A 访问 workspace B。 | attach 同时校验 remoteSessionId、window owner 和 workspaceIdentity/workspaceKey。 |
-| Host pool × realtime scope | Host 收到不属于已绑定 workspace 的事件。 | scope 从 attached session context 实时派生并更新 TaskRealtimeBus。 |
-| Host pool × provider registry | 一个 workspace 的 applied revision 被另一个 workspace 复用。 | 远端 registry 和 revision 继续按 workspaceKey 存储。 |
-| Host pool × cancel | 一个连接尝试取消误杀其他并发等待者。 | pending connect 独立；只有全部等待者取消且 Host 仍 connecting 时才销毁。 |
-| Host pool × stale exit | 旧 Host exit 回调误删新 Host。 | 删除前比较当前 pool entry/process 对象身份。 |
-| Host pool × window lifecycle | 一个窗口关闭误杀另一窗口同 key Host。 | pool key 强制包含 windowWebContentsId。 |
-| Host pool × credentials | 同 key workspace 保存不同密码。 | 已连接 Host 继续复用；重新建连使用发起者本次提供的有效凭据。 |
+| Cross-product                  | Candidate risk                                               | Handling                                                                          |
+| ------------------------------ | ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Host pool × workspace identity | 同一路径不同 SSH 主机串用 services。                         | `remoteHostKey` 只决定进程复用；每次调用继续携带 workspaceIdentity。              |
+| Host pool × Renderer reload    | 一个 Host 重挂多个 session 时覆盖 renderer store。           | 每个 session 独立 MessagePort 和 remoteSessionId。                                |
+| Host pool × mobile replayable  | 手机通过 session A 访问 workspace B。                        | attach 同时校验 remoteSessionId、window owner 和 workspaceIdentity/workspaceKey。 |
+| Host pool × realtime scope     | Host 收到不属于已绑定 workspace 的事件。                     | scope 从 attached session context 实时派生并更新 TaskRealtimeBus。                |
+| Host pool × provider registry  | 一个 workspace 的 applied revision 被另一个 workspace 复用。 | 远端 registry 和 revision 继续按 workspaceKey 存储。                              |
+| Host pool × cancel             | 一个连接尝试取消误杀其他并发等待者。                         | pending connect 独立；只有全部等待者取消且 Host 仍 connecting 时才销毁。          |
+| Host pool × stale exit         | 旧 Host exit 回调误删新 Host。                               | 删除前比较当前 pool entry/process 对象身份。                                      |
+| Host pool × window lifecycle   | 一个窗口关闭误杀另一窗口同 key Host。                        | pool key 强制包含 windowWebContentsId。                                           |
+| Host pool × credentials        | 同 key workspace 保存不同密码。                              | 已连接 Host 继续复用；重新建连使用发起者本次提供的有效凭据。                      |
 
 ## Concept Map
 
-| Concept | Why it matters | Source |
-| --- | --- | --- |
-| `createRemoteWorkspaceSession()` | 当前每次调用都 fork 一个 Host，是本次重构入口。 | `packages/desktop/src/main/desktopRemoteSessions.ts` |
-| `AttachServicePort` | 已支持把新 RPC port 暴露到现有 `activeServices`，是共享 Host 的基础。 | `packages/desktop/src/host/index.ts` |
-| `activeServices` | 一个 Host 内的共享混合 ServiceCollection。 | `packages/desktop/src/host/index.ts` |
-| `createRemoteWorkspaceServiceCollection()` | 组合本地 app-global service、远端 service 和 wrapper。 | `packages/desktop/src/host/remoteWorkspaceServiceCollection.ts` |
-| `connectRemote()` | 一次 SSH backend、远端 server stdio 与 RPC client 的完整连接。 | `packages/server/src/remote/connect.ts` |
-| `createLocalServices()` | 远端 server 的多 workspace service owner。 | `packages/services/src/node.ts` |
-| `ZCodeAgentProcessManager` | 已按 workspaceKey 复用/隔离 Agent 进程。 | `packages/services/src/zcode-agent/zcodeAgentProcessManager.ts` |
-| `remoteWorkspaceSessionStore` | Renderer 按 remoteSessionId 注册 services，再按 identity/path 绑定 workspace。 | `packages/ui/src/store/remoteWorkspaceSessionStore.ts` |
-| `webRemoteControlSharedHostAttachments` | 手机 attachment 需要从逻辑 session 找到共享进程。 | `packages/desktop/src/main/webRemoteControlSharedHostAttachments.ts` |
-| `TaskRealtimeBus` | Host delivery scope、owner/lease 与 session route 的 Main 侧路由器。 | `packages/desktop/src/main/taskRealtimeBus.ts` |
-| `buildRemoteWorkspaceIdentity()` | authority + canonical path 的 workspace 身份。 | `packages/ui/src/lib/remoteWorkspaceHistory.ts` |
+| Concept                                    | Why it matters                                                                 | Source                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `createRemoteWorkspaceSession()`           | 当前每次调用都 fork 一个 Host，是本次重构入口。                                | `packages/desktop/src/main/desktopRemoteSessions.ts`                 |
+| `AttachServicePort`                        | 已支持把新 RPC port 暴露到现有 `activeServices`，是共享 Host 的基础。          | `packages/desktop/src/host/index.ts`                                 |
+| `activeServices`                           | 一个 Host 内的共享混合 ServiceCollection。                                     | `packages/desktop/src/host/index.ts`                                 |
+| `createRemoteWorkspaceServiceCollection()` | 组合本地 app-global service、远端 service 和 wrapper。                         | `packages/desktop/src/host/remoteWorkspaceServiceCollection.ts`      |
+| `connectRemote()`                          | 一次 SSH backend、远端 server stdio 与 RPC client 的完整连接。                 | `packages/server/src/remote/connect.ts`                              |
+| `createLocalServices()`                    | 远端 server 的多 workspace service owner。                                     | `packages/services/src/node.ts`                                      |
+| `ZCodeAgentProcessManager`                 | 已按 workspaceKey 复用/隔离 Agent 进程。                                       | `packages/services/src/zcode-agent/zcodeAgentProcessManager.ts`      |
+| `remoteWorkspaceSessionStore`              | Renderer 按 remoteSessionId 注册 services，再按 identity/path 绑定 workspace。 | `packages/ui/src/store/remoteWorkspaceSessionStore.ts`               |
+| `webRemoteControlSharedHostAttachments`    | 手机 attachment 需要从逻辑 session 找到共享进程。                              | `packages/desktop/src/main/webRemoteControlSharedHostAttachments.ts` |
+| `TaskRealtimeBus`                          | Host delivery scope、owner/lease 与 session route 的 Main 侧路由器。           | `packages/desktop/src/main/taskRealtimeBus.ts`                       |
+| `buildRemoteWorkspaceIdentity()`           | authority + canonical path 的 workspace 身份。                                 | `packages/ui/src/lib/remoteWorkspaceHistory.ts`                      |
 
 ## State Owners
 
-| State / fact | Authority | Mirrors / caches | Evidence |
-| --- | --- | --- | --- |
-| 窗口内 SSH Host 是否存在 | Desktop Main Host pool | none | pool entry + child process |
-| Host readiness | Host pool entry `readiness` | pending connect waiters | `Connected`/`Error`/exit |
-| pending connect | Desktop Main pending connect map | UI loading state | requestId cancel/result |
-| logical remote session | Desktop Main attached session map | Renderer `sessionsById`、tab remoteSessionId | RemoteServicePort payload |
-| RPC attachment | Remote Host attachment map | Main session `attachmentId` | Attach/DetachServicePort |
-| workspace context | Renderer tab/history, bound into Main session | Host realtime scope | workspacePath + workspaceIdentity |
-| workspace isolation key | `resolveWorkspaceKey(context)` | Agent/task/provider maps | workspaceKey |
-| remote Agent process | 远端 `ZCodeAgentProcessManager` | process lifecycle reports | process by workspaceKey |
-| Provider registry applied revision | 远端 workspace runtime | UI sync coordinator | appliedProviderRevision by workspaceKey |
-| task/session/stream state | 远端 Agent/session services | desktop projection/mobile replay mirror | protocol events/snapshots |
+| State / fact                       | Authority                                     | Mirrors / caches                             | Evidence                                |
+| ---------------------------------- | --------------------------------------------- | -------------------------------------------- | --------------------------------------- |
+| 窗口内 SSH Host 是否存在           | Desktop Main Host pool                        | none                                         | pool entry + child process              |
+| Host readiness                     | Host pool entry `readiness`                   | pending connect waiters                      | `Connected`/`Error`/exit                |
+| pending connect                    | Desktop Main pending connect map              | UI loading state                             | requestId cancel/result                 |
+| logical remote session             | Desktop Main attached session map             | Renderer `sessionsById`、tab remoteSessionId | RemoteServicePort payload               |
+| RPC attachment                     | Remote Host attachment map                    | Main session `attachmentId`                  | Attach/DetachServicePort                |
+| workspace context                  | Renderer tab/history, bound into Main session | Host realtime scope                          | workspacePath + workspaceIdentity       |
+| workspace isolation key            | `resolveWorkspaceKey(context)`                | Agent/task/provider maps                     | workspaceKey                            |
+| remote Agent process               | 远端 `ZCodeAgentProcessManager`               | process lifecycle reports                    | process by workspaceKey                 |
+| Provider registry applied revision | 远端 workspace runtime                        | UI sync coordinator                          | appliedProviderRevision by workspaceKey |
+| task/session/stream state          | 远端 Agent/session services                   | desktop projection/mobile replay mirror      | protocol events/snapshots               |
 
 ## Identity Model
 
@@ -243,10 +243,7 @@ interface AttachedRemoteWorkspaceSession {
 权威索引：
 
 ```ts
-sshHostsByPoolKey: Map<
-  `${windowWebContentsId}\0${remoteHostKey}`,
-  RemoteSshHostEntry
->;
+sshHostsByPoolKey: Map<`${windowWebContentsId}\0${remoteHostKey}`, RemoteSshHostEntry>;
 
 pendingConnectsByRequestId: Map<string, PendingRemoteConnect>;
 
@@ -578,102 +575,102 @@ owner/lease、owner command、pending permission/elicitation/command 和 stale r
 
 ## Dimensions
 
-| Dimension | Values / equivalence classes | Include? | Reason |
-| --- | --- | --- | --- |
-| window | same / different | yes | 共享边界。 |
-| remote kind | SSH / WSL / Docker | yes | 仅 SSH 改变。 |
-| SSH key | same / different | yes | Host pool 主键。 |
-| Host readiness | absent / connecting / ready / exited | yes | 并发、取消和错误语义。 |
-| logical session | pending / attached / removed | yes | attachment 生命周期。 |
-| workspace context | unbound / bound | yes | 目录浏览与 identity 校验。 |
-| attached count | 0 / 1 / many | yes | idle cache 和共享行为。 |
-| renderer lifecycle | initial / reload / close | yes | port 重挂与回收。 |
-| client mode | desktop-continuous / web-remote-replayable | yes | delivery 边界不可混用。 |
-| failure layer | Host transport / attachment / workspace initialization | yes | 整体失败与部分失败边界。 |
-| auth | password / private key / agent | yes | remoteHostKey 等价类。 |
-| credential content | same / changed | representative | secret 不进 key，但影响重新建连。 |
-| provider revision | same / independently failed | yes | applied state 按 workspace。 |
+| Dimension          | Values / equivalence classes                           | Include?       | Reason                            |
+| ------------------ | ------------------------------------------------------ | -------------- | --------------------------------- |
+| window             | same / different                                       | yes            | 共享边界。                        |
+| remote kind        | SSH / WSL / Docker                                     | yes            | 仅 SSH 改变。                     |
+| SSH key            | same / different                                       | yes            | Host pool 主键。                  |
+| Host readiness     | absent / connecting / ready / exited                   | yes            | 并发、取消和错误语义。            |
+| logical session    | pending / attached / removed                           | yes            | attachment 生命周期。             |
+| workspace context  | unbound / bound                                        | yes            | 目录浏览与 identity 校验。        |
+| attached count     | 0 / 1 / many                                           | yes            | idle cache 和共享行为。           |
+| renderer lifecycle | initial / reload / close                               | yes            | port 重挂与回收。                 |
+| client mode        | desktop-continuous / web-remote-replayable             | yes            | delivery 边界不可混用。           |
+| failure layer      | Host transport / attachment / workspace initialization | yes            | 整体失败与部分失败边界。          |
+| auth               | password / private key / agent                         | yes            | remoteHostKey 等价类。            |
+| credential content | same / changed                                         | representative | secret 不进 key，但影响重新建连。 |
+| provider revision  | same / independently failed                            | yes            | applied state 按 workspace。      |
 
 ## Candidate Combinations
 
-| Candidate ID | State | Event | Target/surface | Expected guard/effect | Status |
-| --- | --- | --- | --- | --- | --- |
-| SSH-HOST-POOL-01 | no Host | connect A then B, same window/key | Desktop | one Host, two logical sessions/ports | accepted |
-| SSH-HOST-POOL-02 | no Host | same key in different windows | Desktop | one Host per window | accepted |
-| SSH-HOST-POOL-03 | no Host | two different keys in same window | Desktop | two Hosts | accepted |
-| SSH-HOST-POOL-04 | connecting | concurrent same-key connects | Main | share readiness promise and one spawn | accepted |
-| SSH-HOST-POOL-05 | connecting with two waiters | cancel one | Main/UI | one waiter removed, Host continues | accepted |
-| SSH-HOST-POOL-06 | connecting with last waiter | cancel | Main/UI | Host disposed and deployment stops | accepted |
-| SSH-HOST-POOL-07 | ready, temp session | cancel directory selection | Desktop | session detached, Host cached | accepted |
-| SSH-HOST-POOL-08 | ready, two workspaces | close A | Desktop/mobile | detach A only; B remains usable | accepted |
-| SSH-HOST-POOL-09 | ready, one workspace | close last workspace then reopen same key | Desktop | Host stays idle and is reused | accepted |
-| SSH-HOST-POOL-10 | ready Hosts | close window | Main | dispose all Hosts in that window | accepted |
-| SSH-HOST-POOL-11 | ready, two sessions | renderer reload | Desktop | reattach two independent ports to same Host | accepted |
-| SSH-HOST-POOL-12 | ready, two sessions | Host/SSH exits | Desktop/mobile | both sessions close and tabs disconnect | accepted |
-| SSH-HOST-POOL-13 | disconnected group | reconnect A | UI/Main | A and B restored through one new Host | accepted |
-| SSH-HOST-POOL-14 | Host ready | B provider/path init fails | UI/service | A stays connected; B shows failure | accepted |
-| SSH-HOST-POOL-15 | shared Host, A/B | phones attach A and B | mobile | same process, isolated sessions/identities | accepted |
-| SSH-HOST-POOL-16 | session A bound to key A | attach with identity B | mobile | reject identity mismatch | accepted |
-| SSH-HOST-POOL-17 | A/B registry sync | same registry revision | remote server | applied state independently keyed | accepted |
-| SSH-HOST-POOL-18 | attached set changes | bind/unbind workspace | realtime | TaskRealtime scope equals derived union | accepted |
-| SSH-HOST-POOL-19 | WSL/Docker | open multiple workspaces | Desktop | existing session-per-host behavior | accepted |
-| SSH-HOST-POOL-20 | ready or reconnecting | credential content changes | SSH | ready Host reused; new Host uses current credential | accepted |
-| SSH-HOST-POOL-21 | backend 首次 SFTP write/session 失败 | 连续上传多个资源 | SSH deploy | 首个资源 fallback；后续资源直接 exec pipe；只记录一次降级 warn | accepted |
-| SSH-HOST-POOL-22 | 新 session 且 provider registry 尚未同步 | 同步 workspace app-global state | UI/Host RPC | 跳过无决策价值的 pre-probe；先应用 registry，再进行一次成功的 post-apply identity probe | accepted |
-| SSH-HOST-POOL-23 | remote tab 已激活但 services 尚未注册 | Renderer workspace 副作用准备启动 | UI | 状态为 `remote-waiting`；conversation、任务通知 sessions-index 和 MCP 水合的 workspace RPC 调用数均为 0，services 注册后各只启动一次；本地 workspace 继续立即启动 | accepted |
-| SSH-HOST-POOL-24 | 多个 remote tab 的 `workspacePath` 相同、`workspaceIdentity` 不同，只有其中一个 identity 已绑定 live session | Renderer 解析 workspace services | UI | 带 identity 的 tab 只能命中显式 `remoteSessionId` 或 identity 精确映射；精确映射缺失时保持 `remote-waiting`，禁止按 path 借用另一 endpoint | accepted |
-| SSH-HOST-POOL-25 | local tab 与 remote tab 的 `workspacePath` 相同，remote path 索引已绑定 live session | Renderer 解析 local workspace services | UI | local tab 不具备 remote 元数据时必须使用 base services，禁止仅凭 path 借用 remote endpoint | accepted |
-| SSH-HOST-POOL-26 | Web 远控入口携带 remote `workspaceIdentity`，tab 的 `remoteSessionId` 尚未回填或已经失效 | Renderer 解析远控目标 session | UI/mobile | identity 必须参与精确解析；弹层只接收已注册的解析结果，禁止透传未校验 session 或按 path 借用另一 endpoint | accepted |
+| Candidate ID     | State                                                                                                        | Event                                     | Target/surface | Expected guard/effect                                                                                                                                             | Status   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| SSH-HOST-POOL-01 | no Host                                                                                                      | connect A then B, same window/key         | Desktop        | one Host, two logical sessions/ports                                                                                                                              | accepted |
+| SSH-HOST-POOL-02 | no Host                                                                                                      | same key in different windows             | Desktop        | one Host per window                                                                                                                                               | accepted |
+| SSH-HOST-POOL-03 | no Host                                                                                                      | two different keys in same window         | Desktop        | two Hosts                                                                                                                                                         | accepted |
+| SSH-HOST-POOL-04 | connecting                                                                                                   | concurrent same-key connects              | Main           | share readiness promise and one spawn                                                                                                                             | accepted |
+| SSH-HOST-POOL-05 | connecting with two waiters                                                                                  | cancel one                                | Main/UI        | one waiter removed, Host continues                                                                                                                                | accepted |
+| SSH-HOST-POOL-06 | connecting with last waiter                                                                                  | cancel                                    | Main/UI        | Host disposed and deployment stops                                                                                                                                | accepted |
+| SSH-HOST-POOL-07 | ready, temp session                                                                                          | cancel directory selection                | Desktop        | session detached, Host cached                                                                                                                                     | accepted |
+| SSH-HOST-POOL-08 | ready, two workspaces                                                                                        | close A                                   | Desktop/mobile | detach A only; B remains usable                                                                                                                                   | accepted |
+| SSH-HOST-POOL-09 | ready, one workspace                                                                                         | close last workspace then reopen same key | Desktop        | Host stays idle and is reused                                                                                                                                     | accepted |
+| SSH-HOST-POOL-10 | ready Hosts                                                                                                  | close window                              | Main           | dispose all Hosts in that window                                                                                                                                  | accepted |
+| SSH-HOST-POOL-11 | ready, two sessions                                                                                          | renderer reload                           | Desktop        | reattach two independent ports to same Host                                                                                                                       | accepted |
+| SSH-HOST-POOL-12 | ready, two sessions                                                                                          | Host/SSH exits                            | Desktop/mobile | both sessions close and tabs disconnect                                                                                                                           | accepted |
+| SSH-HOST-POOL-13 | disconnected group                                                                                           | reconnect A                               | UI/Main        | A and B restored through one new Host                                                                                                                             | accepted |
+| SSH-HOST-POOL-14 | Host ready                                                                                                   | B provider/path init fails                | UI/service     | A stays connected; B shows failure                                                                                                                                | accepted |
+| SSH-HOST-POOL-15 | shared Host, A/B                                                                                             | phones attach A and B                     | mobile         | same process, isolated sessions/identities                                                                                                                        | accepted |
+| SSH-HOST-POOL-16 | session A bound to key A                                                                                     | attach with identity B                    | mobile         | reject identity mismatch                                                                                                                                          | accepted |
+| SSH-HOST-POOL-17 | A/B registry sync                                                                                            | same registry revision                    | remote server  | applied state independently keyed                                                                                                                                 | accepted |
+| SSH-HOST-POOL-18 | attached set changes                                                                                         | bind/unbind workspace                     | realtime       | TaskRealtime scope equals derived union                                                                                                                           | accepted |
+| SSH-HOST-POOL-19 | WSL/Docker                                                                                                   | open multiple workspaces                  | Desktop        | existing session-per-host behavior                                                                                                                                | accepted |
+| SSH-HOST-POOL-20 | ready or reconnecting                                                                                        | credential content changes                | SSH            | ready Host reused; new Host uses current credential                                                                                                               | accepted |
+| SSH-HOST-POOL-21 | backend 首次 SFTP write/session 失败                                                                         | 连续上传多个资源                          | SSH deploy     | 首个资源 fallback；后续资源直接 exec pipe；只记录一次降级 warn                                                                                                    | accepted |
+| SSH-HOST-POOL-22 | 新 session 且 provider registry 尚未同步                                                                     | 同步 workspace app-global state           | UI/Host RPC    | 跳过无决策价值的 pre-probe；先应用 registry，再进行一次成功的 post-apply identity probe                                                                           | accepted |
+| SSH-HOST-POOL-23 | remote tab 已激活但 services 尚未注册                                                                        | Renderer workspace 副作用准备启动         | UI             | 状态为 `remote-waiting`；conversation、任务通知 sessions-index 和 MCP 水合的 workspace RPC 调用数均为 0，services 注册后各只启动一次；本地 workspace 继续立即启动 | accepted |
+| SSH-HOST-POOL-24 | 多个 remote tab 的 `workspacePath` 相同、`workspaceIdentity` 不同，只有其中一个 identity 已绑定 live session | Renderer 解析 workspace services          | UI             | 带 identity 的 tab 只能命中显式 `remoteSessionId` 或 identity 精确映射；精确映射缺失时保持 `remote-waiting`，禁止按 path 借用另一 endpoint                        | accepted |
+| SSH-HOST-POOL-25 | local tab 与 remote tab 的 `workspacePath` 相同，remote path 索引已绑定 live session                         | Renderer 解析 local workspace services    | UI             | local tab 不具备 remote 元数据时必须使用 base services，禁止仅凭 path 借用 remote endpoint                                                                        | accepted |
+| SSH-HOST-POOL-26 | Web 远控入口携带 remote `workspaceIdentity`，tab 的 `remoteSessionId` 尚未回填或已经失效                     | Renderer 解析远控目标 session             | UI/mobile      | identity 必须参与精确解析；弹层只接收已注册的解析结果，禁止透传未校验 session 或按 path 借用另一 endpoint                                                         | accepted |
 
 ## Pruning Decisions
 
-| Decision ID | Pruned combinations | Guard/invariant | Product reason | Representative coverage |
-| --- | --- | --- | --- | --- |
-| SSH-POOL-PD-01 | same key across windows shares Host | pool key includes window id | 窗口级故障与生命周期隔离 | SSH-HOST-POOL-02 |
-| SSH-POOL-PD-02 | WSL/Docker use Host pool | remote kind must be SSH | 本期控制回归面 | SSH-HOST-POOL-19 |
-| SSH-POOL-PD-03 | all workspaces share one remoteSessionId | session remains workspace-scoped | 保留现有路由/缓存/mobile 语义 | SSH-HOST-POOL-01 |
-| SSH-POOL-PD-04 | last session closes Host | ready Host survives zero binding | 提升再次打开 workspace 的体验 | SSH-HOST-POOL-09 |
-| SSH-POOL-PD-05 | any workspace init failure rolls back Host | Host ready separates transport from workspace init | 避免失败扩散 | SSH-HOST-POOL-14 |
-| SSH-POOL-PD-06 | persist Host/Profile identity | Host pool is runtime-only | 不扩大到配置迁移 | cold-start compatibility tests |
-| SSH-POOL-PD-07 | app cold start auto-connect | restored tabs remain disconnected | 不在后台偷偷建立 SSH | existing persistence tests |
-| SSH-POOL-PD-08 | new disconnect UI | no UI in scope | 聚焦进程模型 | no UI diff |
-| SSH-POOL-PD-09 | mobile creates independent remote runtime | shared-host attachment invariant | Relay/Main 不拥有业务 runtime | SSH-HOST-POOL-15/16 |
+| Decision ID    | Pruned combinations                        | Guard/invariant                                    | Product reason                | Representative coverage        |
+| -------------- | ------------------------------------------ | -------------------------------------------------- | ----------------------------- | ------------------------------ |
+| SSH-POOL-PD-01 | same key across windows shares Host        | pool key includes window id                        | 窗口级故障与生命周期隔离      | SSH-HOST-POOL-02               |
+| SSH-POOL-PD-02 | WSL/Docker use Host pool                   | remote kind must be SSH                            | 本期控制回归面                | SSH-HOST-POOL-19               |
+| SSH-POOL-PD-03 | all workspaces share one remoteSessionId   | session remains workspace-scoped                   | 保留现有路由/缓存/mobile 语义 | SSH-HOST-POOL-01               |
+| SSH-POOL-PD-04 | last session closes Host                   | ready Host survives zero binding                   | 提升再次打开 workspace 的体验 | SSH-HOST-POOL-09               |
+| SSH-POOL-PD-05 | any workspace init failure rolls back Host | Host ready separates transport from workspace init | 避免失败扩散                  | SSH-HOST-POOL-14               |
+| SSH-POOL-PD-06 | persist Host/Profile identity              | Host pool is runtime-only                          | 不扩大到配置迁移              | cold-start compatibility tests |
+| SSH-POOL-PD-07 | app cold start auto-connect                | restored tabs remain disconnected                  | 不在后台偷偷建立 SSH          | existing persistence tests     |
+| SSH-POOL-PD-08 | new disconnect UI                          | no UI in scope                                     | 聚焦进程模型                  | no UI diff                     |
+| SSH-POOL-PD-09 | mobile creates independent remote runtime  | shared-host attachment invariant                   | Relay/Main 不拥有业务 runtime | SSH-HOST-POOL-15/16            |
 
 ## Accepted Cases
 
-| Case ID | Setup | Action | Assertions | Evidence layers | Status |
-| --- | --- | --- | --- | --- | --- |
-| SSH-HOST-POOL-01 | 同窗口，无 Host | 依次连接同 key 的 workspace A/B | 只 fork 一次；A/B sessionId 与 attachmentId 不同；远端一个 server | unit + process/log | planned |
-| SSH-HOST-POOL-04 | Host connecting | 两个 connect 并发进入 | connect/deploy/handshake 只执行一次 | unit | planned |
-| SSH-HOST-POOL-05 | 两个 pending waiter | 取消其中一个 requestId | 另一个继续成功；Host 未 dispose | unit | planned |
-| SSH-HOST-POOL-06 | 仅一个 pending waiter | 取消 requestId | connecting Host 被 dispose；上传/部署停止 | unit + runtime log | planned |
-| SSH-HOST-POOL-08 | A/B attached | 关闭 A tab | Host 仅 detach A；B file/task RPC 成功 | unit + integration | planned |
-| SSH-HOST-POOL-09 | 最后一个 workspace attached | 关闭后再次打开同 key workspace | Host PID 不变；无新 SSH handshake | unit + manual SSH | planned |
-| SSH-HOST-POOL-11 | A/B attached | renderer reload | A/B 原 remoteSessionId 分别重挂到同一 Host process | unit + renderer harness | planned |
-| SSH-HOST-POOL-12 | A/B running | 模拟 SSH/backend close | 两个 session-closed；两个 tab 清 remoteSessionId；pool entry 删除 | unit + fault harness | planned |
-| SSH-HOST-POOL-13 | A/B disconnected、仍打开 | 对 A 点击重连 | 一次 Host 创建；A/B 各获新 session；各自绑定 identity | UI/Main integration | planned |
-| SSH-HOST-POOL-14 | Host 已恢复 | 注入 B provider/path init failure | A connected；B failed；Host 保留 | UI/service integration | planned |
-| SSH-HOST-POOL-15 | A/B attached，同一 Host | mobile 分别打开 A/B | 两个 shared-host attachments 指向同一 process；workspaceKey 不串 | unit + web remote harness | planned |
-| SSH-HOST-POOL-16 | session A 绑定 identity A | mobile 用 identity B attach A | 返回 identity mismatch，不创建 port | unit | planned |
-| SSH-HOST-POOL-17 | A/B 使用同 provider snapshot | 分别 update registry | 远端两个 workspaceKey 都记录 applied revision；失败独立 | service integration | planned |
-| SSH-HOST-POOL-22 | 新 remote session，无 applied revision | 同步 provider registry | 首次操作为 update；之后只做一次成功 identity probe | UI unit | covered |
-| SSH-HOST-POOL-23 | remote tab 有 identity、无已注册 services | 挂载单 pane/跨 workspace pane | waiting 期间数据层不挂载；注册并绑定 session 后只挂载一次；本地立即挂载 | UI hook/component | covered |
-| SSH-HOST-POOL-24 | 115、localhost、jumpserver 三个 remote tab 的路径都为 `/root`，仅 115 identity 已绑定 live session | 分别解析三个 tab 的 workspace services | 115 命中自己的 session；另外两个返回 remote-waiting，不向 115 Host 发起 sessions-index/provider/task RPC；无 identity 的旧 remote tab 仍允许 path fallback | UI resolver unit | covered |
-| SSH-HOST-POOL-25 | local `/root` 与 remote `/root` 同时存在，path 索引指向 remote session | 解析 active local tab 的 workspace services | 返回 local/base 路由，不命中 remote session | UI hook unit | covered |
-| SSH-HOST-POOL-26 | Web 远控入口传入 localhost identity 与失效/缺失的 session，115 path 索引仍存活 | 打开远控弹层 | resolver 收到 localhost identity；弹层只收到 resolver 验证后的 session，不收到失效 session 或 115 session | UI component unit | covered |
-| SSH-HOST-POOL-18 | A attached，然后 B attach，再 A detach | 更新 context | realtime scope 依次为 `{A}`、`{A,B}`、`{B}` | unit | planned |
+| Case ID          | Setup                                                                                              | Action                                      | Assertions                                                                                                                                                 | Evidence layers           | Status  |
+| ---------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ------- |
+| SSH-HOST-POOL-01 | 同窗口，无 Host                                                                                    | 依次连接同 key 的 workspace A/B             | 只 fork 一次；A/B sessionId 与 attachmentId 不同；远端一个 server                                                                                          | unit + process/log        | planned |
+| SSH-HOST-POOL-04 | Host connecting                                                                                    | 两个 connect 并发进入                       | connect/deploy/handshake 只执行一次                                                                                                                        | unit                      | planned |
+| SSH-HOST-POOL-05 | 两个 pending waiter                                                                                | 取消其中一个 requestId                      | 另一个继续成功；Host 未 dispose                                                                                                                            | unit                      | planned |
+| SSH-HOST-POOL-06 | 仅一个 pending waiter                                                                              | 取消 requestId                              | connecting Host 被 dispose；上传/部署停止                                                                                                                  | unit + runtime log        | planned |
+| SSH-HOST-POOL-08 | A/B attached                                                                                       | 关闭 A tab                                  | Host 仅 detach A；B file/task RPC 成功                                                                                                                     | unit + integration        | planned |
+| SSH-HOST-POOL-09 | 最后一个 workspace attached                                                                        | 关闭后再次打开同 key workspace              | Host PID 不变；无新 SSH handshake                                                                                                                          | unit + manual SSH         | planned |
+| SSH-HOST-POOL-11 | A/B attached                                                                                       | renderer reload                             | A/B 原 remoteSessionId 分别重挂到同一 Host process                                                                                                         | unit + renderer harness   | planned |
+| SSH-HOST-POOL-12 | A/B running                                                                                        | 模拟 SSH/backend close                      | 两个 session-closed；两个 tab 清 remoteSessionId；pool entry 删除                                                                                          | unit + fault harness      | planned |
+| SSH-HOST-POOL-13 | A/B disconnected、仍打开                                                                           | 对 A 点击重连                               | 一次 Host 创建；A/B 各获新 session；各自绑定 identity                                                                                                      | UI/Main integration       | planned |
+| SSH-HOST-POOL-14 | Host 已恢复                                                                                        | 注入 B provider/path init failure           | A connected；B failed；Host 保留                                                                                                                           | UI/service integration    | planned |
+| SSH-HOST-POOL-15 | A/B attached，同一 Host                                                                            | mobile 分别打开 A/B                         | 两个 shared-host attachments 指向同一 process；workspaceKey 不串                                                                                           | unit + web remote harness | planned |
+| SSH-HOST-POOL-16 | session A 绑定 identity A                                                                          | mobile 用 identity B attach A               | 返回 identity mismatch，不创建 port                                                                                                                        | unit                      | planned |
+| SSH-HOST-POOL-17 | A/B 使用同 provider snapshot                                                                       | 分别 update registry                        | 远端两个 workspaceKey 都记录 applied revision；失败独立                                                                                                    | service integration       | planned |
+| SSH-HOST-POOL-22 | 新 remote session，无 applied revision                                                             | 同步 provider registry                      | 首次操作为 update；之后只做一次成功 identity probe                                                                                                         | UI unit                   | covered |
+| SSH-HOST-POOL-23 | remote tab 有 identity、无已注册 services                                                          | 挂载单 pane/跨 workspace pane               | waiting 期间数据层不挂载；注册并绑定 session 后只挂载一次；本地立即挂载                                                                                    | UI hook/component         | covered |
+| SSH-HOST-POOL-24 | 115、localhost、jumpserver 三个 remote tab 的路径都为 `/root`，仅 115 identity 已绑定 live session | 分别解析三个 tab 的 workspace services      | 115 命中自己的 session；另外两个返回 remote-waiting，不向 115 Host 发起 sessions-index/provider/task RPC；无 identity 的旧 remote tab 仍允许 path fallback | UI resolver unit          | covered |
+| SSH-HOST-POOL-25 | local `/root` 与 remote `/root` 同时存在，path 索引指向 remote session                             | 解析 active local tab 的 workspace services | 返回 local/base 路由，不命中 remote session                                                                                                                | UI hook unit              | covered |
+| SSH-HOST-POOL-26 | Web 远控入口传入 localhost identity 与失效/缺失的 session，115 path 索引仍存活                     | 打开远控弹层                                | resolver 收到 localhost identity；弹层只收到 resolver 验证后的 session，不收到失效 session 或 115 session                                                  | UI component unit         | covered |
+| SSH-HOST-POOL-18 | A attached，然后 B attach，再 A detach                                                             | 更新 context                                | realtime scope 依次为 `{A}`、`{A,B}`、`{B}`                                                                                                                | unit                      | planned |
 
 ## Matrix Backfill
 
-| File | Change |
-| --- | --- |
-| `docs/architecture/zcode-code-architecture-overview.md` | 更新 SSH Remote Host 为窗口内按 remoteHostKey 共享。 |
-| `docs/architecture/message-flow.md` | 更新多 workspace 到共享 Host/server 的 MessagePort 和 stdio 流。 |
-| `docs/remote-workspace-session-unified-settings.md` | 说明 persisted workspace history 与 runtime Host pool 分离。 |
-| `docs/ssh-remote-app-global-state-authority.md` | 说明一个 Host 多 workspace 时 registry 内容同源、应用状态仍按 workspaceKey。 |
-| `docs/web-remote-control/web-remote-control-architecture.md` | 更新多个 logical session attach 同一 SSH Host 的约束。 |
-| `docs/web-remote-control/task-realtime-sync.md` | 记录共享 Host workspace scope 为 attached session 的派生并集。 |
-| `docs/remote/desktop-remote-session-renderer-reattach.md` | 将“session host”重挂更新为“logical session attachment”重挂。 |
+| File                                                         | Change                                                                       |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `docs/architecture/zcode-code-architecture-overview.md`      | 更新 SSH Remote Host 为窗口内按 remoteHostKey 共享。                         |
+| `docs/architecture/message-flow.md`                          | 更新多 workspace 到共享 Host/server 的 MessagePort 和 stdio 流。             |
+| `docs/remote-workspace-session-unified-settings.md`          | 说明 persisted workspace history 与 runtime Host pool 分离。                 |
+| `docs/ssh-remote-app-global-state-authority.md`              | 说明一个 Host 多 workspace 时 registry 内容同源、应用状态仍按 workspaceKey。 |
+| `docs/web-remote-control/web-remote-control-architecture.md` | 更新多个 logical session attach 同一 SSH Host 的约束。                       |
+| `docs/web-remote-control/task-realtime-sync.md`              | 记录共享 Host workspace scope 为 attached session 的派生并集。               |
+| `docs/remote/desktop-remote-session-renderer-reattach.md`    | 将“session host”重挂更新为“logical session attachment”重挂。                 |
 
 ## 测试设计
 
@@ -749,16 +746,16 @@ pnpm lint
 
 ## 风险与缓解
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| 一个 Host 故障影响更多 workspace | 同配置 workspace 同时断开 | 明确 Host 级故障域；批量重连恢复；不跨窗口共享。 |
-| attachment 未释放 | idle Host 长生命周期内订阅/内存泄漏 | attachmentId + DetachServicePort + dispose-all 测试。 |
-| session/context/Host 多份索引漂移 | identity 串用、scope 错误 | 三事实源模型；workspaceKey/sessionIds/workspaceKeys 按需派生。 |
-| stale process callback | 新 Host 被误清理 | 删除前比较 pool entry/process 对象身份。 |
-| Provider 状态错误共享 | workspace 使用错误模型配置 | applied revision 与 registry cache 继续按 workspaceKey。 |
-| mobile attachment 越界 | 跨 workspace task/data 暴露 | remoteSessionId + window + workspaceIdentity/workspaceKey 四重校验。 |
-| idle SSH 占用资源 | 窗口存活期间保持连接 | 这是已确认的 UX 选择；窗口关闭统一回收；本期不加 idle timeout。 |
-| workspace-scoped credential 重复 | 同配置保存多份密码 | 本期接受，避免引入 Profile/migration；后续可独立设计 SSH Profile。 |
+| Risk                              | Impact                              | Mitigation                                                           |
+| --------------------------------- | ----------------------------------- | -------------------------------------------------------------------- |
+| 一个 Host 故障影响更多 workspace  | 同配置 workspace 同时断开           | 明确 Host 级故障域；批量重连恢复；不跨窗口共享。                     |
+| attachment 未释放                 | idle Host 长生命周期内订阅/内存泄漏 | attachmentId + DetachServicePort + dispose-all 测试。                |
+| session/context/Host 多份索引漂移 | identity 串用、scope 错误           | 三事实源模型；workspaceKey/sessionIds/workspaceKeys 按需派生。       |
+| stale process callback            | 新 Host 被误清理                    | 删除前比较 pool entry/process 对象身份。                             |
+| Provider 状态错误共享             | workspace 使用错误模型配置          | applied revision 与 registry cache 继续按 workspaceKey。             |
+| mobile attachment 越界            | 跨 workspace task/data 暴露         | remoteSessionId + window + workspaceIdentity/workspaceKey 四重校验。 |
+| idle SSH 占用资源                 | 窗口存活期间保持连接                | 这是已确认的 UX 选择；窗口关闭统一回收；本期不加 idle timeout。      |
+| workspace-scoped credential 重复  | 同配置保存多份密码                  | 本期接受，避免引入 Profile/migration；后续可独立设计 SSH Profile。   |
 
 ## 实施顺序约束
 

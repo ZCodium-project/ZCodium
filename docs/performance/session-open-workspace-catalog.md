@@ -49,15 +49,15 @@ CUA：start + 原 startup tracker
 
 ### 中位数对照（ms）
 
-| 指标 | staging | CUA 优化后 | 差值（后－前） |
-| --- | ---: | ---: | ---: |
-| a6 click → 首个可见 row（Agent reused） | 796 | 766 | -30 |
-| 6951 click → 首个可见 row（Agent spawned） | 2704 | 1476 | -1228 |
-| 6951 command resolved → spawn preflight（Host 子阶段） | 1051 | 60 | -991 |
-| 6951 Host prepare | 1775 | 770 | -1005 |
-| 6951 CLI request → ACK | 566 | 541 | -25 |
-| 6951 session restore（request → ACK 子阶段） | 343 | 330 | -13 |
-| 6951 ACK → 可见 row（残差，含埋点间隙） | 225 | 115 | -110 |
+| 指标                                                   | staging | CUA 优化后 | 差值（后－前） |
+| ------------------------------------------------------ | ------: | ---------: | -------------: |
+| a6 click → 首个可见 row（Agent reused）                |     796 |        766 |            -30 |
+| 6951 click → 首个可见 row（Agent spawned）             |    2704 |       1476 |          -1228 |
+| 6951 command resolved → spawn preflight（Host 子阶段） |    1051 |         60 |           -991 |
+| 6951 Host prepare                                      |    1775 |        770 |          -1005 |
+| 6951 CLI request → ACK                                 |     566 |        541 |            -25 |
+| 6951 session restore（request → ACK 子阶段）           |     343 |        330 |            -13 |
+| 6951 ACK → 可见 row（残差，含埋点间隙）                |     225 |        115 |           -110 |
 
 各行独立取中位数，且存在父子关系，不能求和。端到端减少约 45%，明确可归因的是 Host
 约 1s 固定等待消除；不能把另外约 0.2s 的差异也全部算成 CUA 收益。a6 已有 Agent，30ms
@@ -70,16 +70,16 @@ CUA：start + 原 startup tracker
 累计为同一轮已测阶段的算术累计，埋点之间未覆盖的时间单列；可见 row 使用独立 DOM 终点，
 不把 interactive 终点冒充可见终点。
 
-| 阶段 | staging interval | staging cumulative | optimized interval | optimized cumulative |
-| --- | ---: | ---: | ---: | ---: |
-| click → acquire | 55 | 55 | 52 | 52 |
-| Renderer prepare | 0 | 55 | 0 | 52 |
-| Host prepare | 1775 | 1830 | 770 | 822 |
-| CLI request → ACK | 644 | 2474 | 526 | 1348 |
-| initial frame transport + snapshot apply | 5 | 2479 | 2 | 1350 |
-| React render | 92 | 2571 | 56 | 1406 |
-| paint → interactive | 134 | 2705 | 35 | 1441 |
-| 未分配的埋点间隙（补齐独立 click → interactive） | 11 | 2716 | 41 | 1482 |
+| 阶段                                             | staging interval | staging cumulative | optimized interval | optimized cumulative |
+| ------------------------------------------------ | ---------------: | -----------------: | -----------------: | -------------------: |
+| click → acquire                                  |               55 |                 55 |                 52 |                   52 |
+| Renderer prepare                                 |                0 |                 55 |                  0 |                   52 |
+| Host prepare                                     |             1775 |               1830 |                770 |                  822 |
+| CLI request → ACK                                |              644 |               2474 |                526 |                 1348 |
+| initial frame transport + snapshot apply         |                5 |               2479 |                  2 |                 1350 |
+| React render                                     |               92 |               2571 |                 56 |                 1406 |
+| paint → interactive                              |              134 |               2705 |                 35 |                 1441 |
+| 未分配的埋点间隙（补齐独立 click → interactive） |               11 |               2716 |                 41 |                 1482 |
 
 独立 DOM 可见终点分别为 2704 / 1476ms。其他轮的 interval/cumulative 保存在各自
 `runs/<variant>-<session>-roundN/profile.md`；原始样本与汇总在 `results.json`。

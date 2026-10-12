@@ -436,10 +436,7 @@ describe("IntlProvider locale preference sync", () => {
 
   it("首次 settingService update 永久 pending 后再次选择仍会尝试持久化", async () => {
     const pendingUpdate = createDeferred<void>();
-    const update = vi
-      .fn()
-      .mockReturnValueOnce(pendingUpdate.promise)
-      .mockResolvedValue(undefined);
+    const update = vi.fn().mockReturnValueOnce(pendingUpdate.promise).mockResolvedValue(undefined);
     renderIntlProvider({
       settings: {
         locale: "zh-CN",

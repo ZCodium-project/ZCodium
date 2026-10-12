@@ -17,9 +17,7 @@ import { describeAutomationCardSchedule } from "../src/settings/automationCardSc
 describe("automationFormat", () => {
   const scheduleIntl = {
     formatMessage: ({ id }: { id: string }, values?: Record<string, string>) =>
-      id === "automations.schedule.customMinutes"
-        ? `Every ${values?.["interval"]} minutes`
-        : id,
+      id === "automations.schedule.customMinutes" ? `Every ${values?.["interval"]} minutes` : id,
   };
 
   it("分钟步进 cron 展示真实频率而不是默认时间", () => {
@@ -37,8 +35,7 @@ describe("automationFormat", () => {
   it("未知 cron 展示为自定义而不是原表达式", () => {
     expect(
       describeCron("1,15 2-8 * * *", {
-        formatMessage: ({ id }) =>
-          id === "automations.frequency.custom" ? "Custom" : id,
+        formatMessage: ({ id }) => (id === "automations.frequency.custom" ? "Custom" : id),
       }),
     ).toBe("Custom");
   });
@@ -223,12 +220,8 @@ describe("automationFormat", () => {
       customMonth: 1,
     };
 
-    expect(buildCronExpr({ ...base, customMonthlyMode: "date" as const })).toBe(
-      "0 9 1,15,16 * *",
-    );
-    expect(buildCronExpr({ ...base, customMonthlyMode: "weekday" as const })).toBe(
-      "0 9 * * 1#1",
-    );
+    expect(buildCronExpr({ ...base, customMonthlyMode: "date" as const })).toBe("0 9 1,15,16 * *");
+    expect(buildCronExpr({ ...base, customMonthlyMode: "weekday" as const })).toBe("0 9 * * 1#1");
   });
 
   it("卡片优先按 scheduleRule 展示每 30 个月，不被兼容 cron 降级成每月", () => {
@@ -316,20 +309,11 @@ describe("automationFormat", () => {
         id === "automations.frequency.custom" ? "自定义" : id,
     };
 
-    expect(
-      describeAutomationCardSchedule(
-        { cronExpr: "0 8 27 7 *" },
-        intl,
-      ),
-    ).toBe("自定义");
+    expect(describeAutomationCardSchedule({ cronExpr: "0 8 27 7 *" }, intl)).toBe("自定义");
 
-    expect(
-      describeAutomationCardSchedule({ cronExpr: "20 18 13 */1 *" }, intl),
-    ).toBe("自定义");
+    expect(describeAutomationCardSchedule({ cronExpr: "20 18 13 */1 *" }, intl)).toBe("自定义");
 
-    expect(
-      describeAutomationCardSchedule({ cronExpr: "1,15 2-8 * * *" }, intl),
-    ).toBe("自定义");
+    expect(describeAutomationCardSchedule({ cronExpr: "1,15 2-8 * * *" }, intl)).toBe("自定义");
   });
 
   it("相对时间一次性任务不显示为“每 N 分钟”重复，而是自定义", () => {

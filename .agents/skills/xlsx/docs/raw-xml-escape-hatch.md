@@ -19,14 +19,14 @@ The following six categories are the genuine failure modes. In each case
 `openpyxl` either drops the part on save or rewrites it with semantics
 the consuming application no longer accepts.
 
-| Artefact (path inside the .xlsx zip) | Where it appears | What `openpyxl` actually does on save | Why XML edit is the only safe path |
-|---|---|---|---|
-| `xl/vbaProject.bin` | Workbook saved as `.xlsm` with macros / form events | Dropped entirely unless the file was opened with `keep_vba=True`; even then any new sheet may shift cell-level event bindings | Binary VBA bytecode; one byte off and the macro project fails to load |
-| `xl/pivotCaches/pivotCacheDefinition*.xml` + `xl/pivotTables/*.xml` | Pivot tables built from worksheet ranges or external data | Pivot table objects are dropped; pivot caches lose `<cacheSource>` ref tracking | The cache and the table are tightly coupled — editing one without the other corrupts the pivot |
-| `xl/slicers/*.xml` (+ `xl/slicerCaches/*.xml`) | Slicers wired to a pivot or table | Slicer XML is silently removed; pivot still loads but UI filter is gone | Slicers reference pivot cache IDs by GUID; rewriting the parts without preserving GUIDs breaks the binding |
-| `xl/connections.xml` | Workbooks with external data connections (Power Query, ODBC, OLAP) | Connection node is dropped; data refresh button does nothing | The connection definition is the only source of truth for the refresh URL / DSN |
-| `xl/externalLinks/` (incl. `externalLink*.bin`) | `=[OtherBook.xlsx]Sheet!A1` style cross-file references | External link XML retained, `.bin` cache is lost; Excel re-prompts the user for every linked file on open | The `.bin` is a binary cache the format treats as opaque |
-| Form controls / drawing shapes / advanced conditional formatting (color-scale + icon-set composites) | Workbooks with ActiveX form controls, `xl/drawings/drawing*.xml` shape art, multi-rule color-scale + icon-set on the same range | Form controls dropped (they live in `xl/activeX/` plus a paired `.bin`); shapes preserved but bound `linkedCell` may detach; multi-rule conditional formatting collapses into the first rule | None of these are first-class openpyxl objects |
+| Artefact (path inside the .xlsx zip)                                                                 | Where it appears                                                                                                                | What `openpyxl` actually does on save                                                                                                                                                        | Why XML edit is the only safe path                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `xl/vbaProject.bin`                                                                                  | Workbook saved as `.xlsm` with macros / form events                                                                             | Dropped entirely unless the file was opened with `keep_vba=True`; even then any new sheet may shift cell-level event bindings                                                                | Binary VBA bytecode; one byte off and the macro project fails to load                                      |
+| `xl/pivotCaches/pivotCacheDefinition*.xml` + `xl/pivotTables/*.xml`                                  | Pivot tables built from worksheet ranges or external data                                                                       | Pivot table objects are dropped; pivot caches lose `<cacheSource>` ref tracking                                                                                                              | The cache and the table are tightly coupled — editing one without the other corrupts the pivot             |
+| `xl/slicers/*.xml` (+ `xl/slicerCaches/*.xml`)                                                       | Slicers wired to a pivot or table                                                                                               | Slicer XML is silently removed; pivot still loads but UI filter is gone                                                                                                                      | Slicers reference pivot cache IDs by GUID; rewriting the parts without preserving GUIDs breaks the binding |
+| `xl/connections.xml`                                                                                 | Workbooks with external data connections (Power Query, ODBC, OLAP)                                                              | Connection node is dropped; data refresh button does nothing                                                                                                                                 | The connection definition is the only source of truth for the refresh URL / DSN                            |
+| `xl/externalLinks/` (incl. `externalLink*.bin`)                                                      | `=[OtherBook.xlsx]Sheet!A1` style cross-file references                                                                         | External link XML retained, `.bin` cache is lost; Excel re-prompts the user for every linked file on open                                                                                    | The `.bin` is a binary cache the format treats as opaque                                                   |
+| Form controls / drawing shapes / advanced conditional formatting (color-scale + icon-set composites) | Workbooks with ActiveX form controls, `xl/drawings/drawing*.xml` shape art, multi-rule color-scale + icon-set on the same range | Form controls dropped (they live in `xl/activeX/` plus a paired `.bin`); shapes preserved but bound `linkedCell` may detach; multi-rule conditional formatting collapses into the first rule | None of these are first-class openpyxl objects                                                             |
 
 Anything not in this table — column insertion, formula edits, style
 changes, named-range tweaks, merged-cell expansion, chart series ranges
@@ -41,11 +41,11 @@ changes, named-range tweaks, merged-cell expansion, chart series ranges
 Two scripts live at `scripts/office/` and are shared with the docx /
 pptx skills (the OOXML zip layout is identical for all three formats):
 
-| Script | Role | Notes |
-|---|---|---|
-| `scripts/office/unpack.py` | Unzip into a working directory and pretty-print every `*.xml` / `*.rels` so diffs read cleanly | Prints an inventory + a warning when high-risk parts are detected |
-| `scripts/office/pack.py` | Re-zip the working directory back into a valid `.xlsx`, validating XML well-formedness before sealing the archive | Refuses to pack if any XML fails to parse |
-| `scripts/office/validate.py` | Run XSD validation against the bundled OOXML schemas | Flags malformed parts the parsers will choke on |
+| Script                       | Role                                                                                                              | Notes                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `scripts/office/unpack.py`   | Unzip into a working directory and pretty-print every `*.xml` / `*.rels` so diffs read cleanly                    | Prints an inventory + a warning when high-risk parts are detected |
+| `scripts/office/pack.py`     | Re-zip the working directory back into a valid `.xlsx`, validating XML well-formedness before sealing the archive | Refuses to pack if any XML fails to parse                         |
+| `scripts/office/validate.py` | Run XSD validation against the bundled OOXML schemas                                                              | Flags malformed parts the parsers will choke on                   |
 
 Standard CLI workflow:
 
@@ -125,14 +125,14 @@ in-place patch. If a delivery requires modifying any of them, change
 the upstream architecture (regenerate the workbook, replace the link
 with a Power Query, etc.) instead of editing bytes.
 
-| File / location | Why it is unfixable in-place |
-|---|---|
-| `xl/vbaProject.bin` | Binary VBA bytecode; any modification corrupts the macro project |
+| File / location                            | Why it is unfixable in-place                                                                                                 |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `xl/vbaProject.bin`                        | Binary VBA bytecode; any modification corrupts the macro project                                                             |
 | `xl/pivotCaches/pivotCacheDefinition*.xml` | The cache definition ties the pivot to its source data; editing without a paired `pivotTable*.xml` update corrupts the pivot |
-| `xl/pivotTables/*.xml` | Tightly coupled to its cache definition and to internal state Excel rebuilds on load |
-| `xl/slicers/*.xml` | Slicers are connected to specific cache IDs and pivot fields; breaking those connections silently corrupts the file |
-| `xl/connections.xml` | External data connections; editing breaks live data refresh |
-| `xl/externalLinks/` (`*.bin` included) | External workbook links; the binary `.bin` cache files in here must not be modified |
+| `xl/pivotTables/*.xml`                     | Tightly coupled to its cache definition and to internal state Excel rebuilds on load                                         |
+| `xl/slicers/*.xml`                         | Slicers are connected to specific cache IDs and pivot fields; breaking those connections silently corrupts the file          |
+| `xl/connections.xml`                       | External data connections; editing breaks live data refresh                                                                  |
+| `xl/externalLinks/` (`*.bin` included)     | External workbook links; the binary `.bin` cache files in here must not be modified                                          |
 
 If you need to "fix" any of the above, the answer is to rebuild the
 workbook from a clean source — never to hand-edit bytes.
@@ -144,10 +144,10 @@ workbook from a clean source — never to hand-edit bytes.
 The following parts can be edited surgically, but only specific
 attributes are safe — every other byte must remain untouched.
 
-| File | What you may update | What to leave alone |
-|---|---|---|
-| `xl/charts/chartN.xml` | Data series range references (`<numRef><f>`) after a row / column shift | Chart type, formatting, layout, axis configuration |
-| `xl/tables/tableN.xml` | `ref` attribute on `<table>` after appending rows | Column definitions, style info, header row metadata |
+| File                                       | What you may update                                                            | What to leave alone                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `xl/charts/chartN.xml`                     | Data series range references (`<numRef><f>`) after a row / column shift        | Chart type, formatting, layout, axis configuration        |
+| `xl/tables/tableN.xml`                     | `ref` attribute on `<table>` after appending rows                              | Column definitions, style info, header row metadata       |
 | `xl/pivotCaches/pivotCacheDefinition*.xml` | `ref` attribute on `<cacheSource><worksheetSource>` after shifting source data | All other content (cache fields, refresh metadata, GUIDs) |
 
 Any edit that strays beyond the "may update" column lands you back in
@@ -187,15 +187,15 @@ the agent is asked to perform are one to three lines of `openpyxl`**.
 Reach for the escape hatch only when the workbook genuinely contains an
 artefact from §1; reach for the library cookbook in every other case.
 
-| Common task | Library-first answer (use this) | Why escape-hatch is wrong here |
-|---|---|---|
-| Add a column at the end of a sheet | `sheet.cell(row=r, column=last+1, value=...)` then `book.save()` | XML insertion has to keep `<dimension>`, `<cols>`, every cell `r=` attribute, conditional-formatting `sqref`, table `ref`, and chart series ranges in sync; `openpyxl` does it for you |
-| Insert a row in the middle | `sheet.insert_rows(idx)` then refill the new row, then `book.save()` | The deprecated `xlsx_insert_row.py` had a silent `FileNotFoundError` on openpyxl-produced files (`os.path.join(work_dir, "xl", rel.get("Target"))` dropped `work_dir` when `Target` started with `/`); same root-cause bug in `xlsx_shift_rows.py` and `xlsx_add_column.py` |
-| Set cell values from a list | `for r, row in enumerate(rows, start=2): for c, v in enumerate(row, start=1): sheet.cell(row=r, column=c, value=v)` | XML write requires sharedStrings table updates with paired `count` / `uniqueCount` increments — easy to get wrong |
-| Restyle a range (font, fill, border) | `cell.font = Font(...)`, `cell.fill = PatternFill(...)`, etc. | XML restyle requires appending `<font>` / `<fill>` / `<border>` / `<xf>` entries with paired `count` updates and a fresh `cellXfs` index |
-| Add a chart | `openpyxl.chart.LineChart()` + `add_data` + `add_chart` | Chart XML has thirty-plus required nodes; hand-writing them is a waste of context |
-| Add conditional formatting (single rule) | `openpyxl.formatting.rule.CellIsRule(...)` + `add` | Multi-rule color-scale + icon-set composites belong to §1 — but a single rule is a one-line library call |
-| Recalculate after edits | `python scripts/recalc.py output.xlsx 60` | Already covered by `SKILL.md` §4 |
+| Common task                              | Library-first answer (use this)                                                                                     | Why escape-hatch is wrong here                                                                                                                                                                                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a column at the end of a sheet       | `sheet.cell(row=r, column=last+1, value=...)` then `book.save()`                                                    | XML insertion has to keep `<dimension>`, `<cols>`, every cell `r=` attribute, conditional-formatting `sqref`, table `ref`, and chart series ranges in sync; `openpyxl` does it for you                                                                                      |
+| Insert a row in the middle               | `sheet.insert_rows(idx)` then refill the new row, then `book.save()`                                                | The deprecated `xlsx_insert_row.py` had a silent `FileNotFoundError` on openpyxl-produced files (`os.path.join(work_dir, "xl", rel.get("Target"))` dropped `work_dir` when `Target` started with `/`); same root-cause bug in `xlsx_shift_rows.py` and `xlsx_add_column.py` |
+| Set cell values from a list              | `for r, row in enumerate(rows, start=2): for c, v in enumerate(row, start=1): sheet.cell(row=r, column=c, value=v)` | XML write requires sharedStrings table updates with paired `count` / `uniqueCount` increments — easy to get wrong                                                                                                                                                           |
+| Restyle a range (font, fill, border)     | `cell.font = Font(...)`, `cell.fill = PatternFill(...)`, etc.                                                       | XML restyle requires appending `<font>` / `<fill>` / `<border>` / `<xf>` entries with paired `count` updates and a fresh `cellXfs` index                                                                                                                                    |
+| Add a chart                              | `openpyxl.chart.LineChart()` + `add_data` + `add_chart`                                                             | Chart XML has thirty-plus required nodes; hand-writing them is a waste of context                                                                                                                                                                                           |
+| Add conditional formatting (single rule) | `openpyxl.formatting.rule.CellIsRule(...)` + `add`                                                                  | Multi-rule color-scale + icon-set composites belong to §1 — but a single rule is a one-line library call                                                                                                                                                                    |
+| Recalculate after edits                  | `python scripts/recalc.py output.xlsx 60`                                                                           | Already covered by `SKILL.md` §4                                                                                                                                                                                                                                            |
 
 If you find yourself reaching for `unpack.py` to do any of the rows in
 that table, stop and rewrite the operation in `openpyxl` first.

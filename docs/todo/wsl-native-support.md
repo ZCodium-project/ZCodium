@@ -12,11 +12,13 @@
 ## 核心思路
 
 现有 SSH 远程架构：
+
 ```
 Main → spawnHostProcess(InitRemote) → Host Process → SSHBackend → 远程 server
 ```
 
 WSL 架构：
+
 ```
 Main → spawnHostProcess(InitWSL) → Host Process → WSLBackend → wsl.exe → WSL 内 server
 ```
@@ -39,21 +41,21 @@ interface WSLBackendOptions {
 
 ### 各方法实现策略
 
-| 方法 | SSH 实现 | WSL 实现 |
-|------|---------|---------|
-| `detect()` | `ssh exec "uname -s/-m"` | `wsl.exe -d <distro> -- uname -s/-m` |
-| `upload(local, remote)` | SFTP 上传 | `fs.copyFile(local, wslToWindowsPath(remote))`，通过 `\\wsl$\<distro>\` UNC 路径直接复制 |
-| `exec(cmd)` | `ssh exec cmd` | `child_process.spawn("wsl.exe", ["-d", distro, "--", "bash", "-c", cmd])`，返回 stdio stream |
-| `exists(path)` | `ssh exec "test -f"` | `wsl.exe -- test -f <path>` 或直接 `fs.access(wslToWindowsPath(path))` |
-| `readFile(path)` | `ssh exec "cat"` | `fs.readFile(wslToWindowsPath(path))` 或 `wsl.exe -- cat <path>` |
-| `dispose()` | `client.end()` | 无需特殊清理 |
+| 方法                    | SSH 实现                 | WSL 实现                                                                                     |
+| ----------------------- | ------------------------ | -------------------------------------------------------------------------------------------- |
+| `detect()`              | `ssh exec "uname -s/-m"` | `wsl.exe -d <distro> -- uname -s/-m`                                                         |
+| `upload(local, remote)` | SFTP 上传                | `fs.copyFile(local, wslToWindowsPath(remote))`，通过 `\\wsl$\<distro>\` UNC 路径直接复制     |
+| `exec(cmd)`             | `ssh exec cmd`           | `child_process.spawn("wsl.exe", ["-d", distro, "--", "bash", "-c", cmd])`，返回 stdio stream |
+| `exists(path)`          | `ssh exec "test -f"`     | `wsl.exe -- test -f <path>` 或直接 `fs.access(wslToWindowsPath(path))`                       |
+| `readFile(path)`        | `ssh exec "cat"`         | `fs.readFile(wslToWindowsPath(path))` 或 `wsl.exe -- cat <path>`                             |
+| `dispose()`             | `client.end()`           | 无需特殊清理                                                                                 |
 
 ### 路径转换工具
 
 ```typescript
 // Linux 路径 → Windows UNC 路径
 // ~/.zcode/server/node → \\wsl$\Ubuntu\home\user\.zcode\server\node
-function wslToWindowsPath(linuxPath: string, distro: string): string
+function wslToWindowsPath(linuxPath: string, distro: string): string;
 ```
 
 - `~` 需要先通过 `wsl.exe -d <distro> -- echo $HOME` 获取实际 home 目录
@@ -75,16 +77,16 @@ function wslToWindowsPath(linuxPath: string, distro: string): string
 
 ```typescript
 // 检查当前系统是否为 Windows 且安装了 WSL
-async function isWSLAvailable(): Promise<boolean>
+async function isWSLAvailable(): Promise<boolean>;
 
 // 列出已安装的 WSL distro
 interface WSLDistro {
-  name: string;       // e.g. "Ubuntu-22.04"
+  name: string; // e.g. "Ubuntu-22.04"
   isDefault: boolean;
   state: "Running" | "Stopped";
-  version: 1 | 2;    // WSL 1 or 2
+  version: 1 | 2; // WSL 1 or 2
 }
-async function listWSLDistros(): Promise<WSLDistro[]>
+async function listWSLDistros(): Promise<WSLDistro[]>;
 ```
 
 ### 实现方式
@@ -139,7 +141,7 @@ export const hostInitWSLMessageSchema = z.object({
 export const HostMessageTypes = {
   InitLocal: "init-local",
   InitRemote: "init-remote",
-  InitWSL: "init-wsl",       // 新增
+  InitWSL: "init-wsl", // 新增
   Dispose: "dispose",
   Broadcast: "broadcast",
 } as const;
@@ -299,6 +301,7 @@ Web 实现返回 `{ success: false, error: "WSL not supported in web mode" }` �
 ### 入口位置
 
 与 SSH 连接入口并列：
+
 - `ChatEmptyState` 中新增 WSL 连接按钮
 - `WorkspaceSidebar` 中新增 WSL 连接选项
 - 仅在 `process.platform === "win32"` 时显示（通过 `systemInfo.platform` 判断）
@@ -310,6 +313,7 @@ Web 实现返回 `{ success: false, error: "WSL not supported in web mode" }` �
 **文件**: `packages/ui/src/i18n/` 下对应的 locale 文件
 
 新增 key：
+
 ```
 wsl.trigger: "连接到 WSL" / "Connect to WSL"
 wsl.title: "WSL 连接" / "WSL Connection"
@@ -333,6 +337,7 @@ wsl.cancel: "取消" / "Cancel"
 **文件**: `packages/server/src/remote/index.ts`
 
 新增导出：
+
 ```typescript
 export { WSLBackend } from "./wsl-backend.js";
 export type { WSLBackendOptions } from "./wsl-backend.js";

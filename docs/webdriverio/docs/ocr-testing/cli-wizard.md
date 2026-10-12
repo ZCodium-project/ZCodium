@@ -5,8 +5,8 @@ title: CLI Wizard
 
 You can validate which text can be found in an image without running a test by using the OCR CLI Wizard. The only thing that are needed are:
 
--   you have installed the `@wdio/ocr-service` as a dependency, see [Getting Started](./getting-started)
--   an image that you want to process
+- you have installed the `@wdio/ocr-service` as a dependency, see [Getting Started](./getting-started)
+- an image that you want to process
 
 Then run the following command to start the wizard
 
@@ -20,8 +20,8 @@ This will start a wizard that will guide you through the steps to select an imag
 
 The following options can be selected
 
--   Use a "file explorer"
--   Type the file path manually
+- Use a "file explorer"
+- Type the file path manually
 
 ### Use a "file explorer"
 
@@ -35,17 +35,17 @@ This is a direct path to a file somewhere on your local machine
 
 Here you have the option to select an area that needs to be processed. This can speed up the process or reduce/narrow down the amount of text the OCR engine might find. You need to provide `x`, `y`, `width`, `height` data based on the following questions:
 
--   Enter the x coordinate:
--   Enter the y coordinate:
--   Enter the width:
--   Enter the height:
+- Enter the x coordinate:
+- Enter the y coordinate:
+- Enter the width:
+- Enter the height:
 
 ## Do you want to use the advanced mode?
 
 Advanced mode will hold extra features like:
 
--   setting the contrast
--   more to follow in the future
+- setting the contrast
+- more to follow in the future
 
 ## Demo
 

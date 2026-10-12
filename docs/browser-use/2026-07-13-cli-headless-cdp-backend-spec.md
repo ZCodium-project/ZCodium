@@ -29,13 +29,13 @@ ownership 和生命周期语义不同而保持 `type: "iab"`。
 
 ## 2. 澄清记录与固定边界
 
-| 问题 | 用户确认 | 固定边界 |
-| --- | --- | --- |
-| CLI 自启动还是连接外部 CDP | 采用建议方案 | P0 由 CLI managed launch；attach-cdp 留后续 |
-| 是否默认启动 | 采用建议方案 | 必须显式 `--browser-use=headless` |
-| 浏览器 profile | 采用建议方案 | 每个 CLI 进程使用临时 profile，不跨进程恢复登录态 |
-| 生效入口 | 采用建议方案 | `--prompt`、`--target` 和 TUI；ZCode app-server 排除 |
-| 浏览器分发 | 采用建议方案 | P0 不下载/捆绑浏览器；显式路径优先，再查已安装 Chromium |
+| 问题                       | 用户确认     | 固定边界                                                |
+| -------------------------- | ------------ | ------------------------------------------------------- |
+| CLI 自启动还是连接外部 CDP | 采用建议方案 | P0 由 CLI managed launch；attach-cdp 留后续             |
+| 是否默认启动               | 采用建议方案 | 必须显式 `--browser-use=headless`                       |
+| 浏览器 profile             | 采用建议方案 | 每个 CLI 进程使用临时 profile，不跨进程恢复登录态       |
+| 生效入口                   | 采用建议方案 | `--prompt`、`--target` 和 TUI；ZCode app-server 排除    |
+| 浏览器分发                 | 采用建议方案 | P0 不下载/捆绑浏览器；显式路径优先，再查已安装 Chromium |
 
 ## 3. CLI 合同
 
@@ -115,13 +115,13 @@ P0 必须通过 `apiSupportOverrides` 隐藏未完成能力：
 
 状态 owner 是 CLI adapter，不是 Agent core、MCP child、relay 或 desktop main：
 
-| 状态 | owner | 生命周期 |
-| --- | --- | --- |
-| Chromium process | managed CDP adapter | 当前 CLI/TUI app runtime |
-| BrowserContext | managed CDP adapter | 每个 ZCode session 一个隔离 context |
-| target/tab registry | managed CDP adapter | `workspaceKey + sessionId` scope |
-| request/cancel ledger | managed CDP adapter | request/turn，受 AbortSignal 控制 |
-| Browser/Tab JS binding | Node REPL kernel | kernel generation；backend generation 另外校验 |
+| 状态                   | owner               | 生命周期                                       |
+| ---------------------- | ------------------- | ---------------------------------------------- |
+| Chromium process       | managed CDP adapter | 当前 CLI/TUI app runtime                       |
+| BrowserContext         | managed CDP adapter | 每个 ZCode session 一个隔离 context            |
+| target/tab registry    | managed CDP adapter | `workspaceKey + sessionId` scope               |
+| request/cancel ledger  | managed CDP adapter | request/turn，受 AbortSignal 控制              |
+| Browser/Tab JS binding | Node REPL kernel    | kernel generation；backend generation 另外校验 |
 
 行为：
 
@@ -166,35 +166,35 @@ Desktop/Web Remote 的 workspace identity、clientMode 或 deliveryKind 路由�
 
 主域：permission/tool/MCP、architecture/process boundary、desktop lifecycle、CLI packaging。
 
-| Candidate | 组合 | 分类 | 理由 |
-| --- | --- | --- | --- |
-| HCDP-001 | prompt + explicit headless + real Chromium | accepted | Linux 自动化主路径 |
-| HCDP-002 | TUI 多 session + headless | accepted | context/tab 隔离高风险 |
-| HCDP-003 | app-server + headless | pruned/rejected | 违反 shared-host ownership |
-| HCDP-004 | plugin disabled + headless | accepted | 必须 fail closed 且不启动进程 |
-| HCDP-005 | missing executable | accepted | 不得留进程或 fake descriptor |
-| HCDP-006 | external attach CDP | pruned | P0 不拥有外部 browser 生命周期 |
-| HCDP-007 | persistent profile | pruned | P0 以 CI 可重复性优先 |
-| HCDP-008 | Linux × real CDP × no DISPLAY | accepted | 用户目标环境 |
-| HCDP-009 | macOS/Windows path resolution | accepted pairwise | 跨平台解析，实机风险单列 |
-| HCDP-010 | mobile/web remote 自建 headless | pruned | 继续依赖 existing shared host |
+| Candidate | 组合                                       | 分类              | 理由                           |
+| --------- | ------------------------------------------ | ----------------- | ------------------------------ |
+| HCDP-001  | prompt + explicit headless + real Chromium | accepted          | Linux 自动化主路径             |
+| HCDP-002  | TUI 多 session + headless                  | accepted          | context/tab 隔离高风险         |
+| HCDP-003  | app-server + headless                      | pruned/rejected   | 违反 shared-host ownership     |
+| HCDP-004  | plugin disabled + headless                 | accepted          | 必须 fail closed 且不启动进程  |
+| HCDP-005  | missing executable                         | accepted          | 不得留进程或 fake descriptor   |
+| HCDP-006  | external attach CDP                        | pruned            | P0 不拥有外部 browser 生命周期 |
+| HCDP-007  | persistent profile                         | pruned            | P0 以 CI 可重复性优先          |
+| HCDP-008  | Linux × real CDP × no DISPLAY              | accepted          | 用户目标环境                   |
+| HCDP-009  | macOS/Windows path resolution              | accepted pairwise | 跨平台解析，实机风险单列       |
+| HCDP-010  | mobile/web remote 自建 headless            | pruned            | 继续依赖 existing shared host  |
 
 ## 9. 验收用例
 
-| Case | Setup / action | Assertions | Evidence |
-| --- | --- | --- | --- |
-| HCDP-001 | 显式 headless，首次 list | 启动一次；返回一个真实 `cdp` descriptor | adapter integration + real Chrome |
-| HCDP-002 | plugin disabled | 无 broker、无 Chromium process、node_repl 可用 | bootstrap/CLI integration |
-| HCDP-003 | executable 缺失/不可执行 | CLI 明确失败；无 session、无 zombie、无 descriptor | CLI unit + process probe |
-| HCDP-004 | 真实模型脚本调用 Browser Use | MCP js → browser-client → broker → port → Chromium 完整成立 | CLI E2E artifact |
-| HCDP-005 | 本地 HTTP fixture | navigate、DOM、locator、click/fill、screenshot 正确 | real Chromium E2E |
-| HCDP-006 | 无 DISPLAY | native headless 成功，不启动 Xvfb | Linux container E2E |
-| HCDP-007 | turn end / session close | turn 保留 tab；close 清 context/process/temp profile | integration + process evidence |
-| HCDP-008 | cancel/timeout | 无迟到串请求；副作用不确定性正确 | adapter unit/integration |
-| HCDP-009 | browser crash/restart | generation 递增；旧 binding stale | adapter integration |
-| HCDP-010 | unsupported API | 成员从对象图和文档隐藏 | manifest contract |
-| HCDP-011 | URL scheme | http/https/about:blank 允许，其它 scheme 拒绝 | runtime unit + real smoke |
-| HCDP-012 | Node bundle / SEA | injected asset 可解析，启动 smoke 成功 | build contract + startup smoke |
+| Case     | Setup / action                    | Assertions                                                                 | Evidence                            |
+| -------- | --------------------------------- | -------------------------------------------------------------------------- | ----------------------------------- |
+| HCDP-001 | 显式 headless，首次 list          | 启动一次；返回一个真实 `cdp` descriptor                                    | adapter integration + real Chrome   |
+| HCDP-002 | plugin disabled                   | 无 broker、无 Chromium process、node_repl 可用                             | bootstrap/CLI integration           |
+| HCDP-003 | executable 缺失/不可执行          | CLI 明确失败；无 session、无 zombie、无 descriptor                         | CLI unit + process probe            |
+| HCDP-004 | 真实模型脚本调用 Browser Use      | MCP js → browser-client → broker → port → Chromium 完整成立                | CLI E2E artifact                    |
+| HCDP-005 | 本地 HTTP fixture                 | navigate、DOM、locator、click/fill、screenshot 正确                        | real Chromium E2E                   |
+| HCDP-006 | 无 DISPLAY                        | native headless 成功，不启动 Xvfb                                          | Linux container E2E                 |
+| HCDP-007 | turn end / session close          | turn 保留 tab；close 清 context/process/temp profile                       | integration + process evidence      |
+| HCDP-008 | cancel/timeout                    | 无迟到串请求；副作用不确定性正确                                           | adapter unit/integration            |
+| HCDP-009 | browser crash/restart             | generation 递增；旧 binding stale                                          | adapter integration                 |
+| HCDP-010 | unsupported API                   | 成员从对象图和文档隐藏                                                     | manifest contract                   |
+| HCDP-011 | URL scheme                        | http/https/about:blank 允许，其它 scheme 拒绝                              | runtime unit + real smoke           |
+| HCDP-012 | Node bundle / SEA                 | injected asset 可解析，启动 smoke 成功                                     | build contract + startup smoke      |
 | HCDP-013 | context/browser close 永不 settle | 每个 close 有 deadline；Browser 失败不阻断 Execution/MCP；CLI 最终有界退出 | adapter + session/CLI focused tests |
 
 真实 E2E 必须经过 `mcp__node_repl__js` 和 plugin browser-client；直接调用 adapter 只能证明

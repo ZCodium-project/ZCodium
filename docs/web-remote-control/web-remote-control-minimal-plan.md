@@ -439,7 +439,9 @@ GET  /r/:token
 4. relay 找到对应 session，并通知 desktop control ws：
 
 ```ts
-{ type: "mobile-session-request", sessionId }
+{
+  type: ("mobile-session-request", sessionId);
+}
 ```
 
 5. main 收到后立即建立 `ws/desktop/session/:sessionId`

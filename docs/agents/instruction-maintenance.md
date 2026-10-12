@@ -57,4 +57,3 @@
 - 已核对本地 Markdown 链接、Claude 导入目标、根/CLI 脚本定义，以及被引用文件是否纳入 Git；检查改动文件格式与 diff 空白。
 - architecture-governance 通过 skill-creator 通用校验。E2E skill 原有 `disable-model-invocation` 字段不被该校验器支持，修改前后得到相同报错；保留原调用策略，并额外核对 YAML、字段差异与工作流语义。此项是既有兼容限制，不报告为通用校验通过。
 - 本次仅改指令、文档和 skill 展示元数据，按纯文档规则验收，未运行应用 typecheck、lint、UT 或 E2E。真实开发效果仍待后续同类任务观察。
-

@@ -1,11 +1,4 @@
-import {
-  Archive,
-  ArchiveX,
-  CloudDownload,
-  LoaderIcon,
-  Pin,
-  Trash2,
-} from "lucide-react";
+import { Archive, ArchiveX, CloudDownload, LoaderIcon, Pin, Trash2 } from "lucide-react";
 import {
   TID_TASK_ARCHIVE,
   TID_TASK_ITEM,
@@ -13,11 +6,7 @@ import {
   testId,
   type WebRemoteControlTaskTarget,
 } from "@zcode/shared";
-import {
-  useCallback,
-  useState,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useCallback, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
@@ -80,8 +69,7 @@ export function WebRemoteControlTaskIndexRow({
   // 会让左侧 pin 操作被主按钮压住且不可命中；这里和桌面 TaskListItem 一样用行级 hover state 挂载动作。
   const showPinAction = canPinTask && hoverActionsVisible;
   const showArchiveAction = canArchiveTask && (hoverActionsVisible || isArchiveConfirming);
-  const showArchivedActions =
-    (canUnarchiveTask || canDeleteArchivedTask) && hoverActionsVisible;
+  const showArchivedActions = (canUnarchiveTask || canDeleteArchivedTask) && hoverActionsVisible;
   const taskTitle = task.title || intl.formatMessage({ id: "taskList.untitled" });
   const timeLabel = formatTaskRelativeTime(
     taskSortBy === "created" ? task.createdAt : task.updatedAt,
@@ -147,7 +135,10 @@ export function WebRemoteControlTaskIndexRow({
 
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="min-w-0 flex h-6 flex-wrap items-center gap-1.5">
-            <span className="min-w-0 flex-1 truncate text-ui-base text-foreground" title={taskTitle}>
+            <span
+              className="min-w-0 flex-1 truncate text-ui-base text-foreground"
+              title={taskTitle}
+            >
               {taskTitle}
             </span>
             {showWorkspaceLabel ? (

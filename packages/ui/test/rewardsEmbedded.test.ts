@@ -26,9 +26,7 @@ describe("Rewards embedded contract", () => {
     expect(buildRewardsUrl("https://zcode.z.ai", "zh-CN", "zai-light")).toBe(
       "https://zcode.z.ai/cn/rewards?embedded=app&theme=zai-light",
     );
-    expect(buildRewardsUrl("https://zcode.z.ai", "en-US", "zai-dark")).toContain(
-      "/en/rewards?",
-    );
+    expect(buildRewardsUrl("https://zcode.z.ai", "en-US", "zai-dark")).toContain("/en/rewards?");
   });
   it("本地网页必须显式覆盖且仅开发模式允许", () => {
     for (const env of ["test", "production"] as const) {

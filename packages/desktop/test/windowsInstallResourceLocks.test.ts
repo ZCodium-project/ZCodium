@@ -51,9 +51,7 @@ describe("windows install resource locks", () => {
   });
 
   it("matches resource paths regardless of slash direction or case", () => {
-    const markers = [
-      "C:\\Users\\demo\\AppData\\Local\\Programs\\ZCode\\resources\\glm",
-    ];
+    const markers = ["C:\\Users\\demo\\AppData\\Local\\Programs\\ZCode\\resources\\glm"];
 
     expect(
       isWindowsProcessReferencingResourceMarkers(
@@ -68,9 +66,7 @@ describe("windows install resource locks", () => {
   });
 
   it("does not match unrelated processes", () => {
-    const markers = [
-      "C:\\Users\\demo\\AppData\\Local\\Programs\\ZCode\\resources\\glm",
-    ];
+    const markers = ["C:\\Users\\demo\\AppData\\Local\\Programs\\ZCode\\resources\\glm"];
 
     expect(
       isWindowsProcessReferencingResourceMarkers(
@@ -149,9 +145,7 @@ describe("windows install resource locks", () => {
         },
       ])
       .mockResolvedValueOnce([]);
-    const terminate = vi.fn(async (pids: number[]) =>
-      pids.map((pid) => ({ pid })),
-    );
+    const terminate = vi.fn(async (pids: number[]) => pids.map((pid) => ({ pid })));
     const delay = vi.fn(async () => {});
 
     const result = await runWindowsUpdateProcessCleanup({
@@ -194,10 +188,7 @@ describe("windows install resource locks", () => {
 
     expect(result.terminationPids).toEqual([10]);
     expect(result.remainingLockProcesses).toEqual([]);
-    expect(result.errors).toEqual([
-      "terminate: taskkill failed",
-      "rescan: rescan timeout",
-    ]);
+    expect(result.errors).toEqual(["terminate: taskkill failed", "rescan: rescan timeout"]);
   });
 
   it("does not terminate historical pids when the live scan fails", async () => {

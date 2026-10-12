@@ -23,10 +23,7 @@ export interface TimelineScrollMetrics {
 
 /** 距底部的剩余可滚动距离（内容不足一屏时为 0）。 */
 export function distanceToBottom(metrics: TimelineScrollMetrics): number {
-  return Math.max(
-    0,
-    metrics.contentHeight - metrics.viewportHeight - metrics.scrollTop,
-  );
+  return Math.max(0, metrics.contentHeight - metrics.viewportHeight - metrics.scrollTop);
 }
 
 export function isAtBottom(
@@ -86,11 +83,7 @@ export function shouldAdjustVirtualizerForItemSizeChange(input: {
   itemEnd: number;
   scrollTop: number;
 }): boolean {
-  if (
-    input.suppressAdjustment ||
-    input.following ||
-    input.contentWidthChanging
-  ) {
+  if (input.suppressAdjustment || input.following || input.contentWidthChanging) {
     return false;
   }
   return input.itemEnd <= input.scrollTop;
@@ -99,16 +92,10 @@ export function shouldAdjustVirtualizerForItemSizeChange(input: {
 /** 未观察滚动的判定容差：小于该值的 scrollTop 回退视为亚像素抖动，不算用户上滚。 */
 export const UNOBSERVED_SCROLL_EPSILON_PX = 2;
 
-export type TimelineUserScrollIntent =
-  | "none"
-  | "awayFromBottom"
-  | "towardBottom"
-  | "unknown";
+export type TimelineUserScrollIntent = "none" | "awayFromBottom" | "towardBottom" | "unknown";
 
 /** wheel 的 deltaY 与 scrollTop 同向：负值阅读更早内容，正值靠近底部。 */
-export function timelineWheelScrollIntent(
-  deltaY: number,
-): TimelineUserScrollIntent {
+export function timelineWheelScrollIntent(deltaY: number): TimelineUserScrollIntent {
   if (deltaY < 0) return "awayFromBottom";
   if (deltaY > 0) return "towardBottom";
   return "none";
@@ -131,18 +118,10 @@ export function timelineKeyboardScrollIntent(input: {
   editableTarget: boolean;
 }): TimelineUserScrollIntent {
   if (input.editableTarget) return "none";
-  if (
-    input.key === "ArrowUp" ||
-    input.key === "PageUp" ||
-    input.key === "Home"
-  ) {
+  if (input.key === "ArrowUp" || input.key === "PageUp" || input.key === "Home") {
     return "awayFromBottom";
   }
-  if (
-    input.key === "ArrowDown" ||
-    input.key === "PageDown" ||
-    input.key === "End"
-  ) {
+  if (input.key === "ArrowDown" || input.key === "PageDown" || input.key === "End") {
     return "towardBottom";
   }
   if (input.key === " ") {
@@ -181,15 +160,12 @@ export function reconcileFollowingForContentAnchor(input: {
   const userScrollIntent = input.userScrollIntent ?? "unknown";
   if (userScrollIntent === "awayFromBottom") return false;
   if (userScrollIntent === "none") return input.following;
-  if (
-    isAtBottom(input.metrics, input.bottomEpsilonPx ?? BOTTOM_ANCHOR_EPSILON_PX)
-  ) {
+  if (isAtBottom(input.metrics, input.bottomEpsilonPx ?? BOTTOM_ANCHOR_EPSILON_PX)) {
     return true;
   }
   const unobservedUpscroll =
     input.metrics.scrollTop <
-    input.lastObservedScrollTop -
-      (input.scrollEpsilonPx ?? UNOBSERVED_SCROLL_EPSILON_PX);
+    input.lastObservedScrollTop - (input.scrollEpsilonPx ?? UNOBSERVED_SCROLL_EPSILON_PX);
   if (unobservedUpscroll) {
     return false;
   }
@@ -197,10 +173,7 @@ export function reconcileFollowingForContentAnchor(input: {
 }
 
 /** 「回到底部」按钮可见性：仅在解除跟随且确实存在内容时展示。 */
-export function shouldShowBackToBottom(
-  following: boolean,
-  rowCount: number,
-): boolean {
+export function shouldShowBackToBottom(following: boolean, rowCount: number): boolean {
   return !following && rowCount > 0;
 }
 
@@ -264,9 +237,7 @@ export interface PrependAnchorInput {
  * 前插后的 scrollTop 平移量。仅当「首行 rowId 变小」（真前插）时返回正平移；
  * 追加/替换/清空/首帧一律 null（不动滚动位置，交给底部锚定逻辑）。
  */
-export function prependScrollAdjustment(
-  input: PrependAnchorInput,
-): number | null {
+export function prependScrollAdjustment(input: PrependAnchorInput): number | null {
   if (input.prevFirstRowId === null || input.nextFirstRowId === null) {
     return null;
   }
@@ -285,10 +256,7 @@ export function historyPrefetchTriggerPx(viewportHeight: number): number {
   if (!Number.isFinite(viewportHeight) || viewportHeight <= 0) {
     return LOAD_OLDER_TRIGGER_PX;
   }
-  return Math.max(
-    LOAD_OLDER_TRIGGER_PX,
-    viewportHeight * LOAD_OLDER_PREFETCH_VIEWPORTS,
-  );
+  return Math.max(LOAD_OLDER_TRIGGER_PX, viewportHeight * LOAD_OLDER_PREFETCH_VIEWPORTS);
 }
 
 /** scroll 事件是否应触发 loadOlder（到顶 + 可拉 + 非在途）。 */

@@ -57,19 +57,19 @@ active section page-level navigation state +--> breadcrumb items --> header
 
 ## 验收
 
-| ID    | Setup            | Action             | Assertions                                 |
-| ----- | ---------------- | ------------------ | ------------------------------------------ |
-| SHB01 | Settings General | 打开设置           | 顶栏不显示面包屑，保留拖拽区和右侧安全边距 |
-| SHB02 | Memory 项目列表  | 打开 Memory        | 顶栏不显示面包屑                           |
-| SHB03 | Memory 项目详情  | 点击项目           | 显示 `Memory > 项目名`                     |
-| SHB04 | Memory 文件正文  | 点击文件           | 追加文件名                                 |
-| SHB05 | Memory 详情      | 返回或切换 section | 面包屑同步收缩，不残留旧层级               |
-| SHB06 | Memory 文件正文  | 点击项目按钮       | 返回项目文件列表，面包屑收缩为两级         |
-| SHB07 | 任意二级页面     | 点击 section 按钮  | 复用该分区返回动作回到一级页面             |
-| SHB08 | 任意二级页面     | 进入详情           | 隐藏外层 section 大标题，不显示重复 Back   |
-| SHB09 | Model Settings   | 切换供应商或套餐   | 顶栏无面包屑，内容区持续显示大标题         |
-| SHB10 | Usage Stats      | 切换用量 Tab       | 顶栏无面包屑，内容区持续显示大标题         |
-| SHB11 | Settings 插件列表 | 打开插件详情       | 显示 `Plugins > Example Plugin`            |
-| SHB12 | 插件市场         | 打开市场插件详情   | 显示 `Plugin Marketplace > Example Plugin` |
-| SHB13 | 插件市场         | 点击管理已安装     | 显示 `Plugin Marketplace > Plugins`，内容区保留 `Plugins` 大标题 |
-| SHB14 | 市场来源插件管理 | 打开插件、MCP 或 Skill 子页面 | 显示 `Plugin Marketplace > Plugins > 当前页`；点击 `Plugins` 返回管理页 |
+| ID    | Setup             | Action                        | Assertions                                                              |
+| ----- | ----------------- | ----------------------------- | ----------------------------------------------------------------------- |
+| SHB01 | Settings General  | 打开设置                      | 顶栏不显示面包屑，保留拖拽区和右侧安全边距                              |
+| SHB02 | Memory 项目列表   | 打开 Memory                   | 顶栏不显示面包屑                                                        |
+| SHB03 | Memory 项目详情   | 点击项目                      | 显示 `Memory > 项目名`                                                  |
+| SHB04 | Memory 文件正文   | 点击文件                      | 追加文件名                                                              |
+| SHB05 | Memory 详情       | 返回或切换 section            | 面包屑同步收缩，不残留旧层级                                            |
+| SHB06 | Memory 文件正文   | 点击项目按钮                  | 返回项目文件列表，面包屑收缩为两级                                      |
+| SHB07 | 任意二级页面      | 点击 section 按钮             | 复用该分区返回动作回到一级页面                                          |
+| SHB08 | 任意二级页面      | 进入详情                      | 隐藏外层 section 大标题，不显示重复 Back                                |
+| SHB09 | Model Settings    | 切换供应商或套餐              | 顶栏无面包屑，内容区持续显示大标题                                      |
+| SHB10 | Usage Stats       | 切换用量 Tab                  | 顶栏无面包屑，内容区持续显示大标题                                      |
+| SHB11 | Settings 插件列表 | 打开插件详情                  | 显示 `Plugins > Example Plugin`                                         |
+| SHB12 | 插件市场          | 打开市场插件详情              | 显示 `Plugin Marketplace > Example Plugin`                              |
+| SHB13 | 插件市场          | 点击管理已安装                | 显示 `Plugin Marketplace > Plugins`，内容区保留 `Plugins` 大标题        |
+| SHB14 | 市场来源插件管理  | 打开插件、MCP 或 Skill 子页面 | 显示 `Plugin Marketplace > Plugins > 当前页`；点击 `Plugins` 返回管理页 |

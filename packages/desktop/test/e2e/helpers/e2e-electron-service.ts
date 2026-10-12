@@ -24,9 +24,8 @@ export default class ReloadAwareE2EElectronService extends ElectronWorkerService
     if (!instance.isMultiremote) {
       // Bug 根因：reloadSession 不会重新执行 service.before；把当前 service 实例的
       // onReload 注册到 browser，确保 reload helper 能显式重建 CDP bridge 并完成 probe。
-      registerE2EElectronServiceBridgeReload(
-        instance as WebdriverIO.Browser,
-        () => this.onReload(),
+      registerE2EElectronServiceBridgeReload(instance as WebdriverIO.Browser, () =>
+        this.onReload(),
       );
     }
   }

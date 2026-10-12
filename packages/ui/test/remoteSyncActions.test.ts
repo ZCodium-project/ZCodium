@@ -5,11 +5,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { capturedSkillDialogProps, capturedMcpDialogProps, capturedPluginDialogProps } = vi.hoisted(() => ({
-  capturedSkillDialogProps: [] as Array<Record<string, unknown>>,
-  capturedMcpDialogProps: [] as Array<Record<string, unknown>>,
-  capturedPluginDialogProps: [] as Array<Record<string, unknown>>,
-}));
+const { capturedSkillDialogProps, capturedMcpDialogProps, capturedPluginDialogProps } = vi.hoisted(
+  () => ({
+    capturedSkillDialogProps: [] as Array<Record<string, unknown>>,
+    capturedMcpDialogProps: [] as Array<Record<string, unknown>>,
+    capturedPluginDialogProps: [] as Array<Record<string, unknown>>,
+  }),
+);
 
 vi.mock("lucide-react", () => {
   const createIcon = (name: string) => (props: Record<string, unknown>) =>
@@ -22,23 +24,15 @@ vi.mock("lucide-react", () => {
 });
 
 vi.mock("@/components/ui/button.js", () => ({
-  Button: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-  }) => createElement("button", props, children),
+  Button: ({ children, ...props }: { children: ReactNode }) =>
+    createElement("button", props, children),
 }));
 
 vi.mock("@/components/ui/dropdown-menu.js", () => ({
   DropdownMenu: ({ children }: { children: ReactNode }) =>
     createElement("div", { "data-testid": "dropdown-menu" }, children),
-  DropdownMenuContent: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-  }) => createElement("div", { "data-testid": "dropdown-menu-content", ...props }, children),
+  DropdownMenuContent: ({ children, ...props }: { children: ReactNode }) =>
+    createElement("div", { "data-testid": "dropdown-menu-content", ...props }, children),
   DropdownMenuItem: ({
     children,
     disabled,
@@ -102,12 +96,9 @@ afterEach(() => {
 
 describe("RemoteSyncActions", () => {
   it("drops dialog intent across disconnects and remote target changes", async () => {
-    const { useRemoteSyncDialogIntent } = await import(
-      "@/settings/RemoteSyncActions.js"
-    );
+    const { useRemoteSyncDialogIntent } = await import("@/settings/RemoteSyncActions.js");
     const hook = renderHook(
-      ({ rpcReady, targetKey }) =>
-        useRemoteSyncDialogIntent({ rpcReady, targetKey }),
+      ({ rpcReady, targetKey }) => useRemoteSyncDialogIntent({ rpcReady, targetKey }),
       {
         initialProps: {
           rpcReady: true,
@@ -243,9 +234,7 @@ describe("RemoteSyncActions", () => {
     const { REMOTE_SYNC_PREFLIGHT_TIMEOUT_MS, runRemoteSyncPreflightWithTimeout } =
       await import("@/settings/RemoteSyncActions.js");
 
-    await expect(
-      runRemoteSyncPreflightWithTimeout(async () => "ok"),
-    ).resolves.toBe("ok");
+    await expect(runRemoteSyncPreflightWithTimeout(async () => "ok")).resolves.toBe("ok");
     await vi.advanceTimersByTimeAsync(REMOTE_SYNC_PREFLIGHT_TIMEOUT_MS);
   });
 

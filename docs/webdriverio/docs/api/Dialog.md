@@ -8,15 +8,15 @@ Dialog objects are dispatched by [`browser`](/docs/api/browser) via the `browser
 An example of using the Dialog object:
 
 ```ts
-import { browser } from '@wdio/globals'
+import { browser } from "@wdio/globals";
 
-await browser.url('https://webdriver.io')
-browser.on('dialog', async (dialog) => {
-    console.log(dialog.message()) // outputs: "Hello Dialog"
-    await dialog.dismiss()
-})
+await browser.url("https://webdriver.io");
+browser.on("dialog", async (dialog) => {
+  console.log(dialog.message()); // outputs: "Hello Dialog"
+  await dialog.dismiss();
+});
 
-await browser.execute(() => alert('Hello Dialog'))
+await browser.execute(() => alert("Hello Dialog"));
 ```
 
 :::note

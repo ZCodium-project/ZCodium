@@ -179,7 +179,10 @@ function isFunctionallyReady(result: CuaPermissionStatusResult | null): boolean 
 }
 
 /** 应用 sticky 探针，返回真正对外发布的结果。 */
-function withStickyProbes(slot: Slot, result: CuaPermissionStatusResult): CuaPermissionStatusResult {
+function withStickyProbes(
+  slot: Slot,
+  result: CuaPermissionStatusResult,
+): CuaPermissionStatusResult {
   if (!("accessibility" in result)) {
     slot.stickyReady = null;
     return result;

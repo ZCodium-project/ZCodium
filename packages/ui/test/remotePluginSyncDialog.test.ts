@@ -23,9 +23,7 @@ type RemoteInstallResult = Awaited<
   ReturnType<NonNullable<RemotePluginSyncParams["remoteZCodeAgentService"]>["installPlugin"]>
 >;
 
-function makeCandidate(
-  overrides: Partial<PluginSyncCandidate>,
-): PluginSyncCandidate {
+function makeCandidate(overrides: Partial<PluginSyncCandidate>): PluginSyncCandidate {
   return {
     id: "remote-tools-id",
     name: "remote-tools",
@@ -94,9 +92,7 @@ function makeMarketplaceRow(name: string): RemotePluginSyncRow {
   };
 }
 
-function makePluginInfo(
-  overrides: Partial<ZCodePluginInfo>,
-): ZCodePluginInfo {
+function makePluginInfo(overrides: Partial<ZCodePluginInfo>): ZCodePluginInfo {
   return {
     id: "formatter@team-market",
     name: "formatter",
@@ -130,7 +126,11 @@ describe("RemotePluginSyncDialog helpers", () => {
     const rows = buildRemotePluginSyncRows(
       [
         makeCandidate({ id: "missing-id", pluginId: "missing@inline", directoryName: "missing" }),
-        makeCandidate({ id: "existing-id", pluginId: "existing@inline", directoryName: "existing" }),
+        makeCandidate({
+          id: "existing-id",
+          pluginId: "existing@inline",
+          directoryName: "existing",
+        }),
       ],
       [
         {
@@ -152,7 +152,11 @@ describe("RemotePluginSyncDialog helpers", () => {
     const rows = buildRemotePluginSyncRows(
       [
         makeCandidate({ id: "missing-id", pluginId: "missing@inline", directoryName: "missing" }),
-        makeCandidate({ id: "existing-id", pluginId: "existing@inline", directoryName: "existing" }),
+        makeCandidate({
+          id: "existing-id",
+          pluginId: "existing@inline",
+          directoryName: "existing",
+        }),
       ],
       [
         {
@@ -172,7 +176,11 @@ describe("RemotePluginSyncDialog helpers", () => {
     const rows = buildRemotePluginSyncRows(
       [
         makeCandidate({ id: "missing-id", pluginId: "missing@inline", directoryName: "missing" }),
-        makeCandidate({ id: "existing-id", pluginId: "existing@inline", directoryName: "existing" }),
+        makeCandidate({
+          id: "existing-id",
+          pluginId: "existing@inline",
+          directoryName: "existing",
+        }),
       ],
       [
         {
@@ -637,9 +645,7 @@ describe("RemotePluginSyncDialog helpers", () => {
       ],
     });
 
-    expect(result.results).toMatchObject([
-      { pluginId: "formatter@team-market", status: "synced" },
-    ]);
+    expect(result.results).toMatchObject([{ pluginId: "formatter@team-market", status: "synced" }]);
     expect(calls).toEqual([
       { operation: "install", scope: "user" },
       { operation: "setEnabled", scope: "user" },
@@ -723,14 +729,12 @@ describe("RemotePluginSyncDialog helpers", () => {
             stopWaiters.set(candidateId, resolve);
           }),
         cancelOperation: async (operationId) => {
-          await (
-            {
-              cancelPluginOperation: async (params: { operationId: string }) => {
-                cancelCalls.push(params.operationId);
-                return { cancelled: true, operationId: params.operationId };
-              },
-            }
-          ).cancelPluginOperation({ operationId });
+          await {
+            cancelPluginOperation: async (params: { operationId: string }) => {
+              cancelCalls.push(params.operationId);
+              return { cancelled: true, operationId: params.operationId };
+            },
+          }.cancelPluginOperation({ operationId });
         },
       },
     });

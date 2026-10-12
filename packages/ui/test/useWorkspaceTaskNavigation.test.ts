@@ -59,10 +59,7 @@ function servicesWithSetTaskUnread(setTaskUnread: ReturnType<typeof vi.fn>): ISe
 
 function renderNavigation(params: {
   ambientServices: IServiceAccessor;
-  activateTabByPath: (
-    workspacePath: string,
-    options?: { workspaceIdentity?: string },
-  ) => boolean;
+  activateTabByPath: (workspacePath: string, options?: { workspaceIdentity?: string }) => boolean;
   workspacePath?: string;
   workspaceIdentity?: string;
   onNavigateToAutomations?: ReturnType<typeof vi.fn>;
@@ -74,8 +71,7 @@ function renderNavigation(params: {
       useWorkspaceTaskNavigation({
         intl: { formatMessage: ({ id }) => id },
         workspaceAbsPath: params.workspacePath ?? "/home/dev",
-        workspaceIdentity:
-          params.workspaceIdentity ?? "remote:ssh:dev:22:user:/home/dev",
+        workspaceIdentity: params.workspaceIdentity ?? "remote:ssh:dev:22:user:/home/dev",
         activateTabByPath: params.activateTabByPath,
         onNavigateToAutomations: params.onNavigateToAutomations,
       }),
@@ -250,12 +246,7 @@ describe("useWorkspaceTaskNavigation", () => {
     });
 
     await act(async () => {
-      hook.result.current.handleSelectTask(
-        localWorkspacePath,
-        taskId,
-        undefined,
-        321,
-      );
+      hook.result.current.handleSelectTask(localWorkspacePath, taskId, undefined, 321);
       await Promise.resolve();
     });
 
@@ -286,11 +277,12 @@ describe("useWorkspaceTaskNavigation", () => {
         "remote-b": { sessionId: "remote-b", services: targetServices },
       },
     });
-    useTaskQueryCacheStore
-      .getState()
-      .upsertTaskMeta(
-        taskMeta({ workspacePath: targetWorkspacePath, workspaceIdentity: targetWorkspaceIdentity }),
-      );
+    useTaskQueryCacheStore.getState().upsertTaskMeta(
+      taskMeta({
+        workspacePath: targetWorkspacePath,
+        workspaceIdentity: targetWorkspaceIdentity,
+      }),
+    );
     tabStore.setState({
       activeTabId: "remote-a",
       tabs: [
@@ -328,11 +320,7 @@ describe("useWorkspaceTaskNavigation", () => {
     });
 
     await act(async () => {
-      hook.result.current.handleSelectTask(
-        targetWorkspacePath,
-        taskId,
-        targetWorkspaceIdentity,
-      );
+      hook.result.current.handleSelectTask(targetWorkspacePath, taskId, targetWorkspaceIdentity);
       await Promise.resolve();
     });
 
@@ -386,17 +374,14 @@ describe("useWorkspaceTaskNavigation", () => {
     });
 
     act(() => {
-      hook.result.current.handleSelectTask(
-        targetWorkspacePath,
-        taskId,
-        targetWorkspaceIdentity,
-      );
+      hook.result.current.handleSelectTask(targetWorkspacePath, taskId, targetWorkspaceIdentity);
     });
 
     expect(baseSetTaskUnread).not.toHaveBeenCalled();
     expect(staleRemoteSetTaskUnread).not.toHaveBeenCalled();
     expect(
-      useTaskQueryCacheStore.getState().taskMetaByEntityKey[buildTaskEntityKey(remoteTask)]?.unreadAt,
+      useTaskQueryCacheStore.getState().taskMetaByEntityKey[buildTaskEntityKey(remoteTask)]
+        ?.unreadAt,
     ).toBe(2);
     hook.unmount();
   });

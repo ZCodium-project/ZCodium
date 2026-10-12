@@ -38,7 +38,7 @@ Spec: offPeakTaskId -> 未来 Host sendPrompt -> inputId/sourceCommandId
 公共关联字段：
 
 | 字段                            | 含义                                                                                           |
-| --- | --- |
+| ------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `talk_id`                       | task / session ID。                                                                            |
 | `message_id`                    | 当前输入轮次 ID；V4 对应 `sourceCommandId` / `inputId`。同一轮的 completion 和 step 必须相同。 |
 | `model_name` / `model_provider` | 本轮实际模型与 provider。                                                                      |
@@ -48,11 +48,11 @@ Spec: offPeakTaskId -> 未来 Host sendPrompt -> inputId/sourceCommandId
 一轮 Agent 输入的最终汇总；每个 `talk_id + message_id` 至多一条。
 
 | 字段组                           | 字段                                                                                                                   | 含义                                                                                                                                                                             |
-| --- | --- | --- |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 时延                             | `request_time`、`duration_ms`、`time_to_first_token`、`waiting_ms`                                                     | 发送时刻、端到端时长、首 token 时长、权限等等待累计。                                                                                                                            |
 | 用量                             | `input_tokens`、`output_tokens`、`reasoning_tokens`、`cached_input_tokens`、`cache_write_input_tokens`、`total_tokens` | 本轮主 Agent 用量。                                                                                                                                                              |
 | 步骤与工具                       | `agent_step_cnt`、`tool_call_total`、`tool_call_failed`                                                                | 当前轮已收口的 step 数和工具调用统计。                                                                                                                                           |
-| 结果                             | `status`、`error_type`、`error_msg`                                                                                    | `success` / `fail` / `user_interrupt` ；失败归因使用 `error_type`，`error_msg` 非空原文统一为 `[redacted]`，空串保持空。                                                                                                                               |
+| 结果                             | `status`、`error_type`、`error_msg`                                                                                    | `success` / `fail` / `user_interrupt` ；失败归因使用 `error_type`，`error_msg` 非空原文统一为 `[redacted]`，空串保持空。                                                         |
 | 套餐身份字段                     | `plan_status`、`plan_product_id`                                                                                       | 发送时冻结的用户套餐身份：`coding_plan` / `start_plan` / `no_plan` / `unknown` ； 当前套餐的后端稳定商品 ID.                                                                     |
 | 来源与关联（新增）               | `message_source`、`task_trigger`、`automation_id` / `off_peak_task_id`                                                 | 写入 `event_extra_detail`；明确来源、定时/立即运行方式，并把定时任务创建轮和后续运行关联起来。                                                                                   |
 | 定时运行时序（新增，仅定时任务） | `scheduled_at`、`schedule_lag_ms`                                                                                      | 写入 `event_extra_detail`；分别是本次计划触发的 Unix 毫秒时间戳，以及 Host 接纳该执行时刻减去 `scheduled_at`。仅 `task_trigger=schedule` 有值；手动运行为空，不复制到每条 step。 |
@@ -63,12 +63,12 @@ Spec: offPeakTaskId -> 未来 Host sendPrompt -> inputId/sourceCommandId
 一轮内的已收口执行步骤；`message_completion.agent_step_cnt` 必须等于该轮实际成功上报的条数。
 
 | 字段组             | 字段                                                                        | 含义                                                                                                                                   |
-| --- | --- | --- |
+| ------------------ | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 顺序与类型         | `step_id`、`loop_index`、`step_type`、`is_tool_call`                        | `step_id` 是同一 `message_id` 内已收口 step 的稳定唯一标识，`loop_index` 是轮内序号；类型为 `reasoning` / `generation` / `tool_call`。 |
 | 工具               | `tool_name`、`tool_call_id`                                                 | 工具 step 的名称与调用 ID；非工具为空。                                                                                                |
 | 时延与结果         | `duration_ms`、`waiting_ms`、`generation_tail_finalize_ms`、`status`        | step 时长、权限等待、正文末帧收口时延和成功/失败/超时。                                                                                |
-| 用量与错误         | `input_tokens`、`output_tokens`、`cached_tokens`、`error_type`、`error_msg` | 当前兼容口径的 step 用量；失败归因使用 `error_type`，`error_msg` 非空原文统一为 `[redacted]`，空串保持空。                                                                                                   |
-| 来源与关联（新增） | `message_source`、`task_trigger`、`automation_id` / `off_peak_task_id`      | 普通输入与同一 `message_completion` 一致；独立 background subagent 唤起的 completion 细分来源。                                  |
+| 用量与错误         | `input_tokens`、`output_tokens`、`cached_tokens`、`error_type`、`error_msg` | 当前兼容口径的 step 用量；失败归因使用 `error_type`，`error_msg` 非空原文统一为 `[redacted]`，空串保持空。                             |
+| 来源与关联（新增） | `message_source`、`task_trigger`、`automation_id` / `off_peak_task_id`      | 普通输入与同一 `message_completion` 一致；独立 background subagent 唤起的 completion 细分来源。                                        |
 
 `send_btn` 是用户点击/提交事件，不应由后台自动任务伪造；自动任务只复用 completion 和 step。
 
@@ -176,7 +176,7 @@ message_id = 该会话里的哪一次定时运行（runId）
 ```
 
 | 字段               | 范围与生成方式                                                                  | 用途                                                                                                                                        |
-| --- | --- | --- |
+| ------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `automationId`     | 一条定时规则一个，跨每次 schedule / manual run 保持不变。                       | 创建轮和所有执行轮的 `event_extra_detail.automation_id`；**不是** `message_id`。                                                            |
 | `runId`            | 一次定时运行一个：`automationId:scheduledAt` 或 `automationId:manual:uuid`。    | Host `traceId`，再映射为执行轮 `inputId/sourceCommandId/message_id`；是本轮埋点幂等命名空间。completion 以它区分，step 还必须加 `step_id`。 |
 | `scheduledAt`      | `automation_runs` 的本次理论触发时间（Unix 毫秒）；manual run 为空。            | 写入本次 `message_completion.event_extra_detail.scheduled_at`，并计算调度延迟；**不是**规则的 cron 表达式。                                 |
@@ -234,7 +234,7 @@ event_extra_detail.automation_id = A（非空）
 ### 现有字段的可用性
 
 | 现有字段                        | 结论                               | 原因                                                                                                                                            |
-| --- | --- | --- |
+| ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | 定时任务 `runId`                | 执行轮的 message ID 与幂等命名空间 | 当前 `runId -> Host traceId -> inputId/sourceCommandId`；每次运行唯一。`message_completion` 用它去重，多个 `agent_step` 还要以 `step_id` 区分。 |
 | 定时任务 `trigger`              | 可作 `task_trigger` 来源           | 已持久化为 `schedule` / `manual`。                                                                                                              |
 | 定时任务 `automationId`         | 创建轮与运行轮的关联键             | 写入 `event_extra_detail.automation_id`；当前也用于本轮工具隔离。                                                                               |

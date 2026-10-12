@@ -42,7 +42,11 @@ describe("resolveHighspeedPrepareSelection", () => {
         modelId: "GLM-5.3",
         options: { reasoningLevel: "medium" },
       },
-      projectedConfig: { provider: "account:bigmodel-team-coding-plan", model: "GLM-5.3", thought: "high" },
+      projectedConfig: {
+        provider: "account:bigmodel-team-coding-plan",
+        model: "GLM-5.3",
+        thought: "high",
+      },
     });
     expect(fromSubmission).toEqual({
       provider: "account:bigmodel-team-coding-plan",
@@ -59,7 +63,11 @@ describe("resolveHighspeedPrepareSelection", () => {
       draftConfig: {
         provider: "account:bigmodel-team-coding-plan",
         model: "GLM-5.3",
-        modelSelection: { providerId: "account:bigmodel-team-coding-plan", modelId: "GLM-5.3", options: { reasoningLevel: "low" } },
+        modelSelection: {
+          providerId: "account:bigmodel-team-coding-plan",
+          modelId: "GLM-5.3",
+          options: { reasoningLevel: "low" },
+        },
       },
     });
     expect(fromProjectionThought?.reasoningLevel).toBe("high");
@@ -67,7 +75,9 @@ describe("resolveHighspeedPrepareSelection", () => {
 
   it("returns null when neither submission nor fallbacks yield a provider and model", () => {
     expect(
-      resolveHighspeedPrepareSelection({ draftConfig: { provider: "account:bigmodel-team-coding-plan" } }),
+      resolveHighspeedPrepareSelection({
+        draftConfig: { provider: "account:bigmodel-team-coding-plan" },
+      }),
     ).toBeNull();
     expect(resolveHighspeedPrepareSelection({})).toBeNull();
   });

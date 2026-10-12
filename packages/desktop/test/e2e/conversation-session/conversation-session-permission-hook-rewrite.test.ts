@@ -116,12 +116,13 @@ describe("PermissionRequest Hook 改写后的确认替换", () => {
     this.timeout(180000);
     await observeAndDelayFirstApproval();
     // 转正后强制录屏会让无 ffmpeg 的默认回放在业务通过后失败；仅人工审核需要视频。
-    const recording = process.env.ZCODE_E2E_MANUAL_REVIEW === "1"
-      ? await startElectronWindowRecording({
-          outputPath: join(ARTIFACT, "approval-replacement.webm"),
-          frameIntervalMs: 100,
-        })
-      : null;
+    const recording =
+      process.env.ZCODE_E2E_MANUAL_REVIEW === "1"
+        ? await startElectronWindowRecording({
+            outputPath: join(ARTIFACT, "approval-replacement.webm"),
+            frameIntervalMs: 100,
+          })
+        : null;
     let staleResponse: Record<string, unknown> | undefined;
     try {
       await sendV4Prompt(

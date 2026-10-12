@@ -16,10 +16,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_BROWSER_SUBAGENT_BOUNDARY_PARENT"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_BROWSER_SUBAGENT_BOUNDARY_PARENT"]
       },
       "response": {
         "statusCode": 200,
@@ -47,9 +44,7 @@
           "E2E_BROWSER_SUBAGENT_BOUNDARY_PARENT",
           "E2E_BROWSER_FIXTURE_URL:"
         ],
-        "bodyIncludes": [
-          "mcp__node_repl__js"
-        ],
+        "bodyIncludes": ["mcp__node_repl__js"],
         "bodyExcludes": [
           "toolu_e2e_browser_subagent_parent_init",
           "Generate a concise title",
@@ -85,13 +80,8 @@
           "E2E_BROWSER_SUBAGENT_BOUNDARY_PARENT",
           "toolu_e2e_browser_subagent_parent_init"
         ],
-        "lastUserMessageIncludes": [
-          "E2E_BROWSER_SUBAGENT_PARENT_INIT_OK"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "lastUserMessageIncludes": ["E2E_BROWSER_SUBAGENT_PARENT_INIT_OK"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -119,13 +109,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "lastUserMessageIncludes": [
-          "E2E_BROWSER_SUBAGENT_BOUNDARY_CHILD"
-        ],
-        "bodyIncludes": [
-          "E2E_BROWSER_SUBAGENT_BOUNDARY_CHILD",
-          "mcp__node_repl__js"
-        ],
+        "lastUserMessageIncludes": ["E2E_BROWSER_SUBAGENT_BOUNDARY_CHILD"],
+        "bodyIncludes": ["E2E_BROWSER_SUBAGENT_BOUNDARY_CHILD", "mcp__node_repl__js"],
         "bodyExcludes": [
           "toolu_e2e_browser_subagent_child_check",
           "Generate a concise title",
@@ -161,13 +146,8 @@
           "E2E_BROWSER_SUBAGENT_BOUNDARY_CHILD",
           "toolu_e2e_browser_subagent_child_check"
         ],
-        "lastUserMessageIncludes": [
-          "E2E_BROWSER_SUBAGENT_BOUNDARY_CHECKS_OK"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "lastUserMessageIncludes": ["E2E_BROWSER_SUBAGENT_BOUNDARY_CHECKS_OK"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -227,13 +207,8 @@
           "E2E_BROWSER_SUBAGENT_BOUNDARY_PARENT",
           "toolu_e2e_browser_subagent_parent_resume"
         ],
-        "lastUserMessageIncludes": [
-          "E2E_BROWSER_SUBAGENT_PARENT_RESUME_OK"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "lastUserMessageIncludes": ["E2E_BROWSER_SUBAGENT_PARENT_RESUME_OK"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

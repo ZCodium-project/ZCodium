@@ -1,16 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { clearAppData } from "../../../helpers/desktop-app.js";
-import {
-  assertUpstreamRequestCapture,
-} from "../../../helpers/upstream-capture.js";
+import { assertUpstreamRequestCapture } from "../../../helpers/upstream-capture.js";
 import type {
   E2ENetworkCaptureArtifact,
   E2ENetworkCaptureRecord,
 } from "../../../helpers/network-capture-proxy.js";
-import {
-  UPSTREAM_ALTERNATE_MODEL,
-  UPSTREAM_MODEL,
-} from "../../../helpers/upstream-provider.js";
+import { UPSTREAM_ALTERNATE_MODEL, UPSTREAM_MODEL } from "../../../helpers/upstream-provider.js";
 import {
   E2E_REPLY_TOKEN,
   prepareConversationE2E,
@@ -45,16 +40,11 @@ describe("会话区 subagent provider registry 冷启动 E2E", () => {
       `After the subagent returns, reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
     await sendPrompt(prompt);
-    await waitForComposerText(
-      "",
-      "subagent provider registry 冷启动首发后输入框没有清空",
-    );
+    await waitForComposerText("", "subagent provider registry 冷启动首发后输入框没有清空");
     await waitForUserMessageContaining(marker);
 
     const childRecord = await waitForChildSubagentRequestCapture();
-    expect(readModelFromCapture(childRecord.requestJson)).toBe(
-      UPSTREAM_ALTERNATE_MODEL,
-    );
+    expect(readModelFromCapture(childRecord.requestJson)).toBe(UPSTREAM_ALTERNATE_MODEL);
 
     const parentContinuationRecord = await waitForParentContinuationRequestCapture();
     assertUpstreamRequestCapture(parentContinuationRecord, {
@@ -142,9 +132,7 @@ async function readCaptureArtifact(): Promise<E2ENetworkCaptureArtifact | null> 
     return null;
   }
   try {
-    return JSON.parse(
-      await readFile(capturePath, "utf-8"),
-    ) as E2ENetworkCaptureArtifact;
+    return JSON.parse(await readFile(capturePath, "utf-8")) as E2ENetworkCaptureArtifact;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return null;
@@ -158,8 +146,7 @@ function findChildSubagentRequest(artifact: E2ENetworkCaptureArtifact | null) {
     artifact?.records.find(
       (record) =>
         record.method === "POST" &&
-        (record.path.includes("/messages") ||
-          record.path.includes("/chat/completions")) &&
+        (record.path.includes("/messages") || record.path.includes("/chat/completions")) &&
         record.status === "complete" &&
         captureContainsText(record.requestJson, CHILD_MARKER) &&
         readModelFromCapture(record.requestJson) === UPSTREAM_ALTERNATE_MODEL,
@@ -179,15 +166,11 @@ function findParentContinuationRequest(artifact: E2ENetworkCaptureArtifact | nul
   );
 }
 
-function summarizeChildRequestCandidates(
-  artifact: E2ENetworkCaptureArtifact | null,
-) {
+function summarizeChildRequestCandidates(artifact: E2ENetworkCaptureArtifact | null) {
   return {
     records:
       artifact?.records
-        .filter((record) =>
-          captureContainsText(record.requestJson, CHILD_MARKER),
-        )
+        .filter((record) => captureContainsText(record.requestJson, CHILD_MARKER))
         .map((record) => ({
           model: readModelFromCapture(record.requestJson),
           path: record.path,
@@ -197,15 +180,11 @@ function summarizeChildRequestCandidates(
   };
 }
 
-function summarizeParentContinuationCandidates(
-  artifact: E2ENetworkCaptureArtifact | null,
-) {
+function summarizeParentContinuationCandidates(artifact: E2ENetworkCaptureArtifact | null) {
   return {
     records:
       artifact?.records
-        .filter((record) =>
-          captureContainsText(record.requestJson, CHILD_REPLY_TOKEN),
-        )
+        .filter((record) => captureContainsText(record.requestJson, CHILD_REPLY_TOKEN))
         .map((record) => ({
           model: readModelFromCapture(record.requestJson),
           path: record.path,
@@ -218,8 +197,7 @@ function summarizeParentContinuationCandidates(
 function isUpstreamMessageRequest(record: E2ENetworkCaptureRecord) {
   return (
     record.method === "POST" &&
-    (record.path.includes("/messages") ||
-      record.path.includes("/chat/completions"))
+    (record.path.includes("/messages") || record.path.includes("/chat/completions"))
   );
 }
 
@@ -241,7 +219,5 @@ function captureContainsText(value: unknown, expected: string): boolean {
   if (!value || typeof value !== "object") {
     return false;
   }
-  return Object.values(value).some((child) =>
-    captureContainsText(child, expected),
-  );
+  return Object.values(value).some((child) => captureContainsText(child, expected));
 }

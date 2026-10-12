@@ -13,8 +13,6 @@ describe("isOffPeakTask", () => {
   });
 
   it("与 cron 标记互不干扰（D45 兄弟实体各用各的标记）", () => {
-    expect(isOffPeakTask({ cronAutomationId: "automation-1" } as never)).toBe(
-      false,
-    );
+    expect(isOffPeakTask({ cronAutomationId: "automation-1" } as never)).toBe(false);
   });
 });

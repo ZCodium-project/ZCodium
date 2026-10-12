@@ -10,10 +10,7 @@ import {
   waitForConversationToolGroup,
 } from "../../../helpers/conversation-session-tool-groups.js";
 import { ensureToolCrossProductFullAccessMode } from "../../../helpers/conversation-session-tool-cross-product.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../../../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../../../helpers/e2e-runtime-paths.js";
 import {
   E2E_REPLY_TOKEN,
   getV4PaneSnapshot,
@@ -55,16 +52,22 @@ describe("TGE04 reasoning visibility grouping boundary", () => {
   it("隐藏 reasoning 时合并，显示后按可见 reasoning 拆分", async function () {
     this.timeout(240000);
     await ensureToolCrossProductFullAccessMode();
-    await sendV4Prompt([
-      `${CASE_MARKER}: Think briefly before every numbered step, then follow all steps in order.`,
-      `1. Bash: node -e "console.log('TGE04_EXEC_A')"`,
-      `2. Bash: node -e "console.log('TGE04_EXEC_B')"`,
-      `3. Write ${FILE_PATH} with exactly "export const reasoning = 'a';\\n".`,
-      `4. Edit ${FILE_PATH}, replacing "'a'" with "'b'".`,
-      `5. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    ].join(" "));
+    await sendV4Prompt(
+      [
+        `${CASE_MARKER}: Think briefly before every numbered step, then follow all steps in order.`,
+        `1. Bash: node -e "console.log('TGE04_EXEC_A')"`,
+        `2. Bash: node -e "console.log('TGE04_EXEC_B')"`,
+        `3. Write ${FILE_PATH} with exactly "export const reasoning = 'a';\\n".`,
+        `4. Edit ${FILE_PATH}, replacing "'a'" with "'b'".`,
+        `5. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
+      ].join(" "),
+    );
     await waitForV4AssistantMessageContaining(E2E_REPLY_TOKEN, 150000);
-    await waitForV4Pane((snapshot) => !snapshot.canStop, "reasoning boundary 工具轮没有结束", 150000);
+    await waitForV4Pane(
+      (snapshot) => !snapshot.canStop,
+      "reasoning boundary 工具轮没有结束",
+      150000,
+    );
     await expandAssistantHistoriesWithContent();
 
     const hiddenGroups = await listConversationToolGroups();
@@ -74,12 +77,10 @@ describe("TGE04 reasoning visibility grouping boundary", () => {
     await toggleLatestConversationToolGroup("ChangesGroup", true);
     const expandedHiddenGroups = await listConversationToolGroups();
     expect(
-      expandedHiddenGroups.find((group) => group.toolName === "ExecuteGroup")
-        ?.childCount,
+      expandedHiddenGroups.find((group) => group.toolName === "ExecuteGroup")?.childCount,
     ).toBe(2);
     expect(
-      expandedHiddenGroups.find((group) => group.toolName === "ChangesGroup")
-        ?.childCount,
+      expandedHiddenGroups.find((group) => group.toolName === "ChangesGroup")?.childCount,
     ).toBe(2);
 
     const sessionId = (await getV4PaneSnapshot()).sessionId;
@@ -94,8 +95,12 @@ describe("TGE04 reasoning visibility grouping boundary", () => {
       "显示 reasoning 后 Terminal 没有恢复",
     );
     const visibleGroups = await listConversationToolGroups();
-    expect(visibleGroups.filter((group) => group.toolName === "ExecuteGroup").length).toBeGreaterThanOrEqual(2);
-    expect(visibleGroups.filter((group) => group.toolName === "ChangesGroup").length).toBeGreaterThanOrEqual(2);
+    expect(
+      visibleGroups.filter((group) => group.toolName === "ExecuteGroup").length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      visibleGroups.filter((group) => group.toolName === "ChangesGroup").length,
+    ).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -131,16 +136,24 @@ async function waitForRestoredSessionStable(sessionId: string, failureMessage: s
 }
 
 async function waitForRendererAfterReloadSession() {
-  await browser.waitUntil(async () => {
-    try {
-      const puppeteer = await browser.getPuppeteer();
-      const rendererTarget = puppeteer.targets().filter((target) => target.url().includes("/renderer/index.html")).at(-1);
-      const targetId = rendererTarget ? (rendererTarget as unknown as { _targetId?: string })._targetId : null;
-      if (!targetId) return false;
-      await browser.switchToWindow(targetId);
-      return true;
-    } catch {
-      return false;
-    }
-  }, { timeout: 30000, interval: 250, timeoutMsg: "TGE04 reload 后没有 renderer target" });
+  await browser.waitUntil(
+    async () => {
+      try {
+        const puppeteer = await browser.getPuppeteer();
+        const rendererTarget = puppeteer
+          .targets()
+          .filter((target) => target.url().includes("/renderer/index.html"))
+          .at(-1);
+        const targetId = rendererTarget
+          ? (rendererTarget as unknown as { _targetId?: string })._targetId
+          : null;
+        if (!targetId) return false;
+        await browser.switchToWindow(targetId);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { timeout: 30000, interval: 250, timeoutMsg: "TGE04 reload 后没有 renderer target" },
+  );
 }

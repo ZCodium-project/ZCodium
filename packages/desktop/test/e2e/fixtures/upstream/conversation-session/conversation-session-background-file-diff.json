@@ -40,10 +40,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_BACKGROUND_FILE_DIFF",
-          "background-file-diff-e2e/result.md"
-        ],
+        "bodyIncludes": ["E2E_BACKGROUND_FILE_DIFF", "background-file-diff-e2e/result.md"],
         "bodyExcludes": [
           "Async agent launched successfully",
           "Generate a concise title",
@@ -159,10 +156,7 @@
           "CRITICAL: Respond with TEXT ONLY",
           "Verify whether the active session goal"
         ],
-        "lastUserMessageIncludes": [
-          "<task-notification>",
-          "E2E_BACKGROUND_FILE_DIFF_CHILD_DONE"
-        ]
+        "lastUserMessageIncludes": ["<task-notification>", "E2E_BACKGROUND_FILE_DIFF_CHILD_DONE"]
       },
       "response": {
         "statusCode": 200,

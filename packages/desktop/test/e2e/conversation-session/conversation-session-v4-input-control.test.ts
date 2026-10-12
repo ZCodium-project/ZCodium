@@ -1,9 +1,7 @@
 // v4 输入控制条收口：autoDrain / followupMode 不再作为 composer 局部按钮暴露。
 // followupMode 由 app 设置页 zcodeInteractionBehavior 同步到 CLI；autoDrain 保留为
 // stop 后 autoDrain=false 仍是内部投影事实，用户从暂停提示条“继续”恢复消费。
-import {
-  clearAppData,
-} from "../helpers/desktop-app.js";
+import { clearAppData } from "../helpers/desktop-app.js";
 import {
   getV4InputControlState,
   prepareV4ConversationE2E,

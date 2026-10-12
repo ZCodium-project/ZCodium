@@ -7,37 +7,42 @@ This tutorial is for people who are still using `v5` of WebdriverIO and want to 
 
 - we consolidated the parameters for some commands (e.g. `newWindow`, `react$`, `react$$`, `waitUntil`, `dragAndDrop`, `moveTo`, `waitForDisplayed`, `waitForEnabled`, `waitForExist`) and moved all optional parameters into a single object, e.g.
 
-    ```js
-    // v5
-    browser.newWindow(
-        'https://webdriver.io',
-        'WebdriverIO window',
-        'width=420,height=230,resizable,scrollbars=yes,status=1'
-    )
-    // v6
-    browser.newWindow('https://webdriver.io', {
-        windowName: 'WebdriverIO window',
-        windowFeature: 'width=420,height=230,resizable,scrollbars=yes,status=1'
-    })
-    ```
+  ```js
+  // v5
+  browser.newWindow(
+    "https://webdriver.io",
+    "WebdriverIO window",
+    "width=420,height=230,resizable,scrollbars=yes,status=1",
+  );
+  // v6
+  browser.newWindow("https://webdriver.io", {
+    windowName: "WebdriverIO window",
+    windowFeature: "width=420,height=230,resizable,scrollbars=yes,status=1",
+  });
+  ```
 
 - configurations for services moved into the service list, e.g.
 
-    ```js
-    // v5
-    exports.config = {
-        services: ['sauce'],
-        sauceConnect: true,
-        sauceConnectOpts: { foo: 'bar' },
-    }
-    // v6
-    exports.config = {
-        services: [['sauce', {
-            sauceConnect: true,
-            sauceConnectOpts: { foo: 'bar' }
-        }]],
-    }
-    ```
+  ```js
+  // v5
+  exports.config = {
+    services: ["sauce"],
+    sauceConnect: true,
+    sauceConnectOpts: { foo: "bar" },
+  };
+  // v6
+  exports.config = {
+    services: [
+      [
+        "sauce",
+        {
+          sauceConnect: true,
+          sauceConnectOpts: { foo: "bar" },
+        },
+      ],
+    ],
+  };
+  ```
 
 - some service options were renamed for simplification purposes
 - we renamed command `launchApp` to `launchChromeApp` for Chrome WebDriver sessions
@@ -66,7 +71,7 @@ Given that all WebdriverIO versions are tight to each other it is the best to al
 npm i --save-dev @wdio/allure-reporter@6 @wdio/cli@6 @wdio/cucumber-framework@6 @wdio/local-runner@6 @wdio/spec-reporter@6 @wdio/sync@6 wdio-chromedriver-service@6 webdriverio@6
 ```
 
-Usually WebdriverIO dependencies are part of the dev dependencies, depending on your project this can vary though. After this your `package.json` and `package-lock.json` should be updated. __Note:__ these are example dependencies, yours may differ. Make sure you find the latest v6 version by calling, e.g.:
+Usually WebdriverIO dependencies are part of the dev dependencies, depending on your project this can vary though. After this your `package.json` and `package-lock.json` should be updated. **Note:** these are example dependencies, yours may differ. Make sure you find the latest v6 version by calling, e.g.:
 
 ```sh
 npm show webdriverio versions

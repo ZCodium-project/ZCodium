@@ -44,50 +44,31 @@ describe("PV4-21/PV4-22 conversation + file rewind", () => {
 
     await sendV4Prompt("E2E_V4_REWIND_FILE_SAFE 请更新 safe.txt");
     await approvePendingFileWriteIfRequired();
-    await waitForV4TimelineContaining(
-      "V4_REWIND_FILE_SAFE_ORIGINAL_REPLY",
-      90000,
-    );
+    await waitForV4TimelineContaining("V4_REWIND_FILE_SAFE_ORIGINAL_REPLY", 90000);
     await waitForFileContent(SAFE_PATH, "safe-after\n");
     const originalSessionId = (await getV4PaneSnapshot()).sessionId;
 
     await waitForV4Edit();
-    const rowId = await beginFirstV4UserQueryEdit(
-      "E2E_V4_REWIND_FILE_SAFE_EDITED 文件恢复后重发",
-    );
+    const rowId = await beginFirstV4UserQueryEdit("E2E_V4_REWIND_FILE_SAFE_EDITED 文件恢复后重发");
     await clickV4EditWorkspaceReset(rowId);
 
-    const rewindAck = await waitForLatestV4CommandAck(
-      "editUserQuery",
-      30000,
-    ).catch(async (error) => {
-      const fileState = await readFile(SAFE_PATH, "utf8").catch(
-        () => "<missing>",
-      );
-      throw new Error(
-        `${error instanceof Error ? error.message : String(error)}; safe.txt=${JSON.stringify(fileState)}`,
-      );
-    });
+    const rewindAck = await waitForLatestV4CommandAck("editUserQuery", 30000).catch(
+      async (error) => {
+        const fileState = await readFile(SAFE_PATH, "utf8").catch(() => "<missing>");
+        throw new Error(
+          `${error instanceof Error ? error.message : String(error)}; safe.txt=${JSON.stringify(fileState)}`,
+        );
+      },
+    );
     expect(rewindAck.status).toBe("accepted");
 
-    await waitForV4TimelineContaining(
-      "V4_REWIND_FILE_SAFE_EDITED_REPLY",
-      90000,
-    );
-    await waitForV4Pane(
-      (snapshot) => !snapshot.canStop,
-      "safe 组合 rewind 没有回到 idle",
-      60000,
-    );
+    await waitForV4TimelineContaining("V4_REWIND_FILE_SAFE_EDITED_REPLY", 90000);
+    await waitForV4Pane((snapshot) => !snapshot.canStop, "safe 组合 rewind 没有回到 idle", 60000);
     expect(await readFile(SAFE_PATH, "utf8")).toBe("safe-before\n");
     const finalSnapshot = await getV4PaneSnapshot();
     expect(finalSnapshot.sessionId).toBe(originalSessionId);
-    expect(finalSnapshot.timelineText).not.toContain(
-      "V4_REWIND_FILE_SAFE_ORIGINAL_REPLY",
-    );
-    expect(finalSnapshot.timelineText).not.toContain(
-      "Conversation rewind applied",
-    );
+    expect(finalSnapshot.timelineText).not.toContain("V4_REWIND_FILE_SAFE_ORIGINAL_REPLY");
+    expect(finalSnapshot.timelineText).not.toContain("Conversation rewind applied");
   });
 
   it("PV4-22 external modified 先 blocked，新 commandId 降级后只裁对话", async function () {
@@ -96,10 +77,7 @@ describe("PV4-21/PV4-22 conversation + file rewind", () => {
 
     await sendV4Prompt("E2E_V4_REWIND_FILE_CONFLICT 请更新 conflict.txt");
     await approvePendingFileWriteIfRequired();
-    await waitForV4TimelineContaining(
-      "V4_REWIND_FILE_CONFLICT_ORIGINAL_REPLY",
-      90000,
-    );
+    await waitForV4TimelineContaining("V4_REWIND_FILE_CONFLICT_ORIGINAL_REPLY", 90000);
     await waitForFileContent(CONFLICT_PATH, "conflict-after\n");
     await writeFile(CONFLICT_PATH, "external-wins\n", "utf8");
 
@@ -114,34 +92,21 @@ describe("PV4-21/PV4-22 conversation + file rewind", () => {
     expect((await getV4PaneSnapshot()).timelineText).toContain(
       "V4_REWIND_FILE_CONFLICT_ORIGINAL_REPLY",
     );
-    expect(await countUpstreamRequestsContaining(editedMarker)).toBe(
-      requestsBefore,
-    );
+    expect(await countUpstreamRequestsContaining(editedMarker)).toBe(requestsBefore);
 
     await clickV4EditConflictConversationOnly();
-    await waitForV4TimelineContaining(
-      "V4_REWIND_FILE_CONFLICT_EDITED_REPLY",
-      90000,
-    );
+    await waitForV4TimelineContaining("V4_REWIND_FILE_CONFLICT_EDITED_REPLY", 90000);
     expect(await readFile(CONFLICT_PATH, "utf8")).toBe("external-wins\n");
     const finalSnapshot = await getV4PaneSnapshot();
-    expect(finalSnapshot.timelineText).not.toContain(
-      "V4_REWIND_FILE_CONFLICT_ORIGINAL_REPLY",
-    );
-    expect(await countUpstreamRequestsContaining(editedMarker)).toBe(
-      requestsBefore + 1,
-    );
+    expect(finalSnapshot.timelineText).not.toContain("V4_REWIND_FILE_CONFLICT_ORIGINAL_REPLY");
+    expect(await countUpstreamRequestsContaining(editedMarker)).toBe(requestsBefore + 1);
   });
 });
 
 async function prepareFileCase(filePath: string) {
   await rm(CASE_ROOT, { force: true, recursive: true });
   await mkdir(CASE_ROOT, { recursive: true });
-  await writeFile(
-    filePath,
-    filePath === SAFE_PATH ? "safe-before\n" : "conflict-before\n",
-    "utf8",
-  );
+  await writeFile(filePath, filePath === SAFE_PATH ? "safe-before\n" : "conflict-before\n", "utf8");
   await prepareV4ConversationE2E();
   await switchV4Mode("yolo");
 }

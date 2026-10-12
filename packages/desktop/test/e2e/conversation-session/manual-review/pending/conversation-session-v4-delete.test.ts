@@ -31,10 +31,6 @@ describe("v4 M4 门禁：deleteSession", () => {
 
     // 删除会话 → pane 回到 draft
     await clickV4DeleteSession();
-    await waitForV4Pane(
-      (s) => s.sessionId === "draft",
-      "删除后 pane 没有回到 draft",
-      30000,
-    );
+    await waitForV4Pane((s) => s.sessionId === "draft", "删除后 pane 没有回到 draft", 30000);
   });
 });

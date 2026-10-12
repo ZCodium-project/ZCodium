@@ -32,8 +32,7 @@ vi.mock("@/v4/WorkbenchPane.js", async () => {
 vi.mock("@/v4/WorkbenchSplitDivider.js", async () => {
   const React = await import("react");
   return {
-    WorkbenchSplitDivider: () =>
-      React.createElement("div", { "data-testid": "mock-divider" }),
+    WorkbenchSplitDivider: () => React.createElement("div", { "data-testid": "mock-divider" }),
   };
 });
 
@@ -153,10 +152,7 @@ function createGroupedWorkbenchState({
   const activeGroup = activeGroupId
     ? useWorkbenchGroupStore.getState().groups[activeGroupId]
     : null;
-  expect(activeGroup ? leafPaneIds(activeGroup.root) : []).toEqual([
-    V4_PRIMARY_PANE_ID,
-    "pane-1",
-  ]);
+  expect(activeGroup ? leafPaneIds(activeGroup.root) : []).toEqual([V4_PRIMARY_PANE_ID, "pane-1"]);
 }
 
 function renderWorkspace({

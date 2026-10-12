@@ -66,14 +66,14 @@ services zcodeAgentService offPeak/* handler（缺省解析：yolo / allowed_mod
       → offpeak-edit 视图（queued/paused 可编辑，running/终态 readOnly）
 ```
 
-| 层 | 文件 | 职责 |
-| --- | --- | --- |
-| contracts | `apps/zcode-cli/packages/contracts/src/tools/off-peak.ts` + `interfaces/off-peak.port.ts` | 工具 schema（title/prompt 必填，permissionMode/model/thoughtLevel 可选）与 OffPeakPort 判别联合 |
-| core | `core/src/tool/handlers/off-peak.ts`、`runtime/methods/turn-loop-state.ts`（isOffPeakCreateRestrictedTurn + OFF_PEAK_MUTATION_TOOL_NAMES） | handler 最终拒绝边界 + turn 三信号；注册门 `includeOffPeak = Boolean(deps.offPeakPort)` |
-| bootstrap | `zcode-protocol/offpeak-port.ts`、`server-operations.ts`（offPeakToolEnabled 才注入端口）、`zcode-protocol-v4/commands/prompt-turn.ts`（activeOffPeakTaskId + denylist） | 协议桥与 turn 身份维护；flag 缺省不注入 = fail-closed |
-| services | `zcodeAgentService.ts`（offPeak/create|list handler、offPeakToolEnabled 下发+compat、缺省解析）、`automationToolPolicy.ts`（OFF_PEAK_MUTATION_TOOL_NAMES 独立常量）、`node.ts`（前向引用 holder 注入） | host 侧编排；**OffPeakCreate 绝不混入 AUTOMATION_MUTATION_TOOL_NAMES 的任何副本** |
-| host | `packages/desktop/src/host/index.ts` 派发 `toolDenylist: ["CronCreate","OffPeakCreate"]` | D45+D49-2 对称主落点 |
-| UI | `ui/src/ToolCallBlocks/renderers/offpeak-create.tsx`、`v4/ConversationTurnGroup.tsx`（resolveOffPeakTurnCards）、`settings/AutomationsSection.tsx`（resolveOffPeakDetailNavigation） | 静态轮尾卡与 idle tab 编辑跳转 |
+| 层        | 文件                                                                                                                                                                                 | 职责                                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| contracts | `apps/zcode-cli/packages/contracts/src/tools/off-peak.ts` + `interfaces/off-peak.port.ts`                                                                                            | 工具 schema（title/prompt 必填，permissionMode/model/thoughtLevel 可选）与 OffPeakPort 判别联合                                                                 |
+| core      | `core/src/tool/handlers/off-peak.ts`、`runtime/methods/turn-loop-state.ts`（isOffPeakCreateRestrictedTurn + OFF_PEAK_MUTATION_TOOL_NAMES）                                           | handler 最终拒绝边界 + turn 三信号；注册门 `includeOffPeak = Boolean(deps.offPeakPort)`                                                                         |
+| bootstrap | `zcode-protocol/offpeak-port.ts`、`server-operations.ts`（offPeakToolEnabled 才注入端口）、`zcode-protocol-v4/commands/prompt-turn.ts`（activeOffPeakTaskId + denylist）             | 协议桥与 turn 身份维护；flag 缺省不注入 = fail-closed                                                                                                           |
+| services  | `zcodeAgentService.ts`（offPeak/create                                                                                                                                               | list handler、offPeakToolEnabled 下发+compat、缺省解析）、`automationToolPolicy.ts`（OFF_PEAK_MUTATION_TOOL_NAMES 独立常量）、`node.ts`（前向引用 holder 注入） | host 侧编排；**OffPeakCreate 绝不混入 AUTOMATION_MUTATION_TOOL_NAMES 的任何副本** |
+| host      | `packages/desktop/src/host/index.ts` 派发 `toolDenylist: ["CronCreate","OffPeakCreate"]`                                                                                             | D45+D49-2 对称主落点                                                                                                                                            |
+| UI        | `ui/src/ToolCallBlocks/renderers/offpeak-create.tsx`、`v4/ConversationTurnGroup.tsx`（resolveOffPeakTurnCards）、`settings/AutomationsSection.tsx`（resolveOffPeakDetailNavigation） | 静态轮尾卡与 idle tab 编辑跳转                                                                                                                                  |
 
 ## 计费边界（D33，最容易踩坑）
 

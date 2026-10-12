@@ -222,9 +222,7 @@ describe("v4 queue edit extraction", () => {
       data: { pluginId: "document-skills@zcode-plugins-official" },
     };
     const inputApi = {
-      getMarkdown: vi.fn(
-        () => `${mention.markdown} 用户安装期间编辑后的正文`,
-      ),
+      getMarkdown: vi.fn(() => `${mention.markdown} 用户安装期间编辑后的正文`),
       prependMentionIfMissing: vi.fn(() => true),
       setMention: vi.fn(),
       setText: vi.fn(),

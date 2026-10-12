@@ -1,12 +1,6 @@
 // @vitest-environment jsdom
 import { createElement, type ReactNode } from "react";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IMemoryService } from "@zcode/services";
 import {
@@ -27,10 +21,7 @@ vi.mock("@/i18n/IntlProvider.js", () => ({
   useZCodeIntl: () => ({
     locale: "zh-CN",
     intl: {
-      formatMessage: (
-        { id }: { id: string },
-        values?: Record<string, string | number>,
-      ) =>
+      formatMessage: ({ id }: { id: string }, values?: Record<string, string | number>) =>
         values
           ? `${id}:${Object.entries(values)
               .map(([key, value]) => `${key}=${value}`)
@@ -45,11 +36,7 @@ vi.mock("@/ControlHintTooltip.js", () => ({
 }));
 
 vi.mock("@/WorkspaceEditorButtonGroup.js", () => ({
-  WorkspaceEditorButtonGroup: ({
-    workspaceAbsPath,
-  }: {
-    workspaceAbsPath: string;
-  }) =>
+  WorkspaceEditorButtonGroup: ({ workspaceAbsPath }: { workspaceAbsPath: string }) =>
     createElement("button", {
       "data-testid": `memory-editor-${workspaceAbsPath}`,
       type: "button",
@@ -82,8 +69,7 @@ vi.mock("@/settings/PluginScopeMenu.js", () => ({
           className: "lucide-folder",
           "data-testid": triggerIconTestId,
         }),
-        workspaceOptions.find((option) => option.key === selectedScopeKey)
-          ?.label,
+        workspaceOptions.find((option) => option.key === selectedScopeKey)?.label,
       ),
       ...workspaceOptions.map((option) =>
         createElement(
@@ -175,9 +161,7 @@ describe("MemorySettingsSection", () => {
   it("开关位于 Workspace Scope 工具栏上方，关闭时不读取 catalog", () => {
     const memoryService = createService();
     renderSection(memoryService, false);
-    expect(
-      screen.getByRole("switch", { name: "settings.memory.workspaceMemory" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("switch", { name: "settings.memory.workspaceMemory" })).toBeTruthy();
     expect(screen.queryByText("settings.memory.viewer.disabled")).toBeNull();
     expect(screen.queryByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER)).toBeNull();
     expect(memoryService.listProjectMemories).not.toHaveBeenCalled();
@@ -192,58 +176,38 @@ describe("MemorySettingsSection", () => {
     expect(screen.getByTestId(TID_SETTINGS_MEMORY_COUNT).textContent).toBe(
       "settings.memory.viewer.memoryCount.other:count=2",
     );
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md"))).toBeTruthy();
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_ICON, "MEMORY.md"))).toBeTruthy();
     expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md")),
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_ICON, "MEMORY.md")),
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_UPDATED_AT, "MEMORY.md"))
-        .textContent,
-    ).toContain(
-      "settings.memory.viewer.updated.date",
-    );
-    const fileName = screen.getByTestId(
-      testId(TID_SETTINGS_MEMORY_FILE_NAME, "MEMORY.md"),
-    );
+      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_UPDATED_AT, "MEMORY.md")).textContent,
+    ).toContain("settings.memory.viewer.updated.date");
+    const fileName = screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_NAME, "MEMORY.md"));
     expect(fileName.className).toContain("font-medium");
     expect(fileName.className).not.toContain("font-mono");
+    expect(screen.getByTestId("memory-editor-/memory/z-code/MEMORY.md")).toBeTruthy();
     expect(
-      screen.getByTestId("memory-editor-/memory/z-code/MEMORY.md"),
+      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE_EDITOR_ACTIONS, "MEMORY.md")),
     ).toBeTruthy();
-    expect(
-      screen.getByTestId(
-        testId(TID_SETTINGS_MEMORY_FILE_EDITOR_ACTIONS, "MEMORY.md"),
-      ),
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-a.md")),
-    ).toBeTruthy();
-    expect(
-      screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md")),
-    ).toBeNull();
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-a.md"))).toBeTruthy();
+    expect(screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md"))).toBeNull();
     const filesHeading = screen.getByRole("heading", {
       name: "settings.memory.viewer.files",
     });
     const filesHeader = filesHeading.parentElement;
-    expect(
-      filesHeader?.querySelector('[data-testid="settings-memory-refresh"]'),
-    ).toBeTruthy();
+    expect(filesHeader?.querySelector('[data-testid="settings-memory-refresh"]')).toBeTruthy();
   });
 
   it("Workspace Scope 按 settings.json 提供的 recentProjects 顺序排列", async () => {
     renderSection(createService(), true, ["Second", "Z Code"]);
 
-    expect(
-      (await screen.findByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER)).textContent,
-    ).toContain("Second");
-    expect(
-      screen.getAllByRole("menuitemradio").map((item) => item.textContent),
-    ).toEqual(["Second", "Z Code"]);
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md")),
-    ).toBeTruthy();
+    expect((await screen.findByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER)).textContent).toContain(
+      "Second",
+    );
+    expect(screen.getAllByRole("menuitemradio").map((item) => item.textContent)).toEqual([
+      "Second",
+      "Z Code",
+    ]);
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md"))).toBeTruthy();
   });
 
   it("Scope 菜单只列出 Workspace，切换后替换文件列表", async () => {
@@ -251,15 +215,9 @@ describe("MemorySettingsSection", () => {
     await screen.findByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER);
     expect(screen.queryByRole("menuitemradio", { name: /User/ })).toBeNull();
     fireEvent.click(screen.getByRole("menuitemradio", { name: /second/ }));
-    expect(screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent).toContain(
-      "second",
-    );
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md")),
-    ).toBeTruthy();
-    expect(
-      screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md")),
-    ).toBeNull();
+    expect(screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent).toContain("second");
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-b.md"))).toBeTruthy();
+    expect(screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md"))).toBeNull();
   });
 
   it("按当前 Scope 的文件名忽略大小写搜索，无结果时隐藏文件分组", async () => {
@@ -267,23 +225,15 @@ describe("MemorySettingsSection", () => {
     const search = await screen.findByTestId(TID_SETTINGS_MEMORY_SEARCH_INPUT);
 
     fireEvent.change(search, { target: { value: "FACT-A" } });
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-a.md")),
-    ).toBeTruthy();
-    expect(
-      screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md")),
-    ).toBeNull();
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "fact-a.md"))).toBeTruthy();
+    expect(screen.queryByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md"))).toBeNull();
     expect(screen.getByTestId(TID_SETTINGS_MEMORY_SEARCH_CLEAR)).toBeTruthy();
     fireEvent.click(screen.getByTestId(TID_SETTINGS_MEMORY_SEARCH_CLEAR));
-    expect(
-      screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md")),
-    ).toBeTruthy();
+    expect(screen.getByTestId(testId(TID_SETTINGS_MEMORY_FILE, "MEMORY.md"))).toBeTruthy();
 
     fireEvent.change(search, { target: { value: "missing" } });
     expect(screen.getByText("settings.memory.viewer.searchEmpty")).toBeTruthy();
-    expect(
-      screen.queryByRole("heading", { name: "settings.memory.viewer.files" }),
-    ).toBeNull();
+    expect(screen.queryByRole("heading", { name: "settings.memory.viewer.files" })).toBeNull();
   });
 
   it("刷新保留当前 Scope；Scope 消失时回退首项", async () => {
@@ -291,29 +241,15 @@ describe("MemorySettingsSection", () => {
     renderSection(memoryService);
     await screen.findByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER);
     fireEvent.click(screen.getByRole("menuitemradio", { name: /second/ }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "settings.memory.viewer.refresh" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "settings.memory.viewer.refresh" }));
     await waitFor(() =>
-      expect(
-        screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent,
-      ).toContain(
-        "second",
-      ),
+      expect(screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent).toContain("second"),
     );
 
-    vi.mocked(memoryService.listProjectMemories).mockResolvedValueOnce([
-      workspaces[0],
-    ]);
-    fireEvent.click(
-      screen.getByRole("button", { name: "settings.memory.viewer.refresh" }),
-    );
+    vi.mocked(memoryService.listProjectMemories).mockResolvedValueOnce([workspaces[0]]);
+    fireEvent.click(screen.getByRole("button", { name: "settings.memory.viewer.refresh" }));
     await waitFor(() =>
-      expect(
-        screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent,
-      ).toContain(
-        "z-code",
-      ),
+      expect(screen.getByTestId(TID_SETTINGS_MEMORY_SCOPE_TRIGGER).textContent).toContain("z-code"),
     );
   });
 
@@ -326,9 +262,7 @@ describe("MemorySettingsSection", () => {
     renderSection(memoryService);
     expect(screen.getByText("settings.memory.viewer.loading")).toBeTruthy();
     resolveCatalog?.([]);
-    expect(
-      await screen.findByText("settings.memory.viewer.empty"),
-    ).toBeTruthy();
+    expect(await screen.findByText("settings.memory.viewer.empty")).toBeTruthy();
   });
 
   it("Web Remote / Mobile 只展示开关和本地查看提示", () => {

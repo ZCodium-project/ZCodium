@@ -9,6 +9,7 @@ Use this task family when the user provides two DOCX files and wants the differe
 - optional compare focus; if omitted, assume full compare
 
 Allowed focuses:
+
 - `content_only`
 - `structure_only`
 - `rendered_only`
@@ -23,15 +24,19 @@ Default evidence: **content + structure + rendered**.
 Always separate the result into:
 
 ### Content differences
+
 - changed text, headings, tables, notes, or clauses
 
 ### Structure differences
+
 - changed styles, sections, numbering, headers/footers, fields, comments/revisions, direct formatting
 
 ### Rendered differences
+
 - changed page count, blank pages, page numbers, header/footer appearance, overflow, cover/TOC/body layout
 
 Then classify risk:
+
 - content risk
 - structure risk
 - purely visual risk

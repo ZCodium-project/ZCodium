@@ -14,20 +14,22 @@ MCP (Model Context Protocol) is an open protocol that enables AI assistants like
 ### What can I automate with WebdriverIO MCP?
 
 You can automate:
--   **Desktop browsers** (Chrome) - navigation, clicking, typing, screenshots
--   **iOS apps** - on simulators or real devices
--   **Android apps** - on emulators or real devices
--   **Hybrid apps** - switching between native and web contexts
+
+- **Desktop browsers** (Chrome) - navigation, clicking, typing, screenshots
+- **iOS apps** - on simulators or real devices
+- **Android apps** - on emulators or real devices
+- **Hybrid apps** - switching between native and web contexts
 
 ### Do I need to write code?
 
 No! That's the main benefit of MCP. You can describe what you want to do in natural language, and Claude will use the appropriate tools to accomplish the task.
 
 **Example prompts:**
--   "Open Chrome and navigate to webdriver.io"
--   "Click the Get Started button"
--   "Take a screenshot of the current page"
--   "Start my iOS app and log in as test user"
+
+- "Open Chrome and navigate to webdriver.io"
+- "Click the Get Started button"
+- "Take a screenshot of the current page"
+- "Start my iOS app and log in as test user"
 
 ---
 
@@ -41,19 +43,19 @@ Add this to your Claude Desktop config:
 
 ```json
 {
-    "mcpServers": {
-        "wdio-mcp": {
-            "command": "npx",
-            "args": ["-y", "@wdio/mcp"]
-        }
+  "mcpServers": {
+    "wdio-mcp": {
+      "command": "npx",
+      "args": ["-y", "@wdio/mcp"]
     }
+  }
 }
 ```
 
 ### Where is the Claude Desktop config file?
 
--   **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
--   **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ### Do I need Appium for browser automation?
 
@@ -62,6 +64,7 @@ No. Browser automation only requires Chrome to be installed. WebdriverIO handles
 ### Do I need Appium for mobile automation?
 
 Yes. Mobile automation requires:
+
 1. Appium server running (`npm install -g appium && appium`)
 2. Platform drivers installed (`appium driver install xcuitest` for iOS, `appium driver install uiautomator2` for Android)
 3. Appropriate development tools (Xcode for iOS, Android SDK for Android)
@@ -105,6 +108,7 @@ Simply ask Claude:
 "Take a screenshot of the current page"
 
 Screenshots are automatically optimized:
+
 - Scaled to max 2000px dimension
 - Compressed to max 1MB file size
 - Format: PNG or JPEG (automatically selected for optimal quality)
@@ -146,8 +150,8 @@ Or for an installed app:
 
 Yes! For real devices, you'll need the device UDID:
 
--   **iOS:** Connect device, open Finder, click device, click serial number to reveal UDID
--   **Android:** Run `adb devices` in terminal
+- **iOS:** Connect device, open Finder, click device, click serial number to reveal UDID
+- **Android:** Run `adb devices` in terminal
 
 Then ask Claude:
 
@@ -161,9 +165,9 @@ By default, permissions are automatically granted (`autoGrantPermissions: true`)
 
 ### What gestures are supported?
 
--   **Tap:** Tap on elements or coordinates
--   **Swipe:** Swipe up, down, left, or right
--   **Drag and Drop:** Drag from one element to another or to coordinates
+- **Tap:** Tap on elements or coordinates
+- **Swipe:** Swipe up, down, left, or right
+- **Drag and Drop:** Drag from one element to another or to coordinates
 
 Note: `long_press` is available through `execute_script` with Appium mobile commands.
 
@@ -220,9 +224,9 @@ The response includes `total`, `showing`, and `hasMore` to help navigate through
 
 Yes! Use the `elementType` parameter:
 
--   `interactable` (default): Buttons, links, inputs
--   `visual`: Images, SVGs
--   `all`: Both types
+- `interactable` (default): Buttons, links, inputs
+- `visual`: Images, SVGs
+- `all`: Both types
 
 "Get visible visual elements on the page"
 
@@ -230,9 +234,9 @@ Yes! Use the `elementType` parameter:
 
 You can be more specific:
 
--   Provide exact text: "Click the button that says 'Submit Order'"
--   Provide selector: "Click the element with selector #submit-btn"
--   Provide accessibility ID: "Click the element with accessibility ID loginButton"
+- Provide exact text: "Click the button that says 'Submit Order'"
+- Provide selector: "Click the element with selector #submit-btn"
+- Provide accessibility ID: "Click the element with accessibility ID loginButton"
 
 ### What's the best selector strategy for mobile?
 
@@ -244,6 +248,7 @@ You can be more specific:
 ### What is the accessibility tree and when should I use it?
 
 The accessibility tree provides semantic information about page elements (roles, names, states). Use `get_accessibility` when:
+
 - `get_visible_elements` doesn't return expected elements
 - You need to find elements by accessibility role (button, link, textbox, etc.)
 - You need detailed semantic information about elements
@@ -262,9 +267,9 @@ No. The MCP server uses a single-session model. Only one browser or app session 
 
 It depends on the session type and settings:
 
--   **Browser:** Chrome closes completely
--   **Mobile with `noReset: false`:** App terminates
--   **Mobile with `noReset: true` or no `appPath`:** App stays open (session detaches automatically)
+- **Browser:** Chrome closes completely
+- **Mobile with `noReset: false`:** App terminates
+- **Mobile with `noReset: true` or no `appPath`:** App stays open (session detaches automatically)
 
 ### Can I preserve app state between sessions?
 
@@ -276,8 +281,8 @@ This preserves login state, preferences, and other app data.
 
 ### What's the difference between close and detach?
 
--   **Close:** Terminates the browser/app completely
--   **Detach:** Disconnects automation but keeps browser/app running
+- **Close:** Terminates the browser/app completely
+- **Detach:** Disconnects automation but keeps browser/app running
 
 Detach is useful when you want to manually inspect the state after automation.
 
@@ -325,9 +330,11 @@ This is the most common issue when starting mobile automation.
 
 :::tip
 The MCP server requires Appium to be running before starting mobile sessions. Make sure to start Appium first:
+
 ```sh
 appium
 ```
+
 Future versions may include automatic Appium service management.
 :::
 
@@ -359,28 +366,31 @@ Screenshots are automatically compressed to max 1MB, so large screenshots will w
 ### Why is mobile automation slow?
 
 Mobile automation involves:
+
 1. Network communication with Appium server
 2. Appium communicating with the device/simulator
 3. Device rendering and response
 
 Tips for faster automation:
--   Use emulators/simulators instead of real devices for development
--   Use accessibility IDs instead of XPath
--   Enable `inViewportOnly: true` for element detection
--   Use pagination (`limit`) to reduce token usage
+
+- Use emulators/simulators instead of real devices for development
+- Use accessibility IDs instead of XPath
+- Enable `inViewportOnly: true` for element detection
+- Use pagination (`limit`) to reduce token usage
 
 ### How can I speed up element detection?
 
 The MCP server already optimizes element detection using XML page source parsing (2 HTTP calls vs 600+ for traditional element queries). Additional tips:
 
--   Keep `inViewportOnly: true` (default)
--   Set `includeContainers: false` (default)
--   Use `limit` and `offset` for pagination on large screens
--   Use specific selectors instead of finding all elements
+- Keep `inViewportOnly: true` (default)
+- Set `includeContainers: false` (default)
+- Use `limit` and `offset` for pagination on large screens
+- Use specific selectors instead of finding all elements
 
 ### Screenshots are slow or failing
 
 Screenshots are automatically optimized:
+
 - Resized if larger than 2000px
 - Compressed to stay under 1MB
 - Converted to JPEG if PNG is too large
@@ -393,12 +403,12 @@ This optimization reduces processing time and ensures Claude can handle the imag
 
 ### What are the current limitations?
 
--   **Single session:** Only one browser/app at a time
--   **Browser support:** Chrome only (for now)
--   **iframe support:** Limited support for iframes
--   **File uploads:** Not directly supported via tools
--   **Audio/Video:** Cannot interact with media playback
--   **Browser extensions:** Not supported
+- **Single session:** Only one browser/app at a time
+- **Browser support:** Chrome only (for now)
+- **iframe support:** Limited support for iframes
+- **File uploads:** Not directly supported via tools
+- **Audio/Video:** Cannot interact with media playback
+- **Browser extensions:** Not supported
 
 ### Can I use this for production testing?
 
@@ -415,9 +425,10 @@ The MCP server runs locally on your machine. All automation happens through loca
 ### Can Claude access my passwords?
 
 Claude can see page content and interact with elements, but:
--   Passwords in `<input type="password">` fields are masked
--   You should avoid automating sensitive credentials
--   Use test accounts for automation
+
+- Passwords in `<input type="password">` fields are masked
+- You should avoid automating sensitive credentials
+- Use test accounts for automation
 
 ---
 
@@ -426,12 +437,13 @@ Claude can see page content and interact with elements, but:
 ### How can I contribute?
 
 Visit the [GitHub repository](https://github.com/webdriverio/mcp) to:
--   Report bugs
--   Request features
--   Submit pull requests
+
+- Report bugs
+- Request features
+- Submit pull requests
 
 ### Where can I get help?
 
--   [WebdriverIO Discord](https://discord.webdriver.io/)
--   [GitHub Issues](https://github.com/webdriverio/mcp/issues)
--   [WebdriverIO Documentation](https://webdriver.io/)
+- [WebdriverIO Discord](https://discord.webdriver.io/)
+- [GitHub Issues](https://github.com/webdriverio/mcp/issues)
+- [WebdriverIO Documentation](https://webdriver.io/)

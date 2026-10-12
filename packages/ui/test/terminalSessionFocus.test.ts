@@ -10,28 +10,33 @@ describe("TerminalSession focus handoff", () => {
   // Windows 跳过：源代码字符串匹配测试，useEffect 依赖数组变更导致断言失败
   const isWindows = process.platform === "win32";
 
-  (isWindows ? it.skip : it)("keeps visible terminal focus wired to panel open and terminal readiness", () => {
-    const source = readSource("packages/ui/src/terminal/TerminalSession.tsx");
+  (isWindows ? it.skip : it)(
+    "keeps visible terminal focus wired to panel open and terminal readiness",
+    () => {
+      const source = readSource("packages/ui/src/terminal/TerminalSession.tsx");
 
-    expect(source).toContain("const requestFocus = useCallback(() => {");
-    expect(source).toContain("focusRAFRef.current = requestAnimationFrame(() => {");
-    expect(source).toContain("if (!isVisibleRef.current || !term)");
-    expect(source).toContain("term.focus();");
-    expect(source).toContain("requestFocus();\n    }\n  }, [isVisible");
-    // 保活：TerminalSession 现有两条并行路径——persistentKey 分支（effect 开头，term.open(hostEl)）
-    // 和原路径（term.open(el)）。两条路径都含同语义字符串，这里以原路径 term.open(el) 为锚从 openIndex
-    // 起搜，确保只断言原路径内部顺序，不被 persistentKey 分支前方的同名调用误命中（CI 回归保护）。
-    const focusOpenIndex = source.indexOf("term.open(el);");
-    expect(focusOpenIndex).toBeLessThan(
-      source.indexOf('scheduleFitAndResize("init");', focusOpenIndex),
-    );
-    expect(source).toContain("terminalIdRef.current = id;");
-    expect(source.lastIndexOf('scheduleFitAndResize("init");')).toBeGreaterThan(
-      source.indexOf("terminalIdRef.current = id;", focusOpenIndex),
-    );
-    expect(source).toContain("requestFocus();");
-    expect(source).toContain("if (focusRAFRef.current) cancelAnimationFrame(focusRAFRef.current);");
-  });
+      expect(source).toContain("const requestFocus = useCallback(() => {");
+      expect(source).toContain("focusRAFRef.current = requestAnimationFrame(() => {");
+      expect(source).toContain("if (!isVisibleRef.current || !term)");
+      expect(source).toContain("term.focus();");
+      expect(source).toContain("requestFocus();\n    }\n  }, [isVisible");
+      // 保活：TerminalSession 现有两条并行路径——persistentKey 分支（effect 开头，term.open(hostEl)）
+      // 和原路径（term.open(el)）。两条路径都含同语义字符串，这里以原路径 term.open(el) 为锚从 openIndex
+      // 起搜，确保只断言原路径内部顺序，不被 persistentKey 分支前方的同名调用误命中（CI 回归保护）。
+      const focusOpenIndex = source.indexOf("term.open(el);");
+      expect(focusOpenIndex).toBeLessThan(
+        source.indexOf('scheduleFitAndResize("init");', focusOpenIndex),
+      );
+      expect(source).toContain("terminalIdRef.current = id;");
+      expect(source.lastIndexOf('scheduleFitAndResize("init");')).toBeGreaterThan(
+        source.indexOf("terminalIdRef.current = id;", focusOpenIndex),
+      );
+      expect(source).toContain("requestFocus();");
+      expect(source).toContain(
+        "if (focusRAFRef.current) cancelAnimationFrame(focusRAFRef.current);",
+      );
+    },
+  );
 
   it("fits before PTY creation and flushes pending resize when the terminal id is ready", () => {
     const source = readSource("packages/ui/src/terminal/TerminalSession.tsx");
@@ -60,22 +65,13 @@ describe("TerminalSession focus handoff", () => {
     const source = readSource("packages/ui/src/terminal/TerminalSession.tsx");
     const persistentOpenIndex = source.indexOf("term.open(hostEl);");
     expect(persistentOpenIndex).toBeGreaterThanOrEqual(0);
-    const fitIndex = source.indexOf(
-      "initial fit before create (persistent)",
-      persistentOpenIndex,
-    );
-    const createSizeIndex = source.indexOf(
-      "const initialCreateSize =",
-      persistentOpenIndex,
-    );
+    const fitIndex = source.indexOf("initial fit before create (persistent)", persistentOpenIndex);
+    const createSizeIndex = source.indexOf("const initialCreateSize =", persistentOpenIndex);
     const createIndex = source.indexOf(
       ".create({ cols: initialCreateSize.cols",
       persistentOpenIndex,
     );
-    const terminalIdIndex = source.indexOf(
-      "terminalIdRef.current = id;",
-      persistentOpenIndex,
-    );
+    const terminalIdIndex = source.indexOf("terminalIdRef.current = id;", persistentOpenIndex);
     expect(fitIndex).toBeGreaterThan(persistentOpenIndex);
     expect(createSizeIndex).toBeGreaterThan(fitIndex);
     expect(createIndex).toBeGreaterThan(createSizeIndex);
@@ -135,4 +131,3 @@ describe("terminal composed input fallback is platform gated", () => {
     expect(source).toContain("isWindowsDesktop,");
   });
 });
-

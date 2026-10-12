@@ -76,31 +76,31 @@ Web fallback 当前是 no-op，Desktop 会自动补齐 `device_mid`、`app_versi
 
 公共字段：
 
-| 字段 | 说明 |
-| --- | --- |
-| `purchase_funnel_id` | 同一次入口到购买流程复用的漏斗 ID，优先使用 App WebView 注入值 |
-| `entry_plan_list` | 进入购买流程时用户已有的套餐列表；使用动态 key，逗号拼接 |
-| `purchase_attempt_id` | 同一次点击与结果共用的 UUID |
-| `purchase_audience` | `personal` / `team` |
-| `provider_family` | `bigmodel` / `zai` / `unknown` |
-| `channel` | BigModel 默认 `MaaS`，Z.ai 默认 `Z_AI` |
-| `product_id` | 当前商品 ID |
-| `product_name` | 商品展示名或后端名 |
-| `plan_tier` | `lite` / `pro` / `max` / `team_standard` / `team_advanced` / 原始值 |
-| `billing_period` | `month` / `quarter` / `year` / `unknown` |
-| `purchase_method` | `continuous` / `one_time` / `unknown` |
-| `payment_method` | 最终提交支付使用的方式：`alipay` / `paypal` / `stripe` / `unknown` |
-| `seat_count` | 团队席位数；个人为空 |
-| `duration_months` | 团队一次性采购时长；个人和连续订阅为空 |
-| `currency` | 后端或商品币种 |
-| `cashAmount` | 个人套餐取单品 preview `cashAmount`；团队套餐取试算 `balanceDeductAmount` |
-| `giveAmount` | 个人套餐取单品 preview `giveAmount`；团队套餐取试算 `giveDeductAmount` |
-| `thirdPartyAmount` | 个人套餐取单品 preview `thirdPartyAmount`；团队套餐取试算 `thirdPayAmount` |
-| `refundAmount` | 个人套餐取单品 preview `refundAmount`；团队套餐无对应字段时为空 |
-| `residualAmount` | 个人套餐取单品 preview `residualAmount`；团队套餐无对应字段时为空 |
-| `totalOriginalAmount` | 团队试算返回的订单原价；个人套餐为空 |
-| `campaignDiscountAmount` | 团队试算返回的活动优惠金额；个人套餐为空 |
-| `totalPayAmount` | 团队试算返回的优惠后应付总额；个人套餐为空 |
+| 字段                     | 说明                                                                       |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `purchase_funnel_id`     | 同一次入口到购买流程复用的漏斗 ID，优先使用 App WebView 注入值             |
+| `entry_plan_list`        | 进入购买流程时用户已有的套餐列表；使用动态 key，逗号拼接                   |
+| `purchase_attempt_id`    | 同一次点击与结果共用的 UUID                                                |
+| `purchase_audience`      | `personal` / `team`                                                        |
+| `provider_family`        | `bigmodel` / `zai` / `unknown`                                             |
+| `channel`                | BigModel 默认 `MaaS`，Z.ai 默认 `Z_AI`                                     |
+| `product_id`             | 当前商品 ID                                                                |
+| `product_name`           | 商品展示名或后端名                                                         |
+| `plan_tier`              | `lite` / `pro` / `max` / `team_standard` / `team_advanced` / 原始值        |
+| `billing_period`         | `month` / `quarter` / `year` / `unknown`                                   |
+| `purchase_method`        | `continuous` / `one_time` / `unknown`                                      |
+| `payment_method`         | 最终提交支付使用的方式：`alipay` / `paypal` / `stripe` / `unknown`         |
+| `seat_count`             | 团队席位数；个人为空                                                       |
+| `duration_months`        | 团队一次性采购时长；个人和连续订阅为空                                     |
+| `currency`               | 后端或商品币种                                                             |
+| `cashAmount`             | 个人套餐取单品 preview `cashAmount`；团队套餐取试算 `balanceDeductAmount`  |
+| `giveAmount`             | 个人套餐取单品 preview `giveAmount`；团队套餐取试算 `giveDeductAmount`     |
+| `thirdPartyAmount`       | 个人套餐取单品 preview `thirdPartyAmount`；团队套餐取试算 `thirdPayAmount` |
+| `refundAmount`           | 个人套餐取单品 preview `refundAmount`；团队套餐无对应字段时为空            |
+| `residualAmount`         | 个人套餐取单品 preview `residualAmount`；团队套餐无对应字段时为空          |
+| `totalOriginalAmount`    | 团队试算返回的订单原价；个人套餐为空                                       |
+| `campaignDiscountAmount` | 团队试算返回的活动优惠金额；个人套餐为空                                   |
+| `totalPayAmount`         | 团队试算返回的优惠后应付总额；个人套餐为空                                 |
 
 不再上报语义模糊的 `amount`。金额字段保留后端返回的组成语义，不使用
 `payAmount` 冒充 `thirdPartyAmount`，也不在客户端反推缺失的金额。数值统一转换为两位
@@ -122,36 +122,36 @@ Web fallback 当前是 no-op，Desktop 会自动补齐 `device_mid`、`app_versi
 
 结果字段：
 
-| 字段 | 说明 |
-| --- | --- |
-| `failure_stage` | 失败阶段；成功为空 |
-| `error_code` | 稳定错误码；成功为空 |
+| 字段            | 说明                                                               |
+| --------------- | ------------------------------------------------------------------ |
+| `failure_stage` | 失败阶段；成功为空                                                 |
+| `error_code`    | 稳定错误码；成功为空                                               |
 | `error_message` | 归一后的短错误文案，禁止上传 HTML、schema、token、银行卡等敏感内容 |
-| `order_status` | 后端支付状态原文；成功归一为 `SUCCESS`，超时为 `TIMEOUT` |
-| `biz_id` | 个人支付检查 ID |
-| `order_no` | 团队订单号 |
-| `elapsed_ms` | 从点击继续支付到结果上报的耗时 |
+| `order_status`  | 后端支付状态原文；成功归一为 `SUCCESS`，超时为 `TIMEOUT`           |
+| `biz_id`        | 个人支付检查 ID                                                    |
+| `order_no`      | 团队订单号                                                         |
+| `elapsed_ms`    | 从点击继续支付到结果上报的耗时                                     |
 
 ## 结果映射
 
 `purchase_result` 不单独增加 `result` 字段，通过 `order_status` + `error_code` 表达：
 
-| error_code | failure_stage | order_status | 链路 | 说明 |
-| --- | --- | --- | --- | --- |
-| 空字符串 | 空字符串 | `SUCCESS` | 个人 / 团队 | 支付成功 |
-| `create_sign_failed` | `create_sign` | `FAIL` | 个人 BigModel | 首购签约失败 |
-| `update_sign_failed` | `update_sign` | `FAIL` | 个人 BigModel | 变更套餐签约失败 |
-| `paypal_setup_failed` | `paypal_setup` | `FAIL` | 个人 Z.ai | PayPal setup 失败 |
-| `paypal_subscribe_failed` | `paypal_subscribe` | `FAIL` | 个人 Z.ai | PayPal subscribe 失败 |
-| `stripe_pay_failed` | `stripe_pay` | `FAIL` | 个人 Z.ai | Stripe 支付失败 |
-| `create_order_failed` | `create_order` | `FAIL` | 团队 | 创建订单失败 |
-| `continue_order_payment_failed` | `continue_order_payment` | `FAIL` | 团队 | 继续支付待支付订单失败 |
-| `payment_status_failed` | `terminal_status` | `FAIL` | 个人 / 团队 | 后端失败终态 |
-| `payment_status_closed` | `terminal_status` | `CLOSED` | 团队 | 后端关闭终态 |
-| `payment_status_cancelled` | `terminal_status` | `CANCELLED` | 个人 / 团队 | 取消终态 |
-| `payment_check_timeout` | `timeout` | `TIMEOUT` | 个人 / 团队 | 轮询超时 |
-| `user_cancelled` | `user_cancel` | `CANCELLED` | 个人 / 团队 | 用户主动关闭或返回导致本次支付尝试终止 |
-| `unknown_error` | `unknown` | `FAIL` | 个人 / 团队 | 未归类异常 |
+| error_code                      | failure_stage            | order_status | 链路          | 说明                                   |
+| ------------------------------- | ------------------------ | ------------ | ------------- | -------------------------------------- |
+| 空字符串                        | 空字符串                 | `SUCCESS`    | 个人 / 团队   | 支付成功                               |
+| `create_sign_failed`            | `create_sign`            | `FAIL`       | 个人 BigModel | 首购签约失败                           |
+| `update_sign_failed`            | `update_sign`            | `FAIL`       | 个人 BigModel | 变更套餐签约失败                       |
+| `paypal_setup_failed`           | `paypal_setup`           | `FAIL`       | 个人 Z.ai     | PayPal setup 失败                      |
+| `paypal_subscribe_failed`       | `paypal_subscribe`       | `FAIL`       | 个人 Z.ai     | PayPal subscribe 失败                  |
+| `stripe_pay_failed`             | `stripe_pay`             | `FAIL`       | 个人 Z.ai     | Stripe 支付失败                        |
+| `create_order_failed`           | `create_order`           | `FAIL`       | 团队          | 创建订单失败                           |
+| `continue_order_payment_failed` | `continue_order_payment` | `FAIL`       | 团队          | 继续支付待支付订单失败                 |
+| `payment_status_failed`         | `terminal_status`        | `FAIL`       | 个人 / 团队   | 后端失败终态                           |
+| `payment_status_closed`         | `terminal_status`        | `CLOSED`     | 团队          | 后端关闭终态                           |
+| `payment_status_cancelled`      | `terminal_status`        | `CANCELLED`  | 个人 / 团队   | 取消终态                               |
+| `payment_check_timeout`         | `timeout`                | `TIMEOUT`    | 个人 / 团队   | 轮询超时                               |
+| `user_cancelled`                | `user_cancel`            | `CANCELLED`  | 个人 / 团队   | 用户主动关闭或返回导致本次支付尝试终止 |
+| `unknown_error`                 | `unknown`                | `FAIL`       | 个人 / 团队   | 未归类异常                             |
 
 购买安全校验属于 `pay/preview` 前置校验。当前实现只有 preview 成功并进入支付提交链路时才生成 `purchase_attempt_id` 和上报 `purchase_pay_ck`；因此用户取消安全校验不会上报 `purchase_result`。
 

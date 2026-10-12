@@ -80,30 +80,19 @@ export function CapabilityMapDetail({
     const system = systemById.get(group.systemId);
     const complexity = getCapabilityGroupComplexity(group.id);
     return (
-      <DetailShell
-        description={group.description}
-        kicker="能力群"
-        title={group.name}
-      >
+      <DetailShell description={group.description} kicker="能力群" title={group.name}>
         <DetailFact label="顶层区域" value={system?.name ?? "未分配"} />
         <DetailFact label="建议主要 owner" value={group.owner} />
         <DetailFact
           label="主责代码估算（Estimated Owned LOC）"
-          value={formatCapabilityCodeEstimateFull(
-            group.codeEstimate.productionLines,
-          )}
+          value={formatCapabilityCodeEstimateFull(group.codeEstimate.productionLines)}
         />
         <DetailFact
           label="估算置信度（Confidence）"
-          value={
-            capabilityCodeEstimateConfidenceNames[group.codeEstimate.confidence]
-          }
+          value={capabilityCodeEstimateConfidenceNames[group.codeEstimate.confidence]}
         />
         <DetailFact label="能力节点" value={`${nodes.length} 个`} />
-        <DetailFact
-          label="跨群入度（Cross-group In-degree）"
-          value={`${complexity.inDegree} 条`}
-        />
+        <DetailFact label="跨群入度（Cross-group In-degree）" value={`${complexity.inDegree} 条`} />
         <DetailFact
           label="跨群出度（Cross-group Out-degree）"
           value={`${complexity.outDegree} 条`}
@@ -187,9 +176,7 @@ function DetailShell({
     <aside className="self-start rounded-lg border border-card-border bg-card p-4 xl:sticky xl:top-20">
       <div className="text-ui-sm font-medium text-brand">{kicker}</div>
       <h2 className="mt-2 text-ui-lg font-medium text-foreground">{title}</h2>
-      <p className="mt-2 text-ui-base leading-6 text-foreground-subtle">
-        {description}
-      </p>
+      <p className="mt-2 text-ui-base leading-6 text-foreground-subtle">{description}</p>
       <div className="mt-4 grid gap-3">{children}</div>
     </aside>
   );
@@ -224,15 +211,11 @@ function DetailButton({
       <i
         aria-hidden="true"
         className={`mt-1 size-2.5 rounded-full ${
-          relationType
-            ? `capability-relation-dot--${relationType}`
-            : "bg-foreground-subtlest"
+          relationType ? `capability-relation-dot--${relationType}` : "bg-foreground-subtlest"
         }`}
       />
       <span className="min-w-0">
-        <span className="block text-ui-sm font-medium text-foreground">
-          {label}
-        </span>
+        <span className="block text-ui-sm font-medium text-foreground">{label}</span>
         <span className="mt-0.5 block break-words font-mono text-ui-xs text-foreground-subtlest">
           {metadata}
         </span>

@@ -11,17 +11,17 @@
 
 ## 命令面
 
-| 子命令 | 行为 | 落点 |
-|---|---|---|
-| `list [--json] [--available]` | 列出已加载插件（内置 + 已安装）；`--available` 追加市场目录 | `listZCodePlugins` / `getZCodePluginsOverview` |
-| `install <plugin>[@marketplace] [-s <scope>]` | 裸 name 在所有市场里唯一匹配才安装，多个同名报错要求带 `@marketplace` | `installZCodeMarketplacePlugin` |
-| `uninstall <plugin> [-s <scope>] [--keep-data] [--force]` | `--keep-data` 只删安装缓存、保留 `data/<plugin-id>`；非 TTY 未带 `--force` 拒绝执行 | `uninstallZCodeMarketplacePlugin`（新增 `keepData`） |
-| `enable <plugin> [-s <scope>]` / `disable [plugin] [-a\|--all] [-s <scope>]` | `--all` 逐个关闭当前启用的插件；`--all` 不能与插件名或 `--scope` 同用 | `setZCodePluginEnabled` |
-| `update <plugin> [-s <scope>]` | 先刷新所属市场目录再按同条目重装；保留 installedAt 与用户开关 | 新增 `updateZCodeMarketplacePlugin` |
-| `validate <path>` | 本地插件目录 / plugin.json / 市场目录 / marketplace.json 只读校验 | 新增 `validateZCodePluginPath` → adapters `validateLocalPluginPath` |
-| `marketplace add <source> [--scope] [--sparse <path>]` | `--sparse` 可重复，仅 git/github 源生效（复用既有 `sparsePaths`） | `addZCodePluginMarketplace`（新增 `sparsePaths`） |
-| `marketplace list [--json]` / `remove <name>` / `update [name]` | 列出、移除、刷新已知市场 | `getZCodePluginsOverview` / `removeZCodePluginMarketplace` / `updateZCodePluginMarketplace` |
-| 别名 `zcode plugin ...` | 单数形式别名，行为与 `zcode plugins` 相同 | `run.ts` |
+| 子命令                                                                       | 行为                                                                                | 落点                                                                                        |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `list [--json] [--available]`                                                | 列出已加载插件（内置 + 已安装）；`--available` 追加市场目录                         | `listZCodePlugins` / `getZCodePluginsOverview`                                              |
+| `install <plugin>[@marketplace] [-s <scope>]`                                | 裸 name 在所有市场里唯一匹配才安装，多个同名报错要求带 `@marketplace`               | `installZCodeMarketplacePlugin`                                                             |
+| `uninstall <plugin> [-s <scope>] [--keep-data] [--force]`                    | `--keep-data` 只删安装缓存、保留 `data/<plugin-id>`；非 TTY 未带 `--force` 拒绝执行 | `uninstallZCodeMarketplacePlugin`（新增 `keepData`）                                        |
+| `enable <plugin> [-s <scope>]` / `disable [plugin] [-a\|--all] [-s <scope>]` | `--all` 逐个关闭当前启用的插件；`--all` 不能与插件名或 `--scope` 同用               | `setZCodePluginEnabled`                                                                     |
+| `update <plugin> [-s <scope>]`                                               | 先刷新所属市场目录再按同条目重装；保留 installedAt 与用户开关                       | 新增 `updateZCodeMarketplacePlugin`                                                         |
+| `validate <path>`                                                            | 本地插件目录 / plugin.json / 市场目录 / marketplace.json 只读校验                   | 新增 `validateZCodePluginPath` → adapters `validateLocalPluginPath`                         |
+| `marketplace add <source> [--scope] [--sparse <path>]`                       | `--sparse` 可重复，仅 git/github 源生效（复用既有 `sparsePaths`）                   | `addZCodePluginMarketplace`（新增 `sparsePaths`）                                           |
+| `marketplace list [--json]` / `remove <name>` / `update [name]`              | 列出、移除、刷新已知市场                                                            | `getZCodePluginsOverview` / `removeZCodePluginMarketplace` / `updateZCodePluginMarketplace` |
+| 别名 `zcode plugin ...`                                                      | 单数形式别名，行为与 `zcode plugins` 相同                                           | `run.ts`                                                                                    |
 
 ## JSON 输出契约
 
@@ -35,13 +35,13 @@
 
 ## 参数与行为说明
 
-| 项 | zcode 行为 | 原因 |
-|---|---|---|
-| scope 取值 | `user` / `project`（project 映射内部 `workspace`）；`local` 直接报错 | zcode 没有 local settings 层 |
-| `uninstall --force` | 非交互终端不带 `--force` 拒绝卸载 | zcode 既有安全阀，保留 |
-| `marketplace add --scope` / `uninstall -s` | 只校验拼写，不改行为 | known marketplaces / 安装记录都是 Host User inventory |
-| `marketplace add --sparse` | 不支持变参，需重复 `--sparse a --sparse b` | 全局解析器是 strict `parseArgs` |
-| `list --json` 条目字段 | zcode 既有字段 + `diagnostics` | 不破坏现有消费者 |
+| 项                                         | zcode 行为                                                           | 原因                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------- |
+| scope 取值                                 | `user` / `project`（project 映射内部 `workspace`）；`local` 直接报错 | zcode 没有 local settings 层                          |
+| `uninstall --force`                        | 非交互终端不带 `--force` 拒绝卸载                                    | zcode 既有安全阀，保留                                |
+| `marketplace add --scope` / `uninstall -s` | 只校验拼写，不改行为                                                 | known marketplaces / 安装记录都是 Host User inventory |
+| `marketplace add --sparse`                 | 不支持变参，需重复 `--sparse a --sparse b`                           | 全局解析器是 strict `parseArgs`                       |
+| `list --json` 条目字段                     | zcode 既有字段 + `diagnostics`                                       | 不破坏现有消费者                                      |
 
 ## 实现要点
 

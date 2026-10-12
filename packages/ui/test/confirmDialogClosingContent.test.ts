@@ -27,15 +27,9 @@ describe("ConfirmDialogHost closing content", () => {
       "packages/ui/src/settings/automationConfirmDialogPresentation.ts",
     );
 
-    expect(source).toContain(
-      'displayedRequest?.presentation === "automation-confirmation"',
-    );
+    expect(source).toContain('displayedRequest?.presentation === "automation-confirmation"');
     expect(source).toContain("AUTOMATION_CONFIRM_DIALOG_CONTENT_CLASS");
-    expect(presentationSource).toContain(
-      "min-h-[180px] w-[min(448px,calc(100vw-2rem))]",
-    );
-    expect(presentationSource).toContain(
-      '"line-clamp-3 break-words whitespace-pre-line',
-    );
+    expect(presentationSource).toContain("min-h-[180px] w-[min(448px,calc(100vw-2rem))]");
+    expect(presentationSource).toContain('"line-clamp-3 break-words whitespace-pre-line');
   });
 });

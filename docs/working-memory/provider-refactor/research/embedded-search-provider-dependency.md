@@ -14,7 +14,7 @@ Embedded Search 是 Environment 提供的工具能力，与 Model Provider 无�
 resolveEmbeddedSearchBranchCapability({
   bashAvailable,
   embeddedSearchBranchEnabled,
-})
+});
 ```
 
 ## 代码事实

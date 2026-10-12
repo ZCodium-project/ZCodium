@@ -316,10 +316,7 @@ describe("buildWebRemoteControlTaskTargets", () => {
       ),
       taskRuntimeByWorkspaceKey: {
         [tab.workspacePath]: Object.fromEntries(
-          cases.map(({ taskId, runtimeStatus }) => [
-            taskId,
-            { status: runtimeStatus },
-          ]),
+          cases.map(({ taskId, runtimeStatus }) => [taskId, { status: runtimeStatus }]),
         ),
       },
     });
@@ -467,10 +464,7 @@ describe("buildWebRemoteControlTaskTargets", () => {
       ],
     });
 
-    expect(groups[0]?.tasks.map((task) => task.taskId)).toEqual([
-      "newer-created",
-      "newer-updated",
-    ]);
+    expect(groups[0]?.tasks.map((task) => task.taskId)).toEqual(["newer-created", "newer-updated"]);
   });
 
   it("远控把有后台工作的会话并入运行层，updatedAt 交替时不换位", () => {
@@ -546,11 +540,7 @@ describe("buildWebRemoteControlTaskTargets", () => {
       ],
     });
 
-    expect(groups[0]?.tasks.map((item) => item.taskId)).toEqual([
-      "fork",
-      "parent",
-      "completed",
-    ]);
+    expect(groups[0]?.tasks.map((item) => item.taskId)).toEqual(["fork", "parent", "completed"]);
   });
 });
 
@@ -623,10 +613,7 @@ describe("buildWebRemoteControlTaskIndexModel", () => {
     });
 
     expect(model.pinnedTasks.map((task) => task.taskId)).toEqual(["pinned-local"]);
-    expect(model.groups.map((group) => group.workspace.label)).toEqual([
-      "Local App",
-      "Remote App",
-    ]);
+    expect(model.groups.map((group) => group.workspace.label)).toEqual(["Local App", "Remote App"]);
     expect(model.groups.flatMap((group) => group.tasks.map((task) => task.taskId))).toEqual([
       "regular-local",
       "regular-remote",
@@ -675,9 +662,9 @@ describe("buildWebRemoteControlTaskIndexModel", () => {
     expect(titleModel.groups.flatMap((group) => group.tasks.map((task) => task.taskId))).toEqual([
       "regular-remote",
     ]);
-    expect(workspaceModel.groups.flatMap((group) => group.tasks.map((task) => task.taskId))).toEqual([
-      "regular-local",
-    ]);
+    expect(
+      workspaceModel.groups.flatMap((group) => group.tasks.map((task) => task.taskId)),
+    ).toEqual(["regular-local"]);
   });
 
   it("keeps collapsed workspace groups visible while hiding their tasks", () => {

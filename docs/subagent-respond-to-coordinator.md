@@ -110,7 +110,7 @@ stop/cancel/interrupted 等无法继续当前 turn 的终态，或既有 FIFO ba
 - session context：`subagent_message` 不进入 local relevant snippets。
 - E2E `BG25`：`SendMessage -> RespondToCoordinator + continued work -> parent model-only wake ->
 child completion`，同时验证 child conversation 可观测性、父会话不物化普通 child tool row
-和无顶层 synthetic user bubble。
+  和无顶层 synthetic user bubble。
 - E2E `O19`：真实 schema validation error 下，已覆盖 child 卡片正文只展示 input `summary`
   和“回复失败”、不展示 provider wrapper 或原始错误正文，且卡片不可展开。hover 失败状态后
   通用 tooltip 展示对应 `context.errorText` 的 WDIO 断言尚未补齐，当前覆盖状态保持

@@ -10,9 +10,7 @@ import {
   snapshotCliConfig,
   type CliConfigSnapshot,
 } from "../../../helpers/desktop-app.js";
-import {
-  DEFAULT_E2E_NETWORK_CAPTURE_NO_PROXY,
-} from "../../../helpers/network-capture-proxy.js";
+import { DEFAULT_E2E_NETWORK_CAPTURE_NO_PROXY } from "../../../helpers/network-capture-proxy.js";
 import {
   prepareConversationE2E,
   sendPrompt,
@@ -34,12 +32,7 @@ const WEBFETCH_HTML_MARKER = "E2E_WEBFETCH_HTML_MARKER";
 const WEBFETCH_EXTRACTED_MARKER = "E2E_WEBFETCH_EXTRACTED_OK";
 const WEBFETCH_FINAL_MARKER = "E2E_WEBFETCH_FINAL_OK";
 const WEBFETCH_REQUEST_MARKER = "E2E_WEBFETCH_REQUEST";
-const WEBFETCH_PROXY_ROOT = resolve(
-  homedir(),
-  "..",
-  ".e2e-network-capture",
-  CASE_NAME,
-);
+const WEBFETCH_PROXY_ROOT = resolve(homedir(), "..", ".e2e-network-capture", CASE_NAME);
 
 interface WebFetchProxyRecord {
   host: string;
@@ -143,11 +136,7 @@ describe("会话区 WebFetch E2E", () => {
     await waitForUpstreamRequest(
       {
         excludes: ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
-        includes: [
-          WEBFETCH_REQUEST_MARKER,
-          WEBFETCH_TOOL_CALL_ID,
-          WEBFETCH_EXTRACTED_MARKER,
-        ],
+        includes: [WEBFETCH_REQUEST_MARKER, WEBFETCH_TOOL_CALL_ID, WEBFETCH_EXTRACTED_MARKER],
       },
       "WebFetch 工具结果没有进入后续主模型请求",
       90000,

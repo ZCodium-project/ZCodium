@@ -19,8 +19,7 @@ import type {
   WorkspaceFileTreeEditorState,
 } from "@/workspace-file-tree/types.js";
 
-export const WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY =
-  "--workspace-file-tree-mask-offset";
+export const WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY = "--workspace-file-tree-mask-offset";
 
 export function getWorkspaceFileTreeListMaskStyle({
   stickyFolderCount,
@@ -30,8 +29,7 @@ export function getWorkspaceFileTreeListMaskStyle({
   if (stickyFolderCount === 0) {
     return undefined;
   }
-  const hiddenHeight =
-    stickyFolderCount * WORKSPACE_FILE_TREE_VIRTUAL_ROW_HEIGHT_PX;
+  const hiddenHeight = stickyFolderCount * WORKSPACE_FILE_TREE_VIRTUAL_ROW_HEIGHT_PX;
   // 修复原因：sticky 与虚拟列表是滚动容器内的兄弟节点，列表原行仍会从 sticky 下方经过。
   // 遮罩通过原生 scroll 事件同步 CSS 变量，只隐藏视口顶部的吸顶高度，不改变列表布局和滚动范围。
   const maskImage = `linear-gradient(to bottom, transparent 0 ${hiddenHeight}px, black ${hiddenHeight}px)`;
@@ -94,10 +92,7 @@ export function WorkspaceFileTreeList({
   onToggleDirectory: (row: WorkspaceFileTreeRow) => void;
   onOpenPreview: (row: WorkspaceFileTreeRow) => void;
   onOpenBrowserUrl?: (url: string) => void;
-  onKeyDown: (
-    event: KeyboardEvent<HTMLDivElement>,
-    row: WorkspaceFileTreeRow,
-  ) => void;
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>, row: WorkspaceFileTreeRow) => void;
 }) {
   const { intl } = useZCodeIntl();
   if (rootError) {
@@ -118,29 +113,19 @@ export function WorkspaceFileTreeList({
     );
   }
   if (rows.length === 0) {
-    return (
-      <WorkspaceFileTreeNotice
-        icon={<Files className="size-4" />}
-        title={emptyTitle}
-      />
-    );
+    return <WorkspaceFileTreeNotice icon={<Files className="size-4" />} title={emptyTitle} />;
   }
   const renderRow = (row: WorkspaceFileTreeRow, style: CSSProperties) => (
     <WorkspaceFileTreeRowView
       key={row.path}
       row={row}
-      selected={
-        selectedPath !== null &&
-        areWorkspaceFilePathsEqual(selectedPath, row.path)
-      }
+      selected={selectedPath !== null && areWorkspaceFilePathsEqual(selectedPath, row.path)}
       gitStatus={
         getWorkspaceFileGitStatus(gitStatusByPath, row.path) ??
         (isWorkspaceFileGitIgnored(ignoredPathSet, row.path) ? "ignored" : null)
       }
       directoryGitStatuses={
-        row.type === "directory"
-          ? getWorkspaceDirectoryGitStatuses(gitStatusByPath, row.path)
-          : []
+        row.type === "directory" ? getWorkspaceDirectoryGitStatuses(gitStatusByPath, row.path) : []
       }
       gitStatusLabelByStatus={gitStatusLabelByStatus}
       contextMenuLabels={contextMenuLabels}
@@ -158,12 +143,12 @@ export function WorkspaceFileTreeList({
       onKeyDown={onKeyDown}
     />
   );
-  const listStyle: CSSProperties &
-    Record<typeof WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY, string> = {
-    [WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY]: "0px",
-    height: `${totalSize}px`,
-    ...getWorkspaceFileTreeListMaskStyle({ stickyFolderCount }),
-  };
+  const listStyle: CSSProperties & Record<typeof WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY, string> =
+    {
+      [WORKSPACE_FILE_TREE_MASK_OFFSET_PROPERTY]: "0px",
+      height: `${totalSize}px`,
+      ...getWorkspaceFileTreeListMaskStyle({ stickyFolderCount }),
+    };
   return (
     <div
       ref={listRef}

@@ -102,9 +102,7 @@ async function waitForPlanApprovalDialog(timeoutMs: number) {
 }
 
 async function approvePlanWithoutFeedback() {
-  const approveButton = await $(
-    "//button[contains(., 'Approve') or contains(., '批准')]",
-  );
+  const approveButton = await $("//button[contains(., 'Approve') or contains(., '批准')]");
   await approveButton.waitForEnabled({ timeout: 30_000 });
   await approveButton.click();
 }
@@ -125,8 +123,7 @@ async function waitForPlanBeforeContinuation(
           ).find((element) => element.innerText.includes(text));
           if (!plan || !continuationMessage) return false;
           return Boolean(
-            plan.compareDocumentPosition(continuationMessage) &
-              Node.DOCUMENT_POSITION_FOLLOWING,
+            plan.compareDocumentPosition(continuationMessage) & Node.DOCUMENT_POSITION_FOLLOWING,
           );
         },
         planTestId,
@@ -144,9 +141,7 @@ async function openPlanDirectoryEntry(toolCallId: string, timeoutMs: number) {
   await browser.waitUntil(
     async () => {
       await browser.execute((panelTestId) => {
-        const panel = document.querySelector<HTMLElement>(
-          `[data-testid="${panelTestId}"]`,
-        );
+        const panel = document.querySelector<HTMLElement>(`[data-testid="${panelTestId}"]`);
         if (panel?.dataset.state !== "collapsed") return;
         panel.querySelector<HTMLButtonElement>("button")?.click();
       }, TID_CHAT_SUMMARY_PANEL);

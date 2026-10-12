@@ -28,12 +28,7 @@ const PROJECTION_MARKER = "E2E_COMPACT_TIMELINE_PROJECTION";
 const COMPACT_REQUEST_SENTINEL = "CRITICAL: Respond with TEXT ONLY";
 const SEED_REPLY_TOKEN = "upstream-e2e-seed-ok";
 const PENDING_REPLY_TOKEN = "upstream-e2e-pending-ok";
-const AUTO_COMPACT_OBSERVABLE_STATUSES = [
-  "started",
-  "retrying",
-  "completed",
-  "skipped",
-] as const;
+const AUTO_COMPACT_OBSERVABLE_STATUSES = ["started", "retrying", "completed", "skipped"] as const;
 
 describe("会话区 Compact Timeline Projection E2E", () => {
   after(async () => {
@@ -47,8 +42,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const seedPrompt =
-      `${PROJECTION_MARKER}_SEED_${runId}: Reply with exactly "${SEED_REPLY_TOKEN}" and no other text.`;
+    const seedPrompt = `${PROJECTION_MARKER}_SEED_${runId}: Reply with exactly "${SEED_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(seedPrompt);
     await waitForComposerText("", "compact timeline projection seed 发送后输入框没有清空");
     await waitForUpstreamRequestContaining(`${PROJECTION_MARKER}_SEED_${runId}`);
@@ -70,8 +64,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
       PROJECTION_MARKER,
     ]);
 
-    const pendingPrompt =
-      `${PROJECTION_MARKER}_PENDING_${runId}: Reply with exactly "${PENDING_REPLY_TOKEN}" and no other text.`;
+    const pendingPrompt = `${PROJECTION_MARKER}_PENDING_${runId}: Reply with exactly "${PENDING_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(pendingPrompt);
     await waitForComposerText("", "compact timeline projection pending 发送后输入框没有清空");
     await waitForUserMessageContaining(pendingPrompt);
@@ -97,10 +90,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
         await waitForComposerText("", "auto compact/running 中重复 /compact 后输入框没有清空");
         await expectNoUpstreamRequestForTextWithin(COMPACT_REQUEST_SENTINEL, 800);
         expect(
-          await countUpstreamRequestsContainingAll([
-            COMPACT_REQUEST_SENTINEL,
-            PROJECTION_MARKER,
-          ]),
+          await countUpstreamRequestsContainingAll([COMPACT_REQUEST_SENTINEL, PROJECTION_MARKER]),
         ).toBe(expectedCompactRequestCount);
         await assertVisibleUserMessagesNotContaining("/compact");
       }
@@ -116,10 +106,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     );
     await waitForAssistantMessageContaining(PENDING_REPLY_TOKEN);
     expect(
-      await countUpstreamRequestsContainingAll([
-        COMPACT_REQUEST_SENTINEL,
-        PROJECTION_MARKER,
-      ]),
+      await countUpstreamRequestsContainingAll([COMPACT_REQUEST_SENTINEL, PROJECTION_MARKER]),
     ).toBe(expectedCompactRequestCount);
     await waitForChatState(
       (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -141,15 +128,12 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     expect(historyDelta).toBe(1);
     expect(topLevelAssistantMessages.at(-1)?.text).toContain(PENDING_REPLY_TOKEN);
 
-    const autoMarkers = projection.compactMarkers.filter(
-      (marker) => marker.trigger === "auto",
-    );
+    const autoMarkers = projection.compactMarkers.filter((marker) => marker.trigger === "auto");
     expect(autoMarkers.length).toBeGreaterThan(0);
     expect(autoMarkers.filter((marker) => !marker.inAssistantHistory)).toEqual([]);
     expect(
       autoMarkers.some(
-        (marker) =>
-          marker.inAssistantHistory && isAutoCompactTerminalStatus(marker.status),
+        (marker) => marker.inAssistantHistory && isAutoCompactTerminalStatus(marker.status),
       ),
     ).toBe(true);
 
@@ -165,8 +149,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     expect(
       compactStoreMessages.filter(
         (message) =>
-          message.text.includes(SEED_REPLY_TOKEN) ||
-          message.text.includes(PENDING_REPLY_TOKEN),
+          message.text.includes(SEED_REPLY_TOKEN) || message.text.includes(PENDING_REPLY_TOKEN),
       ),
     ).toEqual([]);
 
@@ -193,8 +176,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     await prepareConversationE2E();
 
     const runId = Date.now();
-    const seedPrompt =
-      `${PROJECTION_MARKER}_MANUAL_SPLIT_SEED_${runId}: Reply with exactly "${SEED_REPLY_TOKEN}" and no other text.`;
+    const seedPrompt = `${PROJECTION_MARKER}_MANUAL_SPLIT_SEED_${runId}: Reply with exactly "${SEED_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(seedPrompt);
     await waitForComposerText("", "manual split fixture seed 发送后输入框没有清空");
     await waitForUpstreamRequestContaining(`${PROJECTION_MARKER}_MANUAL_SPLIT_SEED_${runId}`);
@@ -206,8 +188,7 @@ describe("会话区 Compact Timeline Projection E2E", () => {
     );
     await waitForProjectionStoreStable("manual split fixture seed terminal snapshot 没有稳定");
 
-    const prompt =
-      `MR_GOAL_MANUAL_COMPACT_OUTCOME_SEED_${runId}: 只使用只读工具观察项目。`;
+    const prompt = `MR_GOAL_MANUAL_COMPACT_OUTCOME_SEED_${runId}: 只使用只读工具观察项目。`;
     const tailToken = `MANUAL_COMPACT_FAILED_TAIL_VISIBLE_${runId}`;
     await injectManualCompactFailedSplitFixture(prompt, tailToken);
 
@@ -315,39 +296,26 @@ async function readTimelineProjection(): Promise<TimelineProjectionSnapshot> {
         element
           .closest<HTMLElement>(`[data-testid^="${assistantMessagePrefix}-"]`)
           ?.getAttribute("data-message-id") ?? null;
-      const chatView = document.querySelector<HTMLElement>(
-        `[data-testid="${chatViewTestId}"]`,
-      );
+      const chatView = document.querySelector<HTMLElement>(`[data-testid="${chatViewTestId}"]`);
       const taskId = chatView?.getAttribute("data-task-id") || fallbackTaskId;
-      const root = document.querySelector<HTMLElement>(
-        `[data-testid="${messagesTestId}"]`,
-      );
+      const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
       const assistantMessages = Array.from(
-        root?.querySelectorAll<HTMLElement>(
-          `[data-testid^="${assistantMessagePrefix}-"]`,
-        ) ?? [],
+        root?.querySelectorAll<HTMLElement>(`[data-testid^="${assistantMessagePrefix}-"]`) ?? [],
       ).map((message) => ({
-        historyTriggerCount: message.querySelectorAll(
-          `[data-testid^="${historyTriggerPrefix}-"]`,
-        ).length,
+        historyTriggerCount: message.querySelectorAll(`[data-testid^="${historyTriggerPrefix}-"]`)
+          .length,
         id: message.getAttribute("data-message-id"),
-        inAssistantHistory: Boolean(
-          message.closest(`[data-testid^="${historyContentPrefix}-"]`),
-        ),
+        inAssistantHistory: Boolean(message.closest(`[data-testid^="${historyContentPrefix}-"]`)),
         text: normalizeText(message.innerText),
       }));
       const userMessages = Array.from(
-        root?.querySelectorAll<HTMLElement>(
-          `[data-testid^="${userMessagePrefix}-"]`,
-        ) ?? [],
+        root?.querySelectorAll<HTMLElement>(`[data-testid^="${userMessagePrefix}-"]`) ?? [],
       ).map((message) => ({
         id: message.getAttribute("data-message-id"),
         text: normalizeText(message.innerText),
       }));
       const historyTriggers = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${historyTriggerPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${historyTriggerPrefix}-"]`),
       ).map((trigger) => ({
         assistantMessageId: closestAssistantId(trigger),
         expanded: trigger.getAttribute("aria-expanded") === "true",
@@ -355,14 +323,10 @@ async function readTimelineProjection(): Promise<TimelineProjectionSnapshot> {
         text: normalizeText(trigger.innerText),
       }));
       const compactMarkers = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${compactMarkerPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${compactMarkerPrefix}-"]`),
       ).map((marker) => ({
         assistantMessageId: closestAssistantId(marker),
-        inAssistantHistory: Boolean(
-          marker.closest(`[data-testid^="${historyContentPrefix}-"]`),
-        ),
+        inAssistantHistory: Boolean(marker.closest(`[data-testid^="${historyContentPrefix}-"]`)),
         operationId: marker.getAttribute("data-operation-id"),
         phase: marker.getAttribute("data-phase"),
         status: marker.getAttribute("data-status"),
@@ -384,8 +348,8 @@ async function readTimelineProjection(): Promise<TimelineProjectionSnapshot> {
         }
       ).__zcodeSessionStoreE2E;
       const state = storeApi?.getState?.();
-      const rawMessages = Object.values(state?.workspaces ?? {}).flatMap(
-        (workspace) => (taskId ? (workspace.taskMessagesByTaskId?.[taskId] ?? []) : []),
+      const rawMessages = Object.values(state?.workspaces ?? {}).flatMap((workspace) =>
+        taskId ? (workspace.taskMessagesByTaskId?.[taskId] ?? []) : [],
       );
       const storeMessages = rawMessages.map((message) => {
         const partTexts = (message.parts ?? [])
@@ -437,8 +401,7 @@ async function waitForOptionalAutoCompactMarker(
     .waitUntil(
       async () => {
         latestMarkers = (await readTimelineProjection()).compactMarkers.filter(
-          (marker) =>
-            marker.trigger === "auto" && statuses.includes(marker.status ?? ""),
+          (marker) => marker.trigger === "auto" && statuses.includes(marker.status ?? ""),
         );
         return latestMarkers.length > 0;
       },
@@ -455,10 +418,8 @@ async function waitForOptionalAutoCompactMarker(
 async function waitForCompactRequestCount(expectedCount: number, timeoutMsg: string) {
   await browser.waitUntil(
     async () =>
-      (await countUpstreamRequestsContainingAll([
-        COMPACT_REQUEST_SENTINEL,
-        PROJECTION_MARKER,
-      ])) === expectedCount,
+      (await countUpstreamRequestsContainingAll([COMPACT_REQUEST_SENTINEL, PROJECTION_MARKER])) ===
+      expectedCount,
     {
       timeout: 30000,
       timeoutMsg,

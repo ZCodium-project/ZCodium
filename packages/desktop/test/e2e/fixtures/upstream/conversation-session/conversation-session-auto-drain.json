@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_AUTO_DRAIN_RUNNING"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_AUTO_DRAIN_RUNNING"
-        ]
+        "bodyIncludes": ["E2E_AUTO_DRAIN_RUNNING"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_AUTO_DRAIN_RUNNING"]
       },
       "response": {
         "statusCode": 200,
@@ -86,16 +79,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_AUTO_DRAIN_QUEUED"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_AUTO_DRAIN_QUEUED"
-        ]
+        "bodyIncludes": ["E2E_AUTO_DRAIN_QUEUED"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_AUTO_DRAIN_QUEUED"]
       },
       "response": {
         "statusCode": 200,

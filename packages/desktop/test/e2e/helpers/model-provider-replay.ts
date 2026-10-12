@@ -1,21 +1,12 @@
 import { homedir } from "node:os";
 import { resolve } from "node:path";
-import {
-  startUpstreamReplayServer,
-  type UpstreamReplayServer,
-} from "./upstream-replay-server.js";
+import { startUpstreamReplayServer, type UpstreamReplayServer } from "./upstream-replay-server.js";
 import { createE2EReplayFixtureVariables } from "./e2e-runtime-paths.js";
 import { DEFAULT_E2E_NETWORK_CAPTURE_NO_PROXY } from "./network-capture-proxy.js";
 
 const DESKTOP_DIR = resolve(import.meta.dirname, "../../..");
-const UPSTREAM_REPLAY_FIXTURE_ROOT = resolve(
-  DESKTOP_DIR,
-  "test/e2e/fixtures/upstream",
-);
-const UPSTREAM_COMMON_REPLAY_FIXTURE_PATH = resolve(
-  UPSTREAM_REPLAY_FIXTURE_ROOT,
-  "common.json",
-);
+const UPSTREAM_REPLAY_FIXTURE_ROOT = resolve(DESKTOP_DIR, "test/e2e/fixtures/upstream");
+const UPSTREAM_COMMON_REPLAY_FIXTURE_PATH = resolve(UPSTREAM_REPLAY_FIXTURE_ROOT, "common.json");
 
 export async function startConversationModelProviderReplayServer(
   caseName: string,
@@ -29,11 +20,7 @@ export async function startConversationModelProviderReplayServer(
     fixtureVariables: createE2EReplayFixtureVariables(),
     fixturePaths: [
       UPSTREAM_COMMON_REPLAY_FIXTURE_PATH,
-      resolve(
-        UPSTREAM_REPLAY_FIXTURE_ROOT,
-        "conversation-session",
-        `${caseName}.json`,
-      ),
+      resolve(UPSTREAM_REPLAY_FIXTURE_ROOT, "conversation-session", `${caseName}.json`),
     ],
   });
 

@@ -8,10 +8,7 @@ const editableResourceRows = [
   "SubagentsSection.tsx",
 ] as const;
 
-const defaultCursorResourceLists = [
-  ...editableResourceRows,
-  "SkillsSection.tsx",
-] as const;
+const defaultCursorResourceLists = [...editableResourceRows, "SkillsSection.tsx"] as const;
 
 describe("settings resource row navigation", () => {
   it("removes dedicated edit icons from resource lists", async () => {
@@ -36,17 +33,12 @@ describe("settings resource row navigation", () => {
     }
 
     const interactionSource = await readFile(
-      new URL(
-        "../src/settings/settingsResourceRowInteraction.ts",
-        import.meta.url,
-      ),
+      new URL("../src/settings/settingsResourceRowInteraction.ts", import.meta.url),
       "utf8",
     );
     expect(interactionSource).toContain('role: "button"');
     expect(interactionSource).toContain("onKeyDown");
-    expect(interactionSource).toContain(
-      'event.key === "Enter" || event.key === " "',
-    );
+    expect(interactionSource).toContain('event.key === "Enter" || event.key === " "');
     expect(interactionSource).toContain("closest(INTERACTIVE_SELECTOR)");
   });
 

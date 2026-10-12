@@ -196,12 +196,7 @@ describe("会话区 MCP OAuth 状态刷新隔离 E2E", () => {
     await waitForUpstreamRequest(
       {
         excludes: ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
-        includes: [
-          PROMPT_MARKER,
-          DIRECT_RESULT,
-          PLAIN_HTTP_MCP_TOOL_NAME,
-          PLAIN_HTTP_RESULT,
-        ],
+        includes: [PROMPT_MARKER, DIRECT_RESULT, PLAIN_HTTP_MCP_TOOL_NAME, PLAIN_HTTP_RESULT],
       },
       "普通 HTTP MCP tool_result 没有进入 provider continuation",
       60_000,

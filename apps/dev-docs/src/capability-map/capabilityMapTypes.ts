@@ -51,18 +51,9 @@ export interface CapabilityGroupComplexity {
   outDegree: number;
 }
 
-export type CapabilityGroupFlowNode = Node<
-  CapabilityGroupNodeData,
-  "capability-group"
->;
-export type CapabilityItemFlowNode = Node<
-  CapabilityItemNodeData,
-  "capability-item"
->;
-export type CapabilitySystemFlowNode = Node<
-  CapabilitySystemNodeData,
-  "capability-system"
->;
+export type CapabilityGroupFlowNode = Node<CapabilityGroupNodeData, "capability-group">;
+export type CapabilityItemFlowNode = Node<CapabilityItemNodeData, "capability-item">;
+export type CapabilitySystemFlowNode = Node<CapabilitySystemNodeData, "capability-system">;
 export type CapabilityFlowNode =
   | CapabilitySystemFlowNode
   | CapabilityGroupFlowNode
@@ -70,12 +61,8 @@ export type CapabilityFlowNode =
 export type CapabilityFlowEdge = Edge<CapabilityEdgeData, "capability-edge">;
 
 export const nodeById = new Map(capabilityNodes.map((node) => [node.id, node]));
-export const groupById = new Map(
-  capabilityGroups.map((group) => [group.id, group]),
-);
-export const systemById = new Map(
-  capabilitySystems.map((system) => [system.id, system]),
-);
+export const groupById = new Map(capabilityGroups.map((group) => [group.id, group]));
+export const systemById = new Map(capabilitySystems.map((system) => [system.id, system]));
 const mutableGroupComplexityById = new Map<string, CapabilityGroupComplexity>(
   capabilityGroups.map((group) => [
     group.id,
@@ -102,15 +89,10 @@ for (const edge of capabilityEdges) {
 }
 
 export const groupComplexityById = new Map(
-  [...mutableGroupComplexityById].map(([groupId, complexity]) => [
-    groupId,
-    { ...complexity },
-  ]),
+  [...mutableGroupComplexityById].map(([groupId, complexity]) => [groupId, { ...complexity }]),
 );
 
-export const relationTypes = Object.keys(
-  capabilityRelationNames,
-) as CapabilityRelationType[];
+export const relationTypes = Object.keys(capabilityRelationNames) as CapabilityRelationType[];
 
 export const relationColors: Record<CapabilityRelationType, string> = {
   delivery: "var(--color-relation-delivery)",

@@ -6,19 +6,19 @@ Assistant message Markdown uses a reading-oriented type scale while the surround
 
 ## Type Scale
 
-| Surface | Standard |
-|---|---|
-| User and assistant message containers | `text-ui-lg` |
-| Markdown body | `text-ui-base` |
-| h1 | `text-ui-xl` (`--ui-font-size + 4px`) |
-| h2 | `text-ui-lg` (`--ui-font-size + 2px`) |
-| h3 | `text-ui-base` |
-| h4-h6 | `text-ui-base` |
-| Normal and file links | `text-ui-base` |
-| Inline code | `font-mono text-ui-sm` |
-| Code block body | default `14px` |
-| Code block header | `text-ui-base` |
-| Tables | `text-ui-base` |
+| Surface                               | Standard                              |
+| ------------------------------------- | ------------------------------------- |
+| User and assistant message containers | `text-ui-lg`                          |
+| Markdown body                         | `text-ui-base`                        |
+| h1                                    | `text-ui-xl` (`--ui-font-size + 4px`) |
+| h2                                    | `text-ui-lg` (`--ui-font-size + 2px`) |
+| h3                                    | `text-ui-base`                        |
+| h4-h6                                 | `text-ui-base`                        |
+| Normal and file links                 | `text-ui-base`                        |
+| Inline code                           | `font-mono text-ui-sm`                |
+| Code block body                       | default `14px`                        |
+| Code block header                     | `text-ui-base`                        |
+| Tables                                | `text-ui-base`                        |
 
 ## Implementation Contract
 

@@ -26,13 +26,13 @@ Helper/CUA runtime。桌面使用 `desktop-continuous`，手机使用 `web-remot
 
 ## 资产与状态边界
 
-| 事实 | 权威 owner | 产物/校验 |
-| --- | --- | --- |
-| CUA SDK | `@zcode/zcode-cua-plugin` | `scripts/computer-use-client.mjs` + `scripts/check-sdk.mjs` |
-| CUA 文档与 Skill | producer plugin | `docs/computer-use.md`、`skills/computer-use/SKILL.md` |
-| node_repl MCP | `@zcode/browser-use-plugin` | `dist/mcp/server.js` + `scripts/computer-use-client.mjs`（shared host runtime） |
+| 事实                      | 权威 owner                   | 产物/校验                                                                          |
+| ------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| CUA SDK                   | `@zcode/zcode-cua-plugin`    | `scripts/computer-use-client.mjs` + `scripts/check-sdk.mjs`                        |
+| CUA 文档与 Skill          | producer plugin              | `docs/computer-use.md`、`skills/computer-use/SKILL.md`                             |
+| node_repl MCP             | `@zcode/browser-use-plugin`  | `dist/mcp/server.js` + `scripts/computer-use-client.mjs`（shared host runtime）    |
 | CUA runtime/session/frame | shared-host `CuaControlPort` | `createComputerUseRuntime()`；按 `workspaceKey`/`remoteSessionId`/`sessionId` 隔离 |
-| native capability | CUA Helper + TCC | broker token、frame freshness、kill switch、input cleanup |
+| native capability         | CUA Helper + TCC             | broker token、frame freshness、kill switch、input cleanup                          |
 
 ## 必须保持的约束
 
@@ -46,14 +46,14 @@ Helper/CUA runtime。桌面使用 `desktop-continuous`，手机使用 `web-remot
 
 ## 验收用例
 
-| Case | 验证 |
-| --- | --- |
-| SDK 30 方法契约 | producer manifest/schema 与 SDK 方法 union 一一对应 |
-| Worker 重建 | 多次 `node_repl js` 调用可重新 bootstrap，CUA runtime/session 状态保持 |
-| 图片结果 | SDK 将 CUA image block 送入通用 `nodeRepl.emitImage`，不把 base64 变成文本 |
-| 无 broker/权限 | 返回 unavailable/permission error，不启动独立 MCP/Helper |
-| 远程边界 | desktop continuous 与 web remote replayable 共享 attachment，不把 CUA 状态放进 relay/snapshot |
-| 历史记录 | 旧 `mcp__computer-use__*` 可查看但不能重新执行或重新注入 |
+| Case            | 验证                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| SDK 30 方法契约 | producer manifest/schema 与 SDK 方法 union 一一对应                                           |
+| Worker 重建     | 多次 `node_repl js` 调用可重新 bootstrap，CUA runtime/session 状态保持                        |
+| 图片结果        | SDK 将 CUA image block 送入通用 `nodeRepl.emitImage`，不把 base64 变成文本                    |
+| 无 broker/权限  | 返回 unavailable/permission error，不启动独立 MCP/Helper                                      |
+| 远程边界        | desktop continuous 与 web remote replayable 共享 attachment，不把 CUA 状态放进 relay/snapshot |
+| 历史记录        | 旧 `mcp__computer-use__*` 可查看但不能重新执行或重新注入                                      |
 
 ## 相关实现
 

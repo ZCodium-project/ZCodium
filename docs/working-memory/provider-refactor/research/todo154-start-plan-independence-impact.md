@@ -9,21 +9,21 @@
 
 ## 1. 需求对应的实际代码
 
-| 事实 | 代码入口 | 对本需求的影响 |
-| --- | --- | --- |
-| 两家各有固定 Start Provider ID，静态 Access 为 zhipu-account/start-plan | `packages/shared/src/model-provider-types.ts`、`model-provider-family.ts` | 现有对象已经存在，用户要增加的是独立展示/使用入口，不等于新增登录账户 |
-| 服务按品牌加载 OAuth profile/token | `packages/services/src/node.ts` 的 loadAccountIdentity 和 auth 注入 | Start 可继续使用当前登录；不存在本需求必须增加第二套 OAuth 的证据 |
-| Start 余额查询与个人套餐独立；余额决定权益和动态模型集合 | `packages/services/src/model-provider/codingPlanProviderAvailability.ts` | 取消手动连接不能取消 pending、空模型和无权益判断 |
-| current 由当前品牌与 selection.kind 一起计算 | `packages/services/src/model-provider/accountProviderConnectionResolver.ts` | 未选 Start 即使有权益，也不是当前执行连接 |
-| Registry 通过 current !== false 参与 providerExecutable | `packages/provider/src/resolver.ts` | UI 单独显示 Start 不能使真实执行通过 |
-| 所有内建账号套餐被分为 account-plan；有效选择要求恰好一个 current 并映射 providerId | `packages/provider-node/src/model-selection-facade.ts`、`packages/provider/src/effective-model-selection.ts` | 直接让 Start 与 Team 都 current 会破坏选模；必须收口公共选择策略 |
-| 请求期身份要求当前 selection 与 access.mode 匹配 | `resolveCurrentAccountAccess` | 只放开 Registry 仍会在鉴权前被拒绝 |
-| Start 凭据从登录 tokenSet.zcodeJwtToken 读取 | `packages/services/src/model-provider/accountProviderRequestAuthService.ts` | 无需在 Provider Config 或 UI 中新增 token 副本 |
-| family 子项折叠到使用 Start ID 的 side key，详情会按当前套餐定位 | `packages/ui/src/settings/model-provider-section/useModelProviderNavigation.ts` | 独立 Start 需要导航身份与详情解析一起调整 |
-| 点击 Start 会生成 kind:start-plan 并保存 family selection | `packages/ui/src/settings/ModelProviderSection.tsx` 的 resolveConnectionSelectionForNavItem / persistProviderFamilyModeForNavItem | 页面浏览目前有执行连接副作用 |
-| 断开 handler 调用 OAuth logout | 同文件 handleCodingPlanDisconnect | Start 去连接化需要删除对应动作，不能只替换文案 |
-| 登录初始化仍可能选择 Start，重启路径保护旧 Start selection | `packages/ui/src/root/oauthProviderFamilySelectionRefresh.ts`、`packages/ui/src/lib/modelProviderFamilyConnectionSelection.ts` | 初始化与旧记录处理必须一并规划 |
-| 根层失效观察只 find 第一个 current，Toast 只存一条 notice | `accountConnectionRefreshObserver.ts`、`useAccountConnectionLossNotification.ts` | 并存后可能漏提醒或互相覆盖；是否复用 current 需包含这些消费者 |
+| 事实                                                                                | 代码入口                                                                                                                          | 对本需求的影响                                                        |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 两家各有固定 Start Provider ID，静态 Access 为 zhipu-account/start-plan             | `packages/shared/src/model-provider-types.ts`、`model-provider-family.ts`                                                         | 现有对象已经存在，用户要增加的是独立展示/使用入口，不等于新增登录账户 |
+| 服务按品牌加载 OAuth profile/token                                                  | `packages/services/src/node.ts` 的 loadAccountIdentity 和 auth 注入                                                               | Start 可继续使用当前登录；不存在本需求必须增加第二套 OAuth 的证据     |
+| Start 余额查询与个人套餐独立；余额决定权益和动态模型集合                            | `packages/services/src/model-provider/codingPlanProviderAvailability.ts`                                                          | 取消手动连接不能取消 pending、空模型和无权益判断                      |
+| current 由当前品牌与 selection.kind 一起计算                                        | `packages/services/src/model-provider/accountProviderConnectionResolver.ts`                                                       | 未选 Start 即使有权益，也不是当前执行连接                             |
+| Registry 通过 current !== false 参与 providerExecutable                             | `packages/provider/src/resolver.ts`                                                                                               | UI 单独显示 Start 不能使真实执行通过                                  |
+| 所有内建账号套餐被分为 account-plan；有效选择要求恰好一个 current 并映射 providerId | `packages/provider-node/src/model-selection-facade.ts`、`packages/provider/src/effective-model-selection.ts`                      | 直接让 Start 与 Team 都 current 会破坏选模；必须收口公共选择策略      |
+| 请求期身份要求当前 selection 与 access.mode 匹配                                    | `resolveCurrentAccountAccess`                                                                                                     | 只放开 Registry 仍会在鉴权前被拒绝                                    |
+| Start 凭据从登录 tokenSet.zcodeJwtToken 读取                                        | `packages/services/src/model-provider/accountProviderRequestAuthService.ts`                                                       | 无需在 Provider Config 或 UI 中新增 token 副本                        |
+| family 子项折叠到使用 Start ID 的 side key，详情会按当前套餐定位                    | `packages/ui/src/settings/model-provider-section/useModelProviderNavigation.ts`                                                   | 独立 Start 需要导航身份与详情解析一起调整                             |
+| 点击 Start 会生成 kind:start-plan 并保存 family selection                           | `packages/ui/src/settings/ModelProviderSection.tsx` 的 resolveConnectionSelectionForNavItem / persistProviderFamilyModeForNavItem | 页面浏览目前有执行连接副作用                                          |
+| 断开 handler 调用 OAuth logout                                                      | 同文件 handleCodingPlanDisconnect                                                                                                 | Start 去连接化需要删除对应动作，不能只替换文案                        |
+| 登录初始化仍可能选择 Start，重启路径保护旧 Start selection                          | `packages/ui/src/root/oauthProviderFamilySelectionRefresh.ts`、`packages/ui/src/lib/modelProviderFamilyConnectionSelection.ts`    | 初始化与旧记录处理必须一并规划                                        |
+| 根层失效观察只 find 第一个 current，Toast 只存一条 notice                           | `accountConnectionRefreshObserver.ts`、`useAccountConnectionLossNotification.ts`                                                  | 并存后可能漏提醒或互相覆盖；是否复用 current 需包含这些消费者         |
 
 ## 2. 已核对的调用链与状态 owner
 
@@ -47,24 +47,24 @@ ModelFactory → Account Request Auth → Start JWT 请求
 
 ## 3. 与旧材料的差异
 
-| 材料 | 现有描述/状态 | 本轮处理 |
-| --- | --- | --- |
-| [Todo101](../steps/todo-101-concurrent-account-providers-draft.md) | 多个具体 Account Provider 并存的 Draft，明确延期 | 用户本轮只要求独立 Start；不恢复多 Team/动态实例/抽屉方案 |
-| [Todo93](../steps/todo-93-account-plan-loss-manual-switch.md) | 失效只提示一次，用户点击才切换 | 保留无隐式切换目标；独立 Start 的按钮副作用需重新收敛 |
-| `docs/testing/model-provider-restart-connection-e2e-cases.md` I27/MP-R03 | 矩阵写 Start→Team；实际测试注入 Recent 后断言 Configured Default | 矩阵与代码漂移；不能证明正常 Session 长期残留旧 Start，不能据此要求全量迁移 |
-| `docs/testing/start-plan-manual-claim-e2e-coverage.md` | 仍保留早期自动切换历史和后续裁决 | 实施时按最终目标更新验收，当前不改写历史为新事实 |
-| feature graph 的 plan-entitlements | resolveLatestModelProviderFamilyConnectionSelection seed 在当前文件不存在；保留旧 Start 自动回退描述 | 记录 drift，阶段稳定后收敛，不在本轮改图谱 |
+| 材料                                                                     | 现有描述/状态                                                                                        | 本轮处理                                                                    |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Todo101](../steps/todo-101-concurrent-account-providers-draft.md)       | 多个具体 Account Provider 并存的 Draft，明确延期                                                     | 用户本轮只要求独立 Start；不恢复多 Team/动态实例/抽屉方案                   |
+| [Todo93](../steps/todo-93-account-plan-loss-manual-switch.md)            | 失效只提示一次，用户点击才切换                                                                       | 保留无隐式切换目标；独立 Start 的按钮副作用需重新收敛                       |
+| `docs/testing/model-provider-restart-connection-e2e-cases.md` I27/MP-R03 | 矩阵写 Start→Team；实际测试注入 Recent 后断言 Configured Default                                     | 矩阵与代码漂移；不能证明正常 Session 长期残留旧 Start，不能据此要求全量迁移 |
+| `docs/testing/start-plan-manual-claim-e2e-coverage.md`                   | 仍保留早期自动切换历史和后续裁决                                                                     | 实施时按最终目标更新验收，当前不改写历史为新事实                            |
+| feature graph 的 plan-entitlements                                       | resolveLatestModelProviderFamilyConnectionSelection seed 在当前文件不存在；保留旧 Start 自动回退描述 | 记录 drift，阶段稳定后收敛，不在本轮改图谱                                  |
 
 ## 4. 写回链路与不迁移判断的纠偏
 
-| 入口 | 当前代码事实 | 证据 |
-| --- | --- | --- |
-| 普通 Session | applySubmissionExecutionState 在普通提交真正开始执行时 setSessionModelSelection 并 persistRuntimeModelSelection；execution scope 的临时模型排除 | `apps/zcode-cli/packages/core/src/runtime/methods/turn-model.ts:40`，`turn.ts:284` |
-| Composer | useDraftConfigControl 派生 effectiveSelection；captureAcceptedModelSelection 在 accepted 回调写回，保留原 scope／用户改选保护 | `packages/ui/src/v4/composer/useDraftConfigControl.ts:172`、`:242`，`SessionPane.tsx:1493` |
-| Automation | 首次派发通过目标 Host 解析长期选择，将结果写入 run；长期 automation.model_selection 不因该解析更新 | `packages/desktop/src/host/automationModelSelection.ts:5`，`host/index.ts:869`，`packages/services/src/session/automationRepo.ts` 的 fixRunModelSelection |
-| Bot | 草稿首发解析后创建会话；绑定后读取 Session 选择解析并提交，走 Session 写回路径 | `packages/services/src/bots/botsService.ts:4878`、`:4994` |
-| Wiki | 新生成解析一次，RepoWikiDraftSummary 保存 modelConfig.modelSelection；失败页补齐固定已有生成身份 | `packages/services/src/repo-wiki/repoWikiModelClient.ts:98`，`repoWikiService.ts:369` |
-| 显式 Subagent | profile 选择克隆后解析给本次执行，不修改 profile；继承使用父模型 | `apps/zcode-cli/packages/core/src/runtime/helpers/subagent-selection.ts:15`，`runtime/methods/subagent.ts:100` |
+| 入口          | 当前代码事实                                                                                                                                    | 证据                                                                                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 普通 Session  | applySubmissionExecutionState 在普通提交真正开始执行时 setSessionModelSelection 并 persistRuntimeModelSelection；execution scope 的临时模型排除 | `apps/zcode-cli/packages/core/src/runtime/methods/turn-model.ts:40`，`turn.ts:284`                                                                        |
+| Composer      | useDraftConfigControl 派生 effectiveSelection；captureAcceptedModelSelection 在 accepted 回调写回，保留原 scope／用户改选保护                   | `packages/ui/src/v4/composer/useDraftConfigControl.ts:172`、`:242`，`SessionPane.tsx:1493`                                                                |
+| Automation    | 首次派发通过目标 Host 解析长期选择，将结果写入 run；长期 automation.model_selection 不因该解析更新                                              | `packages/desktop/src/host/automationModelSelection.ts:5`，`host/index.ts:869`，`packages/services/src/session/automationRepo.ts` 的 fixRunModelSelection |
+| Bot           | 草稿首发解析后创建会话；绑定后读取 Session 选择解析并提交，走 Session 写回路径                                                                  | `packages/services/src/bots/botsService.ts:4878`、`:4994`                                                                                                 |
+| Wiki          | 新生成解析一次，RepoWikiDraftSummary 保存 modelConfig.modelSelection；失败页补齐固定已有生成身份                                                | `packages/services/src/repo-wiki/repoWikiModelClient.ts:98`，`repoWikiService.ts:369`                                                                     |
+| 显式 Subagent | profile 选择克隆后解析给本次执行，不修改 profile；继承使用父模型                                                                                | `apps/zcode-cli/packages/core/src/runtime/helpers/subagent-selection.ts:15`，`runtime/methods/subagent.ts:100`                                            |
 
 只读 effective-selection 函数不写原输入，不能推出整个提交链路不写回。此前由此推导全量 Session／草稿迁移、升级连接快照、逐存储语义版本，属于助手调查不足，已在用户指出写回事实后撤回。
 
@@ -74,15 +74,15 @@ I27/MP-R03 的实际证据：`packages/desktop/test/e2e/helpers/model-provider-r
 
 ## 5. 新推荐的提交入口调查
 
-| 入口 | 当前提交事实 | 与推荐有关的边界 |
-| --- | --- | --- |
-| 对话 | SessionPane 的 createSubmissionFromComposer／dispatchSendText 形成新提交，accepted 后写回 | 按钮、快捷键、附件、新队列／引导提交需共用检查；不能先发送再推荐 |
-| 定时任务表单 | AutomationEditView.submitAutomation 在校验后调用 onSubmit，保存并运行也复用它 | 可在创建／修改模型保存前提示一次 |
-| 定时任务立即运行 | management store 仅以 automationId 调 runAutomationNow，无本次选择参数 | 用户最终排除此入口，不扩协议 |
-| Wiki | RepoWikiPane.generate 形成新请求；regenerateFailedPages 是另一条固定生成身份路径 | 手动新生成纳入，补齐失败页与自动刷新排除 |
-| 自定义 Subagent | SubagentForm.handleSubmit 校验后 onSave | 创建／修改显式模型保存可接；其他字段修改不提示 |
-| 内置／插件 Subagent | 共用 SubagentModelOverrideControl，handleValueChange → persistConfig 即改即存 | 模型选择即提交；仅调思考强度、继承／默认或启停排除 |
-| Bot／后台执行／闲时 | 各自提交和执行语义已有独立 owner | 用户排除推荐，不改变现有执行路径 |
+| 入口                | 当前提交事实                                                                              | 与推荐有关的边界                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 对话                | SessionPane 的 createSubmissionFromComposer／dispatchSendText 形成新提交，accepted 后写回 | 按钮、快捷键、附件、新队列／引导提交需共用检查；不能先发送再推荐 |
+| 定时任务表单        | AutomationEditView.submitAutomation 在校验后调用 onSubmit，保存并运行也复用它             | 可在创建／修改模型保存前提示一次                                 |
+| 定时任务立即运行    | management store 仅以 automationId 调 runAutomationNow，无本次选择参数                    | 用户最终排除此入口，不扩协议                                     |
+| Wiki                | RepoWikiPane.generate 形成新请求；regenerateFailedPages 是另一条固定生成身份路径          | 手动新生成纳入，补齐失败页与自动刷新排除                         |
+| 自定义 Subagent     | SubagentForm.handleSubmit 校验后 onSave                                                   | 创建／修改显式模型保存可接；其他字段修改不提示                   |
+| 内置／插件 Subagent | 共用 SubagentModelOverrideControl，handleValueChange → persistConfig 即改即存             | 模型选择即提交；仅调思考强度、继承／默认或启停排除               |
+| Bot／后台执行／闲时 | 各自提交和执行语义已有独立 owner                                                          | 用户排除推荐，不改变现有执行路径                                 |
 
 具体源码：`packages/ui/src/v4/SessionPane.tsx`、`settings/AutomationEditView.tsx:1769`、`store/automationManagementStore.ts:424`、`repo-wiki/RepoWikiPane.tsx:795`、`settings/SubagentsSection.tsx:588`。
 

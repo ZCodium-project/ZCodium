@@ -30,19 +30,20 @@ open(url?, { reuseTab = true } = {}):
 ```
 
 关键取舍：
+
 - **默认 `reuseTab: true`**：治本必须默认复用；默认 false 等于又回到「靠模型自觉」的软约束老路。
 - **保留显式逃生口**：模型填表一半时想开同站对照页，默认复用会导航走表单页——传 `reuseTab: false` 或 `tabs.new()` 可强制并行 tab。
 - **`tabs.new()` 语义不变**、main 端不动、任务结束回收不做（用户选择，维持 tab-cleanup-iab.md 既有设计）。
 
 ## 改动清单
 
-| 文件 | 内容 |
-|---|---|
-| `apps/zcode-cli/packages/core/src/browser-client/selection.ts` | 新增纯函数 `selectTabForUrl()`（与 `selectBrowserForUrl` 共享 `urlMatchRank`） |
-| `apps/zcode-cli/packages/core/src/browser-client/facade.ts` | `BrowserTabs.reuse(url)`（单次 list + activateTab）；`open()` 接入并整体降级 |
-| `apps/zcode-cli/packages/core/src/browser-client/documentation.ts` | fallback 文档：`open()` 教成默认导航入口 |
-| `apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md`、`docs/overview.md` | 模型指引同步 |
-| `apps/zcode-cli/packages/core/tests/browser-client.test.ts` | 新增 9 用例（TDD）：精确/同域/父子域/无匹配/list 失败降级/无 url/reuseTab:false/active 优先/最新兜底 |
+| 文件                                                                                             | 内容                                                                                                 |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `apps/zcode-cli/packages/core/src/browser-client/selection.ts`                                   | 新增纯函数 `selectTabForUrl()`（与 `selectBrowserForUrl` 共享 `urlMatchRank`）                       |
+| `apps/zcode-cli/packages/core/src/browser-client/facade.ts`                                      | `BrowserTabs.reuse(url)`（单次 list + activateTab）；`open()` 接入并整体降级                         |
+| `apps/zcode-cli/packages/core/src/browser-client/documentation.ts`                               | fallback 文档：`open()` 教成默认导航入口                                                             |
+| `apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md`、`docs/overview.md` | 模型指引同步                                                                                         |
+| `apps/zcode-cli/packages/core/tests/browser-client.test.ts`                                      | 新增 9 用例（TDD）：精确/同域/父子域/无匹配/list 失败降级/无 url/reuseTab:false/active 优先/最新兜底 |
 
 ## 验证
 

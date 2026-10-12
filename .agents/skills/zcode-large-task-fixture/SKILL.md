@@ -64,4 +64,3 @@ Generated sessions include:
 - Bash, Read, Grep, Glob, Edit, Write, TodoWrite, AskUserQuestion, Agent, WebSearch, and WebFetch tool shapes
 - Patch, compaction, subtask, agent, retry, step-start, and step-finish parts
 - Todo rows, session target rows, model usage rows, turn usage rows, and task index searchable text
-

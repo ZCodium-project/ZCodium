@@ -195,11 +195,11 @@ useEffect(() => {
 
 两份拷贝只要任一处改动，另一处极易遗漏。已确认的漂移：
 
-| # | 项 | 后果 | 状态 |
-|---|----|------|------|
-| 1 | `flushTerminalServiceResize()` | persistentKey 路径 id ready 后未 flush 创建期排队 resize，PTY 停在错误 cols/rows | 已修（f8cfca38b7） |
-| 2 | exit 订阅查 `exitHandlerRef` | persistentKey 路径 exit 订阅未查 onExit 回调，与原路径不对称 | 已修（f8cfca38b7） |
-| 3 | paste 快捷键 `logger.debug("[Terminal] paste via shortcut")` | persistentKey 路径 customKeyEventHandler 漏了该 debug 日志 | 已对齐（本次） |
+| #   | 项                                                           | 后果                                                                             | 状态               |
+| --- | ------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------ |
+| 1   | `flushTerminalServiceResize()`                               | persistentKey 路径 id ready 后未 flush 创建期排队 resize，PTY 停在错误 cols/rows | 已修（f8cfca38b7） |
+| 2   | exit 订阅查 `exitHandlerRef`                                 | persistentKey 路径 exit 订阅未查 onExit 回调，与原路径不对称                     | 已修（f8cfca38b7） |
+| 3   | paste 快捷键 `logger.debug("[Terminal] paste via shortcut")` | persistentKey 路径 customKeyEventHandler 漏了该 debug 日志                       | 已对齐（本次）     |
 
 这 3 个全是"两份拷贝必然漂移"的直接产物。
 

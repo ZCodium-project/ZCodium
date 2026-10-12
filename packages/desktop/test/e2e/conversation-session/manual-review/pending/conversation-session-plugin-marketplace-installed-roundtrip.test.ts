@@ -244,36 +244,41 @@ function readPluginOptions(config: Record<string, unknown>): Record<string, unkn
       ? (config.plugins as Record<string, unknown>)
       : {};
   return typeof plugins.options === "object" && plugins.options !== null
-    ? ((plugins.options as Record<string, unknown>)[PLUGIN_LIFECYCLE_ID] as Record<
+    ? (((plugins.options as Record<string, unknown>)[PLUGIN_LIFECYCLE_ID] as Record<
         string,
         unknown
-      >) ?? {}
+      >) ?? {})
     : {};
 }
 
 async function setPluginControlValueForRoundtrip(key: string, value: string): Promise<void> {
   await waitForPluginControl("plugin-store-config-input", { configKey: key });
-  const state = await browser.execute((configKey, nextValue) => {
-    const input = document.querySelector<HTMLInputElement>(
-      `[data-testid="plugin-store-config-input"][data-config-key="${configKey}"]`,
-    );
-    if (!input) return { updated: false, reason: "missing" };
-    if (input.disabled || input.readOnly) {
-      return {
-        updated: false,
-        reason: "not-editable",
-        disabled: input.disabled,
-        readOnly: input.readOnly,
-        outerHTML: input.outerHTML,
-      };
-    }
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
-    setter?.call(input, nextValue);
-    input.dispatchEvent(new InputEvent("input", { bubbles: true, data: nextValue }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    return { updated: true };
-  }, key, value);
-  if (!state.updated) throw new Error(`Could not set Plugin option input: ${JSON.stringify(state)}`);
+  const state = await browser.execute(
+    (configKey, nextValue) => {
+      const input = document.querySelector<HTMLInputElement>(
+        `[data-testid="plugin-store-config-input"][data-config-key="${configKey}"]`,
+      );
+      if (!input) return { updated: false, reason: "missing" };
+      if (input.disabled || input.readOnly) {
+        return {
+          updated: false,
+          reason: "not-editable",
+          disabled: input.disabled,
+          readOnly: input.readOnly,
+          outerHTML: input.outerHTML,
+        };
+      }
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(input, nextValue);
+      input.dispatchEvent(new InputEvent("input", { bubbles: true, data: nextValue }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      return { updated: true };
+    },
+    key,
+    value,
+  );
+  if (!state.updated)
+    throw new Error(`Could not set Plugin option input: ${JSON.stringify(state)}`);
 }
 
 async function readPluginOptionSource(key: string): Promise<string | null> {
@@ -281,8 +286,10 @@ async function readPluginOptionSource(key: string): Promise<string | null> {
     const input = document.querySelector<HTMLElement>(
       `[data-testid="plugin-store-config-input"][data-config-key="${configKey}"]`,
     );
-    return input?.closest("label")?.querySelector<HTMLElement>("[data-settings-scope]")?.dataset
-      .settingsScope ?? null;
+    return (
+      input?.closest("label")?.querySelector<HTMLElement>("[data-settings-scope]")?.dataset
+        .settingsScope ?? null
+    );
   }, key);
 }
 

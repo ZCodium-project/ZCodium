@@ -30,9 +30,7 @@ const AUTHORITY_SEGMENTS: Record<RemoteWorkspaceIdentityKind, number> = {
   server: 1,
 };
 
-function isRemoteWorkspaceIdentityKind(
-  value: string,
-): value is RemoteWorkspaceIdentityKind {
+function isRemoteWorkspaceIdentityKind(value: string): value is RemoteWorkspaceIdentityKind {
   return value === "ssh" || value === "wsl" || value === "docker" || value === "server";
 }
 
@@ -83,10 +81,7 @@ export function buildServerRemoteWorkspaceIdentity(
  * 统一构造远程 workspace identity。Host、Main 和 UI 禁止自行拼接 authority；
  * `workspacePath` 只在这里归一后进入身份键，实际 IO 仍使用调用方原路径。
  */
-export function buildRemoteWorkspaceIdentity(
-  workspacePath: string,
-  target: RemoteTarget,
-): string {
+export function buildRemoteWorkspaceIdentity(workspacePath: string, target: RemoteTarget): string {
   const normalizedPath = normalizeWorkspacePathForIdentity(workspacePath);
   switch (target.kind) {
     case "ssh":

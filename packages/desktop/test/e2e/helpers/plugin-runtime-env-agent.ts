@@ -4,13 +4,11 @@ import { dirname, join } from "node:path";
 import { DEFAULT_PLUGIN_MARKETPLACES } from "@zcode/shared";
 import { getE2EAppDataPaths } from "./desktop-app.js";
 
-export const PLUGIN_RUNTIME_ENV_MARKETPLACE_ID =
-  "e2e-plugin-runtime-env-market";
+export const PLUGIN_RUNTIME_ENV_MARKETPLACE_ID = "e2e-plugin-runtime-env-market";
 export const PLUGIN_RUNTIME_ENV_NAME = "e2e-plugin-secret-agent";
 export const PLUGIN_RUNTIME_ENV_ID = `${PLUGIN_RUNTIME_ENV_NAME}@${PLUGIN_RUNTIME_ENV_MARKETPLACE_ID}`;
 export const PLUGIN_RUNTIME_ENV_VARIABLE = "E2E_PLUGIN_RUNTIME_SECRET";
-export const PLUGIN_RUNTIME_ENV_RESOLVED_MARKER =
-  "E2E_PLUGIN_RUNTIME_SECRET_RESOLVED";
+export const PLUGIN_RUNTIME_ENV_RESOLVED_MARKER = "E2E_PLUGIN_RUNTIME_SECRET_RESOLVED";
 export const PLUGIN_RUNTIME_ENV_TOOL_NAME =
   "mcp__plugin_e2e-plugin-secret-agent_secret-verifier__verify_secret_env";
 export const PLUGIN_RUNTIME_ENV_AGENT_NAME = `${PLUGIN_RUNTIME_ENV_NAME}:secret-auditor`;
@@ -25,11 +23,7 @@ export async function createPluginRuntimeEnvFixture(
 ): Promise<PluginRuntimeEnvFixture> {
   const { homeDir } = getE2EAppDataPaths();
   await primeDefaultPluginMarketplacesForE2E(homeDir);
-  const marketplaceRoot = join(
-    homeDir,
-    "fixtures",
-    PLUGIN_RUNTIME_ENV_MARKETPLACE_ID,
-  );
+  const marketplaceRoot = join(homeDir, "fixtures", PLUGIN_RUNTIME_ENV_MARKETPLACE_ID);
   const pluginRoot = join(marketplaceRoot, "plugins", PLUGIN_RUNTIME_ENV_NAME);
   await rm(marketplaceRoot, { force: true, recursive: true });
 
@@ -63,9 +57,7 @@ export async function createPluginRuntimeEnvFixture(
   );
   await writeText(
     join(pluginRoot, "server.mjs"),
-    buildSecretVerifierServer(
-      createHash("sha256").update(expectedSecret).digest("hex"),
-    ),
+    buildSecretVerifierServer(createHash("sha256").update(expectedSecret).digest("hex")),
   );
   await writeJson(join(marketplaceRoot, ".claude-plugin", "marketplace.json"), {
     name: PLUGIN_RUNTIME_ENV_MARKETPLACE_ID,
@@ -84,13 +76,7 @@ export async function createPluginRuntimeEnvFixture(
 }
 
 async function primeDefaultPluginMarketplacesForE2E(homeDir: string): Promise<void> {
-  const path = join(
-    homeDir,
-    ".zcode",
-    "cli",
-    "plugins",
-    "known_marketplaces.json",
-  );
+  const path = join(homeDir, ".zcode", "cli", "plugins", "known_marketplaces.json");
   const existing = await readKnownMarketplaceRecords(path);
   const now = new Date().toISOString();
   const byId = new Map(existing.map((record) => [record.id, record]));

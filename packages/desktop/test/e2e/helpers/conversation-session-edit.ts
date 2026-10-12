@@ -48,14 +48,13 @@ export async function waitForEditButtonForUserContaining(
       {
         timeout: 30000,
         timeoutMsg: `user 消息没有出现可用 edit 按钮: ${text}`,
-      }
+      },
     );
   } catch (error) {
     latest = await getEditButtonForUserContaining(text);
-    throw new Error(
-      `user 消息没有出现可用 edit 按钮: ${text}; latest=${JSON.stringify(latest)}`,
-      { cause: error },
-    );
+    throw new Error(`user 消息没有出现可用 edit 按钮: ${text}; latest=${JSON.stringify(latest)}`, {
+      cause: error,
+    });
   }
   if (!latest) {
     throw new Error(`user edit 按钮在等待后仍不存在: ${text}`);
@@ -72,10 +71,7 @@ async function waitForStableEditButtonForUserContaining(
   let latest: EditButtonSnapshot | null = null;
   while (Date.now() - startedAt < 30000) {
     const first = await getEditButtonForUserContaining(text);
-    if (
-      first?.exists &&
-      (!expectEnabled || (!first.disabled && !first.ariaDisabled))
-    ) {
+    if (first?.exists && (!expectEnabled || (!first.disabled && !first.ariaDisabled))) {
       await browser.pause(250);
       const second = await getEditButtonForUserContaining(text);
       if (
@@ -92,9 +88,7 @@ async function waitForStableEditButtonForUserContaining(
     }
     await browser.pause(100);
   }
-  throw new Error(
-    `user 消息 edit 按钮没有稳定下来: ${text}; latest=${JSON.stringify(latest)}`,
-  );
+  throw new Error(`user 消息 edit 按钮没有稳定下来: ${text}; latest=${JSON.stringify(latest)}`);
 }
 
 export async function clickEditButtonForUserContaining(text: string) {
@@ -108,22 +102,16 @@ export async function clickEditButtonForUserContaining(text: string) {
   return button;
 }
 
-export async function editUserMessageContaining(
-  currentText: string,
-  nextText: string,
-) {
+export async function editUserMessageContaining(currentText: string, nextText: string) {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const button = await clickEditButtonForUserContaining(currentText);
     try {
       await setMessageEditInputText(button.messageId, nextText);
-      await clickTestIdByDom(
-        testId(TID_CHAT_MESSAGE_EDIT_SUBMIT, button.messageId),
-        {
-          timeout: 15000,
-          timeoutMsg: `user edit 提交按钮不可点击: ${button.messageId}`,
-        },
-      );
+      await clickTestIdByDom(testId(TID_CHAT_MESSAGE_EDIT_SUBMIT, button.messageId), {
+        timeout: 15000,
+        timeoutMsg: `user edit 提交按钮不可点击: ${button.messageId}`,
+      });
       return button;
     } catch (error) {
       lastError = error;
@@ -134,9 +122,7 @@ export async function editUserMessageContaining(
       }
     }
   }
-  throw lastError instanceof Error
-    ? lastError
-    : new Error(`user edit 重试失败: ${currentText}`);
+  throw lastError instanceof Error ? lastError : new Error(`user edit 重试失败: ${currentText}`);
 }
 
 function isRetryableEditInputError(error: Error) {
@@ -148,9 +134,7 @@ function isRetryableEditInputError(error: Error) {
   );
 }
 
-export function getEditButtonForUserContaining(
-  text: string,
-): Promise<EditButtonSnapshot | null> {
+export function getEditButtonForUserContaining(text: string): Promise<EditButtonSnapshot | null> {
   return getEditButtonForMessageContaining(TID_CHAT_USER_MESSAGE, text);
 }
 
@@ -194,20 +178,14 @@ async function setLexicalInputTextByTestId(testIdValue: string, text: string) {
     await waitForEditInputInitializers(testIdValue);
   }
 
-  throw new Error(
-    `edit 输入框没有写入完整 prompt: expected=${text}, actual=${actual}`,
-  );
+  throw new Error(`edit 输入框没有写入完整 prompt: expected=${text}, actual=${actual}`);
 }
 
 function getEditInputDiagnostics(testIdValue: string) {
   return browser.execute((inputTestId) => {
-    const input = document.querySelector<HTMLElement>(
-      `[data-testid="${inputTestId}"]`,
-    );
+    const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
     const nearby = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        `[data-testid^="chat-message-edit-input-"]`,
-      ),
+      document.querySelectorAll<HTMLElement>(`[data-testid^="chat-message-edit-input-"]`),
     ).map((element) => ({
       bridgeAttr: element.getAttribute("data-e2e-lexical-bridge"),
       contentEditable: element.getAttribute("contenteditable"),
@@ -216,9 +194,7 @@ function getEditInputDiagnostics(testIdValue: string) {
     }));
     return {
       bridgeAttr: input?.getAttribute("data-e2e-lexical-bridge") ?? null,
-      bridgeProperty: Boolean(
-        (input as LexicalInputE2EElement | null)?.__zcodeLexicalInputE2E,
-      ),
+      bridgeProperty: Boolean((input as LexicalInputE2EElement | null)?.__zcodeLexicalInputE2E),
       contentEditable: input?.getAttribute("contenteditable") ?? null,
       exists: Boolean(input),
       nearby,
@@ -230,9 +206,7 @@ function getEditInputDiagnostics(testIdValue: string) {
 
 async function waitForEditInputInitializers(testIdValue: string) {
   await browser.executeAsync((inputTestId, done) => {
-    const input = document.querySelector<LexicalInputE2EElement>(
-      `[data-testid="${inputTestId}"]`,
-    );
+    const input = document.querySelector<LexicalInputE2EElement>(`[data-testid="${inputTestId}"]`);
     input?.__zcodeLexicalInputE2E?.focus();
     // 修复原因：UserMessage 和 ChatPromptEditor 都会在 RAF 回填 initialValue。
     // 等两帧后再模拟用户输入，避免刚写入的新文本被初始化回填覆盖。
@@ -260,12 +234,7 @@ async function replaceContentEditableTextByDom(testIdValue: string, text: string
           `[data-testid="${inputTestId}"]`,
         );
         const latestBridge = latestInput?.__zcodeLexicalInputE2E;
-        return (
-          latestBridge?.getText() ??
-          latestInput?.innerText ??
-          latestInput?.textContent ??
-          ""
-        )
+        return (latestBridge?.getText() ?? latestInput?.innerText ?? latestInput?.textContent ?? "")
           .replace(/\u00a0/g, " ")
           .trim();
       };
@@ -358,9 +327,7 @@ function getEditButtonForMessageContaining(
   return browser.execute(
     (targetMessagePrefix, editButtonPrefix, expectedText) => {
       const messages = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-testid^="${targetMessagePrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLElement>(`[data-testid^="${targetMessagePrefix}-"]`),
       );
       const message = messages.find((element) =>
         element.innerText.replace(/\u00a0/g, " ").includes(expectedText),
@@ -370,9 +337,7 @@ function getEditButtonForMessageContaining(
         return null;
       }
       const button = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(
-          `[data-testid^="${editButtonPrefix}-"]`,
-        ),
+        document.querySelectorAll<HTMLButtonElement>(`[data-testid^="${editButtonPrefix}-"]`),
       ).find((candidate) => candidate.getAttribute("data-message-id") === messageId);
       const resolvedTestId =
         button?.getAttribute("data-testid") ?? `${editButtonPrefix}-${messageId}`;

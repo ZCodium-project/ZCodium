@@ -85,62 +85,66 @@ describe("Automations 空首页 Figma 布局 E2E", () => {
       },
     );
 
-    const layout = await browser.execute((offPeakCreateTestId, manualCreateTestId) => {
-      const requireElement = (selector: string): HTMLElement => {
-        const element = document.querySelector<HTMLElement>(selector);
-        if (!element) throw new Error(`Missing element: ${selector}`);
-        return element;
-      };
-      const rect = (element: HTMLElement) => {
-        const value = element.getBoundingClientRect();
-        return {
-          top: value.top,
-          right: value.right,
-          bottom: value.bottom,
-          left: value.left,
-          width: value.width,
-          height: value.height,
+    const layout = await browser.execute(
+      (offPeakCreateTestId, manualCreateTestId) => {
+        const requireElement = (selector: string): HTMLElement => {
+          const element = document.querySelector<HTMLElement>(selector);
+          if (!element) throw new Error(`Missing element: ${selector}`);
+          return element;
         };
-      };
-      const gridMetrics = (section: HTMLElement) => {
-        const grid = section.querySelector<HTMLElement>(".grid");
-        if (!grid) throw new Error("Missing template grid");
-        return {
-          columns: getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length,
-          cards: grid.children.length,
-          firstCardRadius:
-            grid.querySelector("button") instanceof HTMLElement
-              ? getComputedStyle(grid.querySelector("button") as HTMLElement).borderRadius
-              : "",
+        const rect = (element: HTMLElement) => {
+          const value = element.getBoundingClientRect();
+          return {
+            top: value.top,
+            right: value.right,
+            bottom: value.bottom,
+            left: value.left,
+            width: value.width,
+            height: value.height,
+          };
         };
-      };
+        const gridMetrics = (section: HTMLElement) => {
+          const grid = section.querySelector<HTMLElement>(".grid");
+          if (!grid) throw new Error("Missing template grid");
+          return {
+            columns: getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length,
+            cards: grid.children.length,
+            firstCardRadius:
+              grid.querySelector("button") instanceof HTMLElement
+                ? getComputedStyle(grid.querySelector("button") as HTMLElement).borderRadius
+                : "",
+          };
+        };
 
-      const content = requireElement("[data-automations-content]");
-      const empty = requireElement("[data-automations-empty-state]");
-      const keepAwake = requireElement("[data-automations-keep-awake]");
-      const idle = requireElement("[data-automations-idle-templates]");
-      const scheduled = requireElement("[data-automations-scheduled-templates]");
-      const manualCreate = requireElement(`[data-testid="${manualCreateTestId}"]`);
-      const idleCreate = requireElement(`[data-testid="${offPeakCreateTestId}"]`);
-      const contentStyle = getComputedStyle(content);
+        const content = requireElement("[data-automations-content]");
+        const empty = requireElement("[data-automations-empty-state]");
+        const keepAwake = requireElement("[data-automations-keep-awake]");
+        const idle = requireElement("[data-automations-idle-templates]");
+        const scheduled = requireElement("[data-automations-scheduled-templates]");
+        const manualCreate = requireElement(`[data-testid="${manualCreateTestId}"]`);
+        const idleCreate = requireElement(`[data-testid="${offPeakCreateTestId}"]`);
+        const contentStyle = getComputedStyle(content);
 
-      return {
-        contentWidth:
-          content.getBoundingClientRect().width -
-          Number.parseFloat(contentStyle.paddingLeft) -
-          Number.parseFloat(contentStyle.paddingRight),
-        empty: rect(empty),
-        keepAwake: rect(keepAwake),
-        idle: rect(idle),
-        scheduled: rect(scheduled),
-        manualCreate: rect(manualCreate),
-        idleCreate: rect(idleCreate),
-        emptyRadius: getComputedStyle(empty).borderRadius,
-        keepAwakeRadius: getComputedStyle(keepAwake).borderRadius,
-        idleGrid: gridMetrics(idle),
-        scheduledGrid: gridMetrics(scheduled),
-      };
-    }, TID_OFFPEAK_CREATE_BUTTON, TID_AUTOMATION_CREATE_MANUALLY);
+        return {
+          contentWidth:
+            content.getBoundingClientRect().width -
+            Number.parseFloat(contentStyle.paddingLeft) -
+            Number.parseFloat(contentStyle.paddingRight),
+          empty: rect(empty),
+          keepAwake: rect(keepAwake),
+          idle: rect(idle),
+          scheduled: rect(scheduled),
+          manualCreate: rect(manualCreate),
+          idleCreate: rect(idleCreate),
+          emptyRadius: getComputedStyle(empty).borderRadius,
+          keepAwakeRadius: getComputedStyle(keepAwake).borderRadius,
+          idleGrid: gridMetrics(idle),
+          scheduledGrid: gridMetrics(scheduled),
+        };
+      },
+      TID_OFFPEAK_CREATE_BUTTON,
+      TID_AUTOMATION_CREATE_MANUALLY,
+    );
 
     // Settings 统一内容框当前为 max-w-4xl（896px）+ 左右 32px padding，内列应为 832px；
     // 旧 802px 是收敛 Settings 框架前的历史值，不能继续当作当前布局的回归基线。

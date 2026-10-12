@@ -39,9 +39,10 @@ describe("pluginManagementService suggested prompt operations", () => {
         deliveryKind: "web-remote-replayable",
       }),
     ).resolves.toMatchObject({ status: "missing" });
-    await expect(
-      service.cancelPluginOperation({ operationId: "suggested-1" }),
-    ).resolves.toEqual({ operationId: "suggested-1", cancelled: true });
+    await expect(service.cancelPluginOperation({ operationId: "suggested-1" })).resolves.toEqual({
+      operationId: "suggested-1",
+      cancelled: true,
+    });
 
     expect(resolveSuggestedPluginReference).toHaveBeenCalledWith({
       workspacePath: "/remote/workspace",

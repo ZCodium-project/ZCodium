@@ -35,10 +35,7 @@ function isReachableHttpStatus(status: number): boolean {
   return status >= 200 && status < 500;
 }
 
-async function testUrlServer(
-  config: McpServerConfig,
-  startTime: number,
-): Promise<McpTestResult> {
+async function testUrlServer(config: McpServerConfig, startTime: number): Promise<McpTestResult> {
   if (!config.url) {
     return {
       success: false,

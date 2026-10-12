@@ -1,8 +1,4 @@
-import type {
-  BotConfig,
-  BotProviderCallbackResult,
-  BotsConfigFile,
-} from "@zcode/shared";
+import type { BotConfig, BotProviderCallbackResult, BotsConfigFile } from "@zcode/shared";
 import type { ICredentialService } from "../credential/credential.js";
 import { getWeixinUpdates } from "./providers/weixinProvider.js";
 import {
@@ -25,10 +21,7 @@ interface WeixinChannelRuntimeDeps {
   readConfig(): Promise<BotsConfigFile>;
   readWeixinGetUpdatesBuf(botId: string): Promise<string | undefined>;
   writeWeixinGetUpdatesBuf(botId: string, buf: string): Promise<void>;
-  processProviderCallback(
-    provider: "weixin",
-    payload: unknown,
-  ): Promise<BotProviderCallbackResult>;
+  processProviderCallback(provider: "weixin", payload: unknown): Promise<BotProviderCallbackResult>;
   getUpdates?: typeof getWeixinUpdates;
   acquirePollingLock?: typeof acquireWeixinPollingLock;
 }
@@ -55,9 +48,7 @@ export function createWeixinChannelRuntime(deps: WeixinChannelRuntimeDeps) {
   }
 
   async function pollBot(bot: BotConfig, signal: AbortSignal): Promise<void> {
-    const token = bot.credentialRef
-      ? await deps.credentialService.load(bot.credentialRef)
-      : null;
+    const token = bot.credentialRef ? await deps.credentialService.load(bot.credentialRef) : null;
     if (!token?.trim()) {
       deps.statusSink.setRuntimeStatus({
         botId: bot.id,
@@ -71,10 +62,7 @@ export function createWeixinChannelRuntime(deps: WeixinChannelRuntimeDeps) {
     while (!signal.aborted) {
       let lock: Awaited<ReturnType<typeof acquireWeixinPollingLock>>;
       try {
-        lock = await (deps.acquirePollingLock ?? acquireWeixinPollingLock)(
-          token,
-          bot.id,
-        );
+        lock = await (deps.acquirePollingLock ?? acquireWeixinPollingLock)(token, bot.id);
       } catch (error) {
         if (signal.aborted) return;
         // Bugfix：每个窗口都有独立 host。微信锁 I/O 失败必须退避重试，不能让后台 Promise 退出。
@@ -261,10 +249,7 @@ export function createWeixinChannelRuntime(deps: WeixinChannelRuntimeDeps) {
     }
     const activeWeixinIds = new Set(
       currentConfig.bots
-        .filter(
-          (bot) =>
-            bot.provider === "weixin" && bot.enabled && bot.credentialRef,
-        )
+        .filter((bot) => bot.provider === "weixin" && bot.enabled && bot.credentialRef)
         .map((bot) => bot.id),
     );
     for (const botId of runtimes.keys()) {

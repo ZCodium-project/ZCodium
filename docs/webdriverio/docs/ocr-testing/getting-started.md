@@ -32,9 +32,9 @@ Ensure that you add `@wdio/ocr-service` to your `tsconfig.json` configuration fi
 
 ```json title="tsconfig.json"
 {
-    "compilerOptions": {
-        "types": ["node", "@wdio/globals/types", "@wdio/ocr-service"]
-    }
+  "compilerOptions": {
+    "types": ["node", "@wdio/globals/types", "@wdio/ocr-service"]
+  }
 }
 ```
 
@@ -45,18 +45,18 @@ To use the service you need to add `ocr` to your services array in `wdio.conf.ts
 ```js
 // wdio.conf.js
 exports.config = {
-    //...
-    services: [
-        // your other services
-        [
-            "ocr",
-            {
-                contrast: 0.25,
-                imagesFolder: ".tmp/",
-                language: "eng",
-            },
-        ],
+  //...
+  services: [
+    // your other services
+    [
+      "ocr",
+      {
+        contrast: 0.25,
+        imagesFolder: ".tmp/",
+        language: "eng",
+      },
     ],
+  ],
 };
 ```
 
@@ -64,17 +64,17 @@ exports.config = {
 
 #### `contrast`
 
--   **Type:** `number`
--   **Mandatory:** No
--   **Default:** `0.25`
+- **Type:** `number`
+- **Mandatory:** No
+- **Default:** `0.25`
 
 The higher the contrast, the darker the image and vice versa. This can help to find text in an image. It accepts values between `-1` and `1`.
 
 #### `imagesFolder`
 
--   **Type:** `string`
--   **Mandatory:** No
--   **Default:** `{project-root}/.tmp/ocr`
+- **Type:** `string`
+- **Mandatory:** No
+- **Default:** `{project-root}/.tmp/ocr`
 
 The folder where the OCR results are stored.
 
@@ -84,9 +84,9 @@ If you provide a custom `imagesFolder`, then the service will automatically add 
 
 #### `language`
 
--   **Type:** `string`
--   **Mandatory:** No
--   **Default:** `eng`
+- **Type:** `string`
+- **Mandatory:** No
+- **Default:** `eng`
 
 The language that Tesseract will recognize. More info can be found [here](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions) and the supported languages can be found [here](https://github.com/webdriverio/visual-testing/blob/main/packages/ocr-service/src/utils/constants.ts).
 

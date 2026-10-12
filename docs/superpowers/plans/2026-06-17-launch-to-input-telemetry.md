@@ -25,11 +25,13 @@
 ### Task 1: 共享 launch marks 序列化/解析（`@zcode/shared`）
 
 **Files:**
+
 - Create: `packages/shared/src/launchMarks.ts`
 - Modify: `packages/shared/src/index.ts:111`（在 `collectTelemetryRendererContext` 导出后追加）
 - Test: `packages/shared/test/launchMarks.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `interface LaunchMarks { createdAt: number; mainStart: number; appReady: number; loadUrl: number }`
   - `const LAUNCH_MARKS_QUERY_KEY = "zcodeLaunchMarks"`
@@ -135,11 +137,7 @@ export function parseLaunchMarks(raw: string | null | undefined): LaunchMarks | 
 
 ```ts
 export type { LaunchMarks } from "./launchMarks.js";
-export {
-  LAUNCH_MARKS_QUERY_KEY,
-  parseLaunchMarks,
-  serializeLaunchMarks,
-} from "./launchMarks.js";
+export { LAUNCH_MARKS_QUERY_KEY, parseLaunchMarks, serializeLaunchMarks } from "./launchMarks.js";
 ```
 
 - [ ] **Step 5: Run test to verify it passes**
@@ -159,11 +157,13 @@ git commit -m "feat(shared): launch marks 序列化/解析"
 ### Task 2: 7 段上报与计算逻辑（`uiPerfArmsTelemetry.ts`），废弃 first_screen
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/uiPerfArmsTelemetry.ts`
 - Modify: `packages/ui/src/index.ts:84`
 - Test: `packages/ui/test/uiPerfArmsTelemetry.test.ts`
 
 **Interfaces:**
+
 - Consumes: `LaunchMarks` from `@zcode/shared`（Task 1）
 - Produces:
   - 常量 `LAUNCH_TO_INPUT_SANITY_MAX_MS = 300000`
@@ -206,7 +206,17 @@ function makeReporter() {
   };
 }
 
-function makeTimings(overrides?: Partial<{ createdAt: number; mainStart: number; appReady: number; loadUrl: number; rendererStart: number; reactCommit: number; inputReady: number }>) {
+function makeTimings(
+  overrides?: Partial<{
+    createdAt: number;
+    mainStart: number;
+    appReady: number;
+    loadUrl: number;
+    rendererStart: number;
+    reactCommit: number;
+    inputReady: number;
+  }>,
+) {
   const base = {
     createdAt: 1000,
     mainStart: 1600, // electron_init = 600
@@ -437,10 +447,13 @@ export function reportUiLaunchToInput(timings: LaunchToInputTimings): void {
 - [ ] **Step 4: Update barrel export**
 
 `packages/ui/src/index.ts:84`，把
+
 ```ts
 export { reportUiFirstScreen } from "./lib/uiPerfArmsTelemetry.js";
 ```
+
 替换为：
+
 ```ts
 export { reportUiLaunchToInput } from "./lib/uiPerfArmsTelemetry.js";
 ```
@@ -462,10 +475,12 @@ git commit -m "feat(ui): 启动到能输入 7 段上报,废弃 perf_ui_first_scr
 ### Task 3: main 进程采集 T0–T3 并经 loadURL query 注入
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/index.ts`（顶部记 T1；whenReady 回调记 T2；导出 getter）
 - Modify: `packages/desktop/src/main/desktopHostProcess.ts:86-112`（loadWindow 内记 T3、拼 query）
 
 **Interfaces:**
+
 - Consumes: `serializeLaunchMarks`, `LAUNCH_MARKS_QUERY_KEY`, `LaunchMarks` from `@zcode/shared`（Task 1）
 - Produces: `getMainLaunchPartialMarks(): { createdAt: number; mainStart: number; appReady: number }`（供 loadWindow 调用）
 
@@ -495,7 +510,7 @@ export function getMainLaunchPartialMarks(): Omit<LaunchMarks, "loadUrl"> {
 `index.ts:981` `app.whenReady().then(async () => {` 之后第一行加入：
 
 ```ts
-  launchAppReady = Date.now();
+launchAppReady = Date.now();
 ```
 
 - [ ] **Step 3: `loadWindow` 内记 T3 并拼入 query**
@@ -503,23 +518,20 @@ export function getMainLaunchPartialMarks(): Omit<LaunchMarks, "loadUrl"> {
 `packages/desktop/src/main/desktopHostProcess.ts`，顶部 import 加：
 
 ```ts
-import {
-  LAUNCH_MARKS_QUERY_KEY,
-  serializeLaunchMarks,
-} from "@zcode/shared";
+import { LAUNCH_MARKS_QUERY_KEY, serializeLaunchMarks } from "@zcode/shared";
 import { getMainLaunchPartialMarks } from "./index.js";
 ```
 
 在 `loadWindow` 内构造 `query` 对象处（第 91-99 行的 `Object.fromEntries(...)` 之后、`if (process.env["ELECTRON_RENDERER_URL"])` 之前）插入，仅主窗口 `index` 注入：
 
 ```ts
-  if (page === "index") {
-    const partial = getMainLaunchPartialMarks();
-    query[LAUNCH_MARKS_QUERY_KEY] = serializeLaunchMarks({
-      ...partial,
-      loadUrl: Date.now(), // T3
-    });
-  }
+if (page === "index") {
+  const partial = getMainLaunchPartialMarks();
+  query[LAUNCH_MARKS_QUERY_KEY] = serializeLaunchMarks({
+    ...partial,
+    loadUrl: Date.now(), // T3
+  });
+}
 ```
 
 > 注意：`query` 当前被 `.filter(...)` 收窄成 `Record<string,string>`，`query[KEY] = string` 合法。`loadFile` 分支已透传 `query`，`loadURL` 分支已遍历 `query` 设 searchParams，两条加载路径都会带上。
@@ -541,9 +553,11 @@ git commit -m "feat(desktop): main 采集 T0-T3 经 loadURL query 注入"
 ### Task 4: renderer 读取 marks、记 T4/T5，移除旧 first_screen 调用
 
 **Files:**
+
 - Modify: `packages/desktop/src/renderer/src/main.tsx`
 
 **Interfaces:**
+
 - Consumes: `parseLaunchMarks`, `LAUNCH_MARKS_QUERY_KEY`, `LaunchMarks` from `@zcode/shared`
 - Produces:
   - `window.__ZCODE_LAUNCH_MARKS__: LaunchMarks | null`（从 location query 解析，模块层一次）
@@ -560,10 +574,12 @@ const rendererStartedAt = Date.now();
 const launchMarks: LaunchMarks | null = parseLaunchMarks(
   new URLSearchParams(window.location.search).get(LAUNCH_MARKS_QUERY_KEY),
 );
-(window as Window & {
-  __ZCODE_RENDERER_START__?: number;
-  __ZCODE_LAUNCH_MARKS__?: LaunchMarks | null;
-}).__ZCODE_RENDERER_START__ = rendererStartedAt;
+(
+  window as Window & {
+    __ZCODE_RENDERER_START__?: number;
+    __ZCODE_LAUNCH_MARKS__?: LaunchMarks | null;
+  }
+).__ZCODE_RENDERER_START__ = rendererStartedAt;
 (window as Window & { __ZCODE_LAUNCH_MARKS__?: LaunchMarks | null }).__ZCODE_LAUNCH_MARKS__ =
   launchMarks;
 ```
@@ -607,11 +623,13 @@ git commit -m "feat(desktop): renderer 解析 launch marks 并记 T4/T5"
 ### Task 5: Root 监听门禁清除记 T6 并触发上报
 
 **Files:**
+
 - Modify: `packages/ui/src/Root.tsx`
 - Test: `packages/ui/test/rootLaunchReport.test.ts`（纯函数 `buildLaunchToInputTimings` 单测）
 - Create: `packages/ui/src/lib/launchToInputReport.ts`（纯函数封装，便于单测）
 
 **Interfaces:**
+
 - Consumes: `reportUiLaunchToInput`、`LaunchMarks`（Task 2）
 - Produces:
   - `shouldReportLaunchToInput(state: { isStartupRenderBlocked: boolean; welcomeScreenOpen: boolean; alreadyReported: boolean }): boolean`
@@ -684,9 +702,7 @@ export function shouldReportLaunchToInput(state: {
   alreadyReported: boolean;
 }): boolean {
   // 门禁清除 = RootStartupLoading 退场、输入框挂载;welcome 时虽门禁清除但显示登录页、无输入框,不算"能输入"。
-  return (
-    !state.alreadyReported && !state.isStartupRenderBlocked && !state.welcomeScreenOpen
-  );
+  return !state.alreadyReported && !state.isStartupRenderBlocked && !state.welcomeScreenOpen;
 }
 
 export function readRendererLaunchTimings(): {
@@ -719,40 +735,37 @@ Expected: PASS（4 个用例）
 
 ```ts
 import { reportUiLaunchToInput } from "@/lib/uiPerfArmsTelemetry.js";
-import {
-  readRendererLaunchTimings,
-  shouldReportLaunchToInput,
-} from "@/lib/launchToInputReport.js";
+import { readRendererLaunchTimings, shouldReportLaunchToInput } from "@/lib/launchToInputReport.js";
 import { useRef } from "react"; // 若已 import react hooks，合并
 ```
 
 5b. 在 `isStartupRenderBlocked` 计算（第 547 行）之后加入 effect。`sessionId` 用 marks.createdAt 派生（同进程稳定且唯一）：
 
 ```ts
-  const launchReportedRef = useRef(false);
-  useEffect(() => {
-    if (
-      !shouldReportLaunchToInput({
-        isStartupRenderBlocked,
-        welcomeScreenOpen: Boolean(welcomeScreenOpenReason),
-        alreadyReported: launchReportedRef.current,
-      })
-    ) {
-      return;
-    }
-    launchReportedRef.current = true;
-    const timings = readRendererLaunchTimings();
-    if (!timings || !timings.marks) {
-      return; // 锚点缺失(非桌面/未注入 marks),整批跳过
-    }
-    reportUiLaunchToInput({
-      marks: timings.marks,
-      rendererStart: timings.rendererStart,
-      reactCommit: timings.reactCommit,
-      inputReady: Date.now(), // T6
-      sessionId: `launch-${timings.marks.createdAt}`,
-    });
-  }, [isStartupRenderBlocked, welcomeScreenOpenReason]);
+const launchReportedRef = useRef(false);
+useEffect(() => {
+  if (
+    !shouldReportLaunchToInput({
+      isStartupRenderBlocked,
+      welcomeScreenOpen: Boolean(welcomeScreenOpenReason),
+      alreadyReported: launchReportedRef.current,
+    })
+  ) {
+    return;
+  }
+  launchReportedRef.current = true;
+  const timings = readRendererLaunchTimings();
+  if (!timings || !timings.marks) {
+    return; // 锚点缺失(非桌面/未注入 marks),整批跳过
+  }
+  reportUiLaunchToInput({
+    marks: timings.marks,
+    rendererStart: timings.rendererStart,
+    reactCommit: timings.reactCommit,
+    inputReady: Date.now(), // T6
+    sessionId: `launch-${timings.marks.createdAt}`,
+  });
+}, [isStartupRenderBlocked, welcomeScreenOpenReason]);
 ```
 
 - [ ] **Step 6: Run full ui telemetry + report tests**
@@ -775,6 +788,7 @@ git commit -m "feat(ui): 启动门禁清除时上报 launch_to_input"
 ### Task 6: 更新监控文档与本地验证
 
 **Files:**
+
 - Modify: `docs/monitoring/performance-monitoring.md:169-182`
 
 - [ ] **Step 1: 替换事件一览中的 first_screen 行**
@@ -807,6 +821,7 @@ Expected: PASS
 - [ ] **Step 4: 本地验证（手动，开发构建 `arms_env=local`）**
 
 参照 memory「桌面版 dev 启动」用国内镜像启动桌面 dev：
+
 - 冷启动登录态 → main 日志 `beforeReport` 依次出现 7 条 `custom:perf_ui_launch_*`，`perf_ui_launch_to_input` ≈ 其余 6 段之和。
 - `perf_ui_launch_react_commit_ms` 应接近旧 first_screen 的 ~75ms（sanity）。
 - 未登录冷启动（WelcomeScreen）→ 不出现 `perf_ui_launch_to_input`。

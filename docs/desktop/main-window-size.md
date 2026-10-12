@@ -19,17 +19,17 @@
 
 ## Impact Brief
 
-| Field | Value |
-| --- | --- |
-| Developer intent | 完整重启 ZCode 后恢复用户上次调整的主窗口尺寸 |
-| Capability | Desktop main window size persistence |
-| Change layer | persistence / recovery |
-| Operating mode | planning |
-| Primary seeds | `createWindow`、`createBrowserWindow`、`AppSettings`、`createSettingService` |
-| Out of scope | 窗口位置、多窗口独立尺寸、辅助窗口、Web/手机端 |
+| Field            | Value                                                                        |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Developer intent | 完整重启 ZCode 后恢复用户上次调整的主窗口尺寸                                |
+| Capability       | Desktop main window size persistence                                         |
+| Change layer     | persistence / recovery                                                       |
+| Operating mode   | planning                                                                     |
+| Primary seeds    | `createWindow`、`createBrowserWindow`、`AppSettings`、`createSettingService` |
+| Out of scope     | 窗口位置、多窗口独立尺寸、辅助窗口、Web/手机端                               |
 
-| User scenario | UI entry | Display owner | Commit action | Authority/persistence | Mode boundary |
-| --- | --- | --- | --- | --- | --- |
+| User scenario  | UI entry                           | Display owner            | Commit action                         | Authority/persistence                         | Mode boundary                                |
+| -------------- | ---------------------------------- | ------------------------ | ------------------------------------- | --------------------------------------------- | -------------------------------------------- |
 | 调整后重启应用 | Electron 主窗口边缘/系统最大化控件 | Electron `BrowserWindow` | resize/maximize/unmaximize 后更新设置 | `~/.zcode/v2/setting.json` 的 app-global 字段 | 仅 packaged/dev Desktop main；Web/手机不参与 |
 
 ### Must-preserve invariants
@@ -41,11 +41,11 @@
 
 ## Accepted Cases
 
-| Case | Setup | Action | Assertion |
-| --- | --- | --- | --- |
-| WINDOW-SIZE-01 | 无历史尺寸 | 创建主窗口 | 使用 `1200x800` |
-| WINDOW-SIZE-02 | 合法历史普通尺寸 | 重启并创建主窗口 | 构造参数恢复历史宽高 |
-| WINDOW-SIZE-03 | 历史尺寸超过当前主屏工作区 | 重启并创建主窗口 | 宽高收敛到工作区，不低于窗口最小值 |
-| WINDOW-SIZE-04 | 普通尺寸后最大化退出 | 重启并创建主窗口 | 以普通尺寸创建，再调用 maximize |
-| WINDOW-SIZE-05 | resize/maximize/unmaximize | 等待持久化回调 | 保存非最大化宽高和独立 maximized 状态 |
-| WINDOW-SIZE-06 | 已创建主窗口 | 触发窗口 close 或应用退出准备 | 不启动新的窗口尺寸设置写入 |
+| Case           | Setup                      | Action                        | Assertion                             |
+| -------------- | -------------------------- | ----------------------------- | ------------------------------------- |
+| WINDOW-SIZE-01 | 无历史尺寸                 | 创建主窗口                    | 使用 `1200x800`                       |
+| WINDOW-SIZE-02 | 合法历史普通尺寸           | 重启并创建主窗口              | 构造参数恢复历史宽高                  |
+| WINDOW-SIZE-03 | 历史尺寸超过当前主屏工作区 | 重启并创建主窗口              | 宽高收敛到工作区，不低于窗口最小值    |
+| WINDOW-SIZE-04 | 普通尺寸后最大化退出       | 重启并创建主窗口              | 以普通尺寸创建，再调用 maximize       |
+| WINDOW-SIZE-05 | resize/maximize/unmaximize | 等待持久化回调                | 保存非最大化宽高和独立 maximized 状态 |
+| WINDOW-SIZE-06 | 已创建主窗口               | 触发窗口 close 或应用退出准备 | 不启动新的窗口尺寸设置写入            |

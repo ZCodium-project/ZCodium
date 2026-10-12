@@ -9,13 +9,7 @@ export function SettingsBackButton({
   ...props
 }: Omit<ComponentProps<typeof Button>, "size" | "variant">) {
   return (
-    <Button
-      type="button"
-      size="lg"
-      variant="ghost"
-      className={cn("-ml-2", className)}
-      {...props}
-    >
+    <Button type="button" size="lg" variant="ghost" className={cn("-ml-2", className)} {...props}>
       <ArrowLeft className="size-4" aria-hidden="true" />
       {children}
     </Button>

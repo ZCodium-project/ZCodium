@@ -17,6 +17,7 @@
 ### Task 1: Lock the message-scoped contract in unit tests
 
 **Files:**
+
 - Modify: `packages/ui/test/messageTelemetry.test.ts`
 
 - [x] **Step 1:** Add a two-prompt test on one task. Finalize one generation step in each prompt while passing historical assistant messages to the old API, then assert the second completion reports `agent_step_cnt="1"` and its emitted step has `loop_index="1"`.
@@ -26,6 +27,7 @@
 ### Task 2: Accumulate completion metrics in the prompt lifecycle
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/messageTelemetry.ts`
 
 - [x] **Step 1:** Add prompt-level finalized step count, tool count, failed tool count, and first tool error state initialized by `queuePromptTelemetry()`.
@@ -36,6 +38,7 @@
 ### Task 3: Simplify completion callers and update the monitoring contract
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/useZCodeChat.ts`
 - Modify: `packages/ui/src/lib/zcodeTaskRuntimeMonitor.ts`
 - Modify: `docs/monitoring/business-monitoring.md`
@@ -48,6 +51,7 @@
 ### Task 4: Verify the production fix
 
 **Files:**
+
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 - Modify: `docs/superpowers/specs/2026-07-02-agent-step-message-scope-e2e-design.md`
 

@@ -16,29 +16,29 @@ Grouped 已出现历史任务缺失；回退 3.3.6 后恢复。SQLite 升级前�
 
 ## Clarification log
 
-| Round | Question                           | User answer                                                              | Boundary fixed                                    | Follow-up needed |
-| ----- | ---------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------- | ---------------- |
-| 1     | 问题是否只是 Grouped 最多显示 5 条 | 不是；最新版缺失，3.3.6 显示完整                                         | 不是 UI cap，属于版本数据源回归                   | no               |
-| 2     | 是否仅修 Grouped                   | 所有左侧列表都应使用同一逻辑，包括项目                                   | Project/Timeline/Pinned/Archived/Grouped 全部纳入 | no               |
-| 3     | 行存在和实时字段分别由谁负责       | 明确要求以 task index 为准，session index 提供更多详细数据               | tasks-index 决定持久行；sessions-index 只 enrich  | no               |
-| 4     | 新建但尚未落 task index 的短窗口   | 沿用现有 optimistic/live overlay，不把 session-only 冷摘要当持久任务全集 | 临时行与持久行分层                                | no               |
-| 5     | 新建任务落库后为何未进入 Project   | 用户确认当前 workspace 新建对话必须显示在“项目”列表                      | `task_created` 必须换代 tasks-index 行快照        | no               |
+| Round | Question                              | User answer                                                                  | Boundary fixed                                          | Follow-up needed |
+| ----- | ------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------- |
+| 1     | 问题是否只是 Grouped 最多显示 5 条    | 不是；最新版缺失，3.3.6 显示完整                                             | 不是 UI cap，属于版本数据源回归                         | no               |
+| 2     | 是否仅修 Grouped                      | 所有左侧列表都应使用同一逻辑，包括项目                                       | Project/Timeline/Pinned/Archived/Grouped 全部纳入       | no               |
+| 3     | 行存在和实时字段分别由谁负责          | 明确要求以 task index 为准，session index 提供更多详细数据                   | tasks-index 决定持久行；sessions-index 只 enrich        | no               |
+| 4     | 新建但尚未落 task index 的短窗口      | 沿用现有 optimistic/live overlay，不把 session-only 冷摘要当持久任务全集     | 临时行与持久行分层                                      | no               |
+| 5     | 新建任务落库后为何未进入 Project      | 用户确认当前 workspace 新建对话必须显示在“项目”列表                          | `task_created` 必须换代 tasks-index 行快照              | no               |
 | 6     | SSH/WSL 任务行存在但运行 spinner 缺失 | 修复 task-index 读取归一化，不按远端路径放宽 join，也不读取历史 running 兜底 | SQLite 行实体定位字段权威；保留 workspace identity 隔离 | no               |
 
 Case ID 从 `TSL23` 开始；`TSL22` 已被并行的 Grouped remote-data single-flight 工作预留。
 
 ## Boundary decisions
 
-| Boundary      | Decision                               | Includes                                                         | Excludes / prunes                          | Source                                        |
-| ------------- | -------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------- |
-| 持久行存在    | `tasks-index` list 结果是正向权威      | active、pinned、archived、group member、排序                     | 不由 sessions snapshot 缺失推断删除        | user + runtime evidence                       |
-| 负向可见性    | `deleted` tombstone 最高优先级         | 所有列表 kind、live/restart/replay                               | 不物理删除 CLI transcript                  | TSL20                                         |
-| 实时 activity | `sessions-index` 字段级覆盖            | phase、lastActivityAt、background、pending interaction、实时标题 | 不覆盖 membership/sort/unread              | existing V4 spec                              |
-| 临时新任务    | renderer-owned optimistic/live overlay | create/send accepted 到 task row 落库之间                        | session-only 历史冷摘要不得绕过 task index | existing grouped/workspace promotion contract |
-| 新建收敛边界  | `task_created` 换代 task-row snapshot  | 当前窗口、其它窗口和手机 shared-host 创建的 active task          | 不等待 sessions-index 内容帧隐式带入行     | user + task row authority invariant           |
-| 搜索          | tasks-index 查询决定结果集合           | searchable_text/snippets；命中行可叠加已知 activity              | 不把 sessions title-only filter 当全文搜索 | existing search path                          |
-| 多端          | 相同行存在语义                         | local、SSH/WSL/Docker、desktop continuous、web remote replayable | 不改变各自 snapshot/gap delivery           | architecture invariant                        |
-| 索引读取归一化 | SQLite 行的 `task_id`、`workspace_path` 与主键 `workspace_key` 决定实体定位；合法 remote key 高于 identity 投影列 | 兼容 identity 列或 `meta_json` 缺失/残留旧 identity 的远端历史行 | 不允许投影字段改写隔离键；不按 path 跨远端 join | TSL25 + workspace identity invariant |
+| Boundary       | Decision                                                                                                          | Includes                                                         | Excludes / prunes                               | Source                                        |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------- |
+| 持久行存在     | `tasks-index` list 结果是正向权威                                                                                 | active、pinned、archived、group member、排序                     | 不由 sessions snapshot 缺失推断删除             | user + runtime evidence                       |
+| 负向可见性     | `deleted` tombstone 最高优先级                                                                                    | 所有列表 kind、live/restart/replay                               | 不物理删除 CLI transcript                       | TSL20                                         |
+| 实时 activity  | `sessions-index` 字段级覆盖                                                                                       | phase、lastActivityAt、background、pending interaction、实时标题 | 不覆盖 membership/sort/unread                   | existing V4 spec                              |
+| 临时新任务     | renderer-owned optimistic/live overlay                                                                            | create/send accepted 到 task row 落库之间                        | session-only 历史冷摘要不得绕过 task index      | existing grouped/workspace promotion contract |
+| 新建收敛边界   | `task_created` 换代 task-row snapshot                                                                             | 当前窗口、其它窗口和手机 shared-host 创建的 active task          | 不等待 sessions-index 内容帧隐式带入行          | user + task row authority invariant           |
+| 搜索           | tasks-index 查询决定结果集合                                                                                      | searchable_text/snippets；命中行可叠加已知 activity              | 不把 sessions title-only filter 当全文搜索      | existing search path                          |
+| 多端           | 相同行存在语义                                                                                                    | local、SSH/WSL/Docker、desktop continuous、web remote replayable | 不改变各自 snapshot/gap delivery                | architecture invariant                        |
+| 索引读取归一化 | SQLite 行的 `task_id`、`workspace_path` 与主键 `workspace_key` 决定实体定位；合法 remote key 高于 identity 投影列 | 兼容 identity 列或 `meta_json` 缺失/残留旧 identity 的远端历史行 | 不允许投影字段改写隔离键；不按 path 跨远端 join | TSL25 + workspace identity invariant          |
 
 ## Domain scope and high-risk cross-products
 
@@ -91,18 +91,18 @@ create/send accepted -> optimistic row -> tasks-index commit -> task_created
 
 ## Dimensions and candidate combinations
 
-| Candidate ID | tasks-index row       | sessions summary                | membership      | Expected effect                                            | Status          |
-| ------------ | --------------------- | ------------------------------- | --------------- | ---------------------------------------------------------- | --------------- |
-| TSL23-A      | present               | absent                          | active/grouped  | 保留静态行；无 spinner/attention；显式 group order 不变    | accepted        |
-| TSL23-B      | present               | present                         | 任意非 deleted  | 行来自 task index，activity/title 等按字段 owner enrich    | accepted        |
-| TSL23-C      | present               | stale                           | deleted         | tombstone 排除，不因 summary 复活                          | pruned by TSL20 |
-| TSL24-A      | absent                | stored completed                | none            | 不把冷 summary 直接变成持久列表行；由 syncer 先补 task row | accepted        |
-| TSL24-B      | absent                | newly live                      | pending create  | 只允许既有 optimistic/live overlay 临时显示，落库后对账    | accepted        |
-| TSL25-A      | present in identity A | summary in same path identity B | grouped/project | 不 join、不串 workspace；A 保留静态行                      | accepted        |
-| TSL25-B      | present               | present                         | pinned/archived | membership 决定分区，sessions 字段不能改变分区             | accepted        |
-| TSL25-C      | SQLite 行属于 remote identity A，但 `meta_json` 缺失/残留旧 identity | summary in identity A | grouped/project | 读取时以 SQLite 实体列归一化后 join；不得退化为 path 匹配 | accepted |
-| TSL26-A      | just committed        | present or pending              | active/project  | `task_created` 换代 task-row 快照；新行进入当前 workspace  | accepted        |
-| TSL26-B      | absent                | draft only                      | none            | 未发送草稿不伪造持久 task 行                               | pruned          |
+| Candidate ID | tasks-index row                                                      | sessions summary                | membership      | Expected effect                                            | Status          |
+| ------------ | -------------------------------------------------------------------- | ------------------------------- | --------------- | ---------------------------------------------------------- | --------------- |
+| TSL23-A      | present                                                              | absent                          | active/grouped  | 保留静态行；无 spinner/attention；显式 group order 不变    | accepted        |
+| TSL23-B      | present                                                              | present                         | 任意非 deleted  | 行来自 task index，activity/title 等按字段 owner enrich    | accepted        |
+| TSL23-C      | present                                                              | stale                           | deleted         | tombstone 排除，不因 summary 复活                          | pruned by TSL20 |
+| TSL24-A      | absent                                                               | stored completed                | none            | 不把冷 summary 直接变成持久列表行；由 syncer 先补 task row | accepted        |
+| TSL24-B      | absent                                                               | newly live                      | pending create  | 只允许既有 optimistic/live overlay 临时显示，落库后对账    | accepted        |
+| TSL25-A      | present in identity A                                                | summary in same path identity B | grouped/project | 不 join、不串 workspace；A 保留静态行                      | accepted        |
+| TSL25-B      | present                                                              | present                         | pinned/archived | membership 决定分区，sessions 字段不能改变分区             | accepted        |
+| TSL25-C      | SQLite 行属于 remote identity A，但 `meta_json` 缺失/残留旧 identity | summary in identity A           | grouped/project | 读取时以 SQLite 实体列归一化后 join；不得退化为 path 匹配  | accepted        |
+| TSL26-A      | just committed                                                       | present or pending              | active/project  | `task_created` 换代 task-row 快照；新行进入当前 workspace  | accepted        |
+| TSL26-B      | absent                                                               | draft only                      | none            | 未发送草稿不伪造持久 task 行                               | pruned          |
 
 ## Pruning decisions
 
@@ -115,12 +115,12 @@ create/send accepted -> optimistic row -> tasks-index commit -> task_created
 
 ## Accepted cases
 
-| Case ID | Setup                                                                          | Action                                    | Assertions                                                            | Evidence layers                         | E2E status                          |
-| ------- | ------------------------------------------------------------------------------ | ----------------------------------------- | --------------------------------------------------------------------- | --------------------------------------- | ----------------------------------- |
-| TSL23   | tasks-index 有 25 个 active/grouped task，sessions-index 只有其中 5 个 summary | 构建 Project/Timeline/Grouped             | 仍显示 25 行；5 行有 activity，其余使用持久 meta；组序不变            | pure projection test + hook integration | focused covered; desktop planned    |
-| TSL24   | task row 与 session summary 同时存在，随后 phase/title/activity 更新           | 应用 sessions delta 和 membership refresh | 行身份/分区不变；实时字段更新；pin/unread mutation 不改 activity 排序 | projection/store test                   | focused covered                     |
-| TSL25   | 同 path 不同 identity、索引 JSON identity 过期，或 session summary 缺失/迟到 | cold load、remote restore、summary 到达 | SQLite 实体列先归一化 identity；不串行；缺 summary 时不消失；正确 summary 到达后原行原地 enrich | repo + identity + hook integration | focused covered; remote GUI planned |
-| TSL26   | 当前 workspace 已有旧 task-row snapshot，新对话首次发送后 task row 落库        | 收到 `task_created`                       | 换代 membership/task-row 读取；Project 立即显示新行且后续刷新不消失   | event policy + hook integration         | focused covered; desktop planned    |
+| Case ID | Setup                                                                          | Action                                    | Assertions                                                                                      | Evidence layers                         | E2E status                          |
+| ------- | ------------------------------------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| TSL23   | tasks-index 有 25 个 active/grouped task，sessions-index 只有其中 5 个 summary | 构建 Project/Timeline/Grouped             | 仍显示 25 行；5 行有 activity，其余使用持久 meta；组序不变                                      | pure projection test + hook integration | focused covered; desktop planned    |
+| TSL24   | task row 与 session summary 同时存在，随后 phase/title/activity 更新           | 应用 sessions delta 和 membership refresh | 行身份/分区不变；实时字段更新；pin/unread mutation 不改 activity 排序                           | projection/store test                   | focused covered                     |
+| TSL25   | 同 path 不同 identity、索引 JSON identity 过期，或 session summary 缺失/迟到   | cold load、remote restore、summary 到达   | SQLite 实体列先归一化 identity；不串行；缺 summary 时不消失；正确 summary 到达后原行原地 enrich | repo + identity + hook integration      | focused covered; remote GUI planned |
+| TSL26   | 当前 workspace 已有旧 task-row snapshot，新对话首次发送后 task row 落库        | 收到 `task_created`                       | 换代 membership/task-row 读取；Project 立即显示新行且后续刷新不消失                             | event policy + hook integration         | focused covered; desktop planned    |
 
 ## Matrix backfill and E2E handoff
 

@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ZCodeStreamEvent } from "@zcode/shared";
 import { createContinuousStreamCoalescer } from "../src/session/continuousStreamCoalescer.js";
 
-function messageChunk(content: string, overrides: Partial<Extract<ZCodeStreamEvent, { type: "agent_message_chunk" }>> = {}) {
+function messageChunk(
+  content: string,
+  overrides: Partial<Extract<ZCodeStreamEvent, { type: "agent_message_chunk" }>> = {},
+) {
   return {
     type: "agent_message_chunk",
     taskId: "task-1",
@@ -34,9 +37,7 @@ function toolCall() {
   } satisfies Extract<ZCodeStreamEvent, { type: "tool_call" }>;
 }
 
-function usageUpdate(
-  used: number,
-): Extract<ZCodeStreamEvent, { type: "usage_update" }> {
+function usageUpdate(used: number): Extract<ZCodeStreamEvent, { type: "usage_update" }> {
   return {
     type: "usage_update",
     taskId: "task-1",

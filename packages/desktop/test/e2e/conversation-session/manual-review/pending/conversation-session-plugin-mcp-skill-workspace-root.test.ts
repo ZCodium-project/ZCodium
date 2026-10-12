@@ -1,13 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import {
-  clearAppData,
-  getE2EAppDataPaths,
-} from "../../../helpers/desktop-app.js";
-import {
-  PLUGIN_MCP_PLUGIN_ID,
-  PLUGIN_MCP_PLUGIN_ROOT,
-} from "../../../helpers/plugin-mcp-skill.js";
+import { clearAppData, getE2EAppDataPaths } from "../../../helpers/desktop-app.js";
+import { PLUGIN_MCP_PLUGIN_ID, PLUGIN_MCP_PLUGIN_ROOT } from "../../../helpers/plugin-mcp-skill.js";
 import {
   assertWorkspacePluginRuntime,
   readWorkspacePluginConfig,

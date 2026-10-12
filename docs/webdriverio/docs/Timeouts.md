@@ -19,11 +19,11 @@ Therefore, time is a crucial component in the whole testing process. When a cert
 A session has an associated session script timeout that specifies a time to wait for asynchronous scripts to run. Unless stated otherwise, it is 30 seconds. You can set this timeout like so:
 
 ```js
-await browser.setTimeout({ 'script': 60000 })
+await browser.setTimeout({ script: 60000 });
 await browser.executeAsync((done) => {
-    console.log('this should not fail')
-    setTimeout(done, 59000)
-})
+  console.log("this should not fail");
+  setTimeout(done, 59000);
+});
 ```
 
 ### Session Page Load Timeout
@@ -33,7 +33,7 @@ A session has an associated session page load timeout that specifies a time to w
 You can set this timeout like so:
 
 ```js
-await browser.setTimeout({ 'pageLoad': 10000 })
+await browser.setTimeout({ pageLoad: 10000 });
 ```
 
 > The `pageLoad` keyword is a part of the official WebDriver [specification](https://www.w3.org/TR/webdriver/#set-timeouts), but might not be [supported](https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/687) for your browser (the previous name is `page load`).
@@ -45,7 +45,7 @@ A session has an associated session implicit wait timeout. This specifies the ti
 You can set this timeout via:
 
 ```js
-await browser.setTimeout({ 'implicit': 5000 })
+await browser.setTimeout({ implicit: 5000 });
 ```
 
 ## WebdriverIO related timeouts
@@ -57,20 +57,20 @@ WebdriverIO provides multiple commands to wait on elements to reach a certain st
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    waitforTimeout: 5000,
-    // ...
-}
+  // ...
+  waitforTimeout: 5000,
+  // ...
+};
 ```
 
 In your tests, you now can do this:
 
 ```js
-const myElem = await $('#myElem')
-await myElem.waitForDisplayed()
+const myElem = await $("#myElem");
+await myElem.waitForDisplayed();
 
 // you can also overwrite the default timeout if needed
-await myElem.waitForDisplayed({ timeout: 10000 })
+await myElem.waitForDisplayed({ timeout: 10000 });
 ```
 
 ## Framework related timeouts
@@ -82,43 +82,43 @@ By default, the timeout is 10 seconds, which means that a single test should not
 A single test in Mocha looks like:
 
 ```js
-it('should login into the application', async () => {
-    await browser.url('/login')
+it("should login into the application", async () => {
+  await browser.url("/login");
 
-    const form = await $('form')
-    const username = await $('#username')
-    const password = await $('#password')
+  const form = await $("form");
+  const username = await $("#username");
+  const password = await $("#password");
 
-    await username.setValue('userXY')
-    await password.setValue('******')
-    await form.submit()
+  await username.setValue("userXY");
+  await password.setValue("******");
+  await form.submit();
 
-    expect(await browser.getTitle()).to.be.equal('Admin Area')
-})
+  expect(await browser.getTitle()).to.be.equal("Admin Area");
+});
 ```
 
 In Cucumber, the timeout applies to a single step definition. However, if you want to increase the timeout because your test takes longer than the default value, you need to set it in the framework options.
 
 <Tabs
-  defaultValue="mocha"
-  values={[
-    {label: 'Mocha', value: 'mocha'},
-    {label: 'Jasmine', value: 'jasmine'},
-    {label: 'Cucumber', value: 'cucumber'}
-  ]
+defaultValue="mocha"
+values={[
+{label: 'Mocha', value: 'mocha'},
+{label: 'Jasmine', value: 'jasmine'},
+{label: 'Cucumber', value: 'cucumber'}
+]
 }>
 <TabItem value="mocha">
 
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    framework: 'mocha',
-    mochaOpts: {
-        timeout: 20000
-    },
-    // ...
-}
+  // ...
+  framework: "mocha",
+  mochaOpts: {
+    timeout: 20000,
+  },
+  // ...
+};
 ```
 
 </TabItem>
@@ -127,13 +127,13 @@ export const config = {
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    framework: 'jasmine',
-    jasmineOpts: {
-        defaultTimeoutInterval: 20000
-    },
-    // ...
-}
+  // ...
+  framework: "jasmine",
+  jasmineOpts: {
+    defaultTimeoutInterval: 20000,
+  },
+  // ...
+};
 ```
 
 </TabItem>
@@ -142,13 +142,13 @@ export const config = {
 ```js
 // wdio.conf.js
 export const config = {
-    // ...
-    framework: 'cucumber',
-    cucumberOpts: {
-        timeout: 20000
-    },
-    // ...
-}
+  // ...
+  framework: "cucumber",
+  cucumberOpts: {
+    timeout: 20000,
+  },
+  // ...
+};
 ```
 
 </TabItem>

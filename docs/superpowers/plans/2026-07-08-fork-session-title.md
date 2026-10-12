@@ -19,10 +19,12 @@
 ### Task 1: Add Regression Coverage
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/runtime-persistence.test.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/tests/v4-cold-resume.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AgentRuntime.resumeFromStore()`, `ZCodeProtocolAgentServer` v4 cold subscribe, sessions-index subscribe.
 - Produces: failing tests proving persisted fork title must become a runtime event and live sessions-index summaries must include `parentSessionId`.
 
@@ -55,11 +57,13 @@ Expected before implementation: failure because `resumedSummary.parentSessionId`
 ### Task 2: Preserve Parent Session Identity in Live Index Meta
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/server-types.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/server-operations.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/zcode-protocol/v4-bridge.ts`
 
 **Interfaces:**
+
 - Consumes: `params.parentSessionId` from create/fork record params and persisted `session.parentID` from resume.
 - Produces: `ZCodeProtocolSessionRecord.parentSessionId?: string` and `getSessionIndexMeta(...).parentSessionId`.
 
@@ -92,9 +96,11 @@ Expected: the parent relation assertion passes.
 ### Task 3: Sync Persisted Title on Resume
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/resume.ts`
 
 **Interfaces:**
+
 - Consumes: persisted `SessionInfo.title` and `SessionInfo.titleSource`.
 - Produces: `SessionTitleUpdated` in the current runtime event stream, before `SessionResumed`.
 
@@ -103,7 +109,7 @@ Expected: the parent relation assertion passes.
 After `this.sessionPersisted = true` and before `SessionResumed`, if `session.title.trim()` is non-empty, append:
 
 ```ts
-SessionEventType.SessionTitleUpdated
+SessionEventType.SessionTitleUpdated;
 ```
 
 with `previousTitle: ""`, `title: session.title`, and `source: session.titleSource ?? "generated"`.
@@ -126,9 +132,11 @@ Expected: both pass.
 ### Task 4: Full Verification and Commit
 
 **Files:**
+
 - All modified source, tests, and docs.
 
 **Interfaces:**
+
 - Produces: verified bug fix and Conventional Commit.
 
 - [x] **Step 1: Run required checks**

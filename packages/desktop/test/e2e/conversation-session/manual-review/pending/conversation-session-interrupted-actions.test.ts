@@ -33,10 +33,7 @@ describe("会话区 Interrupted Actions E2E", () => {
 
     const editSourcePrompt = `E2E_SLOW_STREAM E2E_INTERRUPTED_EDIT_SOURCE_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(editSourcePrompt);
-    await waitForComposerText(
-      "",
-      "interrupted edit 源 prompt 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "interrupted edit 源 prompt 发送后输入框没有清空");
     await waitForChatState(
       (snapshot) => snapshot.state === "streaming" && snapshot.queueCount === 0,
       "interrupted edit 源 prompt 没有进入 running",
@@ -55,25 +52,16 @@ describe("会话区 Interrupted Actions E2E", () => {
     } else {
       await waitForChatState(
         (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
-        `queue=0 源 prompt 未出现可点 stop，等待线上快速完成: ${JSON.stringify(
-          editStop,
-        )}`,
+        `queue=0 源 prompt 未出现可点 stop，等待线上快速完成: ${JSON.stringify(editStop)}`,
         90000,
       );
     }
 
     const editRerunPrompt = `E2E_INTERRUPTED_EDIT_RERUN_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    await editUserMessageContaining(
-      `E2E_INTERRUPTED_EDIT_SOURCE_${runId}`,
-      editRerunPrompt,
-    );
-    await waitForUpstreamRequestContaining(
-      `E2E_INTERRUPTED_EDIT_RERUN_${runId}`,
-    );
+    await editUserMessageContaining(`E2E_INTERRUPTED_EDIT_SOURCE_${runId}`, editRerunPrompt);
+    await waitForUpstreamRequestContaining(`E2E_INTERRUPTED_EDIT_RERUN_${runId}`);
     await waitForUserMessageContaining(`E2E_INTERRUPTED_EDIT_RERUN_${runId}`);
-    await assertVisibleUserMessagesNotContaining(
-      `E2E_INTERRUPTED_EDIT_SOURCE_${runId}`,
-    );
+    await assertVisibleUserMessagesNotContaining(`E2E_INTERRUPTED_EDIT_SOURCE_${runId}`);
     await waitForChatState(
       (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
       "interrupted queue=0 edit 重跑后没有回到 idle",
@@ -84,10 +72,7 @@ describe("会话区 Interrupted Actions E2E", () => {
 
     const forkQueueEmptyPrompt = `E2E_SLOW_STREAM E2E_INTERRUPTED_NO_FORK_EMPTY_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(forkQueueEmptyPrompt);
-    await waitForComposerText(
-      "",
-      "interrupted no-fork queue=0 源 prompt 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "interrupted no-fork queue=0 源 prompt 发送后输入框没有清空");
     await waitForChatState(
       (snapshot) => snapshot.state === "streaming" && snapshot.queueCount === 0,
       "interrupted no-fork queue=0 源 prompt 没有进入 running",
@@ -114,9 +99,7 @@ describe("会话区 Interrupted Actions E2E", () => {
       "queue=0 interrupted assistant stop 后没有稳定下来",
       30000,
     );
-    expect(
-      forkQueueEmptySource.sessionId || forkQueueEmptySource.taskId,
-    ).toBeTruthy();
+    expect(forkQueueEmptySource.sessionId || forkQueueEmptySource.taskId).toBeTruthy();
     await expectNoEnabledForkButtonForAssistantContaining(
       "deep",
       "queue=0 interrupted assistant partial 不应提供可用 fork 入口",
@@ -126,10 +109,7 @@ describe("会话区 Interrupted Actions E2E", () => {
 
     const forkHeldPrompt = `E2E_SLOW_STREAM E2E_INTERRUPTED_NO_FORK_HELD_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(forkHeldPrompt);
-    await waitForComposerText(
-      "",
-      "interrupted held no-fork 源 prompt 发送后输入框没有清空",
-    );
+    await waitForComposerText("", "interrupted held no-fork 源 prompt 发送后输入框没有清空");
     await waitForChatState(
       (snapshot) => snapshot.state === "streaming" && snapshot.queueCount === 0,
       "interrupted held no-fork 源 prompt 没有进入 running",
@@ -173,16 +153,13 @@ describe("会话区 Interrupted Actions E2E", () => {
     );
     await waitForChatState(
       (snapshot) =>
-        (snapshot.sessionId || snapshot.taskId) === forkHeldSourceId &&
-        snapshot.queueCount === 1,
+        (snapshot.sessionId || snapshot.taskId) === forkHeldSourceId && snapshot.queueCount === 1,
       "interrupted assistant partial 禁止 fork 后父 held queue 没有保留",
       30000,
     );
     const parentQueue = await waitForQueueCount(1);
     expect(parentQueue[0]?.id).toBe(heldQueueItemId);
-    expect(parentQueue[0]?.content).toContain(
-      `E2E_INTERRUPTED_NO_FORK_HELD_QUEUE_${runId}`,
-    );
+    expect(parentQueue[0]?.content).toContain(`E2E_INTERRUPTED_NO_FORK_HELD_QUEUE_${runId}`);
   });
 });
 
@@ -235,12 +212,8 @@ async function clickChatStopIfAvailable() {
   };
 }
 
-async function expectNoEnabledForkButtonForAssistantContaining(
-  text: string,
-  timeoutMsg: string,
-) {
-  let latest: Awaited<ReturnType<typeof getForkButtonForAssistantContaining>> =
-    null;
+async function expectNoEnabledForkButtonForAssistantContaining(text: string, timeoutMsg: string) {
+  let latest: Awaited<ReturnType<typeof getForkButtonForAssistantContaining>> = null;
   const deadline = Date.now() + 3000;
   do {
     latest = await getForkButtonForAssistantContaining(text);

@@ -13,18 +13,12 @@ import {
 } from "@/WebRemoteControlDialog.js";
 
 vi.mock("@/components/ui/button.js", () => ({
-  Button: ({
-    children,
-    ...props
-  }: {
-    children?: ReactNode;
-    [key: string]: unknown;
-  }) => createElement("button", props, children),
+  Button: ({ children, ...props }: { children?: ReactNode; [key: string]: unknown }) =>
+    createElement("button", props, children),
 }));
 
 vi.mock("@/components/ui/dialog.js", () => ({
-  Dialog: ({ children }: { children?: ReactNode }) =>
-    createElement("div", null, children),
+  Dialog: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   DialogContent: ({
     children,
     className,
@@ -36,17 +30,10 @@ vi.mock("@/components/ui/dialog.js", () => ({
     showCloseButton?: boolean;
     [key: string]: unknown;
   }) => createElement("section", { className, ...props }, children),
-  DialogDescription: ({ children }: { children?: ReactNode }) =>
-    createElement("p", null, children),
-  DialogHeader: ({
-    children,
-    className,
-  }: {
-    children?: ReactNode;
-    className?: string;
-  }) => createElement("header", { className }, children),
-  DialogTitle: ({ children }: { children?: ReactNode }) =>
-    createElement("h2", null, children),
+  DialogDescription: ({ children }: { children?: ReactNode }) => createElement("p", null, children),
+  DialogHeader: ({ children, className }: { children?: ReactNode; className?: string }) =>
+    createElement("header", { className }, children),
+  DialogTitle: ({ children }: { children?: ReactNode }) => createElement("h2", null, children),
 }));
 
 const feedbackMocks = vi.hoisted(() => ({
@@ -243,13 +230,9 @@ describe("WebRemoteControlDialog layout", () => {
 
   it("打开弹层时先复用已连接手机的 window 会话再考虑重新 start", () => {
     const source = readWebRemoteControlDialogSource();
-    const reuseIndex = source.indexOf(
-      "isReusableWebRemoteControlSession(currentStatus)",
-    );
+    const reuseIndex = source.indexOf("isReusableWebRemoteControlSession(currentStatus)");
     const startIndex = source.indexOf("platform.startWebRemoteControl");
-    const pollReuseIndex = source.indexOf(
-      "isReusableWebRemoteControlSession(nextStatus)",
-    );
+    const pollReuseIndex = source.indexOf("isReusableWebRemoteControlSession(nextStatus)");
 
     expect(reuseIndex).toBeGreaterThan(-1);
     expect(startIndex).toBeGreaterThan(-1);
@@ -318,9 +301,7 @@ describe("WebRemoteControlDialog layout", () => {
     );
 
     const scanCardIndex = html.indexOf('data-testid="web-remote-control-scan-card"');
-    const connectionCardIndex = html.indexOf(
-      'data-testid="web-remote-control-connection-card"',
-    );
+    const connectionCardIndex = html.indexOf('data-testid="web-remote-control-connection-card"');
     const copyLinkIndex = html.indexOf('data-testid="web-remote-control-copy-link-row"');
     const botChannelIndex = html.indexOf("webRemoteControl.botChannel.title");
 

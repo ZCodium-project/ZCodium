@@ -42,7 +42,10 @@ export function FrameChart({
   const forecast = showForecast ? scenario.forecast : undefined;
   const forecastFrames = forecast?.horizonFrames ?? 0;
   const chartFrameCount = scenario.buckets.length + forecastFrames;
-  const chartWidth = Math.max(embedded ? 520 : 720, gutter + chartFrameCount * (barWidth + gap) + 20);
+  const chartWidth = Math.max(
+    embedded ? 520 : 720,
+    gutter + chartFrameCount * (barWidth + gap) + 20,
+  );
   const maxChars = Math.max(
     1,
     scenario.maxChars,
@@ -78,10 +81,14 @@ export function FrameChart({
       <div className="panelHeader">
         <div>
           <h2>{title}</h2>
-          <p>{subtitle ?? `${scenario.totalFrames} frames · ${scenario.nonEmptyFrames} non-empty · max ${scenario.maxChars} chars`}</p>
+          <p>
+            {subtitle ??
+              `${scenario.totalFrames} frames · ${scenario.nonEmptyFrames} non-empty · max ${scenario.maxChars} chars`}
+          </p>
           {forecast ? (
             <p>
-              smooth window {forecast.windowFrames} frames · forecast {forecast.horizonFrames} frames
+              smooth window {forecast.windowFrames} frames · forecast {forecast.horizonFrames}{" "}
+              frames
             </p>
           ) : null}
         </div>
@@ -184,7 +191,8 @@ function buildTrendPath(
   }
   return points
     .map((point, index) => {
-      const x = options.gutter + point.frameIndex * (options.barWidth + options.gap) + options.barWidth / 2;
+      const x =
+        options.gutter + point.frameIndex * (options.barWidth + options.gap) + options.barWidth / 2;
       const y = options.chartHeight - (point.chars / options.maxChars) * (options.chartHeight - 28);
       return `${index === 0 ? "M" : "L"} ${roundPathValue(x)} ${roundPathValue(y)}`;
     })

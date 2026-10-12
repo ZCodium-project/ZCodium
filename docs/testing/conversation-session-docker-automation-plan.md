@@ -28,7 +28,8 @@ CDD01 已迁入 formal 路径，但单 spec Docker `replay-isolated` 运行
 历史 `conversation-session-admission`、`conversation-session-needs-docker-fix` 和 `conversation-session-tool-cross-product` preset 已删除。需要定位某个 case 时统一使用 `E2E_SPEC` 指定 direct-root spec；只有取得绿色证据后才能用 `e2e:docker:admit` 登记到 verified 集合。
 
 | Spec | 迁移状态 |
-| --- | --- |
+| ---- | -------- |
+
 <!-- conversation-session-verified-table-end -->
 
 运行入口：

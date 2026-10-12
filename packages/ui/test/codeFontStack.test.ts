@@ -2,14 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const styles = readFileSync("packages/ui/src/styles.css", "utf8");
-const codeViewerSource = readFileSync(
-  "packages/ui/src/components/ui/code-viewer.tsx",
-  "utf8",
-);
-const diffViewerSource = readFileSync(
-  "packages/ui/src/components/ui/diff-viewer.tsx",
-  "utf8",
-);
+const codeViewerSource = readFileSync("packages/ui/src/components/ui/code-viewer.tsx", "utf8");
+const diffViewerSource = readFileSync("packages/ui/src/components/ui/diff-viewer.tsx", "utf8");
 
 describe("code font stack", () => {
   it("uses sans-serif CJK fallbacks before generic monospace", () => {

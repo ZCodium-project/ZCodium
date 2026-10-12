@@ -208,17 +208,18 @@ describe("workbench group store and persistence", () => {
   });
 
   it("updates and persists the active group ratio without rebuilding workspace bindings", () => {
-    useWorkbenchGroupStore.getState().splitSessionIntoGroup(
-      V4_PRIMARY_PANE_ID,
-      "right",
-      binding(SCOPE_B, "sess-b"),
-      binding(SCOPE_A, "sess-a"),
-    );
+    useWorkbenchGroupStore
+      .getState()
+      .splitSessionIntoGroup(
+        V4_PRIMARY_PANE_ID,
+        "right",
+        binding(SCOPE_B, "sess-b"),
+        binding(SCOPE_A, "sess-a"),
+      );
     const before = useWorkbenchGroupStore.getState();
     const groupId = before.activeGroupId!;
-    const splitId = before.groups[groupId]!.root.type === "split"
-      ? before.groups[groupId]!.root.id
-      : "missing";
+    const splitId =
+      before.groups[groupId]!.root.type === "split" ? before.groups[groupId]!.root.id : "missing";
     const store = before as typeof before & {
       setSplitRatio: (groupId: string, splitId: string, ratio: number) => void;
     };
@@ -268,9 +269,7 @@ describe("workbench group store and persistence", () => {
       restoredUnvalidated: true,
     });
     persistWorkbenchGroups(restored as WorkbenchGroupSnapshot);
-    expect(storage.get(WORKBENCH_GROUP_STORAGE_KEY)).not.toContain(
-      "restoredUnvalidated",
-    );
+    expect(storage.get(WORKBENCH_GROUP_STORAGE_KEY)).not.toContain("restoredUnvalidated");
     expect(
       confirmRestoredWorkbenchGroupPane(
         restored?.groups[group.id] as NonNullable<typeof restored>["groups"][string],

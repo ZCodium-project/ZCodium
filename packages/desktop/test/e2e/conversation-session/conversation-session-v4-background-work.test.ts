@@ -3,9 +3,7 @@
 // → BackgroundTaskStarted 事件 → reducer 填充 backgroundWorks → 后台工作面板显示 running →
 // 点取消 → cancelBackgroundWork 命令 → v4-bridge cancelBackgroundTask → 进程被杀 →
 // BackgroundTaskCompleted(cancelled) → 面板状态 cancelled。证明后台工作全链路。
-import {
-  clearAppData,
-} from "../helpers/desktop-app.js";
+import { clearAppData } from "../helpers/desktop-app.js";
 import {
   approveV4Permission,
   clickV4BackgroundWorkCancel,
@@ -101,9 +99,9 @@ describe("v4 M4 门禁：cancelBackgroundWork", () => {
     );
     const ack = await getLatestV4CommandAck("cancelBackgroundWork");
     expect(["accepted", "noop"]).toContain(ack?.status);
-    await browser.waitUntil(
-      async () => (await getV4ComposerBackgroundWorkCounts()) === null,
-      { timeout: 30000, timeoutMsg: "最后一个 running task 收口后 Composer 入口仍存在" },
-    );
+    await browser.waitUntil(async () => (await getV4ComposerBackgroundWorkCounts()) === null, {
+      timeout: 30000,
+      timeoutMsg: "最后一个 running task 收口后 Composer 入口仍存在",
+    });
   });
 });

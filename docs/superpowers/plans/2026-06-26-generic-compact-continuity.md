@@ -57,11 +57,13 @@
 ## Task 1: 收敛 Compact Prompt 与 Summary Message Shape
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/compact/prompt.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 - Test: `apps/zcode-cli/tools/prompt-trajectory/tests/derive.test.ts`
 
 **Interfaces:**
+
 - Produce: `buildCompactPrompt(customInstructions, { mode?: "full" | "recent" | "up_to" })`
 - Produce: `formatCompactSummary(text)` returns text shaped as `Summary:\n...` when `<summary>` exists.
 - Produce: `buildCompactSummaryMessage(summary, options)` accepts `{ suppressFollowup?: boolean; transcriptPath?: string; recentMessagesPreserved?: boolean; replStateCleared?: boolean }`.
@@ -88,11 +90,13 @@
 ## Task 2: Align Compact Request Tool Exposure and Tool Call Denial
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active-helpers.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - Produce: `buildCompactSummaryRequestOptions(...)` or equivalent helper that returns normal `tools: this.getTools()` and compact metadata.
 - Produce: compact-specific tool-call denial path: any model tool call during compact is rejected before tool execution and surfaces as `CoreErrorType.ModelError` with message `Compact summary model attempted to call tools`.
 - Consume: existing `formatCompactSummaryOrThrow(runtime, result)` for final validation.
@@ -108,11 +112,13 @@
 ## Task 3: Implement Recent Group Preservation for Auto/Reactive Compact
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/helpers/compact.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - Produce: `selectCompactEntries(input)` returning:
   - `entriesForSummary: RuntimeMessageEntry[]`
   - `preservedEntries: RuntimeMessageEntry[]`
@@ -131,12 +137,14 @@
 ## Task 4: Restore Recent File Context After Compact
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/helpers/compact.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 - Test: `apps/zcode-cli/packages/core/tests/read-file-state-hydrator.test.ts`
 
 **Interfaces:**
+
 - Produce: `buildPostCompactReadStateReminderEntries(input)` returning model-only `RuntimeMessageEntry[]`.
 - Input includes `readFileState`, `workspaceRoot`, `workingDirectory`, `maxFiles = 5`, `maxTotalApproxTokens = 50_000`, `maxFileApproxTokens = 5_000`.
 
@@ -151,11 +159,13 @@
 ## Task 5: Remove ZCode Todo State From Post-Compact Context
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/helpers/compact.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - Do not append compact-specific todo state after compact. The generic todo reminder cadence still applies, but compact completion does not immediately restore the current todo list into provider-visible context.
 
 - [ ] Update existing todo compact test to expect summary body does not contain `Current session todo state (authoritative):`.
@@ -167,6 +177,7 @@
 ## Task 6: Investigate Current Auto Compact Budget Drift, Then Keep ZCode Threshold Defaults and Align Summary Output Cap
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/compact/policy.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact.ts`
@@ -175,6 +186,7 @@
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - Produce: `AutoCompactDecision` diagnostics must expose enough budget facts to debug failures:
   - `contextWindow`
   - `effectiveContextWindow`
@@ -206,12 +218,14 @@
 ## Task 7: Explicitly Skip Local Microcompact Changes
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/microcompact.ts`
 - Modify: `apps/zcode-cli/packages/core/src/compact/microcompact.ts`
 - Test: `apps/zcode-cli/packages/core/tests/microcompact.test.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - keep-recent/local replacement 依赖 `context_hint`/server fallback 能力，ZCode 当前没有对应接口；本轮不改 local microcompact 的 provider-visible 行为。
 - Runtime compact 收敛路径默认不依赖 microcompact；local microcompact 只保留现有显式 opt-in/安全修复，避免在缺少 `context_hint` 的情况下破坏 cache hit 或污染 provider-visible context。
 
@@ -221,10 +235,12 @@
 ## Task 8: Media Handling Should Degrade on Failure, Not Always Strip
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/compact-active.ts`
 - Test: `apps/zcode-cli/packages/core/tests/runtime-compact.test.ts`
 
 **Interfaces:**
+
 - First freeze the intended compact media handling with a provider-visible fixture. Only implement retry/degrade behavior if the frozen behavior keeps provider-supported media on the first compact attempt and strips/retries after a media/context failure.
 - If the frozen behavior strips media before compact summary requests, keep the existing stripping direction and only adjust the provider-visible shape accordingly.
 
@@ -239,12 +255,14 @@
 ## Task 9: Preserve UI Divider Invariant
 
 **Files:**
+
 - Modify only if tests expose breakage: `packages/shared/src/zcode-session-visible-content.ts`
 - Modify only if tests expose breakage: `packages/ui/src/lib/zcodeSessionProjection.ts`
 - Modify only if tests expose breakage: `packages/services/src/zcode-agent/zcodeTaskServiceAdapter.ts`
 - Test: existing UI/projection tests or add focused unit coverage near projection tests.
 
 **Interfaces:**
+
 - `isZCodeCompactSummaryMessage` must continue filtering model-only compact summary messages.
 - `synthesizeCompactionTimeline` must continue rendering only lifecycle compaction parts as `context_compaction` divider.
 
@@ -257,10 +275,12 @@
 ## Task 10: Provider-Visible Golden/Trajectory Verification
 
 **Files:**
+
 - Modify: `apps/zcode-cli/tools/prompt-trajectory/tests/derive.test.ts`
 - Optional generated artifact review only: `apps/zcode-cli/tools/prompt-trajectory/out/...`
 
 **Scenarios:**
+
 - Manual full compact.
 - Auto compact with pending user tail.
 - Reactive compact after provider context overflow.

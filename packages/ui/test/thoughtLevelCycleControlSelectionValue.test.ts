@@ -1,13 +1,7 @@
 // @vitest-environment jsdom
 
 import { createElement } from "react";
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { ZCodeConfigOption } from "@zcode/shared";
 import { ThoughtLevelCycleControl } from "@/chat-input-toolbar/ThoughtLevelCycleControl.js";
@@ -129,20 +123,17 @@ describe("ThoughtLevelCycleControl selection commit", () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  it.each(["Enter", " "])(
-    "commits a keyboard confirmation with %s",
-    async (key) => {
-      const onCurrentValueCommit = vi.fn();
-      renderControl({ onCurrentValueCommit });
+  it.each(["Enter", " "])("commits a keyboard confirmation with %s", async (key) => {
+    const onCurrentValueCommit = vi.fn();
+    renderControl({ onCurrentValueCommit });
 
-      openSelect();
-      fireEvent.keyDown(getOption("high"), { key });
+    openSelect();
+    fireEvent.keyDown(getOption("high"), { key });
 
-      await act(async () => undefined);
-      expect(onCurrentValueCommit).toHaveBeenCalledOnce();
-      expect(onCurrentValueCommit).toHaveBeenCalledWith("high");
-    },
-  );
+    await act(async () => undefined);
+    expect(onCurrentValueCommit).toHaveBeenCalledOnce();
+    expect(onCurrentValueCommit).toHaveBeenCalledWith("high");
+  });
 
   it("commits a touch tap on the current value", async () => {
     const onCurrentValueCommit = vi.fn();

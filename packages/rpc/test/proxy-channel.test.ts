@@ -21,7 +21,15 @@ function createServicePair<T extends object>(service: unknown) {
   const ch = client.getChannel("svc");
   const proxy = ProxyChannel.toService<T>(ch);
 
-  return { proxy, server, client, dispose: () => { server.dispose(); client.dispose(); } };
+  return {
+    proxy,
+    server,
+    client,
+    dispose: () => {
+      server.dispose();
+      client.dispose();
+    },
+  };
 }
 
 describe("ProxyChannel", () => {
@@ -137,9 +145,9 @@ describe("ProxyChannel", () => {
     expect(exported.archive).toBeInstanceOf(Uint8Array);
     expect([...exported.archive]).toEqual([31, 139, 8, 0]);
 
-    await expect(
-      proxy.importArchive({ archive: new Uint8Array([1, 2, 3]) }),
-    ).resolves.toEqual([1, 2, 3]);
+    await expect(proxy.importArchive({ archive: new Uint8Array([1, 2, 3]) })).resolves.toEqual([
+      1, 2, 3,
+    ]);
     expect(received).toEqual([true]);
     dispose();
   });

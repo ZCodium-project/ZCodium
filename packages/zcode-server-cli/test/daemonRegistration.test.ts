@@ -12,12 +12,12 @@ const serviceMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("node:child_process", async (importOriginal) => ({
-  ...await importOriginal<typeof import("node:child_process")>(),
+  ...(await importOriginal<typeof import("node:child_process")>()),
   fork: serviceMocks.fork,
 }));
 
 vi.mock("../src/platform/serviceManager.js", async (importOriginal) => ({
-  ...await importOriginal<typeof import("../src/platform/serviceManager.js")>(),
+  ...(await importOriginal<typeof import("../src/platform/serviceManager.js")>()),
   registerService: serviceMocks.registerService,
   unregisterService: serviceMocks.unregisterService,
 }));
@@ -79,8 +79,10 @@ describe("daemon service registration", () => {
   it("stops and unregisters a same-root legacy service before registering the root-scoped identity", async () => {
     const root = await mkdtemp(join(process.platform === "win32" ? tmpdir() : "/tmp", "zdr-"));
     const layout = resolveServerLayout(join(root, "server"));
-    const platform = process.platform === "darwin" || process.platform === "linux" ? process.platform : "win32";
-    const kind = platform === "darwin" ? "launchd" : platform === "linux" ? "systemd" : "task-scheduler";
+    const platform =
+      process.platform === "darwin" || process.platform === "linux" ? process.platform : "win32";
+    const kind =
+      platform === "darwin" ? "launchd" : platform === "linux" ? "systemd" : "task-scheduler";
     const legacyDescriptor = createServiceDescriptor({
       platform,
       command: join(layout.stableBinDir, platform === "win32" ? "zcode.cmd" : "zcode"),

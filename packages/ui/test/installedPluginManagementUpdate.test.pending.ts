@@ -127,9 +127,8 @@ describe("InstalledPluginDetailPanel update badge", () => {
   });
 
   it("renders the update button, target version, and new-sessions note when update-available", async () => {
-    const { InstalledPluginDetailPanel } = await import(
-      "../src/settings/InstalledPluginManagement.js"
-    );
+    const { InstalledPluginDetailPanel } =
+      await import("../src/settings/InstalledPluginManagement.js");
     const { ZCodeIntlProvider } = await import("@/i18n/IntlProvider.js");
 
     const html = renderToStaticMarkup(
@@ -154,9 +153,8 @@ describe("InstalledPluginDetailPanel update badge", () => {
   });
 
   it("omits the update block when there is no update", async () => {
-    const { InstalledPluginDetailPanel } = await import(
-      "../src/settings/InstalledPluginManagement.js"
-    );
+    const { InstalledPluginDetailPanel } =
+      await import("../src/settings/InstalledPluginManagement.js");
     const { ZCodeIntlProvider } = await import("@/i18n/IntlProvider.js");
 
     const html = renderToStaticMarkup(
@@ -179,9 +177,8 @@ describe("InstalledPluginDetailPanel update badge", () => {
   });
 
   it("invokes onRequestUpdate with the plugin id when the update button is clicked", async () => {
-    const { InstalledPluginDetailPanel } = await import(
-      "../src/settings/InstalledPluginManagement.js"
-    );
+    const { InstalledPluginDetailPanel } =
+      await import("../src/settings/InstalledPluginManagement.js");
     const { ZCodeIntlProvider } = await import("@/i18n/IntlProvider.js");
     const onRequestUpdate = vi.fn();
     const root: Root = createRoot(installMinimalDom());

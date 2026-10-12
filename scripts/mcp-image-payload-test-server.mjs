@@ -45,11 +45,7 @@ server.registerTool(
         .max(8 * 1024 * 1024)
         .optional()
         .describe("Target base64 payload bytes. Overrides preset when provided."),
-      label: z
-        .string()
-        .max(80)
-        .optional()
-        .describe("Optional label included in the text summary."),
+      label: z.string().max(80).optional().describe("Optional label included in the text summary."),
       dataUrl: z
         .boolean()
         .optional()

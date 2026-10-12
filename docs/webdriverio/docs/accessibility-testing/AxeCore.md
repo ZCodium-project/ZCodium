@@ -12,18 +12,18 @@ npm install -g @axe-core/webdriverio
 The Axe adapter can be used either in [standalone or testrunner](/docs/setuptypes) mode by simply importing and initializing it with the [browser object](/docs/api/browser), e.g.:
 
 ```ts
-import { browser } from '@wdio/globals'
-import AxeBuilder from '@axe-core/webdriverio'
+import { browser } from "@wdio/globals";
+import AxeBuilder from "@axe-core/webdriverio";
 
-describe('Accessibility Test', () => {
-    it('should get the accessibility results from a page', async () => {
-        const builder = new AxeBuilder({ client: browser })
+describe("Accessibility Test", () => {
+  it("should get the accessibility results from a page", async () => {
+    const builder = new AxeBuilder({ client: browser });
 
-        await browser.url('https://testingbot.com')
-        const result = await builder.analyze()
-        console.log('Acessibility Results:', result)
-    })
-})
+    await browser.url("https://testingbot.com");
+    const result = await builder.analyze();
+    console.log("Acessibility Results:", result);
+  });
+});
 ```
 
 You can find more documentation on the Axe WebdriverIO adapter [on GitHub](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/webdriverio#usage).

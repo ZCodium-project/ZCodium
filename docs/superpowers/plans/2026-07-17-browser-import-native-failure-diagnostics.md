@@ -24,10 +24,12 @@
 ### Task 1: Log a safe helper failure reason at the protocol boundary
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/windowsChromeAppBoundKey.ts`
 - Test: `packages/desktop/test/windowsChromeAppBoundKey.test.ts`
 
 **Interfaces:**
+
 - Consumes: `HelperProcessResult.stdout`, `BrowserDataLogger.warn`, and the existing `WindowsChromeAppBoundImportError` codes.
 - Produces: local warning `[browser-data] Windows Chrome App-Bound helper 返回失败` with `{ reason }`; public errors remain unchanged.
 
@@ -122,10 +124,7 @@ const APP_BOUND_HELPER_FAILURE_REASONS = new Set([
   "service_cleanup_failed",
 ]);
 
-function throwAppBoundDecryptionFailure(
-  logger: BrowserDataLogger,
-  reason: string,
-): never {
+function throwAppBoundDecryptionFailure(logger: BrowserDataLogger, reason: string): never {
   // Bugfix 原因：helper 原本返回了稳定子错误码，但通用映射会丢失根因；这里只记录白名单值，禁止记录可能含密钥或路径的原始响应。
   logger.warn("[browser-data] Windows Chrome App-Bound helper 返回失败", {
     reason: APP_BOUND_HELPER_FAILURE_REASONS.has(reason) ? reason : "invalid_response",
@@ -168,11 +167,13 @@ git commit -m "fix(desktop): retain browser helper failure reason"
 ### Task 2: Identify the real signed-helper failure without exposing browser secrets
 
 **Files:**
+
 - Read: `%LOCALAPPDATA%\Google\Chrome\User Data\Local State`
 - Execute: `C:\Program Files\ZCode\resources\browser-import\zcode-browser-import-helper.exe`
 - Inspect: Windows service list for `ZCodeBrowserImport_*`
 
 **Interfaces:**
+
 - Consumes: only the `APPB` encrypted key blob and discovered Chrome executable path in memory.
 - Produces: `result=ok` or `result=error reason=<allowlisted reason|invalid_response>` and a residual-service count; never prints the helper payload.
 
@@ -287,6 +288,7 @@ Expected: one concrete hypothesis is selected from runtime evidence before any r
 ### Task 3: Support credential-switch UAC without cross-account process reads
 
 **Files:**
+
 - Modify: `packages/desktop/native/windows-browser-import-helper/Program.cs`
 - Test: `packages/desktop/test/windowsChromeAppBoundKey.test.ts`
 - Update: `docs/browser-use/2026-07-13-browser-settings-spec.md`

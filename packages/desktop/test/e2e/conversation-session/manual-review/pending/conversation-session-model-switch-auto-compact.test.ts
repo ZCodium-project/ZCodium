@@ -122,12 +122,7 @@ describe("会话区模型切换与 Auto Compact 交集 E2E", () => {
     const completedMarker =
       compactMarker.status === "success"
         ? compactMarker
-        : await waitForV4CompactMarkerMatch(
-            ["success"],
-            "manual",
-            compactMarker.rowId,
-            90000,
-          );
+        : await waitForV4CompactMarkerMatch(["success"], "manual", compactMarker.rowId, 90000);
     expect(completedMarker.rowId).not.toBeNull();
     await waitForV4Idle("模型切换 guard compact 终态后会话没有回到 idle", 90000);
     await waitForModelSwitchIdle("模型切换 guard compact 完成后 pending 状态没有结束");
@@ -329,8 +324,7 @@ async function confirmModelSwitchCompressionDialog() {
   });
 
   const result = await browser.execute(() => {
-    const dialog =
-      document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
     const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
     const readLabels = (button: HTMLButtonElement) =>
       [
@@ -368,8 +362,7 @@ async function cancelModelSwitchCompressionDialog() {
   });
 
   const result = await browser.execute(() => {
-    const dialog =
-      document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
     const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
     const readLabels = (button: HTMLButtonElement) =>
       [
@@ -399,10 +392,14 @@ async function cancelModelSwitchCompressionDialog() {
 }
 
 async function hasModelSwitchCompressionDialog() {
-  return browser.execute((titleZh, titleEn) => {
-    const bodyText = document.body.innerText;
-    return bodyText.includes(titleZh) || bodyText.includes(titleEn);
-  }, MODEL_SWITCH_GUARD_TITLE_ZH, MODEL_SWITCH_GUARD_TITLE_EN);
+  return browser.execute(
+    (titleZh, titleEn) => {
+      const bodyText = document.body.innerText;
+      return bodyText.includes(titleZh) || bodyText.includes(titleEn);
+    },
+    MODEL_SWITCH_GUARD_TITLE_ZH,
+    MODEL_SWITCH_GUARD_TITLE_EN,
+  );
 }
 
 async function waitForModelSwitchCompressionDialogClosed() {
@@ -429,10 +426,9 @@ async function expectToolbarConfig(model: string, thoughtLevel: string) {
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   if (!labelCandidates.some((label) => expectedLabels.includes(label))) {
     throw new Error(
       `思考深度未精确匹配 ${thoughtLevel}: ${JSON.stringify({

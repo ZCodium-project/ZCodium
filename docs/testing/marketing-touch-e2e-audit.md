@@ -21,14 +21,14 @@
 
 ## UI Surface Matrix
 
-| 场景          | UI 入口            | 共享实现                            | 展示 owner                     | 数据来源               | 门禁                     | 提交动作                           | 权威/持久化                       | 模式边界                           | 必须隔离                 |
-| ------------- | ------------------ | ----------------------------------- | ------------------------------ | ---------------------- | ------------------------ | ---------------------------------- | --------------------------------- | ---------------------------------- | ------------------------ |
-| Banner        | WorkspaceSidebar   | MarketingBanner/VisualBody          | Controller                     | GET banner             | 资源准备、ready、pending | claim/open_url/navigate/copy/close | 服务端投放与 action；宿主资源缓存 | Desktop/Web 共用；Web ZIP fallback | 设置页、任务模型选择     |
+| 场景          | UI 入口            | 共享实现                            | 展示 owner                     | 数据来源               | 门禁                     | 提交动作                           | 权威/持久化                       | 模式边界                           | 必须隔离                       |
+| ------------- | ------------------ | ----------------------------------- | ------------------------------ | ---------------------- | ------------------------ | ---------------------------------- | --------------------------------- | ---------------------------------- | ------------------------------ |
+| Banner        | WorkspaceSidebar   | MarketingBanner/VisualBody          | Controller                     | GET banner             | 资源准备、ready、pending | claim/open_url/navigate/copy/close | 服务端投放与 action；宿主资源缓存 | Desktop/Web 共用；Web ZIP fallback | 设置页、任务模型选择           |
 | 独立弹窗      | Shell 自动展示     | MarketingDialogs/CloudContentDialog | Controller waitingPopup/dialog | GET popup              | 页面可见、无其他 modal   | 按钮与三种关闭入口                 | 服务端投放；当前窗口状态          | 不随 workspace 重建 owner          | 安全校验弹层、升级页、已有弹窗 |
-| 结果弹窗      | Banner 动作成功    | 同一 Dialog                         | Controller waitingResult       | 同次投放 success_popup | 结果优先、资源准备       | 新动作 confirm；关闭不重复 cancel  | claim 是成功权威                  | 不让刷新失败逆转成功               | 其他独立 Popup           |
-| 领取失败      | Banner/Popup claim | MarketingFailureDialog/Alert        | Controller error               | data.message           | 非成功或结果不确定       | 知道了/Esc/遮罩 clearError         | 不自动重试、不额外上报            | 共用组件，窄屏不是手机实机         | 原 Popup 应恢复          |
-| 设置/插件市场 | navigate           | 原设置页/市场页                     | 导航关联 + 原页面 owner        | args 与既有目录        | 目标实际接管后确认       | 仅导航，不保存连接/安装插件        | 原设置/插件服务                   | workspaceIdentity；不另建 runtime  | task/模型/连接事实       |
-| 升级购买      | navigate upgrade   | 原升级 Provider/webview             | 导航关联 + 购买容器            | 当前 upgradeTarget     | dom-ready；失败/取消恢复 | 打开成功 confirm，不是支付成功     | 原购买流程                        | Desktop 支持；Web 明确失败         | 自动下单/支付            |
+| 结果弹窗      | Banner 动作成功    | 同一 Dialog                         | Controller waitingResult       | 同次投放 success_popup | 结果优先、资源准备       | 新动作 confirm；关闭不重复 cancel  | claim 是成功权威                  | 不让刷新失败逆转成功               | 其他独立 Popup                 |
+| 领取失败      | Banner/Popup claim | MarketingFailureDialog/Alert        | Controller error               | data.message           | 非成功或结果不确定       | 知道了/Esc/遮罩 clearError         | 不自动重试、不额外上报            | 共用组件，窄屏不是手机实机         | 原 Popup 应恢复                |
+| 设置/插件市场 | navigate           | 原设置页/市场页                     | 导航关联 + 原页面 owner        | args 与既有目录        | 目标实际接管后确认       | 仅导航，不保存连接/安装插件        | 原设置/插件服务                   | workspaceIdentity；不另建 runtime  | task/模型/连接事实             |
+| 升级购买      | navigate upgrade   | 原升级 Provider/webview             | 导航关联 + 购买容器            | 当前 upgradeTarget     | dom-ready；失败/取消恢复 | 打开成功 confirm，不是支付成功     | 原购买流程                        | Desktop 支持；Web 明确失败         | 自动下单/支付                  |
 
 ```text
 HTTP GET(seq) -> schema -> 资源授权/下载/校验 -> Controller 当前候选
@@ -81,7 +81,7 @@ HTTP GET(seq) -> schema -> 资源授权/下载/校验 -> Controller 当前候选
 | 范围          | 已有 setup/action/assertion                                                             | 缺失或调整                                                                                                                                                | 优先级 |
 | ------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | 初始 Popup    | MTC-01：默认独立 Popup → 内容关闭按钮 → cancel 恰好一次                                 | 右上角 X、Esc、遮罩分别验证；目前只是检查 X 样式，没有点击 X 验证上报                                                                                     | P0     |
-| Banner 领取   | MTC-03：真实 HTTP/PNG/ZIP、安全校验 success、挂起 claim → loading → success/confirm      | 快速双击、安全校验 cancel/error、未登录、提交超时、明确失败/不确定；不能以 disabled 样式断言代替双击提交计数                                               | P0     |
+| Banner 领取   | MTC-03：真实 HTTP/PNG/ZIP、安全校验 success、挂起 claim → loading → success/confirm     | 快速双击、安全校验 cancel/error、未登录、提交超时、明确失败/不确定；不能以 disabled 样式断言代替双击提交计数                                              | P0     |
 | claim 后刷新  | success Popup 可见                                                                      | 必须断言真实 account/权益刷新被调用且更新投影；另注入刷新失败，确认不逆转 claim                                                                           | P0     |
 | 同 ID 重投放  | 成功后和关闭后等待正常 30s；再关闭计数；独立 Popup 重投放                               | 持续同 ID 正在展示不叠加；旧 GET/慢资源完成不能复活被关闭内容                                                                                             | P0     |
 | 轮询          | 30s 正常等待、online 加速                                                               | hidden 恢复、慢请求并发合并、失败退避、空数组撤下、十分钟过期、身份/语言重建；生产 600s 不能拿测试 30s 代替                                               | P0/P1  |
@@ -175,9 +175,9 @@ impact-only，本轮不修改产品 spec/测试或自动 promotion。后续计�
 
 | 位置                                                       | 原因与补充验证                                                                                                                         | 源码归属证据                                                          |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| MarketingTouchProvider.tsx:275、278                        | IServiceAccessor 没有 modelProviderService；成功路径的后置刷新调用仍是旧 API。当前领取用例只断言成功弹窗，没有验证刷新执行             | `git blame`：`fe04f4ba330`；本分支新增文件                  |
-| Root.tsx:3、357                                            | 移除了 RefreshCw import，但加载失败重试 UI 仍引用它。正常启动不会触发该 error 分支，应补故障注入回归                                   | `a19b8c64f11` 移除 import；基线 diff 可见                   |
-| ModelProviderSection.tsx:1121                              | 新导航匹配读取 item.provider.id；当前 ProviderSettingsFormProvider 是 providerId。不能只更换测试 selector 掩盖自定义 provider 路径缺陷 | `646cba8528f`；本分支新增 effect                            |
+| MarketingTouchProvider.tsx:275、278                        | IServiceAccessor 没有 modelProviderService；成功路径的后置刷新调用仍是旧 API。当前领取用例只断言成功弹窗，没有验证刷新执行             | `git blame`：`fe04f4ba330`；本分支新增文件                            |
+| Root.tsx:3、357                                            | 移除了 RefreshCw import，但加载失败重试 UI 仍引用它。正常启动不会触发该 error 分支，应补故障注入回归                                   | `a19b8c64f11` 移除 import；基线 diff 可见                             |
+| ModelProviderSection.tsx:1121                              | 新导航匹配读取 item.provider.id；当前 ProviderSettingsFormProvider 是 providerId。不能只更换测试 selector 掩盖自定义 provider 路径缺陷 | `646cba8528f`；本分支新增 effect                                      |
 | marketing-touch-entitlement.test.ts:94、100、131、163、164 | bigmodelCodingPlan/bigmodel 枚举与 modelProviderFamilyModes/SelectedKeys 已不存在                                                      | 本分支新增迁移 spec；当前类型检查复现，不推测迁移责任                 |
 | marketing-touch-delivery.test.ts:35–42、393                | 连接无副作用检查读取已删的两字段。当前应使用 providerFamilyConnectionSelections，并先断言有效初始选择存在                              | plain JSON 读取绕过 TS 检查；源码事实，不能宣称本轮实际进入该断言通过 |
 

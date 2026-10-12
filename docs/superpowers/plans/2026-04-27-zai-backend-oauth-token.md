@@ -26,6 +26,7 @@
 ## Task 1: Write Failing ZAI Backend OAuth Tests
 
 **Files:**
+
 - Modify: `packages/services/test/oauthService.test.ts:96`
 - Modify: `packages/services/test/oauthService.test.ts:110`
 - Test: `packages/services/test/oauthService.test.ts`
@@ -253,6 +254,7 @@ Expected: FAIL. The failures should point to old ZAI authorize URL, form-encoded
 ## Task 2: Implement ZAI Backend OAuth Token Exchange
 
 **Files:**
+
 - Modify: `packages/services/src/oauth/providers/zaiProviderConfig.ts:5`
 - Modify: `packages/services/src/oauth/providers/zaiProviderAdapter.ts:13`
 - Test: `packages/services/test/oauthService.test.ts`
@@ -412,6 +414,7 @@ Expected: PASS for `packages/services/test/oauthService.test.ts`.
 ## Task 3: Update OAuth Documentation
 
 **Files:**
+
 - Modify: `docs/oauth/oauth-multi-provider-implementation.md:62`
 
 - [ ] **Step 1: Update ZAI runtime config notes**
@@ -460,6 +463,7 @@ This is a documentation-only task. Verification happens in Task 4.
 ## Task 4: Run Required Verification
 
 **Files:**
+
 - Verify all changed files.
 
 - [ ] **Step 1: Run focused OAuth tests**

@@ -16,10 +16,7 @@ const remainingWaitMessages: Record<string, string> = {
   "offPeak.create.remaining.lessThanMinute": "不到 1 分钟",
 };
 const remainingWaitIntl = {
-  formatMessage(
-    { id }: { id: string },
-    values?: Record<string, string | number>,
-  ) {
+  formatMessage({ id }: { id: string }, values?: Record<string, string | number>) {
     let message = remainingWaitMessages[id] ?? id;
     for (const [key, value] of Object.entries(values ?? {})) {
       message = message.replaceAll(`{${key}}`, String(value));
@@ -50,10 +47,7 @@ const offPeakEditViewSource = readFileSync(
   new URL("../src/settings/OffPeakEditView.tsx", import.meta.url),
   "utf8",
 );
-const stylesSource = readFileSync(
-  new URL("../src/styles.css", import.meta.url),
-  "utf8",
-);
+const stylesSource = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
 describe("resolveLocalizedOffPeakCreateTitle", () => {
   it("updates an untouched localized default when the locale changes", () => {
     expect(
@@ -153,53 +147,33 @@ describe("formatOffPeakRemainingWait", () => {
     [125 * 60_000, "2 小时 5 分钟"],
     [120 * 60_000, "2 小时"],
     [42 * 60_000, "42 分钟"],
-  ])(
-    "formats a %i ms wait with hour/minute granularity",
-    (waitMs, expected) => {
-      expect(
-        formatOffPeakRemainingWait(now + waitMs, now, remainingWaitIntl),
-      ).toBe(expected);
-    },
-  );
+  ])("formats a %i ms wait with hour/minute granularity", (waitMs, expected) => {
+    expect(formatOffPeakRemainingWait(now + waitMs, now, remainingWaitIntl)).toBe(expected);
+  });
 
   it("rounds a positive partial minute up and avoids calendar dates", () => {
-    const label = formatOffPeakRemainingWait(
-      now + 60_001,
-      now,
-      remainingWaitIntl,
-    );
+    const label = formatOffPeakRemainingWait(now + 60_001, now, remainingWaitIntl);
 
     expect(label).toBe("2 分钟");
     expect(label).not.toMatch(/[年月日]/);
   });
 
   it("uses a sub-minute label once the recovery point is reached", () => {
-    expect(formatOffPeakRemainingWait(now, now, remainingWaitIntl)).toBe(
-      "不到 1 分钟",
-    );
+    expect(formatOffPeakRemainingWait(now, now, remainingWaitIntl)).toBe("不到 1 分钟");
   });
-
 });
 
 describe("idle-time quota tooltip wiring", () => {
   it("uses the remote remaining-wait implementation and advances it by minute", () => {
-    expect(automationsSectionSource).toContain(
-      "time: formatOffPeakRemainingWait(",
-    );
-    expect(automationsSectionSource).toContain(
-      "const remainderMs = remainingMs % minuteMs;",
-    );
-    expect(automationsSectionSource).not.toContain(
-      "new Intl.DateTimeFormat(locale",
-    );
+    expect(automationsSectionSource).toContain("time: formatOffPeakRemainingWait(");
+    expect(automationsSectionSource).toContain("const remainderMs = remainingMs % minuteMs;");
+    expect(automationsSectionSource).not.toContain("new Intl.DateTimeFormat(locale");
   });
 });
 
 describe("resolveOffPeakStatusFooter", () => {
   it("uses pause for paused tasks even when a queue position is present", () => {
-    expect(
-      resolveOffPeakStatusFooter({ status: "paused", queuePosition: 1 }),
-    ).toMatchObject({
+    expect(resolveOffPeakStatusFooter({ status: "paused", queuePosition: 1 })).toMatchObject({
       icon: "pause",
       className: "text-idle-task",
       labelId: "offPeak.badge.pausedPosition",
@@ -207,40 +181,32 @@ describe("resolveOffPeakStatusFooter", () => {
   });
 
   it("keeps moon for queued tasks and warning for failures", () => {
-    expect(
-      resolveOffPeakStatusFooter({ status: "queued", queuePosition: 2 }).icon,
-    ).toBe("moon");
-    expect(resolveOffPeakStatusFooter({ status: "failed" }).icon).toBe(
-      "warning",
-    );
+    expect(resolveOffPeakStatusFooter({ status: "queued", queuePosition: 2 }).icon).toBe("moon");
+    expect(resolveOffPeakStatusFooter({ status: "failed" }).icon).toBe("warning");
   });
 });
 
 describe("resolveFailedOffPeakQueueFooter", () => {
   it("retains a failed task's queue position as a secondary status", () => {
-    expect(
-      resolveFailedOffPeakQueueFooter({ status: "failed", queuePosition: 212 }),
-    ).toMatchObject({
-      icon: "moon",
-      className: "text-idle-task",
-      labelId: "offPeak.badge.queuePosition",
-      labelValues: { position: "212" },
-    });
+    expect(resolveFailedOffPeakQueueFooter({ status: "failed", queuePosition: 212 })).toMatchObject(
+      {
+        icon: "moon",
+        className: "text-idle-task",
+        labelId: "offPeak.badge.queuePosition",
+        labelValues: { position: "212" },
+      },
+    );
   });
 
   it("does not add a secondary status without both failure and a queue position", () => {
     expect(resolveFailedOffPeakQueueFooter({ status: "failed" })).toBeNull();
-    expect(
-      resolveFailedOffPeakQueueFooter({ status: "queued", queuePosition: 212 }),
-    ).toBeNull();
+    expect(resolveFailedOffPeakQueueFooter({ status: "queued", queuePosition: 212 })).toBeNull();
   });
 });
 
 describe("idle-time and scheduled tag colors", () => {
   it("uses the Figma purple semantic tokens for idle-time queue tags", () => {
-    expect(offPeakTaskListSource).toContain(
-      "bg-idle-task-surface py-0.5 pl-1 pr-2 text-idle-task",
-    );
+    expect(offPeakTaskListSource).toContain("bg-idle-task-surface py-0.5 pl-1 pr-2 text-idle-task");
     expect(offPeakTaskListSource).not.toContain("bg-brand/15");
     expect(stylesSource).toContain("--color-idle-task: #9e77ed;");
     expect(stylesSource).toContain("--color-idle-task-surface: #f5f3ff;");
@@ -258,20 +224,14 @@ describe("idle-time and scheduled tag colors", () => {
 describe("off-peak pause presentation", () => {
   it("shows the Pause queue hint and performs the action without confirmation", () => {
     const menuHintStart = offPeakTaskListSource.indexOf("function OffPeakMenuHint");
-    const menuHintEnd = offPeakTaskListSource.indexOf(
-      "const STATUS_ICON",
-      menuHintStart,
-    );
+    const menuHintEnd = offPeakTaskListSource.indexOf("const STATUS_ICON", menuHintStart);
     const menuHintSource = offPeakTaskListSource.slice(menuHintStart, menuHintEnd);
     const pauseBlockStart = offPeakTaskListSource.indexOf("data-testid={TID_OFFPEAK_ACTION_PAUSE}");
     const pauseBlockEnd = offPeakTaskListSource.indexOf(
       'task.status === "paused"',
       pauseBlockStart,
     );
-    const pauseBlock = offPeakTaskListSource.slice(
-      pauseBlockStart,
-      pauseBlockEnd,
-    );
+    const pauseBlock = offPeakTaskListSource.slice(pauseBlockStart, pauseBlockEnd);
 
     expect(menuHintStart).toBeGreaterThanOrEqual(0);
     expect(menuHintEnd).toBeGreaterThan(menuHintStart);
@@ -293,9 +253,7 @@ describe("off-peak pause presentation", () => {
 
 describe("off-peak permission recommendation", () => {
   it("uses a neutral info toast instead of warning semantics", () => {
-    const hintStart = offPeakEditViewSource.indexOf(
-      'id: "offPeak.form.fullAccessHint"',
-    );
+    const hintStart = offPeakEditViewSource.indexOf('id: "offPeak.form.fullAccessHint"');
     const hintEnd = offPeakEditViewSource.indexOf("});", hintStart);
     const hintToast = offPeakEditViewSource.slice(hintStart, hintEnd);
 
@@ -307,14 +265,10 @@ describe("off-peak permission recommendation", () => {
   });
 
   it("centers automation upgrade and running toasts", () => {
-    const topCenterToastCount = automationsSectionSource.match(
-      /position: "top-center"/g,
-    )?.length;
+    const topCenterToastCount = automationsSectionSource.match(/position: "top-center"/g)?.length;
 
     expect(topCenterToastCount).toBe(2);
-    expect(automationsSectionSource).toContain(
-      'anchorId: AUTOMATIONS_TOAST_ANCHOR_ID',
-    );
+    expect(automationsSectionSource).toContain("anchorId: AUTOMATIONS_TOAST_ANCHOR_ID");
   });
 });
 
@@ -329,17 +283,9 @@ describe("off-peak terminal status presentation", () => {
       /task\.status === "completed"\s*\?\s*"opacity-60 hover:bg-hover"\s*:\s*"hover:bg-hover"/,
     );
 
-    const menuTriggerStart = offPeakTaskListSource.indexOf(
-      "data-testid={TID_OFFPEAK_CARD_MENU}",
-    );
-    const menuTriggerEnd = offPeakTaskListSource.indexOf(
-      "</button>",
-      menuTriggerStart,
-    );
-    const menuTriggerSource = offPeakTaskListSource.slice(
-      menuTriggerStart,
-      menuTriggerEnd,
-    );
+    const menuTriggerStart = offPeakTaskListSource.indexOf("data-testid={TID_OFFPEAK_CARD_MENU}");
+    const menuTriggerEnd = offPeakTaskListSource.indexOf("</button>", menuTriggerStart);
+    const menuTriggerSource = offPeakTaskListSource.slice(menuTriggerStart, menuTriggerEnd);
 
     expect(menuTriggerStart).toBeGreaterThanOrEqual(0);
     expect(menuTriggerSource).toContain("disabled={busy}");

@@ -24,10 +24,12 @@
 ### Task 1: Revision 23 shared contract
 
 **Files:**
+
 - Modify: `packages/shared/src/conversation-share.ts:121-217`
 - Test: `packages/shared/test/conversationShareContract.test.ts:54-270`
 
 **Interfaces:**
+
 - Produces: `ConversationShareIntegrity` with exactly two hashes.
 - Produces: `ConversationShareConfirmRequest` with exactly four top-level fields.
 - Consumers: HTTP client, service integrity builder, mock transport, Preview and Continuation parsers.
@@ -91,12 +93,14 @@ Expected: PASS.
 ### Task 2: Slim confirm construction and preparation idempotency
 
 **Files:**
+
 - Modify: `packages/services/src/conversation-share/conversationShareIntegrity.ts:1-105`
 - Modify: `packages/services/src/conversation-share/conversationShareService.ts:145-174`
 - Test: `packages/services/test/conversationShareIntegrity.test.ts:55-104`
 - Test: `packages/services/test/conversationShareService.test.ts:190-230`
 
 **Interfaces:**
+
 - Consumes: revision 23 `ConversationShareConfirmRequest` from Task 1.
 - Produces: `buildConversationShareConfirmRequest(input)` returning the slim DTO.
 - Produces: `sha256ConversationShareJson(confirmRequest)` passed only as `preparation.payload_sha256`.
@@ -122,9 +126,7 @@ In the service test, assert:
 ```ts
 expect(confirmRequests[0]).not.toHaveProperty("payload_sha256");
 expect(confirmRequests[0].integrity).not.toHaveProperty("payload_sha256");
-expect(preparationRequests[0].payload_sha256).toBe(
-  sha256ConversationShareJson(confirmRequests[0]),
-);
+expect(preparationRequests[0].payload_sha256).toBe(sha256ConversationShareJson(confirmRequests[0]));
 ```
 
 Also assert preparation metadata still comes from `PublishTextConversationInput`, because it is no longer present on the confirm request.
@@ -140,10 +142,7 @@ Expected: FAIL because the builder and service still use legacy confirm fields a
 Define the builder input as the slim confirm fields plus a local-only artifact descriptor array:
 
 ```ts
-type ConversationShareConfirmRequestBase = Omit<
-  ConversationShareConfirmRequest,
-  "integrity"
-> & {
+type ConversationShareConfirmRequestBase = Omit<ConversationShareConfirmRequest, "integrity"> & {
   artifacts: ConversationShareArtifactDescriptor[];
 };
 ```
@@ -161,11 +160,13 @@ Expected: PASS.
 ### Task 3: HTTP serialization and stateful mock reconstruction
 
 **Files:**
+
 - Modify: `packages/services/src/conversation-share/conversationShareMockApiClient.ts:1-458`
 - Test: `packages/services/test/conversationShareHttpClient.test.ts:102-227`
 - Test: `packages/services/test/conversationShareMockApiClient.test.ts:1-330`
 
 **Interfaces:**
+
 - Consumes: slim confirm DTO and two-hash integrity from Tasks 1-2.
 - Produces: Mock Preview/Continuation responses whose metadata comes from preparation and whose artifact list comes from successful uploads.
 
@@ -174,10 +175,7 @@ Expected: PASS.
 Update the HTTP logging/serialization fixture to the slim body and assert the serialized body equals it exactly. In Mock lifecycle tests, assert Preview and Continuation integrity contain exactly:
 
 ```ts
-expect(Object.keys(preview.integrity).sort()).toEqual([
-  "artifact_set_sha256",
-  "projection_sha256",
-]);
+expect(Object.keys(preview.integrity).sort()).toEqual(["artifact_set_sha256", "projection_sha256"]);
 ```
 
 Add a strict rejection test showing that a legacy confirm body with `payload_sha256` returns code `3001`. Keep the existing upload-incomplete and invalid-public-row cases, but construct their preparation hash with `sha256ConversationShareJson(confirmRequest)`.
@@ -219,11 +217,13 @@ Expected: PASS.
 ### Task 4: Affected-suite and mechanical verification
 
 **Files:**
+
 - Verify: `packages/shared/test/conversationShareContract.test.ts`
 - Verify: `packages/services/test/conversationShare*.test.ts`
 - Verify: `docs/superpowers/specs/2026-08-10-conversation-share-api-integration-design.md`
 
 **Interfaces:**
+
 - Consumes: all prior tasks.
 - Produces: verified revision 23 implementation with no unrelated changes staged.
 

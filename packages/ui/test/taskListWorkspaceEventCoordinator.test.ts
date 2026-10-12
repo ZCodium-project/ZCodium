@@ -4,10 +4,7 @@ import {
   clearTaskListWorkspaceEventCoordinatorForTest,
   handleTaskListWorkspaceEventCacheSync,
 } from "@/lib/taskListWorkspaceEventCoordinator.js";
-import {
-  buildTaskListCacheDescriptor,
-  buildTaskWorkspaceKey,
-} from "@/lib/taskQueryCache.js";
+import { buildTaskListCacheDescriptor, buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
 import { useTaskQueryCacheStore } from "@/store/taskQueryCacheStore.js";
 import { useZCodeSessionStore } from "@/store/zcodeSessionStore.js";
 
@@ -39,7 +36,9 @@ function createDescriptor(kind: "active" | "archived" | "pinned") {
 function taskIdsFor(queryKey: string): string[] {
   const cacheState = useTaskQueryCacheStore.getState();
   const result = cacheState.resultsByQueryKey[queryKey];
-  return result?.taskKeys.map((taskKey) => cacheState.taskMetaByEntityKey[taskKey]?.taskId ?? "") ?? [];
+  return (
+    result?.taskKeys.map((taskKey) => cacheState.taskMetaByEntityKey[taskKey]?.taskId ?? "") ?? []
+  );
 }
 
 function createDeleteEvent(taskId: string): ZCodeWorkspaceTaskListChanged {

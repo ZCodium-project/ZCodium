@@ -8,14 +8,14 @@ WebdriverIO is an automation framework that relies on various automation protoco
 Internally WebdriverIO uses protocol commands for almost all interactions with the remote agent. However additional commands assigned to the [Browser](/docs/api/browser) or [Element](/docs/api/element) Object simplify the usage of WebdriverIO, e.g. getting the text of an element using protocol commands would look like this:
 
 ```js
-const searchInput = await browser.findElement('css selector', '#lst-ib')
-await client.getElementText(searchInput['element-6066-11e4-a52e-4f735466cecf'])
+const searchInput = await browser.findElement("css selector", "#lst-ib");
+await client.getElementText(searchInput["element-6066-11e4-a52e-4f735466cecf"]);
 ```
 
 Using the convenient commands of the [Browser](/docs/api/browser) or [Element](/docs/api/element) Object this can be reduced to:
 
 ```js
-$('#lst-ib').getText()
+$("#lst-ib").getText();
 ```
 
 The following section explain each individual protocol.
@@ -61,8 +61,8 @@ The [Selenium Standalone](https://www.selenium.dev/documentation/grid/advanced_f
 
 ## JSON Wire Protocol
 
-The [JSON Wire Protocol](https://www.selenium.dev/documentation/legacy/json_wire_protocol/) is the pre-predecessor of the WebDriver protocol and __deprecated__ today. While some commands might still be supported in certain environments, it is not recommended to use any of its commands.
+The [JSON Wire Protocol](https://www.selenium.dev/documentation/legacy/json_wire_protocol/) is the pre-predecessor of the WebDriver protocol and **deprecated** today. While some commands might still be supported in certain environments, it is not recommended to use any of its commands.
 
 ## Mobile JSON Wire Protocol
 
-The [Mobile JSON Wire Protocol](https://github.com/SeleniumHQ/mobile-spec/blob/master/spec-draft.md) is a super set of mobile commands on top of the JSON Wire Protocol. Given this one is deprecated the Mobile JSON Wire Protocol also got __deprecated__. Appium might still support some of its commands but it is not recommended to use them.
+The [Mobile JSON Wire Protocol](https://github.com/SeleniumHQ/mobile-spec/blob/master/spec-draft.md) is a super set of mobile commands on top of the JSON Wire Protocol. Given this one is deprecated the Mobile JSON Wire Protocol also got **deprecated**. Appium might still support some of its commands but it is not recommended to use them.

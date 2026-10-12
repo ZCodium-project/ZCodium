@@ -4,10 +4,7 @@
 // 事件 → reducer onCompactLifecycle → timelineMarker compact/manual/success。
 // 证明 slash 命令入口 + compact 全链路（命令面已桥接，仅补 UI 触发）。
 import { TID_V4_COMPOSER_INPUT } from "@zcode/shared";
-import {
-  clearAppData,
-  setInputValueByTestIdDom,
-} from "../helpers/desktop-app.js";
+import { clearAppData, setInputValueByTestIdDom } from "../helpers/desktop-app.js";
 import {
   clickV4Send,
   prepareV4ConversationE2E,
@@ -30,8 +27,7 @@ describe("v4 M4 门禁：compact（/compact slash）", () => {
     await sendV4Prompt("E2E_V4_COMPACT_SEED 请回复种子");
     await waitForV4TimelineContaining("V4_COMPACT_SEED_OK", 45000);
     await waitForV4Pane(
-      (s) =>
-        !s.canStop && s.sessionId !== "draft" && s.sessionId !== null,
+      (s) => !s.canStop && s.sessionId !== "draft" && s.sessionId !== null,
       "首轮没有回到空闲态",
       45000,
     );

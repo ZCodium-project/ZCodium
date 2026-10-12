@@ -1,9 +1,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { clearAppData } from "../../../helpers/desktop-app.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../../../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../../../helpers/e2e-runtime-paths.js";
 import {
   E2E_REPLY_TOKEN,
   openAssistantHistoryForAssistantContaining,
@@ -16,9 +13,7 @@ import {
   waitForUserMessageContaining,
 } from "../../../helpers/conversation-session.js";
 
-const TOOL_ACTION_RUNTIME_ROOT = resolveE2ERuntimePath(
-  "conversation-session-tool-actions",
-);
+const TOOL_ACTION_RUNTIME_ROOT = resolveE2ERuntimePath("conversation-session-tool-actions");
 const TOOL_FILE_PATH = resolveE2EToolPath(
   "conversation-session-tool-actions",
   "tool-action-guard.txt",
@@ -36,16 +31,11 @@ describe("会话区 Tool Action Guard E2E", () => {
 
     const runId = Date.now();
     await mkdir(TOOL_ACTION_RUNTIME_ROOT, { recursive: true });
-    await writeFile(
-      TOOL_FILE_PATH,
-      `E2E_TOOL_FILE_CONTENT_${runId}\n`,
-      "utf-8",
-    );
+    await writeFile(TOOL_FILE_PATH, `E2E_TOOL_FILE_CONTENT_${runId}\n`, "utf-8");
 
     await prepareConversationE2E();
 
-    const prompt =
-      `E2E_TOOL_ACTION_GUARD_${runId}: Read ${TOOL_FILE_PATH}, then reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const prompt = `E2E_TOOL_ACTION_GUARD_${runId}: Read ${TOOL_FILE_PATH}, then reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendPrompt(prompt);
     await waitForComposerText("", "tool action guard 首发后输入框没有清空");
     await waitForUserMessageContaining(`E2E_TOOL_ACTION_GUARD_${runId}`);

@@ -128,15 +128,20 @@ describe("Guarded dangerous command once approval", () => {
       const color = mode === "guarded" ? "icon-blue" : "warning";
       expect(await trigger.$(`svg.lucide-${icon}`).isExisting()).toBe(true);
       await browser.waitUntil(
-        () => browser.execute((triggerId, token) => {
-          const element = document.querySelector<HTMLElement>(`[data-testid="${triggerId}"]`)!;
-          const probe = document.createElement("span");
-          probe.style.color = `var(--color-${token})`;
-          element.append(probe);
-          const expected = getComputedStyle(probe).color;
-          probe.remove();
-          return getComputedStyle(element).color === expected;
-        }, TID_CHAT_MODE_SELECT_TRIGGER, color),
+        () =>
+          browser.execute(
+            (triggerId, token) => {
+              const element = document.querySelector<HTMLElement>(`[data-testid="${triggerId}"]`)!;
+              const probe = document.createElement("span");
+              probe.style.color = `var(--color-${token})`;
+              element.append(probe);
+              const expected = getComputedStyle(probe).color;
+              probe.remove();
+              return getComputedStyle(element).color === expected;
+            },
+            TID_CHAT_MODE_SELECT_TRIGGER,
+            color,
+          ),
         { timeout: 5000, timeoutMsg: `${mode} trigger color` },
       );
       await sendV4Prompt(marker + " Run the isolated cleanup command once.");

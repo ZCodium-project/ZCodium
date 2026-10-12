@@ -162,11 +162,8 @@ async function confirmModelSwitchCompressionDialog() {
   await waitForModelSwitchCompressionDialog(15000);
 
   const clicked = await browser.execute(() => {
-    const dialog =
-      document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
-    const buttons = Array.from(
-      dialog.querySelectorAll<HTMLButtonElement>("button"),
-    );
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]') ?? document.body;
+    const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
     const confirmButton = buttons.find((button) => {
       const text = button.innerText.replace(/\s+/g, " ").trim();
       return (
@@ -232,12 +229,13 @@ async function expectToolbarConfig(model: string, thoughtLevel: string) {
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   const matchedThoughtLevel = labelCandidates.some((label) =>
-    expectedLabels.some((expectedLabel) => label === expectedLabel || label.includes(expectedLabel)),
+    expectedLabels.some(
+      (expectedLabel) => label === expectedLabel || label.includes(expectedLabel),
+    ),
   );
   if (!matchedThoughtLevel) {
     throw new Error(

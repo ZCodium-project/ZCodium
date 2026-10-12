@@ -60,11 +60,9 @@ describe("定时任务自定义长月度间隔 E2E", () => {
     });
 
     // 回归保护：上下箭头必须驱动受控输入值，并在 0–200 边界禁用，不能只渲染图标。
-    await setInputValueByTestIdDom(
-      TID_AUTOMATION_CUSTOM_INTERVAL_SELECT,
-      "199",
-      { timeoutMsg: "自定义重复弹窗没有可输入的频率控件" },
-    );
+    await setInputValueByTestIdDom(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT, "199", {
+      timeoutMsg: "自定义重复弹窗没有可输入的频率控件",
+    });
     await clickTestIdByDom(TID_AUTOMATION_CUSTOM_INTERVAL_INCREMENT, {
       timeoutMsg: "自定义重复频率的增加按钮不可点击",
     });
@@ -81,27 +79,21 @@ describe("定时任务自定义长月度间隔 E2E", () => {
       timeoutMsg: "自定义重复频率的减少按钮不可点击",
     });
     await browser.waitUntil(
-      async () =>
-        (await readInputValueByTestId(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)) === "199",
+      async () => (await readInputValueByTestId(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)) === "199",
       {
         timeout: 10000,
         timeoutMsg: "频率减少后没有更新为 199",
       },
     );
     await setInputValueByTestIdDom(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT, "0");
-    await browser.waitUntil(
-      () => isTestIdDisabled(TID_AUTOMATION_CUSTOM_INTERVAL_DECREMENT),
-      {
-        timeout: 10000,
-        timeoutMsg: "频率为 0 时没有禁用减少按钮",
-      },
-    );
+    await browser.waitUntil(() => isTestIdDisabled(TID_AUTOMATION_CUSTOM_INTERVAL_DECREMENT), {
+      timeout: 10000,
+      timeoutMsg: "频率为 0 时没有禁用减少按钮",
+    });
 
-    await setInputValueByTestIdDom(
-      TID_AUTOMATION_CUSTOM_INTERVAL_SELECT,
-      TARGET_INTERVAL,
-      { timeoutMsg: "自定义重复弹窗没有可输入的频率控件" },
-    );
+    await setInputValueByTestIdDom(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT, TARGET_INTERVAL, {
+      timeoutMsg: "自定义重复弹窗没有可输入的频率控件",
+    });
     await selectRadixOption(
       TID_AUTOMATION_CUSTOM_UNIT_SELECT,
       testId(TID_AUTOMATION_CUSTOM_UNIT_OPTION, "monthly"),
@@ -135,7 +127,9 @@ describe("定时任务自定义长月度间隔 E2E", () => {
     await waitForTestIdByDom(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT, {
       timeoutMsg: "重新进入编辑后没有复原自定义重复控件",
     });
-    expect(await readInputValueByTestId(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)).toBe(TARGET_INTERVAL);
+    expect(await readInputValueByTestId(TID_AUTOMATION_CUSTOM_INTERVAL_SELECT)).toBe(
+      TARGET_INTERVAL,
+    );
   });
 });
 

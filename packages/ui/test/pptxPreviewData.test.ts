@@ -33,8 +33,7 @@ describe("PPTX preview data loading", () => {
     await expect(
       readPptxPreviewData({
         fileSize: 3,
-        readRange: async (offset) =>
-          offset === 0 ? new Uint8Array([1, 2]) : new Uint8Array([3]),
+        readRange: async (offset) => (offset === 0 ? new Uint8Array([1, 2]) : new Uint8Array([3])),
         isDisposed: () => false,
       }),
     ).resolves.toEqual(new Uint8Array([1, 2, 3]).buffer);

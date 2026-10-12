@@ -22,12 +22,14 @@
 ### Task 1: 添加并验证 Web favicon
 
 **Files:**
+
 - Modify: `packages/web/test/webRemoteControlBootstrapShell.test.ts`
 - Create: `packages/web/public/favicon.ico`
 - Modify: `packages/web/index.html`
 - Modify: `docs/superpowers/specs/2026-07-10-web-remote-control-favicon-design.md`
 
 **Interfaces:**
+
 - Consumes: `public/logo/icons/32x32.png` 小尺寸 App 图标和 `packages/desktop/build/icon.ico` 品牌资产。
 - Produces: base 无关的 `<link rel="icon" type="image/png" href="data:image/png;base64,..." sizes="32x32">` metadata，以及构建后进入 `dist` 的传统 `favicon.ico` 静态文件。
 

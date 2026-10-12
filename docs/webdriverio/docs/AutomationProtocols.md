@@ -19,7 +19,7 @@ The WebDriver protocol was designed to automate a browser from the user perspect
 
 To use this automation protocol, you need a proxy server that translates all commands and executes them in the target environment (i.e. the browser or the mobile app).
 
-For browser automation, the proxy server is usually the browser driver. There are drivers  available for all browsers:
+For browser automation, the proxy server is usually the browser driver. There are drivers available for all browsers:
 
 - Chrome – [ChromeDriver](http://chromedriver.chromium.org/downloads)
 - Firefox – [Geckodriver](https://github.com/mozilla/geckodriver/releases)

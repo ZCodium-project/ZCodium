@@ -6,19 +6,13 @@ vi.mock("@/components/ui/tooltip.js", () => ({
   Tooltip: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   TooltipContent: ({ children }: { children?: ReactNode }) =>
     createElement("div", { role: "tooltip" }, children),
-  TooltipProvider: ({ children }: { children?: ReactNode }) =>
-    createElement("div", null, children),
+  TooltipProvider: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
   TooltipTrigger: ({ children }: { children?: ReactNode }) => children,
 }));
 
 vi.mock("@/components/ai-elements/message.js", () => ({
-  MessageResponse: ({
-    children,
-    className,
-  }: {
-    children?: ReactNode;
-    className?: string;
-  }) => createElement("div", { "data-message-class": className }, children),
+  MessageResponse: ({ children, className }: { children?: ReactNode; className?: string }) =>
+    createElement("div", { "data-message-class": className }, children),
 }));
 
 import { UpdateReleaseNotesTooltip } from "@/UpdateReleaseNotesTooltip.js";

@@ -680,9 +680,7 @@ export function RemoteConnectionFields({
               )}
             >
               {intl.formatMessage({
-                id: wslUserIsInvalid
-                  ? "wsl.validation.invalidUser"
-                  : "wsl.userDescription",
+                id: wslUserIsInvalid ? "wsl.validation.invalidUser" : "wsl.userDescription",
               })}
             </p>
           </div>

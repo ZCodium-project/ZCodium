@@ -46,17 +46,17 @@ Host cleanup 卡住或旧版本异常退出时，WSL 内 detached `zcode-cli` �
 
 ## 回收时点
 
-| 事件 | 是否回收 | 范围 | 原因 |
-| --- | --- | --- | --- |
-| 关闭一个真实 BrowserWindow | 是 | 该窗口 Local Host、dedicated sessions、共享 SSH Hosts、Bot runtimes | 窗口 owner 已结束 |
-| Windows 关闭按钮隐藏到托盘 | 否 | 无 | 窗口和运行中任务仍存活 |
-| 最小化窗口 | 否 | 无 | 仅可见性变化 |
-| renderer reload / crash recovery | 否 | 仅旧 attachment | Host/CLI 生命周期属于窗口，不属于 renderer |
-| 手机 `/remote` 断线或 bridge dispose | 否 | 仅 mobile attachment | shared-host attachment 不拥有 runtime |
-| `before-quit` / Cmd+Q / 托盘“退出” | 是并等待 | 应用内全部 Local/Remote Hosts | App owner 结束 |
-| 自动更新安装前 | 是并等待 | 应用内全部 Local/Remote Hosts | 释放进程、文件和 runtime 锁后再交接更新 |
-| Host 远端连接异常关闭 | 是 | 当前 Host 的 services、attachments、Agent 和 backend | Host 故障域结束 |
-| Main/Host IPC disconnect | 是，有界 | 当前 Host 全部资源 | 父 owner 已消失 |
+| 事件                                 | 是否回收 | 范围                                                                | 原因                                       |
+| ------------------------------------ | -------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| 关闭一个真实 BrowserWindow           | 是       | 该窗口 Local Host、dedicated sessions、共享 SSH Hosts、Bot runtimes | 窗口 owner 已结束                          |
+| Windows 关闭按钮隐藏到托盘           | 否       | 无                                                                  | 窗口和运行中任务仍存活                     |
+| 最小化窗口                           | 否       | 无                                                                  | 仅可见性变化                               |
+| renderer reload / crash recovery     | 否       | 仅旧 attachment                                                     | Host/CLI 生命周期属于窗口，不属于 renderer |
+| 手机 `/remote` 断线或 bridge dispose | 否       | 仅 mobile attachment                                                | shared-host attachment 不拥有 runtime      |
+| `before-quit` / Cmd+Q / 托盘“退出”   | 是并等待 | 应用内全部 Local/Remote Hosts                                       | App owner 结束                             |
+| 自动更新安装前                       | 是并等待 | 应用内全部 Local/Remote Hosts                                       | 释放进程、文件和 runtime 锁后再交接更新    |
+| Host 远端连接异常关闭                | 是       | 当前 Host 的 services、attachments、Agent 和 backend                | Host 故障域结束                            |
+| Main/Host IPC disconnect             | 是，有界 | 当前 Host 全部资源                                                  | 父 owner 已消失                            |
 
 ## 生命周期状态机
 
@@ -229,15 +229,15 @@ task repository。正常退出删除 registry。
 
 时间预算使用常量并在测试中注入，不散落 magic number：
 
-| 阶段 | 建议默认值 | 说明 |
-| --- | ---: | --- |
-| Agent stdin graceful exit | 300 ms | 复用当前发布态快速路径 |
-| Agent process-tree TERM/KILL fallback | 2,250 ms | 当前 2s + 250ms 兜底 |
-| remote server RPC stop | 1,000 ms | 超时后仍继续 service dispose |
-| remote server service/Agent dispose | 3,500 ms | 覆盖 Agent process-tree fallback |
-| Host remote stream close | 5,000 ms | 覆盖 server 两阶段并留调度余量 |
-| Main per-host force fallback | 6,000 ms | 必须晚于 Host/remote 正常预算 |
-| App/update aggregate barrier | 8,000 ms | Hosts 并行等待，不按数量累加 |
+| 阶段                                  | 建议默认值 | 说明                             |
+| ------------------------------------- | ---------: | -------------------------------- |
+| Agent stdin graceful exit             |     300 ms | 复用当前发布态快速路径           |
+| Agent process-tree TERM/KILL fallback |   2,250 ms | 当前 2s + 250ms 兜底             |
+| remote server RPC stop                |   1,000 ms | 超时后仍继续 service dispose     |
+| remote server service/Agent dispose   |   3,500 ms | 覆盖 Agent process-tree fallback |
+| Host remote stream close              |   5,000 ms | 覆盖 server 两阶段并留调度余量   |
+| Main per-host force fallback          |   6,000 ms | 必须晚于 Host/remote 正常预算    |
+| App/update aggregate barrier          |   8,000 ms | Hosts 并行等待，不按数量累加     |
 
 E2E coverage 可使用现有 coverage-specific 延长配置。所有 timeout 日志必须包含 phase、host label、PID、
 remote kind 和 elapsedMs；高频协议帧不得提升到 info。
@@ -316,15 +316,15 @@ pnpm lint
 
 ## 风险与缓解
 
-| 风险 | 缓解 |
-| --- | --- |
-| update/app quit 变慢 | Hosts 并行等待；正常退出事件驱动，只有异常进入 deadline |
-| timeout 层级倒置导致上层先杀下层 | 统一预算常量并测试严格顺序：Agent < server < Host < app |
-| 重复窗口/app/update dispose | single-flight + process 对象去重 + registry 先摘除后 await |
-| 误杀用户 WSL 进程 | 禁止 distro terminate；ownerId + PID start time + env + executable 多重校验 |
-| 手机断线误杀 Host | mobile attachment 与 Host owner 分层，bridge dispose 测试 |
-| SSH/Docker 回归 | 统一接口兼容旧 `dispose()`，分别覆盖 backend 行为 |
-| main 持有业务状态 | manager 只持 Host/session 生命周期，不持 task/queue/snapshot |
+| 风险                             | 缓解                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| update/app quit 变慢             | Hosts 并行等待；正常退出事件驱动，只有异常进入 deadline                     |
+| timeout 层级倒置导致上层先杀下层 | 统一预算常量并测试严格顺序：Agent < server < Host < app                     |
+| 重复窗口/app/update dispose      | single-flight + process 对象去重 + registry 先摘除后 await                  |
+| 误杀用户 WSL 进程                | 禁止 distro terminate；ownerId + PID start time + env + executable 多重校验 |
+| 手机断线误杀 Host                | mobile attachment 与 Host owner 分层，bridge dispose 测试                   |
+| SSH/Docker 回归                  | 统一接口兼容旧 `dispose()`，分别覆盖 backend 行为                           |
+| main 持有业务状态                | manager 只持 Host/session 生命周期，不持 task/queue/snapshot                |
 
 ## 实施顺序
 

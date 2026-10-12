@@ -15,10 +15,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_V4_DRAIN_SLOW"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_V4_DRAIN_SLOW"]
       },
       "response": {
         "statusCode": 200,

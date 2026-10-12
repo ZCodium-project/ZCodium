@@ -9,29 +9,17 @@ function makeHome() {
   return mkdtempSync(join(tmpdir(), "zcode-mcp-sync-home-"));
 }
 
-async function writeZcodeUserMcp(
-  home: string,
-  servers: Record<string, Record<string, unknown>>,
-) {
+async function writeZcodeUserMcp(home: string, servers: Record<string, Record<string, unknown>>) {
   const configPath = join(home, ".zcode", "cli", "config.json");
   await mkdir(join(home, ".zcode", "cli"), { recursive: true });
-  await writeFile(
-    configPath,
-    `${JSON.stringify({ mcp: { servers } }, null, 2)}\n`,
-  );
+  await writeFile(configPath, `${JSON.stringify({ mcp: { servers } }, null, 2)}\n`);
   return configPath;
 }
 
-async function writeAgentsUserMcp(
-  home: string,
-  servers: Record<string, Record<string, unknown>>,
-) {
+async function writeAgentsUserMcp(home: string, servers: Record<string, Record<string, unknown>>) {
   const configPath = join(home, ".agents", "mcp.json");
   await mkdir(join(home, ".agents"), { recursive: true });
-  await writeFile(
-    configPath,
-    `${JSON.stringify({ mcpServers: servers }, null, 2)}\n`,
-  );
+  await writeFile(configPath, `${JSON.stringify({ mcpServers: servers }, null, 2)}\n`);
   return configPath;
 }
 
@@ -341,8 +329,7 @@ describe("mcp sync service", () => {
         overwrite: false,
       });
 
-      const configMode = (await stat(join(remoteHome, ".zcode", "cli", "config.json")))
-        .mode;
+      const configMode = (await stat(join(remoteHome, ".zcode", "cli", "config.json"))).mode;
       expect(configMode & 0o777).toBe(0o600);
     } finally {
       process.umask(previousUmask);
@@ -411,9 +398,7 @@ describe("mcp sync service", () => {
         },
       },
     ]);
-    expect(result.servers[0]?.file?.filePath).toBe(
-      join(home, ".zcode", "cli", "config.json"),
-    );
+    expect(result.servers[0]?.file?.filePath).toBe(join(home, ".zcode", "cli", "config.json"));
   });
 
   it("loads workspace MCP before user MCP using the same directory precedence", async () => {

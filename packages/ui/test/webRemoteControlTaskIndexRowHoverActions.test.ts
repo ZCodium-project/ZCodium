@@ -53,7 +53,9 @@ const stableIntl = {
   formatMessage: ({ id }: { id: string }) => id,
 };
 
-function createTask(overrides: Partial<WebRemoteControlTaskTarget> = {}): WebRemoteControlTaskTarget {
+function createTask(
+  overrides: Partial<WebRemoteControlTaskTarget> = {},
+): WebRemoteControlTaskTarget {
   return {
     createdAt: 1,
     taskId: "task-1",
@@ -214,8 +216,7 @@ describe("WebRemoteControlTaskIndexRow hover actions", () => {
   afterEach(() => {
     delete (globalThis as { document?: unknown }).document;
     delete (globalThis as { window?: unknown }).window;
-    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-      .IS_REACT_ACT_ENVIRONMENT;
+    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
   });
 
   it("renders pin and archive actions from row hover state", async () => {

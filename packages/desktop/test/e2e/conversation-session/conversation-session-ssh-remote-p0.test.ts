@@ -880,9 +880,7 @@ function readRemoteTabSnapshot(expectedIdentity: string): Promise<RemoteTabSnaps
   }, expectedIdentity);
 }
 
-async function readHostProcesses(): Promise<
-  Array<{ name: string; pid: number }>
-> {
+async function readHostProcesses(): Promise<Array<{ name: string; pid: number }>> {
   await openResourceManager();
   await switchToElectronRendererTarget(isResourceManagerUrl);
   await waitForResourceManagerReady();

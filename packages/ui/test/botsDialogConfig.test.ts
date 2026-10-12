@@ -41,12 +41,12 @@ describe("BotsDialog config", () => {
       "assistant_toolcalls_changes",
       "summary_changes",
     ]);
-    expect(
-      getBotReplyGranularityEntryForProvider("feishu", "assistant_changes").id,
-    ).toBe("streaming_card");
-    expect(
-      getBotReplyGranularityEntryForProvider("telegram", "streaming_card").id,
-    ).toBe("assistant_changes");
+    expect(getBotReplyGranularityEntryForProvider("feishu", "assistant_changes").id).toBe(
+      "streaming_card",
+    );
+    expect(getBotReplyGranularityEntryForProvider("telegram", "streaming_card").id).toBe(
+      "assistant_changes",
+    );
   });
 
   it("keeps bind state actions localized", () => {
@@ -73,13 +73,11 @@ describe("BotsDialog config", () => {
       label: "Lark",
       implemented: true,
     });
-    expect(BOT_PROVIDERS.find((provider) => provider.id === "dingding")).toEqual(
-      {
-        id: "dingding",
-        label: "DingTalk",
-        implemented: false,
-      },
-    );
+    expect(BOT_PROVIDERS.find((provider) => provider.id === "dingding")).toEqual({
+      id: "dingding",
+      label: "DingTalk",
+      implemented: false,
+    });
     expect(enUS["bots.channel.dingding"]).toBeTruthy();
     expect(zhCN["bots.channel.dingding"]).toBeTruthy();
     expect(enUS["bots.newBot.providerDescription.lark"]).toBeTruthy();
@@ -89,12 +87,8 @@ describe("BotsDialog config", () => {
   });
 
   it("uses welcome screen region tags for Feishu and Lark bot entries", () => {
-    expect(getBotProviderRegionTagLabelId("lark")).toBe(
-      "login.oauth.regionTag.zai",
-    );
-    expect(getBotProviderRegionTagLabelId("feishu")).toBe(
-      "login.oauth.regionTag.bigmodel",
-    );
+    expect(getBotProviderRegionTagLabelId("lark")).toBe("login.oauth.regionTag.zai");
+    expect(getBotProviderRegionTagLabelId("feishu")).toBe("login.oauth.regionTag.bigmodel");
     expect(getBotProviderRegionTagLabelId("telegram")).toBeNull();
     expect(enUS["login.oauth.regionTag.zai"]).toBe("Global");
     expect(zhCN["login.oauth.regionTag.zai"]).toBe("全球");
@@ -116,9 +110,7 @@ describe("BotsDialog config", () => {
   });
 
   it("resolves remote-control bot entry to provider creation when no bot exists", () => {
-    expect(
-      resolveBotProviderEntry([createBot("weixin-one", "weixin")], "feishu"),
-    ).toEqual({
+    expect(resolveBotProviderEntry([createBot("weixin-one", "weixin")], "feishu")).toEqual({
       mode: "create",
       provider: "feishu",
     });

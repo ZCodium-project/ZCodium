@@ -15,8 +15,7 @@ export const ACKNOWLEDGED_WEB_REMOTE_CONTROL_RELAY_LIMITS = {
   assemblyTimeoutMs: WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS.assemblyTimeoutMs,
 } as const;
 
-export interface AcknowledgedWebRemoteControlRelayProtocolOptions
-  extends WebRemoteControlRpcTransportIdentity {
+export interface AcknowledgedWebRemoteControlRelayProtocolOptions extends WebRemoteControlRpcTransportIdentity {
   sendFrame(payload: WebRemoteControlRpcTransportPayload): boolean | void;
   measureFrameBytes?(payload: WebRemoteControlRpcTransportFramePayload): number;
   saturationHighWaterMarkBytes?: number;
@@ -27,8 +26,7 @@ export interface AcknowledgedWebRemoteControlRelayProtocolOptions
   now?: () => number;
 }
 
-export interface AcknowledgedWebRemoteControlRelayProtocolAdapter
-  extends ConnectionFlowControl {
+export interface AcknowledgedWebRemoteControlRelayProtocolAdapter extends ConnectionFlowControl {
   readonly protocol: IMessagePassingProtocol;
   readonly onDegraded: Event<WebRemoteControlRpcTransportFault>;
   acceptPayload(payload: unknown): boolean;
@@ -145,8 +143,7 @@ export function resolveAcknowledgedRelayLimits(
     ),
     assemblyTimeoutMs: Math.min(
       requirePositiveSafeInteger(
-        options.assemblyTimeoutMs ??
-          ACKNOWLEDGED_WEB_REMOTE_CONTROL_RELAY_LIMITS.assemblyTimeoutMs,
+        options.assemblyTimeoutMs ?? ACKNOWLEDGED_WEB_REMOTE_CONTROL_RELAY_LIMITS.assemblyTimeoutMs,
         "assemblyTimeoutMs",
       ),
       ACKNOWLEDGED_WEB_REMOTE_CONTROL_RELAY_LIMITS.assemblyTimeoutMs,

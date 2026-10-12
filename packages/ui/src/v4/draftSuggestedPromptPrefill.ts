@@ -55,9 +55,7 @@ export async function buildDraftSuggestedPromptPrefill({
     return { text };
   }
 
-  const entry = catalog.find(
-    (candidate) => candidate.pluginId === plugin.stableId,
-  );
+  const entry = catalog.find((candidate) => candidate.pluginId === plugin.stableId);
   // Bug 原因：缺失和禁用此前与冲突共用静默降级分支，调用层无法区分需要告知用户的状态。
   // catalog 无条目即代表当前 workspace 未安装，无需再发起一套安装状态查询。
   if (!entry || !entry.enabled) {

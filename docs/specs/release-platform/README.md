@@ -2,12 +2,12 @@
 
 这是 z-code 与独立打包平台之间的 v1 契约入口。
 
-| 文件 | 用途 |
-| --- | --- |
-| [`release-candidate.v1.schema.json`](./release-candidate.v1.schema.json) | 候选版本和平台制品的机器校验 Schema |
-| [`release-platform.v1.openapi.yaml`](./release-platform.v1.openapi.yaml) | Control plane REST API 的 OpenAPI 3.1 描述 |
-| [`release-platform-api-v1.md`](./release-platform-api-v1.md) | 状态机、校验规则、错误、事件、安全和迁移约束 |
-| [`docs/adr/0004-release-packaging-platform-contract.md`](../../adr/0004-release-packaging-platform-contract.md) | 为什么由平台托管候选状态和正式发布 |
+| 文件                                                                                                            | 用途                                         |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| [`release-candidate.v1.schema.json`](./release-candidate.v1.schema.json)                                        | 候选版本和平台制品的机器校验 Schema          |
+| [`release-platform.v1.openapi.yaml`](./release-platform.v1.openapi.yaml)                                        | Control plane REST API 的 OpenAPI 3.1 描述   |
+| [`release-platform-api-v1.md`](./release-platform-api-v1.md)                                                    | 状态机、校验规则、错误、事件、安全和迁移约束 |
+| [`docs/adr/0004-release-packaging-platform-contract.md`](../../adr/0004-release-packaging-platform-contract.md) | 为什么由平台托管候选状态和正式发布           |
 
 ## v1 实现前必须完成
 

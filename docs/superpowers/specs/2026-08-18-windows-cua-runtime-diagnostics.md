@@ -26,12 +26,12 @@ node_modules/...     ← 实际安装：8/10 装的旧提交（不一致）
 
 于是同一个符号在两处结论相反：
 
-| 事实 | node_modules（旧） | producer main@72a8487d（真） |
-|---|---|---|
-| `package.json.zcodeCuaRuntime` | 无 | **有** |
-| `dist/windows-helper.js` | 无 | **有（已入库）** |
-| `WINDOWS_DEV_CONTROL_PROTOCOL` | 无导出 | **有**（`windowsDevHelperMain.ts:17`） |
-| `ports.ts` 的 controller 端口 | 无 | **有**（`CuaController*` + take/stop） |
+| 事实                           | node_modules（旧） | producer main@72a8487d（真）           |
+| ------------------------------ | ------------------ | -------------------------------------- |
+| `package.json.zcodeCuaRuntime` | 无                 | **有**                                 |
+| `dist/windows-helper.js`       | 无                 | **有（已入库）**                       |
+| `WINDOWS_DEV_CONTROL_PROTOCOL` | 无导出             | **有**（`windowsDevHelperMain.ts:17`） |
+| `ports.ts` 的 controller 端口  | 无                 | **有**（`CuaController*` + take/stop） |
 
 那 8 个 TS 错误全部由此而来，不是 producer 回归。基于错误前提的改动已由
 `b99a74dbdf` 整体回退（被误删的 controller 端口和协议常量单源引入均已还原）。
@@ -110,7 +110,6 @@ pnpm dev:desktop ────┤
   不回退安装包资源」的既有边界。
 - 依赖仓库 `.npmrc` 的 `node-linker=hoisted` 让该路径是物理目录。换 isolated linker 时它是
   symlink，解析按 `development-root-not-found` fail closed，并由 3.1 的日志说明原因。
-
 
 ## 4. 复核过、确认「不是差距」的项
 

@@ -48,8 +48,7 @@ export function estimateSmoothMetricLinesPerSecond(input: {
 
   const sampledLinesPerSecond = (delta / input.elapsedMs) * 1_000;
   const smoothed =
-    input.previousLinesPerSecond * (1 - SPEED_EMA_ALPHA) +
-    sampledLinesPerSecond * SPEED_EMA_ALPHA;
+    input.previousLinesPerSecond * (1 - SPEED_EMA_ALPHA) + sampledLinesPerSecond * SPEED_EMA_ALPHA;
   return clampMetricSpeed(smoothed);
 }
 

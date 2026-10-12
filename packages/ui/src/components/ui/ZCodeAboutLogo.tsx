@@ -26,10 +26,7 @@ export function ZCodeAboutLogo({ className }: { className?: string }) {
           <stop offset="1" stopColor="#818cf8" />
         </linearGradient>
       </defs>
-      <path
-        fill="url(#zcode-brand-z-gradient)"
-        d="M184 224H512L453 308Q439 328 415 328H184Z"
-      />
+      <path fill="url(#zcode-brand-z-gradient)" d="M184 224H512L453 308Q439 328 415 328H184Z" />
       <path fill="url(#zcode-brand-z-gradient)" d="M584 224H832L424 800H176Z" />
       <path
         fill="url(#zcode-brand-z-gradient)"

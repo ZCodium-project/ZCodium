@@ -9,15 +9,17 @@ describe("normalizePowerShellReadlineRedraw", () => {
 
     const result = normalizePowerShellReadlineRedraw(input, "powershell.exe");
 
-    expect(result).toBe(`${ESC}[1;29H${ESC}[93mls${ESC}[37m${ESC}[49m  ${ESC}[37m${ESC}[49m${ESC}[0m${ESC}[1;33H`);
+    expect(result).toBe(
+      `${ESC}[1;29H${ESC}[93mls${ESC}[37m${ESC}[49m  ${ESC}[37m${ESC}[49m${ESC}[0m${ESC}[1;33H`,
+    );
   });
 
   it("should handle PowerShell 7 shell names", () => {
     const input = `${ESC}[1;29H${ESC}[37m${ESC}[40m  `;
 
-    expect(normalizePowerShellReadlineRedraw(input, "C:\\Program Files\\PowerShell\\7\\pwsh.exe")).toBe(
-      `${ESC}[1;29H${ESC}[37m${ESC}[49m  `,
-    );
+    expect(
+      normalizePowerShellReadlineRedraw(input, "C:\\Program Files\\PowerShell\\7\\pwsh.exe"),
+    ).toBe(`${ESC}[1;29H${ESC}[37m${ESC}[49m  `);
   });
 
   it("should leave non-PowerShell data unchanged", () => {

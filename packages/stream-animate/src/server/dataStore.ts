@@ -7,7 +7,10 @@ import type { RunSummary } from "../shared/types.js";
 export const DATA_DIR_NAME = ".stream-animate-data";
 
 export function createRunId(now = new Date()) {
-  const stamp = now.toISOString().replaceAll(/[-:.TZ]/gu, "").slice(0, 14);
+  const stamp = now
+    .toISOString()
+    .replaceAll(/[-:.TZ]/gu, "")
+    .slice(0, 14);
   const suffix = Math.random().toString(36).slice(2, 8);
   return `${stamp}-${suffix}`;
 }
@@ -50,7 +53,9 @@ export async function listRuns(packageRoot: string) {
   const runsRoot = join(getDataDir(packageRoot), "runs");
   const summaryPaths = await collectSummaryPaths(runsRoot);
   const runs = await Promise.all(
-    summaryPaths.map(async (summaryPath) => JSON.parse(await readFile(summaryPath, "utf-8")) as RunSummary),
+    summaryPaths.map(
+      async (summaryPath) => JSON.parse(await readFile(summaryPath, "utf-8")) as RunSummary,
+    ),
   );
   return runs.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }

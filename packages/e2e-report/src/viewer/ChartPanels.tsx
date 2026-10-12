@@ -15,14 +15,7 @@ import { Line } from "react-chartjs-2";
 import type { PerformanceTrends, TrendSeries } from "./trendData.js";
 import { formatNumber } from "./format.js";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
 export function TrendPanels({
   trendError,
@@ -89,12 +82,7 @@ function TrendLinePanel({
   );
 }
 
-function Panel(props: {
-  children: ReactNode;
-  meta?: string;
-  title: string;
-  wide?: boolean;
-}) {
+function Panel(props: { children: ReactNode; meta?: string; title: string; wide?: boolean }) {
   return (
     <section className={props.wide ? "panel wide" : "panel"}>
       <div className="panelHeader">
@@ -157,10 +145,7 @@ function buildLineOptions(unit: string): ChartOptions<"line"> {
         callbacks: {
           label(context: TooltipItem<"line">) {
             const value = Number(context.raw ?? 0);
-            return `${context.dataset.label ?? "Value"}: ${formatNumber(
-              value,
-              unit,
-            )}`;
+            return `${context.dataset.label ?? "Value"}: ${formatNumber(value, unit)}`;
           },
         },
       },
@@ -213,11 +198,7 @@ function resolveChartColor(color: string) {
   if (!cssVariable) {
     return color;
   }
-  return (
-    getComputedStyle(document.documentElement)
-      .getPropertyValue(cssVariable)
-      .trim() || color
-  );
+  return getComputedStyle(document.documentElement).getPropertyValue(cssVariable).trim() || color;
 }
 
 function withAlpha(color: string, alpha: number) {
@@ -247,13 +228,9 @@ function hexToRgb(color: string): [number, number, number] {
 }
 
 function chartTextColor() {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue("--muted")
-    .trim();
+  return getComputedStyle(document.documentElement).getPropertyValue("--muted").trim();
 }
 
 function chartGridColor() {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue("--line")
-    .trim();
+  return getComputedStyle(document.documentElement).getPropertyValue("--line").trim();
 }

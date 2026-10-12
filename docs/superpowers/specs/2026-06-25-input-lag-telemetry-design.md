@@ -69,14 +69,14 @@ editor 内容变化
 
 复用现有 `ArmsCustomEventPayload`(`name` / `group` / `value` / `properties`):
 
-| 字段 | 值 | 用途 |
-|------|-----|------|
-| `name` | `"perf_ui_input_lag"` | 事件名 |
-| `group` | `"ui_perf"` | 沿用现有分组 |
-| `value` | `Math.round(lagMs)` | 主指标,看板做分布/p95 |
-| `properties.lag_ms` | 同 value | 与 stream_stall 的 `stall_ms` 镜像口径,便于维度筛选 |
-| `properties.text_length` | 当前编辑器文本长度 | 关键归因:验证「文本越长越卡」 |
-| `properties.task_id` | 当前 taskId(草稿态为空) | 关联会话,与其它 ui_perf 事件口径一致 |
+| 字段                     | 值                      | 用途                                                |
+| ------------------------ | ----------------------- | --------------------------------------------------- |
+| `name`                   | `"perf_ui_input_lag"`   | 事件名                                              |
+| `group`                  | `"ui_perf"`             | 沿用现有分组                                        |
+| `value`                  | `Math.round(lagMs)`     | 主指标,看板做分布/p95                               |
+| `properties.lag_ms`      | 同 value                | 与 stream_stall 的 `stall_ms` 镜像口径,便于维度筛选 |
+| `properties.text_length` | 当前编辑器文本长度      | 关键归因:验证「文本越长越卡」                       |
+| `properties.task_id`     | 当前 taskId(草稿态为空) | 关联会话,与其它 ui_perf 事件口径一致                |
 
 不放(YAGNI):文本内容(隐私+体积)、model(输入侧与模型无关)、
 mention 数量(首版先看 text_length,需要再加)。

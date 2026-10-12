@@ -27,6 +27,7 @@
 **Purpose:** 先把行为契约留在 docs，再写代码，符合仓库 NL -> Code 约束。
 
 **Files:**
+
 - Create: `docs/runtime-tools/bash-read-file-state.md`
 
 **Checklist:**
@@ -94,6 +95,7 @@ Expected: 只新增上述 spec 文档，无 runtime 代码变更。
 **Purpose:** 先用单测锁定真实缺口和边界，避免只补 `cat` 一个点。
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 
 **Test helper changes:**
@@ -243,16 +245,16 @@ readFileState.set(createReadFileStateKey(filePath, 1, undefined), {
 });
 ```
 
-  - `executionResult.startedAt = new Date(1500)`
-  - `fileSystemPort.stat` returns `mtimeMs = 2000`
-  - command: `pnpm format`
-  - Assert output contains:
+- `executionResult.startedAt = new Date(1500)`
+- `fileSystemPort.stat` returns `mtimeMs = 2000`
+- command: `pnpm format`
+- Assert output contains:
 
 ```text
 [This command modified 1 file you've previously read: fixture.ts. Call Read before editing.]
 ```
 
-  - Assert `bashToolEntry.formatModelContent?.(output)` also contains the hint text.
+- Assert `bashToolEntry.formatModelContent?.(output)` also contains the hint text.
 
 - [ ] `it("does not emit stale hint when write-like Bash exits with provider error", async () => { ... })`
   - Cover provider-error path with `status: "failed"`, `exitCode: 2`, `command: "pnpm format"` and a newer mtime.
@@ -277,12 +279,19 @@ Expected before implementation: the new read-state/stale producer tests fail bec
 **Purpose:** 新增一个小而集中的 runtime helper，承载保守的命令识别、文件读取、read-state 写入、stale hint 生成。
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/tool/handlers/bash-read-file-state.ts`
 
 **Imports:**
 
 ```ts
-import type { BashOutput, ExecutionResult, FileSystemPort, FileSystemStatResult, TraceContext } from "@zcode/contracts";
+import type {
+  BashOutput,
+  ExecutionResult,
+  FileSystemPort,
+  FileSystemStatResult,
+  TraceContext,
+} from "@zcode/contracts";
 import { resolveWorkspacePath } from "../path-policy.js";
 import {
   createReadFileStateKey,
@@ -290,7 +299,11 @@ import {
   normalizeReadFileStateMtimeMs,
 } from "../read-file-state.js";
 import type { ReadFileStateEntry, ToolExecutionContext } from "../types.js";
-import { analyzeBashCommand, isBashCommandPermissionSafe, type BashCommandInvocation } from "./bash-command-parser.js";
+import {
+  analyzeBashCommand,
+  isBashCommandPermissionSafe,
+  type BashCommandInvocation,
+} from "./bash-command-parser.js";
 import { isBashProviderErrorStatus } from "./bash-semantics.js";
 ```
 
@@ -452,7 +465,9 @@ const entry: ReadFileStateEntry = {
   isPartialView: false,
   readAt: new Date(),
   revisionId: read.revision?.id ?? stat.revision?.id,
-  mtimeMs: normalizeReadFileStateMtimeMs(read.revision?.mtimeMs ?? stat.revision?.mtimeMs ?? stat.mtimeMs),
+  mtimeMs: normalizeReadFileStateMtimeMs(
+    read.revision?.mtimeMs ?? stat.revision?.mtimeMs ?? stat.mtimeMs,
+  ),
   sizeBytes: read.revision?.sizeBytes ?? stat.revision?.sizeBytes ?? stat.sizeBytes,
 };
 context.readFileState.set(createReadFileStateKey(resolvedPath, offset ?? 1, limit), entry);
@@ -503,7 +518,7 @@ const WRITE_COMMAND_MARKERS = new RegExp(
 - [ ] Return exact provider-facing string shape:
 
 ```ts
-`[This command modified ${paths.length} ${paths.length === 1 ? "file" : "files"} you've previously read: ${displayPaths}${hiddenSuffix}. Call Read before editing.]`
+`[This command modified ${paths.length} ${paths.length === 1 ? "file" : "files"} you've previously read: ${displayPaths}${hiddenSuffix}. Call Read before editing.]`;
 ```
 
 **Trace helper:**
@@ -537,6 +552,7 @@ Expected after Phase 2 only: tests still fail until handler integration imports 
 **Purpose:** 把 helper 接到 foreground Bash 完成路径，保持 output formatter 和 image/background 分支不被污染。
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/bash.ts`
 - Do not modify unless tests reveal necessity: `apps/zcode-cli/packages/core/src/tool/handlers/bash-output.ts`
 - Do not modify: `apps/zcode-cli/packages/contracts/src/tools/bash.ts`
@@ -594,6 +610,7 @@ Expected: new Bash read-state and stale hint tests pass.
 **Purpose:** 防止实现只覆盖 happy path；把保守边界锁死。
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 - Modify if gaps are found: `apps/zcode-cli/packages/core/src/tool/handlers/bash-read-file-state.ts`
 

@@ -54,12 +54,12 @@ lookup 文档不存在”的残缺官方插件。
 
 ## 4. Case Planning
 
-| Case ID | Setup | Action | Assertions | Evidence |
-| --- | --- | --- | --- | --- |
-| BUV-030 | 五个版本事实源 | 运行版本对齐测试 | 全部精确等于 `0.3.0` | Bootstrap、SEA、MCP unit |
-| BUV-031 | `0.2.1` 与 `0.3.0` cache 并存 | discover plugins | 只加载 `0.3.0`，无 duplicate diagnostic | Adapter unit |
-| BUV-032 | Browser Use source 缺少 `docs/recording.md` | filesystem/SEA seed | 完整性检查拒绝残缺资产 | Bootstrap、SEA unit |
-| BUV-033 | Desktop/remote runtime 资产脚本 | 检查必需路径合同 | `docs/recording.md` 在本地和远端链路均存在 | Desktop、Server unit |
+| Case ID | Setup                                       | Action              | Assertions                                 | Evidence                 |
+| ------- | ------------------------------------------- | ------------------- | ------------------------------------------ | ------------------------ |
+| BUV-030 | 五个版本事实源                              | 运行版本对齐测试    | 全部精确等于 `0.3.0`                       | Bootstrap、SEA、MCP unit |
+| BUV-031 | `0.2.1` 与 `0.3.0` cache 并存               | discover plugins    | 只加载 `0.3.0`，无 duplicate diagnostic    | Adapter unit             |
+| BUV-032 | Browser Use source 缺少 `docs/recording.md` | filesystem/SEA seed | 完整性检查拒绝残缺资产                     | Bootstrap、SEA unit      |
+| BUV-033 | Desktop/remote runtime 资产脚本             | 检查必需路径合同    | `docs/recording.md` 在本地和远端链路均存在 | Desktop、Server unit     |
 
 ## 5. 完成门槛
 
@@ -71,12 +71,12 @@ lookup 文档不存在”的残缺官方插件。
 
 ## 6. 验证结果
 
-| 验证项 | 结果 |
-| --- | --- |
-| Browser Use plugin | 6 files / 32 tests 通过 |
-| Bootstrap plugin distribution | 2 files / 41 tests 通过 |
-| Adapter stale/current cache | 1 file / 66 tests 通过 |
-| SEA Browser Use release/alignment | 2 tests 通过 |
-| Desktop + Server runtime assets | 2 files / 116 tests 通过 |
-| `pnpm typecheck` | 通过 |
-| `pnpm lint` | 0 errors；仓库已有 warnings 保持不变 |
+| 验证项                            | 结果                                 |
+| --------------------------------- | ------------------------------------ |
+| Browser Use plugin                | 6 files / 32 tests 通过              |
+| Bootstrap plugin distribution     | 2 files / 41 tests 通过              |
+| Adapter stale/current cache       | 1 file / 66 tests 通过               |
+| SEA Browser Use release/alignment | 2 tests 通过                         |
+| Desktop + Server runtime assets   | 2 files / 116 tests 通过             |
+| `pnpm typecheck`                  | 通过                                 |
+| `pnpm lint`                       | 0 errors；仓库已有 warnings 保持不变 |

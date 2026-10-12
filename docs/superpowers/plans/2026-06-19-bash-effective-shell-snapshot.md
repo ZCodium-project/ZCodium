@@ -85,9 +85,11 @@ The intended end state is:
 ### Task 1: Define Effective Bash Shell Descriptor
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/interfaces/execution.port.ts`
 
 **Interfaces:**
+
 - Produces: `ExecutionShellSelection`, `ExecutionShellSource`, `ExecutionShellDisplay`
 - Consumes: existing `ExecutionShellDialect`
 
@@ -155,11 +157,13 @@ Expected: typecheck passes or fails only at downstream call sites that still exp
 ### Task 2: Refactor Bash Shell Resolver Into One Data Source
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/adapters/src/exec/bash-shell-provider.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/exec/index.ts`
 - Test: `apps/zcode-cli/packages/adapters/tests/exec.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionShellSelection`
 - Produces: `resolveEffectiveBashShellSelection(options)`, `createShellProviderCommand(...)` continues to consume the chosen provider
 
@@ -245,6 +249,7 @@ Expected: all adapter exec tests pass.
 ### Task 3: Feed Session Shell Snapshot Into Context
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/interfaces/context-source.port.ts`
 - Modify: `apps/zcode-cli/packages/adapters/src/context/index.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/types.ts`
@@ -253,6 +258,7 @@ Expected: all adapter exec tests pass.
 - Test: `apps/zcode-cli/packages/core/tests/runtime-trace.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionShellSelection.display.name`
 - Produces: stable `EnvInfo.shell` from the effective snapshot
 
@@ -333,11 +339,13 @@ Expected: new tests pass and existing context behavior remains covered.
 ### Task 4: Add Shell Change Mid-Conversation System Source
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/system-reminder/source.ts`
 - Test: `apps/zcode-cli/packages/core/tests/system-reminder-source.test.ts`
 - Test: `apps/zcode-cli/packages/core/src/runtime/helpers/provider-request-messages.ts` existing tests or nearest provider-request helper test file
 
 **Interfaces:**
+
 - Produces: `shell_environment_change` source
 - Consumes: existing mid-conversation system projection
 
@@ -391,6 +399,7 @@ Expected: source classification passes.
 ### Task 5: Replace Silent Shell Updates With Explicit Runtime Shell Updates
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/types.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/internal-methods.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/config.ts`
@@ -399,6 +408,7 @@ Expected: source classification passes.
 - Test: `apps/zcode-cli/packages/bootstrap/tests/zcode-protocol.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionShellSelection`
 - Produces: runtime method `updateBashShellSelection(selection, options)`
 
@@ -436,12 +446,9 @@ if (options?.notifyModel === true && previousKey !== nextKey && selection) {
 ```ts
 function shellSelectionCacheKey(selection: ExecutionShellSelection | undefined): string {
   if (!selection) return "auto:none";
-  return [
-    selection.source,
-    selection.dialect,
-    selection.display.name,
-    selection.path ?? "",
-  ].join("\0");
+  return [selection.source, selection.dialect, selection.display.name, selection.path ?? ""].join(
+    "\0",
+  );
 }
 ```
 
@@ -497,6 +504,7 @@ Expected: shell update is model-visible through an added mid-conversation system
 ### Task 6: Thread Effective Shell Selection Through Bash Execution
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/tool/types.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/handlers/bash.ts`
 - Modify: `apps/zcode-cli/packages/core/src/tool/executor/types.ts`
@@ -506,6 +514,7 @@ Expected: shell update is model-visible through an added mid-conversation system
 - Test: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 
 **Interfaces:**
+
 - Consumes: runtime `bashShellSelection`
 - Produces: Bash execution request with `command.shellOverride = bashShellSelection`
 
@@ -560,10 +569,12 @@ Expected: Bash handler passes the effective shell selection when present and pre
 ### Task 7: Make Explore Inherit Shell Snapshot and Execution Selection
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
 - Test: `apps/zcode-cli/packages/core/tests/subagent-explore.test.ts`
 
 **Interfaces:**
+
 - Consumes: parent runtime `bashShellSelection`
 - Produces: child runtime with matching `envInfo.shell` and matching Bash execution selection
 
@@ -574,9 +585,7 @@ When building `childEnvInfo`, prefer:
 ```ts
 const childEnvInfo = {
   ...(this.contextSourceSnapshot?.envInfo ?? this.config.envInfo ?? fallbackEnvInfo),
-  ...(this.config.bashShellSelection
-    ? { shell: this.config.bashShellSelection.display.name }
-    : {}),
+  ...(this.config.bashShellSelection ? { shell: this.config.bashShellSelection.display.name } : {}),
 };
 ```
 
@@ -614,12 +623,14 @@ Expected: Explore prompt and child Bash execution no longer diverge from the par
 ### Task 8: Preserve Session Resume and History Semantics
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/resume.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/message-persistence.ts`
 - Modify: `apps/zcode-cli/packages/core/src/agent/session-history-hydrator.ts`
 - Test: `apps/zcode-cli/packages/bootstrap/tests/session-persistence.test.ts`
 
 **Interfaces:**
+
 - Consumes: persisted `EnvInfo.shell` and `shell_environment_change` attachments
 - Produces: resumed sessions that retain the original environment snapshot plus later shell-change notices
 
@@ -656,11 +667,13 @@ Expected: resume keeps chronological truth instead of rewriting the initial envi
 ### Task 9: Keep Windows Detection Changes Separate and Conservative
 
 **Files:**
+
 - Modify only if product wants this in the same change: `apps/zcode-cli/packages/adapters/src/exec/bash-shell-provider.ts`
 - Modify only if product wants this in the same change: `packages/services/src/system/integratedTerminalShells.ts`
 - Test only if product wants this in the same change: `apps/zcode-cli/packages/adapters/tests/exec.test.ts`
 
 **Interfaces:**
+
 - Consumes: existing Windows Git Bash candidate resolver
 - Produces: optional extra candidate coverage without changing source-of-truth semantics
 
@@ -689,9 +702,11 @@ Expected: existing Git Bash and CMD behavior remains unchanged except the new pe
 ### Task 10: Documentation and Validation
 
 **Files:**
+
 - Create or update: `docs/runtime-tools/bash-effective-shell-snapshot.md`
 
 **Interfaces:**
+
 - Consumes: final implementation semantics
 - Produces: maintainable spec explaining why this is not a patch-on-patch fix
 

@@ -22,10 +22,7 @@
           "E2E_PLAN_SESSION_SWITCH_ENTER",
           "E2E_PLAN_SESSION_SWITCH_EXIT"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -54,10 +51,7 @@
           "E2E_PLAN_SESSION_SWITCH_RESTORED_BODY",
           "toolu_e2e_plan_session_switch_enter"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

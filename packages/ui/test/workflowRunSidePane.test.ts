@@ -1861,7 +1861,10 @@ describe("WorkflowRunSidePane 阶段名册", () => {
     createElement(
       ZCodeIntlProvider,
       { initialLocale: "en-US" },
-      createElement(WorkflowRunSidePane, { tab: { ...tab, ...overrides }, onOpenWorkflowActorSession }),
+      createElement(WorkflowRunSidePane, {
+        tab: { ...tab, ...overrides },
+        onOpenWorkflowActorSession,
+      }),
     );
 
   it("tab 带 focusPhaseId：那一站展开、门开着、节头滚到顶并亮一下；换 openedAt 再落；不带就不落", () => {

@@ -47,8 +47,7 @@
         min-width: 320px;
         background:
           linear-gradient(rgba(240, 234, 219, 0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(240, 234, 219, 0.025) 1px, transparent 1px),
-          var(--night);
+          linear-gradient(90deg, rgba(240, 234, 219, 0.025) 1px, transparent 1px), var(--night);
         background-size: 28px 28px;
         color: var(--paper);
         font-family: var(--sans);
@@ -1308,8 +1307,7 @@
       .decision-card.recommended {
         border-color: var(--acid);
         background:
-          linear-gradient(160deg, rgba(214, 255, 71, 0.1), transparent 48%),
-          var(--night-2);
+          linear-gradient(160deg, rgba(214, 255, 71, 0.1), transparent 48%), var(--night-2);
       }
 
       .decision-card .decision-label {
@@ -1844,8 +1842,8 @@
             <h1>一个任务，<br /><em>多段续跑</em></h1>
             <div class="hero-deck">
               <p>
-                从用户提交到服务端取号，从本地认领到 Agent 分段执行，再到 History 和核销：
-                完整解释 Task、Session、Ticket 三种身份如何协作。
+                从用户提交到服务端取号，从本地认领到 Agent 分段执行，再到 History 和核销： 完整解释
+                Task、Session、Ticket 三种身份如何协作。
               </p>
               <div class="formula">
                 <strong>1 USER TASK</strong><br />
@@ -1865,8 +1863,8 @@
               <div>
                 <h2>先选对观察视角</h2>
                 <p>
-                  Off-Peak 不是单纯的定时任务。它把一次用户任务拆成产品身份、本地控制、
-                  Agent 执行和服务端准入四个层次；每层回答的问题不同。
+                  Off-Peak 不是单纯的定时任务。它把一次用户任务拆成产品身份、本地控制、 Agent
+                  执行和服务端准入四个层次；每层回答的问题不同。
                 </p>
               </div>
             </div>
@@ -1874,28 +1872,39 @@
               <article class="guide-card">
                 <div class="guide-kicker"><span class="guide-glyph">01</span>PRODUCT</div>
                 <h3>用户看到什么</h3>
-                <p>提交一次性任务，等待低峰执行；无论中间续跑多少段，任务卡片和 History 都保持一个身份。</p>
+                <p>
+                  提交一次性任务，等待低峰执行；无论中间续跑多少段，任务卡片和 History
+                  都保持一个身份。
+                </p>
               </article>
               <article class="guide-card">
                 <div class="guide-kicker"><span class="guide-glyph">02</span>LOCAL CONTROL</div>
                 <h3>客户端控制什么</h3>
-                <p>SQLite 保存聚合当前态；Service 同步票据；Scheduler 负责认领、派发、超时回收和退避。</p>
+                <p>
+                  SQLite 保存聚合当前态；Service 同步票据；Scheduler
+                  负责认领、派发、超时回收和退避。
+                </p>
               </article>
               <article class="guide-card">
                 <div class="guide-kicker"><span class="guide-glyph">03</span>AGENT RUNTIME</div>
                 <h3>任务如何真正执行</h3>
-                <p>首段创建 Session，后续段恢复同一 Session；每次模型请求都必须携带当段有效 ticket。</p>
+                <p>
+                  首段创建 Session，后续段恢复同一 Session；每次模型请求都必须携带当段有效 ticket。
+                </p>
               </article>
               <article class="guide-card">
                 <div class="guide-kicker"><span class="guide-glyph">04</span>SERVER GATE</div>
                 <h3>谁决定何时能跑</h3>
-                <p>服务端维护 FIFO、并发和 ticket 生命周期。客户端只观察结果，不复制服务端排队真相。</p>
+                <p>
+                  服务端维护 FIFO、并发和 ticket 生命周期。客户端只观察结果，不复制服务端排队真相。
+                </p>
               </article>
             </div>
             <div class="reading-rule">
               <strong>推荐阅读顺序</strong>
               Product → Local Service / Scheduler → Host / Agent → Server Gateway。
-              但运行时状态会反向回流：服务端票据决定准入，Agent 结果决定本地终态，本地聚合再决定 UI。
+              但运行时状态会反向回流：服务端票据决定准入，Agent 结果决定本地终态，本地聚合再决定
+              UI。
             </div>
           </section>
 
@@ -1913,8 +1922,8 @@
             <div class="callout">
               <div class="callout-label">Canonical definition</div>
               <p class="callout-main">
-                <strong>off_peak_tasks</strong> 是当前态聚合根，同时兼任调度锁、服务端快照、
-                核销 outbox 和 History tombstone。
+                <strong>off_peak_tasks</strong> 是当前态聚合根，同时兼任调度锁、服务端快照、 核销
+                outbox 和 History tombstone。
               </p>
             </div>
           </section>
@@ -1925,8 +1934,8 @@
               <div>
                 <h2>四个对象，三种基数</h2>
                 <p>
-                  任务是稳定聚合根，Session 是连续上下文，Ticket 是每一执行分段的准入凭证，
-                  History 则只是面向用户的派生投影。
+                  任务是稳定聚合根，Session 是连续上下文，Ticket 是每一执行分段的准入凭证， History
+                  则只是面向用户的派生投影。
                 </p>
               </div>
             </div>
@@ -1954,7 +1963,9 @@
                 <article class="entity-secondary ticket">
                   <small>ADMISSION SEGMENT</small>
                   <h3>Ticket · 1 : N</h3>
-                  <p>每个最多约 3 小时的准入分段一张票。当前本地聚合行只留“现在这张”，旧票会被覆盖。</p>
+                  <p>
+                    每个最多约 3 小时的准入分段一张票。当前本地聚合行只留“现在这张”，旧票会被覆盖。
+                  </p>
                 </article>
                 <article class="entity-secondary history">
                   <small>PRODUCT PROJECTION</small>
@@ -2026,10 +2037,11 @@
             </div>
             <div class="reading-rule">
               <strong>权责边界</strong>
-              客户端 timer 负责“什么时候再来问”，服务端 Promote timer 负责“什么时候从 queued 推进到 ready”。
-              Status 查询只是读取服务端状态，不应承担推进 FIFO 的职责。
+              客户端 timer 负责“什么时候再来问”，服务端 Promote timer 负责“什么时候从 queued 推进到
+              ready”。 Status 查询只是读取服务端状态，不应承担推进 FIFO 的职责。
             </div>
-            <pre class="flow-code architecture-ascii" aria-label="Off-Peak 状态与事件顺序 ASCII 图">User
+            <pre class="flow-code architecture-ascii" aria-label="Off-Peak 状态与事件顺序 ASCII 图">
+User
   │ create task
   ▼
 Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
@@ -2048,7 +2060,8 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                                              │                            │
                                              └──── result / 3102 / 429 ──┘
                     ▲
-                    └──── task terminal or continuation ────</pre>
+                    └──── task terminal or continuation ────</pre
+            >
           </section>
 
           <section id="api-contract" class="reveal">
@@ -2068,50 +2081,79 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 <div>
                   <div class="api-owner">HOST SERVICE · QUOTA SNAPSHOT</div>
                   <h3 class="api-path">GET /ticket/availability</h3>
-                  <p>读取当前用户能否创建新 ticket；不可创建时返回精确的 <code>next_take_at</code>，供 UI 提前置灰并到点重查。</p>
+                  <p>
+                    读取当前用户能否创建新 ticket；不可创建时返回精确的
+                    <code>next_take_at</code>，供 UI 提前置灰并到点重查。
+                  </p>
                 </div>
-                <div class="api-result">true → enable create<br />false → disable until next_take_at<br />error → disable until refresh</div>
+                <div class="api-result">
+                  true → enable create<br />false → disable until next_take_at<br />error → disable
+                  until refresh
+                </div>
               </article>
               <article class="api-step">
                 <div class="api-number">02</div>
                 <div>
                   <div class="api-owner">HOST SERVICE · TAKE</div>
                   <h3 class="api-path">POST /ticket</h3>
-                  <p><code>task_id</code> 换取当前 <code>ticket_id</code>。服务端可能立即 queued，也可能返回额度、资格或网络错误。</p>
+                  <p>
+                    <code>task_id</code> 换取当前 <code>ticket_id</code>。服务端可能立即
+                    queued，也可能返回额度、资格或网络错误。
+                  </p>
                 </div>
-                <div class="api-result">OK → persist ticket<br />3101 / 3103 → reject + refresh snapshot<br />5xx / network → backoff</div>
+                <div class="api-result">
+                  OK → persist ticket<br />3101 / 3103 → reject + refresh snapshot<br />5xx /
+                  network → backoff
+                </div>
               </article>
               <article class="api-step">
                 <div class="api-number">03</div>
                 <div>
                   <div class="api-owner">HOST SERVICE · OBSERVE</div>
                   <h3 class="api-path">POST /ticket/status</h3>
-                  <p>批量读取最多 100 张票，按 <code>ticket_id</code> 回写 queued / ready / active / expired / settled / not_found 投影。</p>
+                  <p>
+                    批量读取最多 100 张票，按 <code>ticket_id</code> 回写 queued / ready / active /
+                    expired / settled / not_found 投影。
+                  </p>
                 </div>
-                <div class="api-result">ready → next_run_at<br />expired → continuation<br />not_found → needs repair</div>
+                <div class="api-result">
+                  ready → next_run_at<br />expired → continuation<br />not_found → needs repair
+                </div>
               </article>
               <article class="api-step">
                 <div class="api-number">04</div>
                 <div>
                   <div class="api-owner">ZCODE CLI · ADMIT EACH MODEL CALL</div>
                   <h3 class="api-path">POST /anthropic/v1/messages</h3>
-                  <p>每一次模型请求携带 <code>X-Off-Peak-Ticket-ID</code>。Agent 已启动不代表后续每个 turn 都天然获准。</p>
+                  <p>
+                    每一次模型请求携带 <code>X-Off-Peak-Ticket-ID</code>。Agent 已启动不代表后续每个
+                    turn 都天然获准。
+                  </p>
                 </div>
-                <div class="api-result">2xx → model response<br />429 / 3105 → retry later<br />400 / 3102 → segment expired</div>
+                <div class="api-result">
+                  2xx → model response<br />429 / 3105 → retry later<br />400 / 3102 → segment
+                  expired
+                </div>
               </article>
               <article class="api-step">
                 <div class="api-number">05</div>
                 <div>
                   <div class="api-owner">HOST SERVICE · SETTLE OUTBOX</div>
                   <h3 class="api-path">POST /ticket/:ticket_id/settle</h3>
-                  <p>任务终态或分段结束后核销。客户端先落本地 pending，再异步发送，避免一次网络失败丢失终态意图。</p>
+                  <p>
+                    任务终态或分段结束后核销。客户端先落本地
+                    pending，再异步发送，避免一次网络失败丢失终态意图。
+                  </p>
                 </div>
-                <div class="api-result">2xx / 4xx → acknowledged<br />5xx / network → retry<br />delete row → current risk</div>
+                <div class="api-result">
+                  2xx / 4xx → acknowledged<br />5xx / network → retry<br />delete row → current risk
+                </div>
               </article>
             </div>
             <div class="reading-rule">
               <strong>关键结论</strong>
-              队列位置、Promote、并发和票据有效性都由服务端 MySQL 真源决定。本地 SQLite 只保存调度所需的当前快照。
+              队列位置、Promote、并发和票据有效性都由服务端 MySQL 真源决定。本地 SQLite
+              只保存调度所需的当前快照。
             </div>
           </section>
 
@@ -2227,8 +2269,8 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
               <div>
                 <h2>字段分组地图</h2>
                 <p>
-                  用搜索框可按字段名或语义过滤。内部调度字段不会进入 UI 领域对象，但和业务字段共处一行，
-                  这是该表既是聚合根又是基础设施状态表的直接体现。
+                  用搜索框可按字段名或语义过滤。内部调度字段不会进入 UI
+                  领域对象，但和业务字段共处一行， 这是该表既是聚合根又是基础设施状态表的直接体现。
                 </p>
               </div>
             </div>
@@ -2236,13 +2278,20 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
             <div class="schema-toolbar">
               <label class="search">
                 <span>/</span>
-                <input id="schema-search" type="search" placeholder="搜索字段：ticket、session、history…" />
+                <input
+                  id="schema-search"
+                  type="search"
+                  placeholder="搜索字段：ticket、session、history…"
+                />
               </label>
               <div class="toolbar-note"><span id="schema-count">8</span> GROUPS · 30 COLUMNS</div>
             </div>
 
             <div class="schema-groups" id="schema-groups">
-              <article class="schema-group" data-search="身份 表单 task title prompt permission model thought">
+              <article
+                class="schema-group"
+                data-search="身份 表单 task title prompt permission model thought"
+              >
                 <div class="schema-group-head">
                   <h3>身份与表单</h3>
                   <span>6 fields</span>
@@ -2267,7 +2316,9 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
                 <div class="field">
                   <div class="field-name">model<b>TEXT · NULLABLE</b></div>
-                  <div class="field-desc">指定 idle 模型；为空时派发阶段回落 allowed_models 第一项。</div>
+                  <div class="field-desc">
+                    指定 idle 模型；为空时派发阶段回落 allowed_models 第一项。
+                  </div>
                 </div>
                 <div class="field">
                   <div class="field-name">thought_level<b>TEXT · NULLABLE</b></div>
@@ -2275,7 +2326,10 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
               </article>
 
-              <article class="schema-group" data-search="workspace path identity key 本地 远程 项目">
+              <article
+                class="schema-group"
+                data-search="workspace path identity key 本地 远程 项目"
+              >
                 <div class="schema-group-head">
                   <h3>Workspace 边界</h3>
                   <span>3 fields</span>
@@ -2298,7 +2352,10 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
               </article>
 
-              <article class="schema-group" data-search="session conversation 对话 会话 resume 续跑">
+              <article
+                class="schema-group"
+                data-search="session conversation 对话 会话 resume 续跑"
+              >
                 <div class="schema-group-head">
                   <h3>Session 绑定</h3>
                   <span>2 fields</span>
@@ -2313,7 +2370,10 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
               </article>
 
-              <article class="schema-group" data-search="状态 时间 failure files queued started ended 终态">
+              <article
+                class="schema-group"
+                data-search="状态 时间 failure files queued started ended 终态"
+              >
                 <div class="schema-group-head">
                   <h3>本地执行聚合</h3>
                   <span>6 fields</span>
@@ -2328,7 +2388,9 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
                 <div class="field">
                   <div class="field-name">started_at<b>INTEGER · NULLABLE</b></div>
-                  <div class="field-desc">首段 Host 接受 Prompt 的时间；续跑使用 COALESCE 保留。</div>
+                  <div class="field-desc">
+                    首段 Host 接受 Prompt 的时间；续跑使用 COALESCE 保留。
+                  </div>
                 </div>
                 <div class="field">
                   <div class="field-name">ended_at<b>INTEGER · NULLABLE</b></div>
@@ -2340,18 +2402,25 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
                 <div class="field">
                   <div class="field-name">files_changed<b>INTEGER · NULLABLE</b></div>
-                  <div class="field-desc">从现有 task diff 汇总；部分 Bash 改动可能不在统计内。</div>
+                  <div class="field-desc">
+                    从现有 task diff 汇总；部分 Bash 改动可能不在统计内。
+                  </div>
                 </div>
               </article>
 
-              <article class="schema-group" data-search="服务端 ticket 注册 调度 位次 poll ready schedulable">
+              <article
+                class="schema-group"
+                data-search="服务端 ticket 注册 调度 位次 poll ready schedulable"
+              >
                 <div class="schema-group-head">
                   <h3>服务端调度快照</h3>
                   <span>5 fields</span>
                 </div>
                 <div class="field">
                   <div class="field-name">server_ticket_id<b>TEXT · NULLABLE</b></div>
-                  <div class="field-desc">只保存当前分段 ticket；重新取号覆盖，不保留旧票历史。</div>
+                  <div class="field-desc">
+                    只保存当前分段 ticket；重新取号覆盖，不保留旧票历史。
+                  </div>
                 </div>
                 <div class="field">
                   <div class="field-name">registered_at<b>INTEGER · NULLABLE</b></div>
@@ -2371,14 +2440,19 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
               </article>
 
-              <article class="schema-group" data-search="claim lease scheduler lock attempt error 认领 退避">
+              <article
+                class="schema-group"
+                data-search="claim lease scheduler lock attempt error 认领 退避"
+              >
                 <div class="schema-group-head">
                   <h3>调度 Lease 与诊断</h3>
                   <span>4 fields</span>
                 </div>
                 <div class="field">
                   <div class="field-name">claim_running<b>INTEGER · DEFAULT 0</b></div>
-                  <div class="field-desc">single-flight 认领锁；只防单任务重复，不限制任务间并发。</div>
+                  <div class="field-desc">
+                    single-flight 认领锁；只防单任务重复，不限制任务间并发。
+                  </div>
                 </div>
                 <div class="field">
                   <div class="field-name">claimed_at<b>INTEGER · NULLABLE</b></div>
@@ -2386,7 +2460,9 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
                 <div class="field">
                   <div class="field-name">attempt_count<b>INTEGER · DEFAULT 0</b></div>
-                  <div class="field-desc">Host 派发失败次数；成功 markRunning 后不归零但不暴露 UI。</div>
+                  <div class="field-desc">
+                    Host 派发失败次数；成功 markRunning 后不归零但不暴露 UI。
+                  </div>
                 </div>
                 <div class="field">
                   <div class="field-name">last_error<b>TEXT · NULLABLE</b></div>
@@ -2405,7 +2481,9 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </div>
                 <div class="field">
                   <div class="field-name">history_deleted_at<b>INTEGER · NULLABLE</b></div>
-                  <div class="field-desc">History tombstone；只隐藏摘要，不删任务、Session 或执行字段。</div>
+                  <div class="field-desc">
+                    History tombstone；只隐藏摘要，不删任务、Session 或执行字段。
+                  </div>
                 </div>
               </article>
 
@@ -2452,15 +2530,39 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>灰度关闭且无存量：</strong>整个闲时区域隐藏。</span></div>
-                    <div class="branch"><span><strong>灰度关闭但有存量：</strong>只藏创建入口，任务继续跑。</span></div>
-                    <div class="branch"><span><strong>非 Coding Plan：</strong>按钮锁定并展示升级提示。</span></div>
-                    <div class="branch"><span><strong>client/configs：</strong>只负责功能曝光与 allowed models，不再下发静态 limit。</span></div>
-                    <div class="branch"><span><strong>availability=false：</strong>按服务端 next_take_at 提前置灰并展示 Tooltip；到点自动重查。</span></div>
-                    <div class="branch"><span><strong>服务端 3103：</strong>处理查询后的并发竞态，展示错误并刷新 availability，不保存永久 boolean。</span></div>
-                    <div class="branch"><span><strong>桌面远程 / 手机 remote：</strong>不提供新建入口。</span></div>
+                    <div class="branch">
+                      <span><strong>灰度关闭且无存量：</strong>整个闲时区域隐藏。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>灰度关闭但有存量：</strong>只藏创建入口，任务继续跑。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>非 Coding Plan：</strong>按钮锁定并展示升级提示。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>client/configs：</strong>只负责功能曝光与 allowed
+                        models，不再下发静态 limit。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>availability=false：</strong>按服务端 next_take_at 提前置灰并展示
+                        Tooltip；到点自动重查。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>服务端 3103：</strong>处理查询后的并发竞态，展示错误并刷新
+                        availability，不保存永久 boolean。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>桌面远程 / 手机 remote：</strong>不提供新建入口。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">client/configs: exposure + models
+                  <pre class="flow-code">
+client/configs: exposure + models
   -&gt; GET /ticket/availability
      -&gt; false: disable until next_take_at, then refresh
      -&gt; true/error: allow create
@@ -2468,7 +2570,8 @@ Renderer ─RPC─▶ Host Service ─take/status/settle─▶ Server Ticket DB
            -&gt; success: create local task
            -&gt; 3103: show error + refresh availability
 
-POST /ticket remains the final quota authority</pre>
+POST /ticket remains the final quota authority</pre
+                  >
                 </div>
               </details>
 
@@ -2481,16 +2584,39 @@ POST /ticket remains the final quota authority</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>3101 / 3103 / 凭证缺失 / 网络失败：</strong>不落本地任务行。</span></div>
-                    <div class="branch"><span><strong>ticket=queued：</strong>保存 position，等待状态同步。</span></div>
-                    <div class="branch"><span><strong>ticket=ready：</strong>schedulable=1，并立即唤醒 scheduler。</span></div>
-                    <div class="branch"><span><strong>异常返回 active/expired/settled/not_found：</strong>仍会创建本地 queued 行且 schedulable=0；只有后续 expired 分支会自动重取，settled/not_found 可能停滞。</span></div>
-                    <div class="branch"><span><strong>取号成功但 SQLite INSERT 失败：</strong>存在服务端孤儿票风险，当前无主动 settle。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>3101 / 3103 / 凭证缺失 / 网络失败：</strong>不落本地任务行。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>ticket=queued：</strong>保存 position，等待状态同步。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>ticket=ready：</strong>schedulable=1，并立即唤醒 scheduler。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>异常返回 active/expired/settled/not_found：</strong>仍会创建本地
+                        queued 行且 schedulable=0；只有后续 expired
+                        分支会自动重取，settled/not_found 可能停滞。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>取号成功但 SQLite INSERT 失败：</strong
+                        >存在服务端孤儿票风险，当前无主动 settle。</span
+                      >
+                    </div>
                   </div>
-                  <pre class="flow-code">random offPeakTaskId
+                  <pre class="flow-code">
+random offPeakTaskId
   → POST /ticket
     → failure: no row
-    → success: INSERT queued</pre>
+    → success: INSERT queued</pre
+                  >
                 </div>
               </details>
 
@@ -2503,19 +2629,42 @@ POST /ticket remains the final quota authority</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>ready：</strong>写 schedulable=1；queued 新晋级时 wake scheduler。</span></div>
-                    <div class="branch"><span><strong>queued：</strong>写 schedulable=0 和 position。</span></div>
-                    <div class="branch"><span><strong>active：</strong>只清 position，不直接改本地状态。</span></div>
-                    <div class="branch"><span><strong>expired + local queued：</strong>清快照并同 taskId 重取票。</span></div>
-                    <div class="branch"><span><strong>expired + local paused：</strong>原地等待用户 Continue。</span></div>
-                    <div class="branch"><span><strong>settled / not_found / 未匹配：</strong>当前实现忽略。</span></div>
-                    <div class="branch"><span><strong>整轮失败：</strong>10s 指数退避到 5min；running 不受影响。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>ready：</strong>写 schedulable=1；queued 新晋级时 wake
+                        scheduler。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>queued：</strong>写 schedulable=0 和 position。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>active：</strong>只清 position，不直接改本地状态。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>expired + local queued：</strong>清快照并同 taskId 重取票。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>expired + local paused：</strong>原地等待用户 Continue。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>settled / not_found / 未匹配：</strong>当前实现忽略。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>整轮失败：</strong>10s 指数退避到 5min；running 不受影响。</span
+                      >
+                    </div>
                   </div>
-                  <pre class="flow-code">outbox → nonTerminal
+                  <pre class="flow-code">
+outbox → nonTerminal
   → missing ticket: retake
   → batchStatus ≤ 100
   → apply by ticketId
-  → schedule next cycle</pre>
+  → schedule next cycle</pre
+                  >
                 </div>
               </details>
 
@@ -2528,17 +2677,41 @@ POST /ticket remains the final quota authority</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>Pause：</strong>仅 queued 且未认领可进入 paused；票继续排队。</span></div>
-                    <div class="branch"><span><strong>Continue + 活票：</strong>paused→queued，零成本恢复。</span></div>
-                    <div class="branch"><span><strong>Continue + expired/not_found/无票：</strong>同 taskId 重取号。</span></div>
-                    <div class="branch"><span><strong>Continue + settled：</strong>当前会被视为“票仍活着”，但后续同步又不处理 settled，存在停滞边界。</span></div>
-                    <div class="branch"><span><strong>Continue 状态查询失败：</strong>按票活处理，避免白耗额度。</span></div>
-                    <div class="branch"><span><strong>编辑：</strong>只允许 queued/paused；workspace 不可改。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>Pause：</strong>仅 queued 且未认领可进入 paused；票继续排队。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>Continue + 活票：</strong>paused→queued，零成本恢复。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Continue + expired/not_found/无票：</strong>同 taskId
+                        重取号。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Continue + settled：</strong
+                        >当前会被视为“票仍活着”，但后续同步又不处理 settled，存在停滞边界。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Continue 状态查询失败：</strong>按票活处理，避免白耗额度。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>编辑：</strong>只允许 queued/paused；workspace 不可改。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">queued --pause--> paused
+                  <pre class="flow-code">
+queued --pause--> paused
 paused --continue--> queued
   ├─ alive ticket: reuse
-  └─ dead ticket: retake</pre>
+  └─ dead ticket: retake</pre
+                  >
                 </div>
               </details>
 
@@ -2551,19 +2724,45 @@ paused --continue--> queued
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>认领条件：</strong>queued + schedulable=1 + claim_running=0。</span></div>
-                    <div class="branch"><span><strong>僵尸认领：</strong>claimed_at 超过 10min 后释放。</span></div>
-                    <div class="branch"><span><strong>内存退避未到：</strong>立即 release claim，等待后续 tick。</span></div>
-                    <div class="branch"><span><strong>没有 Host / forward 失败：</strong>保持 queued，30s 指数退避到 15min。</span></div>
-                    <div class="branch"><span><strong>Host ok：</strong>markRunning 并回填 conversation/session。</span></div>
-                    <div class="branch"><span><strong>结果迟到且任务已 Pause/Cancel：</strong>markRunning 守卫拒绝。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>认领条件：</strong>queued + schedulable=1 + claim_running=0。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>僵尸认领：</strong>claimed_at 超过 10min 后释放。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>内存退避未到：</strong>立即 release claim，等待后续 tick。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>没有 Host / forward 失败：</strong>保持 queued，30s 指数退避到
+                        15min。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Host ok：</strong>markRunning 并回填 conversation/session。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>结果迟到且任务已 Pause/Cancel：</strong>markRunning
+                        守卫拒绝。</span
+                      >
+                    </div>
                   </div>
-                  <pre class="flow-code">BEGIN IMMEDIATE
+                  <pre class="flow-code">
+BEGIN IMMEDIATE
   SELECT due
   UPDATE claim_running = 1
 COMMIT
 
-dispatch → main → host</pre>
+dispatch → main → host</pre
+                  >
                 </div>
               </details>
 
@@ -2576,21 +2775,47 @@ dispatch → main → host</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>首跑：</strong>createTask + 原始 prompt；派发后才产生 Session。</span></div>
-                    <div class="branch"><span><strong>续跑：</strong>resume 同一 Session + 固定 continuation prompt。</span></div>
-                    <div class="branch"><span><strong>无 ticket / 无模型 / 无凭证：</strong>Host 返回 transient，scheduler 重试。</span></div>
-                    <div class="branch"><span><strong>Session 正忙：</strong>拒绝 turnRuntimeModel 延迟入队，避免边界失真。</span></div>
-                    <div class="branch"><span><strong>Turn 结束：</strong>清临时 overlay，恢复用户原 provider。</span></div>
-                    <div class="branch"><span><strong>用户插话/终态后聊天：</strong>天然走用户 provider。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>首跑：</strong>createTask + 原始 prompt；派发后才产生
+                        Session。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>续跑：</strong>resume 同一 Session + 固定 continuation
+                        prompt。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>无 ticket / 无模型 / 无凭证：</strong>Host 返回
+                        transient，scheduler 重试。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Session 正忙：</strong>拒绝 turnRuntimeModel
+                        延迟入队，避免边界失真。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>Turn 结束：</strong>清临时 overlay，恢复用户原 provider。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>用户插话/终态后聊天：</strong>天然走用户 provider。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">first:
+                  <pre class="flow-code">
+first:
   createTask → send original prompt
 
 resume:
   resumeTask → send continuation
 
 both:
-  turnRuntimeModel = idle plan</pre>
+  turnRuntimeModel = idle plan</pre
+                  >
                 </div>
               </details>
 
@@ -2603,15 +2828,37 @@ both:
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>429/3105：</strong>min(Retry-After, 5min)，无头默认 60s，无限探测。</span></div>
-                    <div class="branch"><span><strong>用户 Cancel：</strong>AbortSignal 中止 sleep 和在途请求。</span></div>
-                    <div class="branch"><span><strong>400/3102 或旧 3001：</strong>写稳定错误标记，由 Host 改走换票续跑。</span></div>
-                    <div class="branch"><span><strong>其他错误：</strong>使用普通 Agent retry；耗尽后进入 failed。</span></div>
-                    <div class="branch"><span><strong>普通 Provider 429：</strong>不享受无限探测，保持原重试预算。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>429/3105：</strong>min(Retry-After, 5min)，无头默认
+                        60s，无限探测。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>用户 Cancel：</strong>AbortSignal 中止 sleep 和在途请求。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>400/3102 或旧 3001：</strong>写稳定错误标记，由 Host
+                        改走换票续跑。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>其他错误：</strong>使用普通 Agent retry；耗尽后进入 failed。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>普通 Provider 429：</strong>不享受无限探测，保持原重试预算。</span
+                      >
+                    </div>
                   </div>
-                  <pre class="flow-code">429/3105 → queued hold → retry ∞
+                  <pre class="flow-code">
+429/3105 → queued hold → retry ∞
 3102      → marker → requeue + retake
-other     → normal retry → failed?</pre>
+other     → normal retry → failed?</pre
+                  >
                 </div>
               </details>
 
@@ -2619,21 +2866,44 @@ other     → normal retry → failed?</pre>
                 <summary>
                   <span class="flow-index">08</span>
                   <h3>敏感操作与确认</h3>
-                  <p>当前代码只复用普通 Session 的 permission / elicitation 交互，聚合态保持 running。</p>
+                  <p>
+                    当前代码只复用普通 Session 的 permission / elicitation 交互，聚合态保持
+                    running。
+                  </p>
                   <span class="flow-toggle">+</span>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>敏感工具请求：</strong>普通 Session 展示确认，Off-Peak 卡片保持 Running。</span></div>
-                    <div class="branch"><span><strong>批准 / 拒绝：</strong>同一自动 turn 继续，仍使用 idle plan。</span></div>
-                    <div class="branch"><span><strong>通知：</strong>由 Session 通用链路负责，不重复发送 Off-Peak 等确认通知。</span></div>
-                    <div class="branch"><span><strong>取消：</strong>进入 cancelled，并中止 Agent loop。</span></div>
-                    <div class="branch"><span><strong>历史兼容：</strong>旧库预留值初始化时迁移为 running。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>敏感工具请求：</strong>普通 Session 展示确认，Off-Peak 卡片保持
+                        Running。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>批准 / 拒绝：</strong>同一自动 turn 继续，仍使用 idle plan。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>通知：</strong>由 Session 通用链路负责，不重复发送 Off-Peak
+                        等确认通知。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>取消：</strong>进入 cancelled，并中止 Agent loop。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>历史兼容：</strong>旧库预留值初始化时迁移为 running。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">permission requested
+                  <pre class="flow-code">
+permission requested
   → session waits for response
   → off_peak_tasks stays running
-  → same turn keeps idle plan</pre>
+  → same turn keeps idle plan</pre
+                  >
                 </div>
               </details>
 
@@ -2646,15 +2916,32 @@ other     → normal retry → failed?</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>触发：</strong>模型请求收到 3102，不依赖客户端本地计时。</span></div>
-                    <div class="branch"><span><strong>回队：</strong>running/awaiting→queued，保留 startedAt/session。</span></div>
-                    <div class="branch"><span><strong>重取成功：</strong>覆盖 server_ticket_id，等待新票 ready。</span></div>
-                    <div class="branch"><span><strong>重取失败：</strong>保持 queued，后续同步继续补取。</span></div>
-                    <div class="branch"><span><strong>Runtime 不可用：</strong>无法续跑，按普通 failed 收口。</span></div>
+                    <div class="branch">
+                      <span><strong>触发：</strong>模型请求收到 3102，不依赖客户端本地计时。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>回队：</strong>running/awaiting→queued，保留
+                        startedAt/session。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>重取成功：</strong>覆盖 server_ticket_id，等待新票 ready。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>重取失败：</strong>保持 queued，后续同步继续补取。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>Runtime 不可用：</strong>无法续跑，按普通 failed 收口。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">task-A + ticket-1 + session-X
+                  <pre class="flow-code">
+task-A + ticket-1 + session-X
            ↓ 3102
-task-A + ticket-2 + session-X</pre>
+task-A + ticket-2 + session-X</pre
+                  >
                 </div>
               </details>
 
@@ -2667,19 +2954,43 @@ task-A + ticket-2 + session-X</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>succeeded：</strong>completed；stopped：cancelled；其他：failed。</span></div>
-                    <div class="branch"><span><strong>终态回写：</strong>endedAt、failureReason、filesChanged，清 claim/schedulable。</span></div>
-                    <div class="branch"><span><strong>迟到终态：</strong>终态不可逆守卫拒绝覆盖。</span></div>
-                    <div class="branch"><span><strong>settle 2xx：</strong>写 settledAt。</span></div>
-                    <div class="branch"><span><strong>settle 4xx：</strong>按幂等 ack 写 settledAt。</span></div>
-                    <div class="branch"><span><strong>网络/5xx：</strong>保留 NULL，下个 sync 周期补报。</span></div>
-                    <div class="branch"><span><strong>通知：</strong>completed / failed / awaiting 状态边沿触发。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>succeeded：</strong
+                        >completed；stopped：cancelled；其他：failed。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>终态回写：</strong>endedAt、failureReason、filesChanged，清
+                        claim/schedulable。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>迟到终态：</strong>终态不可逆守卫拒绝覆盖。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>settle 2xx：</strong>写 settledAt。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>settle 4xx：</strong>按幂等 ack 写 settledAt。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>网络/5xx：</strong>保留 NULL，下个 sync 周期补报。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>通知：</strong>completed / failed / awaiting 状态边沿触发。</span
+                      >
+                    </div>
                   </div>
-                  <pre class="flow-code">local terminal
+                  <pre class="flow-code">
+local terminal
   → unread + history status
   → settle current ticket
     ├─ ack: settled_at
-    └─ retryable: outbox</pre>
+    └─ retryable: outbox</pre
+                  >
                 </div>
               </details>
 
@@ -2692,16 +3003,36 @@ task-A + ticket-2 + session-X</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>Cancel：</strong>先写 cancelled，再 best-effort stopGeneration，异步 settle。</span></div>
-                    <div class="branch"><span><strong>Delete 非终态：</strong>先 Cancel，再 DELETE 本地任务行。</span></div>
-                    <div class="branch"><span><strong>Delete 终态：</strong>直接 DELETE，不删除 Session。</span></div>
-                    <div class="branch"><span><strong>Delete history：</strong>只写 historyDeletedAt，无确认、无 Undo。</span></div>
-                    <div class="branch"><span><strong>未启动任务删 History：</strong>不写 tombstone。</span></div>
-                    <div class="branch"><span><strong>重复删 History：</strong>幂等，保留首次时间。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>Cancel：</strong>先写 cancelled，再 best-effort
+                        stopGeneration，异步 settle。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>Delete 非终态：</strong>先 Cancel，再 DELETE 本地任务行。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>Delete 终态：</strong>直接 DELETE，不删除 Session。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Delete history：</strong>只写 historyDeletedAt，无确认、无
+                        Undo。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>未启动任务删 History：</strong>不写 tombstone。</span>
+                    </div>
+                    <div class="branch">
+                      <span><strong>重复删 History：</strong>幂等，保留首次时间。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">cancel  = terminal state
+                  <pre class="flow-code">
+cancel  = terminal state
 delete  = physical row delete
-history = visibility tombstone</pre>
+history = visibility tombstone</pre
+                  >
                 </div>
               </details>
 
@@ -2714,17 +3045,41 @@ history = visibility tombstone</pre>
                 </summary>
                 <div class="flow-body">
                   <div class="branch-list">
-                    <div class="branch"><span><strong>App 重启：</strong>running/awaiting→queued，保留 session、startedAt、queuedAt。</span></div>
-                    <div class="branch"><span><strong>Scheduler 正常退出：</strong>主动 release in-flight claim。</span></div>
-                    <div class="branch"><span><strong>Scheduler 崩溃：</strong>认领超过 10min 后回收。</span></div>
-                    <div class="branch"><span><strong>机器休眠：</strong>queued 原地保留，唤醒后继续同步，无 skip。</span></div>
-                    <div class="branch"><span><strong>Keep Awake：</strong>设置开启且 running/awaiting 数量&gt;0 时阻止闲置休眠。</span></div>
-                    <div class="branch"><span><strong>合盖：</strong>powerSaveBlocker 无法阻止。</span></div>
+                    <div class="branch">
+                      <span
+                        ><strong>App 重启：</strong>running/awaiting→queued，保留
+                        session、startedAt、queuedAt。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Scheduler 正常退出：</strong>主动 release in-flight claim。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>Scheduler 崩溃：</strong>认领超过 10min 后回收。</span>
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>机器休眠：</strong>queued 原地保留，唤醒后继续同步，无 skip。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span
+                        ><strong>Keep Awake：</strong>设置开启且 running/awaiting 数量&gt;0
+                        时阻止闲置休眠。</span
+                      >
+                    </div>
+                    <div class="branch">
+                      <span><strong>合盖：</strong>powerSaveBlocker 无法阻止。</span>
+                    </div>
                   </div>
-                  <pre class="flow-code">recoverInterrupted:
+                  <pre class="flow-code">
+recoverInterrupted:
   running / awaiting
     → queued
-    → resume same session later</pre>
+    → resume same session later</pre
+                  >
                 </div>
               </details>
             </div>
@@ -2736,7 +3091,8 @@ history = visibility tombstone</pre>
               <div>
                 <h2>为什么 History 是 0 / 1</h2>
                 <p>
-                  没有独立 runs 表。UI 直接从任务聚合行计算一条摘要，因此多张 ticket、多段执行对用户保持透明。
+                  没有独立 runs 表。UI 直接从任务聚合行计算一条摘要，因此多张
+                  ticket、多段执行对用户保持透明。
                 </p>
               </div>
             </div>
@@ -2769,10 +3125,26 @@ history = visibility tombstone</pre>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>running</td><td>In progress</td><td>Date.now()</td></tr>
-                <tr><td>completed</td><td>Succeeded</td><td>endedAt</td></tr>
-                <tr><td>failed</td><td>Failure</td><td>endedAt</td></tr>
-                <tr><td>cancelled after start</td><td>Skipped</td><td>endedAt</td></tr>
+                <tr>
+                  <td>running</td>
+                  <td>In progress</td>
+                  <td>Date.now()</td>
+                </tr>
+                <tr>
+                  <td>completed</td>
+                  <td>Succeeded</td>
+                  <td>endedAt</td>
+                </tr>
+                <tr>
+                  <td>failed</td>
+                  <td>Failure</td>
+                  <td>endedAt</td>
+                </tr>
+                <tr>
+                  <td>cancelled after start</td>
+                  <td>Skipped</td>
+                  <td>endedAt</td>
+                </tr>
               </tbody>
             </table>
           </section>
@@ -2783,8 +3155,8 @@ history = visibility tombstone</pre>
               <div>
                 <h2>要不要像普通定时任务一样加 Run History</h2>
                 <p>
-                  普通 Automation 的同一定义会按周期产生很多次独立触发，runs 表既是幂等账本也是历史。
-                  Off-Peak 当前只有一次逻辑运行，重复发生的是 ticket 分段。
+                  普通 Automation 的同一定义会按周期产生很多次独立触发，runs
+                  表既是幂等账本也是历史。 Off-Peak 当前只有一次逻辑运行，重复发生的是 ticket 分段。
                 </p>
               </div>
             </div>
@@ -2802,7 +3174,10 @@ history = visibility tombstone</pre>
               <article class="decision-card">
                 <span class="decision-label">NOT RECOMMENDED</span>
                 <h3>照搬 off_peak_runs</h3>
-                <p>如果一条任务仍然只允许一次逻辑执行，那么 task 与 run 永远接近 1:1，只会把同一状态拆写两遍。</p>
+                <p>
+                  如果一条任务仍然只允许一次逻辑执行，那么 task 与 run 永远接近
+                  1:1，只会把同一状态拆写两遍。
+                </p>
                 <ul>
                   <li>适合：未来支持重复触发同一任务定义</li>
                   <li>不适合：只为保存 ticket 分段</li>
@@ -2812,7 +3187,10 @@ history = visibility tombstone</pre>
               <article class="decision-card recommended">
                 <span class="decision-label">RECOMMENDED EVOLUTION</span>
                 <h3>按需增加 off_peak_tickets</h3>
-                <p>让聚合表继续回答“任务现在怎样”，子表专门记录“每张票怎样流转与核销”。产品 History 仍保持 0/1。</p>
+                <p>
+                  让聚合表继续回答“任务现在怎样”，子表专门记录“每张票怎样流转与核销”。产品 History
+                  仍保持 0/1。
+                </p>
                 <ul>
                   <li>解决：本地额度与票据链审计</li>
                   <li>解决：任务删除后的 settle outbox</li>
@@ -2851,8 +3229,8 @@ history = visibility tombstone</pre>
             </div>
             <div class="reading-rule">
               <strong>不要越权</strong>
-              服务端已经有权威的 MySQL ticket 生命周期和审计；本地 ticket 表只是可靠执行账本与诊断缓存，
-              不能成为 FIFO、并发额度或准入有效性的第二真源。
+              服务端已经有权威的 MySQL ticket 生命周期和审计；本地 ticket
+              表只是可靠执行账本与诊断缓存， 不能成为 FIFO、并发额度或准入有效性的第二真源。
             </div>
           </section>
 
@@ -2871,32 +3249,49 @@ history = visibility tombstone</pre>
               <article class="migration-step">
                 <b>PHASE 01</b>
                 <h3>只加表，不改读路径</h3>
-                <p>使用 <code>CREATE TABLE IF NOT EXISTS</code> 创建 ticket ledger 和索引；原任务表、原 RPC、原 UI 全部不动。</p>
+                <p>
+                  使用 <code>CREATE TABLE IF NOT EXISTS</code> 创建 ticket ledger
+                  和索引；原任务表、原 RPC、原 UI 全部不动。
+                </p>
               </article>
               <article class="migration-step">
                 <b>PHASE 02</b>
                 <h3>回填当前票快照</h3>
-                <p>每个任务最多回填当前 <code>server_ticket_id</code>，标记为 legacy backfill。已经被覆盖的历史票无法凭空恢复。</p>
+                <p>
+                  每个任务最多回填当前 <code>server_ticket_id</code>，标记为 legacy
+                  backfill。已经被覆盖的历史票无法凭空恢复。
+                </p>
               </article>
               <article class="migration-step">
                 <b>PHASE 03</b>
                 <h3>先双写，再观察</h3>
-                <p>Take、status、segment end、settle 同时写旧聚合字段与新子表；对账后再把诊断和 outbox 查询切到子表。</p>
+                <p>
+                  Take、status、segment end、settle 同时写旧聚合字段与新子表；对账后再把诊断和
+                  outbox 查询切到子表。
+                </p>
               </article>
               <article class="migration-step">
                 <b>PHASE 04</b>
                 <h3>逐项切换消费方</h3>
-                <p>先切 settle 重试，再切本地额度与诊断；任务卡片和 0/1 History 继续从聚合表读取，避免产品语义漂移。</p>
+                <p>
+                  先切 settle 重试，再切本地额度与诊断；任务卡片和 0/1 History
+                  继续从聚合表读取，避免产品语义漂移。
+                </p>
               </article>
             </div>
             <div class="compat-note">
               <article>
                 <strong>向前升级：可以无感</strong>
-                <p>新版本首次启动自动建表并回填当前票。旧任务照常运行；没有历史票时只影响审计完整度，不影响执行。</p>
+                <p>
+                  新版本首次启动自动建表并回填当前票。旧任务照常运行；没有历史票时只影响审计完整度，不影响执行。
+                </p>
               </article>
               <article>
                 <strong>回退旧版：功能可用，但有边界</strong>
-                <p>保留聚合字段即可让旧版本继续跑；旧版本期间产生的新票不会写 ledger，重新升级后无法补回完整链路。</p>
+                <p>
+                  保留聚合字段即可让旧版本继续跑；旧版本期间产生的新票不会写
+                  ledger，重新升级后无法补回完整链路。
+                </p>
               </article>
             </div>
             <div class="reading-rule">
@@ -2928,7 +3323,10 @@ history = visibility tombstone</pre>
               </article>
               <article class="risk good">
                 <h3>确认链路已收敛</h3>
-                <p>Permission / elicitation 只走普通 Session；Off-Peak 聚合保持 running，不暴露不可达状态。</p>
+                <p>
+                  Permission / elicitation 只走普通 Session；Off-Peak 聚合保持
+                  running，不暴露不可达状态。
+                </p>
               </article>
               <article class="risk">
                 <h3>running 写入早于网关 admitted</h3>
@@ -2936,23 +3334,36 @@ history = visibility tombstone</pre>
               </article>
               <article class="risk">
                 <h3>not_found 没有自动修复</h3>
-                <p>普通同步对 not_found 不做重取；queued 任务可能持续携带旧票，只有 Continue 会处理。</p>
+                <p>
+                  普通同步对 not_found 不做重取；queued 任务可能持续携带旧票，只有 Continue 会处理。
+                </p>
               </article>
               <article class="risk">
                 <h3>next_poll_at 尚未真正驱动</h3>
-                <p>字段会写库，但同步仍是 Service 级公共 timer，不按每条任务的 next_poll_at 过滤；即使无任务，finally 仍会约 5 分钟后再排一次 timer。</p>
+                <p>
+                  字段会写库，但同步仍是 Service 级公共 timer，不按每条任务的 next_poll_at
+                  过滤；即使无任务，finally 仍会约 5 分钟后再排一次 timer。
+                </p>
               </article>
               <article class="risk good">
                 <h3>额度误判改为服务端快照</h3>
-                <p>D39 删除本地 task.createdAt 与静态 limit 预判，改由 availability 返回实时 can_take_number 与 next_take_at。</p>
+                <p>
+                  D39 删除本地 task.createdAt 与静态 limit 预判，改由 availability 返回实时
+                  can_take_number 与 next_take_at。
+                </p>
               </article>
               <article class="risk good">
                 <h3>client/configs 不再携带 limit</h3>
-                <p>共享配置只控制曝光和模型列表；服务端内部 limit/window 不再泄漏为客户端推断规则。</p>
+                <p>
+                  共享配置只控制曝光和模型列表；服务端内部 limit/window 不再泄漏为客户端推断规则。
+                </p>
               </article>
               <article class="risk good">
                 <h3>3103 不再形成永久锁</h3>
-                <p>客户端保存的是带 next_take_at 的短期服务端快照，不保存 quotaExhausted boolean；到点重查，查询失败则保持禁入直到成功刷新。</p>
+                <p>
+                  客户端保存的是带 next_take_at 的短期服务端快照，不保存 quotaExhausted
+                  boolean；到点重查，查询失败则保持禁入直到成功刷新。
+                </p>
               </article>
               <article class="risk">
                 <h3>Delete 可丢 settle outbox</h3>
@@ -2960,15 +3371,23 @@ history = visibility tombstone</pre>
               </article>
               <article class="risk">
                 <h3>多 Host 重复同步</h3>
-                <p>每个窗口 Host 都启动 sync；写入和接口幂等，但批量状态请求和 settle 扫描会放大。</p>
+                <p>
+                  每个窗口 Host 都启动 sync；写入和接口幂等，但批量状态请求和 settle 扫描会放大。
+                </p>
               </article>
               <article class="risk">
                 <h3>客户端没有票据审计历史</h3>
-                <p>服务端有 ticket 真源和审计，但本地旧 ticket 会被覆盖；离线诊断无法还原每段耗时、结束原因与 settle 重试。</p>
+                <p>
+                  服务端有 ticket 真源和审计，但本地旧 ticket
+                  会被覆盖；离线诊断无法还原每段耗时、结束原因与 settle 重试。
+                </p>
               </article>
               <article class="risk">
                 <h3>客户端注释与服务端 Promote 已漂移</h3>
-                <p>当前服务端由独立 timer 推进 queued → ready；若客户端仍假定 status 查询会触发 Promote，轮询语义和故障判断会失真。</p>
+                <p>
+                  当前服务端由独立 timer 推进 queued → ready；若客户端仍假定 status 查询会触发
+                  Promote，轮询语义和故障判断会失真。
+                </p>
               </article>
             </div>
           </section>
@@ -2978,7 +3397,9 @@ history = visibility tombstone</pre>
               <div class="section-no">12 /</div>
               <div>
                 <h2>最终能力边界</h2>
-                <p>一眼判断一个需求是否还能继续塞进当前表，还是已经应该拆出 runs / tickets / events。</p>
+                <p>
+                  一眼判断一个需求是否还能继续塞进当前表，还是已经应该拆出 runs / tickets / events。
+                </p>
               </div>
             </div>
             <div class="final-definition">
@@ -3012,7 +3433,9 @@ history = visibility tombstone</pre>
 
         <footer>
           <span>ZCODE · OFF-PEAK TASK FIELD MANUAL</span>
-          <span>Source: current client code + server contract · docs/off-peak-task · 2026-07-20</span>
+          <span
+            >Source: current client code + server contract · docs/off-peak-task · 2026-07-20</span
+          >
         </footer>
       </main>
     </div>
@@ -3028,9 +3451,8 @@ history = visibility tombstone</pre>
       const sections = [...document.querySelectorAll("main section[id]")];
       const activateSection = () => {
         const active =
-          sections
-            .filter((section) => section.getBoundingClientRect().top <= 160)
-            .at(-1)?.id ?? sections[0]?.id;
+          sections.filter((section) => section.getBoundingClientRect().top <= 160).at(-1)?.id ??
+          sections[0]?.id;
         navLinks.forEach((link) => {
           link.classList.toggle("active", link.getAttribute("href") === `#${active}`);
         });

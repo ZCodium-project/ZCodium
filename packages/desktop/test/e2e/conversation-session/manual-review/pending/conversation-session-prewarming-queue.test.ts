@@ -28,10 +28,8 @@ describe("会话区 Prewarming Queue E2E", () => {
     const runId = Date.now();
     const firstMarker = `E2E_PREWARMING_FIRST_${runId}`;
     const queuedMarker = `E2E_PREWARMING_QUEUED_${runId}`;
-    const firstPrompt =
-      `E2E_PREWARMING_DELAY ${firstMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
-    const queuedPrompt =
-      `${queuedMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const firstPrompt = `E2E_PREWARMING_DELAY ${firstMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
+    const queuedPrompt = `${queuedMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
     await sendPrompt(firstPrompt);
     await waitForComposerText("", "prewarming 首轮发送后输入框没有清空");

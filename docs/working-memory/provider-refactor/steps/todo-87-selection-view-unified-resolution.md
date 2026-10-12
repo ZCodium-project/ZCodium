@@ -117,16 +117,16 @@ ModelFactory 继续只校验明确 Selection；解析成功不承诺未来执行
 
 这是 option-source、validation、draft-default 和 commit-effect 的改动；不改存储 schema，不新增迁移或后台批量重写。
 
-| 入口/级别 | 当前事实与代码起点 | 接入和保存边界 |
-| --- | --- | --- |
-| 公共层，must-inspect | `packages/provider/src/facades.ts`；`packages/services/src/model-provider/providerFacadeServices.ts`；`packages/ui/src/hooks/useModelSelectionView.ts` | 输入原选择，返回带临时 effectiveSelection 的 View；公共订阅/有限读取重试，保持只读与输入隔离，Host/RPC 类型一致 |
-| Composer，must-inspect | `packages/ui/src/v4/composer/useDraftConfigControl.ts`；`packages/ui/src/lib/composerRecent.ts` | 当前 revision 检查直接清 draft.modelSelection 并自动持久化，必须改成临时派生；文本编辑不顺手写入有效结果，成功写回防旧提交覆盖新意图 |
-| 定时任务编辑，must-inspect | `packages/ui/src/settings/AutomationEditView.tsx` | 已通过 useModelSelectionView 读取目标 Host；表单解析、提示、保存使用同一个结果，取消不写 |
-| 定时任务后台，must-inspect | `packages/desktop/src/scheduler/index.ts`；`packages/desktop/src/host/index.ts`；`packages/services/src/session/automationRepo.ts` | 当前先把 automation.modelSelection 固定到 run 再派发。必须在首次固定前完成目标 Host 解析，或调整这条现有链的固定位置；不能只在页面修，也不能把账号规则塞给 scheduler/Main |
-| Bot，must-inspect | `packages/services/src/bots/botsService.ts` | 草稿候选已读目标 ModelSelectionService；显示与首次提交前统一解析，保留 Bot 自己的上下文/保存边界 |
-| Wiki，should-inspect | `packages/ui/src/repo-wiki/RepoWikiPane.tsx`；`packages/services/src/repo-wiki` | 显式生成选择复用规则；后台启动点查漏。生成配置与当前聊天选择不互改 |
-| Subagent，conditional | `packages/ui/src/settings/SubagentsSection.tsx`；目标执行层 | 显式 override 的选择入口核对接入；没有 override 时继续继承 Parent Active Model，不改为当前账号默认模型。若执行侧拿不到同一选择事实，先报告边界，不下沉临时别名 |
-| Off-Peak，must-inspect | `packages/services/src/model-provider/offPeakModelSelectionView.ts`；`packages/services/src/session/offPeakTaskService.ts` | 不跨账号自动换模型或迁移 Ticket；原 Provider 暂不可用只形成临时不完整结果，执行保护保留。现有 list/get/sync 的 repairLegacyModelSelections 对已有新 Selection 不匹配会写库 invalidate，需切断这种自动破坏原意图的路径；真正旧结构迁移独立保留，历史/Ticket 不重解释 |
+| 入口/级别                  | 当前事实与代码起点                                                                                                                                     | 接入和保存边界                                                                                                                                                                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公共层，must-inspect       | `packages/provider/src/facades.ts`；`packages/services/src/model-provider/providerFacadeServices.ts`；`packages/ui/src/hooks/useModelSelectionView.ts` | 输入原选择，返回带临时 effectiveSelection 的 View；公共订阅/有限读取重试，保持只读与输入隔离，Host/RPC 类型一致                                                                                                                                                     |
+| Composer，must-inspect     | `packages/ui/src/v4/composer/useDraftConfigControl.ts`；`packages/ui/src/lib/composerRecent.ts`                                                        | 当前 revision 检查直接清 draft.modelSelection 并自动持久化，必须改成临时派生；文本编辑不顺手写入有效结果，成功写回防旧提交覆盖新意图                                                                                                                                |
+| 定时任务编辑，must-inspect | `packages/ui/src/settings/AutomationEditView.tsx`                                                                                                      | 已通过 useModelSelectionView 读取目标 Host；表单解析、提示、保存使用同一个结果，取消不写                                                                                                                                                                            |
+| 定时任务后台，must-inspect | `packages/desktop/src/scheduler/index.ts`；`packages/desktop/src/host/index.ts`；`packages/services/src/session/automationRepo.ts`                     | 当前先把 automation.modelSelection 固定到 run 再派发。必须在首次固定前完成目标 Host 解析，或调整这条现有链的固定位置；不能只在页面修，也不能把账号规则塞给 scheduler/Main                                                                                           |
+| Bot，must-inspect          | `packages/services/src/bots/botsService.ts`                                                                                                            | 草稿候选已读目标 ModelSelectionService；显示与首次提交前统一解析，保留 Bot 自己的上下文/保存边界                                                                                                                                                                    |
+| Wiki，should-inspect       | `packages/ui/src/repo-wiki/RepoWikiPane.tsx`；`packages/services/src/repo-wiki`                                                                        | 显式生成选择复用规则；后台启动点查漏。生成配置与当前聊天选择不互改                                                                                                                                                                                                  |
+| Subagent，conditional      | `packages/ui/src/settings/SubagentsSection.tsx`；目标执行层                                                                                            | 显式 override 的选择入口核对接入；没有 override 时继续继承 Parent Active Model，不改为当前账号默认模型。若执行侧拿不到同一选择事实，先报告边界，不下沉临时别名                                                                                                      |
+| Off-Peak，must-inspect     | `packages/services/src/model-provider/offPeakModelSelectionView.ts`；`packages/services/src/session/offPeakTaskService.ts`                             | 不跨账号自动换模型或迁移 Ticket；原 Provider 暂不可用只形成临时不完整结果，执行保护保留。现有 list/get/sync 的 repairLegacyModelSelections 对已有新 Selection 不匹配会写库 invalidate，需切断这种自动破坏原意图的路径；真正旧结构迁移独立保留，历史/Ticket 不重解释 |
 
 Desktop 和 Web 复用解析算法，但不改变 continuous/replayable 投递。远端 View 不就绪时不退回 Local Host；隔离沿用 workspaceIdentity、remoteSessionId 和现有 service owner。不能把账号切换变成第二套远端同步。
 
@@ -152,22 +152,22 @@ Desktop 和 Web 复用解析算法，但不改变 continuous/replayable 投递�
 
 ## 7. 验收用例与剪枝（合同；实际覆盖级别见 coverage matrix）
 
-| ID | 前置和动作 | 必须证明 | 证据 |
-| --- | --- | --- | --- |
-| SR87-01 | 个人/Team 切换，新 Provider 有相同模型/档位 | 只改 Provider，模型/档位保留；普通 DeepSeek 不动 | 公共单测 + Composer E2E 请求 |
-| SR87-02 | 目标只缺档位或缺模型 | 仅有效结果分层置空；原意图及文件不变，不选默认、不按档位索引映射 | 单测 + 控件/提交阻断 + 文件 |
-| SR87-03 | Personal/Built-in 更新档位、模型 enabled 或模型成员 | 与账号更新使用同一解析入口；有效选择不变，无效部分置空 | 配置/View 集成 + UI |
-| SR87-04 | View 迟到、未知、Host 切换，期间用户又改选择 | 不误清空、不串 Host、不覆盖最新用户选择；Ready 权威空候选才判失效 | 状态/服务测试 |
-| SR87-05 | 重启后读取旧账号选择，未观察切换事件 | 仅凭当前 View 完成账号对应；旧 legacy 结构仍归 Decoder | 公共/恢复集成测试 |
-| SR87-06 | 定时任务已保存旧账号模型，切换后不打开编辑页直接触发 | 首次 run 固定正确选择；实际请求一致；同 run 重试不重新换模型 | Air E2E + run 记录/请求 |
-| SR87-07 | Bot 旧草稿、Wiki 显式设置再次使用 | 复用解析；各自记录不污染 Composer/Recent | 业务集成；交互按已接受用例补 E2E |
-| SR87-08 | 继承型 Subagent、已运行/已完成记录 | 不跟随当前账号替换，不重写历史/执行对象 | 定向不变量测试 |
-| SR87-09 | 配置同步未完成时立刻发远端请求 | 不新增发送前同步屏障；目标 Host 自己校验 | 既有同步测试 + 调用边界检查 |
-| SR87-10 | 原选择临时无效，编辑文字，再恢复配置 | 文字保存不清原选择；有效结果恢复，用户明确清空则不恢复 | Draft/文件测试 + Composer E2E |
-| SR87-11 | 首读临时失败，随后恢复且 revision 不变；没有变化事件 | 公共层有限读取重试可恢复；耗尽可 reload；换目标/销毁取消，解析不完整不重试 | Hook/服务测试，受控故障 |
-| SR87-12 | 两个消费者传不同选择；同 revision 下改输入或提交后再编辑 | effectiveSelection 不串用，旧回包/旧提交成功不覆盖新意图；失败不写回 | 公共读取与提交测试 |
-| SR87-13 | Z.AI/BigModel 域切换，已保存 Off-Peak 选择与当前账号不匹配 | 不自动换 Provider；只读结果不完整、原意图不改，执行前检查继续阻断；不因账号切换自动换票 | 公共/服务测试 + Air mock 交互与无派发证据 |
-| SR87-14 | 已有闲时 Ticket/queued/续跑；list/get/sync；切回原账号 | 读取/轮询不清新 Selection 或从旧修复字段重绑另一账号；切回可重算模型有效结果（不保证 Ticket 有效）；历史不变，既有过期/3102 处理保留 | 服务/存储/Ticket 集成测试 |
+| ID      | 前置和动作                                                 | 必须证明                                                                                                                             | 证据                                      |
+| ------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| SR87-01 | 个人/Team 切换，新 Provider 有相同模型/档位                | 只改 Provider，模型/档位保留；普通 DeepSeek 不动                                                                                     | 公共单测 + Composer E2E 请求              |
+| SR87-02 | 目标只缺档位或缺模型                                       | 仅有效结果分层置空；原意图及文件不变，不选默认、不按档位索引映射                                                                     | 单测 + 控件/提交阻断 + 文件               |
+| SR87-03 | Personal/Built-in 更新档位、模型 enabled 或模型成员        | 与账号更新使用同一解析入口；有效选择不变，无效部分置空                                                                               | 配置/View 集成 + UI                       |
+| SR87-04 | View 迟到、未知、Host 切换，期间用户又改选择               | 不误清空、不串 Host、不覆盖最新用户选择；Ready 权威空候选才判失效                                                                    | 状态/服务测试                             |
+| SR87-05 | 重启后读取旧账号选择，未观察切换事件                       | 仅凭当前 View 完成账号对应；旧 legacy 结构仍归 Decoder                                                                               | 公共/恢复集成测试                         |
+| SR87-06 | 定时任务已保存旧账号模型，切换后不打开编辑页直接触发       | 首次 run 固定正确选择；实际请求一致；同 run 重试不重新换模型                                                                         | Air E2E + run 记录/请求                   |
+| SR87-07 | Bot 旧草稿、Wiki 显式设置再次使用                          | 复用解析；各自记录不污染 Composer/Recent                                                                                             | 业务集成；交互按已接受用例补 E2E          |
+| SR87-08 | 继承型 Subagent、已运行/已完成记录                         | 不跟随当前账号替换，不重写历史/执行对象                                                                                              | 定向不变量测试                            |
+| SR87-09 | 配置同步未完成时立刻发远端请求                             | 不新增发送前同步屏障；目标 Host 自己校验                                                                                             | 既有同步测试 + 调用边界检查               |
+| SR87-10 | 原选择临时无效，编辑文字，再恢复配置                       | 文字保存不清原选择；有效结果恢复，用户明确清空则不恢复                                                                               | Draft/文件测试 + Composer E2E             |
+| SR87-11 | 首读临时失败，随后恢复且 revision 不变；没有变化事件       | 公共层有限读取重试可恢复；耗尽可 reload；换目标/销毁取消，解析不完整不重试                                                           | Hook/服务测试，受控故障                   |
+| SR87-12 | 两个消费者传不同选择；同 revision 下改输入或提交后再编辑   | effectiveSelection 不串用，旧回包/旧提交成功不覆盖新意图；失败不写回                                                                 | 公共读取与提交测试                        |
+| SR87-13 | Z.AI/BigModel 域切换，已保存 Off-Peak 选择与当前账号不匹配 | 不自动换 Provider；只读结果不完整、原意图不改，执行前检查继续阻断；不因账号切换自动换票                                              | 公共/服务测试 + Air mock 交互与无派发证据 |
+| SR87-14 | 已有闲时 Ticket/queued/续跑；list/get/sync；切回原账号     | 读取/轮询不清新 Selection 或从旧修复字段重绑另一账号；切回可重算模型有效结果（不保证 Ticket 有效）；历史不变，既有过期/3102 处理保留 | 服务/存储/Ticket 集成测试                 |
 
 组合剪枝：不为颜色、每个供应商品牌或每档 reasoning 做全排列；个人/Team 取连接变化代表，Start 取 pending/空模型代表，Off-Peak 取 Z.AI/BigModel 切域不改原意图及执行阻断代表，普通 Provider 取配置变化代表。远端取身份隔离与读取恢复代表；继承型 Subagent 只做不变量。没有同模型挑首模型、按中文/强度位置猜档位、自动批量写盘、闲时跨账号自动替换或票据迁移均明确排除。
 
@@ -210,11 +210,11 @@ E2E 交接：在 case catalog/coverage matrix 登记 SR87 映射后，按 e2e-ca
 
 ### 当前裁决状态（不等于开发完成）
 
-| 项目 | 结论 | 后续 |
-| --- | --- | --- |
-| Todo 85 D01：发送前远端配置同步 | 明确不恢复 | 不再列为待裁决 |
-| Todo 85 D02：账号切换后的模型选择 | 按本 Todo 统一解析，不恢复旧事件驱动批量改写 | 待实施与验证 |
-| 闲时任务跨账号与 Ticket | 本轮不做跨账号自动替换/票据迁移；修正读取破坏原意图 | 按上述收缩范围实施 |
-| Todo 86：刷新职责 | 独立草案，仍待讨论 | 不阻塞 Todo 85 收尾，不自动扩大本 Todo |
+| 项目                              | 结论                                                | 后续                                   |
+| --------------------------------- | --------------------------------------------------- | -------------------------------------- |
+| Todo 85 D01：发送前远端配置同步   | 明确不恢复                                          | 不再列为待裁决                         |
+| Todo 85 D02：账号切换后的模型选择 | 按本 Todo 统一解析，不恢复旧事件驱动批量改写        | 待实施与验证                           |
+| 闲时任务跨账号与 Ticket           | 本轮不做跨账号自动替换/票据迁移；修正读取破坏原意图 | 按上述收缩范围实施                     |
+| Todo 86：刷新职责                 | 独立草案，仍待讨论                                  | 不阻塞 Todo 85 收尾，不自动扩大本 Todo |
 
 截至本轮，固定 staging 恢复记录中已列出的产品裁决没有新增悬而未决项；最终 review、未提交恢复组的提交及 Todo 87 实施仍未完成，不能据此宣称事故已全部收口。实施中若遇到本文件第 8 节列出的真实边界冲突，再带具体事实讨论。

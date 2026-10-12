@@ -18,9 +18,7 @@ interface RemoteConnectionDirectoryFailureState {
   step: RemoteWizardStep;
 }
 
-export function isRemoteConnectionFlowActive(
-  snapshot: RemoteConnectionDialogSnapshot,
-): boolean {
+export function isRemoteConnectionFlowActive(snapshot: RemoteConnectionDialogSnapshot): boolean {
   return snapshot.loading || Boolean(snapshot.connectedSessionId);
 }
 

@@ -807,6 +807,7 @@ Provider 使用原生 mentions 和卡片中的有序 at 节点恢复可信 menti
 逐条输入 → 停止屏障 → 全批次有效性判断 → 保留原始消息提交
 原生 mention targetId + 当前 bot openId → isCurrentBot → 模型分工
 ```
+
 当前授权、Host 持久化 owner、CLI 单一 admission、desktop continuous/mobile replayable 不变。
 
 模型身份定位补充：除 mention 清单外，逐条输入投影有序 text/channelMention 节点，

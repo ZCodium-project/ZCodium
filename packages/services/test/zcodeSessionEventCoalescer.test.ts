@@ -76,9 +76,9 @@ describe("createBackgroundSessionEventCoalescer", () => {
     expect(emitted).toHaveLength(1);
     const event = emitted[0];
     expect(event?.type).toBe("session.event");
-    expect(
-      event?.type === "session.event" ? event.event.payload : null,
-    ).toMatchObject({ delta: "abc" });
+    expect(event?.type === "session.event" ? event.event.payload : null).toMatchObject({
+      delta: "abc",
+    });
   });
 
   it("flushes pending deltas before structural session events", () => {
@@ -93,9 +93,9 @@ describe("createBackgroundSessionEventCoalescer", () => {
     coalescer.accept(result);
 
     expect(emitted).toHaveLength(2);
-    expect(
-      emitted[0]?.type === "session.event" ? emitted[0].event.payload : null,
-    ).toMatchObject({ delta: "a" });
+    expect(emitted[0]?.type === "session.event" ? emitted[0].event.payload : null).toMatchObject({
+      delta: "a",
+    });
     expect(emitted[1]).toBe(result);
   });
 
@@ -111,9 +111,9 @@ describe("createBackgroundSessionEventCoalescer", () => {
     coalescer.dispose();
 
     expect(emitted).toHaveLength(1);
-    expect(
-      emitted[0]?.type === "session.event" ? emitted[0].event.payload : null,
-    ).toMatchObject({ delta: "前半段继续" });
+    expect(emitted[0]?.type === "session.event" ? emitted[0].event.payload : null).toMatchObject({
+      delta: "前半段继续",
+    });
   });
 
   it("keeps only the latest tool progress event in one background window", () => {
@@ -132,9 +132,9 @@ describe("createBackgroundSessionEventCoalescer", () => {
     vi.advanceTimersByTime(100);
 
     expect(emitted).toHaveLength(1);
-    expect(
-      emitted[0]?.type === "session.event" ? emitted[0].event.payload : null,
-    ).toMatchObject({ stdoutBytes: 30 });
+    expect(emitted[0]?.type === "session.event" ? emitted[0].event.payload : null).toMatchObject({
+      stdoutBytes: 30,
+    });
   });
 
   it("flushes pending events before snapshots", () => {

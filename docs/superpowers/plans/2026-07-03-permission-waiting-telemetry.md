@@ -17,6 +17,7 @@
 ### Task 1: Add failing telemetry state-machine tests
 
 **Files:**
+
 - Modify: `packages/ui/test/messageTelemetry.test.ts`
 
 - [x] Add tests that start a tool step, open/close permission intervals, and assert:
@@ -39,6 +40,7 @@ expect(completion.eventExtraDetail).toMatchObject({
 ### Task 2: Implement request-scoped waiting aggregation
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/messageTelemetry.ts`
 
 - [x] Replace the single `permissionRequestedAt` field with a `Map` keyed by `requestId`.
@@ -52,6 +54,7 @@ expect(completion.eventExtraDetail).toMatchObject({
 ### Task 3: Wire desktop and remote response paths
 
 **Files:**
+
 - Modify: `packages/ui/src/hooks/taskStreamEventHandlers.ts`
 - Modify: `packages/ui/src/hooks/useChatTaskControlActions.ts`
 - Modify: `packages/ui/src/lib/zcodeTaskRuntimeMonitor.ts`
@@ -66,6 +69,7 @@ expect(completion.eventExtraDetail).toMatchObject({
 ### Task 4: Update telemetry documentation
 
 **Files:**
+
 - Modify: `docs/monitoring/business-monitoring.md`
 - Modify: `docs/monitoring/performance-telemetry-catalog.md`
 

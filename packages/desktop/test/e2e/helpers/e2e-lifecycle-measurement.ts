@@ -1,7 +1,4 @@
-import type {
-  E2ELifecycleEvent,
-  E2ELifecyclePhase,
-} from "../reporting/e2e-reporting-types.js";
+import type { E2ELifecycleEvent, E2ELifecyclePhase } from "../reporting/e2e-reporting-types.js";
 
 export async function runMeasuredE2ELifecyclePhase<T>(
   phase: E2ELifecyclePhase,

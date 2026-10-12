@@ -17,13 +17,7 @@ import { logger } from "@/logger.js";
 
 const RewardsContext = createContext<(() => Promise<void>) | null>(null);
 export const useOpenRewards = () => useContext(RewardsContext);
-export function RewardsProvider({
-  children,
-  desktop,
-}: {
-  children: ReactNode;
-  desktop: boolean;
-}) {
+export function RewardsProvider({ children, desktop }: { children: ReactNode; desktop: boolean }) {
   const [opened, setOpened] = useState(false);
   const platform = usePlatform();
   const { locale } = useZCodeIntl();

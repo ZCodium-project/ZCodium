@@ -158,7 +158,7 @@ describe("Host OffPeak dispatch current execution contract", () => {
       {},
       {
         sessionId: "new",
-      messageId: "trace-new",
+        messageId: "trace-new",
         source: "automation_idle",
         workspaceIdentity: state.request.workspaceIdentity,
       },

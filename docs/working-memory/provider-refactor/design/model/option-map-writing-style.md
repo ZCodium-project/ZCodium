@@ -37,18 +37,18 @@
 ```js
 reasoningLevel == "disabled"
   ? {
-      "thinking": {
-        "type": "disabled"
-      }
+      thinking: {
+        type: "disabled",
+      },
     }
   : {
-      "thinking": {
-        "type": "adaptive"
+      thinking: {
+        type: "adaptive",
       },
-      "output_config": {
-        "effort": reasoningLevel
-      }
-    }
+      output_config: {
+        effort: reasoningLevel,
+      },
+    };
 ```
 
 示例只说明结构写法，不要求所有模型使用这些字段或档位。

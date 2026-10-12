@@ -22,10 +22,7 @@ export function readPersistedPaneSession(workspaceKey: string): string | null {
   }
 }
 
-export function persistPaneSession(
-  workspaceKey: string,
-  sessionId: string | null,
-): void {
+export function persistPaneSession(workspaceKey: string, sessionId: string | null): void {
   try {
     if (sessionId) {
       localStorage.setItem(storageKey(workspaceKey), sessionId);

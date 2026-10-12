@@ -54,16 +54,16 @@
 
 本项为 feature-boundary-planner 的 planning，主要层级是 persistence / validation / commit-effect。没有 codegraph 工具；以下为定向读取及此前内存复现，不声称已完成全仓审计。
 
-| 等级 / 场景 | 入口及共享实现 | 原意图与提交落点 | 当前事实 / 必须检查 |
-| --- | --- | --- | --- |
-| must-inspect：用户／项目设置表单 | SubagentsSection → subagentsService → subagentMarkdown | 表单草稿；显式 Save 写各自 Markdown | 当前 serializer 写 `modelSelection`；必须统一为正式原字段，保存不重引中间态 |
-| must-inspect：Host 读取 | `packages/services/src/subagents/subagentMarkdown.ts`、`subagentModelSelection.ts` | 文件是权威；返回内部 selection | 当前按是否存在 modelSelection 分双读路径；需删除中间格式分支，明确迁移与正式读取分界 |
-| must-inspect：Agent 冷启动 | bootstrap `subagents.ts`、`subagent-legacy-selection.ts`、`app/create-app.ts`；core `profile-model-selection.ts` | Markdown → 内部 profile | 当前每次导入旧身份只改内存、不写 Markdown；需追到重启后二次读取，不能只测单次结果 |
-| must-inspect：内置覆盖 | subagentsService 的 state importer / prepareRuntimeState，bootstrap state reader | `agents-state.json` | 格式不回退；彻查旧双 map 只在迁移入口读，正式 reader 只读当前字段 |
-| invariant-only：项目／插件等范围外文件 | 项目/插件 agent discovery 和 profile loader | 各自原文件 | 自动迁移不写入，不新增中间态或旧身份长期兼容；用户主动 Save 与自动迁移分开 |
-| must-inspect：所有 Selection 使用入口 | Todo 96 的 Session、Automation、Bot、Wiki、Recent/Default/Draft | 各业务原有存储、保存时机 | 排查同类中间态兼容、新空值回读旧值、反复内存转换、环境失败破坏原意图；不是只检查 Subagent |
-| invariant-only：实际执行 / 远端 | Subagent child 启动、目标 Host 的有效解析及最终 Registry 校验 | 本次运行冻结的具体选择 | 不绕过最终校验、不改正在运行请求；不借本地配置修远端，不新增发送前同步 |
-| invariant-only：闲时 | Off-Peak migration / Ticket | 已有票据与固定运行选择 | 纳入旧读取事实审计；不得机械套用 Individual 迁移或改变 Ticket 绑定，冲突另列裁决 |
+| 等级 / 场景                            | 入口及共享实现                                                                                                   | 原意图与提交落点                    | 当前事实 / 必须检查                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| must-inspect：用户／项目设置表单       | SubagentsSection → subagentsService → subagentMarkdown                                                           | 表单草稿；显式 Save 写各自 Markdown | 当前 serializer 写 `modelSelection`；必须统一为正式原字段，保存不重引中间态               |
+| must-inspect：Host 读取                | `packages/services/src/subagents/subagentMarkdown.ts`、`subagentModelSelection.ts`                               | 文件是权威；返回内部 selection      | 当前按是否存在 modelSelection 分双读路径；需删除中间格式分支，明确迁移与正式读取分界      |
+| must-inspect：Agent 冷启动             | bootstrap `subagents.ts`、`subagent-legacy-selection.ts`、`app/create-app.ts`；core `profile-model-selection.ts` | Markdown → 内部 profile             | 当前每次导入旧身份只改内存、不写 Markdown；需追到重启后二次读取，不能只测单次结果         |
+| must-inspect：内置覆盖                 | subagentsService 的 state importer / prepareRuntimeState，bootstrap state reader                                 | `agents-state.json`                 | 格式不回退；彻查旧双 map 只在迁移入口读，正式 reader 只读当前字段                         |
+| invariant-only：项目／插件等范围外文件 | 项目/插件 agent discovery 和 profile loader                                                                      | 各自原文件                          | 自动迁移不写入，不新增中间态或旧身份长期兼容；用户主动 Save 与自动迁移分开                |
+| must-inspect：所有 Selection 使用入口  | Todo 96 的 Session、Automation、Bot、Wiki、Recent/Default/Draft                                                  | 各业务原有存储、保存时机            | 排查同类中间态兼容、新空值回读旧值、反复内存转换、环境失败破坏原意图；不是只检查 Subagent |
+| invariant-only：实际执行 / 远端        | Subagent child 启动、目标 Host 的有效解析及最终 Registry 校验                                                    | 本次运行冻结的具体选择              | 不绕过最终校验、不改正在运行请求；不借本地配置修远端，不新增发送前同步                    |
+| invariant-only：闲时                   | Off-Peak migration / Ticket                                                                                      | 已有票据与固定运行选择              | 纳入旧读取事实审计；不得机械套用 Individual 迁移或改变 Ticket 绑定，冲突另列裁决          |
 
 共享的是身份解码、内部 Selection 和候选解析，不共享保存副作用：Subagent Save 不等于 Composer 发送接纳，内置 JSON 不等于 Markdown，插件也不等于用户文件。主会话、定时任务的执行行为不在本项擅自重构。
 
@@ -75,15 +75,15 @@
 
 对每个持久格式分别记录下面这些列；“当前字段名”相同不代表属于同一格式。范围是本轮 Provider / Model Selection 重构，不扩成全仓所有数据迁移重做。
 
-| 入口 / 文件或表 | 发布旧格式 | 正式当前格式 | 未上线中间态分支 | 迁移入口及触发 | 完成写入证据 | 正式 reader / runtime 是否回读旧值 | 保存是否重写旧/中间格式 | 处理 / 测试 / 二审 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 用户目录 Subagent Markdown | 待核实样本 | model / thoughtLevel，新 Provider 值 | modelSelection（确定移除兼容） | 既有用户配置初始化／迁移阶段 | 待实现 | 待逐调用链核对 | 当前存在 | 待执行 |
-| 项目／插件 Subagent Markdown | 原文件保留 | 正式读取使用 model / thoughtLevel | modelSelection（不增加兼容） | 排除自动迁移 | 验证无自动写入 | 纳入读取审计，不新增旧身份旁路 | 项目显式 Save 与自动迁移分开 | 待验证 |
-| 内置 Subagent state JSON | 待核实旧双 map | builtInModelSelectionOverrides | 按发布来源识别 | 现有 prepareRuntimeState | 待复验 | 待复验 | 待复验 | 待执行 |
-| Session / Recent / Draft | 各实际旧存储 | 各正式存储 | 待逐项列明 | 对照 Todo 96 | 待记录 | 待记录 | 待记录 | 待执行 |
-| Automation / Bot / Wiki | 各实际旧存储 | 各正式存储 | 待逐项列明 | 对照 Todo 96 | 待记录 | 待记录 | 待记录 | 待执行 |
-| Provider config / Account connection | 各实际发布旧格式 | 各正式配置 | 待核对本轮被替代字段 | 各自现有迁移入口 | 待记录 | 待记录 | 待记录 | 新设计冲突单列，不顺带重做 |
-| Off-Peak | 既有旧任务记录 | 现行任务格式 | 待核实 | 既有专用边界 | 待记录 | 待记录 | 待记录 | 审计，不改变票据契约 |
+| 入口 / 文件或表                      | 发布旧格式       | 正式当前格式                         | 未上线中间态分支               | 迁移入口及触发               | 完成写入证据   | 正式 reader / runtime 是否回读旧值 | 保存是否重写旧/中间格式      | 处理 / 测试 / 二审         |
+| ------------------------------------ | ---------------- | ------------------------------------ | ------------------------------ | ---------------------------- | -------------- | ---------------------------------- | ---------------------------- | -------------------------- |
+| 用户目录 Subagent Markdown           | 待核实样本       | model / thoughtLevel，新 Provider 值 | modelSelection（确定移除兼容） | 既有用户配置初始化／迁移阶段 | 待实现         | 待逐调用链核对                     | 当前存在                     | 待执行                     |
+| 项目／插件 Subagent Markdown         | 原文件保留       | 正式读取使用 model / thoughtLevel    | modelSelection（不增加兼容）   | 排除自动迁移                 | 验证无自动写入 | 纳入读取审计，不新增旧身份旁路     | 项目显式 Save 与自动迁移分开 | 待验证                     |
+| 内置 Subagent state JSON             | 待核实旧双 map   | builtInModelSelectionOverrides       | 按发布来源识别                 | 现有 prepareRuntimeState     | 待复验         | 待复验                             | 待复验                       | 待执行                     |
+| Session / Recent / Draft             | 各实际旧存储     | 各正式存储                           | 待逐项列明                     | 对照 Todo 96                 | 待记录         | 待记录                             | 待记录                       | 待执行                     |
+| Automation / Bot / Wiki              | 各实际旧存储     | 各正式存储                           | 待逐项列明                     | 对照 Todo 96                 | 待记录         | 待记录                             | 待记录                       | 待执行                     |
+| Provider config / Account connection | 各实际发布旧格式 | 各正式配置                           | 待核对本轮被替代字段           | 各自现有迁移入口             | 待记录         | 待记录                             | 待记录                       | 新设计冲突单列，不顺带重做 |
+| Off-Peak                             | 既有旧任务记录   | 现行任务格式                         | 待核实                         | 既有专用边界                 | 待记录         | 待记录                             | 待记录                       | 审计，不改变票据契约       |
 
 追踪至少覆盖：迁移、正式读取、设置页展示、实际执行、保存、重启。不能仅搜索 `legacy` 命名；重点查 `new ?? old`、新值无效后 fallback、双读 parser、RPC resolver、每次加载重新导入，以及测试是否把旧运行行为锁成正确。
 
@@ -93,18 +93,18 @@
 
 维度：真正旧格式／当前格式／未上线中间态；用户／项目／内置 JSON／插件只读；首次迁移／重启／显式保存；正常写入／失败／并发编辑；在线／离线。只覆盖改变语义的组合，不笛卡尔积铺开。
 
-| 用例 | 准备与动作 | 断言及证据 | 状态 |
-| --- | --- | --- | --- |
-| SA97-01 | 用户目录里两种真实旧字符串编码，迁移后重启加载 | 仅 Provider 值改变，模型/档位保留；第二次加载不再调用旧身份转换 | accepted，待单测/文件集成 |
-| SA97-02 | 未登录、空 Provider、SSH 断连条件下迁移同一旧选择 | 输出一致，无账号/网络/候选查询；原意图不被置空 | accepted，对接 SM96 |
-| SA97-03 | 含正文同名字符串、注释、未知 YAML 字段、不同换行的文件 | 精确文件差异仅在目标字段值；迁移幂等，不整份重建 | accepted，待文件测试 |
-| SA97-04 | 设置页创建/编辑用户及项目 agent，保存后冷启动 | 只写正式 model / thoughtLevel；Host/Agent 解码一致；实际 child 消费对应内部选择 | accepted，待服务/Agent 集成及 Pro E2E |
-| SA97-05 | 中间态 Markdown 的 modelSelection | 无专用兼容、逆迁移或优先读取分支；保存不再产生该字段；不借测试要求恢复该格式 | accepted，待负向测试及引用审查 |
-| SA97-06 | 其他存储已存在当前字段，旧字段与其冲突；当前值清空/不可用 | 正式路径不调用旧 reader，不复活旧意图；保留各自已裁决的清空/损坏处理 | accepted，逐入口测试 |
-| SA97-07 | 用户目录迁移同时用户编辑，或写入失败，随后重新加载 | 不覆盖并发内容、不标假完成、不绕过迁移进入旧字段执行路径；沿用迁移失败处理，不为写权限扩大产品设计 | accepted，待文件测试 |
-| SA97-08 | 内置 JSON 旧双 map 迁移并重启，及新版覆盖保存 | 正式 reader 只读新字段，覆盖原子性保持；不随 Markdown 改回旧格式 | accepted，待集成 |
-| SA97-09 | 同时存在用户、项目、插件的旧文件，执行初始化迁移 | 仅用户目录文件变化，项目和插件文件字节不变；不创建影子文件、不改权限、不为范围外旧身份新增兼容执行路径 | accepted，待文件集成 |
-| SA97-10 | 审计表每个入口：迁移完成，再读取/执行/保存/重启 | 旧字段只在迁移使用，无中间态兼容；附实现位置、测试命令、结果与二审结论 | accepted，完成门槛 |
+| 用例    | 准备与动作                                                | 断言及证据                                                                                             | 状态                                  |
+| ------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| SA97-01 | 用户目录里两种真实旧字符串编码，迁移后重启加载            | 仅 Provider 值改变，模型/档位保留；第二次加载不再调用旧身份转换                                        | accepted，待单测/文件集成             |
+| SA97-02 | 未登录、空 Provider、SSH 断连条件下迁移同一旧选择         | 输出一致，无账号/网络/候选查询；原意图不被置空                                                         | accepted，对接 SM96                   |
+| SA97-03 | 含正文同名字符串、注释、未知 YAML 字段、不同换行的文件    | 精确文件差异仅在目标字段值；迁移幂等，不整份重建                                                       | accepted，待文件测试                  |
+| SA97-04 | 设置页创建/编辑用户及项目 agent，保存后冷启动             | 只写正式 model / thoughtLevel；Host/Agent 解码一致；实际 child 消费对应内部选择                        | accepted，待服务/Agent 集成及 Pro E2E |
+| SA97-05 | 中间态 Markdown 的 modelSelection                         | 无专用兼容、逆迁移或优先读取分支；保存不再产生该字段；不借测试要求恢复该格式                           | accepted，待负向测试及引用审查        |
+| SA97-06 | 其他存储已存在当前字段，旧字段与其冲突；当前值清空/不可用 | 正式路径不调用旧 reader，不复活旧意图；保留各自已裁决的清空/损坏处理                                   | accepted，逐入口测试                  |
+| SA97-07 | 用户目录迁移同时用户编辑，或写入失败，随后重新加载        | 不覆盖并发内容、不标假完成、不绕过迁移进入旧字段执行路径；沿用迁移失败处理，不为写权限扩大产品设计     | accepted，待文件测试                  |
+| SA97-08 | 内置 JSON 旧双 map 迁移并重启，及新版覆盖保存             | 正式 reader 只读新字段，覆盖原子性保持；不随 Markdown 改回旧格式                                       | accepted，待集成                      |
+| SA97-09 | 同时存在用户、项目、插件的旧文件，执行初始化迁移          | 仅用户目录文件变化，项目和插件文件字节不变；不创建影子文件、不改权限、不为范围外旧身份新增兼容执行路径 | accepted，待文件集成                  |
+| SA97-10 | 审计表每个入口：迁移完成，再读取/执行/保存/重启           | 旧字段只在迁移使用，无中间态兼容；附实现位置、测试命令、结果与二审结论                                 | accepted，完成门槛                    |
 
 1. 补齐审计表的真实发布依据和调用链，按 §3 已裁决的用户目录范围接入既有迁移阶段；不扩展到项目或插件自动改写。
 2. 同步 Todo 96 中“Markdown 不自动重写”的旧条款，并标注本项为新裁决；具体 effectiveSelection 执行接入仍由 Todo 96 完成。
@@ -117,15 +117,15 @@
 
 ## 7. 实施、验收与二审（2026-09-08）
 
-| 用例 | 当前结果 |
-| --- | --- |
-| SA97-01/02/03 | 纯转换与文件集成通过；两种旧编码离线固定迁移，BOM/CRLF/注释/正文保留；重启幂等，后来加入的旧文件仍可导入 |
-| SA97-04 | Host/Agent 正式 codec 一致；Pro SE 三条创建/编辑落盘及 I20 冷启动 child 共4项通过 |
-| SA97-05 | 中间态 modelSelection 无读取/逆迁移分支；正式 serializer 不再产生该字段，负向测试通过 |
-| SA97-06/08 | JSON 当前 map 的空/坏/缺档位不回读旧双 map；Host/独立 Agent 初始化先导入落盘，旧 map 只留回滚；I20 从旧 JSON 验证 child/high |
-| SA97-07 | 并发初始化、写失败重试、写前外部编辑、临时文件清理测试通过；不宣称能锁住不遵守应用文件锁的外部编辑器全部竞争窗口 |
-| SA97-09 | 用户/项目/插件三份同内容 CRLF 文件，实际调用各 loader 连续两次，只有用户文件 Provider 身份改变，项目/插件文件及其显式旧身份不变；另有符号链接、只读文件不写的文件测试。没有为未迁移身份新增内存 alias |
-| SA97-10 | 全域审计已落表；发现 Session 普通 codec 回读旧 thoughtLevel，已移到 SQLite 单向导入并通过23条测试。Wiki 剩余边界已由 §8 完成；Off-Peak 保留已裁决专用例外 |
+| 用例          | 当前结果                                                                                                                                                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SA97-01/02/03 | 纯转换与文件集成通过；两种旧编码离线固定迁移，BOM/CRLF/注释/正文保留；重启幂等，后来加入的旧文件仍可导入                                                                                              |
+| SA97-04       | Host/Agent 正式 codec 一致；Pro SE 三条创建/编辑落盘及 I20 冷启动 child 共4项通过                                                                                                                     |
+| SA97-05       | 中间态 modelSelection 无读取/逆迁移分支；正式 serializer 不再产生该字段，负向测试通过                                                                                                                 |
+| SA97-06/08    | JSON 当前 map 的空/坏/缺档位不回读旧双 map；Host/独立 Agent 初始化先导入落盘，旧 map 只留回滚；I20 从旧 JSON 验证 child/high                                                                          |
+| SA97-07       | 并发初始化、写失败重试、写前外部编辑、临时文件清理测试通过；不宣称能锁住不遵守应用文件锁的外部编辑器全部竞争窗口                                                                                      |
+| SA97-09       | 用户/项目/插件三份同内容 CRLF 文件，实际调用各 loader 连续两次，只有用户文件 Provider 身份改变，项目/插件文件及其显式旧身份不变；另有符号链接、只读文件不写的文件测试。没有为未迁移身份新增内存 alias |
+| SA97-10       | 全域审计已落表；发现 Session 普通 codec 回读旧 thoughtLevel，已移到 SQLite 单向导入并通过23条测试。Wiki 剩余边界已由 §8 完成；Off-Peak 保留已裁决专用例外                                             |
 
 - 扩大回归：根61文件/900条、Agent17文件/201条通过；随后新增 custom: Provider 编码冲突红灯并修复，共享 Subagent 3文件/25条通过。
 - 根 typecheck/lint、Agent bootstrap typecheck 通过；Lint 41警告/0错误，存量警告及94遗留清理另记。

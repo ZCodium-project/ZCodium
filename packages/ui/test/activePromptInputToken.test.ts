@@ -88,10 +88,7 @@ describe("active prompt input token", () => {
       trigger: "/",
     });
     expect(
-      getActivePromptInputTokenReplacementRange(
-        snapshot,
-        selection(text, "/goal".length - 1),
-      ),
+      getActivePromptInputTokenReplacementRange(snapshot, selection(text, "/goal".length - 1)),
     ).toEqual({ start: 0, end: "/goal".length });
   });
 });

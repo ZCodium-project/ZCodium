@@ -12,21 +12,21 @@
 
 ## 1. Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Developer intent | 保留每窗口 32 个逻辑 Tab 硬上限，移除跨应用重启恢复 |
-| Capability | Desktop embedded Browser logical tab lifetime |
-| Change layer | persistence / recovery / commit-effect |
-| Operating mode | implementation handoff |
-| Primary seeds | `BrowserGuestManager`、`useAppPanels`、`AnimatedSidePanePanel`、Desktop main wiring |
-| Out of scope | 进程内多轮复用、guest renderer 异常退出原位恢复、Browser command、手机 replayable、远程 workspace runtime |
+| Field            | Value                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| Developer intent | 保留每窗口 32 个逻辑 Tab 硬上限，移除跨应用重启恢复                                                       |
+| Capability       | Desktop embedded Browser logical tab lifetime                                                             |
+| Change layer     | persistence / recovery / commit-effect                                                                    |
+| Operating mode   | implementation handoff                                                                                    |
+| Primary seeds    | `BrowserGuestManager`、`useAppPanels`、`AnimatedSidePanePanel`、Desktop main wiring                       |
+| Out of scope     | 进程内多轮复用、guest renderer 异常退出原位恢复、Browser command、手机 replayable、远程 workspace runtime |
 
 ### 1.1 固定产品常量
 
-| 项目 | 值 | 语义 |
-| --- | ---: | --- |
-| 逻辑 Browser tab | 每个 BrowserWindow `32` 个 | 普通 Browser 与 Browser Use 合并计数；超限后从 UI 和 main registry 完整关闭 |
-| 跨重启 Browser tab | `0` 个 | 完整退出后新进程从空 Browser Tab 集合启动 |
+| 项目               |                         值 | 语义                                                                        |
+| ------------------ | -------------------------: | --------------------------------------------------------------------------- |
+| 逻辑 Browser tab   | 每个 BrowserWindow `32` 个 | 普通 Browser 与 Browser Use 合并计数；超限后从 UI 和 main registry 完整关闭 |
+| 跨重启 Browser tab |                     `0` 个 | 完整退出后新进程从空 Browser Tab 集合启动                                   |
 
 不再存在 Browser Tab page-state 的 100 页、64 MiB、500 history 产品容量；这些值只属于已退役的恢复仓库实现。
 
@@ -34,41 +34,41 @@
 
 ### 2.1 UI Surface Matrix
 
-| User scenario | UI entry | Shared implementation | Display/draft owner | Commit action | Authority/persistence | Mode boundary | Must remain isolated from |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 打开/切换普通 Browser | Side Pane Browser tab | `UnifiedBrowserView` | renderer side-pane registry | attach/report/close | 当前 Electron 进程内存；不落盘 | Desktop only | 手机 replayable、其它 workspace/session |
-| Agent 操作 Browser Use | Browser Use side pane | `BrowserUseSidePaneContent` + `UnifiedBrowserView` | renderer shell + main `BrowserGuestManager` | Browser command / attach / close | 当前 Electron 进程内存；不落盘 | Desktop continuous | relay、Host task snapshot、手机独立 runtime |
-| 创建第 33 个 Tab | Side Pane tab strip | residency coordinator | main logical catalog | `closeTabDurably()` | UI/main/guest 同时删除；无跨重启仓库 | 每 BrowserWindow | 当前操作、截图、下载、媒体等保护 lease |
-| 完整退出再启动 | Desktop lifecycle | `prepareAppQuit` + renderer bootstrap | 新进程空 registry | 不执行 Browser Tab restore | 无 Browser Tab recovery file authority | dev/packaged 一致 | conversation/task 自身的冷恢复 |
+| User scenario          | UI entry              | Shared implementation                              | Display/draft owner                         | Commit action                    | Authority/persistence                  | Mode boundary      | Must remain isolated from                   |
+| ---------------------- | --------------------- | -------------------------------------------------- | ------------------------------------------- | -------------------------------- | -------------------------------------- | ------------------ | ------------------------------------------- |
+| 打开/切换普通 Browser  | Side Pane Browser tab | `UnifiedBrowserView`                               | renderer side-pane registry                 | attach/report/close              | 当前 Electron 进程内存；不落盘         | Desktop only       | 手机 replayable、其它 workspace/session     |
+| Agent 操作 Browser Use | Browser Use side pane | `BrowserUseSidePaneContent` + `UnifiedBrowserView` | renderer shell + main `BrowserGuestManager` | Browser command / attach / close | 当前 Electron 进程内存；不落盘         | Desktop continuous | relay、Host task snapshot、手机独立 runtime |
+| 创建第 33 个 Tab       | Side Pane tab strip   | residency coordinator                              | main logical catalog                        | `closeTabDurably()`              | UI/main/guest 同时删除；无跨重启仓库   | 每 BrowserWindow   | 当前操作、截图、下载、媒体等保护 lease      |
+| 完整退出再启动         | Desktop lifecycle     | `prepareAppQuit` + renderer bootstrap              | 新进程空 registry                           | 不执行 Browser Tab restore       | 无 Browser Tab recovery file authority | dev/packaged 一致  | conversation/task 自身的冷恢复              |
 
 ### 2.2 Shared And Divergent Behavior
 
-| Concern | Shared across surfaces | Deliberately different | Why it matters |
-| --- | --- | --- | --- |
-| Tab 上限 | Browser 与 Browser Use 共用每窗口 32 个逻辑 Tab | 保护信号按各自运行态汇总 | 禁止一类 Tab 绕过总量上限 |
-| 进程内复用 | stable logical tabId 与 live guest 在进程内保留 | guest crash 可替换 webContentsId | 移除跨重启恢复不能破坏进程内连续性 |
-| 完整重启 | 两类 Tab 都不恢复 | conversation/task 数据仍按各自规则冷恢复 | Browser UI 状态不能混入任务恢复 |
-| 手机远控 | 不创建独立 Browser runtime | 继续通过 shared-host attachment 使用当前桌面进程 | 不得把桌面 Tab 持久化语义扩散到 replayable snapshot |
+| Concern    | Shared across surfaces                          | Deliberately different                           | Why it matters                                      |
+| ---------- | ----------------------------------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| Tab 上限   | Browser 与 Browser Use 共用每窗口 32 个逻辑 Tab | 保护信号按各自运行态汇总                         | 禁止一类 Tab 绕过总量上限                           |
+| 进程内复用 | stable logical tabId 与 live guest 在进程内保留 | guest crash 可替换 webContentsId                 | 移除跨重启恢复不能破坏进程内连续性                  |
+| 完整重启   | 两类 Tab 都不恢复                               | conversation/task 数据仍按各自规则冷恢复         | Browser UI 状态不能混入任务恢复                     |
+| 手机远控   | 不创建独立 Browser runtime                      | 继续通过 shared-host attachment 使用当前桌面进程 | 不得把桌面 Tab 持久化语义扩散到 replayable snapshot |
 
 ### 2.3 Feature Relationships
 
-| Rank | From | Semantic edge | To | Why inspect it | Evidence |
-| --- | --- | --- | --- | --- | --- |
-| must-inspect | Browser tab hard limit | closes through | `BrowserGuestManager` | 第 33 个 Tab 必须关闭完整 logical tab | manager/coordinator tests |
-| must-inspect | Desktop bootstrap | must-not-call | Browser Tab restore | 新进程必须得到空 Tab strip | `useAppPanels` + Electron E2E |
-| must-inspect | Desktop main wiring | must-not-inject | persistent recovery store | 禁止运行期继续写可恢复 shell/pageState | main wiring + userData evidence |
-| should-inspect | App shutdown | releases | live guests | 正常退出只等待既有业务资源，不保存 Browser Tab | `prepareAppQuit` |
-| invariant-only | guest crash recovery | remains in-process | replacement guest | mounted guest 异常退出仍可原位恢复 | `UnifiedBrowserView` tests |
-| invariant-only | mobile remote | remains isolated | Browser Tab lifecycle | 不新增 task snapshot/runtime 字段 | architecture constraints |
+| Rank           | From                   | Semantic edge      | To                        | Why inspect it                                 | Evidence                        |
+| -------------- | ---------------------- | ------------------ | ------------------------- | ---------------------------------------------- | ------------------------------- |
+| must-inspect   | Browser tab hard limit | closes through     | `BrowserGuestManager`     | 第 33 个 Tab 必须关闭完整 logical tab          | manager/coordinator tests       |
+| must-inspect   | Desktop bootstrap      | must-not-call      | Browser Tab restore       | 新进程必须得到空 Tab strip                     | `useAppPanels` + Electron E2E   |
+| must-inspect   | Desktop main wiring    | must-not-inject    | persistent recovery store | 禁止运行期继续写可恢复 shell/pageState         | main wiring + userData evidence |
+| should-inspect | App shutdown           | releases           | live guests               | 正常退出只等待既有业务资源，不保存 Browser Tab | `prepareAppQuit`                |
+| invariant-only | guest crash recovery   | remains in-process | replacement guest         | mounted guest 异常退出仍可原位恢复             | `UnifiedBrowserView` tests      |
+| invariant-only | mobile remote          | remains isolated   | Browser Tab lifecycle     | 不新增 task snapshot/runtime 字段              | architecture constraints        |
 
 ### 2.4 State Owners And Commit Sinks
 
-| State/fact | Display owner | Authoritative owner | Commit command/service | Persistence/cache |
-| --- | --- | --- | --- | --- |
-| 当前 Tab strip | renderer workspace side-pane registry | renderer + main logical catalog | open/close/limit close | 仅进程内 |
-| live guest/CDP | `UnifiedBrowserView` | `BrowserGuestManager` | attach/detach/close | 不持久化 |
-| 32 个上限与 LRU | 无独立 UI | `BrowserTabResidencyCoordinator` | `closeTabForLimit` | 仅进程内 |
-| Browser Tab 重启状态 | 无 | 无 | 无 restore command | 不写 recovery file |
+| State/fact           | Display owner                         | Authoritative owner              | Commit command/service | Persistence/cache  |
+| -------------------- | ------------------------------------- | -------------------------------- | ---------------------- | ------------------ |
+| 当前 Tab strip       | renderer workspace side-pane registry | renderer + main logical catalog  | open/close/limit close | 仅进程内           |
+| live guest/CDP       | `UnifiedBrowserView`                  | `BrowserGuestManager`            | attach/detach/close    | 不持久化           |
+| 32 个上限与 LRU      | 无独立 UI                             | `BrowserTabResidencyCoordinator` | `closeTabForLimit`     | 仅进程内           |
+| Browser Tab 重启状态 | 无                                    | 无                               | 无 restore command     | 不写 recovery file |
 
 ### 2.5 Must-Preserve Invariants
 
@@ -84,12 +84,12 @@
 
 当前环境没有可用的本仓 codegraph 查询工具，采用 feature graph 声明的 seed 与 `rg` 直接调用点追踪：
 
-| Seed | Key path | Depth | Interpretation |
-| --- | --- | ---: | --- |
-| `BrowserGuestManager` | main wiring → attach/report/close | 2 | hard limit 与运行态 owner |
-| `browserViewRestoreTabs` | UI effect → platform → IPC → manager | 2 | 必须从 renderer bootstrap 移除的跨重启入口 |
-| `BrowserTabRecoveryStore` | Desktop main constructor injection | 2 | 必须停止装配的持久化 sink |
-| `AnimatedSidePanePanel` | side-pane registry → Browser surface | 2 | 第 33 个 Tab close 的 UI 消费者 |
+| Seed                      | Key path                             | Depth | Interpretation                             |
+| ------------------------- | ------------------------------------ | ----: | ------------------------------------------ |
+| `BrowserGuestManager`     | main wiring → attach/report/close    |     2 | hard limit 与运行态 owner                  |
+| `browserViewRestoreTabs`  | UI effect → platform → IPC → manager |     2 | 必须从 renderer bootstrap 移除的跨重启入口 |
+| `BrowserTabRecoveryStore` | Desktop main constructor injection   |     2 | 必须停止装配的持久化 sink                  |
+| `AnimatedSidePanePanel`   | side-pane registry → Browser surface |     2 | 第 33 个 Tab close 的 UI 消费者            |
 
 ### 2.7 Graph Drift / Delta
 
@@ -187,12 +187,12 @@ complete quit
 
 继续使用的能力：
 
-| 方向 | 能力 | 用途 |
-| --- | --- | --- |
-| renderer → main | `browserViewCloseTab` | 用户显式 close |
-| main → renderer | `onBrowserViewCloseTab` | 用户/Agent/上限关闭后删除 tab 壳 |
+| 方向            | 能力                         | 用途                                          |
+| --------------- | ---------------------------- | --------------------------------------------- |
+| renderer → main | `browserViewCloseTab`        | 用户显式 close                                |
+| main → renderer | `onBrowserViewCloseTab`      | 用户/Agent/上限关闭后删除 tab 壳              |
 | renderer → main | `browserViewReportResidency` | selected/visible/保护状态与可信 sender window |
-| renderer → main | `browserViewAttachGuest` | live guest attach 与迟到事件防护 |
+| renderer → main | `browserViewAttachGuest`     | live guest attach 与迟到事件防护              |
 
 `browserViewRestoreTabs`、`onBrowserViewSuspend`、`onBrowserViewRestore` 与恢复 generation 属于 legacy compatibility；
 Desktop bootstrap/main production wiring 不调用、不注入持久化 store。Agent stdio BrowserCommand 无需修改。
@@ -201,26 +201,26 @@ Desktop bootstrap/main production wiring 不调用、不注入持久化 store。
 
 ### 9.1 Boundary Decisions
 
-| Boundary | Decision | Includes | Excludes / prunes | Source |
-| --- | --- | --- | --- | --- |
-| 第 33 个 Tab | 完整关闭最老安全候选 | Browser + Browser Use | suspend shell、30 分钟保护 | 用户裁决 + 运行时反馈 |
-| 完整应用重启 | Browser Tab 全部消失 | dev + packaged、local + remote tab UI | shell/pageState/history 恢复 | 用户生产实测与明确指令 |
-| 进程内切换 | 保留 live tab | task/workspace/session 切换 | 跨进程 stable tabId | 既有 BTL01-03 |
-| guest crash | 原位替换 | recoverable renderer exit | 应用退出后替换 | BCP-207 |
-| 手机远控 | 不新增状态 | shared-host attachment | 独立 runtime、replayable Browser Tab snapshot | 架构约束 |
+| Boundary     | Decision             | Includes                              | Excludes / prunes                             | Source                 |
+| ------------ | -------------------- | ------------------------------------- | --------------------------------------------- | ---------------------- |
+| 第 33 个 Tab | 完整关闭最老安全候选 | Browser + Browser Use                 | suspend shell、30 分钟保护                    | 用户裁决 + 运行时反馈  |
+| 完整应用重启 | Browser Tab 全部消失 | dev + packaged、local + remote tab UI | shell/pageState/history 恢复                  | 用户生产实测与明确指令 |
+| 进程内切换   | 保留 live tab        | task/workspace/session 切换           | 跨进程 stable tabId                           | 既有 BTL01-03          |
+| guest crash  | 原位替换             | recoverable renderer exit             | 应用退出后替换                                | BCP-207                |
+| 手机远控     | 不新增状态           | shared-host attachment                | 独立 runtime、replayable Browser Tab snapshot | 架构约束               |
 
 ### 9.2 Accepted Cases
 
-| Case | Setup / event | Assertions | Status |
-| --- | --- | --- | --- |
-| BTL01-03 | 无预算压力的多 turn / 双 session 多 tab | 进程内 stable tab、guest 与 scope 连续 | accepted |
-| BTL04 | 已有 32 个逻辑 tab，再创建第 33 个 | 最老安全候选从 DOM、main registry 与 guest 完整消失；总数回到 32 | accepted |
-| BTL05 | 所有超额候选均有运行态保护 | 暂时超限；保护释放后自动关闭最老安全候选 | accepted |
-| BTL10 | local/remote、不同 workspace identity 共处窗口 | 共享物理上限但 scope/命令不串 | accepted |
-| BTL11 | 用户 close live tab | UI/main/guest 完整关闭；迟到 attach 不复活 | accepted |
-| BTL12 | 完整退出前存在多个 Browser / Browser Use tab | 下一进程 Browser tab strip、main registry、webview 均为 0 | accepted |
-| BTL19 | remote tab 的 visibility/attach/list/claim | `remoteSessionId` 不丢失，跨 remote scope fail closed | accepted |
-| BTL20 | 当前进程 catalog 存在暂时无 live guest 的 logical tab | 仍计入 32 个上限，且可作为最老安全候选被完整关闭 | accepted |
+| Case     | Setup / event                                         | Assertions                                                       | Status   |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------------------- | -------- |
+| BTL01-03 | 无预算压力的多 turn / 双 session 多 tab               | 进程内 stable tab、guest 与 scope 连续                           | accepted |
+| BTL04    | 已有 32 个逻辑 tab，再创建第 33 个                    | 最老安全候选从 DOM、main registry 与 guest 完整消失；总数回到 32 | accepted |
+| BTL05    | 所有超额候选均有运行态保护                            | 暂时超限；保护释放后自动关闭最老安全候选                         | accepted |
+| BTL10    | local/remote、不同 workspace identity 共处窗口        | 共享物理上限但 scope/命令不串                                    | accepted |
+| BTL11    | 用户 close live tab                                   | UI/main/guest 完整关闭；迟到 attach 不复活                       | accepted |
+| BTL12    | 完整退出前存在多个 Browser / Browser Use tab          | 下一进程 Browser tab strip、main registry、webview 均为 0        | accepted |
+| BTL19    | remote tab 的 visibility/attach/list/claim            | `remoteSessionId` 不丢失，跨 remote scope fail closed            | accepted |
+| BTL20    | 当前进程 catalog 存在暂时无 live guest 的 logical tab | 仍计入 32 个上限，且可作为最老安全候选被完整关闭                 | accepted |
 
 ### 9.3 Retired / Pruned Cases
 
@@ -232,13 +232,13 @@ Desktop bootstrap/main production wiring 不调用、不注入持久化 store。
 
 ### 9.4 Planning Handoff
 
-| Item | Destination | Status |
-| --- | --- | --- |
-| Spec update | 本文 | complete |
-| Case catalog | `docs/conversation-session-case-catalog.md` BTL | complete |
-| Coverage matrix | conversation + Browser Use matrices | complete |
-| Feature graph | `zcode-feature-graph.yaml` | complete |
-| E2E handoff | `browser-tab-residency.test.ts` | complete |
+| Item            | Destination                                     | Status   |
+| --------------- | ----------------------------------------------- | -------- |
+| Spec update     | 本文                                            | complete |
+| Case catalog    | `docs/conversation-session-case-catalog.md` BTL | complete |
+| Coverage matrix | conversation + Browser Use matrices             | complete |
+| Feature graph   | `zcode-feature-graph.yaml`                      | complete |
+| E2E handoff     | `browser-tab-residency.test.ts`                 | complete |
 
 ## 10. 完成门槛
 

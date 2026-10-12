@@ -11,18 +11,11 @@ export function resolveWorkspaceDragSiblingDisplacement(params: {
   itemGap: number;
   overIndex: number;
 }): number {
-  const displacement =
-    WORKSPACE_DRAG_COLLAPSED_ROW_HEIGHT + Math.max(0, params.itemGap);
-  if (
-    params.index < params.activeIndex &&
-    params.index >= params.overIndex
-  ) {
+  const displacement = WORKSPACE_DRAG_COLLAPSED_ROW_HEIGHT + Math.max(0, params.itemGap);
+  if (params.index < params.activeIndex && params.index >= params.overIndex) {
     return displacement;
   }
-  if (
-    params.index > params.activeIndex &&
-    params.index <= params.overIndex
-  ) {
+  if (params.index > params.activeIndex && params.index <= params.overIndex) {
     return -displacement;
   }
   return 0;

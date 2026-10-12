@@ -20,50 +20,50 @@ npx wdio run ./wdio.conf.js
 Given you have the following Lit component:
 
 ```ts title="./components/Component.ts"
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
-@customElement('simple-greeting')
+@customElement("simple-greeting")
 export class SimpleGreeting extends LitElement {
-    @property()
-    name?: string = 'World'
+  @property()
+  name?: string = "World";
 
-    // Render the UI as a function of component state
-    render() {
-        return html`<p>Hello, ${this.name}!</p>`
-    }
+  // Render the UI as a function of component state
+  render() {
+    return html`<p>Hello, ${this.name}!</p>`;
+  }
 }
 ```
 
 In order test the component you have to render it into the test page before the test starts and ensure it gets cleaned up afterwards:
 
 ```ts title="lit.test.js"
-import expect from 'expect'
-import { waitFor } from '@testing-library/dom'
+import expect from "expect";
+import { waitFor } from "@testing-library/dom";
 
 // import Lit component
-import './components/Component.ts'
+import "./components/Component.ts";
 
-describe('Lit Component testing', () => {
-    let elem: HTMLElement
+describe("Lit Component testing", () => {
+  let elem: HTMLElement;
 
-    beforeEach(() => {
-        elem = document.createElement('simple-greeting')
-    })
+  beforeEach(() => {
+    elem = document.createElement("simple-greeting");
+  });
 
-    it('should render component', async () => {
-        elem.setAttribute('name', 'WebdriverIO')
-        document.body.appendChild(elem)
+  it("should render component", async () => {
+    elem.setAttribute("name", "WebdriverIO");
+    document.body.appendChild(elem);
 
-        await waitFor(() => {
-            expect(elem.shadowRoot.textContent).toBe('Hello, WebdriverIO!')
-        })
-    })
+    await waitFor(() => {
+      expect(elem.shadowRoot.textContent).toBe("Hello, WebdriverIO!");
+    });
+  });
 
-    afterEach(() => {
-        elem.remove()
-    })
-})
+  afterEach(() => {
+    elem.remove();
+  });
+});
 ```
 
 You can find a full example of a WebdriverIO component test suite for Lit in our [example repository](https://github.com/webdriverio/component-testing-examples/tree/main/lit-typescript-vite).

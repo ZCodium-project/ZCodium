@@ -47,10 +47,7 @@ export function resolvePendingCodingPlanUpgradeAfterLogin(params: {
   if (params.loginAttempt.id !== params.pending.loginAttemptId) {
     return { action: "discard" };
   }
-  if (
-    params.loginAttempt.status === "requested" ||
-    params.loginAttempt.status === "waiting"
-  ) {
+  if (params.loginAttempt.status === "requested" || params.loginAttempt.status === "waiting") {
     return { action: "wait" };
   }
   if (params.loginAttempt.status === "succeeded") {

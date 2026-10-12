@@ -43,6 +43,7 @@ For example, if you are using a real production user and need to enter a passwor
 The above will hide the text value from WDIO logs as the following:
 
 Logs example:
+
 ```text
 INFO webdriver: DATA { text: "**MASKED**" }
 ```
@@ -53,13 +54,15 @@ Paired with the proper Appium version, the Appium Logs will also be exempt from 
 :::info
 
 Limitations:
-  - In Appium, additional plugins could leak even though we ask to mask the information.
-  - Cloud providers could use a proxy for HTTP logging, which bypasses the mask mechanism put in place.
-  - The `getValue` command is not supported. Moreover, if used on the same element, it can expose the value intended to be masked when using `addValue` or `setValue`.
+
+- In Appium, additional plugins could leak even though we ask to mask the information.
+- Cloud providers could use a proxy for HTTP logging, which bypasses the mask mechanism put in place.
+- The `getValue` command is not supported. Moreover, if used on the same element, it can expose the value intended to be masked when using `addValue` or `setValue`.
 
 Minimum required version:
- - WDIO v9.15.0
- - Appium v3.0.0
+
+- WDIO v9.15.0
+- Appium v3.0.0
 
 :::
 
@@ -73,15 +76,16 @@ For example, if you are using a Cloud provider and use the info level, then most
 INFO @wdio/local-runner: Start worker 0-0 with arg: ./wdio.conf.ts --user=cloud_user --key=myCloudSecretExposedKey --spec myTest.test.ts
 ```
 
-To counter that we can pass the the regular expression `'--key=([^ ]*)'` and now in the logs you will see 
+To counter that we can pass the the regular expression `'--key=([^ ]*)'` and now in the logs you will see
 
 ```text
 INFO @wdio/local-runner: Start worker 0-0 with arg: ./wdio.conf.ts --user=cloud_user --key=**MASKED** --spec myTest.test.ts
 ```
 
 You can achieve the above by providing the regular expression to the `maskingPatterns` field of the configuration.
-  - For multiple regular expressions, use a single string but with a comma-separated value.
-  - For more details on masking patterns, see the [Masking Patterns section in the WDIO Logger README](https://github.com/webdriverio/webdriverio/blob/main/packages/wdio-logger/README.md#masking-patterns).
+
+- For multiple regular expressions, use a single string but with a comma-separated value.
+- For more details on masking patterns, see the [Masking Patterns section in the WDIO Logger README](https://github.com/webdriverio/webdriverio/blob/main/packages/wdio-logger/README.md#masking-patterns).
 
 ```ts
 export const config: WebdriverIO.Config = {
@@ -109,7 +113,8 @@ export const config: WebdriverIO.Config = {
 :::info
 
 Minimum required version:
- - WDIO v9.15.0
+
+- WDIO v9.15.0
 
 :::
 
@@ -119,19 +124,19 @@ Another way to block the logging of sensitive data is to lower or silence the lo
 It can achieved as follow:
 
 ```ts
-import logger from '@wdio/logger';
+import logger from "@wdio/logger";
 
 /**
-  * Set the logger level of the WDIO logger to 'silent' before *running a promise, which helps hide sensitive information in the logs.
+ * Set the logger level of the WDIO logger to 'silent' before *running a promise, which helps hide sensitive information in the logs.
  */
 export const withSilentLogger = async <T>(promise: () => Promise<T>): Promise<T> => {
-  const webdriverLogLevel = driver.options.logLevel ?? 'error';
+  const webdriverLogLevel = driver.options.logLevel ?? "error";
 
   try {
-    logger.setLevel('webdriver', 'silent');
+    logger.setLevel("webdriver", "silent");
     return await promise();
   } finally {
-    logger.setLevel('webdriver', webdriverLogLevel);
+    logger.setLevel("webdriver", webdriverLogLevel);
   }
 };
 ```
@@ -139,12 +144,15 @@ export const withSilentLogger = async <T>(promise: () => Promise<T>): Promise<T>
 ### Thirds Party Solutions
 
 #### Appium
+
 Appium offers its masking solution; see [Log filter](https://appium.io/docs/en/latest/guides/log-filters/)
- - It can be tricky to use their solution. One way if possible is to pass a token in your string like `@mask@` and use it as a regular expression
- - In some Appium versions, the values are also logged with each character comma-separated, so we need to be careful.
- - Unfortunately, BrowserStack does not support this solution, but it is still useful locally
- 
+
+- It can be tricky to use their solution. One way if possible is to pass a token in your string like `@mask@` and use it as a regular expression
+- In some Appium versions, the values are also logged with each character comma-separated, so we need to be careful.
+- Unfortunately, BrowserStack does not support this solution, but it is still useful locally
+
 Using the `@mask@` example previously mentioned, we can use the following JSON file named `appiumMaskLogFilters.json`
+
 ```json
 [
   {
@@ -161,16 +169,17 @@ Using the `@mask@` example previously mentioned, we can use the following JSON f
 ```
 
 Then pass the JSON file name to the `logFilters` field into the appium service config:
+
 ```ts
-import { AppiumServerArguments, AppiumServiceConfig } from '@wdio/appium-service';
-import { ServiceEntry } from '@wdio/types/build/Services';
+import { AppiumServerArguments, AppiumServiceConfig } from "@wdio/appium-service";
+import { ServiceEntry } from "@wdio/types/build/Services";
 
 const appium = [
-  'appium',
+  "appium",
   {
     args: {
-      log: './logs/appium.log',
-      logFilters: './appiumMaskLogFilters.json',
+      log: "./logs/appium.log",
+      logFilters: "./appiumMaskLogFilters.json",
     } satisfies AppiumServerArguments,
   } satisfies AppiumServiceConfig,
 ] satisfies ServiceEntry;
@@ -179,4 +188,5 @@ const appium = [
 #### BrowserStack
 
 BrowserStack also offer some level of masking to hide some data; see [hide sensitive data](https://www.browserstack.com/docs/automate/selenium/hide-sensitive-data)
- - Unfortunately, the solution is all-or-nothing, so all text values of provided commands will be masked.
+
+- Unfortunately, the solution is all-or-nothing, so all text values of provided commands will be masked.

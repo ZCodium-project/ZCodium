@@ -8,26 +8,26 @@
 
 ## Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Change | 为 Desktop 本地 IAB Browser Use 增加可重复执行的 Electron WDIO E2E，不再把 unit test 或一次性人工 smoke 当成正式 E2E |
-| User-visible surfaces | conversation、Browser/browser-use side pane、真实 `<webview>` guest、Node REPL 图片与轮尾截图、自由尺寸 viewport |
-| Existing owners | CLI runtime/browser-client、host/main BrowserControl、`BrowserGuestManager`、renderer side pane、conversation projection |
-| First batch | 本地 Desktop `desktop-continuous` + IAB；provider 使用 case-local deterministic replay；视觉断言以几何/CDP 指标为主 |
-| Deferred | SSH/WSL/Docker、mobile replayable 正式恢复、Windows UAC/App-Bound 实机、extension 正向路径、未闭环 Browser safety confirmation |
+| Field                 | Value                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Change                | 为 Desktop 本地 IAB Browser Use 增加可重复执行的 Electron WDIO E2E，不再把 unit test 或一次性人工 smoke 当成正式 E2E           |
+| User-visible surfaces | conversation、Browser/browser-use side pane、真实 `<webview>` guest、Node REPL 图片与轮尾截图、自由尺寸 viewport               |
+| Existing owners       | CLI runtime/browser-client、host/main BrowserControl、`BrowserGuestManager`、renderer side pane、conversation projection       |
+| First batch           | 本地 Desktop `desktop-continuous` + IAB；provider 使用 case-local deterministic replay；视觉断言以几何/CDP 指标为主            |
+| Deferred              | SSH/WSL/Docker、mobile replayable 正式恢复、Windows UAC/App-Bound 实机、extension 正向路径、未闭环 Browser safety confirmation |
 
 ## Clarification Log
 
-| Round | Question | User answer | Boundary fixed |
-| --- | --- | --- | --- |
-| 1 | 首批是否限定本地 Desktop IAB | 按建议继续 | Desktop IAB 为本轮正式目标；远端与手机只登记缺口 |
-| 1 | 是否允许 synthetic provider replay 驱动真实 `mcp__node_repl__js` | 按建议继续 | replay 只固定模型选择，Browser 命令仍走真实 host/main/webview/CDP |
-| 1 | 视觉证据采用像素 diff 还是几何/CDP 指标 | 按建议继续 | 几何、guest metrics、PNG 尺寸为主，少量截图作 review 证据 |
-| 1 | Windows 原生导入是否为本轮硬门禁 | 按建议继续 | 协议/unit 保持；签名 Chrome、UAC、服务清理进入 Windows 专用后续门禁 |
-| 1 | 未实现安全确认/deny 防绕过是否写成正式断言 | 按建议继续 | 保持 undefined/deferred；不根据当前实现猜产品语义 |
-| 2 | 是否补“多 session 同时对话、同时操作多个 tab” | 用户明确要求补充 | 取同 workspace 的 A/B 两个 running session、每个 session 两个 IAB tab，验证权限、provider continuation、tab/guest/page state 与 side pane 隔离 |
-| 2 | 是否补 subagent Browser Use 边界 | 用户明确要求补充；2026-10-09 改为 subagent 可用 | foreground built-in child 可使用普通 Node REPL 与 Browser，与对话共用 Tab，新开 Tab 在面板可见且结束后保留；返回主 Agent 后原 binding 继续可用 |
-| 2 | 并发权限顺序如何取代表 | 按高风险状态组合剪枝 | 先批准前台 B，再切回批准 A；不排列 3+ session/tab、deny/allowAlways 与所有 subagent method |
+| Round | Question                                                         | User answer                                     | Boundary fixed                                                                                                                                 |
+| ----- | ---------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | 首批是否限定本地 Desktop IAB                                     | 按建议继续                                      | Desktop IAB 为本轮正式目标；远端与手机只登记缺口                                                                                               |
+| 1     | 是否允许 synthetic provider replay 驱动真实 `mcp__node_repl__js` | 按建议继续                                      | replay 只固定模型选择，Browser 命令仍走真实 host/main/webview/CDP                                                                              |
+| 1     | 视觉证据采用像素 diff 还是几何/CDP 指标                          | 按建议继续                                      | 几何、guest metrics、PNG 尺寸为主，少量截图作 review 证据                                                                                      |
+| 1     | Windows 原生导入是否为本轮硬门禁                                 | 按建议继续                                      | 协议/unit 保持；签名 Chrome、UAC、服务清理进入 Windows 专用后续门禁                                                                            |
+| 1     | 未实现安全确认/deny 防绕过是否写成正式断言                       | 按建议继续                                      | 保持 undefined/deferred；不根据当前实现猜产品语义                                                                                              |
+| 2     | 是否补“多 session 同时对话、同时操作多个 tab”                    | 用户明确要求补充                                | 取同 workspace 的 A/B 两个 running session、每个 session 两个 IAB tab，验证权限、provider continuation、tab/guest/page state 与 side pane 隔离 |
+| 2     | 是否补 subagent Browser Use 边界                                 | 用户明确要求补充；2026-10-09 改为 subagent 可用 | foreground built-in child 可使用普通 Node REPL 与 Browser，与对话共用 Tab，新开 Tab 在面板可见且结束后保留；返回主 Agent 后原 binding 继续可用 |
+| 2     | 并发权限顺序如何取代表                                           | 按高风险状态组合剪枝                            | 先批准前台 B，再切回批准 A；不排列 3+ session/tab、deny/allowAlways 与所有 subagent method                                                     |
 
 ## Domain Scope And State Owners
 
@@ -46,47 +46,47 @@ case-local provider replay
   -> TurnComplete
 ```
 
-| State / fact | Authority | E2E evidence |
-| --- | --- | --- |
-| Browser API 与 REPL binding | CLI runtime + browser-client | provider request、tool result、structured error |
-| tab scope、selected、pending command、generation | `BrowserGuestManager` | main-side guest registry、command result、真实 guest URL |
-| tab 可见性与后台挂载 | renderer side-pane registry | DOM test id、webContentsId、切换前后网页 JS state |
-| viewport、DPR、截图背压 | guest CDP + main manager | `innerWidth/innerHeight/devicePixelRatio`、PNG dimensions、capture count |
-| conversation 图片事实 | CLI event log/projection | live UI、cold hydration、row source/order/count |
+| State / fact                                     | Authority                    | E2E evidence                                                             |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------ |
+| Browser API 与 REPL binding                      | CLI runtime + browser-client | provider request、tool result、structured error                          |
+| tab scope、selected、pending command、generation | `BrowserGuestManager`        | main-side guest registry、command result、真实 guest URL                 |
+| tab 可见性与后台挂载                             | renderer side-pane registry  | DOM test id、webContentsId、切换前后网页 JS state                        |
+| viewport、DPR、截图背压                          | guest CDP + main manager     | `innerWidth/innerHeight/devicePixelRatio`、PNG dimensions、capture count |
+| conversation 图片事实                            | CLI event log/projection     | live UI、cold hydration、row source/order/count                          |
 
 ## Dimensions And Equivalence Classes
 
-| Dimension | Included values | Pruned/deferred values | Reason |
-| --- | --- | --- | --- |
-| Backend | IAB；已有 CLI managed CDP smoke 作为独立代表 | extension 正向动作 | extension 尚未实现，不能用 stub 证明可用 |
-| Client | Desktop local `desktop-continuous` | mobile `web-remote-replayable` 正式恢复 | 手机不创建 Browser runtime/pane；后续只通过 shared-host 验证恢复 |
-| Session | 同 workspace 双 session同时 running、各双 tab；后台 session；单 session 双 turn | 3+ session/tab 与全 lifecycle 笛卡尔积 | 2 × 2 已跨越 conversation、interaction、broker、renderer 与 guest ownership 边界 |
-| Tab | agent-created、双 tab、后台保活、跨 turn stable id | human claimed、blank、closed/stale 重入、应用重启恢复 | 产品只承诺进程内 tab 持久；human/blank/stale 进入独立 lifecycle case |
-| API | `tabs.new/list/get/finalize`、`tab.close/goto`、`domSnapshot`、locator `count/fill/click`、CUA `type`、`screenshot` | `press`、dialog、其余 method × OS | 按输入、pointer、视觉、lifecycle 等价类取代表 |
-| Viewport | normal/free、Fit/50%、zoom `0/+2/-2`、边界/越界 | UA/touch/network/device emulation | 当前只定义 CSS viewport |
-| Completion | normal、conversation 图片 cold restore | stop/failure、超预算、连续两轮、每种失败码 | 首批先守住正常完成双图事实；负向终态继续留在 BTA gap |
-| Security | replay 动态 URL 只接受 loopback 并 fail closed；subagent Browser Use 与对话共用 Tab | URL scheme 产品拒绝、payment/delete/upload/secret confirmation 与跨 API deny | subagent tab 归属（父会话）已确认；Browser safety 产品实现尚未闭环 |
+| Dimension  | Included values                                                                                                     | Pruned/deferred values                                                       | Reason                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Backend    | IAB；已有 CLI managed CDP smoke 作为独立代表                                                                        | extension 正向动作                                                           | extension 尚未实现，不能用 stub 证明可用                                         |
+| Client     | Desktop local `desktop-continuous`                                                                                  | mobile `web-remote-replayable` 正式恢复                                      | 手机不创建 Browser runtime/pane；后续只通过 shared-host 验证恢复                 |
+| Session    | 同 workspace 双 session同时 running、各双 tab；后台 session；单 session 双 turn                                     | 3+ session/tab 与全 lifecycle 笛卡尔积                                       | 2 × 2 已跨越 conversation、interaction、broker、renderer 与 guest ownership 边界 |
+| Tab        | agent-created、双 tab、后台保活、跨 turn stable id                                                                  | human claimed、blank、closed/stale 重入、应用重启恢复                        | 产品只承诺进程内 tab 持久；human/blank/stale 进入独立 lifecycle case             |
+| API        | `tabs.new/list/get/finalize`、`tab.close/goto`、`domSnapshot`、locator `count/fill/click`、CUA `type`、`screenshot` | `press`、dialog、其余 method × OS                                            | 按输入、pointer、视觉、lifecycle 等价类取代表                                    |
+| Viewport   | normal/free、Fit/50%、zoom `0/+2/-2`、边界/越界                                                                     | UA/touch/network/device emulation                                            | 当前只定义 CSS viewport                                                          |
+| Completion | normal、conversation 图片 cold restore                                                                              | stop/failure、超预算、连续两轮、每种失败码                                   | 首批先守住正常完成双图事实；负向终态继续留在 BTA gap                             |
+| Security   | replay 动态 URL 只接受 loopback 并 fail closed；subagent Browser Use 与对话共用 Tab                                 | URL scheme 产品拒绝、payment/delete/upload/secret confirmation 与跨 API deny | subagent tab 归属（父会话）已确认；Browser safety 产品实现尚未闭环               |
 
 ## Candidate Decisions
 
-| ID | Setup / action | Expected assertions | Status |
-| --- | --- | --- | --- |
-| BU-E2E-001 | A 有 loaded Browser/browser-use tab，切到无 tab 的 B，再切回 A | B 收起；A guest 始终 mounted；webContentsId、URL、history/JS state 不变；切回主动展开 | accepted |
-| BU-E2E-002 | replay 令模型执行 `tabs.new -> goto local fixture -> domSnapshot -> locator fill/click/press -> screenshot` | 真实 IAB pane 激活；trusted input 改变 guest；tool/meta 正确；截图为非空 PNG | accepted |
-| BU-E2E-003 | 同 session 两 tab跨两轮，执行 `turnEnded` 与 `finalize({keep:[A]})`，随后 `list -> get(B)` | A/B 都保留；未列 tab 不关闭；get(B) 同时激活 manager 与 UI；显式 close 只关闭目标 | accepted |
-| BU-E2E-004 | A/B 同 workspace，A 拥有 human tab；混合空白 human tab 与 agent-created blank | B `user.openTabs=[]` 且不可 claim；A 仍可恢复；human blank 被过滤，agent blank 仍在 `tabs.list` | accepted |
-| BU-E2E-005 | 网页 input 聚焦后强制 host Composer 抢焦，再调用 locator fill、CUA/DOM CUA type | 文本只进入 guest，Composer 保持空；focus token 漂移 fail closed | accepted |
-| BU-E2E-006 | 动画/hidden duplicate/overlay/iframe/navigation race 页面执行 fill/click | fill 不等待 click stable/hit-target；unique-visible 成功；真正歧义给候选；失败不泄漏 AbortError、TypeError 或 `undefined.count` | accepted |
-| BU-E2E-007 | Agent new/show/activate/set/reset viewport 触发多帧布局，稳定后用户 resize | 模型布局稳定期 0 warning；稳定后用户 resize 仅提示一次并 dim，不阻塞页面 | accepted |
-| BU-E2E-008 | 自由尺寸 `393x852`、`393x1200`、`3840x2160`、越界草稿，退出/重入 | strict range；失败不部分应用；同一 guest；tab-local size 保留；重入 zoom 回 Fit | accepted |
-| BU-E2E-009 | 同一 tab 在 Desktop zoom `0/+2/-2`，分别使用 Fit/50% | frame/native guest 四边重合；viewport/DPR=1 不变；无裁切/额外 scroll extent；中心 pointer 映射正确 | accepted |
-| BU-E2E-010 | qualifying Browser API 正常完成、显式 `emitImage`、discovery/failure/stop、连续两轮与 cold restore | 正常轮尾追加；显式图不抑制尾图；负向不追加；超预算压缩；恢复后只一次且顺序稳定 | accepted |
-| BU-E2E-011 | human top/iframe alert/confirm；Agent `getDialog/handleDialog` | human 只出现一个可信 `<host> says` 系统框；自动化继续走 Chromium/CDP dialog | accepted |
-| BU-E2E-012 | 主 Agent 缓存 Browser 对象，subagent 列出对话 Tab 并新开 Tab 操作，再回主 Agent | subagent Browser 调用成功、能看到主 Agent 的 Tab，新 Tab 在当前对话面板可见；普通 Node REPL 可用；child 结束后其 Tab 保留；主 Agent binding 继续可用 | accepted |
-| BU-E2E-013 | window B 上报 window A 的 guest webContentsId | 必须 fail closed，B 不能操作 A guest | bug-candidate；当前实现疑似缺少 `hostWebContents` 校验，不加入通过门禁 |
-| BU-E2E-014 | SSH/mobile/Windows signed Chrome/UAC | 按各端真实链路回归 | deferred；需要专用环境 |
-| BU-E2E-015 | payment/delete/upload/secret confirmation 后换 evaluate/CUA/backend 绕过 | 同一意图仍拒绝 | undefined；等待 Browser safety 产品实现确认 |
-| BU-E2E-016 | A/B 同时 running，各自产生 Browser 权限请求并各创建两个 IAB tab；操作期间来回切 session | 每张权限只路由到来源 session；A/B 的 `tabs.list`、tab id、URL、页面状态和 side pane 可见性互不串线；后台完成不抢前台 | accepted |
+| ID         | Setup / action                                                                                              | Expected assertions                                                                                                                                  | Status                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| BU-E2E-001 | A 有 loaded Browser/browser-use tab，切到无 tab 的 B，再切回 A                                              | B 收起；A guest 始终 mounted；webContentsId、URL、history/JS state 不变；切回主动展开                                                                | accepted                                                               |
+| BU-E2E-002 | replay 令模型执行 `tabs.new -> goto local fixture -> domSnapshot -> locator fill/click/press -> screenshot` | 真实 IAB pane 激活；trusted input 改变 guest；tool/meta 正确；截图为非空 PNG                                                                         | accepted                                                               |
+| BU-E2E-003 | 同 session 两 tab跨两轮，执行 `turnEnded` 与 `finalize({keep:[A]})`，随后 `list -> get(B)`                  | A/B 都保留；未列 tab 不关闭；get(B) 同时激活 manager 与 UI；显式 close 只关闭目标                                                                    | accepted                                                               |
+| BU-E2E-004 | A/B 同 workspace，A 拥有 human tab；混合空白 human tab 与 agent-created blank                               | B `user.openTabs=[]` 且不可 claim；A 仍可恢复；human blank 被过滤，agent blank 仍在 `tabs.list`                                                      | accepted                                                               |
+| BU-E2E-005 | 网页 input 聚焦后强制 host Composer 抢焦，再调用 locator fill、CUA/DOM CUA type                             | 文本只进入 guest，Composer 保持空；focus token 漂移 fail closed                                                                                      | accepted                                                               |
+| BU-E2E-006 | 动画/hidden duplicate/overlay/iframe/navigation race 页面执行 fill/click                                    | fill 不等待 click stable/hit-target；unique-visible 成功；真正歧义给候选；失败不泄漏 AbortError、TypeError 或 `undefined.count`                      | accepted                                                               |
+| BU-E2E-007 | Agent new/show/activate/set/reset viewport 触发多帧布局，稳定后用户 resize                                  | 模型布局稳定期 0 warning；稳定后用户 resize 仅提示一次并 dim，不阻塞页面                                                                             | accepted                                                               |
+| BU-E2E-008 | 自由尺寸 `393x852`、`393x1200`、`3840x2160`、越界草稿，退出/重入                                            | strict range；失败不部分应用；同一 guest；tab-local size 保留；重入 zoom 回 Fit                                                                      | accepted                                                               |
+| BU-E2E-009 | 同一 tab 在 Desktop zoom `0/+2/-2`，分别使用 Fit/50%                                                        | frame/native guest 四边重合；viewport/DPR=1 不变；无裁切/额外 scroll extent；中心 pointer 映射正确                                                   | accepted                                                               |
+| BU-E2E-010 | qualifying Browser API 正常完成、显式 `emitImage`、discovery/failure/stop、连续两轮与 cold restore          | 正常轮尾追加；显式图不抑制尾图；负向不追加；超预算压缩；恢复后只一次且顺序稳定                                                                       | accepted                                                               |
+| BU-E2E-011 | human top/iframe alert/confirm；Agent `getDialog/handleDialog`                                              | human 只出现一个可信 `<host> says` 系统框；自动化继续走 Chromium/CDP dialog                                                                          | accepted                                                               |
+| BU-E2E-012 | 主 Agent 缓存 Browser 对象，subagent 列出对话 Tab 并新开 Tab 操作，再回主 Agent                             | subagent Browser 调用成功、能看到主 Agent 的 Tab，新 Tab 在当前对话面板可见；普通 Node REPL 可用；child 结束后其 Tab 保留；主 Agent binding 继续可用 | accepted                                                               |
+| BU-E2E-013 | window B 上报 window A 的 guest webContentsId                                                               | 必须 fail closed，B 不能操作 A guest                                                                                                                 | bug-candidate；当前实现疑似缺少 `hostWebContents` 校验，不加入通过门禁 |
+| BU-E2E-014 | SSH/mobile/Windows signed Chrome/UAC                                                                        | 按各端真实链路回归                                                                                                                                   | deferred；需要专用环境                                                 |
+| BU-E2E-015 | payment/delete/upload/secret confirmation 后换 evaluate/CUA/backend 绕过                                    | 同一意图仍拒绝                                                                                                                                       | undefined；等待 Browser safety 产品实现确认                            |
+| BU-E2E-016 | A/B 同时 running，各自产生 Browser 权限请求并各创建两个 IAB tab；操作期间来回切 session                     | 每张权限只路由到来源 session；A/B 的 `tabs.list`、tab id、URL、页面状态和 side pane 可见性互不串线；后台完成不抢前台                                 | accepted                                                               |
 
 并发代表的状态与权限顺序固定为：
 
@@ -125,16 +125,16 @@ main: bootstrap -> cache Browser/Tab -> parent-before
 
 ## Pruning Decisions
 
-| Decision | Guard / invariant | Representative coverage |
-| --- | --- | --- |
-| 不把 Playwright 当 backend | Playwright 是 tab API family | IAB full chain + CLI managed CDP smoke |
-| 不为手机另起 runtime | `/remote` 必须 shared-host attachment | 后续 mobile replayable 只恢复 conversation fact |
-| 不测应用重启恢复 tab | IAB 只承诺当前 ZCode 进程内持久 | BU-E2E-003 |
-| 不做全部 method × OS × zoom | 高风险等价类和 pairwise 足够区分行为 | BU-E2E-005/006/008/009 |
-| 不用 stub 声称 extension 可用 | unavailable member/backend 必须隐藏 | discovery contract/unit；正向 deferred |
-| 不固化未确认 safety 行为 | 当前矩阵仍为待实现 | BU-E2E-015 保持 undefined |
-| 不排列 3+ session、3+ tab 与全部权限响应顺序 | 2 × 2 已同时跨越 conversation、interaction、broker、renderer 与 guest ownership 边界 | BU-E2E-016 |
-| 不把 subagent × 所有 Browser method 做全排列 | 初始化、tabs.new/list、goto、fill 与读取覆盖初始化、transport 与 tab 归属等价类 | BU-E2E-012 |
+| Decision                                     | Guard / invariant                                                                    | Representative coverage                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| 不把 Playwright 当 backend                   | Playwright 是 tab API family                                                         | IAB full chain + CLI managed CDP smoke          |
+| 不为手机另起 runtime                         | `/remote` 必须 shared-host attachment                                                | 后续 mobile replayable 只恢复 conversation fact |
+| 不测应用重启恢复 tab                         | IAB 只承诺当前 ZCode 进程内持久                                                      | BU-E2E-003                                      |
+| 不做全部 method × OS × zoom                  | 高风险等价类和 pairwise 足够区分行为                                                 | BU-E2E-005/006/008/009                          |
+| 不用 stub 声称 extension 可用                | unavailable member/backend 必须隐藏                                                  | discovery contract/unit；正向 deferred          |
+| 不固化未确认 safety 行为                     | 当前矩阵仍为待实现                                                                   | BU-E2E-015 保持 undefined                       |
+| 不排列 3+ session、3+ tab 与全部权限响应顺序 | 2 × 2 已同时跨越 conversation、interaction、broker、renderer 与 guest ownership 边界 | BU-E2E-016                                      |
+| 不把 subagent × 所有 Browser method 做全排列 | 初始化、tabs.new/list、goto、fill 与读取覆盖初始化、transport 与 tab 归属等价类      | BU-E2E-012                                      |
 
 ## E2E Handoff
 

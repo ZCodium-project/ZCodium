@@ -17,6 +17,7 @@
 ### Task 1: Document Runtime Tool Perf Scope
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-06-16-ui-perf-arms-telemetry-design.md`
 - Modify: `apps/zcode-cli/docs/design/v2/tool/00-tool-change-chain.md`
 - Create: `docs/superpowers/plans/2026-06-25-tool-runtime-perf-telemetry.md`
@@ -28,6 +29,7 @@ Document `perf` as structured metadata only, with low-cardinality and privacy co
 ### Task 2: Write Failing Tests
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 - Modify: `apps/zcode-cli/packages/core/tests/write-tool-contract.test.ts`
 - Modify: `apps/zcode-cli/packages/core/tests/edit-tool-contract.test.ts`
@@ -37,6 +39,7 @@ Document `perf` as structured metadata only, with low-cardinality and privacy co
 - [x] **Step 1: Test handler output perf**
 
 Expected fields:
+
 - Bash: `commandRunMs`, `outputBytes`, `exitCode`, `timedOut`, `commandCategory`, `commandHash`.
 - Write: `fsReadMs`, `fsWriteMs`, `fileCount`, `totalBytes`, `maxFileBytes`, `workspaceKind`.
 - Edit: `fsReadMs`, `fsWriteMs`, `patchMatchMs`, `hunkCount`, `matchAttempts`, `totalBytes`.
@@ -52,6 +55,7 @@ Expected `reportUiToolCallDetail` emits `perf_ui_tool_call_detail` with sanitize
 ### Task 3: Implement Runtime Perf
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/contracts/src/tools/bash.ts`
 - Modify: `apps/zcode-cli/packages/contracts/src/tools/write.ts`
 - Modify: `apps/zcode-cli/packages/contracts/src/tools/edit.ts`
@@ -84,6 +88,7 @@ Set `payload.result.perf` from structured output plus permission wait.
 ### Task 4: Implement UI Reporting
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/uiPerfArmsTelemetry.ts`
 - Modify: `packages/ui/src/hooks/taskStreamEventHandlers.ts`
 - Modify: `packages/ui/test/uiPerfArmsTelemetry.test.ts`

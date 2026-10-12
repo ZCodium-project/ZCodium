@@ -6,10 +6,7 @@ import {
   waitForConversationToolGroup,
 } from "../../../helpers/conversation-session-tool-groups.js";
 import { ensureToolCrossProductFullAccessMode } from "../../../helpers/conversation-session-tool-cross-product.js";
-import {
-  resolveE2ERuntimePath,
-  resolveE2EToolPath,
-} from "../../../helpers/e2e-runtime-paths.js";
+import { resolveE2ERuntimePath, resolveE2EToolPath } from "../../../helpers/e2e-runtime-paths.js";
 import {
   E2E_REPLY_TOKEN,
   prepareV4ConversationE2E,
@@ -47,18 +44,22 @@ describe("TGE03 Changes responsive file summary", () => {
     this.timeout(180000);
     await ensureToolCrossProductFullAccessMode();
     const paths = FILES.map((name) => resolveE2EToolPath(CASE_NAME, name));
-    await sendV4Prompt([
-      `${CASE_MARKER}: Follow these file tool steps exactly in order.`,
-      ...paths.map((path, index) =>
-        `${index + 1}. Use Write to create ${path} with exactly "TGE03_${index}\\n".`,
-      ),
-      `5. Use Edit on ${paths[0]} to replace "TGE03_0" with "TGE03_EDITED".`,
-      `6. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    ].join(" "));
+    await sendV4Prompt(
+      [
+        `${CASE_MARKER}: Follow these file tool steps exactly in order.`,
+        ...paths.map(
+          (path, index) =>
+            `${index + 1}. Use Write to create ${path} with exactly "TGE03_${index}\\n".`,
+        ),
+        `5. Use Edit on ${paths[0]} to replace "TGE03_0" with "TGE03_EDITED".`,
+        `6. Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
+      ].join(" "),
+    );
 
     await waitForConversationToolGroup(
       "ChangesGroup",
-      (group) => group.status === "in_progress" && /Writing|Editing|写入|编辑/u.test(group.summaryText),
+      (group) =>
+        group.status === "in_progress" && /Writing|Editing|写入|编辑/u.test(group.summaryText),
       "Changes 没有显示运行文件摘要",
       90000,
     );
@@ -81,8 +82,7 @@ describe("TGE03 Changes responsive file summary", () => {
         "ChangesGroup",
         (group) =>
           group.status === "completed" &&
-          (group.summaryText.includes("4 files") ||
-            group.summaryText.includes("4 个文件")),
+          (group.summaryText.includes("4 files") || group.summaryText.includes("4 个文件")),
         "Changes 完成摘要没有显示 4 个唯一文件",
       );
       for (const file of FILES) expect(wide.summaryText).toContain(file);
@@ -104,7 +104,11 @@ describe("TGE03 Changes responsive file summary", () => {
       );
       await clickChangesFileChip("App.tsx");
       await browser.waitUntil(
-        () => browser.execute((testId) => Boolean(document.querySelector(`[data-testid="${testId}"]`)), TID_PREVIEW_PANE),
+        () =>
+          browser.execute(
+            (testId) => Boolean(document.querySelector(`[data-testid="${testId}"]`)),
+            TID_PREVIEW_PANE,
+          ),
         { timeout: 10000, timeoutMsg: "点击 Changes file chip 后没有打开 preview pane" },
       );
     } finally {
@@ -115,8 +119,12 @@ describe("TGE03 Changes responsive file summary", () => {
 
 async function clickChangesFileChip(fileName: string) {
   const clicked = await browser.execute((name) => {
-    const group = Array.from(document.querySelectorAll<HTMLElement>('[data-tool-name="ChangesGroup"]')).at(-1);
-    const button = Array.from(group?.querySelectorAll<HTMLButtonElement>("button") ?? []).find((candidate) => candidate.innerText.includes(name));
+    const group = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-tool-name="ChangesGroup"]'),
+    ).at(-1);
+    const button = Array.from(group?.querySelectorAll<HTMLButtonElement>("button") ?? []).find(
+      (candidate) => candidate.innerText.includes(name),
+    );
     button?.click();
     return Boolean(button);
   }, fileName);

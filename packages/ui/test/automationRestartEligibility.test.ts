@@ -40,16 +40,12 @@ describe("canRestartAutomation", () => {
 
   it("重复立即运行会映射到正在运行提示", () => {
     expect(getAutomationRunNowToastId("queued")).toBe("automations.runNowQueued");
-    expect(getAutomationRunNowToastId("duplicate")).toBe(
-      "automations.runNowAlreadyRunning",
-    );
+    expect(getAutomationRunNowToastId("duplicate")).toBe("automations.runNowAlreadyRunning");
     expect(getAutomationRunNowToastId("failed")).toBe("automations.runNowFailed");
   });
 
   it("立即运行入口只跟随当前请求的瞬时 busy 状态", () => {
-    const menuStart = automationsSectionSource.indexOf(
-      "function AutomationActionsMenu",
-    );
+    const menuStart = automationsSectionSource.indexOf("function AutomationActionsMenu");
     const menuEnd = automationsSectionSource.indexOf(
       "export function AutomationsSection",
       menuStart,
@@ -59,9 +55,7 @@ describe("canRestartAutomation", () => {
     expect(menuStart).toBeGreaterThanOrEqual(0);
     expect(menuSource).toContain("disabled={busy}");
     expect(menuSource).not.toContain("runNowDisabled");
-    expect(automationsSectionSource).not.toContain(
-      "runNowBlockedAutomationIds",
-    );
+    expect(automationsSectionSource).not.toContain("runNowBlockedAutomationIds");
     expect(automationEditViewSource).not.toContain("runNowDisabled");
   });
 
@@ -72,13 +66,9 @@ describe("canRestartAutomation", () => {
     expect(getAutomationActionErrorToastId("restart")).toBe("automations.error.restart");
     expect(getAutomationActionErrorToastId("delete")).toBe("automations.error.delete");
     expect(
-      getAutomationCreateErrorToastId(
-        "[AUTOMATION_CREATE_LIMIT_REACHED] automation limit reached",
-      ),
+      getAutomationCreateErrorToastId("[AUTOMATION_CREATE_LIMIT_REACHED] automation limit reached"),
     ).toBe("automations.error.createLimit");
-    expect(getAutomationCreateErrorToastId("rpc unavailable")).toBe(
-      "automations.error.create",
-    );
+    expect(getAutomationCreateErrorToastId("rpc unavailable")).toBe("automations.error.create");
   });
 
   it("会话创建卡片按 automationId 定位对应详情", () => {

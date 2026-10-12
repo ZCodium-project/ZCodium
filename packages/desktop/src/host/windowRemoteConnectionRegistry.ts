@@ -24,9 +24,7 @@ export interface WindowRemoteConnectionHandle<TServices, TCapabilities = never> 
   services: TServices;
   capabilities?: TCapabilities;
   dispose(): void | Promise<void>;
-  onDidClose?(
-    listener: (event: WindowRemoteConnectionCloseEvent) => void,
-  ): { dispose(): void };
+  onDidClose?(listener: (event: WindowRemoteConnectionCloseEvent) => void): { dispose(): void };
 }
 
 export interface WindowRemoteConnectionConnectRequest {
@@ -153,13 +151,8 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
     request: WindowRemoteConnectionConnectRequest,
   ) => Promise<WindowRemoteConnectionHandle<TServices, TCapabilities>>;
   createId: () => string;
-  onSessionClosed?: (
-    event: WindowRemoteConnectionCloseEvent & { remoteSessionId: string },
-  ) => void;
-  releaseWorkspace?: (
-    services: TServices,
-    context: RemoteWorkspaceContext,
-  ) => Promise<void>;
+  onSessionClosed?: (event: WindowRemoteConnectionCloseEvent & { remoteSessionId: string }) => void;
+  releaseWorkspace?: (services: TServices, context: RemoteWorkspaceContext) => Promise<void>;
   onWorkspaceReleaseError?: (context: RemoteWorkspaceContext, error: unknown) => void;
   wslIdleTtlMs?: number;
 }) {
@@ -278,11 +271,7 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
   function prepareWorkspaceRuntime(
     session: LogicalSession<TServices, TCapabilities>,
   ): Promise<void> {
-    if (
-      session.entry.target.kind !== "wsl" ||
-      !session.workspacePath ||
-      !session.workspaceKey
-    ) {
+    if (session.entry.target.kind !== "wsl" || !session.workspacePath || !session.workspaceKey) {
       session.workspaceReadyState = "ready";
       session.workspaceReady = Promise.resolve();
       return session.workspaceReady;
@@ -290,19 +279,13 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
     const workspaceKey = session.workspaceKey;
     const entry = session.entry;
     const existing = entry.workspaceRuntimeByKey.get(workspaceKey);
-    const hasOtherOwner = hasOtherWorkspaceOwner(
-      entry,
-      workspaceKey,
-      session.remoteSessionId,
-    );
+    const hasOtherOwner = hasOtherWorkspaceOwner(entry, workspaceKey, session.remoteSessionId);
     const state =
       existing ??
       ({
         context: {
           workspacePath: session.workspacePath,
-          ...(session.workspaceIdentity
-            ? { workspaceIdentity: session.workspaceIdentity }
-            : {}),
+          ...(session.workspaceIdentity ? { workspaceIdentity: session.workspaceIdentity } : {}),
         },
         generation: 0,
       } satisfies WorkspaceRuntimeState);
@@ -325,8 +308,7 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
         if (
           sessionsById.get(session.remoteSessionId) !== session ||
           session.cancelled ||
-          entry.workspaceRuntimeByKey.get(workspaceKey)?.generation !==
-            session.workspaceGeneration
+          entry.workspaceRuntimeByKey.get(workspaceKey)?.generation !== session.workspaceGeneration
         ) {
           throw new WindowRemoteConnectCancelledError();
         }
@@ -368,9 +350,7 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
     }, wslIdleTtlMs);
   }
 
-  async function disposeEntry(
-    entry: ConnectionEntry<TServices, TCapabilities>,
-  ): Promise<void> {
+  async function disposeEntry(entry: ConnectionEntry<TServices, TCapabilities>): Promise<void> {
     if (entry.disposePromise) {
       return entry.disposePromise;
     }
@@ -601,10 +581,7 @@ export function createWindowRemoteConnectionRegistry<TServices, TCapabilities = 
     void workspaceRelease?.catch(() => undefined);
     session.rejectCancellation(new WindowRemoteConnectCancelledError());
     if (session.entry.sessions.size === 0) {
-      if (
-        session.entry.target.kind === "ssh" &&
-        session.entry.state === "connecting"
-      ) {
+      if (session.entry.target.kind === "ssh" && session.entry.state === "connecting") {
         // Bug 根因：最后一个 waiter 取消后，旧 entry 仍以 connecting 留在复用表；立即重连会
         // 继续等待已经 aborted 的 readiness，并沿用上一次凭据。先按对象身份退休旧 entry，
         // 再触发底层取消；迟到的旧 completion 不能删除或复活同 key 的新连接。

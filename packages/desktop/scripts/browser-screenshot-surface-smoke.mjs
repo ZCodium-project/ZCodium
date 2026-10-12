@@ -6,8 +6,7 @@ const INITIAL_SURFACE = { width: 800, height: 450 };
 const SENTINEL_SIZE = 96;
 const RESULT_PATH = process.env.ZCODE_SCREENSHOT_SMOKE_RESULT_PATH;
 const SCALE_FACTOR = process.env.ZCODE_SCREENSHOT_SMOKE_SCALE_FACTOR;
-const SUCCESS_RESULT =
-  '{"width":1280,"height":720,"periodicRepeat":false,"corners":"distinct"}';
+const SUCCESS_RESULT = '{"width":1280,"height":720,"periodicRepeat":false,"corners":"distinct"}';
 
 let scaleFactorError;
 if (SCALE_FACTOR) {
@@ -202,7 +201,10 @@ async function run() {
 
     const guestUrl = htmlDataUrl(guestHtml());
     await window.loadURL(htmlDataUrl(hostHtml(guestUrl)));
-    const guestId = await window.webContents.executeJavaScript("window.waitForGuestDomReady()", true);
+    const guestId = await window.webContents.executeJavaScript(
+      "window.waitForGuestDomReady()",
+      true,
+    );
     guest = webContents.fromId(guestId);
     if (!guest) throw new Error(`guest webContents ${guestId} was not found`);
 

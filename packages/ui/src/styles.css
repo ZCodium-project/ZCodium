@@ -881,11 +881,7 @@ html[data-document-hidden] *::after {
   .highspeed-animated-gradient-text .animated-gradient-text {
     /* Bug 根因：accelerated turn 只改了工时文案，内部思考和工具仍继承普通扫光色。 */
     --animated-gradient-text-strong: var(--color-icon-purple);
-    --animated-gradient-text-soft: color-mix(
-      in srgb,
-      var(--color-icon-purple) 22%,
-      transparent
-    );
+    --animated-gradient-text-soft: color-mix(in srgb, var(--color-icon-purple) 22%, transparent);
   }
 
   .cua-group-gradient-text {

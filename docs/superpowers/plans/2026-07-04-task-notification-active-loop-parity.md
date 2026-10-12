@@ -216,8 +216,9 @@ In `apps/zcode-cli/packages/core/src/runtime/methods/turn-loop.ts`:
 
 ```ts
 await this.drainPendingSubagentNotifications(state.turnTraceContext);
-const drainedRuntimeCommands =
-  await this.drainPendingRuntimeCommandsForActiveLoop(state.turnTraceContext);
+const drainedRuntimeCommands = await this.drainPendingRuntimeCommandsForActiveLoop(
+  state.turnTraceContext,
+);
 if (drainedRuntimeCommands.drained > 0) {
   state.repeatedToolCallSignature = undefined;
   state.repeatedToolCallStreakCount = 0;

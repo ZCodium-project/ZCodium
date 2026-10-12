@@ -17,9 +17,7 @@ interface ShouldShowTaskConfigLoadingOnSwitchParams {
   nextTaskId: string | null;
 }
 
-export function shouldKeepTaskStreamingDuringRestore(
-  taskStatus: ZCodeTaskRuntimeStatus,
-): boolean {
+export function shouldKeepTaskStreamingDuringRestore(taskStatus: ZCodeTaskRuntimeStatus): boolean {
   // Bugfix: 任务切到后台后再切回来时，如果这条 task 其实还在持续输出，
   // 恢复链路不能把它先打回 restoring/ready。
   // 否则 ChatView 会误以为生成已经结束，"思考中" 动画会在切回来后直接消失。
@@ -79,10 +77,7 @@ export function resolveTaskRuntimeStatusAfterRestore(
     persistedStatus &&
     persistedStatus !== "running" &&
     typeof persistedUpdatedAt === "number" &&
-    (
-      latestUserMessageTimestamp === null ||
-      persistedUpdatedAt >= latestUserMessageTimestamp
-    )
+    (latestUserMessageTimestamp === null || persistedUpdatedAt >= latestUserMessageTimestamp)
   ) {
     // Bugfix: 历史任务恢复时，store 里可能还残留上一帧的 streaming 运行态。
     // 如果宿主已经把这一轮真正收尾（completed/error）持久化到 meta.status，

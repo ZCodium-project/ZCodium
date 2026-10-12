@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FeedbackTicketStatus } from "@zcode/shared";
-import {
-  FEEDBACK_STATUS_MESSAGE_IDS,
-  STATUS_META,
-} from "@/feedback/feedbackMeta.js";
+import { FEEDBACK_STATUS_MESSAGE_IDS, STATUS_META } from "@/feedback/feedbackMeta.js";
 import {
   formatRelativeTime,
   formatSubmittedAt,
@@ -12,10 +9,7 @@ import {
 import enUS from "@/i18n/locales/en-US.js";
 import zhCN from "@/i18n/locales/zh-CN.js";
 
-function mockFormatMessage(
-  descriptor: { id: string },
-  values?: Record<string, string>,
-) {
+function mockFormatMessage(descriptor: { id: string }, values?: Record<string, string>) {
   const messages: Record<string, string> = {
     "feedback.time.justNow": enUS["feedback.time.justNow"],
     "feedback.time.minutesAgo": enUS["feedback.time.minutesAgo"],
@@ -37,9 +31,7 @@ describe("feedback status metadata", () => {
     expect(STATUS_META[archivedStatus]?.className).toBeTruthy();
     expect(STATUS_META[archivedStatus]?.dot).toBeTruthy();
     expect(STATUS_USER_HINT[archivedStatus]).toContain("关闭");
-    expect(FEEDBACK_STATUS_MESSAGE_IDS[archivedStatus]).toBe(
-      "feedback.status.completed",
-    );
+    expect(FEEDBACK_STATUS_MESSAGE_IDS[archivedStatus]).toBe("feedback.status.completed");
   });
 
   it("presents the archived API status as completed to users", () => {
@@ -57,8 +49,6 @@ describe("feedback status metadata", () => {
 
     expect(formatRelativeTime(justNow, mockFormatMessage)).toBe("just now");
     expect(formatRelativeTime(minutesAgo, mockFormatMessage)).toBe("5 min ago");
-    expect(formatSubmittedAt(submittedAt, mockFormatMessage)).toBe(
-      "Submitted 2 hr ago",
-    );
+    expect(formatSubmittedAt(submittedAt, mockFormatMessage)).toBe("Submitted 2 hr ago");
   });
 });

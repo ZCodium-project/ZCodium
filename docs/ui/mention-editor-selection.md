@@ -15,7 +15,7 @@ Lexical state
   +-- 图标             -> CSS 装饰，不增加 DOM 文本节点
 ```
 
-- 保留 TextNode token 原子编辑语义；DOM 文本必须与 __text 完全一致，图标异步失败不替换文字节点。
+- 保留 TextNode token 原子编辑语义；DOM 文本必须与 \_\_text 完全一致，图标异步失败不替换文字节点。
 - getTextContent 返回展示文字；整篇与选区 Markdown 序列化显式读取 mention.markdown。
 - 普通文本按选区截取；与选区有实际交集的 mention 输出完整 canonical，剪切删除相同的原子范围。折叠选区与仅接触 token 边界不算交集。
 - 整篇输出保留既有段落双换行、LineBreak 单换行和空白语义；选区输出保留 Lexical RangeSelection 的段落分隔规则。对外 getText/getMarkdown、onChange 继续输出 canonical Markdown。
@@ -26,13 +26,13 @@ Lexical state
 
 ## 接受的用例
 
-| ID | 设置/动作 | 必须断言 |
-| --- | --- | --- |
-| MSEL-01 | 纯文字、首部/中部/尾部/唯一/相邻 mention，真实平台全选键 | DOM 选区非折叠且完整；全选后替换不残留 token |
-| MSEL-02 | 全选后删除、撤销 | 编辑器清空；撤销恢复 canonical 和标签 |
-| MSEL-03 | 正反向部分选区，复制与剪切 | 普通文字截取准确，mention 原子输出，剪切范围与输出一致 |
-| MSEL-04 | 旧 JSON、多段落、Unicode、图标失败 | 展示长度正确、canonical 不丢失、图标更新保留文字节点 |
-| MSEL-05 | 预填后输入与 Option+ArrowRight | 标签保留、正常追加正文 |
+| ID      | 设置/动作                                                | 必须断言                                               |
+| ------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| MSEL-01 | 纯文字、首部/中部/尾部/唯一/相邻 mention，真实平台全选键 | DOM 选区非折叠且完整；全选后替换不残留 token           |
+| MSEL-02 | 全选后删除、撤销                                         | 编辑器清空；撤销恢复 canonical 和标签                  |
+| MSEL-03 | 正反向部分选区，复制与剪切                               | 普通文字截取准确，mention 原子输出，剪切范围与输出一致 |
+| MSEL-04 | 旧 JSON、多段落、Unicode、图标失败                       | 展示长度正确、canonical 不丢失、图标更新保留文字节点   |
+| MSEL-05 | 预填后输入与 Option+ArrowRight                           | 标签保留、正常追加正文                                 |
 
 优先扩展已有 chat-input-mention-navigation E2E。单测验证序列化与剪贴板命令，真实浏览器验证原生 selection 和编辑效果，不以仅 dispatchCommand 返回 true 作为通过。
 

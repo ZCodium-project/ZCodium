@@ -10,12 +10,12 @@ Appearance UI font-size preference can resize text without changing the root
 
 `--ui-font-size` is the persisted UI baseline. Its default is 14px.
 
-| Utility | Formula | Default |
-| --- | --- | ---: |
-| `text-ui-lg` | `--ui-font-size + 2px` | 16px |
-| `text-ui-base` | `--ui-font-size` | 14px |
-| `text-ui-sm` | `--ui-font-size - 2px` | 12px |
-| `text-ui-xs` | `--ui-font-size - 4px` | 10px |
+| Utility        | Formula                | Default |
+| -------------- | ---------------------- | ------: |
+| `text-ui-lg`   | `--ui-font-size + 2px` |    16px |
+| `text-ui-base` | `--ui-font-size`       |    14px |
+| `text-ui-sm`   | `--ui-font-size - 2px` |    12px |
+| `text-ui-xs`   | `--ui-font-size - 4px` |    10px |
 
 `text-mobile-input-safe` is fixed at 16px and is reserved for editable mobile
 Web controls that must stay above iOS Safari's focus-zoom threshold. It is a

@@ -613,13 +613,19 @@ describe("createAcknowledgedWebRemoteControlRelayProtocol", () => {
 
     deliverAcknowledgement = false;
     left.protocol.send(VSBuffer.wrap(new Uint8Array([4, 5, 6])));
-    expect(received).toEqual([[1, 2, 3], [4, 5, 6]]);
+    expect(received).toEqual([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
     expect(left.unacknowledgedBytes).toBeGreaterThan(0);
     const replayedSeq = leftFrames.at(-1)?.seq;
 
     deliverAcknowledgement = true;
     expect(left.replayUnacknowledged()).toBe(true);
-    expect(received).toEqual([[1, 2, 3], [4, 5, 6]]);
+    expect(received).toEqual([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
     expect(leftFrames.at(-1)?.seq).toBe(replayedSeq);
     expect(left.unacknowledgedBytes).toBe(0);
     left.dispose();

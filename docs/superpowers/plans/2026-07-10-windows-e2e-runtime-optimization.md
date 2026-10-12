@@ -52,65 +52,65 @@
 
 ### 3. 当前基线
 
-| 指标 | 结果 |
-| --- | ---: |
-| 完整耗时 | `> 60 min`，第 67 个 spec 被截断 |
-| 首个 worker 前准备 | `102.5 s` |
-| 可完整计算的 spec | 66 |
-| 66 个 spec 墙钟时间 | `3484.4 s` / `58.07 min` |
-| test body 合计 | `1320.1 s` / `22.00 min` |
-| worker 启动合计 | `470.0 s` / `7.83 min` |
-| test 间隙合计 | `5.5 s` |
-| worker 退出/换 session 合计 | `1689.1 s` / `28.15 min` |
-| raw failure | 4 |
+| 指标                        |                             结果 |
+| --------------------------- | -------------------------------: |
+| 完整耗时                    | `> 60 min`，第 67 个 spec 被截断 |
+| 首个 worker 前准备          |                        `102.5 s` |
+| 可完整计算的 spec           |                               66 |
+| 66 个 spec 墙钟时间         |         `3484.4 s` / `58.07 min` |
+| test body 合计              |         `1320.1 s` / `22.00 min` |
+| worker 启动合计             |           `470.0 s` / `7.83 min` |
+| test 间隙合计               |                          `5.5 s` |
+| worker 退出/换 session 合计 |         `1689.1 s` / `28.15 min` |
+| raw failure                 |                                4 |
 
 66 个完整 spec 的时间构成：
 
-| 阶段 | 时间 | 占比 |
-| --- | ---: | ---: |
-| test body | 22.00 min | 37.9% |
-| worker 启动 | 7.83 min | 13.5% |
-| test 间隙 | 0.09 min | 0.2% |
+| 阶段                   |      时间 |  占比 |
+| ---------------------- | --------: | ----: |
+| test body              | 22.00 min | 37.9% |
+| worker 启动            |  7.83 min | 13.5% |
+| test 间隙              |  0.09 min |  0.2% |
 | worker 退出/换 session | 28.15 min | 48.5% |
 
 关键结论：退出/换 session 比全部测试断言本身还多 6.15 分钟，是第一主因；测试之间几乎没有空转。
 
 ### 4. 分位数
 
-| 维度 | P50 | P90 | P95 | Max |
-| --- | ---: | ---: | ---: | ---: |
-| case test body | 10.2 s | 19.6 s | 36.1 s | 94.7 s |
-| spec 墙钟 | 44.0 s | 72.4 s | 95.3 s | 247.0 s |
+| 维度           |    P50 |    P90 |    P95 |     Max |
+| -------------- | -----: | -----: | -----: | ------: |
+| case test body | 10.2 s | 19.6 s | 36.1 s |  94.7 s |
+| spec 墙钟      | 44.0 s | 72.4 s | 95.3 s | 247.0 s |
 
 多数 spec 在 test body 之外稳定多出约 30 到 32 秒。进一步拆分后，普通 spec 的启动通常为 4 到 7 秒，退出通常为 25.8 到 26.6 秒。
 
 ### 5. 最慢 spec
 
-| spec | case 数 | 墙钟 | test body | 非 test 时间 |
-| --- | ---: | ---: | ---: | ---: |
-| `conversation-session-background.test.ts` | 18 | 247.0 s | 211.2 s | 35.8 s |
-| `conversation-session-model-switch-queue.test.ts` | 2 | 147.0 s | 103.6 s | 43.4 s |
-| `coding-plan-team-usage.test.ts` | 5 | 95.7 s | 65.6 s | 30.1 s |
-| `conversation-session-read-session-context-timeout.test.ts` | 1 | 95.3 s | 63.9 s | 31.4 s |
-| `conversation-session-edit.test.ts` | 2 | 87.4 s | 55.9 s | 31.5 s |
-| `conversation-session-model-switch-restore-repro.test.ts` | 2 | 77.0 s | 48.5 s | 28.5 s |
-| `conversation-session-compact-actions.test.ts` | 1 | 72.4 s | 41.0 s | 31.4 s |
-| `conversation-session-config-and-multisession.test.ts` | 1 | 67.5 s | 36.4 s | 31.1 s |
-| `conversation-session-new-session-inherits-model.test.ts` | 1 | 64.2 s | 14.1 s | 50.1 s |
-| `conversation-session-fork.test.ts` | 3 | 64.1 s | 33.7 s | 30.4 s |
+| spec                                                        | case 数 |    墙钟 | test body | 非 test 时间 |
+| ----------------------------------------------------------- | ------: | ------: | --------: | -----------: |
+| `conversation-session-background.test.ts`                   |      18 | 247.0 s |   211.2 s |       35.8 s |
+| `conversation-session-model-switch-queue.test.ts`           |       2 | 147.0 s |   103.6 s |       43.4 s |
+| `coding-plan-team-usage.test.ts`                            |       5 |  95.7 s |    65.6 s |       30.1 s |
+| `conversation-session-read-session-context-timeout.test.ts` |       1 |  95.3 s |    63.9 s |       31.4 s |
+| `conversation-session-edit.test.ts`                         |       2 |  87.4 s |    55.9 s |       31.5 s |
+| `conversation-session-model-switch-restore-repro.test.ts`   |       2 |  77.0 s |    48.5 s |       28.5 s |
+| `conversation-session-compact-actions.test.ts`              |       1 |  72.4 s |    41.0 s |       31.4 s |
+| `conversation-session-config-and-multisession.test.ts`      |       1 |  67.5 s |    36.4 s |       31.1 s |
+| `conversation-session-new-session-inherits-model.test.ts`   |       1 |  64.2 s |    14.1 s |       50.1 s |
+| `conversation-session-fork.test.ts`                         |       3 |  64.1 s |    33.7 s |       30.4 s |
 
 `background.test.ts` 虽然总耗时最高，但 18 个 case 共用一次 session，固定成本只有约 36 秒，摊销效率很好。它不是优先拆分对象。
 
 ### 6. 最慢 case 与时间语义
 
-| case | test body | 分类 |
-| --- | ---: | --- |
-| queued text 消费前切模型并 auto drain | 94.7 s | 非必要的 fixture 长延迟 |
-| ReadSessionContext lite 抽取超过 45 秒 | 63.9 s | 有意覆盖时间边界 |
-| edit + held queue | 45.2 s | 失败后吃满等待窗口 |
-| compacting actions | 41.0 s | 失败/竞态放大 |
-| 多 session 并发切换 | 36.4 s | 真实交互成本 |
-| background queue drain | 36.1 s | 受控后台流程 |
+| case                                   | test body | 分类                    |
+| -------------------------------------- | --------: | ----------------------- |
+| queued text 消费前切模型并 auto drain  |    94.7 s | 非必要的 fixture 长延迟 |
+| ReadSessionContext lite 抽取超过 45 秒 |    63.9 s | 有意覆盖时间边界        |
+| edit + held queue                      |    45.2 s | 失败后吃满等待窗口      |
+| compacting actions                     |    41.0 s | 失败/竞态放大           |
+| 多 session 并发切换                    |    36.4 s | 真实交互成本            |
+| background queue drain                 |    36.1 s | 受控后台流程            |
 
 `conversation-session-model-switch-queue.json` 的两个 controlled stream 都把尾部事件放在 `90000/90100/90200 ms`。第二个 case 必须等首轮结束后验证 auto drain，因此 94.7 秒几乎全部由 90.2 秒 fixture 时钟决定。这里不需要 90 秒才能证明“切换发生在 running 窗口”。
 
@@ -159,13 +159,13 @@
 111 个 case 分布在 67 个 spec：
 
 | 每 spec case 数 | spec 数 |
-| ---: | ---: |
-| 1 | 51 |
-| 2 | 8 |
-| 3 | 3 |
-| 5 | 1 |
-| 6 | 2 |
-| 18 | 1 |
+| --------------: | ------: |
+|               1 |      51 |
+|               2 |       8 |
+|               3 |       3 |
+|               5 |       1 |
+|               6 |       2 |
+|              18 |       1 |
 
 51 个单 case spec 意味着绝大多数 case 都单独支付一次 Electron 启动与退出成本。WDIO 本地文档支持把嵌套 spec 数组顺序放进同一 worker，但本项目 `beforeSession` 会按 spec 注入 HOME、启动配置和 replay fixture，分组必须先验证 fixture 冲突与状态清理，不能全量粗暴合并。
 
@@ -193,15 +193,15 @@
 
 ### 12. 优化方案比较
 
-| 方案 | 预计收益 | 风险 | 建议 |
-| --- | --- | --- | --- |
-| 修复 26 秒 session 退出 | 串行节省约 18 到 22 分钟 | 可能重新引入 orphan host/agent | 第一优先，必须 A/B |
-| 把 90.2 秒 replay 缩到 15.2 秒 | 单次节省约 75 秒 | running 窗口过短会竞态 | 快速收益，定向验证 |
-| 兼容 spec 分组复用 session | 视分组数节省 10 到 20 分钟 | HOME/fixture/启动态串扰 | canary 后逐步扩大 |
-| 两个独立 HOME 的 shard | 墙钟接近减半 | 资源翻倍、cleanup 互杀 | cleanup 隔离后启用 |
-| 直接提高 `maxInstances` | 表面接近减半 | 当前必然互删 HOME | 禁止 |
-| 将 55 秒边界 case 移出默认 MR lane | 默认 lane 节省约 64 秒 | 降低每次 MR 的边界覆盖 | 保留 nightly/slow lane |
-| 基础设施健康门/熔断 | 正常运行增加约 30 秒 | 多一个入口和 artifact | CI 必做 |
+| 方案                               | 预计收益                   | 风险                           | 建议                   |
+| ---------------------------------- | -------------------------- | ------------------------------ | ---------------------- |
+| 修复 26 秒 session 退出            | 串行节省约 18 到 22 分钟   | 可能重新引入 orphan host/agent | 第一优先，必须 A/B     |
+| 把 90.2 秒 replay 缩到 15.2 秒     | 单次节省约 75 秒           | running 窗口过短会竞态         | 快速收益，定向验证     |
+| 兼容 spec 分组复用 session         | 视分组数节省 10 到 20 分钟 | HOME/fixture/启动态串扰        | canary 后逐步扩大      |
+| 两个独立 HOME 的 shard             | 墙钟接近减半               | 资源翻倍、cleanup 互杀         | cleanup 隔离后启用     |
+| 直接提高 `maxInstances`            | 表面接近减半               | 当前必然互删 HOME              | 禁止                   |
+| 将 55 秒边界 case 移出默认 MR lane | 默认 lane 节省约 64 秒     | 降低每次 MR 的边界覆盖         | 保留 nightly/slow lane |
+| 基础设施健康门/熔断                | 正常运行增加约 30 秒       | 多一个入口和 artifact          | CI 必做                |
 
 ### 13. 目标预算
 
@@ -223,12 +223,14 @@
 ### Task 1: 记录 WDIO 生命周期耗时
 
 **Files:**
+
 - Modify: `packages/e2e-report/src/shared/types.ts`
 - Modify: `packages/e2e-report/src/node/index.ts`
 - Modify: `packages/desktop/wdio.conf.ts`
 - Create: `packages/e2e-report/test/node-index.test.ts`
 
 **Interfaces:**
+
 - Consumes: WDIO 的 `onPrepare`、`beforeSession`、`before`、`after`、`afterSession`、`onComplete` hooks。
 - Produces: `lifecycle-events.ndjson` 和 summary 中的 `lifecycle` 聚合，后续退出 A/B、预算门和 shard 合并都依赖这些字段。
 
@@ -275,12 +277,15 @@ summary 至少输出：
 
 ```ts
 lifecycle: {
-  byPhase: Record<E2ELifecyclePhase, {
-    count: number;
-    p50Ms: number;
-    p95Ms: number;
-    totalMs: number;
-  }>;
+  byPhase: Record<
+    E2ELifecyclePhase,
+    {
+      count: number;
+      p50Ms: number;
+      p95Ms: number;
+      totalMs: number;
+    }
+  >;
 }
 ```
 
@@ -342,11 +347,13 @@ git commit -m "test(desktop): record e2e lifecycle timings"
 ### Task 2: A/B 验证并修复 26 秒 session 退出
 
 **Files:**
+
 - Create: `packages/desktop/test/e2e/helpers/e2e-process-cleanup.ts`
 - Modify: `packages/desktop/wdio.conf.ts`
 - Create: `packages/desktop/test/e2e-process-cleanup.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的 `after`、`after-session` lifecycle 指标。
 - Produces: 一个经证据验证的退出策略，要求 teardown P50 不超过 8 秒且无 orphan process。
 
@@ -430,10 +437,12 @@ git commit -m "test(desktop): reduce windows e2e session teardown"
 ### Task 3: 压缩非必要的 90.2 秒 controlled stream
 
 **Files:**
+
 - Modify: `packages/desktop/test/e2e/fixtures/upstream/conversation-session/conversation-session-model-switch-queue.json`
 - Modify: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-model-switch-queue.json`
 
 **Interfaces:**
+
 - Consumes: `conversation-session-model-switch-queue.test.ts` 现有 running、queue、model capture 断言。
 - Produces: 仍可稳定完成切模型动作，但尾部事件在 15.2 秒结束的 controlled stream。
 
@@ -483,11 +492,13 @@ git commit -m "test(desktop): shorten model switch queue replay"
 ### Task 4: 用兼容 spec 分组摊薄 session 固定成本
 
 **Files:**
+
 - Create: `packages/desktop/test/e2e/spec-groups.ts`
 - Create: `packages/desktop/test/spec-groups.test.ts`
 - Modify: `packages/desktop/wdio.conf.ts`
 
 **Interfaces:**
+
 - Consumes: WDIO 嵌套 `specs` 数组能力和现有 `beforeSession(specs)` fixture 合并逻辑。
 - Produces: 显式、可审计的兼容组；默认定向 `--spec` 行为不变。
 
@@ -516,8 +527,7 @@ Expected: FAIL，分组函数尚不存在。
 - [ ] **Step 3: 实现 opt-in 分组**
 
 ```ts
-const groupCompatibleSpecs =
-  process.env.ZCODE_E2E_GROUP_COMPATIBLE_SPECS === "1";
+const groupCompatibleSpecs = process.env.ZCODE_E2E_GROUP_COMPATIBLE_SPECS === "1";
 ```
 
 分组函数只在某个 group 的全部成员都包含于 configured specs 时生成嵌套数组；只命中部分成员时保持独立。reporter 的 configured spec 计数使用 flatten 后的文件列表；WDIO `config.specs` 保留嵌套数组。
@@ -563,6 +573,7 @@ git commit -m "test(desktop): group compatible windows e2e specs"
 ### Task 5: 增加安全的双 shard Windows 入口
 
 **Files:**
+
 - Create: `packages/desktop/scripts/run-windows-e2e-shards.mjs`
 - Create: `packages/desktop/test/windows-e2e-shards.test.ts`
 - Modify: `packages/desktop/package.json`
@@ -570,6 +581,7 @@ git commit -m "test(desktop): group compatible windows e2e specs"
 - Modify: `.gitlab/ci/20-test.yml`
 
 **Interfaces:**
+
 - Consumes: Task 2 的 HOME 精确进程清理、WDIO `--shard=x/y`、动态 mock/replay 端口。
 - Produces: 两个独立 HOME、run id、artifact 的并行 shard；任一失败时总入口返回非零。
 
@@ -651,12 +663,14 @@ git commit -m "ci(desktop): shard windows conversation e2e"
 ### Task 6: 增加 CI 健康门、slow lane 与耗时预算
 
 **Files:**
+
 - Create: `packages/desktop/scripts/check-e2e-duration-budget.mjs`
 - Create: `packages/desktop/test/e2e-duration-budget.test.ts`
 - Modify: `.gitlab/ci/20-test.yml`
 - Modify: `packages/desktop/test/e2e/fixtures/cases/conversation-session/conversation-session-read-session-context-timeout.json`
 
 **Interfaces:**
+
 - Consumes: Task 1 lifecycle summary、Task 5 shard summaries。
 - Produces: 基础设施失败快速停止、慢 case 显式分类、性能回归预算。
 
@@ -739,9 +753,11 @@ git commit -m "ci(desktop): add windows e2e runtime budgets"
 ### Task 7: 最终验证与基线更新
 
 **Files:**
+
 - Modify: `docs/superpowers/plans/2026-07-10-windows-e2e-runtime-optimization.md`
 
 **Interfaces:**
+
 - Consumes: Tasks 1-6 的 artifact 和 summary。
 - Produces: 完整的新基线、实际节省和残余风险。
 
@@ -798,21 +814,21 @@ Run id: `desktop-e2e-optimized-full-20260711-final`
 
 Artifact: `packages/desktop/.e2e-artifacts/desktop-e2e-optimized-full-20260711-final`
 
-| 指标 | 实测 |
-| --- | ---: |
-| 父 runner 墙钟 | `2,926,331 ms`（48 分 46 秒） |
-| shard 1 | `2,608,448 ms`（43 分 28 秒），42 spec workers |
-| shard 2 | `2,824,532 ms`（47 分 05 秒），41 spec workers |
-| 完整范围 | 83 spec workers，184 tests |
-| 通过 / 失败 | 177 / 7，pass rate `96.20%` |
-| infra / flaky | 0 / 0 |
-| test body 合计 | `2,581,448 ms`（43 分 01 秒） |
-| 可见 worker hooks 合计 | `203,017 ms`（3 分 23 秒） |
-| 未归因 session/WebDriver 成本 | `2,632,773 ms`（43 分 53 秒） |
-| worker 合计 | `5,417,238 ms`（90 分 17 秒） |
-| 两个 child 串行估算 | `5,432,980 ms`（90 分 33 秒） |
-| build-once + parent 固定成本 | `101,799 ms`（1 分 42 秒） |
-| 相对同范围串行估算 | 节省 `2,506,649 ms`（41 分 47 秒），墙钟下降约 `46.1%` |
+| 指标                          |                                                   实测 |
+| ----------------------------- | -----------------------------------------------------: |
+| 父 runner 墙钟                |                          `2,926,331 ms`（48 分 46 秒） |
+| shard 1                       |         `2,608,448 ms`（43 分 28 秒），42 spec workers |
+| shard 2                       |         `2,824,532 ms`（47 分 05 秒），41 spec workers |
+| 完整范围                      |                             83 spec workers，184 tests |
+| 通过 / 失败                   |                            177 / 7，pass rate `96.20%` |
+| infra / flaky                 |                                                  0 / 0 |
+| test body 合计                |                          `2,581,448 ms`（43 分 01 秒） |
+| 可见 worker hooks 合计        |                             `203,017 ms`（3 分 23 秒） |
+| 未归因 session/WebDriver 成本 |                          `2,632,773 ms`（43 分 53 秒） |
+| worker 合计                   |                          `5,417,238 ms`（90 分 17 秒） |
+| 两个 child 串行估算           |                          `5,432,980 ms`（90 分 33 秒） |
+| build-once + parent 固定成本  |                             `101,799 ms`（1 分 42 秒） |
+| 相对同范围串行估算            | 节省 `2,506,649 ms`（41 分 47 秒），墙钟下降约 `46.1%` |
 
 旧基线在 60 分钟外层超时时只完成 66 个 spec，且最后一个 spec 被截断。新结果覆盖 83 个 spec workers 并完整收尾，因此不能把 `48:46` 直接当作同范围的 `60 -> 49`；按本次两个 child 的实际累计时长估算，同范围串行约 `90:33`，two-shard 已接近理论减半。
 
@@ -820,15 +836,15 @@ Artifact: `packages/desktop/.e2e-artifacts/desktop-e2e-optimized-full-20260711-f
 
 本次 7 个失败都被 reporter 分类为产品/断言失败，`infraFailureCount=0`：
 
-| Spec | 原因摘要 |
-| --- | --- |
-| `conversation-session-background.test.ts` | background child completion notification 未进入父模型请求 |
-| `conversation-session-compact-actions.test.ts` | 未捕获到预期 DeepSeek 请求 body |
-| `conversation-session-composer-prefix-routing.test.ts` | `/` skill 候选面板未打开 |
-| `conversation-session-deepseek-v4-reasoning-request-shape.test.ts` | 当前思考档位仍为 `high`，未切到 `max` |
-| `conversation-session-edit.test.ts` | stop 后 active turn 未释放到 completed |
-| `conversation-session-markdown-table-enhanced-scroll.test.ts` | resize 前未进入左借位状态 |
-| `conversation-session-model-switch-restore-repro.test.ts` | session 重建后任务列表缺少目标 task |
+| Spec                                                               | 原因摘要                                                  |
+| ------------------------------------------------------------------ | --------------------------------------------------------- |
+| `conversation-session-background.test.ts`                          | background child completion notification 未进入父模型请求 |
+| `conversation-session-compact-actions.test.ts`                     | 未捕获到预期 DeepSeek 请求 body                           |
+| `conversation-session-composer-prefix-routing.test.ts`             | `/` skill 候选面板未打开                                  |
+| `conversation-session-deepseek-v4-reasoning-request-shape.test.ts` | 当前思考档位仍为 `high`，未切到 `max`                     |
+| `conversation-session-edit.test.ts`                                | stop 后 active turn 未释放到 completed                    |
+| `conversation-session-markdown-table-enhanced-scroll.test.ts`      | resize 前未进入左借位状态                                 |
+| `conversation-session-model-switch-restore-repro.test.ts`          | session 重建后任务列表缺少目标 task                       |
 
 其中 DeepSeek V4 和 edit spec 是运行前工作树里已有的未提交修改；本优化没有修改或提交这两个 case。
 

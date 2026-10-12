@@ -1,9 +1,10 @@
 import type { InputId, ZCodeProvider, ZCodeTaskMeta } from "@zcode/shared";
-import { getTaskMeta, resolveWorkspaceStateKey, useZCodeSessionStore } from "@/store/zcodeSessionStore.js";
 import {
-  mergeTaskMetaCandidates,
-  mergeTaskWithOptimisticMeta,
-} from "@/lib/zcodeTaskMetaMerge.js";
+  getTaskMeta,
+  resolveWorkspaceStateKey,
+  useZCodeSessionStore,
+} from "@/store/zcodeSessionStore.js";
+import { mergeTaskMetaCandidates, mergeTaskWithOptimisticMeta } from "@/lib/zcodeTaskMetaMerge.js";
 import {
   applyTaskQueryCacheMutation,
   removeTaskFromTaskQueryCaches,
@@ -104,19 +105,19 @@ export function syncTaskMetaToTaskCaches(params: {
   const store = useZCodeSessionStore.getState();
   const workspaceState = store.getWorkspaceState(params.workspacePath, params.workspaceIdentity);
   const previousTask = getTaskMeta(workspaceState, params.task.taskId);
-  const queryTask = useTaskQueryCacheStore.getState().taskMetaByEntityKey[
-    buildTaskEntityKey({
-      taskId: params.task.taskId,
-      workspacePath: params.workspacePath,
-      workspaceIdentity: params.workspaceIdentity ?? params.task.workspaceIdentity,
-    })
-  ];
+  const queryTask =
+    useTaskQueryCacheStore.getState().taskMetaByEntityKey[
+      buildTaskEntityKey({
+        taskId: params.task.taskId,
+        workspacePath: params.workspacePath,
+        workspaceIdentity: params.workspaceIdentity ?? params.task.workspaceIdentity,
+      })
+    ];
   // Bugfix: session/readSession 快照的 updatedAt 可能落后于首发 prompt 写入的前端乐观时间。
   // 同步快照时必须先和本地已有 task meta 单调合并，否则新建任务会在 sqlite 首屏刷新后跳回下面。
   // Bugfix: 重启恢复时 workspace store 可能还没有当前 task，但 query cache 已经有 sqlite indexed meta。
   // raw session snapshot 不带 titleOverridden，必须一起合并，避免手动重命名标题在 renderer 被还原。
-  const task =
-    mergeTaskMetaCandidates(params.task, previousTask, queryTask) ?? params.task;
+  const task = mergeTaskMetaCandidates(params.task, previousTask, queryTask) ?? params.task;
   const cachedTasks = workspaceState.taskListCache ?? [];
   const hasCachedTask = cachedTasks.some((cachedTask) => cachedTask.taskId === task.taskId);
   const shouldExistInWorkspaceTaskCache =
@@ -160,9 +161,7 @@ export function syncTaskMetaToTaskCaches(params: {
       previousTask: previousTask ?? task,
       nextTask: task,
       previousState:
-        previousTask && !params.forceInsertMembership
-          ? params.membership
-          : ABSENT_MEMBERSHIP,
+        previousTask && !params.forceInsertMembership ? params.membership : ABSENT_MEMBERSHIP,
       nextState: params.membership,
     });
   }
@@ -247,7 +246,7 @@ export function patchTaskMetaInTaskCaches(params: {
     ...patch,
     // Bugfix: 用户手动重命名后，运行中的 session_info_update 仍可能带回自动标题。
     // 这些 patch 只该刷新运行态字段，不能把 titleOverridden 的手动标题短暂冲掉。
-    title: shouldPreserveManualTitle ? currentTask.title : patch.title ?? currentTask.title,
+    title: shouldPreserveManualTitle ? currentTask.title : (patch.title ?? currentTask.title),
     titleOverridden: patch.titleOverridden ?? currentTask.titleOverridden,
   };
   // Bugfix: session_info_update / snapshot patch 可能只是在补运行态，却带回 "New session" 占位标题。
@@ -258,9 +257,7 @@ export function patchTaskMetaInTaskCaches(params: {
   if (taskCacheState.taskListCache) {
     store.setTaskListCache(
       params.workspacePath,
-      taskCacheState.taskListCache.map((task) =>
-        task.taskId === params.taskId ? nextTask : task,
-      ),
+      taskCacheState.taskListCache.map((task) => (task.taskId === params.taskId ? nextTask : task)),
       params.workspaceIdentity,
     );
   }
@@ -289,7 +286,6 @@ export function insertTaskIntoTaskCaches(params: {
     ensureInWorkspaceTaskCache:
       params.membership.pinned === false && params.membership.archived === false,
   });
-
 }
 
 export function initializeBackgroundTaskInTaskCaches(params: {
@@ -302,9 +298,7 @@ export function initializeBackgroundTaskInTaskCaches(params: {
   const store = useZCodeSessionStore.getState();
   const workspaceState = store.getWorkspaceState(params.workspacePath, params.workspaceIdentity);
   const previousTask = getTaskMeta(workspaceState, params.task.taskId);
-  const task = previousTask
-    ? mergeTaskWithOptimisticMeta(params.task, previousTask)
-    : params.task;
+  const task = previousTask ? mergeTaskWithOptimisticMeta(params.task, previousTask) : params.task;
 
   store.initializeBackgroundTaskRuntime(params.workspacePath, {
     workspaceIdentity: params.workspaceIdentity,

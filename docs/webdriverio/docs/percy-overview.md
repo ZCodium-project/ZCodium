@@ -1,6 +1,6 @@
 ---
 id: percy-overview
-title: Unlocking Percy - An Overview 
+title: Unlocking Percy - An Overview
 ---
 
 ## Introduction

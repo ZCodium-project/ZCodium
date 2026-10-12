@@ -76,66 +76,66 @@ sanitize headers / request metadata       always
 
 ### Feature Summary
 
-| Field | Value |
-| --- | --- |
-| Developer intent | 增加默认关闭的 ModelIO 全量保留开关 |
-| Capability | ModelIO diagnostics retention |
-| Change layer | presentation / draft-default / commit-effect / persistence |
-| Operating mode | planning |
-| Primary seeds | `GeneralSectionContent`, `appSettingsSchema`, `syncAppRuntimePreferences`, `AiSdkModelAdapter`, `writeModelIODebugRecord` |
-| Out of scope | conversation 内容、task snapshot、queue、stream replay、ModelIO 读取 UI、日志导出策略 |
+| Field            | Value                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Developer intent | 增加默认关闭的 ModelIO 全量保留开关                                                                                       |
+| Capability       | ModelIO diagnostics retention                                                                                             |
+| Change layer     | presentation / draft-default / commit-effect / persistence                                                                |
+| Operating mode   | planning                                                                                                                  |
+| Primary seeds    | `GeneralSectionContent`, `appSettingsSchema`, `syncAppRuntimePreferences`, `AiSdkModelAdapter`, `writeModelIODebugRecord` |
+| Out of scope     | conversation 内容、task snapshot、queue、stream replay、ModelIO 读取 UI、日志导出策略                                     |
 
 ### UI Surface Matrix
 
-| User scenario | UI entry | Shared implementation | Display/draft owner | Default/inherit source | Validation/gating | Commit action | Authority/persistence | Mode boundary | Must remain isolated from |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 保留完整模型诊断轨迹 | Settings / General | `GeneralSectionContent` + `Switch` | `useSettings` shared snapshot | `appSettingsSchema` default `false` | boolean schema | `ISettingService.update` + runtime preference sync | `~/.zcode/v2/setting.json` + active CLI runtime snapshot | desktop/web UI 共用；local/remote Host 同步 | conversation/session recovery、provider 配置、日志脱敏 |
+| User scenario        | UI entry           | Shared implementation              | Display/draft owner           | Default/inherit source              | Validation/gating | Commit action                                      | Authority/persistence                                    | Mode boundary                               | Must remain isolated from                              |
+| -------------------- | ------------------ | ---------------------------------- | ----------------------------- | ----------------------------------- | ----------------- | -------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| 保留完整模型诊断轨迹 | Settings / General | `GeneralSectionContent` + `Switch` | `useSettings` shared snapshot | `appSettingsSchema` default `false` | boolean schema    | `ISettingService.update` + runtime preference sync | `~/.zcode/v2/setting.json` + active CLI runtime snapshot | desktop/web UI 共用；local/remote Host 同步 | conversation/session recovery、provider 配置、日志脱敏 |
 
 ### Shared And Divergent Behavior
 
-| Concern | Shared across surfaces | Deliberately different | Why it matters for this change |
-| --- | --- | --- | --- |
-| UI/component | 复用 SettingsRow/Switch | 无第二入口 | 避免多个草稿 owner |
-| Default/inheritance | 所有 workspace 读取 App 全局默认 false | 旧 CLI 不支持热同步时继续 bounded | 保持向后兼容 |
-| Commit effect | 本地与远端活动 CLI 都接收偏好 | standalone CLI 无 UI，继续默认 false | 不扩张 CLI config 合同 |
-| Persistence/recovery | App setting 持久化 | 不进入 session/task snapshot | 避免诊断偏好污染恢复状态 |
+| Concern              | Shared across surfaces                 | Deliberately different               | Why it matters for this change |
+| -------------------- | -------------------------------------- | ------------------------------------ | ------------------------------ |
+| UI/component         | 复用 SettingsRow/Switch                | 无第二入口                           | 避免多个草稿 owner             |
+| Default/inheritance  | 所有 workspace 读取 App 全局默认 false | 旧 CLI 不支持热同步时继续 bounded    | 保持向后兼容                   |
+| Commit effect        | 本地与远端活动 CLI 都接收偏好          | standalone CLI 无 UI，继续默认 false | 不扩张 CLI config 合同         |
+| Persistence/recovery | App setting 持久化                     | 不进入 session/task snapshot         | 避免诊断偏好污染恢复状态       |
 
 ### Feature Relationships
 
-| Rank | From | Semantic edge | To | Condition | Why inspect it | Evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| must-inspect | Settings switch | persists-to | App settings | always | 默认值与历史兼容 | `validationAppSettings.ts`, `settingService.ts` |
-| must-inspect | App settings | syncs-to | active local/remote CLI | active workspace | 切换需即时生效 | `useSettingService.ts`, `zcodeAgentService.ts`, `botRemoteWorkspaceBridge.ts` |
-| must-inspect | CLI preference | controls | ModelIO writer | every model attempt | 定义 full 与 bounded 分支 | `runner.ts`, `runner-debug.ts` |
-| should-inspect | full retention | increases | retained diagnostic volume | enabled | 脱敏不能关闭 | `runner-debug-redaction.ts`, i18n copy |
-| invariant-only | full retention | must-not-mutate | conversation delivery/recovery | all modes | 仅诊断持久化变化 | architecture docs |
-| evidence-only | capability | covered-by | schema/UI/protocol/adapter tests | implementation | 证明端到端边界 | listed tests below |
+| Rank           | From            | Semantic edge   | To                               | Condition           | Why inspect it            | Evidence                                                                      |
+| -------------- | --------------- | --------------- | -------------------------------- | ------------------- | ------------------------- | ----------------------------------------------------------------------------- |
+| must-inspect   | Settings switch | persists-to     | App settings                     | always              | 默认值与历史兼容          | `validationAppSettings.ts`, `settingService.ts`                               |
+| must-inspect   | App settings    | syncs-to        | active local/remote CLI          | active workspace    | 切换需即时生效            | `useSettingService.ts`, `zcodeAgentService.ts`, `botRemoteWorkspaceBridge.ts` |
+| must-inspect   | CLI preference  | controls        | ModelIO writer                   | every model attempt | 定义 full 与 bounded 分支 | `runner.ts`, `runner-debug.ts`                                                |
+| should-inspect | full retention  | increases       | retained diagnostic volume       | enabled             | 脱敏不能关闭              | `runner-debug-redaction.ts`, i18n copy                                        |
+| invariant-only | full retention  | must-not-mutate | conversation delivery/recovery   | all modes           | 仅诊断持久化变化          | architecture docs                                                             |
+| evidence-only  | capability      | covered-by      | schema/UI/protocol/adapter tests | implementation      | 证明端到端边界            | listed tests below                                                            |
 
 ### State Owners And Commit Sinks
 
-| State/fact | Draft/display owner | Authoritative owner | Commit command/service | Persistence/cache | Evidence |
-| --- | --- | --- | --- | --- | --- |
-| 用户选择 | Settings React snapshot | `ISettingService` | `update()` | `setting.json` | UI/service tests |
+| State/fact    | Draft/display owner             | Authoritative owner            | Commit command/service               | Persistence/cache   | Evidence               |
+| ------------- | ------------------------------- | ------------------------------ | ------------------------------------ | ------------------- | ---------------------- |
+| 用户选择      | Settings React snapshot         | `ISettingService`              | `update()`                           | `setting.json`      | UI/service tests       |
 | 活动 CLI 偏好 | Host latest preference snapshot | workspace CLI protocol context | `workspace/updateModelIoPreferences` | process memory only | protocol/service tests |
-| 单次写入模式 | `AiSdkModelAdapter` | adapter attempt snapshot | runner input | none | adapter tests |
+| 单次写入模式  | `AiSdkModelAdapter`             | adapter attempt snapshot       | runner input                         | none                | adapter tests          |
 
 ### Must-Preserve Invariants
 
-| Invariant | Surfaces/modes | Proof needed | Evidence |
-| --- | --- | --- | --- |
-| 默认关闭完全保持旧 bounded 行为 | all | existing rotation/size/delta tests continue passing | adapters tests |
-| 凭据脱敏始终开启 | full + bounded | full record headers remain redacted | adapters tests |
-| 不启动 dormant workspace | local/remote | runtime preference sync only targets active clients | service implementation/tests |
-| 不改变 desktop/mobile delivery | continuous/replayable | no realtime schema/state change | static boundary review |
+| Invariant                       | Surfaces/modes        | Proof needed                                        | Evidence                     |
+| ------------------------------- | --------------------- | --------------------------------------------------- | ---------------------------- |
+| 默认关闭完全保持旧 bounded 行为 | all                   | existing rotation/size/delta tests continue passing | adapters tests               |
+| 凭据脱敏始终开启                | full + bounded        | full record headers remain redacted                 | adapters tests               |
+| 不启动 dormant workspace        | local/remote          | runtime preference sync only targets active clients | service implementation/tests |
+| 不改变 desktop/mobile delivery  | continuous/replayable | no realtime schema/state change                     | static boundary review       |
 
 ### Codegraph Evidence
 
-| Seed | Query | Direct callers / key path | Depth | Interpretation |
-| --- | --- | --- | --- | --- |
-| repository root | settings/runtime/modelIO impact | codegraph index unavailable; used focused `rg` fallback | 0 | graph drift must be checked by text/type/test evidence |
-| `GeneralSectionContent` | callers | `SettingsPage` | 1 | single UI entry |
-| `syncAppRuntimePreferences` | callers | Root/useSettings/Bot remote bridge | 2 | local and remote runtime sync owner |
-| `writeModelIODebugRecord` | callers | generate/stream recorder | 2 | single persistence boundary |
+| Seed                        | Query                           | Direct callers / key path                               | Depth | Interpretation                                         |
+| --------------------------- | ------------------------------- | ------------------------------------------------------- | ----- | ------------------------------------------------------ |
+| repository root             | settings/runtime/modelIO impact | codegraph index unavailable; used focused `rg` fallback | 0     | graph drift must be checked by text/type/test evidence |
+| `GeneralSectionContent`     | callers                         | `SettingsPage`                                          | 1     | single UI entry                                        |
+| `syncAppRuntimePreferences` | callers                         | Root/useSettings/Bot remote bridge                      | 2     | local and remote runtime sync owner                    |
+| `writeModelIODebugRecord`   | callers                         | generate/stream recorder                                | 2     | single persistence boundary                            |
 
 ### Graph Drift And Delta
 
@@ -145,28 +145,28 @@ sanitize headers / request metadata       always
 
 ### Boundary Decisions
 
-| Boundary | Decision | Includes | Excludes / prunes | Source |
-| --- | --- | --- | --- | --- |
-| 全量定义 | 禁止所有自动删除、重置、delta/tail 与生产字段裁剪 | request/response 完整诊断字段 | 安全脱敏 | user intent + security invariant |
-| 生效范围 | App 全局，活动 local/remote CLI 即时同步 | future and resident apps | standalone CLI UI | app settings architecture |
-| 历史处理 | 不回填、不重写 | future attempts | 恢复已淘汰数据 | append-only boundary |
-| conversation E2E | 不新增 | schema/UI/protocol/adapter integration tests | session state matrix | no conversation behavior change |
+| Boundary         | Decision                                          | Includes                                     | Excludes / prunes    | Source                           |
+| ---------------- | ------------------------------------------------- | -------------------------------------------- | -------------------- | -------------------------------- |
+| 全量定义         | 禁止所有自动删除、重置、delta/tail 与生产字段裁剪 | request/response 完整诊断字段                | 安全脱敏             | user intent + security invariant |
+| 生效范围         | App 全局，活动 local/remote CLI 即时同步          | future and resident apps                     | standalone CLI UI    | app settings architecture        |
+| 历史处理         | 不回填、不重写                                    | future attempts                              | 恢复已淘汰数据       | append-only boundary             |
+| conversation E2E | 不新增                                            | schema/UI/protocol/adapter integration tests | session state matrix | no conversation behavior change  |
 
 ### Candidate And Accepted Cases
 
-| Case ID | Setup | Action | Assertions | Evidence layers |
-| --- | --- | --- | --- | --- |
-| MIO-FR-01 | empty historical settings | load settings | switch/default is false | schema |
-| MIO-FR-02 | bounded production writer | write multiple sessions and growing context | max 3 files; delta/tail and size reset unchanged | adapter/files |
-| MIO-FR-03 | full retention enabled | write multiple sessions and repeated context | all files remain; each record is full; production duplicate fields remain | adapter/files |
-| MIO-FR-04 | full retention enabled with oversized session file | append next record | existing file is not reset and no `modelIOReset` marker is emitted | adapter/files |
-| MIO-FR-05 | active local/remote services | toggle switch | setting persists, active Host ACKs, cross-window payload includes full snapshot | UI/service/protocol |
-| MIO-FR-06 | full retention record contains credentials in headers | write record | sensitive headers remain `[redacted]` | adapter/files |
+| Case ID   | Setup                                                 | Action                                       | Assertions                                                                      | Evidence layers     |
+| --------- | ----------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------- | ------------------- |
+| MIO-FR-01 | empty historical settings                             | load settings                                | switch/default is false                                                         | schema              |
+| MIO-FR-02 | bounded production writer                             | write multiple sessions and growing context  | max 3 files; delta/tail and size reset unchanged                                | adapter/files       |
+| MIO-FR-03 | full retention enabled                                | write multiple sessions and repeated context | all files remain; each record is full; production duplicate fields remain       | adapter/files       |
+| MIO-FR-04 | full retention enabled with oversized session file    | append next record                           | existing file is not reset and no `modelIOReset` marker is emitted              | adapter/files       |
+| MIO-FR-05 | active local/remote services                          | toggle switch                                | setting persists, active Host ACKs, cross-window payload includes full snapshot | UI/service/protocol |
+| MIO-FR-06 | full retention record contains credentials in headers | write record                                 | sensitive headers remain `[redacted]`                                           | adapter/files       |
 
 ### Pruning Decisions
 
-| Decision ID | Pruned combinations | Guard/invariant | Product reason | Representative coverage |
-| --- | --- | --- | --- | --- |
-| MIO-PR-01 | session phase × queue × delivery kind | writer mode does not read or write these states | avoid false conversation coupling | static review |
-| MIO-PR-02 | provider/model Cartesian product | retention branch is provider-neutral after record construction | one generate/stream representative is sufficient | adapter unit tests |
-| MIO-PR-03 | theme × locale × viewport screenshots | standard SettingsRow/Switch only, no new layout primitive | bilingual copy + component render test | UI unit test |
+| Decision ID | Pruned combinations                   | Guard/invariant                                                | Product reason                                   | Representative coverage |
+| ----------- | ------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------ | ----------------------- |
+| MIO-PR-01   | session phase × queue × delivery kind | writer mode does not read or write these states                | avoid false conversation coupling                | static review           |
+| MIO-PR-02   | provider/model Cartesian product      | retention branch is provider-neutral after record construction | one generate/stream representative is sufficient | adapter unit tests      |
+| MIO-PR-03   | theme × locale × viewport screenshots | standard SettingsRow/Switch only, no new layout primitive      | bilingual copy + component render test           | UI unit test            |

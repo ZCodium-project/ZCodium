@@ -38,6 +38,7 @@
 ### Task 1: Shared Contract And RPC Wiring
 
 **Files:**
+
 - Modify: `packages/shared/src/channels.ts`
 - Create: `packages/shared/src/skill-sync.ts`
 - Modify: `packages/shared/src/index.ts`
@@ -132,17 +133,16 @@ export interface ISkillSyncService {
   listRemoteUserSkillStatuses(params: {
     directoryNames: string[];
   }): Promise<SkillSyncRemoteStatusResult>;
-  exportSkillsArchive(params: {
-    skillIds: string[];
-  }): Promise<SkillSyncArchiveExportResult>;
+  exportSkillsArchive(params: { skillIds: string[] }): Promise<SkillSyncArchiveExportResult>;
   importSkillsArchive(params: {
     archive: Uint8Array;
     overwrite?: false;
   }): Promise<SkillSyncImportResult>;
 }
 
-export const ISkillSyncService =
-  createServiceDescriptor<ISkillSyncService>(ServiceChannels.SkillSync);
+export const ISkillSyncService = createServiceDescriptor<ISkillSyncService>(
+  ServiceChannels.SkillSync,
+);
 ```
 
 - [ ] **Step 3: Wire service into public accessors**
@@ -174,9 +174,9 @@ In `packages/client/src/remoteServiceAccess.ts`, import `ISkillSyncService`, add
 and initialize it after `skillsService`:
 
 ```ts
-    this.skillSyncService = ProxyChannel.toService<ISkillSyncService>(
-      channelClient.getChannel(ISkillSyncService.channelName),
-    );
+this.skillSyncService = ProxyChannel.toService<ISkillSyncService>(
+  channelClient.getChannel(ISkillSyncService.channelName),
+);
 ```
 
 - [ ] **Step 4: Run typecheck to capture missing registrations**
@@ -201,6 +201,7 @@ git commit -m "feat: add skill sync service contract"
 ### Task 2: Safe Skill Archive Helper
 
 **Files:**
+
 - Create: `packages/services/src/skill-sync/skillSyncArchive.ts`
 - Test: `packages/services/test/skillSyncArchive.test.ts`
 
@@ -230,9 +231,7 @@ describe("skill sync archive", () => {
     await writeFile(join(skillDir, "SKILL.md"), "---\nname: review\n---\nbody");
     await writeFile(join(skillDir, "notes.txt"), "hello");
 
-    const archive = await createSkillSyncArchive([
-      { sourcePath: skillDir, archivePath: "review" },
-    ]);
+    const archive = await createSkillSyncArchive([{ sourcePath: skillDir, archivePath: "review" }]);
     const output = join(root, "out");
     await extractSkillSyncArchive(archive, output);
 
@@ -271,13 +270,7 @@ Create `packages/services/src/skill-sync/skillSyncArchive.ts` using Node built-i
 
 ```ts
 import { gzip, gunzip } from "node:zlib";
-import {
-  lstat,
-  mkdir,
-  readFile,
-  readdir,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, posix, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 
@@ -379,6 +372,7 @@ git commit -m "feat: add safe skill sync archive helper"
 ### Task 3: Skill Sync Service Implementation
 
 **Files:**
+
 - Create: `packages/services/src/skill-sync/skillSyncService.ts`
 - Modify: `packages/services/src/node.ts`
 - Modify: `packages/desktop/src/host/remoteWorkspaceServiceCollection.ts`
@@ -403,7 +397,10 @@ function makeHome() {
 async function writeSkill(home: string, directoryName: string, name = directoryName) {
   const dir = join(home, ".zcode", "skills", directoryName);
   await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, "SKILL.md"), `---\nname: ${name}\ndescription: ${name} desc\n---\nBody`);
+  await writeFile(
+    join(dir, "SKILL.md"),
+    `---\nname: ${name}\ndescription: ${name} desc\n---\nBody`,
+  );
   return dir;
 }
 
@@ -452,8 +449,9 @@ describe("skill sync service", () => {
 
     expect(first.results[0]).toMatchObject({ directoryName: "review", status: "synced" });
     expect(second.results[0]).toMatchObject({ directoryName: "review", status: "skipped" });
-    await expect(readFile(join(remoteHome, ".zcode", "skills", "review", "SKILL.md"), "utf-8"))
-      .resolves.toContain("name: review");
+    await expect(
+      readFile(join(remoteHome, ".zcode", "skills", "review", "SKILL.md"), "utf-8"),
+    ).resolves.toContain("name: review");
     process.env.HOME = originalHome;
   });
 });
@@ -488,17 +486,12 @@ import type {
   SkillSyncRemoteStatusResult,
 } from "@zcode/shared";
 import type { ISkillSyncService } from "./skillSync.js";
-import {
-  createSkillSyncArchive,
-  extractSkillSyncArchive,
-} from "./skillSyncArchive.js";
+import { createSkillSyncArchive, extractSkillSyncArchive } from "./skillSyncArchive.js";
 
 const SKILL_FILE_NAME = "SKILL.md";
 const DEFAULT_MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
 
-export function createSkillSyncService(options?: {
-  maxArchiveBytes?: number;
-}): ISkillSyncService {
+export function createSkillSyncService(options?: { maxArchiveBytes?: number }): ISkillSyncService {
   const maxArchiveBytes = options?.maxArchiveBytes ?? DEFAULT_MAX_ARCHIVE_BYTES;
   return {
     async listLocalUserSkillCandidates() {
@@ -533,7 +526,9 @@ export function createSkillSyncService(options?: {
         })),
       );
       if (archive.byteLength > maxArchiveBytes) {
-        throw new Error(`skill sync archive exceeds limit: ${archive.byteLength}/${maxArchiveBytes}`);
+        throw new Error(
+          `skill sync archive exceeds limit: ${archive.byteLength}/${maxArchiveBytes}`,
+        );
       }
       return {
         archive,
@@ -544,7 +539,9 @@ export function createSkillSyncService(options?: {
     async importSkillsArchive(params) {
       if (params.overwrite) throw new Error("skill sync overwrite is not supported");
       if (params.archive.byteLength > maxArchiveBytes) {
-        throw new Error(`skill sync archive exceeds limit: ${params.archive.byteLength}/${maxArchiveBytes}`);
+        throw new Error(
+          `skill sync archive exceeds limit: ${params.archive.byteLength}/${maxArchiveBytes}`,
+        );
       }
       return await importArchive(params.archive);
     },
@@ -605,6 +602,7 @@ git commit -m "feat: implement skill sync service"
 ### Task 4: Reusable Remote Skill Sync Dialog
 
 **Files:**
+
 - Create: `packages/ui/src/settings/RemoteSkillSyncDialog.tsx`
 - Test: `packages/ui/test/remoteSkillSyncDialog.test.tsx`
 - Modify: `packages/ui/test/skillsSection.test.ts` service mock objects so they include `skillSyncService`
@@ -802,6 +800,7 @@ git commit -m "feat: add remote skill sync dialog"
 ### Task 5: Settings Skills Context Entry
 
 **Files:**
+
 - Modify: `packages/ui/src/SettingsPage.tsx`
 - Modify: `packages/ui/src/settings/SkillsSection.tsx`
 - Test: `packages/ui/test/skillsSection.test.ts`
@@ -896,14 +895,16 @@ Add `RemoteSkillSyncDialog` state and render it when `isConnectedSshWorkspace`.
 Add a compact context line near the top:
 
 ```tsx
-{isConnectedSshWorkspace ? (
-  <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground-subtle">
-    {intl.formatMessage(
-      { id: "settings.skills.remoteContext" },
-      { target: `${remoteTarget.username}@${remoteTarget.host}`, path: activeWorkspacePath },
-    )}
-  </div>
-) : null}
+{
+  isConnectedSshWorkspace ? (
+    <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground-subtle">
+      {intl.formatMessage(
+        { id: "settings.skills.remoteContext" },
+        { target: `${remoteTarget.username}@${remoteTarget.host}`, path: activeWorkspacePath },
+      )}
+    </div>
+  ) : null;
+}
 ```
 
 Add the sync button in the existing header action group, using an icon from `lucide-react` such as `UploadCloud`.
@@ -954,6 +955,7 @@ git commit -m "feat: add settings entry for remote skill sync"
 ### Task 6: SSH Workspace Header And SSH Dialog Entries
 
 **Files:**
+
 - Modify: `packages/ui/src/WorkspaceHeaderSections.tsx`
 - Modify: `packages/ui/src/RemoteConnectionDialogContent.tsx`
 - Modify: `packages/ui/src/SSHDialog.tsx`
@@ -1005,37 +1007,41 @@ const showRemoteSkillSyncAction = shouldShowRemoteSkillSyncAction({
 Inside `DropdownMenuContent`, before `TaskActionMenuContent`, add:
 
 ```tsx
-{showRemoteSkillSyncAction && remoteTarget ? (
-  <>
-    <DropdownMenuItem onSelect={() => setRemoteSkillSyncOpen(true)}>
-      <UploadCloud className="size-3.5" />
-      {intl.formatMessage({ id: "settings.skills.remoteSync.open" })}
-    </DropdownMenuItem>
-    <DropdownMenuSeparator />
-  </>
-) : null}
+{
+  showRemoteSkillSyncAction && remoteTarget ? (
+    <>
+      <DropdownMenuItem onSelect={() => setRemoteSkillSyncOpen(true)}>
+        <UploadCloud className="size-3.5" />
+        {intl.formatMessage({ id: "settings.skills.remoteSync.open" })}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+    </>
+  ) : null;
+}
 ```
 
 Render dialog after the dropdown:
 
 ```tsx
-{showRemoteSkillSyncAction && remoteTarget ? (
-  <RemoteSkillSyncDialog
-    open={remoteSkillSyncOpen}
-    onOpenChange={setRemoteSkillSyncOpen}
-    localSkillSyncService={baseServices.skillSyncService}
-    remoteSkillSyncService={services.skillSyncService}
-    remoteTarget={remoteTarget}
-    workspacePath={workspaceAbsPath}
-    workspaceIdentity={workspaceIdentity}
-    onSynced={async () => {
-      await services.skillsService.list({
-        workspacePath: workspaceAbsPath,
-        workspaceIdentity,
-      });
-    }}
-  />
-) : null}
+{
+  showRemoteSkillSyncAction && remoteTarget ? (
+    <RemoteSkillSyncDialog
+      open={remoteSkillSyncOpen}
+      onOpenChange={setRemoteSkillSyncOpen}
+      localSkillSyncService={baseServices.skillSyncService}
+      remoteSkillSyncService={services.skillSyncService}
+      remoteTarget={remoteTarget}
+      workspacePath={workspaceAbsPath}
+      workspaceIdentity={workspaceIdentity}
+      onSynced={async () => {
+        await services.skillsService.list({
+          workspacePath: workspaceAbsPath,
+          workspaceIdentity,
+        });
+      }}
+    />
+  ) : null;
+}
 ```
 
 Use `invalidateDeferredDraftSessionForSkillChange` in `onSynced` with reason `"remote-skill-sync"` so the next draft context reload sees the synced skill list.
@@ -1054,12 +1060,7 @@ onSkillsSynced?: () => Promise<void> | void;
 Show a secondary button above the directory browser success state when `remoteTarget?.kind === "ssh"` and both services exist:
 
 ```tsx
-<Button
-  type="button"
-  variant="secondary"
-  size="sm"
-  onClick={() => setRemoteSkillSyncOpen(true)}
->
+<Button type="button" variant="secondary" size="sm" onClick={() => setRemoteSkillSyncOpen(true)}>
   <UploadCloud className="size-3.5" />
   {intl.formatMessage({ id: "settings.skills.remoteSync.open" })}
 </Button>
@@ -1106,6 +1107,7 @@ git commit -m "feat: expose remote skill sync entry points"
 ### Task 7: Final Verification And Cleanup
 
 **Files:**
+
 - Verify all touched files.
 - Update docs only if implementation changes product behavior beyond the design spec.
 

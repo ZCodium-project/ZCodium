@@ -91,10 +91,7 @@ function virtualItem(index: number): VirtualItem {
 describe("workspace file tree helpers", () => {
   it("用物理路径计算 compact folder 后代的目录加载深度", () => {
     expect(
-      getWorkspaceFileTreeDirectoryLoadDepth(
-        "/workspace",
-        "/workspace/docs/api/architecture/chat",
-      ),
+      getWorkspaceFileTreeDirectoryLoadDepth("/workspace", "/workspace/docs/api/architecture/chat"),
     ).toBe(4);
     expect(
       getWorkspaceFileTreeDirectoryLoadDepth(
@@ -190,46 +187,27 @@ describe("workspace file tree helpers", () => {
   });
 
   it("detects HTML files that can open in the built-in browser", () => {
-    expect(
-      isWorkspaceFileTreeHtmlFile(row("/workspace/index.html", "file", 0)),
-    ).toBe(true);
-    expect(
-      isWorkspaceFileTreeHtmlFile(row("/workspace/preview.HTM", "file", 0)),
-    ).toBe(true);
-    expect(
-      isWorkspaceFileTreeHtmlFile(row("/workspace/src", "directory", 0)),
-    ).toBe(false);
-    expect(
-      isWorkspaceFileTreeHtmlFile(row("/workspace/readme.md", "file", 0)),
-    ).toBe(false);
+    expect(isWorkspaceFileTreeHtmlFile(row("/workspace/index.html", "file", 0))).toBe(true);
+    expect(isWorkspaceFileTreeHtmlFile(row("/workspace/preview.HTM", "file", 0))).toBe(true);
+    expect(isWorkspaceFileTreeHtmlFile(row("/workspace/src", "directory", 0))).toBe(false);
+    expect(isWorkspaceFileTreeHtmlFile(row("/workspace/readme.md", "file", 0))).toBe(false);
   });
 
   it("creates file URLs for HTML browser opening", () => {
-    expect(
-      createWorkspaceFileTreeHtmlBrowserUrl(
-        row("/workspace/demo page.html", "file", 0),
-      ),
-    ).toBe("file:///workspace/demo%20page.html");
-    expect(
-      createWorkspaceFileTreeHtmlBrowserUrl(
-        row("C:\\workspace\\index.html", "file", 0),
-      ),
-    ).toBe("file:///C:/workspace/index.html");
-    expect(
-      createWorkspaceFileTreeHtmlBrowserUrl(
-        row("/workspace/index.ts", "file", 0),
-      ),
-    ).toBe(null);
+    expect(createWorkspaceFileTreeHtmlBrowserUrl(row("/workspace/demo page.html", "file", 0))).toBe(
+      "file:///workspace/demo%20page.html",
+    );
+    expect(createWorkspaceFileTreeHtmlBrowserUrl(row("C:\\workspace\\index.html", "file", 0))).toBe(
+      "file:///C:/workspace/index.html",
+    );
+    expect(createWorkspaceFileTreeHtmlBrowserUrl(row("/workspace/index.ts", "file", 0))).toBe(null);
   });
 
   it("flattens only visible expanded rows", () => {
     const childrenByDirectory = new Map<string, WorkspaceFileTreeNode[]>([
       [
         "/workspace",
-        [
-          node("/workspace/src", "directory", 0),
-          node("/workspace/README.md", "file", 0),
-        ],
+        [node("/workspace/src", "directory", 0), node("/workspace/README.md", "file", 0)],
       ],
       ["/workspace/src", [node("/workspace/src/index.ts", "file", 1)]],
     ]);
@@ -254,11 +232,7 @@ describe("workspace file tree helpers", () => {
         loadingDirectoryPaths: new Set(),
         errorByDirectory: new Map(),
       }).map((row) => row.path),
-    ).toEqual([
-      "/workspace/src",
-      "/workspace/src/index.ts",
-      "/workspace/README.md",
-    ]);
+    ).toEqual(["/workspace/src", "/workspace/src/index.ts", "/workspace/README.md"]);
   });
 
   it("刷新文件树会覆盖已加载和已展开的子目录", () => {
@@ -302,14 +276,8 @@ describe("workspace file tree helpers", () => {
     const childrenByDirectory = new Map<string, WorkspaceFileTreeNode[]>([
       ["/workspace", [node("/workspace/src", "directory", 0)]],
       ["/workspace/src", [node("/workspace/src/features", "directory", 1)]],
-      [
-        "/workspace/src/features",
-        [node("/workspace/src/features/auth", "directory", 2)],
-      ],
-      [
-        "/workspace/src/features/auth",
-        [node("/workspace/src/features/auth/index.ts", "file", 3)],
-      ],
+      ["/workspace/src/features", [node("/workspace/src/features/auth", "directory", 2)]],
+      ["/workspace/src/features/auth", [node("/workspace/src/features/auth/index.ts", "file", 3)]],
     ]);
 
     const rows = flattenWorkspaceFileTreeRows({
@@ -327,9 +295,7 @@ describe("workspace file tree helpers", () => {
       flattenEmptyDirectories: true,
     });
 
-    expect(
-      rows.map((row) => ({ path: row.path, name: row.name, depth: row.depth })),
-    ).toEqual([
+    expect(rows.map((row) => ({ path: row.path, name: row.name, depth: row.depth }))).toEqual([
       {
         path: "/workspace/src/features/auth",
         name: "src/features/auth",
@@ -370,11 +336,7 @@ describe("workspace file tree helpers", () => {
         errorByDirectory: new Map(),
         flattenEmptyDirectories: true,
       }).map((row) => row.path),
-    ).toEqual([
-      "/workspace/src",
-      "/workspace/src/features",
-      "/workspace/src/index.ts",
-    ]);
+    ).toEqual(["/workspace/src", "/workspace/src/features", "/workspace/src/index.ts"]);
   });
 
   it("does not flatten through symlink directories", () => {
@@ -385,21 +347,14 @@ describe("workspace file tree helpers", () => {
     const childrenByDirectory = new Map<string, WorkspaceFileTreeNode[]>([
       ["/workspace", [node("/workspace/src", "directory", 0)]],
       ["/workspace/src", [symlinkDirectory]],
-      [
-        "/workspace/src/linked-dir",
-        [node("/workspace/src/linked-dir/index.ts", "file", 2)],
-      ],
+      ["/workspace/src/linked-dir", [node("/workspace/src/linked-dir/index.ts", "file", 2)]],
     ]);
 
     const rows = flattenWorkspaceFileTreeRows({
       rootPath: "/workspace",
       childrenByDirectory,
       expandedPaths: new Set(["/workspace/src"]),
-      loadedDirectoryPaths: new Set([
-        "/workspace",
-        "/workspace/src",
-        "/workspace/src/linked-dir",
-      ]),
+      loadedDirectoryPaths: new Set(["/workspace", "/workspace/src", "/workspace/src/linked-dir"]),
       loadingDirectoryPaths: new Set(),
       errorByDirectory: new Map(),
       flattenEmptyDirectories: true,
@@ -426,96 +381,57 @@ describe("workspace file tree helpers", () => {
   });
 
   it("uses workspace-relative paths for local and Windows separators", () => {
-    expect(
-      getWorkspaceFileRelativePath("/workspace", "/workspace/src/index.ts"),
-    ).toBe("src/index.ts");
-    expect(
-      getWorkspaceFileRelativePath("C:\\repo", "C:\\repo\\src\\index.ts"),
-    ).toBe("src/index.ts");
+    expect(getWorkspaceFileRelativePath("/workspace", "/workspace/src/index.ts")).toBe(
+      "src/index.ts",
+    );
+    expect(getWorkspaceFileRelativePath("C:\\repo", "C:\\repo\\src\\index.ts")).toBe(
+      "src/index.ts",
+    );
   });
 
   it("builds ancestor directories for revealing active side pane files", () => {
     expect(
-      getWorkspaceFileAncestorDirectories(
-        "/workspace",
-        "/workspace/src/app/index.tsx",
-      ),
+      getWorkspaceFileAncestorDirectories("/workspace", "/workspace/src/app/index.tsx"),
     ).toEqual(["/workspace/src", "/workspace/src/app"]);
     expect(
-      getWorkspaceFileAncestorDirectories(
-        "C:\\repo",
-        "C:\\repo\\src\\app\\index.tsx",
-      ),
+      getWorkspaceFileAncestorDirectories("C:\\repo", "C:\\repo\\src\\app\\index.tsx"),
     ).toEqual(["C:\\repo\\src", "C:\\repo\\src\\app"]);
-    expect(
-      getWorkspaceFileAncestorDirectories("/workspace", "/outside/index.ts"),
-    ).toEqual([]);
+    expect(getWorkspaceFileAncestorDirectories("/workspace", "/outside/index.ts")).toEqual([]);
   });
 
   it("resolves directory refresh depth and parents across separators", () => {
-    expect(
-      getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace"),
-    ).toBe(0);
-    expect(
-      getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace/src"),
-    ).toBe(1);
-    expect(
-      getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace/src/app"),
-    ).toBe(2);
-    expect(
-      getWorkspaceFileDirectoryChildDepth("C:\\repo", "C:\\repo\\src\\app"),
-    ).toBe(2);
+    expect(getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace")).toBe(0);
+    expect(getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace/src")).toBe(1);
+    expect(getWorkspaceFileDirectoryChildDepth("/workspace", "/workspace/src/app")).toBe(2);
+    expect(getWorkspaceFileDirectoryChildDepth("C:\\repo", "C:\\repo\\src\\app")).toBe(2);
 
-    expect(
-      getWorkspaceFileParentDirectory("/workspace", "/workspace/src/app"),
-    ).toBe("/workspace/src");
-    expect(
-      getWorkspaceFileParentDirectory("/workspace", "/workspace/src"),
-    ).toBe("/workspace");
-    expect(
-      getWorkspaceFileParentDirectory("/workspace", "/workspace"),
-    ).toBeNull();
-    expect(
-      getWorkspaceFileParentDirectory("C:\\repo", "C:\\repo\\src\\app"),
-    ).toBe("C:\\repo\\src");
+    expect(getWorkspaceFileParentDirectory("/workspace", "/workspace/src/app")).toBe(
+      "/workspace/src",
+    );
+    expect(getWorkspaceFileParentDirectory("/workspace", "/workspace/src")).toBe("/workspace");
+    expect(getWorkspaceFileParentDirectory("/workspace", "/workspace")).toBeNull();
+    expect(getWorkspaceFileParentDirectory("C:\\repo", "C:\\repo\\src\\app")).toBe("C:\\repo\\src");
   });
 
   it("compares paths across Windows and POSIX separators", () => {
-    expect(
-      areWorkspaceFilePathsEqual(
-        "C:\\repo\\src\\app.tsx",
-        "C:/repo/src/app.tsx",
-      ),
-    ).toBe(true);
-    expect(
-      areWorkspaceFilePathsEqual("/repo/src/app.tsx", "/repo/src/other.tsx"),
-    ).toBe(false);
+    expect(areWorkspaceFilePathsEqual("C:\\repo\\src\\app.tsx", "C:/repo/src/app.tsx")).toBe(true);
+    expect(areWorkspaceFilePathsEqual("/repo/src/app.tsx", "/repo/src/other.tsx")).toBe(false);
   });
 
   it("detects paths inside a workspace across separators", () => {
-    expect(
-      isWorkspaceFilePathInside("/workspace", "/workspace/src/index.ts"),
-    ).toBe(true);
-    expect(isWorkspaceFilePathInside("C:\\repo", "C:/repo/src/index.ts")).toBe(
-      true,
-    );
-    expect(
-      isWorkspaceFilePathInside("/workspace", "/workspace-other/index.ts"),
-    ).toBe(false);
+    expect(isWorkspaceFilePathInside("/workspace", "/workspace/src/index.ts")).toBe(true);
+    expect(isWorkspaceFilePathInside("C:\\repo", "C:/repo/src/index.ts")).toBe(true);
+    expect(isWorkspaceFilePathInside("/workspace", "/workspace-other/index.ts")).toBe(false);
   });
 
   it("opens raster images as image previews but keeps svg as file preview", () => {
-    expect(
-      createCodeViewerSourceForWorkspaceFile("/workspace/logo.png"),
-    ).toEqual({
+    expect(createCodeViewerSourceForWorkspaceFile("/workspace/logo.png")).toEqual({
       type: "image",
       title: "logo.png",
       path: "/workspace/logo.png",
       mediaType: "image/png",
     });
-    expect(
-      createCodeViewerSourceForWorkspaceFile("/workspace/logo.svg"),
-    ).toEqual({
+    expect(createCodeViewerSourceForWorkspaceFile("/workspace/logo.svg")).toEqual({
       type: "file",
       title: "logo.svg",
       path: "/workspace/logo.svg",
@@ -525,9 +441,7 @@ describe("workspace file tree helpers", () => {
   it("keeps pdf as file preview and relies on preview pane lazy upgrade", () => {
     // pdf 的类型升级收口在 PreviewPane 的 resolvePreviewPanePdfSource，
     // 文件树保持 file，让所有入口的 tab key 都是 file:{path}，避免同一文件开出两个 tab。
-    expect(
-      createCodeViewerSourceForWorkspaceFile("/workspace/report.pdf"),
-    ).toEqual({
+    expect(createCodeViewerSourceForWorkspaceFile("/workspace/report.pdf")).toEqual({
       type: "file",
       title: "report.pdf",
       path: "/workspace/report.pdf",
@@ -574,27 +488,13 @@ describe("workspace file tree helpers", () => {
       },
     ]);
 
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/index.ts"),
-    ).toBe("modified");
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/new.ts"),
-    ).toBe("untracked");
-    expect(getWorkspaceFileGitStatus(statusByPath, "C:/repo/src/app.tsx")).toBe(
-      "modified",
-    );
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/staged-new.ts"),
-    ).toBe("added");
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/removed.ts"),
-    ).toBe("deleted");
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/moved.ts"),
-    ).toBe("renamed");
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/clean.ts"),
-    ).toBeNull();
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/index.ts")).toBe("modified");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/new.ts")).toBe("untracked");
+    expect(getWorkspaceFileGitStatus(statusByPath, "C:/repo/src/app.tsx")).toBe("modified");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/staged-new.ts")).toBe("added");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/removed.ts")).toBe("deleted");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/moved.ts")).toBe("renamed");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/clean.ts")).toBeNull();
   });
 
   it("keeps the strongest Git status when staged and unstaged entries share a path", () => {
@@ -613,36 +513,18 @@ describe("workspace file tree helpers", () => {
       },
     ]);
 
-    expect(
-      getWorkspaceFileGitStatus(statusByPath, "/workspace/src/index.ts"),
-    ).toBe("added");
+    expect(getWorkspaceFileGitStatus(statusByPath, "/workspace/src/index.ts")).toBe("added");
   });
 
   it("maps Git file tree statuses to dedicated color tokens", () => {
-    expect(getWorkspaceFileGitStatusTextClassName("modified")).toBe(
-      "text-git-modified",
-    );
-    expect(getWorkspaceFileGitStatusTextClassName("added")).toBe(
-      "text-git-added",
-    );
-    expect(getWorkspaceFileGitStatusTextClassName("deleted")).toBe(
-      "text-git-deleted",
-    );
-    expect(getWorkspaceFileGitStatusTextClassName("renamed")).toBe(
-      "text-git-renamed",
-    );
-    expect(getWorkspaceFileGitStatusTextClassName("untracked")).toBe(
-      "text-git-untracked",
-    );
-    expect(getWorkspaceFileGitStatusTextClassName("ignored")).toBe(
-      "text-git-ignored",
-    );
-    expect(getWorkspaceFileGitStatusIndicatorClassName("untracked")).toBe(
-      "text-git-untracked/70",
-    );
-    expect(getWorkspaceFileGitStatusDotClassName()).toBe(
-      "bg-git-descendant/60",
-    );
+    expect(getWorkspaceFileGitStatusTextClassName("modified")).toBe("text-git-modified");
+    expect(getWorkspaceFileGitStatusTextClassName("added")).toBe("text-git-added");
+    expect(getWorkspaceFileGitStatusTextClassName("deleted")).toBe("text-git-deleted");
+    expect(getWorkspaceFileGitStatusTextClassName("renamed")).toBe("text-git-renamed");
+    expect(getWorkspaceFileGitStatusTextClassName("untracked")).toBe("text-git-untracked");
+    expect(getWorkspaceFileGitStatusTextClassName("ignored")).toBe("text-git-ignored");
+    expect(getWorkspaceFileGitStatusIndicatorClassName("untracked")).toBe("text-git-untracked/70");
+    expect(getWorkspaceFileGitStatusDotClassName()).toBe("bg-git-descendant/60");
   });
 
   it("uses the resolved descendant priority for directory text color", () => {
@@ -662,23 +544,14 @@ describe("workspace file tree helpers", () => {
 
   it("treats deleted file tree rows as non-openable virtual files", () => {
     expect(
-      isWorkspaceFileTreeDeletedFile(
-        row("/workspace/src/removed.ts", "file", 1),
-        "deleted",
-      ),
+      isWorkspaceFileTreeDeletedFile(row("/workspace/src/removed.ts", "file", 1), "deleted"),
     ).toBe(true);
     expect(
-      isWorkspaceFileTreeDeletedFile(
-        row("/workspace/src/index.ts", "file", 1),
-        "modified",
-      ),
+      isWorkspaceFileTreeDeletedFile(row("/workspace/src/index.ts", "file", 1), "modified"),
     ).toBe(false);
-    expect(
-      isWorkspaceFileTreeDeletedFile(
-        row("/workspace/src", "directory", 0),
-        "deleted",
-      ),
-    ).toBe(false);
+    expect(isWorkspaceFileTreeDeletedFile(row("/workspace/src", "directory", 0), "deleted")).toBe(
+      false,
+    );
   });
 
   it("aggregates Git statuses for directories", () => {
@@ -709,15 +582,13 @@ describe("workspace file tree helpers", () => {
       },
     ]);
 
-    expect(
-      getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/src"),
-    ).toEqual(["modified", "untracked", "deleted"]);
-    expect(
-      getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/docs"),
-    ).toEqual(["modified"]);
-    expect(
-      getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/empty"),
-    ).toEqual([]);
+    expect(getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/src")).toEqual([
+      "modified",
+      "untracked",
+      "deleted",
+    ]);
+    expect(getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/docs")).toEqual(["modified"]);
+    expect(getWorkspaceDirectoryGitStatuses(statusByPath, "/workspace/empty")).toEqual([]);
   });
 
   it("matches ignored paths across separators without treating them as changed descendants", () => {
@@ -726,15 +597,9 @@ describe("workspace file tree helpers", () => {
       "/workspace/build/output.txt",
     ]);
 
-    expect(
-      isWorkspaceFileGitIgnored(ignoredPathSet, "C:/repo/dist/bundle.js"),
-    ).toBe(true);
-    expect(
-      isWorkspaceFileGitIgnored(ignoredPathSet, "/workspace/build/output.txt"),
-    ).toBe(true);
-    expect(
-      isWorkspaceFileGitIgnored(ignoredPathSet, "/workspace/src/index.ts"),
-    ).toBe(false);
+    expect(isWorkspaceFileGitIgnored(ignoredPathSet, "C:/repo/dist/bundle.js")).toBe(true);
+    expect(isWorkspaceFileGitIgnored(ignoredPathSet, "/workspace/build/output.txt")).toBe(true);
+    expect(isWorkspaceFileGitIgnored(ignoredPathSet, "/workspace/src/index.ts")).toBe(false);
   });
 
   it("adds deleted Git rows under loaded directories", () => {
@@ -753,13 +618,14 @@ describe("workspace file tree helpers", () => {
       statusByPath,
     });
 
-    expect(
-      nextChildrenByDirectory.get("/workspace/src")?.map((child) => child.path),
-    ).toEqual(["/workspace/src/deleted.ts", "/workspace/src/index.ts"]);
+    expect(nextChildrenByDirectory.get("/workspace/src")?.map((child) => child.path)).toEqual([
+      "/workspace/src/deleted.ts",
+      "/workspace/src/index.ts",
+    ]);
     expect(nextChildrenByDirectory.get("/workspace/unloaded")).toBeUndefined();
-    expect(
-      childrenByDirectory.get("/workspace/src")?.map((child) => child.path),
-    ).toEqual(["/workspace/src/index.ts"]);
+    expect(childrenByDirectory.get("/workspace/src")?.map((child) => child.path)).toEqual([
+      "/workspace/src/index.ts",
+    ]);
   });
 
   it("creates flat file tree rows from workspace search entries", () => {
@@ -844,11 +710,7 @@ describe("workspace file tree helpers", () => {
         changedOnly: false,
         statusByPath: new Map(),
       }).map((item) => item.path),
-    ).toEqual([
-      "/workspace/src",
-      "/workspace/src/app",
-      "/workspace/src/app/index.ts",
-    ]);
+    ).toEqual(["/workspace/src", "/workspace/src/app", "/workspace/src/app/index.ts"]);
   });
 
   it("filters file tree rows to changed files and changed descendant directories", () => {
@@ -886,9 +748,7 @@ describe("workspace file tree helpers", () => {
       row("/workspace/src/index.ts", "file", 1),
       row("/workspace/src/view.tsx", "file", 1),
     ];
-    const statusByPath = new Map([
-      ["/workspace/src/view.tsx", "modified" as const],
-    ]);
+    const statusByPath = new Map([["/workspace/src/view.tsx", "modified" as const]]);
 
     expect(
       filterWorkspaceFileTreeRows({

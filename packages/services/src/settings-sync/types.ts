@@ -1,7 +1,4 @@
-import type {
-  SettingsSyncAgent,
-  SettingsSyncCategory,
-} from "@zcode/shared";
+import type { SettingsSyncAgent, SettingsSyncCategory } from "@zcode/shared";
 
 export interface SettingsSyncSourceItem {
   id: string;

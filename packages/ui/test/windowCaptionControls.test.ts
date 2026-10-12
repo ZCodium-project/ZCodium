@@ -11,8 +11,7 @@ describe("windowCaptionControls", () => {
     const style = createWindowsCaptionControlsStyle(181);
 
     expect(style).toEqual({
-      "--windows-caption-controls-right-inset":
-        "136px",
+      "--windows-caption-controls-right-inset": "136px",
       "--windows-caption-control-width": "calc(var(--windows-caption-controls-right-inset) / 3)",
     });
     expect(WINDOWS_CAPTION_CONTROLS_RIGHT_INSET_VAR).toBe(

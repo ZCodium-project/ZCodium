@@ -66,10 +66,10 @@ startup（含 750–1080ms bundle 验签 + Gatekeeper + 健康），而它要发
 
 ### 3.1 凭据铸造与注入（两平台统一）
 
-| 平台 | 传输路径 | pluginAuthority |
-| --- | --- | --- |
-| darwin | `resolveBrokerSocketPath()` 稳定推导（ZCODE_HOME 派生），零 IO | spawn 时铸造（per-bootstrap config-provenance，保留现状） |
-| win32 | Host app 进程铸一次的稳定 pipe 名（含随机段；模块级 singleton；Host 重建复用同名；跨 app 运行必不相同） | 同 darwin |
+| 平台   | 传输路径                                                                                                | pluginAuthority                                           |
+| ------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| darwin | `resolveBrokerSocketPath()` 稳定推导（ZCODE_HOME 派生），零 IO                                          | spawn 时铸造（per-bootstrap config-provenance，保留现状） |
+| win32  | Host app 进程铸一次的稳定 pipe 名（含随机段；模块级 singleton；Host 重建复用同名；跨 app 运行必不相同） | 同 darwin                                                 |
 
 - spawn env 注入 = 纯查表，函数体内不得出现任何 `await` Helper 相关 IO。
 - win32 spawn env 额外注入 **fork recipe**（见 3.3）。
@@ -201,14 +201,14 @@ Agent(SDK)                                    Helper
 
 ## 四、边界与状态 owner
 
-| 状态/事实 | 权威 owner | 说明 |
-| --- | --- | --- |
-| 稳定 pipe 名（win32） | Host 模块级 singleton | app 进程铸一次，Host 重建复用 |
-| 稳定 socket 路径（darwin） | `resolveBrokerSocketPath()` 纯推导 | 零状态 |
-| pluginAuthority | spawn 侧铸造 | config-provenance 语义，Helper 不校验它 |
-| Helper 进程生命周期 | launcher watchdog（认 hostPid）+ idle 计时（darwin standalone） | 无人使用即退出 |
-| Helper 健康 | 按需查询（调用重试、设置页、权限维护） | 无周期探测 |
-| spawn admission marker | 废弃（本规范） | resolver restart 内部的恢复代际仍保留，但不再被 spawn env 消费 |
+| 状态/事实                  | 权威 owner                                                      | 说明                                                           |
+| -------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
+| 稳定 pipe 名（win32）      | Host 模块级 singleton                                           | app 进程铸一次，Host 重建复用                                  |
+| 稳定 socket 路径（darwin） | `resolveBrokerSocketPath()` 纯推导                              | 零状态                                                         |
+| pluginAuthority            | spawn 侧铸造                                                    | config-provenance 语义，Helper 不校验它                        |
+| Helper 进程生命周期        | launcher watchdog（认 hostPid）+ idle 计时（darwin standalone） | 无人使用即退出                                                 |
+| Helper 健康                | 按需查询（调用重试、设置页、权限维护）                          | 无周期探测                                                     |
+| spawn admission marker     | 废弃（本规范）                                                  | resolver restart 内部的恢复代际仍保留，但不再被 spawn env 消费 |
 
 ## 五、实现分阶段
 
@@ -233,17 +233,17 @@ Agent(SDK)                                    Helper
 
 ## 六、验证矩阵
 
-| Case | 平台 | 初始状态 | 事件 | 预期 |
-| --- | --- | --- | --- | --- |
-| MC-1 | darwin | 冷启 app | spawn env 解析 | 无 Helper IO（fake host 断言 start/checkHealth 未被调用），毫秒级 |
-| MC-2 | darwin | 干净机器 | 首次 CUA 调用 | SDK 安装+拉起后调用成功（M7 回归） |
-| MC-3 | darwin | 授权流刚结束（host 在） | spawn | 仍恒注入稳定 socket；不探针、不等 1s |
-| MC-4 | win32 | 冷启 app | spawn env 解析 | 零等待、零 acquire；env 含 pipe 名 + recipe |
-| MC-5 | win32 | 无 Helper | 首次 CUA 调用 | SDK fork → warmup 窗内连上 → 调用成功 |
-| MC-6 | win32 | Helper 被 kill | 下一次 CUA 调用 | 失败 retryable → ensure 再 fork（同名 pipe）→ 恢复 |
-| MC-7 | win32 | 双 Agent 并发首调 | 同时 ensure | pipe 单实例；第二 fork 失败无害；连同一 Helper |
-| MC-8 | 两平台 | Helper 已重启/换代 | spawn env 与既有 Agent 凭据 | 传输路径恒定（同 socket/pipe），Helper 换代不换发凭据；darwin authority 按 spawn 铸造、各 agent 可不同，属既有语义 |
-| MC-9 | win32 | 未开对话 | 直接进设置页 | probe → Host fork → 权限真值；失败则 idle:true 降级 |
+| Case | 平台   | 初始状态                | 事件                        | 预期                                                                                                               |
+| ---- | ------ | ----------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| MC-1 | darwin | 冷启 app                | spawn env 解析              | 无 Helper IO（fake host 断言 start/checkHealth 未被调用），毫秒级                                                  |
+| MC-2 | darwin | 干净机器                | 首次 CUA 调用               | SDK 安装+拉起后调用成功（M7 回归）                                                                                 |
+| MC-3 | darwin | 授权流刚结束（host 在） | spawn                       | 仍恒注入稳定 socket；不探针、不等 1s                                                                               |
+| MC-4 | win32  | 冷启 app                | spawn env 解析              | 零等待、零 acquire；env 含 pipe 名 + recipe                                                                        |
+| MC-5 | win32  | 无 Helper               | 首次 CUA 调用               | SDK fork → warmup 窗内连上 → 调用成功                                                                              |
+| MC-6 | win32  | Helper 被 kill          | 下一次 CUA 调用             | 失败 retryable → ensure 再 fork（同名 pipe）→ 恢复                                                                 |
+| MC-7 | win32  | 双 Agent 并发首调       | 同时 ensure                 | pipe 单实例；第二 fork 失败无害；连同一 Helper                                                                     |
+| MC-8 | 两平台 | Helper 已重启/换代      | spawn env 与既有 Agent 凭据 | 传输路径恒定（同 socket/pipe），Helper 换代不换发凭据；darwin authority 按 spawn 铸造、各 agent 可不同，属既有语义 |
+| MC-9 | win32  | 未开对话                | 直接进设置页                | probe → Host fork → 权限真值；失败则 idle:true 降级                                                                |
 
 回归红线（沿隔离规范 §7，继续有效）：
 

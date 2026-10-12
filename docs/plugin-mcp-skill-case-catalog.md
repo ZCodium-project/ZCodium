@@ -15,30 +15,30 @@
 
 ## 枚举边界
 
-| 维度              | 等价类                                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------------------- |
-| 安装状态          | `not-installed`、`installed-enabled`、`installed-disabled`                                       |
-| 触发面            | `installed_plugins.json` 存在/缺失、`config.json#plugins.enabledPlugins[id]` 真/假/缺           |
-| MCP server 启动   | `lazy`（仅在 listTools 时 spawn）；`eager`（plugin 启用即 spawn）                               |
-| 对话层 tool 暴露  | `tools[]` 数组里包含 namespaced 工具名 / 不包含                                                  |
-| 软证据            | chat 出现 `chat-tool-call-block-<toolName>` block / 不出现                                       |
-| fixture 复用      | `fixtures/upstream/plugin-mcp-skill/conversation-session-plugin-mcp-skill-{baselines,installed-enabled}.json` |
+| 维度             | 等价类                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| 安装状态         | `not-installed`、`installed-enabled`、`installed-disabled`                                                    |
+| 触发面           | `installed_plugins.json` 存在/缺失、`config.json#plugins.enabledPlugins[id]` 真/假/缺                         |
+| MCP server 启动  | `lazy`（仅在 listTools 时 spawn）；`eager`（plugin 启用即 spawn）                                             |
+| 对话层 tool 暴露 | `tools[]` 数组里包含 namespaced 工具名 / 不包含                                                               |
+| 软证据           | chat 出现 `chat-tool-call-block-<toolName>` block / 不出现                                                    |
+| fixture 复用     | `fixtures/upstream/plugin-mcp-skill/conversation-session-plugin-mcp-skill-{baselines,installed-enabled}.json` |
 
 ## Review 状态
 
-| 状态          | 含义                                  |
-| ------------- | ------------------------------------- |
-| accepted      | 产品预期明确，可以生成测试            |
-| undefined     | 产品预期未定义，待补                  |
-| bug-candidate | 当前实现与 case 冲突，未必是协议问题  |
+| 状态          | 含义                                 |
+| ------------- | ------------------------------------ |
+| accepted      | 产品预期明确，可以生成测试           |
+| undefined     | 产品预期未定义，待补                 |
+| bug-candidate | 当前实现与 case 冲突，未必是协议问题 |
 
 ## Case 列表
 
-| ID  | 前置状态                                | 用户/系统事件                     | 规则命中                                                       | 期望结果                                                                                              | Review   |
-| --- | --------------------------------------- | --------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------- |
-| P01 | `installed_plugins.json` 不含本插件     | 用户在 chat 里发普通文本          | `not-installed` baseline                                        | 请求 `tools[]` 不含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 无对应 tool-call block                  | accepted |
-| P02 | `installed_plugins.json` 含本插件，`enabledPlugins[id] = true` | 用户发"调工具"prompt | `installed-enabled` 强证据 | 请求 `tools[]` 含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 出现该工具的 tool-call block                | accepted |
-| P03 | `installed_plugins.json` 含本插件，`enabledPlugins[id] = false` | 用户发普通文本     | `installed-disabled`                                            | 请求 `tools[]` 不含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 无对应 tool-call block                    | accepted |
+| ID  | 前置状态                                                        | 用户/系统事件            | 规则命中                   | 期望结果                                                                                          | Review   |
+| --- | --------------------------------------------------------------- | ------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| P01 | `installed_plugins.json` 不含本插件                             | 用户在 chat 里发普通文本 | `not-installed` baseline   | 请求 `tools[]` 不含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 无对应 tool-call block     | accepted |
+| P02 | `installed_plugins.json` 含本插件，`enabledPlugins[id] = true`  | 用户发"调工具"prompt     | `installed-enabled` 强证据 | 请求 `tools[]` 含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 出现该工具的 tool-call block | accepted |
+| P03 | `installed_plugins.json` 含本插件，`enabledPlugins[id] = false` | 用户发普通文本           | `installed-disabled`       | 请求 `tools[]` 不含 `mcp__plugin_e2e-plugin-mcp-ping_ping__ping`；chat 无对应 tool-call block     | accepted |
 
 ## v1 验证记录
 

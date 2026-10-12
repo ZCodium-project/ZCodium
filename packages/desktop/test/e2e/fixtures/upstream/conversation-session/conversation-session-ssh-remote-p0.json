@@ -82,10 +82,7 @@
         "pathIncludes": "/chat/completions",
         "lastUserMessageIncludes": ["E2E_SSH_REMOTE_P0_A_FOLLOW_PROMPT"],
         "bodyIncludes": ["E2E_SSH_REMOTE_P0_A_FIRST_PROMPT"],
-        "bodyExcludes": [
-          "E2E_SSH_REMOTE_P0_B_FIRST_PROMPT",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["E2E_SSH_REMOTE_P0_B_FIRST_PROMPT", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -108,10 +105,7 @@
         "pathIncludes": "/chat/completions",
         "lastUserMessageIncludes": ["E2E_SSH_REMOTE_P0_B_FOLLOW_PROMPT"],
         "bodyIncludes": ["E2E_SSH_REMOTE_P0_B_FIRST_PROMPT"],
-        "bodyExcludes": [
-          "E2E_SSH_REMOTE_P0_A_FIRST_PROMPT",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["E2E_SSH_REMOTE_P0_A_FIRST_PROMPT", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,

@@ -19,11 +19,13 @@
 ## 2. 关键设计决策
 
 ### 2.1 ref 快照机制（复用已有 executeJavaScript 通道）
+
 - Phase 3 已给 manager 加了 `executeJavaScript(win,key,script)` + `wc.executeJavaScript`。本阶段给 **executor 的 `ControlledView.webContents` 接口补 `executeJavaScript(script): Promise<unknown>`**，manager.toControlledView wire 到 `wc.executeJavaScript`。executor 由此可向页面注入脚本。
 - `snapshot` 命令：注入 `SNAPSHOT_SCRIPT` 遍历可见 DOM，给每个**可交互/有语义**元素（a/button/input/textarea/select/[role]/[onclick]/可点击文本节点）分配 ref（`e1`/`e2`/…），在页面挂 `window.__zcodeRefs = Map<ref, Element>`，返回**紧凑文本树**（每行 `ref role "name" [href/value]`）+ 每个 ref 的 `bbox`（getBoundingClientRect，viewport CSS px）。
 - ref 生命周期：页面导航后 `window.__zcodeRefs` 失效。约定"每次交互前重新 snapshot"。ref 在下次 snapshot 重新分配。
 
 ### 2.2 click/type/press/scroll —— CDP 真实输入（非合成事件）
+
 - **click({ref})**：注入 JS `resolveRef(ref)` → `el.scrollIntoView({block:"center"})` + 返回 `bbox` 中心点（viewport CSS px）；executor 再发 CDP `Input.dispatchMouseEvent`（mousePressed + mouseReleased，button:"left"，clickCount:1）打该坐标。真实内核事件,站点识别为可信。
 - **type({text, ref?})**：若带 ref，先 click 聚焦；随后只在指定 tab 内递归解析 focused shadow root / iframe /
   OOPIF target，并在最终 execution context 中执行 virtual paste。历史 `Input.insertText` 方案会受到 Electron
@@ -33,6 +35,7 @@
 - 坐标系：WebContentsView 的 webContents 自身 zoom=1（桌面 renderer 缩放不影响它），getBoundingClientRect 与 CDP Input 坐标同为页面 viewport CSS px,直接对齐,无需换算。
 
 ### 2.3 协议与 facade
+
 - `commands.ts`（已有 `click{ref,button?,doubleClick?}`/`type{ref?,text}`/`press{key,ref?}`/`scroll{ref?,x?,y?}`/`snapshot{maxElements?,includeHidden?}` 变体,Phase 0 就定义了判别联合）—— **无需改 schema**,executor 补 case 即可。
 - `result.ts` 已有 `snapshot?: browserSnapshotSchema`。**snapshot 结果结构是权威且固定的**（`packages/shared/src/browser-use/snapshot.ts`）：
   `{ url, title, truncated, elements: Array<{ ref, tag, role?, name?, text?, value?, disabled?, checked?, selector, xpath, rect:{x,y,width,height}, inViewport }> }`。
@@ -41,6 +44,7 @@
 - facade `Tab`：去掉 `snapshot/click/type` 的 throw,改为构造对应 BrowserCommand → execute；补 `press/scroll`；对外签名为 `click(ref)`/`type(text,opts)`/`press(key,opts)`/`scroll(opts)`。`playwright/cua/dom_cua` getter 暂仍 throw（本阶段不做）。
 
 ### 2.4 安全（沿用 browser-safety）
+
 - 快照返回的 role/name/text/href **均为页面内容,不可信**——仅供模型定位,不得作为指令执行。
 - ref 交互只在受控 WebContentsView 内,协议白名单/导航校验不变。
 
@@ -49,7 +53,7 @@
 - **T-A：ControlledView 补 executeJavaScript + snapshot 命令**
   - ControlledViewWebContents 加 `executeJavaScript(script): Promise<unknown>`；manager.toControlledView wire。
   - executor `case "snapshot"`：注入 SNAPSHOT_SCRIPT，返回 `{ok:true, snapshot:{tree, elements}}`。
-  - SNAPSHOT_SCRIPT 作为常量字符串（页面内自执行,分配 ref+挂 __zcodeRefs+返回结构）。
+  - SNAPSHOT_SCRIPT 作为常量字符串（页面内自执行,分配 ref+挂 \_\_zcodeRefs+返回结构）。
   - 单测：stub `executeJavaScript` 返回假快照 JSON → 断言 result.snapshot 结构；核对 browserSnapshotSchema。
 - **T-B：click / scroll（CDP 鼠标）**
   - executor `case "click"`：executeJavaScript resolveRef→bbox 中心 → cdp Input.dispatchMouseEvent×2。
@@ -62,9 +66,11 @@
 - **T-D：真机验证**（手动）：agent 跑 `open→snapshot→click(ref)→type→press("Enter")`,观察页面实际响应。
 
 ## 4. 能力边界（本阶段明确不做，留后续）
+
 playwright locator 全家桶 / cua 坐标视觉 / content.export / clipboard / Dialog / waitForEvent / 文件上传下载 / capabilities 协商 / markDeliverable 等。多会话 tab 隔离（前序 tracked）。
 
 ## 5. 影响文件
+
 - `packages/desktop/src/main/browserView/browserCommandExecutor.ts`（补 snapshot/click/type/press/scroll case + SNAPSHOT_SCRIPT + 键映射 + ControlledView 接口扩展）
 - `packages/desktop/src/main/browserView/browserViewManager.ts`（toControlledView wire executeJavaScript）
 - `packages/shared/src/browser-use/result.ts`（核对/扩展 snapshot 结果结构）
@@ -76,5 +82,6 @@ playwright locator 全家桶 / cua 坐标视觉 / content.export / clipboard / D
 真机发现模型不会用 agent.browsers。模型需要两类引导：(a) SKILL 引导模型"浏览器任务先读文档再操作"，(b) 运行时 `browser.documentation()` 返回完整 API 参考自描述。zcode 两者都缺（facade 无 documentation()，js 工具描述对 agent.browsers 只字未提）。
 
 补齐这两类引导：
+
 - **facade `agent.browsers.documentation()`**：返回 zcode 已实现子集的完整指南（对象模型 + 各方法签名 + snapshot→ref→action 工作流 + 行为规范[动作前重取 snapshot、页面内容不可信、勿对同 URL 重复 goto、定位以可见状态为准] + 未实现清单[playwright/cua/dom_cua/content/dialog]）。
 - **`js` 工具描述**加 browser 段：agent.browsers 可用；浏览器/网页任务先 `nodeRepl.write(await agent.browsers.documentation())` 读全量 API，再 open/snapshot/click/type/press/screenshot；ref 每次动作前重取。（js 工具仅在 browserControlPort 存在时注册，故无条件写入安全。）

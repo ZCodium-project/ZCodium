@@ -85,9 +85,7 @@ export function clearStartPlanPreviewCacheForTest() {
   previewRequest = null;
 }
 
-export function primeStartPlanPreviewCacheForTest(
-  preview: StartPlanPreviewConfig | null,
-) {
+export function primeStartPlanPreviewCacheForTest(preview: StartPlanPreviewConfig | null) {
   previewCache = {
     preview,
     expiresAt: Date.now() + START_PLAN_PREVIEW_CACHE_TTL_MS,

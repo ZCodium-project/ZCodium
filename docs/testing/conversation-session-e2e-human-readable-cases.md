@@ -166,8 +166,8 @@
 | 模型切换 ACK 已 accepted、目标 projection 尚未到达 → 立即新建草稿                       | 新草稿先继承目标模型且 thought 置空，不能继承源模型 thought；权威 projection 到达后再整体补实际 thought                 | 来源：I54；已计划                      |
 | GLM-5.2/high 与 GLM-5-Turbo/enabled 之间切换                                            | model、thought current 和可选 thought 列表原子切换；不能把源模型档位套到目标模型                                        | 来源：I39、I42；I39 已覆盖，I42 已计划 |
 | 只有旧版分离 model/thought 偏好，或打开了另一个历史 session                             | 只迁移能组成合法模型配置的元组；孤立 thought 被忽略；浏览历史 session 不改写最后一次显式选择                            | 来源：I43、I44；已计划                 |
-| Workspace A 的未发送草稿切到 yolo/edit → 打开本地或 SSH Workspace B 新草稿              | B 使用自己的 Root Draft 和默认 mode，不继承 A；返回 A 后仍恢复 A 的选择                                                  | 来源：I45、I46；已计划                 |
-| Root Draft 已设置 mode → 打开历史 session 并切换其 mode → 返回 Root Composer            | Session 与 Root scope 分别保存自己的 mode，互不覆盖                                                                      | 来源：I47；已计划                      |
+| Workspace A 的未发送草稿切到 yolo/edit → 打开本地或 SSH Workspace B 新草稿              | B 使用自己的 Root Draft 和默认 mode，不继承 A；返回 A 后仍恢复 A 的选择                                                 | 来源：I45、I46；已计划                 |
+| Root Draft 已设置 mode → 打开历史 session 并切换其 mode → 返回 Root Composer            | Session 与 Root scope 分别保存自己的 mode，互不覆盖                                                                     | 来源：I47；已计划                      |
 | 草稿 mode localStorage 缺失、非法或不可读 → 进入新草稿                                  | 确定性回落 build，不继承旧 workspace/project mode，且不阻断输入框                                                       | 来源：I48；已计划                      |
 | 草稿 mode 已选 edit → 迟到 workspace config/broadcast 返回其它 mode → 首发              | toolbar、预热 session 和首发都保持 edit，不被迟到配置覆盖                                                               | 来源：I49；已计划                      |
 | V4 切换 custom provider 返回 `provider.notInRegistry`                                   | 强制重推 provider registry，并用相同目标配置只重试一次；第二次失败不得无限循环                                          | 来源：I40；待补                        |

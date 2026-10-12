@@ -22,23 +22,23 @@
                 ModelFactory 精确校验
 ```
 
-| 状态 | 唯一 owner | 本轮明确不做 |
-| --- | --- | --- |
-| 原持久选择 | Session、任务或 profile 原存储 | 不在查询/刷新时写空；不新建 Bot 绑定选型 |
-| 账号 current/权益/动态模型 | Host Account Source 的同一份结果 | 不将 current 写入 Provider 配置；不扩大到普通 Provider/闲时 |
-| Worker 可执行集合 | Worker 已应用 Registry | 不把 Source 已收到当成已应用 |
-| 本次模型 | admission 固定 Selection / Active Model | Factory 不 remap，不因后台更新替换固定请求 |
-| 手机连接与恢复 | 既有 shared-host attachment / replayable | 不另起手机 Host/Agent，不改变桌面 continuous |
+| 状态                       | 唯一 owner                               | 本轮明确不做                                                |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| 原持久选择                 | Session、任务或 profile 原存储           | 不在查询/刷新时写空；不新建 Bot 绑定选型                    |
+| 账号 current/权益/动态模型 | Host Account Source 的同一份结果         | 不将 current 写入 Provider 配置；不扩大到普通 Provider/闲时 |
+| Worker 可执行集合          | Worker 已应用 Registry                   | 不把 Source 已收到当成已应用                                |
+| 本次模型                   | admission 固定 Selection / Active Model  | Factory 不 remap，不因后台更新替换固定请求                  |
+| 手机连接与恢复             | 既有 shared-host attachment / replayable | 不另起手机 Host/Agent，不改变桌面 continuous                |
 
 ## 2. 五项修复逐项复审
 
-| 项目 | 实现与证据 | 未夸大部分 |
-| --- | --- | --- |
-| P100-01 完整 states | shared 严格 schema、Host 序列化、Worker parse/source 全程携带；普通托管账号 entitled=true 缺 current 拒收。真实 Built-in 测试个人→Team→个人的 Registry 集合与 Facade 结果 | 单机进程内往返不等于真实 SSH 部署升级验证 |
-| P100-02 收到/应用 | 改为 receivedRevision；失败不记录收到成功。同值 replace=false 仍 refresh。协议 Server 调生产交付方法验证 Source B/Registry A，再配套配置 B 应用 | 沿用 ensure/队列，没有重建生命周期或新增 latest barrier |
-| P100-03 显式 child | Node Facade 构造器由 Host/Worker 共用；通过 DI 传至 Core、Workflow、Script。override 优先；显式失败不能继承；隐式保留父 Active Model | 普通 child 和 Script child 的现行配置禁用再次创建 Subagent，不能为测试虚构可用的无限嵌套功能 |
-| P100-04 Bot | 绑定后 read Session 完整原选择→同一 View→send 传有效选择；无效不派发、不改原意图。`/model` 和 reasoning 立即保存同一 Session，完整 setter 先校验后保存 | synthetic Bot harness 不是飞书/真实 Worker 请求的替代证据 |
-| P100-05 附件 | task adapter、Agent 参数、严格协议及 Core intent 均携带 Selection/modelExecution；执行凭据只进非持久依赖。legacy 后台等待真实 completion 再释放本轮归属/controller | 不把 legacy send 构造成新的 V4 replay/ACK 通路 |
+| 项目                | 实现与证据                                                                                                                                                                | 未夸大部分                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| P100-01 完整 states | shared 严格 schema、Host 序列化、Worker parse/source 全程携带；普通托管账号 entitled=true 缺 current 拒收。真实 Built-in 测试个人→Team→个人的 Registry 集合与 Facade 结果 | 单机进程内往返不等于真实 SSH 部署升级验证                                                    |
+| P100-02 收到/应用   | 改为 receivedRevision；失败不记录收到成功。同值 replace=false 仍 refresh。协议 Server 调生产交付方法验证 Source B/Registry A，再配套配置 B 应用                           | 沿用 ensure/队列，没有重建生命周期或新增 latest barrier                                      |
+| P100-03 显式 child  | Node Facade 构造器由 Host/Worker 共用；通过 DI 传至 Core、Workflow、Script。override 优先；显式失败不能继承；隐式保留父 Active Model                                      | 普通 child 和 Script child 的现行配置禁用再次创建 Subagent，不能为测试虚构可用的无限嵌套功能 |
+| P100-04 Bot         | 绑定后 read Session 完整原选择→同一 View→send 传有效选择；无效不派发、不改原意图。`/model` 和 reasoning 立即保存同一 Session，完整 setter 先校验后保存                    | synthetic Bot harness 不是飞书/真实 Worker 请求的替代证据                                    |
+| P100-05 附件        | task adapter、Agent 参数、严格协议及 Core intent 均携带 Selection/modelExecution；执行凭据只进非持久依赖。legacy 后台等待真实 completion 再释放本轮归属/controller        | 不把 legacy send 构造成新的 V4 replay/ACK 通路                                               |
 
 实际创建链新增证据：`workflow-effective-selection.test.ts` 运行真实 Workflow child，由其 Agent 工具启动显式 Subagent，断言最终模型执行使用新 Provider、父 Session 和 profile 未改。
 
@@ -46,20 +46,20 @@
 
 ## 3. 消费入口逐项结论
 
-| 入口 | 核查结果 / 决策 |
-| --- | --- |
-| Composer | `useModelSelectionView` 订阅目标服务；携带原意图的消费者在事件后重读，不直接接受无调用者意图的广播结果；generation/requestId 丢弃旧回包。读取失败保留 ready View。既有测试通过；本轮未改 React |
-| 定时任务 | `automationModelSelection.ts` 在新提交边界 getView(selection)，有 issue/缺档位失败，返回 effectiveSelection；未指定选择才用 preferred。固定 run 不重新解析。既有测试通过 |
-| Wiki | `RepoWikiModelClient.readConfig(resolveIntent)` 明确区分新生成和固定后补页。前者携带选择取得有效值，后者保持已固定配置；workspaceIdentity 传递至目标读取。相关既有测试通过 |
-| 显式/隐式 Subagent | 显式走 Worker 本地公共端口；隐式、内部 override、执行范围不 remap。实际 Agent 工具测试及恢复 child 再输入测试均有请求断言 |
-| Workflow | 真实 Workflow 子 Runtime 的显式 profile 已验证；父 Workflow 本身继承原 Session 执行约定，不为它自动另选模型 |
-| Script | `agent(..., opts.model)` 是现行显式程序调用参数，精确 provider-qualified 选择；无参数继承父选择。Script child 禁止再启动 Subagent，但 DI 仍传递。未借本轮更改这项程序接口语义 |
-| 标题 / Goal 标题 | sidecar 使用显式 title 配置或 Session 选择，精确创建后应用已有辅助低成本选项；并非任意 UI 草稿消费。无新增 UI 独立选模入口，本轮不改其合同，不声称它已自动跟随账号 |
-| Compact | 运行中优先复用输入 Active Model；缺省独立路径按 Session 精确创建。不能把压缩内部每次请求当新用户意图；本轮保持，不在 Factory 偷换 |
-| Memory | Extraction 捕获产生工作的 Model；Dream 缺省从 Session 精确创建。`captureProjectMemoryAgentContext` 固定模型和上下文；本轮不重新定义 Dream 调度合同 |
-| Off-Peak | Ticket/selectionScope/requestAuth 与输入一起固定；附件补齐执行依赖，原 Ticket 不跨账号迁移；内部 override 不因 profile 失败而被阻断 |
-| Bot busy/Guide/queue | 本轮解析只加在空闲新输入分支。既有 busy 分支保持 CommandInbox/已接纳输入语义，没有出队 remap 或第二份 accepted queue |
-| 手机/SSH | 新读取使用 task target 的 workspaceIdentity；Session setter/附件协议复用原服务，不改 attachment、owner/lease 或 deliveryKind。实际部署/多端同 Session 仍需单独产品证据 |
+| 入口                 | 核查结果 / 决策                                                                                                                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Composer             | `useModelSelectionView` 订阅目标服务；携带原意图的消费者在事件后重读，不直接接受无调用者意图的广播结果；generation/requestId 丢弃旧回包。读取失败保留 ready View。既有测试通过；本轮未改 React |
+| 定时任务             | `automationModelSelection.ts` 在新提交边界 getView(selection)，有 issue/缺档位失败，返回 effectiveSelection；未指定选择才用 preferred。固定 run 不重新解析。既有测试通过                       |
+| Wiki                 | `RepoWikiModelClient.readConfig(resolveIntent)` 明确区分新生成和固定后补页。前者携带选择取得有效值，后者保持已固定配置；workspaceIdentity 传递至目标读取。相关既有测试通过                     |
+| 显式/隐式 Subagent   | 显式走 Worker 本地公共端口；隐式、内部 override、执行范围不 remap。实际 Agent 工具测试及恢复 child 再输入测试均有请求断言                                                                      |
+| Workflow             | 真实 Workflow 子 Runtime 的显式 profile 已验证；父 Workflow 本身继承原 Session 执行约定，不为它自动另选模型                                                                                    |
+| Script               | `agent(..., opts.model)` 是现行显式程序调用参数，精确 provider-qualified 选择；无参数继承父选择。Script child 禁止再启动 Subagent，但 DI 仍传递。未借本轮更改这项程序接口语义                  |
+| 标题 / Goal 标题     | sidecar 使用显式 title 配置或 Session 选择，精确创建后应用已有辅助低成本选项；并非任意 UI 草稿消费。无新增 UI 独立选模入口，本轮不改其合同，不声称它已自动跟随账号                             |
+| Compact              | 运行中优先复用输入 Active Model；缺省独立路径按 Session 精确创建。不能把压缩内部每次请求当新用户意图；本轮保持，不在 Factory 偷换                                                              |
+| Memory               | Extraction 捕获产生工作的 Model；Dream 缺省从 Session 精确创建。`captureProjectMemoryAgentContext` 固定模型和上下文；本轮不重新定义 Dream 调度合同                                             |
+| Off-Peak             | Ticket/selectionScope/requestAuth 与输入一起固定；附件补齐执行依赖，原 Ticket 不跨账号迁移；内部 override 不因 profile 失败而被阻断                                                            |
+| Bot busy/Guide/queue | 本轮解析只加在空闲新输入分支。既有 busy 分支保持 CommandInbox/已接纳输入语义，没有出队 remap 或第二份 accepted queue                                                                           |
+| 手机/SSH             | 新读取使用 task target 的 workspaceIdentity；Session setter/附件协议复用原服务，不改 attachment、owner/lease 或 deliveryKind。实际部署/多端同 Session 仍需单独产品证据                         |
 
 这里的“保持”不表示所有历史辅助功能都已实现未来多账号产品；只表示不与 Todo99 已裁决的新意图/冻结执行边界混淆。Todo101 不在本轮范围。
 
@@ -106,11 +106,11 @@ Codegraph 当前不可用；按实际符号/调用链审查，不声称全仓索
 
 测试目录 `/Users/dev/zcode-todo99-e2e.1lO3PN`，Node 24.14.0、Electron/Chrome 146；使用当前 worktree 源码的隔离副本，不改 Pro 日常数据或 Git checkout，不操作钥匙串。代码基线如页首，加本次待提交 Todo99 变更。构建缺 `.git` 时显示 unknown，因此不能以构建内嵌版本代替这里记录的来源。
 
-| 用例 / run | 结果与实际证据 |
-| --- | --- |
-| `conversation-session-model-provider-effective-selection`，`desktop-e2e-20260909104713317-p13081-192c13543a9c637f` | 2/2 通过：未发送原选择保留、Team/high 实际请求、旧定时选择实际派发 |
-| `conversation-session-worker-effective-selection`，`desktop-e2e-20260909111544019-p19700-8c54b26069ee4be6` | 3/3 通过：W99-E01、E02/E03/E06、E04，详见下述证据分层 |
-| `bots/manual-review/pending/bot-effective-selection`，`desktop-e2e-20260909112059410-p20639-1fd964b954aa4d72` | 5/5 通过：绑定后可用/不可用、主动设置最高档、首次派发/菜单保留原意图；此组仍是 synthetic task harness |
+| 用例 / run                                                                                                         | 结果与实际证据                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `conversation-session-model-provider-effective-selection`，`desktop-e2e-20260909104713317-p13081-192c13543a9c637f` | 2/2 通过：未发送原选择保留、Team/high 实际请求、旧定时选择实际派发                                    |
+| `conversation-session-worker-effective-selection`，`desktop-e2e-20260909111544019-p19700-8c54b26069ee4be6`         | 3/3 通过：W99-E01、E02/E03/E06、E04，详见下述证据分层                                                 |
+| `bots/manual-review/pending/bot-effective-selection`，`desktop-e2e-20260909112059410-p20639-1fd964b954aa4d72`      | 5/5 通过：绑定后可用/不可用、主动设置最高档、首次派发/菜单保留原意图；此组仍是 synthetic task harness |
 
 每个 run 的 `summary.json`、`summary.md`、`test-results.ndjson` 位于上述测试目录的 `packages/desktop/.e2e-artifacts/<run>/`；模型请求证据另在 `network-capture/coding-plan-data-plane.json` 与 `upstream-provider.json`。大体积 WDIO 日志不入 Git。
 

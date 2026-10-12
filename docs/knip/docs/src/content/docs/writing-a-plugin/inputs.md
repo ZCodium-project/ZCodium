@@ -75,7 +75,7 @@ respectively.
 Example:
 
 ```ts
-toConfig('typescript', './path/to/tsconfig.json');
+toConfig("typescript", "./path/to/tsconfig.json");
 ```
 
 For instance, the Angular plugin uses this to tell Knip about its `tsConfig`
@@ -117,7 +117,7 @@ The GitHub Action plugin understands `working-directory` and adds this `dir` to
 the input:
 
 ```ts
-toDependency('esbuild', { dir: 'packages/app' });
+toDependency("esbuild", { dir: "packages/app" });
 ```
 
 Knip now understands `esbuild` is a dependency of the workspace in the
@@ -146,7 +146,7 @@ typically used with the [toProductionEntry][2] input type.
 Example:
 
 ```ts
-toProductionEntry('./entry.ts', { allowIncludeExports: true });
+toProductionEntry("./entry.ts", { allowIncludeExports: true });
 ```
 
 [1]: #toentry

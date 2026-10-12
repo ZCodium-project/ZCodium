@@ -76,16 +76,16 @@ Desktop→远端环境 provisioning 与 Host→Worker Account 同步是不同边
 
 ## 3. 已有正确机制：应保留，不重写
 
-| 机制 | 调查结果 | 证据入口（基线） |
-| --- | --- | --- |
-| Registry 完整应用 | 并发读取 config/account，检查刷新 generation；Account 所基于的 Built-in 不匹配时保留上一份完整快照 | `packages/provider/src/registry-service.ts:180` |
-| Facade 同快照解析 | 候选 Registry 和 Account states 来自一次 `getSnapshot()`；不是分别向两项服务取最新值再拼起来 | `packages/provider/src/facades.ts:483` |
-| Account revision | 标识已经包含 Built-in 来源、Overlay 和 states；仅 current 改变也会变更，不必再造 revision 系统 | `packages/provider/src/sources.ts:60` |
-| Account 刷新 | 合并 pending reasons、串行运行；失败保留上次结果；失败期间新事件会继续处理；初次失败仅账号 fail-closed | `packages/provider/src/account-provider-service.ts:95` |
-| 账号作用域隔离 | Resolver 按身份/连接作用域选择可复用的旧结果，不因一次查询失败直接把另一账号的可用事实继承过来 | `packages/services/src/model-provider/accountProviderConnectionResolver.ts:76` |
-| UI 异步隔离 | 公共 Hook 处理 owner、输入变化、请求代次、旧回包；有输入时收到通用 change 通知会重新带原选择取 View | `packages/ui/src/hooks/useModelSelectionView.ts` |
-| Composer 原意图 | 草稿保存原意图，显示/提交派生有效选择；读取失败不把原意图清库；accepted 写回有独立边界 | `packages/ui/src/v4/composer/useDraftConfigControl.ts:173` |
-| 最终创建 Model | 精确校验已经给定的 Provider/Model/档位，再创建冻结配置的 Model；不回退套餐首模型 | `apps/zcode-cli/packages/bootstrap/src/app/provider-registry-model-runtime.ts:43` |
+| 机制              | 调查结果                                                                                               | 证据入口（基线）                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Registry 完整应用 | 并发读取 config/account，检查刷新 generation；Account 所基于的 Built-in 不匹配时保留上一份完整快照     | `packages/provider/src/registry-service.ts:180`                                   |
+| Facade 同快照解析 | 候选 Registry 和 Account states 来自一次 `getSnapshot()`；不是分别向两项服务取最新值再拼起来           | `packages/provider/src/facades.ts:483`                                            |
+| Account revision  | 标识已经包含 Built-in 来源、Overlay 和 states；仅 current 改变也会变更，不必再造 revision 系统         | `packages/provider/src/sources.ts:60`                                             |
+| Account 刷新      | 合并 pending reasons、串行运行；失败保留上次结果；失败期间新事件会继续处理；初次失败仅账号 fail-closed | `packages/provider/src/account-provider-service.ts:95`                            |
+| 账号作用域隔离    | Resolver 按身份/连接作用域选择可复用的旧结果，不因一次查询失败直接把另一账号的可用事实继承过来         | `packages/services/src/model-provider/accountProviderConnectionResolver.ts:76`    |
+| UI 异步隔离       | 公共 Hook 处理 owner、输入变化、请求代次、旧回包；有输入时收到通用 change 通知会重新带原选择取 View    | `packages/ui/src/hooks/useModelSelectionView.ts`                                  |
+| Composer 原意图   | 草稿保存原意图，显示/提交派生有效选择；读取失败不把原意图清库；accepted 写回有独立边界                 | `packages/ui/src/v4/composer/useDraftConfigControl.ts:173`                        |
+| 最终创建 Model    | 精确校验已经给定的 Provider/Model/档位，再创建冻结配置的 Model；不回退套餐首模型                       | `apps/zcode-cli/packages/bootstrap/src/app/provider-registry-model-runtime.ts:43` |
 
 因此，所谓“统一解决中间态”不是全仓加锁，也不是删除现有正确机制。应明确：Account 发布完整结果，Registry 发布完整应用结果，所有需要组合事实的消费者读后者；异步来源的生产还需要针对性保证作用域一致。
 
@@ -172,27 +172,27 @@ Worker 正在使用 A
 
 ## 5. 逐入口消费审查表
 
-| 入口 | 基线实际行为 | 调查结论 / 后续归属 |
-| --- | --- | --- |
-| Composer 新建与已有会话草稿 | Hook 带原选择读目标服务；派生 draftConfig；accepted 才提交有效选择的成功写回 | 已接公共算法；保留 scope/request 防竞态，不持续回灌 Session snapshot |
-| 普通 Core Turn | admission 前冻结传入 intent 或 Session 选择；随后精确创建 Model | 应保持执行层不偷偷 remap；要求上游新意图入口传完整结果 |
-| 定时任务首次派发 | `automationModelSelection.ts` 有原选择时 getView(input)，派发返回结果 | 正确；不能只验证编辑器，需保持后台这条链 |
-| 定时任务已固定 run / 重试 | fixedSelection 分支直接返回；调用方用 run 选择 | 正确例外；不要重新对应账号 |
-| Bot 草稿展示/首次创建 | 展示返回副本有效值；创建解析并提交有效值 | 已接；P100-04 是另一个已有任务分支 |
-| Bot 已有任务新消息 | 沿 Session 选择继续 | P100-04；区分空闲新轮与已接纳运行输入 |
-| 任务适配器附件分支 | 未转发选择/执行上下文 | P100-05；有附件与无附件必须达到相同选择契约 |
-| Wiki 新生成 | `resolveGenerationConfig` 带原选择读目标 View，校验 issue，固定生成配置 | 已接公共解析；`repoWikiModelClient.ts:95` |
-| Wiki 固定生成重试 | `resolveConfig` 不再重新解释账号选择 | 正确例外，不能把 retry 改成 getView 后换套餐 |
-| 显式 Subagent | 原 profile 选择直接进工厂 | P100-03；实际执行入口、内置 JSON 覆盖与用户 Markdown 解析结果统一对待 |
-| 隐式 Subagent | 继承父 Active Model，有冻结模型工厂 | 正确例外；不能因后台 current 更新让子任务换模型 |
-| Workflow / script child | 独立 child runtime 装配，依赖需要贯穿 | 接公共能力时必须覆盖该装配，不另写匹配表 |
-| 标题 / Goal 标题 | `title-generation-sidecar.ts:103` 取 title 配置或 Session Selection，再精确建 Model | 不是 UI 消费；独立显式配置是潜在漏接点。已查 Host 当前创建通常只开关标题，没有普通 UI 独立选模入口；不夸大为已确认用户故障 |
-| Compact | 有输入 Model 时继承；没有时精确创建 Session Model | 保留运行中继承；手动独立 Compact 的新意图与冻结执行应在入口区分，不把内部每个 model step 都重解析 |
-| Memory Extraction / Dream | `project-memory-agent.ts:34` 优先输入 Model，否则从 Session 创建 | Extraction 继承正确；Dream 缺省路径需在后续入口规格明确新工作还是继承工作，不强制统一为最新账号 |
-| 连接测试 | 测试明确的设置 Provider / Model，在 Worker 查实际模型 | 不应通过普通账号 remap 测成另一套餐。同步正确性适用，公共“当前套餐对应”不无条件适用 |
-| Off-Peak | 创建时取 Ticket；派发校验，使用 Ticket 请求上下文 | 维持原绑定、原 domain 和执行专用 scope；不并入普通账号自动 remap；P100-05 不能丢执行上下文 |
-| 手机远控 | 共用目标 Host 服务/任务命令，UI 共用公共 Hook | 不需新增手机 Account 计算；必须保持 replayable 恢复、workspaceIdentity 和 attachment 边界 |
-| 独立终端 CLI | 同一 Provider 核心，简化 Account 来源，不完整 Team/Start 装配 | 用户已排除，记录差异即可 |
+| 入口                        | 基线实际行为                                                                        | 调查结论 / 后续归属                                                                                                        |
+| --------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Composer 新建与已有会话草稿 | Hook 带原选择读目标服务；派生 draftConfig；accepted 才提交有效选择的成功写回        | 已接公共算法；保留 scope/request 防竞态，不持续回灌 Session snapshot                                                       |
+| 普通 Core Turn              | admission 前冻结传入 intent 或 Session 选择；随后精确创建 Model                     | 应保持执行层不偷偷 remap；要求上游新意图入口传完整结果                                                                     |
+| 定时任务首次派发            | `automationModelSelection.ts` 有原选择时 getView(input)，派发返回结果               | 正确；不能只验证编辑器，需保持后台这条链                                                                                   |
+| 定时任务已固定 run / 重试   | fixedSelection 分支直接返回；调用方用 run 选择                                      | 正确例外；不要重新对应账号                                                                                                 |
+| Bot 草稿展示/首次创建       | 展示返回副本有效值；创建解析并提交有效值                                            | 已接；P100-04 是另一个已有任务分支                                                                                         |
+| Bot 已有任务新消息          | 沿 Session 选择继续                                                                 | P100-04；区分空闲新轮与已接纳运行输入                                                                                      |
+| 任务适配器附件分支          | 未转发选择/执行上下文                                                               | P100-05；有附件与无附件必须达到相同选择契约                                                                                |
+| Wiki 新生成                 | `resolveGenerationConfig` 带原选择读目标 View，校验 issue，固定生成配置             | 已接公共解析；`repoWikiModelClient.ts:95`                                                                                  |
+| Wiki 固定生成重试           | `resolveConfig` 不再重新解释账号选择                                                | 正确例外，不能把 retry 改成 getView 后换套餐                                                                               |
+| 显式 Subagent               | 原 profile 选择直接进工厂                                                           | P100-03；实际执行入口、内置 JSON 覆盖与用户 Markdown 解析结果统一对待                                                      |
+| 隐式 Subagent               | 继承父 Active Model，有冻结模型工厂                                                 | 正确例外；不能因后台 current 更新让子任务换模型                                                                            |
+| Workflow / script child     | 独立 child runtime 装配，依赖需要贯穿                                               | 接公共能力时必须覆盖该装配，不另写匹配表                                                                                   |
+| 标题 / Goal 标题            | `title-generation-sidecar.ts:103` 取 title 配置或 Session Selection，再精确建 Model | 不是 UI 消费；独立显式配置是潜在漏接点。已查 Host 当前创建通常只开关标题，没有普通 UI 独立选模入口；不夸大为已确认用户故障 |
+| Compact                     | 有输入 Model 时继承；没有时精确创建 Session Model                                   | 保留运行中继承；手动独立 Compact 的新意图与冻结执行应在入口区分，不把内部每个 model step 都重解析                          |
+| Memory Extraction / Dream   | `project-memory-agent.ts:34` 优先输入 Model，否则从 Session 创建                    | Extraction 继承正确；Dream 缺省路径需在后续入口规格明确新工作还是继承工作，不强制统一为最新账号                            |
+| 连接测试                    | 测试明确的设置 Provider / Model，在 Worker 查实际模型                               | 不应通过普通账号 remap 测成另一套餐。同步正确性适用，公共“当前套餐对应”不无条件适用                                        |
+| Off-Peak                    | 创建时取 Ticket；派发校验，使用 Ticket 请求上下文                                   | 维持原绑定、原 domain 和执行专用 scope；不并入普通账号自动 remap；P100-05 不能丢执行上下文                                 |
+| 手机远控                    | 共用目标 Host 服务/任务命令，UI 共用公共 Hook                                       | 不需新增手机 Account 计算；必须保持 replayable 恢复、workspaceIdentity 和 attachment 边界                                  |
+| 独立终端 CLI                | 同一 Provider 核心，简化 Account 来源，不完整 Team/Start 装配                       | 用户已排除，记录差异即可                                                                                                   |
 
 ### 请求期鉴权不是第二个模型选择器
 
@@ -204,17 +204,17 @@ Worker 正在使用 A
 
 ### 时机、频率与生命周期
 
-| 项目 | 当前事实 | 判断 |
-| --- | --- | --- |
-| 上游失效触发 | Family/connection/endpoint 设置变化、配置源变化；登录登出/购买等业务显式 refresh | 事件驱动；Account read 通常读取缓存，不等于每次查询远端 |
-| 热推 | Account change 后遍历 `activeClientsByWorkspaceKey` | 普通 Worker 在此；不是全进程广播 |
-| 按需检查 | 创建/恢复会话、部分读取/订阅、generateText、连接测试及启动就绪等 | 已共用一个 sync helper，不是每处各写一套网络同步；但策略入口分散 |
-| 普通 V4 发送 | 同步检查在 createSession 分支，而非每次普通 sendText 强制追平 Desktop→SSH | 保留已裁决的无全局发送屏障 |
-| 去重 | 每个 Client WeakMap 保存确认 revision；同值跳过 | 数据完整/ACK 正确后可继续用；revision 是内容身份，不是可比较新旧的数字 |
-| 串行化 | 每 Client Promise 队列，失败不毒化下一个任务 | 已存在，不需要再叠队列；snapshot 在入队前读取，不能仅靠 revision 字符串宣称具备乱序丢弃功能 |
-| Worker 重建 | 确认缓存以 Client 对象为 key，新对象不会继承旧确认；WeakMap 不形成永久强引用 | 不应额外制造按 workspace 永久确认表 |
-| Wiki Worker | 独立 process manager；已 wire Host handlers；不在普通 active map 热推名单，generateText 前检查 | 不是“完全未同步”。允许旧完整快照；若未来其内部自主发起新工作，需要明确初始化/刷新范围 |
-| Plugin / MCP 专用 Worker | 专用 manager，主要做插件/MCP 管理 | 不因“统一”强迫纯读取能力等待账号就绪 |
+| 项目                     | 当前事实                                                                                       | 判断                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 上游失效触发             | Family/connection/endpoint 设置变化、配置源变化；登录登出/购买等业务显式 refresh               | 事件驱动；Account read 通常读取缓存，不等于每次查询远端                                     |
+| 热推                     | Account change 后遍历 `activeClientsByWorkspaceKey`                                            | 普通 Worker 在此；不是全进程广播                                                            |
+| 按需检查                 | 创建/恢复会话、部分读取/订阅、generateText、连接测试及启动就绪等                               | 已共用一个 sync helper，不是每处各写一套网络同步；但策略入口分散                            |
+| 普通 V4 发送             | 同步检查在 createSession 分支，而非每次普通 sendText 强制追平 Desktop→SSH                      | 保留已裁决的无全局发送屏障                                                                  |
+| 去重                     | 每个 Client WeakMap 保存确认 revision；同值跳过                                                | 数据完整/ACK 正确后可继续用；revision 是内容身份，不是可比较新旧的数字                      |
+| 串行化                   | 每 Client Promise 队列，失败不毒化下一个任务                                                   | 已存在，不需要再叠队列；snapshot 在入队前读取，不能仅靠 revision 字符串宣称具备乱序丢弃功能 |
+| Worker 重建              | 确认缓存以 Client 对象为 key，新对象不会继承旧确认；WeakMap 不形成永久强引用                   | 不应额外制造按 workspace 永久确认表                                                         |
+| Wiki Worker              | 独立 process manager；已 wire Host handlers；不在普通 active map 热推名单，generateText 前检查 | 不是“完全未同步”。允许旧完整快照；若未来其内部自主发起新工作，需要明确初始化/刷新范围       |
+| Plugin / MCP 专用 Worker | 专用 manager，主要做插件/MCP 管理                                                              | 不因“统一”强迫纯读取能力等待账号就绪                                                        |
 
 最低收口建议：保留现有同步 helper/队列，在模型执行 Worker 的初始化/使用契约中明确所需事实；修 P100-01/P100-02。不追求本轮消灭所有 ensure 调用，更不把账号检查加到每个无关 RPC。以后删除传输层，不应修改有效选择算法或各业务保存语义。
 

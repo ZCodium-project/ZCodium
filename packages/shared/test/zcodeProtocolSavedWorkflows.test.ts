@@ -215,7 +215,13 @@ describe("zcode-protocol saved workflows", () => {
           updatedAt: 2,
           spentTokens: 0,
           artifacts: [
-            { id: "report", kind: "file", title: "审计报告", version: 2, contentType: "application/pdf" },
+            {
+              id: "report",
+              kind: "file",
+              title: "审计报告",
+              version: 2,
+              contentType: "application/pdf",
+            },
             // 预置看板没有 contentType；title 也可缺（facade 的默认标题就是 id）。
             { id: "perf", kind: "chart", version: 1 },
           ],
@@ -230,7 +236,9 @@ describe("zcode-protocol saved workflows", () => {
     expect(withArtifacts.runs[1]).not.toHaveProperty("artifacts");
 
     const row = (artifacts: unknown) => ({
-      runs: [{ runId: "r1", status: "completed", createdAt: 1, updatedAt: 2, spentTokens: 0, artifacts }],
+      runs: [
+        { runId: "r1", status: "completed", createdAt: 1, updatedAt: 2, spentTokens: 0, artifacts },
+      ],
     });
     // 上界 8：chips 一行画得下的数量，与通知载荷同值。
     const nine = Array.from({ length: 9 }, (_, index) => ({
@@ -239,14 +247,20 @@ describe("zcode-protocol saved workflows", () => {
       version: 1,
     }));
     expect(() => zcodeWorkflowsRunsResultSchema.parse(row(nine))).toThrow();
-    expect(zcodeWorkflowsRunsResultSchema.parse(row(nine.slice(0, 8))).runs[0]?.artifacts).toHaveLength(8);
+    expect(
+      zcodeWorkflowsRunsResultSchema.parse(row(nine.slice(0, 8))).runs[0]?.artifacts,
+    ).toHaveLength(8);
     // 未知 kind 与未知键都拒（元素 strict）：GUI 按 kind 画图标，没有兜底图标可用。
-    expect(() => zcodeWorkflowsRunsResultSchema.parse(row([{ id: "a", kind: "video", version: 1 }]))).toThrow();
+    expect(() =>
+      zcodeWorkflowsRunsResultSchema.parse(row([{ id: "a", kind: "video", version: 1 }])),
+    ).toThrow();
     expect(() =>
       zcodeWorkflowsRunsResultSchema.parse(row([{ id: "a", kind: "file", version: 1, bytes: 12 }])),
     ).toThrow();
     // id 非空、version 必填。
-    expect(() => zcodeWorkflowsRunsResultSchema.parse(row([{ id: "", kind: "file", version: 1 }]))).toThrow();
+    expect(() =>
+      zcodeWorkflowsRunsResultSchema.parse(row([{ id: "", kind: "file", version: 1 }])),
+    ).toThrow();
     expect(() => zcodeWorkflowsRunsResultSchema.parse(row([{ id: "a", kind: "file" }]))).toThrow();
   });
 

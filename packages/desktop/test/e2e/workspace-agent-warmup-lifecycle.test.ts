@@ -1,9 +1,5 @@
 import { dirname } from "node:path";
-import {
-  DEFAULT_WORKSPACE,
-  clearAppData,
-  waitForWorkspaceApp,
-} from "./helpers/desktop-app.js";
+import { DEFAULT_WORKSPACE, clearAppData, waitForWorkspaceApp } from "./helpers/desktop-app.js";
 import {
   PASSIVE_AGENT_STARTUP_SCENARIO,
   getPassiveAgentStartupWorkspacePaths,
@@ -36,12 +32,9 @@ describe("workspace Agent 预热生命周期", () => {
       dirname(DEFAULT_WORKSPACE),
       PASSIVE_AGENT_STARTUP_SCENARIO.workspaceCount,
     );
-    const activeWorkspacePath = workspacePaths[
-      PASSIVE_AGENT_STARTUP_SCENARIO.activeWorkspaceIndex
-    ];
-    const explicitWorkspacePath = workspacePaths[
-      PASSIVE_AGENT_STARTUP_SCENARIO.explicitWorkspaceIndex
-    ];
+    const activeWorkspacePath = workspacePaths[PASSIVE_AGENT_STARTUP_SCENARIO.activeWorkspaceIndex];
+    const explicitWorkspacePath =
+      workspacePaths[PASSIVE_AGENT_STARTUP_SCENARIO.explicitWorkspaceIndex];
     if (!activeWorkspacePath || !explicitWorkspacePath) {
       throw new Error("启动 fixture 缺少 active 或显式打开 workspace");
     }
@@ -79,10 +72,7 @@ describe("workspace Agent 预热生命周期", () => {
     await switchToElectronRendererTarget(isMainRendererUrl);
     await openWorkspaceDraftFromSidebar(explicitWorkspacePath);
 
-    const expectedAfterExplicitOpen = [
-      ...startupWarmupWorkspacePaths,
-      explicitWorkspacePath,
-    ];
+    const expectedAfterExplicitOpen = [...startupWarmupWorkspacePaths, explicitWorkspacePath];
     await switchToElectronRendererTarget(isResourceManagerUrl);
     await assertStableAgentSelection(workspacePaths, expectedAfterExplicitOpen);
 

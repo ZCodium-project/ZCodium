@@ -34,9 +34,8 @@ function buildDesktopOAuthLoginRedirectUri(origin: string): string {
 
 const PRODUCTION_DESKTOP_OAUTH_LOGIN_REDIRECT_URI =
   buildDesktopOAuthLoginRedirectUri("https://zcode.z.ai/");
-const TEST_DESKTOP_OAUTH_LOGIN_REDIRECT_URI = buildDesktopOAuthLoginRedirectUri(
-  "https://zcode.z.ai/",
-);
+const TEST_DESKTOP_OAUTH_LOGIN_REDIRECT_URI =
+  buildDesktopOAuthLoginRedirectUri("https://zcode.z.ai/");
 
 // Windows 机器上设置了 ZAI_TEST_OAUTH_ORIGIN 等环境变量，会覆盖测试预期的 test 端点值
 // 过滤掉这些可能污染测试的环境变量
@@ -1009,9 +1008,7 @@ describe("oauthService", () => {
     const { authorizeUrl } = await service.startOAuth(ZAI_PROVIDER_ID);
     const parsed = new URL(authorizeUrl);
 
-    expect(parsed.origin + parsed.pathname).toBe(
-      "https://chat.z.ai/api/oauth/authorize",
-    );
+    expect(parsed.origin + parsed.pathname).toBe("https://chat.z.ai/api/oauth/authorize");
     expect(parsed.searchParams.get("redirect_uri")).toBe(TEST_DESKTOP_OAUTH_LOGIN_REDIRECT_URI);
     expect(parsed.searchParams.get("client_id")).toBe("client_P8X5CMWmlaRO9gyO-KSqtg");
   });
@@ -1150,9 +1147,7 @@ describe("oauthService", () => {
     const { authorizeUrl } = await service.startOAuth(ZAI_PROVIDER_ID);
     const parsed = new URL(authorizeUrl);
 
-    expect(parsed.origin + parsed.pathname).toBe(
-      "https://chat.z.ai/api/oauth/authorize",
-    );
+    expect(parsed.origin + parsed.pathname).toBe("https://chat.z.ai/api/oauth/authorize");
     expect(parsed.searchParams.get("client_id")).toBe("client_P8X5CMWmlaRO9gyO-KSqtg");
   });
 
@@ -2121,7 +2116,8 @@ describe("oauthService", () => {
             accessToken,
             zcodeJwtToken,
           }),
-          normalizeError: (error: unknown) => (error instanceof Error ? error : new Error(String(error))),
+          normalizeError: (error: unknown) =>
+            error instanceof Error ? error : new Error(String(error)),
         },
       ],
       now: () => 2_000_000_000_000,
@@ -2162,7 +2158,8 @@ describe("oauthService", () => {
             state: new URL(url).searchParams.get("state") ?? "",
           }),
           exchangeToken: async () => exchange,
-          normalizeError: (error: unknown) => (error instanceof Error ? error : new Error(String(error))),
+          normalizeError: (error: unknown) =>
+            error instanceof Error ? error : new Error(String(error)),
         },
       ],
     });

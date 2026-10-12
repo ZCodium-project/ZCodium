@@ -2,12 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getPresentationElementSelectedText } from "@/presentation/presentationTextSelection.js";
 
-function domRect(
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-): DOMRect {
+function domRect(left: number, top: number, width: number, height: number): DOMRect {
   return {
     x: left,
     y: top,
@@ -50,9 +45,7 @@ describe("getPresentationElementSelectedText", () => {
     installRangeRects();
     const surface = document.createElement("div");
     document.body.append(surface);
-    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(
-      domRect(0, 0, 1_000, 500),
-    );
+    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(domRect(0, 0, 1_000, 500));
     const before = appendText(surface, "Before element", 40);
     appendText(surface, "Current selected words", 340);
     appendText(surface, "Overlapping foreign text", 400);
@@ -79,9 +72,7 @@ describe("getPresentationElementSelectedText", () => {
     installRangeRects();
     const surface = document.createElement("div");
     document.body.append(surface);
-    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(
-      domRect(0, 0, 1_000, 500),
-    );
+    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(domRect(0, 0, 1_000, 500));
     const current = appendText(surface, "Current selected words", 340);
     const after = appendText(surface, "After element", 760);
     const selection = window.getSelection();
@@ -106,9 +97,7 @@ describe("getPresentationElementSelectedText", () => {
     installRangeRects();
     const surface = document.createElement("div");
     document.body.append(surface);
-    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(
-      domRect(0, 0, 1_000, 500),
-    );
+    vi.spyOn(surface, "getBoundingClientRect").mockReturnValue(domRect(0, 0, 1_000, 500));
     const outside = appendText(surface, "Outside", 40);
     const selection = window.getSelection();
     const range = document.createRange();

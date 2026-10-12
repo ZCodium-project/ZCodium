@@ -3,9 +3,7 @@ export interface WebRemoteControlFeatureGate {
   assertEnabled(): void;
 }
 
-export function createWebRemoteControlFeatureGate(
-  enabled = true,
-): WebRemoteControlFeatureGate {
+export function createWebRemoteControlFeatureGate(enabled = true): WebRemoteControlFeatureGate {
   return {
     isEnabled: () => enabled,
     assertEnabled: () => {

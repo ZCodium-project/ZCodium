@@ -10,10 +10,7 @@ import type { TaskChatMessage } from "@/lib/taskChatMessageTypes.js";
 import { readRawToolCallFileSummaries } from "@/ToolCallBlocks/fileSummaries.js";
 
 interface TaskChangeSummaryIntl {
-  formatMessage: (
-    desc: { id: string },
-    values?: Record<string, string>,
-  ) => string;
+  formatMessage: (desc: { id: string }, values?: Record<string, string>) => string;
 }
 
 interface AggregatedFileChange {
@@ -63,13 +60,8 @@ export function formatTaskTitleWithChanges(
   return `${title} (${formatTaskChangeStats(summary, intl)})`;
 }
 
-export function toWorkspaceRelativePath(
-  workspacePath: string,
-  filePath: string,
-): string {
-  const normalizedWorkspacePath = trimTrailingSeparators(
-    workspacePath.replace(/\\/g, "/"),
-  );
+export function toWorkspaceRelativePath(workspacePath: string, filePath: string): string {
+  const normalizedWorkspacePath = trimTrailingSeparators(workspacePath.replace(/\\/g, "/"));
   const normalizedFilePath = filePath.replace(/\\/g, "/");
 
   if (normalizedFilePath === normalizedWorkspacePath) {
@@ -103,9 +95,7 @@ export function formatTaskChangedFileLabel(
     statParts.push(`-${file.removed}`);
   }
 
-  return statParts.length > 0
-    ? `${relativePath} ${statParts.join(" ")}`
-    : relativePath;
+  return statParts.length > 0 ? `${relativePath} ${statParts.join(" ")}` : relativePath;
 }
 
 export function buildPerTurnFileChangeMap(
@@ -164,10 +154,7 @@ export function buildTaskChangeSummary(
   let removed = 0;
   const files: ZCodeTaskChangedFileSummary[] = Array.from(changedFileMap.values())
     .map((file) => {
-      const fileStat = computeLineChangeStat(
-        file.originalContent,
-        file.finalContent,
-      );
+      const fileStat = computeLineChangeStat(file.originalContent, file.finalContent);
       added += fileStat.added;
       removed += fileStat.removed;
       return {
@@ -300,9 +287,7 @@ export function buildTaskChangeSummaryFromToolCalls(
   for (let messageIndex = 0; messageIndex < messages.length; messageIndex++) {
     const message = messages[messageIndex]!;
     const turnIndex =
-      message.role === "assistant"
-        ? (message.turnIndex ?? messageIndex)
-        : messageIndex;
+      message.role === "assistant" ? (message.turnIndex ?? messageIndex) : messageIndex;
     const summary = buildToolCallChangeSummary(message, turnIndex).summary;
     if (!summary) {
       continue;
@@ -385,10 +370,7 @@ export function buildTurnChangeSummary(
   let removed = 0;
   const files: ZCodeTaskChangedFileSummary[] = Array.from(filesByPath.entries())
     .map(([path, snapshot]) => {
-      const fileStat = computeLineChangeStat(
-        snapshot.beforeContent,
-        snapshot.afterContent,
-      );
+      const fileStat = computeLineChangeStat(snapshot.beforeContent, snapshot.afterContent);
       added += fileStat.added;
       removed += fileStat.removed;
       return {

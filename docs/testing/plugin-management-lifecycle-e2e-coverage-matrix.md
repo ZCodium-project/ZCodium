@@ -5,46 +5,46 @@
 
 ## Coverage status
 
-| Case                                      | Spec abbreviation | UI automation | Runtime/storage evidence                                          | Human review | Formal spec | Linux Docker | macOS CI | Windows CI |
-| ----------------------------------------- | ----------------- | ------------- | ----------------------------------------------------------------- | ------------ | ----------- | ------------ | -------- | ---------- |
-| `PLM-LC-001` discovery/navigation         | `PD`              | targeted pass | UI state + screenshot captured                                    | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-002` presentation                 | `PP`              | targeted pass | DOM/a11y/overflow + screenshot captured                           | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-003` personal main lifecycle      | `PM`              | targeted pass | overview/list/storage + update badge/inline entry + v2 Skill/MCP provider evidence pass | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-004` persistence/local visibility | `PV`              | targeted pass | restart/config/enabled/workspace B evidence pass                  | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-005` orphan/reassociate           | `PO`              | targeted pass | source/config/enabled + all update entries (menu/detail/badge/inline) absent + fresh-session Skill evidence pass | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-006` builtin suppress/restore     | `PB`              | targeted pass | suppression/config/data + Catalog/cache preservation + restart evidence pending | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-007` local official CDN           | `PC`              | targeted pass | loopback HTTP ZIP/cache/overview evidence pass                    | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-007b` real CDN smoke              | `PCS`             | not run       | not captured                                                      | pending      | never       | never        | never    | never      |
-| `PLM-LC-008` recoverable failures         | `PF`              | targeted pass | source/refresh/describe/install/update preservation evidence pass | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-009` inline smoke                 | `PI`              | targeted pass | UI/list + fresh-session Skill invocation evidence pass            | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-010` secret env/agent projection  | `PEA`             | targeted pass | MCP resolved marker + no-secret capture + one canonical agent row + Electron `capturePage()` video | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-011` no-Git GitHub Archive        | `PGA`             | targeted pass | real Claude Marketplace/plugin HTTP + missing-Git diagnostic; run `desktop-e2e-20260806033745155-p99439-e61ceea7b4c68fcf` | pending      | never       | never        | never    | never      |
-| `PLM-LC-012` isolated refresh/atomic cache | `PRA`             | not run       | partial refresh + persisted failure + rollback evidence pending    | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-014` builtin uninstall/detail parity | `PBD`           | not run       | describe/components + suppression/runtime absence + cache/manifest unchanged pending | pending | blocked | blocked | blocked | blocked |
-| `PLM-LC-015` bundled install ownership   | `PBO`              | not run       | bundled restore vs CDN Marketplace ownership evidence pending     | pending      | blocked     | blocked      | blocked  | blocked    |
-| `PLM-LC-016` seed/cache/runtime separation | `PBS`            | not run       | filesystem/SEA seed, suppressed discovery, describe and self-heal evidence pending | pending | blocked | blocked | blocked | blocked |
-| `PLM-LC-017` installed row menu layout   | `PML`             | targeted pass | workspace-override row menu single-line text + screenshot         | pending      | blocked     | blocked      | blocked  | blocked    |
+| Case                                         | Spec abbreviation | UI automation | Runtime/storage evidence                                                                                                  | Human review | Formal spec | Linux Docker | macOS CI | Windows CI |
+| -------------------------------------------- | ----------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------ | ----------- | ------------ | -------- | ---------- |
+| `PLM-LC-001` discovery/navigation            | `PD`              | targeted pass | UI state + screenshot captured                                                                                            | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-002` presentation                    | `PP`              | targeted pass | DOM/a11y/overflow + screenshot captured                                                                                   | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-003` personal main lifecycle         | `PM`              | targeted pass | overview/list/storage + update badge/inline entry + v2 Skill/MCP provider evidence pass                                   | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-004` persistence/local visibility    | `PV`              | targeted pass | restart/config/enabled/workspace B evidence pass                                                                          | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-005` orphan/reassociate              | `PO`              | targeted pass | source/config/enabled + all update entries (menu/detail/badge/inline) absent + fresh-session Skill evidence pass          | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-006` builtin suppress/restore        | `PB`              | targeted pass | suppression/config/data + Catalog/cache preservation + restart evidence pending                                           | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-007` local official CDN              | `PC`              | targeted pass | loopback HTTP ZIP/cache/overview evidence pass                                                                            | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-007b` real CDN smoke                 | `PCS`             | not run       | not captured                                                                                                              | pending      | never       | never        | never    | never      |
+| `PLM-LC-008` recoverable failures            | `PF`              | targeted pass | source/refresh/describe/install/update preservation evidence pass                                                         | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-009` inline smoke                    | `PI`              | targeted pass | UI/list + fresh-session Skill invocation evidence pass                                                                    | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-010` secret env/agent projection     | `PEA`             | targeted pass | MCP resolved marker + no-secret capture + one canonical agent row + Electron `capturePage()` video                        | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-011` no-Git GitHub Archive           | `PGA`             | targeted pass | real Claude Marketplace/plugin HTTP + missing-Git diagnostic; run `desktop-e2e-20260806033745155-p99439-e61ceea7b4c68fcf` | pending      | never       | never        | never    | never      |
+| `PLM-LC-012` isolated refresh/atomic cache   | `PRA`             | not run       | partial refresh + persisted failure + rollback evidence pending                                                           | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-014` builtin uninstall/detail parity | `PBD`             | not run       | describe/components + suppression/runtime absence + cache/manifest unchanged pending                                      | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-015` bundled install ownership       | `PBO`             | not run       | bundled restore vs CDN Marketplace ownership evidence pending                                                             | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-016` seed/cache/runtime separation   | `PBS`             | not run       | filesystem/SEA seed, suppressed discovery, describe and self-heal evidence pending                                        | pending      | blocked     | blocked      | blocked  | blocked    |
+| `PLM-LC-017` installed row menu layout       | `PML`             | targeted pass | workspace-override row menu single-line text + screenshot                                                                 | pending      | blocked     | blocked      | blocked  | blocked    |
 
 ## Candidate spec paths
 
 Todo103 新增/迁接候选：PLM-LC-018/019 对应 `plugins/manual-review/pending/plugin-store-auto-refresh-{throttled,on-enter}.test.ts`；Pro `desktop-e2e-20260909-152018-653` 两例通过。PLM-LC-020 对应 `plugins/manual-review/pending/plugin-subagent-override-cold.test.ts`，Pro `desktop-e2e-20260909-152419-828` 冷启动 child/父 continuation 请求验证通过，case-local fixture check 通过。三项均未人工晋级；019 保持公网 smoke、不进入正式 CI。
 
-| Abbreviation | Pending spec                                                                     |
-| ------------ | -------------------------------------------------------------------------------- |
-| `PD` / `PP`  | `plugins/manual-review/pending/plugin-management-discovery-presentation.test.ts` |
-| `PM`         | `plugins/manual-review/pending/plugin-management-personal-lifecycle.test.ts`     |
-| `PV` / `PO`  | `plugins/manual-review/pending/plugin-management-persistence-source.test.ts`     |
-| `PB` / `PI`  | `plugins/manual-review/pending/plugin-management-builtin-inline.test.ts`         |
-| `PC`         | `plugins/manual-review/pending/plugin-cdn-zip-marketplace-install.test.ts`       |
-| `PCS`        | `plugins/manual-review/pending/plugin-cdn-zip-official-cdn-smoke.test.ts`        |
-| `PF`         | `plugins/manual-review/pending/plugin-management-recoverable-failures.test.ts`   |
-| `PEA`        | `plugins/manual-review/pending/plugin-runtime-env-agent-projection.test.ts`      |
-| `PGA`        | `plugins/manual-review/pending/plugin-no-git-github-archive.test.ts`             |
-| `PRA`        | `plugins/manual-review/pending/plugin-refresh-atomic-cache.test.ts`              |
-| `PBD`        | `plugins/manual-review/pending/plugin-management-builtin-detail-parity.test.ts`  |
+| Abbreviation | Pending spec                                                                        |
+| ------------ | ----------------------------------------------------------------------------------- |
+| `PD` / `PP`  | `plugins/manual-review/pending/plugin-management-discovery-presentation.test.ts`    |
+| `PM`         | `plugins/manual-review/pending/plugin-management-personal-lifecycle.test.ts`        |
+| `PV` / `PO`  | `plugins/manual-review/pending/plugin-management-persistence-source.test.ts`        |
+| `PB` / `PI`  | `plugins/manual-review/pending/plugin-management-builtin-inline.test.ts`            |
+| `PC`         | `plugins/manual-review/pending/plugin-cdn-zip-marketplace-install.test.ts`          |
+| `PCS`        | `plugins/manual-review/pending/plugin-cdn-zip-official-cdn-smoke.test.ts`           |
+| `PF`         | `plugins/manual-review/pending/plugin-management-recoverable-failures.test.ts`      |
+| `PEA`        | `plugins/manual-review/pending/plugin-runtime-env-agent-projection.test.ts`         |
+| `PGA`        | `plugins/manual-review/pending/plugin-no-git-github-archive.test.ts`                |
+| `PRA`        | `plugins/manual-review/pending/plugin-refresh-atomic-cache.test.ts`                 |
+| `PBD`        | `plugins/manual-review/pending/plugin-management-builtin-detail-parity.test.ts`     |
 | `PBO`        | `plugins/manual-review/pending/plugin-management-bundled-install-ownership.test.ts` |
-| `PBS`        | `plugins/manual-review/pending/plugin-management-seed-runtime-separation.test.ts` |
-| `PML`        | `plugins/manual-review/pending/plugin-management-installed-menu-layout.test.ts`   |
+| `PBS`        | `plugins/manual-review/pending/plugin-management-seed-runtime-separation.test.ts`   |
+| `PML`        | `plugins/manual-review/pending/plugin-management-installed-menu-layout.test.ts`     |
 
 ## Latest targeted verification
 

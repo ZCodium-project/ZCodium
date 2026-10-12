@@ -4,17 +4,22 @@ import * as f from "./botsService.fixtures.js";
 describe("botsService registration", () => {
   it("starts Feishu QR app registration", async () => {
     const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
-      const body = init?.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init?.body ?? ""));
+      const body =
+        init?.body instanceof URLSearchParams
+          ? init.body
+          : new URLSearchParams(String(init?.body ?? ""));
       if (body.get("action") === "init") {
         return new Response(JSON.stringify({ supported_auth_methods: ["client_secret"] }));
       }
-      return new Response(JSON.stringify({
-        device_code: "device-1",
-        verification_uri_complete: "https://accounts.feishu.cn/verify?device_code=device-1",
-        user_code: "ABCD",
-        interval: 2,
-        expire_in: 600,
-      }));
+      return new Response(
+        JSON.stringify({
+          device_code: "device-1",
+          verification_uri_complete: "https://accounts.feishu.cn/verify?device_code=device-1",
+          user_code: "ABCD",
+          interval: 2,
+          expire_in: 600,
+        }),
+      );
     });
     vi.stubGlobal("fetch", fetchMock);
     const service = f.createBotsService({
@@ -40,17 +45,22 @@ describe("botsService registration", () => {
 
   it("starts Lark QR app registration from the SDK default Feishu issuer", async () => {
     const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
-      const body = init?.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init?.body ?? ""));
+      const body =
+        init?.body instanceof URLSearchParams
+          ? init.body
+          : new URLSearchParams(String(init?.body ?? ""));
       if (body.get("action") === "init") {
         return new Response(JSON.stringify({ supported_auth_methods: ["client_secret"] }));
       }
-      return new Response(JSON.stringify({
-        device_code: "device-lark",
-        verification_uri_complete: "https://open.feishu.cn/page/launcher?user_code=LARK",
-        user_code: "LARK",
-        interval: 2,
-        expire_in: 600,
-      }));
+      return new Response(
+        JSON.stringify({
+          device_code: "device-lark",
+          verification_uri_complete: "https://open.feishu.cn/page/launcher?user_code=LARK",
+          user_code: "LARK",
+          interval: 2,
+          expire_in: 600,
+        }),
+      );
     });
     vi.stubGlobal("fetch", fetchMock);
     const service = f.createBotsService({
@@ -79,10 +89,15 @@ describe("botsService registration", () => {
   });
 
   it("switches Lark QR app registration polling to the Lark issuer", async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
-      user_info: { open_id: "ou_owner", tenant_brand: "lark" },
-      error: "authorization_pending",
-    })));
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            user_info: { open_id: "ou_owner", tenant_brand: "lark" },
+            error: "authorization_pending",
+          }),
+        ),
+    );
     vi.stubGlobal("fetch", fetchMock);
     const service = f.createBotsService({
       credentialService: f.createCredentialService(),
@@ -109,11 +124,16 @@ describe("botsService registration", () => {
   });
 
   it("polls Feishu QR app registration success", async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
-      client_id: "cli_xxx",
-      client_secret: "secret",
-      user_info: { open_id: "ou_owner", tenant_brand: "feishu" },
-    })));
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            client_id: "cli_xxx",
+            client_secret: "secret",
+            user_info: { open_id: "ou_owner", tenant_brand: "feishu" },
+          }),
+        ),
+    );
     vi.stubGlobal("fetch", fetchMock);
     const service = f.createBotsService({
       credentialService: f.createCredentialService(),
@@ -137,11 +157,16 @@ describe("botsService registration", () => {
   });
 
   it("polls Lark QR app registration success after domain switch", async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
-      client_id: "cli_lark",
-      client_secret: "secret",
-      user_info: { open_id: "ou_owner", tenant_brand: "lark" },
-    })));
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            client_id: "cli_lark",
+            client_secret: "secret",
+            user_info: { open_id: "ou_owner", tenant_brand: "lark" },
+          }),
+        ),
+    );
     vi.stubGlobal("fetch", fetchMock);
     const service = f.createBotsService({
       credentialService: f.createCredentialService(),
@@ -168,7 +193,6 @@ describe("botsService registration", () => {
     ]);
   });
 
-
   it("backfills the Feishu bot name when saving scanned credentials", async () => {
     const fetchMock = vi.fn(async (url: string) => {
       if (url.endsWith("/tenant_access_token/internal")) {
@@ -178,14 +202,16 @@ describe("botsService registration", () => {
         return new Response(JSON.stringify({ code: 999, msg: "not ready" }));
       }
       if (url.endsWith("/application/v6/applications/me?lang=zh_cn")) {
-        return new Response(JSON.stringify({
-          code: 0,
-          data: {
-            app: {
-              app_name: "ZCode Assistant",
+        return new Response(
+          JSON.stringify({
+            code: 0,
+            data: {
+              app: {
+                app_name: "ZCode Assistant",
+              },
             },
-          },
-        }));
+          }),
+        );
       }
       return new Response(JSON.stringify({ code: 999, msg: "unexpected request" }));
     });
@@ -217,5 +243,4 @@ describe("botsService registration", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     service.disposeAll();
   });
-
 });

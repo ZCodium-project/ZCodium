@@ -32,12 +32,12 @@
 
 ## Shared And Divergent Behavior
 
-| Concern              | Shared across surfaces                        | Deliberately different                                    | Why it matters for this change            |
-| -------------------- | --------------------------------------------- | --------------------------------------------------------- | ----------------------------------------- |
-| Option source        | ProviderConfigResolver 与 Registry View       | 设置页还需要无效项和显式 Personal 值                      | Registry 不能为了设置页保留灰色不可用模型 |
-| Validation           | Schema、三层 Overlay 与完整性校验             | accessId 鉴权、额度、网络错误仍由执行链路处理             | Registry 不承担账号权限判断               |
-| Commit effect        | 无                                            | 设置保存、模型选择、Agent 执行各自保持原有 owner          | 共享解析不能统一掉不同产品语义            |
-| Persistence/recovery | Config 类型与普通 Object 序列化格式           | 物理文件、远端服务、缓存和 watcher 由 Source Service 决定 | 纯领域包不拥有 IO                         |
+| Concern              | Shared across surfaces                  | Deliberately different                                    | Why it matters for this change            |
+| -------------------- | --------------------------------------- | --------------------------------------------------------- | ----------------------------------------- |
+| Option source        | ProviderConfigResolver 与 Registry View | 设置页还需要无效项和显式 Personal 值                      | Registry 不能为了设置页保留灰色不可用模型 |
+| Validation           | Schema、三层 Overlay 与完整性校验       | accessId 鉴权、额度、网络错误仍由执行链路处理             | Registry 不承担账号权限判断               |
+| Commit effect        | 无                                      | 设置保存、模型选择、Agent 执行各自保持原有 owner          | 共享解析不能统一掉不同产品语义            |
+| Persistence/recovery | Config 类型与普通 Object 序列化格式     | 物理文件、远端服务、缓存和 watcher 由 Source Service 决定 | 纯领域包不拥有 IO                         |
 
 ## Feature Relationships
 
@@ -62,14 +62,14 @@
 
 ## Must-Preserve Invariants
 
-| Invariant                                                               | Surfaces/modes             | Proof needed           | Evidence               |
-| ----------------------------------------------------------------------- | -------------------------- | ---------------------- | ---------------------- |
-| Official key 保留 Official 顺序；Personal-only key 按 Personal 顺序追加 | Config、Settings、Registry | Overlay 单测           | configuration design   |
-| 嵌套 ConfigOverlay 递归覆盖，普通字段整体替换，输入不被修改             | 所有消费方                 | 单元测试               | configuration design   |
-| Account Source 只为 account kind 产生第三层 ProviderConfig；API Provider 没有该层 | Host/Worker/CLI/TUI | Resolver 单测 | registry design |
-| Registry 只发布完整、启用、静态可选的模型                               | 模型选择与执行             | Resolver/Registry 单测 | 已确认产品结论         |
-| Registry 替换 View 不改变调用方已经持有的旧 View/Model                  | 活动 Loop                  | 不可变快照单测         | runtime design         |
-| 本批代码不读写文件、不发网络请求、不依赖 UI/Services/SDK                | 所有进程                   | 包依赖审查             | 用户确认的纯领域包边界 |
+| Invariant                                                                         | Surfaces/modes             | Proof needed           | Evidence               |
+| --------------------------------------------------------------------------------- | -------------------------- | ---------------------- | ---------------------- |
+| Official key 保留 Official 顺序；Personal-only key 按 Personal 顺序追加           | Config、Settings、Registry | Overlay 单测           | configuration design   |
+| 嵌套 ConfigOverlay 递归覆盖，普通字段整体替换，输入不被修改                       | 所有消费方                 | 单元测试               | configuration design   |
+| Account Source 只为 account kind 产生第三层 ProviderConfig；API Provider 没有该层 | Host/Worker/CLI/TUI        | Resolver 单测          | registry design        |
+| Registry 只发布完整、启用、静态可选的模型                                         | 模型选择与执行             | Resolver/Registry 单测 | 已确认产品结论         |
+| Registry 替换 View 不改变调用方已经持有的旧 View/Model                            | 活动 Loop                  | 不可变快照单测         | runtime design         |
+| 本批代码不读写文件、不发网络请求、不依赖 UI/Services/SDK                          | 所有进程                   | 包依赖审查             | 用户确认的纯领域包边界 |
 
 ## Codegraph Evidence
 
@@ -125,33 +125,33 @@
 | Boundary              | Decision                          | Includes                                             | Excludes / prunes                                   | Source      |
 | --------------------- | --------------------------------- | ---------------------------------------------------- | --------------------------------------------------- | ----------- |
 | M2-A                  | Config + Resolver + 内存 Registry | schema、overlay、order、filter、issues、index、event | storage、watcher、account request、UI、ModelFactory | user/design |
-| Registry availability | 只包含配置完整且启用的模型        | complete、enabled、三层 Provider Config             | accessId 是否可鉴权、网络健康、额度、瞬时 token    | user/design |
+| Registry availability | 只包含配置完整且启用的模型        | complete、enabled、三层 Provider Config              | accessId 是否可鉴权、网络健康、额度、瞬时 token     | user/design |
 | View ownership        | Registry 原子替换不可变 View      | 新查询使用新 View                                    | 修改旧 View / 活动 Model                            | user/design |
 
 ## Accepted Cases
 
-| Case ID          | Setup                                      | Action               | Assertions                                             | Evidence layers  | E2E status |
-| ---------------- | ------------------------------------------ | -------------------- | ------------------------------------------------------ | ---------------- | ---------- |
-| M2A-OVERLAY-01   | Official `[A,B,C]`，Personal `[Y,C',X,A']` | overlay              | 结果 `[A',B,C',Y,X]`；输入不变                         | unit             | not-needed |
-| M2A-OVERLAY-02   | 嵌套 Properties + 普通数组/Record          | overlay              | 嵌套 Config 逐字段继承；数组/Record 整体替换           | unit             | not-needed |
-| M2A-MODEL-01     | Official/Personal 多条 regex 规则          | resolve model        | 全串匹配；后命中规则覆盖前规则                         | unit             | not-needed |
-| M2A-ACCESS-01    | API 与 Account Provider 同时存在           | overlay Account Config | 只补齐 Account Provider 的 accessId/models；API 不变 | unit             | not-needed |
-| M2A-VALID-01     | 不完整、禁用、完整 Provider/model          | resolve              | Registry View 只含完整启用项；问题保留给 Resolver 结果 | unit             | not-needed |
-| M2A-REGISTRY-01  | Registry 已持有 v1                         | replace v2           | revision/event 更新；旧 v1 快照保持不变                | unit             | not-needed |
-| M2A-SELECTION-01 | provider/model 存在或缺失                  | validate             | 返回稳定的成功/错误结果                                | unit             | not-needed |
-| M2B-SOURCE-01    | Config/Account Source 均有当前快照         | service start        | 先订阅后读取；发布一份完整 Registry Snapshot           | unit             | not-needed |
-| M2B-REFRESH-01   | 读取 v1 期间 Source 更新为 v2              | source invalidation  | 丢弃过时代际，只发布 v2                                | unit             | not-needed |
-| M2B-REFRESH-02   | 两个 Source revision 均未变化              | 重复 invalidation    | 不重建 View、不增加 Registry revision                  | unit             | not-needed |
-| M2B-FAILURE-01   | 已发布 v1，下一次 Source 读取失败          | source invalidation  | v1 保持可用；报告刷新错误；后续成功可恢复到 v2         | unit             | not-needed |
-| M2C-SETTINGS-01  | Official、Personal、无效和 Account 过滤项  | project settings     | 返回 Personal 显式值、Effective 值、问题与可调序标记   | unit             | not-needed |
-| M2C-SELECTION-01 | Settings 仍包含不可发布项                  | project selection    | Selection View 只包含 Registry 已发布的 Provider/Model | unit             | not-needed |
-| M2D-CONFIG-01    | Official 或 Personal Source 更新           | config source event  | Config Service 通知 Registry 读取两路最新快照          | unit             | not-needed |
-| M2D-CONFIG-02    | Settings 保存、删除或重排 Personal 配置    | repository update    | 在 Repository 原子边界内只修改 Personal 层             | unit             | not-needed |
-| M2D-CONFIG-03    | 保存带正则元字符的精确 Provider/Model ID   | settings model save  | 精确规则转义；不意外匹配其他 ID                        | unit             | not-needed |
-| M2E-MIGRATE-01   | 新 Personal Config 文件不存在，旧配置存在  | repository read      | 单向导入、校验并原子写入当前 schemaVersion 文件        | unit/integration | not-needed |
-| M2E-MIGRATE-02   | Personal Config 是受支持的旧 schemaVersion | repository read      | 按相邻版本逐级迁移并写回最新版                         | unit             | not-needed |
-| M2E-MIGRATE-03   | 文件版本高于当前程序支持范围               | repository read      | 报错且不覆盖原文件                                     | unit             | not-needed |
-| M2E-MIGRATE-04   | 旧配置转换或新文件原子写失败               | repository read      | 报错并保留旧文件；不发布半迁移 Snapshot                | integration      | not-needed |
+| Case ID          | Setup                                      | Action                 | Assertions                                             | Evidence layers  | E2E status |
+| ---------------- | ------------------------------------------ | ---------------------- | ------------------------------------------------------ | ---------------- | ---------- |
+| M2A-OVERLAY-01   | Official `[A,B,C]`，Personal `[Y,C',X,A']` | overlay                | 结果 `[A',B,C',Y,X]`；输入不变                         | unit             | not-needed |
+| M2A-OVERLAY-02   | 嵌套 Properties + 普通数组/Record          | overlay                | 嵌套 Config 逐字段继承；数组/Record 整体替换           | unit             | not-needed |
+| M2A-MODEL-01     | Official/Personal 多条 regex 规则          | resolve model          | 全串匹配；后命中规则覆盖前规则                         | unit             | not-needed |
+| M2A-ACCESS-01    | API 与 Account Provider 同时存在           | overlay Account Config | 只补齐 Account Provider 的 accessId/models；API 不变   | unit             | not-needed |
+| M2A-VALID-01     | 不完整、禁用、完整 Provider/model          | resolve                | Registry View 只含完整启用项；问题保留给 Resolver 结果 | unit             | not-needed |
+| M2A-REGISTRY-01  | Registry 已持有 v1                         | replace v2             | revision/event 更新；旧 v1 快照保持不变                | unit             | not-needed |
+| M2A-SELECTION-01 | provider/model 存在或缺失                  | validate               | 返回稳定的成功/错误结果                                | unit             | not-needed |
+| M2B-SOURCE-01    | Config/Account Source 均有当前快照         | service start          | 先订阅后读取；发布一份完整 Registry Snapshot           | unit             | not-needed |
+| M2B-REFRESH-01   | 读取 v1 期间 Source 更新为 v2              | source invalidation    | 丢弃过时代际，只发布 v2                                | unit             | not-needed |
+| M2B-REFRESH-02   | 两个 Source revision 均未变化              | 重复 invalidation      | 不重建 View、不增加 Registry revision                  | unit             | not-needed |
+| M2B-FAILURE-01   | 已发布 v1，下一次 Source 读取失败          | source invalidation    | v1 保持可用；报告刷新错误；后续成功可恢复到 v2         | unit             | not-needed |
+| M2C-SETTINGS-01  | Official、Personal、无效和 Account 过滤项  | project settings       | 返回 Personal 显式值、Effective 值、问题与可调序标记   | unit             | not-needed |
+| M2C-SELECTION-01 | Settings 仍包含不可发布项                  | project selection      | Selection View 只包含 Registry 已发布的 Provider/Model | unit             | not-needed |
+| M2D-CONFIG-01    | Official 或 Personal Source 更新           | config source event    | Config Service 通知 Registry 读取两路最新快照          | unit             | not-needed |
+| M2D-CONFIG-02    | Settings 保存、删除或重排 Personal 配置    | repository update      | 在 Repository 原子边界内只修改 Personal 层             | unit             | not-needed |
+| M2D-CONFIG-03    | 保存带正则元字符的精确 Provider/Model ID   | settings model save    | 精确规则转义；不意外匹配其他 ID                        | unit             | not-needed |
+| M2E-MIGRATE-01   | 新 Personal Config 文件不存在，旧配置存在  | repository read        | 单向导入、校验并原子写入当前 schemaVersion 文件        | unit/integration | not-needed |
+| M2E-MIGRATE-02   | Personal Config 是受支持的旧 schemaVersion | repository read        | 按相邻版本逐级迁移并写回最新版                         | unit             | not-needed |
+| M2E-MIGRATE-03   | 文件版本高于当前程序支持范围               | repository read        | 报错且不覆盖原文件                                     | unit             | not-needed |
+| M2E-MIGRATE-04   | 旧配置转换或新文件原子写失败               | repository read        | 报错并保留旧文件；不发布半迁移 Snapshot                | integration      | not-needed |
 
 ## E2E Handoff Notes
 

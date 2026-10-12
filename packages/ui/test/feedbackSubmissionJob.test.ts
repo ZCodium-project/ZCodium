@@ -110,17 +110,15 @@ function startTestFeedbackSubmissionJob(
   const { formDraft, ...submissionOptions } = options;
   return startFeedbackSubmissionJob({
     ...submissionOptions,
-    formDraft:
-      formDraft ??
-      {
-        description: options.ticketInput.description,
-        contact: options.ticketInput.contact,
-        screenshots: options.screenshots,
-        includeLogs: options.includeLogs,
-        type: options.ticketInput.type,
-        severity: options.ticketInput.severity,
-        module: options.ticketInput.module,
-      },
+    formDraft: formDraft ?? {
+      description: options.ticketInput.description,
+      contact: options.ticketInput.contact,
+      screenshots: options.screenshots,
+      includeLogs: options.includeLogs,
+      type: options.ticketInput.type,
+      severity: options.ticketInput.severity,
+      module: options.ticketInput.module,
+    },
   });
 }
 

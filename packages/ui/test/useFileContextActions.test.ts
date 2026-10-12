@@ -78,15 +78,11 @@ describe("useFileContextActions", () => {
     expect(latestResult!.canRevealInFileManager(target)).toBe(true);
     await latestResult!.revealInFileManager(target);
 
-    expect(mockOpenInEditor).toHaveBeenCalledWith(
-      "explorer",
-      "/workspace/repo/src",
-      {
-        pathKind: "directory",
-        remoteTarget,
-        workspaceIdentity: "remote:wsl:Ubuntu-24.04:dev:/workspace/repo",
-      },
-    );
+    expect(mockOpenInEditor).toHaveBeenCalledWith("explorer", "/workspace/repo/src", {
+      pathKind: "directory",
+      remoteTarget,
+      workspaceIdentity: "remote:wsl:Ubuntu-24.04:dev:/workspace/repo",
+    });
     expect(mockOpenInFileManager).not.toHaveBeenCalled();
   });
 

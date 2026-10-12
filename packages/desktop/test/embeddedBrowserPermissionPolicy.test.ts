@@ -142,32 +142,28 @@ describe("applyEmbeddedBrowserPermissionPolicy 注册", () => {
 });
 
 describe("静默放行白名单", () => {
-  it.each([
-    "clipboard-sanitized-write",
-    "fullscreen",
-    "pointerLock",
-    "mediaKeySystem",
-  ])("%s 放行且打 allowlist 日志", async (permission) => {
-    await applyEmbeddedBrowserPermissionPolicy(session, { logger });
+  it.each(["clipboard-sanitized-write", "fullscreen", "pointerLock", "mediaKeySystem"])(
+    "%s 放行且打 allowlist 日志",
+    async (permission) => {
+      await applyEmbeddedBrowserPermissionPolicy(session, { logger });
 
-    await expect(driveRequest(session, permission, { requestingUrl: GUEST_URL })).resolves.toBe(
-      true,
-    );
-    expect(session.handlers.check!(null, permission, GUEST_ORIGIN)).toBe(true);
-    expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining("decision=granted"),
-      expect.objectContaining({ permission, source: "allowlist" }),
-    );
-  });
+      await expect(driveRequest(session, permission, { requestingUrl: GUEST_URL })).resolves.toBe(
+        true,
+      );
+      expect(session.handlers.check!(null, permission, GUEST_ORIGIN)).toBe(true);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining("decision=granted"),
+        expect.objectContaining({ permission, source: "allowlist" }),
+      );
+    },
+  );
 });
 
 describe("弹窗级敏感权限", () => {
   it("无记录且未接入弹窗时默认拒绝（安全闭环）", async () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger });
 
-    await expect(driveRequest(session, "media", { requestingUrl: GUEST_URL })).resolves.toBe(
-      false,
-    );
+    await expect(driveRequest(session, "media", { requestingUrl: GUEST_URL })).resolves.toBe(false);
     expect(logger.info).toHaveBeenCalledWith(
       expect.stringContaining("decision=denied"),
       expect.objectContaining({ permission: "media", source: "default-deny" }),
@@ -214,12 +210,14 @@ describe("弹窗级敏感权限", () => {
       const prompt = vi.fn(async () => action);
       await applyEmbeddedBrowserPermissionPolicy(session, { logger, prompt, store });
 
-      await expect(driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL })).resolves
-        .toBe(granted);
+      await expect(
+        driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL }),
+      ).resolves.toBe(granted);
       expect(prompt).toHaveBeenCalledTimes(1);
 
-      await expect(driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL })).resolves
-        .toBe(granted);
+      await expect(
+        driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL }),
+      ).resolves.toBe(granted);
       expect(prompt).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
         expect.anything(),
@@ -240,12 +238,12 @@ describe("弹窗级敏感权限", () => {
     const prompt = vi.fn(async () => "dismiss" as const);
     await applyEmbeddedBrowserPermissionPolicy(session, { logger, prompt, store });
 
-    await expect(driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL })).resolves.toBe(
-      false,
-    );
-    await expect(driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL })).resolves.toBe(
-      false,
-    );
+    await expect(
+      driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL }),
+    ).resolves.toBe(false);
+    await expect(
+      driveRequest(session, "clipboard-read", { requestingUrl: GUEST_URL }),
+    ).resolves.toBe(false);
     expect(prompt).toHaveBeenCalledTimes(2);
     expect(store.record[GUEST_ORIGIN]).toBeUndefined();
     expect(logger.info).toHaveBeenCalledWith(
@@ -342,9 +340,9 @@ describe("设备与屏幕共享", () => {
   it("setDevicePermissionHandler 恒 true：放行到 select-* chooser（实测 false 会拦死 requestDevice）", async () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger });
 
-    expect(
-      session.handlers.device!({ origin: GUEST_ORIGIN, device: { deviceId: "dev-1" } }),
-    ).toBe(true);
+    expect(session.handlers.device!({ origin: GUEST_ORIGIN, device: { deviceId: "dev-1" } })).toBe(
+      true,
+    );
     expect(session.handlers.device!({ origin: "unknown", device: undefined })).toBe(true);
   });
 
@@ -368,9 +366,20 @@ describe("设备与屏幕共享", () => {
     const callback = vi.fn();
     const webContentsStub = { getURL: () => GUEST_URL, id: 7, hostWebContents: { id: 3 } };
     if (event === "select-serial-port") {
-      session.emit(event, { preventDefault: vi.fn() }, [{ portId: "port-1", portName: "COM1" }], webContentsStub, callback);
+      session.emit(
+        event,
+        { preventDefault: vi.fn() },
+        [{ portId: "port-1", portName: "COM1" }],
+        webContentsStub,
+        callback,
+      );
     } else {
-      session.emit(event, { preventDefault: vi.fn() }, { deviceList: [{ deviceId: "dev-1" }] }, callback);
+      session.emit(
+        event,
+        { preventDefault: vi.fn() },
+        { deviceList: [{ deviceId: "dev-1" }] },
+        callback,
+      );
     }
     expect(callback).toHaveBeenCalledWith(cancelArg);
     expect(logger.info).toHaveBeenCalledWith(
@@ -387,7 +396,12 @@ describe("设备与屏幕共享", () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger, devicePicker });
 
     const callback = vi.fn();
-    session.emit("select-hid-device", { preventDefault: vi.fn() }, { deviceList: [{ deviceId: "dev-9" }] }, callback);
+    session.emit(
+      "select-hid-device",
+      { preventDefault: vi.fn() },
+      { deviceList: [{ deviceId: "dev-9" }] },
+      callback,
+    );
     await vi.waitFor(() => expect(callback).toHaveBeenCalledWith("dev-9"));
     expect(devicePicker).toHaveBeenCalledWith(
       expect.objectContaining({ permission: "select-hid-device", origin: "unknown" }),
@@ -402,7 +416,12 @@ describe("设备与屏幕共享", () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger, devicePicker });
 
     const callback = vi.fn();
-    session.emit("select-usb-device", { preventDefault: vi.fn() }, { deviceList: [{ deviceId: "dev-1" }] }, callback);
+    session.emit(
+      "select-usb-device",
+      { preventDefault: vi.fn() },
+      { deviceList: [{ deviceId: "dev-1" }] },
+      callback,
+    );
     await vi.waitFor(() => expect(callback).toHaveBeenCalledWith(undefined));
   });
 
@@ -430,17 +449,19 @@ describe("设备与屏幕共享", () => {
       secondCallback,
     );
     expect(devicePicker).toHaveBeenCalledTimes(1);
-    expect(updateDevices).toHaveBeenCalledWith([
-      { deviceId: "dev-1" },
-      { deviceId: "dev-2" },
-    ]);
+    expect(updateDevices).toHaveBeenCalledWith([{ deviceId: "dev-1" }, { deviceId: "dev-2" }]);
     expect(secondCallback).not.toHaveBeenCalled();
 
     resolvePicker({ deviceId: "dev-2" });
     await vi.waitFor(() => expect(firstCallback).toHaveBeenCalledWith("dev-2"));
     // 结算后可以开新的选择器
     const thirdCallback = vi.fn();
-    session.emit("select-hid-device", { preventDefault: vi.fn() }, { deviceList: [{ deviceId: "dev-3" }] }, thirdCallback);
+    session.emit(
+      "select-hid-device",
+      { preventDefault: vi.fn() },
+      { deviceList: [{ deviceId: "dev-3" }] },
+      thirdCallback,
+    );
     await vi.waitFor(() => expect(devicePicker).toHaveBeenCalledTimes(2));
   });
 
@@ -453,10 +474,7 @@ describe("设备与屏幕共享", () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger, onDisplayMediaRequest });
 
     const callback = vi.fn();
-    session.handlers.displayMedia!(
-      { frame: { url: GUEST_URL }, videoRequested: true },
-      callback,
-    );
+    session.handlers.displayMedia!({ frame: { url: GUEST_URL }, videoRequested: true }, callback);
     expect(onDisplayMediaRequest).toHaveBeenCalledWith(
       { origin: GUEST_ORIGIN },
       expect.any(Function),
@@ -505,9 +523,7 @@ describe("持久化 store 集成", () => {
     const prompt = vi.fn(async () => "block-always" as const);
     await applyEmbeddedBrowserPermissionPolicy(session, { logger, prompt, store });
 
-    expect(
-      session.handlers.check!(null, "notifications", "https://allowed.com"),
-    ).toBe(true);
+    expect(session.handlers.check!(null, "notifications", "https://allowed.com")).toBe(true);
 
     await expect(
       driveRequest(session, "notifications", { requestingUrl: "https://allowed.com/page" }),

@@ -46,9 +46,7 @@ object per file structured like this:
       "dependencies": [],
       "devDependencies": [],
       "binaries": [],
-      "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
-      ],
+      "unresolved": [{ "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }],
       "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
       "types": [
         { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
@@ -239,7 +237,7 @@ sent to a service.
 Here's a most minimal reporter example:
 
 ```ts title="./my-reporter.ts"
-import type { Reporter } from 'knip';
+import type { Reporter } from "knip";
 
 const reporter: Reporter = function (options) {
   console.log(options.issues);
@@ -283,7 +281,7 @@ npm packages as preprocessors.
 Example preprocessor:
 
 ```ts title="./preprocess.ts"
-import type { Preprocessor } from 'knip';
+import type { Preprocessor } from "knip";
 
 const preprocess: Preprocessor = function (options) {
   // modify options.issues and options.counters

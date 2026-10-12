@@ -3,17 +3,11 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 function readOpenSplitButtonSource() {
-  return readFileSync(
-    resolve(process.cwd(), "packages/ui/src/OpenSplitButton.tsx"),
-    "utf8",
-  );
+  return readFileSync(resolve(process.cwd(), "packages/ui/src/OpenSplitButton.tsx"), "utf8");
 }
 
 function readAssistantPreviewCardsSource() {
-  return readFileSync(
-    resolve(process.cwd(), "packages/ui/src/AssistantPreviewCards.tsx"),
-    "utf8",
-  );
+  return readFileSync(resolve(process.cwd(), "packages/ui/src/AssistantPreviewCards.tsx"), "utf8");
 }
 
 describe("OpenSplitButton open-with ordering", () => {

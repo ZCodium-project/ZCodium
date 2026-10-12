@@ -57,10 +57,7 @@ describe("FeedbackSupplementComposer", () => {
     });
 
     expect(calls).toEqual(["comment", "upload"]);
-    expect(feedbackService.comment).toHaveBeenCalledWith(
-      "tkt_1",
-      "补充说明\n\n附件：detail.log",
-    );
+    expect(feedbackService.comment).toHaveBeenCalledWith("tkt_1", "补充说明\n\n附件：detail.log");
     expect(feedbackService.uploadAttachmentData).toHaveBeenCalledWith("tkt_1", "other", {
       dataBase64: "ZGV0YWls",
       filename: "detail.log",

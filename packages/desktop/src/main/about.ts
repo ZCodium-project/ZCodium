@@ -1,8 +1,4 @@
-import type {
-  AboutPanelOptionsOptions,
-  BrowserWindow,
-  MessageBoxReturnValue,
-} from "electron";
+import type { AboutPanelOptionsOptions, BrowserWindow, MessageBoxReturnValue } from "electron";
 import { existsSync, readFileSync } from "node:fs";
 import { arch, hostname, platform, release, type, version as osVersion } from "node:os";
 import { join } from "node:path";

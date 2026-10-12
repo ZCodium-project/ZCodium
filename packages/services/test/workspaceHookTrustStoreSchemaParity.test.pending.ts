@@ -33,7 +33,11 @@ function makeRoot(): string {
 
 function writeJson(path: string, value: unknown): void {
   mkdirSync(join(path, ".."), { recursive: true });
-  writeFileSync(path, typeof value === "string" ? value : `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  writeFileSync(
+    path,
+    typeof value === "string" ? value : `${JSON.stringify(value, null, 2)}\n`,
+    "utf8",
+  );
 }
 
 function setupWorkspaceWithHook(): { home: string; workspace: string } {

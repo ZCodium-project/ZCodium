@@ -37,11 +37,10 @@ WSL backend 和 stdio lifecycle。
 桌面端从当前分支启动，通过开发态固定端口 `9229` 的 CDP 调用 preload bridge：
 
 ```js
-window.zcode.connectRemote(
-  { kind: "wsl", distro: "Ubuntu" },
-  requestId,
-  { workspacePath, workspaceIdentity },
-);
+window.zcode.connectRemote({ kind: "wsl", distro: "Ubuntu" }, requestId, {
+  workspacePath,
+  workspaceIdentity,
+});
 ```
 
 进程采样使用：
@@ -58,10 +57,10 @@ wsl.exe -d Ubuntu -- bash -lc "ps -eo pid,ppid,rss,lstart,args"
 第一个连接成功，logical session 为
 `80b8b530-d2ca-447a-9966-9d3472f76dae`：
 
-| 层 | PID | RSS | 启动时间 | 说明 |
-| --- | ---: | ---: | --- | --- |
+| 层                                 |   PID |        RSS | 启动时间 | 说明                      |
+| ---------------------------------- | ----: | ---------: | -------- | ------------------------- |
 | Windows remote UtilityProcess Host | 24868 | 未单独采集 | 17:26:13 | 第一个 WSL workspace 创建 |
-| WSL `zcode-server` | 1083 | 192188 KiB | 17:26:24 | 唯一 server |
+| WSL `zcode-server`                 |  1083 | 192188 KiB | 17:26:24 | 唯一 server               |
 
 ### 两个 workspace
 
@@ -83,11 +82,11 @@ remoteSessionId:
   0e03e8c0-213f-4966-a119-0a4ebfcf6808
 ```
 
-| 层 | PID | PPID | RSS | 计数 |
-| --- | ---: | ---: | ---: | ---: |
-| Windows remote UtilityProcess Host | 24708 | 3596 | 未单独采集 | 1 |
-| Windows `wsl.exe` launcher | 26684 | 24708 | 未单独采集 | 1 个 launcher 链路 |
-| WSL `zcode-server` | 1106 | 1105 | 198232 KiB | 1 |
+| 层                                 |   PID |  PPID |        RSS |               计数 |
+| ---------------------------------- | ----: | ----: | ---------: | -----------------: |
+| Windows remote UtilityProcess Host | 24708 |  3596 | 未单独采集 |                  1 |
+| Windows `wsl.exe` launcher         | 26684 | 24708 | 未单独采集 | 1 个 launcher 链路 |
+| WSL `zcode-server`                 |  1106 |  1105 | 198232 KiB |                  1 |
 
 释放第 4、5 个 logical session、保留三个 workspace 后，Host PID 仍为 `24708`，server PID
 仍为 `1106`，server 计数仍为 `1`；当时 RSS 为 `167216 KiB`。
@@ -118,10 +117,10 @@ T+2s: Host PID 24868 present; server PID 1083 present
 
 重新连接一个 workspace 后：
 
-| 资源 | 退出前 PID | 正常关闭后约 4.0s |
-| --- | ---: | --- |
-| Windows remote Host | 25468 | 不存在 |
-| WSL `zcode-server` | 1122 | 计数 0 |
+| 资源                | 退出前 PID | 正常关闭后约 4.0s |
+| ------------------- | ---------: | ----------------- |
+| Windows remote Host |      25468 | 不存在            |
+| WSL `zcode-server`  |       1122 | 计数 0            |
 
 主窗口调用 `CloseMainWindow()` 后，main process 在 `741ms` 退出；从发起关闭到最终 PID 检查为
 `4024ms`。第二轮仍有三个 workspace owner 时重复关闭，main 在 `396ms` 退出，`3641ms`

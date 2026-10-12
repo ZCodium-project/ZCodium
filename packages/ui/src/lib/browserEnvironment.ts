@@ -18,9 +18,7 @@ function getLocalStorageCandidate(): unknown {
   }
 }
 
-function isBrowserReadableStorageLike(
-  storage: unknown,
-): storage is BrowserReadableStorageLike {
+function isBrowserReadableStorageLike(storage: unknown): storage is BrowserReadableStorageLike {
   return (
     Boolean(storage) &&
     typeof (storage as Partial<BrowserReadableStorageLike>).getItem === "function"

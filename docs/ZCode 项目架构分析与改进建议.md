@@ -5,8 +5,6 @@
 > `docs/architecture/zcode-code-architecture-overview.md`。
 
 > 调研范围：z\-code monorepo（v2\.15\.1，pnpm workspace），含嵌套独立 monorepo `apps/zcode-cli`（ZCode Agent，v0\.14\.1）。数据来源于仓库实际文件统计与文档核对，日期 2026\-06\-10。
-> 
-> 
 
 ## 一、整体架构概览
 
@@ -18,17 +16,17 @@ shared ← rpc ← services ← client ← server
                    ui    desktop / web
 ```
 
-|包|职责|TS 源码行数|
-|---|---|---|
-|@zcode/rpc|VS Code 风格 7 层 IPC 框架，传输无关、类型安全|4,934|
-|@zcode/shared|共享类型 \+ zod schema \+ ZCode Protocol 契约|20,531|
-|@zcode/services|35 个业务子域服务（agent/session/git/bots/oauth…）|96,506|
-|@zcode/client|RPC 桥接（MessagePort / WebSocket → service 代理）|945|
-|@zcode/server|后端入口（Hono HTTP/WS、stdio、Remote SSH）|11,923|
-|@zcode/ui|平台无关 React 19 组件库（桌面/手机共用）|267,181|
-|@zcode/web|Vite SPA（web 端 \+ 手机远控 /remote、/remote/v3）|6,917|
-|@zcode/desktop|Electron 41 桌面端（main/host/preload/renderer）|39,161|
-|apps/zcode\-cli|嵌套 monorepo，ZCode Agent / app\-server，14 个子包|181,683|
+| 包              | 职责                                                | TS 源码行数 |
+| --------------- | --------------------------------------------------- | ----------- |
+| @zcode/rpc      | VS Code 风格 7 层 IPC 框架，传输无关、类型安全      | 4,934       |
+| @zcode/shared   | 共享类型 \+ zod schema \+ ZCode Protocol 契约       | 20,531      |
+| @zcode/services | 35 个业务子域服务（agent/session/git/bots/oauth…）  | 96,506      |
+| @zcode/client   | RPC 桥接（MessagePort / WebSocket → service 代理）  | 945         |
+| @zcode/server   | 后端入口（Hono HTTP/WS、stdio、Remote SSH）         | 11,923      |
+| @zcode/ui       | 平台无关 React 19 组件库（桌面/手机共用）           | 267,181     |
+| @zcode/web      | Vite SPA（web 端 \+ 手机远控 /remote、/remote/v3）  | 6,917       |
+| @zcode/desktop  | Electron 41 桌面端（main/host/preload/renderer）    | 39,161      |
+| apps/zcode\-cli | 嵌套 monorepo，ZCode Agent / app\-server，14 个子包 | 181,683     |
 
 全仓 TS 总量约 **63 万行**，其中 ui 占比约 57%。
 
@@ -125,31 +123,29 @@ ZCode 的核心架构（分层依赖、RPC 抽象、协议单一真相源、cont
 # 第二部分（深挖）：为什么 Bug 频发——根因分析
 
 > 本部分针对"开发过程中 bug 频发、严重拖慢进度"做根因级分析。所有数据来自 git 历史统计与代码实际取证（2026\-06\-10），关键结论均已二次人工核验。
-> 
-> 
 
 ## 一、硬数据：bug 问题有多严重
 
-|指标|数值|含义|
-|---|---|---|
-|近 90 天非 merge commit 总数|4,044|—|
-|其中 fix commit|**2,236（55%）**|一半以上的工作量在修 bug|
-|feat 类 commit|609|**fix : feat ≈ 3\.7 : 1**|
-|revert|28|修复本身也在被推翻|
-|代码中"修复/根因/竞态"类注释|1,376 处|每个都是一次 bug 的墓碑|
+| 指标                         | 数值             | 含义                      |
+| ---------------------------- | ---------------- | ------------------------- |
+| 近 90 天非 merge commit 总数 | 4,044            | —                         |
+| 其中 fix commit              | **2,236（55%）** | 一半以上的工作量在修 bug  |
+| feat 类 commit               | 609              | **fix : feat ≈ 3\.7 : 1** |
+| revert                       | 28               | 修复本身也在被推翻        |
+| 代码中"修复/根因/竞态"类注释 | 1,376 处         | 每个都是一次 bug 的墓碑   |
 
 **"反复修"模式极其显著**（同一文件 7 天内被 fix ≥2 次的次数）：
 
-|次数|文件|
-|---|---|
-|90|ui/WorkspaceGroupedTasksSection\.tsx|
-|82|ui/ChatInputToolbar\.tsx|
-|79|ui/ChatView\.tsx|
-|70|services/zcode\-agent/zcodeTaskServiceAdapter\.ts|
-|58|ui/settings/model\-provider\-section/StatusCards\.tsx|
-|57|ui/chat\-input\-toolbar/modelSelection\.ts|
-|52|ui/hooks/useTaskRestore\.ts|
-|50|ui/hooks/taskStreamEventHandlers\.ts|
+| 次数 | 文件                                                  |
+| ---- | ----------------------------------------------------- |
+| 90   | ui/WorkspaceGroupedTasksSection\.tsx                  |
+| 82   | ui/ChatInputToolbar\.tsx                              |
+| 79   | ui/ChatView\.tsx                                      |
+| 70   | services/zcode\-agent/zcodeTaskServiceAdapter\.ts     |
+| 58   | ui/settings/model\-provider\-section/StatusCards\.tsx |
+| 57   | ui/chat\-input\-toolbar/modelSelection\.ts            |
+| 52   | ui/hooks/useTaskRestore\.ts                           |
+| 50   | ui/hooks/taskStreamEventHandlers\.ts                  |
 
 热点文件的 fix 几乎 100% 在 7 天内再次被 fix——**修复是补丁式的，没有触达根因，同一类 bug 在反复回归**。fix 按包分布：ui（5,732 次文件触碰）≫ services（2,360）≫ desktop（728）≫ zcode\-cli（717），bug 集中在"聊天/任务/模型选择"的状态同步带上。
 
@@ -177,13 +173,13 @@ ZCode 的核心架构（分层依赖、RPC 抽象、协议单一真相源、cont
 
 ## 四、根因 3：竞态防护是手工、分散、无 cleanup 的
 
-|模式|数量（ui 包）|风险|
-|---|---|---|
-|`let cancelled` / `isMounted` 手工取消旗|64 处 / 21 文件|漏写即 stale 写入|
-|effect/handler 内 fire\-and\-forget async IIFE|33 处|无取消、无串行化|
-|setTimeout vs clearTimeout|70 vs 21|大量定时器无 cleanup|
-|useRef 镜像状态 hack|125 处|绕过 React 数据流|
-|防循环/防重入布尔旗|109 处|重入即破坏不变量|
+| 模式                                           | 数量（ui 包）   | 风险                 |
+| ---------------------------------------------- | --------------- | -------------------- |
+| `let cancelled` / `isMounted` 手工取消旗       | 64 处 / 21 文件 | 漏写即 stale 写入    |
+| effect/handler 内 fire\-and\-forget async IIFE | 33 处           | 无取消、无串行化     |
+| setTimeout vs clearTimeout                     | 70 vs 21        | 大量定时器无 cleanup |
+| useRef 镜像状态 hack                           | 125 处          | 绕过 React 数据流    |
+| 防循环/防重入布尔旗                            | 109 处          | 重入即破坏不变量     |
 
 - hooks 目录 77 个文件 **2\.5 万行**，最大单 hook `useZCodeChatSendPrompt.ts` 1,892 行、`useTaskRestore.ts` 1,753 行。
 
@@ -199,7 +195,7 @@ ZCode 的核心架构（分层依赖、RPC 抽象、协议单一真相源、cont
 
 3. **唯一防线是本地 pre\-push**，可被 `--no-verify` 绕过，且只跑 lint \+ unit，不含 typecheck。
 
-4. **bug 热点恰好是测试盲区**：ui 有 316 个测试文件但策略是"拆出纯函数来测"——`ChatView.tsx`（1,492 行）无任何渲染测试、`taskStreamEventHandlers.ts`（1,373 行）无直接单测、**`services/src/zcode-agent/`**** 11 个源文件主路径零覆盖**（仅 legacy 兼容路径有 1 个测试）。
+4. **bug 热点恰好是测试盲区**：ui 有 316 个测试文件但策略是"拆出纯函数来测"——`ChatView.tsx`（1,492 行）无任何渲染测试、`taskStreamEventHandlers.ts`（1,373 行）无直接单测、**`services/src/zcode-agent/`\*\*** 11 个源文件主路径零覆盖\*\*（仅 legacy 兼容路径有 1 个测试）。
 
 5. **没有协议契约测试**：app 侧与 agent 侧各测各的，没有"同一份 NDJSON 样本双向互验"；也没有 continuous/replayable"同输入同终态"对照测试——而双链路恰是架构上最复杂的部分。
 
@@ -208,16 +204,15 @@ ZCode 的核心架构（分层依赖、RPC 抽象、协议单一真相源、cont
 ## 六、根因 5：错误吞噬 \+ 兜底文化，把 bug 转化为"状态撕裂"（bug 难定位的原因）
 
 - 生产代码约 **720 个 catch**，主流模式是"warn \+ return 默认值"。最危险的吞噬点（已定位）：
+  - `zcodeTaskServiceAdapter.ts:958-998`：`task_complete`/`task_error` 同步 task index 失败只 warn 后 return → **内存已更新、sqlite 索引没更新 → 任务列表长期显示"运行中"**；
 
-    - `zcodeTaskServiceAdapter.ts:958-998`：`task_complete`/`task_error` 同步 task index 失败只 warn 后 return → **内存已更新、sqlite 索引没更新 → 任务列表长期显示"运行中"**；
+  - `zcodeTaskServiceAdapter.ts:752`：`getTaskMeta().catch(() => null)` 把 DB 真错误伪装成"无旧数据"，触发一连串 legacy 兜底；
 
-    - `zcodeTaskServiceAdapter.ts:752`：`getTaskMeta().catch(() => null)` 把 DB 真错误伪装成"无旧数据"，触发一连串 legacy 兜底；
-
-    - `useZCodeConfig.ts:1227/1293`：config 读取失败静默回退 default，用户看到的不是真配置。
+  - `useZCodeConfig.ts:1227/1293`：config 读取失败静默回退 default，用户看到的不是真配置。
 
 - **80\+ 处"兜底"中文注释**，多数注释本身写着"Bugfix: …兜底"——即每个兜底都是上一个 bug 的补丁，掩盖根因并在下游制造新的不一致。
 
-- **协议返回值大面积不校验**（已核验）：`zcodeProtocolClient.ts` 的 `resultSchema` 是可选参数，`zcodeAgentService.ts`**36 处 ****`request()`**** 调用不传**，agent 返回的 JSON 直接当强类型用；`taskIndexRepo.ts` 还有 9 处 `as unknown as` 把 sqlite 行硬转领域对象。
+- **协议返回值大面积不校验**（已核验）：`zcodeProtocolClient.ts` 的 `resultSchema` 是可选参数，`zcodeAgentService.ts`**36 处 \*\***`request()`\***\* 调用不传**，agent 返回的 JSON 直接当强类型用；`taskIndexRepo.ts` 还有 9 处 `as unknown as` 把 sqlite 行硬转领域对象。
 
 **后果**：bug 发生时不报错、不上抛，而是变成"列表状态不对/模型显示不对/配置好像丢了"这类难复现的状态撕裂，定位成本极高——这正是"bug 极大影响开发进度"的直接体感来源。
 

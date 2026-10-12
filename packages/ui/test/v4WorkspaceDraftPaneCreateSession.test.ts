@@ -217,9 +217,7 @@ function capturedPaneIds(): unknown[] {
 }
 
 function expectTwoRenderedPanes(): void {
-  expect(capturedPaneIds()).toEqual(
-    expect.arrayContaining([V4_PRIMARY_PANE_ID, "pane-1"]),
-  );
+  expect(capturedPaneIds()).toEqual(expect.arrayContaining([V4_PRIMARY_PANE_ID, "pane-1"]));
 }
 
 function sessionPaneProps(paneId: string): Record<string, unknown> {
@@ -239,10 +237,7 @@ describe("V4WorkspaceChatArea split draft session creation", () => {
     usePaneLayoutStore
       .getState()
       .splitPane(V4_PRIMARY_PANE_ID, "row", { workspacePath: "/workspace" });
-    expect(leafPaneIds(usePaneLayoutStore.getState().root)).toEqual([
-      V4_PRIMARY_PANE_ID,
-      "pane-1",
-    ]);
+    expect(leafPaneIds(usePaneLayoutStore.getState().root)).toEqual([V4_PRIMARY_PANE_ID, "pane-1"]);
 
     const root = renderWorkspace("main-session", onPaneActiveSessionChange);
     expectTwoRenderedPanes();

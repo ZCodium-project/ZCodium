@@ -13,6 +13,7 @@
 ### Task 1: Persist SSH Alias Metadata
 
 **Files:**
+
 - Modify: `packages/shared/src/index.ts`
 - Modify: `packages/shared/src/protocol.ts`
 - Modify: `packages/shared/src/validation.ts`
@@ -57,17 +58,14 @@ Add this test to `packages/ui/test/remoteWorkspaceHistory.test.ts`:
 
 ```ts
 it("persists and hydrates SSH config alias metadata", () => {
-  const snapshot = createRemoteTargetSnapshot(
-    "remote:ssh:localhost:2223:root:/root",
-    {
-      kind: "ssh",
-      host: "localhost",
-      port: 2223,
-      username: "root",
-      password: "secret",
-      sshConfigAlias: "linux-arm64",
-    },
-  );
+  const snapshot = createRemoteTargetSnapshot("remote:ssh:localhost:2223:root:/root", {
+    kind: "ssh",
+    host: "localhost",
+    port: 2223,
+    username: "root",
+    password: "secret",
+    sshConfigAlias: "linux-arm64",
+  });
 
   expect(snapshot).toMatchObject({
     kind: "ssh",
@@ -167,6 +165,7 @@ Expected after implementation: PASS.
 ### Task 2: Render Sidebar Alias Suffix
 
 **Files:**
+
 - Modify: `packages/ui/src/WorkspaceSidebarItem.tsx`
 - Test: `packages/ui/test/workspaceSidebarRemoteNotice.test.ts`
 
@@ -233,6 +232,7 @@ Expected after implementation: PASS.
 ### Task 3: Verify Repository Constraints
 
 **Files:**
+
 - Modify: `docs/ui/ssh-config-alias.md`
 
 - [x] **Step 1: Update the feature spec**

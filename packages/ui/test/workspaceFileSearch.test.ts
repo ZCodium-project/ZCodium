@@ -104,7 +104,10 @@ describe("workspace file search", () => {
       const bucket = nextSeed() % 40;
       const stamp = nextSeed().toString(36);
       entries.push(
-        entry(`pkg-${bucket}/mod-${bucket}/target-${stamp}-${i}.ts`, i % 500 === 0 ? "directory" : "file"),
+        entry(
+          `pkg-${bucket}/mod-${bucket}/target-${stamp}-${i}.ts`,
+          i % 500 === 0 ? "directory" : "file",
+        ),
       );
     }
     const candidates = mapWorkspaceFileEntriesToSearchCandidates(entries);

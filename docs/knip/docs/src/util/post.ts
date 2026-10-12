@@ -1,39 +1,44 @@
 export const replaceShortenedUrls = (post: PostWithUser) => {
-  let text = (post.note_tweet?.text ?? post.text).replace(/^(@[^ ]+ )*/, '');
+  let text = (post.note_tweet?.text ?? post.text).replace(/^(@[^ ]+ )*/, "");
   if (!post.entities.urls) return { ...post, text };
   post.entities.urls.sort((a, b) => b.start - a.start);
   for (const urlEntity of post.entities.urls) {
     if (urlEntity.media_key) {
-      const media = (post.media ?? []).find(media => media.media_key === urlEntity.media_key);
-      if (media && media.type === 'photo') {
+      const media = (post.media ?? []).find((media) => media.media_key === urlEntity.media_key);
+      if (media && media.type === "photo") {
         text = text.replace(urlEntity.url, `<img src="${media.url}" alt="${media.alt_text}" />`);
       }
-    } else if (urlEntity.expanded_url.includes('twitter.com')) {
-      text = text.replace(urlEntity.url, '');
+    } else if (urlEntity.expanded_url.includes("twitter.com")) {
+      text = text.replace(urlEntity.url, "");
     } else {
-      text = text.replace(urlEntity.url, `<a href="${urlEntity.expanded_url}">${urlEntity.expanded_url}</a>`);
+      text = text.replace(
+        urlEntity.url,
+        `<a href="${urlEntity.expanded_url}">${urlEntity.expanded_url}</a>`,
+      );
     }
   }
   if (post.media && post.note_tweet?.text) {
-    text = text + post.media.map(media => `<img src="${media.url}" alt="${media.alt_text}" />`).join('');
+    text =
+      text +
+      post.media.map((media) => `<img src="${media.url}" alt="${media.alt_text}" />`).join("");
   }
   post.text = text;
   return post;
 };
 
-const timeFormatter = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: 'numeric',
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "numeric",
   hour12: true,
-  timeZone: 'UTC',
+  timeZone: "UTC",
 });
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
   hour12: true,
-  timeZone: 'UTC',
+  timeZone: "UTC",
 });
 
 export const formatTimestamp = (date: string) => {
@@ -110,7 +115,7 @@ interface User {
 
 interface Media {
   url: string;
-  type: 'photo';
+  type: "photo";
   alt_text: string;
   media_key: string;
 }

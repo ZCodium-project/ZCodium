@@ -16,16 +16,9 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_DEVELOPER_TOOLS"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ],
-        "lastUserMessageIncludes": [
-          "E2E_DEVELOPER_TOOLS"
-        ]
+        "bodyIncludes": ["E2E_DEVELOPER_TOOLS"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"],
+        "lastUserMessageIncludes": ["E2E_DEVELOPER_TOOLS"]
       },
       "response": {
         "statusCode": 200,

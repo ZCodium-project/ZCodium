@@ -1039,9 +1039,15 @@ tools:
   it("persists plugin agent model overrides by agent id and echoes them in list", async () => {
     const home = await makeTempHome();
     const workspacePath = join(home, "workspace");
-    const pluginRoot = await writeOfficialPluginFixture(home, "documents", "0.1.4", "visual-judge", {
-      model: "custom:custom-openai:gpt-5.4",
-    });
+    const pluginRoot = await writeOfficialPluginFixture(
+      home,
+      "documents",
+      "0.1.4",
+      "visual-judge",
+      {
+        model: "custom:custom-openai:gpt-5.4",
+      },
+    );
     const agentId = "plugin:documents@zcode-plugins-official:visual-judge";
     const service = createSubagentsService({ homeDir: home, isDesktopRuntime: true });
 
@@ -1075,7 +1081,9 @@ tools:
     });
     // 运行时投影（规范名 + 裸名别名）与设置页资源投影必须回显同一覆盖，否则 @ 提及与设置页不一致。
     expect(
-      overridden.agents.filter((agent) => agent.source === "plugin").map((agent) => agent.modelSelection),
+      overridden.agents
+        .filter((agent) => agent.source === "plugin")
+        .map((agent) => agent.modelSelection),
     ).toEqual([selection, selection]);
 
     // 清除完整选择时一并清掉档位，回落到 md 声明；不恢复旧双 map 保存入口。

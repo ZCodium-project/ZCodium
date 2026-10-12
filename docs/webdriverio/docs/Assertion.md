@@ -6,17 +6,17 @@ title: Assertion
 The [WDIO testrunner](https://webdriver.io/docs/clioptions) comes with a built in assertion library that allows you to make powerful assertions on various aspects of the browser or elements within your (web) application. It extends [Jests Matchers](https://jestjs.io/docs/en/using-matchers) functionality with additional, for e2e testing optimized, matchers, e.g.:
 
 ```js
-const $button = await $('button')
-await expect($button).toBeDisplayed()
+const $button = await $("button");
+await expect($button).toBeDisplayed();
 ```
 
 or
 
 ```js
-const selectOptions = await $$('form select>option')
+const selectOptions = await $$("form select>option");
 
 // make sure there is at least one option in select
-await expect(selectOptions).toHaveChildren({ gte: 1 })
+await expect(selectOptions).toHaveChildren({ gte: 1 });
 ```
 
 For the full list, see the [expect API doc](/docs/api/expect-webdriverio).
@@ -29,11 +29,11 @@ WebdriverIO includes soft assertions by default from expect-webdriver(5.2.0). So
 
 ```js
 // These won't throw immediately if they fail
-await expect.soft(await $('h1').getText()).toEqual('Basketball Shoes');
-await expect.soft(await $('#price').getText()).toMatch(/€\d+/);
+await expect.soft(await $("h1").getText()).toEqual("Basketball Shoes");
+await expect.soft(await $("#price").getText()).toMatch(/€\d+/);
 
 // Regular assertions still throw immediately
-await expect(await $('.add-to-cart').isClickable()).toBe(true);
+await expect(await $(".add-to-cart").isClickable()).toBe(true);
 ```
 
 ## Migrating from Chai
@@ -48,25 +48,25 @@ Assume Chai was imported explicitly in a file, e.g.:
 
 ```js
 // myfile.js - original code
-import { expect as expectChai } from 'chai'
+import { expect as expectChai } from "chai";
 
-describe('Homepage', () => {
-    it('should assert', async () => {
-        await browser.url('./')
-        expectChai(await browser.getUrl()).to.include('/login')
-    })
-})
+describe("Homepage", () => {
+  it("should assert", async () => {
+    await browser.url("./");
+    expectChai(await browser.getUrl()).to.include("/login");
+  });
+});
 ```
 
 To migrate this code remove the Chai import and use the new expect-webdriverio assertion method `toHaveUrl` instead:
 
 ```js
 // myfile.js - migrated code
-describe('Homepage', () => {
-    it('should assert', async () => {
-        await browser.url('./')
-        await expect(browser).toHaveUrl('/login') // new expect-webdriverio API method https://webdriver.io/docs/api/expect-webdriverio.html#tohaveurl
-    });
+describe("Homepage", () => {
+  it("should assert", async () => {
+    await browser.url("./");
+    await expect(browser).toHaveUrl("/login"); // new expect-webdriverio API method https://webdriver.io/docs/api/expect-webdriverio.html#tohaveurl
+  });
 });
 ```
 
@@ -74,21 +74,21 @@ If you wanted to use both Chai and expect-webdriverio in the same file you would
 
 ```js
 // myfile.js
-import { expect as expectChai } from 'chai'
-import { expect as expectWDIO } from '@wdio/globals'
+import { expect as expectChai } from "chai";
+import { expect as expectWDIO } from "@wdio/globals";
 
-describe('Element', () => {
-    it('should be displayed', async () => {
-        const isDisplayed = await $("#element").isDisplayed()
-        expectChai(isDisplayed).to.equal(true); // Chai assertion
-    })
+describe("Element", () => {
+  it("should be displayed", async () => {
+    const isDisplayed = await $("#element").isDisplayed();
+    expectChai(isDisplayed).to.equal(true); // Chai assertion
+  });
 });
 
-describe('Other element', () => {
-    it('should not be displayed', async () => {
-        await expectWDIO($("#element")).not.toBeDisplayed(); // expect-webdriverio assertion
-    })
-})
+describe("Other element", () => {
+  it("should not be displayed", async () => {
+    await expectWDIO($("#element")).not.toBeDisplayed(); // expect-webdriverio assertion
+  });
+});
 ```
 
 ### Global
@@ -98,28 +98,28 @@ Assume `expect` was globally overridden to use Chai. In order to use expect-webd
 ```js
 // wdio.conf.js
 before: async () => {
-    await import('expect-webdriverio');
-    global.wdioExpect = global.expect;
-    const chai = await import('chai');
-    global.expect = chai.expect;
-}
+  await import("expect-webdriverio");
+  global.wdioExpect = global.expect;
+  const chai = await import("chai");
+  global.expect = chai.expect;
+};
 ```
 
 Now Chai and expect-webdriverio can be used alongside each other. In your code you would use Chai and expect-webdriverio assertions as follows, e.g.:
 
 ```js
 // myfile.js
-describe('Element', () => {
-    it('should be displayed', async () => {
-        const isDisplayed = await $("#element").isDisplayed()
-        expect(isDisplayed).to.equal(true); // Chai assertion
-    });
+describe("Element", () => {
+  it("should be displayed", async () => {
+    const isDisplayed = await $("#element").isDisplayed();
+    expect(isDisplayed).to.equal(true); // Chai assertion
+  });
 });
 
-describe('Other element', () => {
-    it('should not be displayed', async () => {
-        await expectWdio($("#element")).not.toBeDisplayed(); // expect-webdriverio assertion
-    });
+describe("Other element", () => {
+  it("should not be displayed", async () => {
+    await expectWdio($("#element")).not.toBeDisplayed(); // expect-webdriverio assertion
+  });
 });
 ```
 

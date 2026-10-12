@@ -24,6 +24,7 @@
 ### Task 1: Route And Build Script
 
 **Files:**
+
 - Modify: `packages/shared/test/webRemoteControl.test.ts`
 - Modify: `packages/desktop/test/root-build-scripts.test.ts`
 - Modify: `package.json`
@@ -33,21 +34,19 @@
 In `packages/shared/test/webRemoteControl.test.ts`, add this case inside `describe("resolveWebRemoteControlRoutePathFromBaseUrl", () => { ... })`, after the v3 case:
 
 ```ts
-  it("resolves the test QR route from the Vite remote test base", () => {
-    expect(resolveWebRemoteControlRoutePathFromBaseUrl("/remote/__test__/")).toBe(
-      "/remote/__test__",
-    );
-  });
+it("resolves the test QR route from the Vite remote test base", () => {
+  expect(resolveWebRemoteControlRoutePathFromBaseUrl("/remote/__test__/")).toBe("/remote/__test__");
+});
 ```
 
 In `packages/desktop/test/root-build-scripts.test.ts`, add this case after the existing v3 build-script case:
 
 ```ts
-  it("pnpm build:web-remote-control:test 应使用 /remote/__test__/ base 构建测试远控资源", () => {
-    expect(rootPackageJson.scripts["build:web-remote-control:test"]).toBe(
-      "pnpm --filter @zcode/web exec vite build --base=/remote/__test__/",
-    );
-  });
+it("pnpm build:web-remote-control:test 应使用 /remote/__test__/ base 构建测试远控资源", () => {
+  expect(rootPackageJson.scripts["build:web-remote-control:test"]).toBe(
+    "pnpm --filter @zcode/web exec vite build --base=/remote/__test__/",
+  );
+});
 ```
 
 - [ ] **Step 2: Run tests and verify the red state**
@@ -91,6 +90,7 @@ git commit -m "feat(web): add remote test build path"
 ### Task 2: Static Container Artifacts
 
 **Files:**
+
 - Modify: `packages/desktop/test/root-build-scripts.test.ts`
 - Create: `Dockerfile.web-remote-control-test`
 - Create: `nginx.web-remote-control-test.conf`
@@ -135,39 +135,33 @@ const webRemoteControlTestSmokeScriptSource = readFileSync(
 Add these tests after the new `build:web-remote-control:test` case:
 
 ```ts
-  it("remote test Dockerfile 应使用 test nginx 配置并健康检查 /remote/__test__", () => {
-    expect(webRemoteControlTestDockerfileSource).toContain(
-      "COPY nginx.web-remote-control-test.conf /etc/nginx/nginx.conf",
-    );
-    expect(webRemoteControlTestDockerfileSource).toContain(
-      "http://127.0.0.1/remote/__test__",
-    );
-    expect(webRemoteControlTestDockerfileSource).not.toContain("remote/v3");
-  });
+it("remote test Dockerfile 应使用 test nginx 配置并健康检查 /remote/__test__", () => {
+  expect(webRemoteControlTestDockerfileSource).toContain(
+    "COPY nginx.web-remote-control-test.conf /etc/nginx/nginx.conf",
+  );
+  expect(webRemoteControlTestDockerfileSource).toContain("http://127.0.0.1/remote/__test__");
+  expect(webRemoteControlTestDockerfileSource).not.toContain("remote/v3");
+});
 
-  it("remote test nginx 配置应只服务 /remote/__test__ 资源前缀", () => {
-    expect(webRemoteControlTestNginxConfigSource).toContain("location = /remote/__test__");
-    expect(webRemoteControlTestNginxConfigSource).toContain(
-      "location ^~ /remote/__test__/assets/",
-    );
-    expect(webRemoteControlTestNginxConfigSource).toContain(
-      "location ^~ /remote/__test__/material-icons/",
-    );
-    expect(webRemoteControlTestNginxConfigSource).toContain("return 302 /remote/__test__");
-    expect(webRemoteControlTestNginxConfigSource).not.toContain("location = /remote/v3");
-  });
+it("remote test nginx 配置应只服务 /remote/__test__ 资源前缀", () => {
+  expect(webRemoteControlTestNginxConfigSource).toContain("location = /remote/__test__");
+  expect(webRemoteControlTestNginxConfigSource).toContain("location ^~ /remote/__test__/assets/");
+  expect(webRemoteControlTestNginxConfigSource).toContain(
+    "location ^~ /remote/__test__/material-icons/",
+  );
+  expect(webRemoteControlTestNginxConfigSource).toContain("return 302 /remote/__test__");
+  expect(webRemoteControlTestNginxConfigSource).not.toContain("location = /remote/v3");
+});
 
-  it("remote test Docker smoke 脚本应验证 /remote/__test__ 构建和路由", () => {
-    expect(webRemoteControlTestSmokeScriptSource).toContain(
-      "pnpm run build:web-remote-control:test",
-    );
-    expect(webRemoteControlTestSmokeScriptSource).toContain("/remote/__test__/assets/*");
-    expect(webRemoteControlTestSmokeScriptSource).toContain("test_url /remote/__test__ 200");
-    expect(webRemoteControlTestSmokeScriptSource).toContain("test_url /remote/__test__/ 301");
-    expect(webRemoteControlTestSmokeScriptSource).toContain(
-      "test_url /remote/__test__/material-icons/typescript.svg 200",
-    );
-  });
+it("remote test Docker smoke 脚本应验证 /remote/__test__ 构建和路由", () => {
+  expect(webRemoteControlTestSmokeScriptSource).toContain("pnpm run build:web-remote-control:test");
+  expect(webRemoteControlTestSmokeScriptSource).toContain("/remote/__test__/assets/*");
+  expect(webRemoteControlTestSmokeScriptSource).toContain("test_url /remote/__test__ 200");
+  expect(webRemoteControlTestSmokeScriptSource).toContain("test_url /remote/__test__/ 301");
+  expect(webRemoteControlTestSmokeScriptSource).toContain(
+    "test_url /remote/__test__/material-icons/typescript.svg 200",
+  );
+});
 ```
 
 - [ ] **Step 2: Run tests and verify the red state**
@@ -449,6 +443,7 @@ git commit -m "feat(web): add remote test static container"
 ### Task 3: Test Publish Script
 
 **Files:**
+
 - Modify: `packages/desktop/test/root-build-scripts.test.ts`
 - Create: `scripts/docker-build-and-push-web-remote-control-test.sh`
 
@@ -475,28 +470,28 @@ const webRemoteControlTestPublishScriptSource = readFileSync(
 Add this test after the smoke-script test:
 
 ```ts
-  it("remote test 发布脚本应只更新 deployment-remote-test.yaml", () => {
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      'IMAGE_NAME="${DOCKER_IMAGE_NAME:-uhub.service.ucloud.cn/tianqi/zcode-remote-mobile-test}"',
-    );
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      'DOCKERFILE="${DOCKERFILE:-Dockerfile.web-remote-control-test}"',
-    );
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      'K8S_DEPLOYMENT_FILE="${K8S_DEPLOYMENT_FILE:-zcode/frontend/deployment-remote-test.yaml}"',
-    );
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      'local branch_name="${K8S_BRANCH_NAME:-deploy/zcode-remote-mobile-test-$TAG}"',
-    );
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      'local mr_title="chore: update zcode remote test image to $TAG"',
-    );
-    expect(webRemoteControlTestPublishScriptSource).toContain(
-      "pnpm run build:web-remote-control:test",
-    );
-    expect(webRemoteControlTestPublishScriptSource).not.toContain("deployment-remote-v3.yaml");
-    expect(webRemoteControlTestPublishScriptSource).not.toContain("zcode-remote-mobile-v3");
-  });
+it("remote test 发布脚本应只更新 deployment-remote-test.yaml", () => {
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    'IMAGE_NAME="${DOCKER_IMAGE_NAME:-uhub.service.ucloud.cn/tianqi/zcode-remote-mobile-test}"',
+  );
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    'DOCKERFILE="${DOCKERFILE:-Dockerfile.web-remote-control-test}"',
+  );
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    'K8S_DEPLOYMENT_FILE="${K8S_DEPLOYMENT_FILE:-zcode/frontend/deployment-remote-test.yaml}"',
+  );
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    'local branch_name="${K8S_BRANCH_NAME:-deploy/zcode-remote-mobile-test-$TAG}"',
+  );
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    'local mr_title="chore: update zcode remote test image to $TAG"',
+  );
+  expect(webRemoteControlTestPublishScriptSource).toContain(
+    "pnpm run build:web-remote-control:test",
+  );
+  expect(webRemoteControlTestPublishScriptSource).not.toContain("deployment-remote-v3.yaml");
+  expect(webRemoteControlTestPublishScriptSource).not.toContain("zcode-remote-mobile-v3");
+});
 ```
 
 - [ ] **Step 2: Run tests and verify the red state**
@@ -818,6 +813,7 @@ git commit -m "feat(web): add remote test publish script"
 ### Task 4: Architecture Documentation
 
 **Files:**
+
 - Modify: `docs/web-remote-control/web-remote-control-architecture.md`
 
 - [ ] **Step 1: Update the static deployment section**
@@ -832,12 +828,12 @@ In the text block under that sentence, add the test chain after the v3 chain:
 
 ```markdown
 test:
-  -> pnpm run build:web-remote-control:test
-  -> packages/web/dist
-  -> Dockerfile.web-remote-control-test
-  -> uhub.service.ucloud.cn/tianqi/zcode-remote-mobile-test
-  -> zcode/frontend/deployment-remote-test.yaml
-  -> /remote/__test__
+-> pnpm run build:web-remote-control:test
+-> packages/web/dist
+-> Dockerfile.web-remote-control-test
+-> uhub.service.ucloud.cn/tianqi/zcode-remote-mobile-test
+-> zcode/frontend/deployment-remote-test.yaml
+-> /remote/**test**
 ```
 
 Replace the paragraph below the text block with:
@@ -892,6 +888,7 @@ git commit -m "docs: document remote test deployment"
 ### Task 5: Full Verification
 
 **Files:**
+
 - Verify changed files only; no edits unless a command exposes a concrete issue.
 
 - [ ] **Step 1: Run focused unit tests**

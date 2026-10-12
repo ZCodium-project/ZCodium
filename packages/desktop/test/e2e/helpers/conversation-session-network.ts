@@ -100,28 +100,17 @@ export async function getLatestUpstreamToolResultByToolCallId(
 ): Promise<UpstreamToolResultSnapshot | null> {
   const artifact = await readUpstreamCaptureArtifact();
   const records = artifact?.records ?? [];
-  for (
-    let recordIndex = records.length - 1;
-    recordIndex >= 0;
-    recordIndex -= 1
-  ) {
-    const result = readUpstreamToolResultFromRequest(
-      records[recordIndex]?.requestJson,
-      toolCallId,
-    );
+  for (let recordIndex = records.length - 1; recordIndex >= 0; recordIndex -= 1) {
+    const result = readUpstreamToolResultFromRequest(records[recordIndex]?.requestJson, toolCallId);
     if (result) return result;
   }
   return null;
 }
 
 /** 返回首个匹配 provider 请求实际暴露的工具名，用于核对 turn-scoped 工具权限边界。 */
-export async function getUpstreamRequestToolNames(
-  query: UpstreamRequestQuery,
-): Promise<string[]> {
+export async function getUpstreamRequestToolNames(query: UpstreamRequestQuery): Promise<string[]> {
   const record = await findUpstreamRequestRecord(query);
-  return readUpstreamRequestTools(record?.requestJson)
-    .map(readUpstreamToolName)
-    .filter(Boolean);
+  return readUpstreamRequestTools(record?.requestJson).map(readUpstreamToolName).filter(Boolean);
 }
 
 /** 返回首个匹配 provider 请求里的原始工具 contract，覆盖 description 与 input schema。 */
@@ -164,15 +153,8 @@ export async function findLastUpstreamRequestIndex(
   return null;
 }
 
-export async function waitForUpstreamRequestContaining(
-  text: string,
-  timeout = 30000,
-) {
-  await waitForUpstreamRequest(
-    { includes: [text] },
-    `没有捕获到 上游 请求 body: ${text}`,
-    timeout,
-  );
+export async function waitForUpstreamRequestContaining(text: string, timeout = 30000) {
+  await waitForUpstreamRequest({ includes: [text] }, `没有捕获到 上游 请求 body: ${text}`, timeout);
 }
 
 export async function waitForUpstreamRequest(
@@ -207,10 +189,7 @@ export async function waitForUpstreamRequest(
   }
 }
 
-export async function expectNoUpstreamRequestForTextWithin(
-  text: string,
-  durationMs: number,
-) {
+export async function expectNoUpstreamRequestForTextWithin(text: string, durationMs: number) {
   const before = await countUpstreamRequestsContaining(text);
   await browser.pause(durationMs);
   const after = await countUpstreamRequestsContaining(text);
@@ -259,12 +238,8 @@ function matchesUpstreamRequest(
     !captureContainsText(record.requestJson, "Generate a concise title") &&
     (query.includes ?? []).every((text) => captureContainsText(record.requestJson, text)) &&
     !(query.excludes ?? []).some((text) => captureContainsText(record.requestJson, text)) &&
-    (query.lastUserMessageIncludes ?? []).every((text) =>
-      latestUserMessageText.includes(text),
-    ) &&
-    !(query.lastUserMessageExcludes ?? []).some((text) =>
-      latestUserMessageText.includes(text),
-    )
+    (query.lastUserMessageIncludes ?? []).every((text) => latestUserMessageText.includes(text)) &&
+    !(query.lastUserMessageExcludes ?? []).some((text) => latestUserMessageText.includes(text))
   );
 }
 
@@ -276,9 +251,7 @@ function isUpstreamModelRequestPath(path: string): boolean {
 
 async function findUpstreamRequestRecord(query: UpstreamRequestQuery) {
   const artifact = await readUpstreamCaptureArtifact();
-  return (
-    artifact?.records.find((record) => matchesUpstreamRequest(record, query)) ?? null
-  );
+  return artifact?.records.find((record) => matchesUpstreamRequest(record, query)) ?? null;
 }
 
 function readUpstreamRequestTools(requestJson: unknown): unknown[] {
@@ -325,11 +298,7 @@ export function readUpstreamToolResultFromRequest(
   if (!requestJson || typeof requestJson !== "object") return null;
   const messages = (requestJson as { messages?: unknown }).messages;
   if (!Array.isArray(messages)) return null;
-  for (
-    let messageIndex = messages.length - 1;
-    messageIndex >= 0;
-    messageIndex -= 1
-  ) {
+  for (let messageIndex = messages.length - 1; messageIndex >= 0; messageIndex -= 1) {
     const message = messages[messageIndex];
     if (!message || typeof message !== "object") continue;
     const content = (message as { content?: unknown }).content;
@@ -343,10 +312,7 @@ export function readUpstreamToolResultFromRequest(
         tool_use_id?: unknown;
         type?: unknown;
       };
-      if (
-        record.type !== "tool_result" ||
-        record.tool_use_id !== toolCallId
-      ) {
+      if (record.type !== "tool_result" || record.tool_use_id !== toolCallId) {
         continue;
       }
       return {

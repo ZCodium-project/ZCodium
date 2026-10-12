@@ -1679,7 +1679,10 @@ describe("CreateWorkflowToolCallBlock 名册站", () => {
     expect(row.tagName).toBe("BUTTON");
     expect(row.getAttribute("data-more-count")).toBe("55");
     fireEvent.click(row);
-    expect(onOpenWorkflowRun).toHaveBeenCalledWith({ workflowName: "bug-scan", phaseId: "phase#a" });
+    expect(onOpenWorkflowRun).toHaveBeenCalledWith({
+      workflowName: "bug-scan",
+      phaseId: "phase#a",
+    });
     // 站头（有回调时是按钮，title = 站名）同一条路。
     fireEvent.click(view.getByTitle("review"));
     expect(onOpenWorkflowRun).toHaveBeenCalledTimes(2);
@@ -1976,7 +1979,10 @@ describe("CreateWorkflowToolCallBlock as AmendWorkflow", () => {
       expect(zhCN[key as keyof typeof zhCN], key).toBeTruthy();
     }
     // 旧 lineage 键随 resume_from 一起退场；卡上的两句 lineage（调整自 / 已被替代）按用户裁决不画，键也不留。
-    for (const gone of ["chat.toolCall.workflow.card.supersededBy", "chat.toolCall.workflow.card.amends"]) {
+    for (const gone of [
+      "chat.toolCall.workflow.card.supersededBy",
+      "chat.toolCall.workflow.card.amends",
+    ]) {
       expect((enUS as Record<string, string>)[gone], gone).toBeUndefined();
       expect((zhCN as Record<string, string>)[gone], gone).toBeUndefined();
     }
@@ -2002,8 +2008,14 @@ describe("CreateWorkflowToolCallBlock as AmendWorkflow", () => {
   });
 
   it.each([
-    [{ run_id: "r", max_concurrency: 4 }, { runId: "r", requested: 4 }],
-    [{ run_id: "r", max_concurrency: null }, { runId: "r", requested: null }],
+    [
+      { run_id: "r", max_concurrency: 4 },
+      { runId: "r", requested: 4 },
+    ],
+    [
+      { run_id: "r", max_concurrency: null },
+      { runId: "r", requested: null },
+    ],
     // 带了脚本来源：这次修订要编译，不是就地生效的形状。
     [{ run_id: "r", max_concurrency: 4, script: "phase('a')" }, undefined],
     [{ run_id: "r", max_concurrency: 4, path: ".zcode/workflow-drafts/x.dwf.ts" }, undefined],
@@ -2281,7 +2293,12 @@ describe("ConversationRowView 把工具卡的产物药丸变成打开请求", ()
   it.each([
     ["请求高于默认", { run_id: "run-7", max_concurrency: 40 }, 13, "at most 40 at once"],
     ["请求正好是默认", { run_id: "run-7", max_concurrency: 13 }, 13, "limit back to the default"],
-    ["解除上限（null）", { run_id: "run-7", max_concurrency: null }, 13, "limit back to the default"],
+    [
+      "解除上限（null）",
+      { run_id: "run-7", max_concurrency: null },
+      13,
+      "limit back to the default",
+    ],
     ["请求低于默认", { run_id: "run-7", max_concurrency: 4 }, 13, "at most 4 at once"],
     // 默认未知（那条 run 已被淘汰出投影）：只能照念请求值。
     ["默认未知", { run_id: "run-7", max_concurrency: 4 }, undefined, "at most 4 at once"],

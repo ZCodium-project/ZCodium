@@ -14,12 +14,8 @@ import { resolveVerticalScrollMaskState } from "../src/mentions/components/scrol
 
 describe("mention search hint copy", () => {
   it("只提示插件、文件和对话，不再提及画板", () => {
-    expect(zhCN["chat.mention.searchHint"]).toBe(
-      "输入内容以搜索插件、文件或对话",
-    );
-    expect(enUS["chat.mention.searchHint"]).toBe(
-      "Type to search plugins, files, or conversations",
-    );
+    expect(zhCN["chat.mention.searchHint"]).toBe("输入内容以搜索插件、文件或对话");
+    expect(enUS["chat.mention.searchHint"]).toBe("Type to search plugins, files, or conversations");
   });
 });
 
@@ -71,7 +67,14 @@ describe("buildVirtualRows", () => {
 
   it("shows loading status row when section is loading", () => {
     const sections: MentionPanelSection[] = [
-      { id: "files", title: "Files", options: [], emptyText: "No files", loading: true, loadingText: "Loading..." },
+      {
+        id: "files",
+        title: "Files",
+        options: [],
+        emptyText: "No files",
+        loading: true,
+        loadingText: "Loading...",
+      },
     ];
     const rows = buildVirtualRows(sections);
     expect(rows).toHaveLength(1);
@@ -80,7 +83,13 @@ describe("buildVirtualRows", () => {
 
   it("shows error status row when section has error", () => {
     const sections: MentionPanelSection[] = [
-      { id: "files", title: "Files", options: [], emptyText: "No files", errorText: "Failed to load" },
+      {
+        id: "files",
+        title: "Files",
+        options: [],
+        emptyText: "No files",
+        errorText: "Failed to load",
+      },
     ];
     const rows = buildVirtualRows(sections);
     expect(rows).toHaveLength(1);
@@ -143,9 +152,7 @@ describe("buildVirtualRows", () => {
 
     expect(html.indexOf('role="listbox"')).toBeGreaterThanOrEqual(0);
     expect(html.indexOf("Type to search")).toBeGreaterThanOrEqual(0);
-    expect(html.indexOf('role="listbox"')).toBeLessThan(
-      html.indexOf("Type to search"),
-    );
+    expect(html.indexOf('role="listbox"')).toBeLessThan(html.indexOf("Type to search"));
   });
 });
 

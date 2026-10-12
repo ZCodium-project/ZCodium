@@ -1,7 +1,4 @@
-import type {
-  ZCodeAutomationRunOutcome,
-  ZCodeAutomationTrigger,
-} from "@zcode/shared";
+import type { ZCodeAutomationRunOutcome, ZCodeAutomationTrigger } from "@zcode/shared";
 
 export interface CronRunLifecycleRepo {
   ensureRunClaimed(params: {
@@ -11,11 +8,7 @@ export interface CronRunLifecycleRepo {
     scheduledAt: number | null;
     trigger: ZCodeAutomationTrigger;
   }): Promise<void>;
-  markRunOutcome(
-    runId: string,
-    outcome: ZCodeAutomationRunOutcome,
-    error?: string,
-  ): Promise<void>;
+  markRunOutcome(runId: string, outcome: ZCodeAutomationRunOutcome, error?: string): Promise<void>;
   markRunDispatch(params: {
     runId: string;
     dispatchStatus: "failed_to_dispatch";

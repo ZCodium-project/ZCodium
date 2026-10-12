@@ -403,9 +403,11 @@ export async function waitForDisplayedPluginControl(
 export async function addMarketplaceSourceThroughUi(source: string): Promise<void> {
   await waitForPluginControl("plugin-store-create");
   await browser.execute(() => {
-    document.querySelector<HTMLElement>('[data-testid="plugin-store-create"]')?.dispatchEvent(
-      new PointerEvent("pointerdown", { bubbles: true, button: 0, pointerType: "mouse" }),
-    );
+    document
+      .querySelector<HTMLElement>('[data-testid="plugin-store-create"]')
+      ?.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, button: 0, pointerType: "mouse" }),
+      );
   });
   await waitForPluginControl("plugin-store-add-source-menu-item");
   await clickPluginControl("plugin-store-add-source-menu-item");

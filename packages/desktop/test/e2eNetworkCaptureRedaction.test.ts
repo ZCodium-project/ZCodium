@@ -8,7 +8,7 @@ import {
   redactE2ENetworkCaptureJson,
   redactE2ENetworkCaptureJsonText,
   sanitizeE2ENetworkCaptureHeaders,
-  shouldRecordE2ENetworkResponseChunkTimeline
+  shouldRecordE2ENetworkResponseChunkTimeline,
 } from "./e2e/helpers/e2e-network-capture-redaction.js";
 import { removeUnusableE2ENetworkCaptureLeafCertificates } from "./e2e/helpers/network-capture-proxy.js";
 
@@ -19,13 +19,13 @@ describe("E2E network capture redaction", () => {
         authorization: "Bearer secret",
         "content-type": "application/json",
         "x-api-key": "user-api-key",
-        "x-session-id": "session-safe-to-record"
-      })
+        "x-session-id": "session-safe-to-record",
+      }),
     ).toEqual({
       authorization: E2E_NETWORK_CAPTURE_REDACTION_VALUE,
       "content-type": "application/json",
       "x-api-key": E2E_NETWORK_CAPTURE_REDACTION_VALUE,
-      "x-session-id": "session-safe-to-record"
+      "x-session-id": "session-safe-to-record",
     });
   });
 
@@ -35,23 +35,23 @@ describe("E2E network capture redaction", () => {
         code: 200,
         data: {
           keyCipher: "encrypted-pkcs8",
-          provider: "stagingModel"
+          provider: "stagingModel",
         },
         request: {
           apiKey: "user-api-key",
-          sig: "handshake-signature"
-        }
-      })
+          sig: "handshake-signature",
+        },
+      }),
     ).toEqual({
       code: 200,
       data: {
         keyCipher: E2E_NETWORK_CAPTURE_REDACTION_VALUE,
-        provider: "stagingModel"
+        provider: "stagingModel",
       },
       request: {
         apiKey: E2E_NETWORK_CAPTURE_REDACTION_VALUE,
-        sig: E2E_NETWORK_CAPTURE_REDACTION_VALUE
-      }
+        sig: E2E_NETWORK_CAPTURE_REDACTION_VALUE,
+      },
     });
   });
 
@@ -59,13 +59,13 @@ describe("E2E network capture redaction", () => {
     const preview = redactE2ENetworkCaptureJsonText(
       JSON.stringify({
         code: 200,
-        data: { keyCipher: "encrypted-pkcs8" }
-      })
+        data: { keyCipher: "encrypted-pkcs8" },
+      }),
     );
 
     expect(JSON.parse(preview)).toEqual({
       code: 200,
-      data: { keyCipher: E2E_NETWORK_CAPTURE_REDACTION_VALUE }
+      data: { keyCipher: E2E_NETWORK_CAPTURE_REDACTION_VALUE },
     });
     expect(preview).not.toContain("encrypted-pkcs8");
   });
@@ -73,18 +73,18 @@ describe("E2E network capture redaction", () => {
   it("records raw response chunks only for SSE streams", () => {
     expect(
       shouldRecordE2ENetworkResponseChunkTimeline(true, {
-        "content-type": "application/json; charset=utf-8"
-      })
+        "content-type": "application/json; charset=utf-8",
+      }),
     ).toBe(false);
     expect(
       shouldRecordE2ENetworkResponseChunkTimeline(true, {
-        "content-type": "text/event-stream; charset=utf-8"
-      })
+        "content-type": "text/event-stream; charset=utf-8",
+      }),
     ).toBe(true);
     expect(
       shouldRecordE2ENetworkResponseChunkTimeline(false, {
-        "content-type": "text/event-stream; charset=utf-8"
-      })
+        "content-type": "text/event-stream; charset=utf-8",
+      }),
     ).toBe(false);
   });
 
@@ -109,24 +109,26 @@ describe("E2E network capture redaction", () => {
         writeFile(join(keysDir, `${expiredHost}.key`), expired.privateKey),
         writeFile(join(keysDir, `${expiredHost}.public.key`), "expired-public-key"),
         writeFile(join(keysDir, `${freshHost}.key`), fresh.privateKey),
-        writeFile(join(keysDir, `${mismatchedHost}.key`), fresh.privateKey)
+        writeFile(join(keysDir, `${mismatchedHost}.key`), fresh.privateKey),
       ]);
 
       await removeUnusableE2ENetworkCaptureLeafCertificates(root, new Date("2030-01-01T00:00:00Z"));
 
       await expect(readFile(join(certsDir, `${expiredHost}.pem`))).rejects.toMatchObject({
-        code: "ENOENT"
+        code: "ENOENT",
       });
       await expect(readFile(join(keysDir, `${expiredHost}.key`))).rejects.toMatchObject({
-        code: "ENOENT"
+        code: "ENOENT",
       });
       await expect(readFile(join(keysDir, `${expiredHost}.public.key`))).rejects.toMatchObject({
-        code: "ENOENT"
+        code: "ENOENT",
       });
       await expect(readFile(join(certsDir, `${mismatchedHost}.pem`))).rejects.toMatchObject({
-        code: "ENOENT"
+        code: "ENOENT",
       });
-      await expect(readFile(join(certsDir, `${freshHost}.pem`), "utf8")).resolves.toContain("BEGIN CERTIFICATE");
+      await expect(readFile(join(certsDir, `${freshHost}.pem`), "utf8")).resolves.toContain(
+        "BEGIN CERTIFICATE",
+      );
       await expect(readFile(join(certsDir, "ca.pem"), "utf8")).resolves.toBe("root-ca");
     } finally {
       await rm(root, { force: true, recursive: true });
@@ -134,7 +136,10 @@ describe("E2E network capture redaction", () => {
   });
 });
 
-function createCertificate(commonName: string, notAfter: Date): { certificate: string; privateKey: string } {
+function createCertificate(
+  commonName: string,
+  notAfter: Date,
+): { certificate: string; privateKey: string } {
   const keys = forge.pki.rsa.generateKeyPair(1024);
   const certificate = forge.pki.createCertificate();
   certificate.publicKey = keys.publicKey;
@@ -146,6 +151,6 @@ function createCertificate(commonName: string, notAfter: Date): { certificate: s
   certificate.sign(keys.privateKey, forge.md.sha256.create());
   return {
     certificate: forge.pki.certificateToPem(certificate),
-    privateKey: forge.pki.privateKeyToPem(keys.privateKey)
+    privateKey: forge.pki.privateKeyToPem(keys.privateKey),
   };
 }

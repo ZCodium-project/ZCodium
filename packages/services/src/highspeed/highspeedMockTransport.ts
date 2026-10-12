@@ -32,8 +32,7 @@ export function createHighspeedMockTransport(options?: {
       }
       const taskId =
         scenario === "existing-foreign-task-card" ? "mock-foreign-task" : request.task_id;
-      const expiresAt =
-        scenario === "expired-card" ? current - 1 : current + MOCK_CARD_LIFETIME_MS;
+      const expiresAt = scenario === "expired-card" ? current - 1 : current + MOCK_CARD_LIFETIME_MS;
       return {
         code: 0,
         msg: "success",

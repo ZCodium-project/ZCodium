@@ -53,16 +53,16 @@
 
 字段含义：
 
-| 字段 | 含义 |
-| --- | --- |
-| `id` | 稳定 case id 或 fixture id，必须非空 |
-| `code` | Node 风格错误码，如 `ENOSPC`、`EACCES`、`EPERM` |
-| `operations` | 匹配的 fs / storage 操作；支持 `mkdir`、`writeFile`、`appendFile`、`rename`、`rm`、`sqliteOpen`、`sqliteRun`、`any` |
-| `pathIncludes` | 路径包含匹配；路径会统一把 `\` 规范成 `/` |
-| `pathEndsWith` | 路径后缀匹配 |
-| `pathRegex` | 正则匹配规范化后的路径 |
-| `maxMatches` | 最大命中次数；默认 `1`；`0` 表示无限命中 |
-| `message` | 注入错误的可读说明 |
+| 字段           | 含义                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `id`           | 稳定 case id 或 fixture id，必须非空                                                                                |
+| `code`         | Node 风格错误码，如 `ENOSPC`、`EACCES`、`EPERM`                                                                     |
+| `operations`   | 匹配的 fs / storage 操作；支持 `mkdir`、`writeFile`、`appendFile`、`rename`、`rm`、`sqliteOpen`、`sqliteRun`、`any` |
+| `pathIncludes` | 路径包含匹配；路径会统一把 `\` 规范成 `/`                                                                           |
+| `pathEndsWith` | 路径后缀匹配                                                                                                        |
+| `pathRegex`    | 正则匹配规范化后的路径                                                                                              |
+| `maxMatches`   | 最大命中次数；默认 `1`；`0` 表示无限命中                                                                            |
+| `message`      | 注入错误的可读说明                                                                                                  |
 
 匹配规则：
 
@@ -90,13 +90,13 @@
 
 每条存储 fault E2E 至少要保留这些证据：
 
-| 层 | 证据 |
-| --- | --- |
-| UI | 用户可见错误、按钮状态、queue/runtime 是否符合产品预期 |
-| Runtime | `activeInputId`、queue、session status、compact marker |
-| Files | 目标文件是否缺失、部分写入、损坏或恢复成功 |
-| Log | 同一 `sessionId` / `inputId` 的错误码和恢复日志 |
-| Fault artifact | 命中的 `id`、`operation`、`path`、`code`、命中次数 |
+| 层             | 证据                                                   |
+| -------------- | ------------------------------------------------------ |
+| UI             | 用户可见错误、按钮状态、queue/runtime 是否符合产品预期 |
+| Runtime        | `activeInputId`、queue、session status、compact marker |
+| Files          | 目标文件是否缺失、部分写入、损坏或恢复成功             |
+| Log            | 同一 `sessionId` / `inputId` 的错误码和恢复日志        |
+| Fault artifact | 命中的 `id`、`operation`、`path`、`code`、命中次数     |
 
 ## 当前状态
 

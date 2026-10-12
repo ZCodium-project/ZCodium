@@ -14,15 +14,16 @@ These snapshot capabilities are available for running end-to-end tests within th
 :::
 
 ## Use Snapshots
+
 To snapshot a value, you can use the `toMatchSnapshot()` from [`expect()`](/docs/api/expect-webdriverio) API:
 
 ```ts
-import { browser, expect } from '@wdio/globals'
+import { browser, expect } from "@wdio/globals";
 
-it('can take a DOM snapshot', () => {
-    await browser.url('https://guinea-pig.webdriver.io/')
-    await expect($('.findme')).toMatchSnapshot()
-})
+it("can take a DOM snapshot", () => {
+  await browser.url("https://guinea-pig.webdriver.io/");
+  await expect($(".findme")).toMatchSnapshot();
+});
 ```
 
 The first time this test is run, WebdriverIO creates a snapshot file that looks like this:
@@ -30,7 +31,8 @@ The first time this test is run, WebdriverIO creates a snapshot file that looks 
 ```js
 // Snapshot v1
 
-exports[`main suite 1 > can take a DOM snapshot 1`] = `"<h1 class="findme">Test CSS Attributes</h1>"`;
+exports[`main suite 1 > can take a DOM snapshot 1`] =
+  `"<h1 class="findme">Test CSS Attributes</h1>"`;
 ```
 
 The snapshot artifact should be committed alongside code changes, and reviewed as part of your code review process. On subsequent test runs, WebdriverIO will compare the rendered output with the previous snapshot. If they match, the test will pass. If they don't match, either the test runner found a bug in your code that should be fixed, or the implementation has changed and the snapshot needs to be updated.
@@ -41,29 +43,29 @@ To update the snapshot, pass in the `-s` flag (or `--updateSnapshot`) to the `wd
 npx wdio run wdio.conf.js -s
 ```
 
-__Note:__ if you run tests with multiple browsers in parallel only one snapshot is being created and compared against. If you like to have a separate snapshot per capability, please [raise an issue](https://github.com/webdriverio/webdriverio/issues/new?assignees=&labels=Idea+%F0%9F%92%A1%2CNeeds+Triaging+%E2%8F%B3&projects=&template=feature-request.yml&title=%5B%F0%9F%92%A1+Feature%5D%3A+%3Ctitle%3E) and let us know about your use case.
+**Note:** if you run tests with multiple browsers in parallel only one snapshot is being created and compared against. If you like to have a separate snapshot per capability, please [raise an issue](https://github.com/webdriverio/webdriverio/issues/new?assignees=&labels=Idea+%F0%9F%92%A1%2CNeeds+Triaging+%E2%8F%B3&projects=&template=feature-request.yml&title=%5B%F0%9F%92%A1+Feature%5D%3A+%3Ctitle%3E) and let us know about your use case.
 
 ## Inline Snapshots
 
 Similarly, you can use the `toMatchInlineSnapshot()` to store the snapshot inline within the test file.
 
 ```ts
-import { expect, $ } from '@wdio/globals'
+import { expect, $ } from "@wdio/globals";
 
-it('can take inline DOM snapshots', () => {
-  const elem = $('.container')
-  await expect(elem.getCSSProperty()).toMatchInlineSnapshot()
-})
+it("can take inline DOM snapshots", () => {
+  const elem = $(".container");
+  await expect(elem.getCSSProperty()).toMatchInlineSnapshot();
+});
 ```
 
 Instead of creating a snapshot file, Vitest will modify the test file directly to update the snapshot as a string:
 
 ```ts
-import { expect, $ } from '@wdio/globals'
+import { expect, $ } from "@wdio/globals";
 
-it('can take inline DOM snapshots', () => {
-    const elem = $('.container')
-    await expect(elem.getCSSProperty()).toMatchInlineSnapshot(`
+it("can take inline DOM snapshots", () => {
+  const elem = $(".container");
+  await expect(elem.getCSSProperty()).toMatchInlineSnapshot(`
         {
             "parsed": {
                 "alpha": 0,
@@ -74,8 +76,8 @@ it('can take inline DOM snapshots', () => {
             "property": "background-color",
             "value": "rgba(0,0,0,0)",
         }
-    `)
-})
+    `);
+});
 ```
 
 This allows you to see the expected output directly without jumping across different files.
@@ -89,12 +91,12 @@ To enable visual snapshots, add the `@wdio/visual-service` to your setup. You ca
 You can then take a visual snapshot via `toMatchElementSnapshot()`, e.g.:
 
 ```ts
-import { expect, $ } from '@wdio/globals'
+import { expect, $ } from "@wdio/globals";
 
-it('can take inline DOM snapshots', () => {
-  const elem = $('.container')
-  await expect(elem.getCSSProperty()).toMatchInlineSnapshot()
-})
+it("can take inline DOM snapshots", () => {
+  const elem = $(".container");
+  await expect(elem.getCSSProperty()).toMatchInlineSnapshot();
+});
 ```
 
 An image is then stored in the baseline directory. Check out the [Visual Testing](/docs/visual-testing) for more information.

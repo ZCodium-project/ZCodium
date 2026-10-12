@@ -20,22 +20,24 @@ These docs leave out Safari web extensions as their support for it is way behind
 Loading a web extension in Chrome can be done through providing a `base64` encoded string of the `crx` file or by providing a path to the web extension folder. The easiest is just to do the latter by defining your Chrome capabilities as following:
 
 ```js wdio.conf.js
-import path from 'node:path'
-import url from 'node:url'
+import path from "node:path";
+import url from "node:url";
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 export const config = {
-    // ...
-    capabilities: [{
-        browserName,
-        'goog:chromeOptions': {
-            // given your wdio.conf.js is in the root directory and your compiled
-            // web extension files are located in the `./dist` folder
-            args: [`--load-extension=${path.join(__dirname, '..', '..', 'dist')}`]
-        }
-    }]
-}
+  // ...
+  capabilities: [
+    {
+      browserName,
+      "goog:chromeOptions": {
+        // given your wdio.conf.js is in the root directory and your compiled
+        // web extension files are located in the `./dist` folder
+        args: [`--load-extension=${path.join(__dirname, "..", "..", "dist")}`],
+      },
+    },
+  ],
+};
 ```
 
 :::info
@@ -47,22 +49,24 @@ If you automate a different browser than Chrome, e.g. Brave, Edge or Opera, chan
 If you compile your extension as `.crx` file using e.g. the [crx](https://www.npmjs.com/package/crx) NPM package, you can also inject the bundled extension via:
 
 ```js wdio.conf.js
-import path from 'node:path'
-import url from 'node:url'
+import path from "node:path";
+import url from "node:url";
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const extPath = path.join(__dirname, `web-extension-chrome.crx`)
-const chromeExtension = (await fs.readFile(extPath)).toString('base64')
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+const extPath = path.join(__dirname, `web-extension-chrome.crx`);
+const chromeExtension = (await fs.readFile(extPath)).toString("base64");
 
 export const config = {
-    // ...
-    capabilities: [{
-        browserName,
-        'goog:chromeOptions': {
-            extensions: [chromeExtension]
-        }
-    }]
-}
+  // ...
+  capabilities: [
+    {
+      browserName,
+      "goog:chromeOptions": {
+        extensions: [chromeExtension],
+      },
+    },
+  ],
+};
 ```
 
 ### Firefox
@@ -105,31 +109,37 @@ If you define a `default_popup` browser action entry in your [extension manifest
 In Chrome this works by retrieving the extension ID and opening the popup page through `browser.url('...')`. The behavior on that page will be the same as within the popup. To do so we recommend to write the following custom command:
 
 ```ts customCommand.ts
-export async function openExtensionPopup (this: WebdriverIO.Browser, extensionName: string, popupUrl = 'index.html') {
-  if ((this.capabilities as WebdriverIO.Capabilities).browserName !== 'chrome') {
-    throw new Error('This command only works with Chrome')
+export async function openExtensionPopup(
+  this: WebdriverIO.Browser,
+  extensionName: string,
+  popupUrl = "index.html",
+) {
+  if ((this.capabilities as WebdriverIO.Capabilities).browserName !== "chrome") {
+    throw new Error("This command only works with Chrome");
   }
-  await this.url('chrome://extensions/')
+  await this.url("chrome://extensions/");
 
-  const extensions = await this.$$('extensions-item')
-  const extension = await extensions.find(async (ext) => (
-    await ext.$('#name').getText()) === extensionName
-  )
+  const extensions = await this.$$("extensions-item");
+  const extension = await extensions.find(
+    async (ext) => (await ext.$("#name").getText()) === extensionName,
+  );
 
   if (!extension) {
-    const installedExtensions = await extensions.map((ext) => ext.$('#name').getText())
-    throw new Error(`Couldn't find extension "${extensionName}", available installed extensions are "${installedExtensions.join('", "')}"`)
+    const installedExtensions = await extensions.map((ext) => ext.$("#name").getText());
+    throw new Error(
+      `Couldn't find extension "${extensionName}", available installed extensions are "${installedExtensions.join('", "')}"`,
+    );
   }
 
-  const extId = await extension.getAttribute('id')
-  await this.url(`chrome-extension://${extId}/popup/${popupUrl}`)
+  const extId = await extension.getAttribute("id");
+  await this.url(`chrome-extension://${extId}/popup/${popupUrl}`);
 }
 
 declare global {
   namespace WebdriverIO {
-      interface Browser {
-        openExtensionPopup: typeof openExtensionPopup
-      }
+    interface Browser {
+      openExtensionPopup: typeof openExtensionPopup;
+    }
   }
 }
 ```
@@ -137,20 +147,20 @@ declare global {
 In your `wdio.conf.js` you can import this file and register the custom command in your `before` hook, e.g.:
 
 ```ts wdio.conf.ts
-import { browser } from '@wdio/globals'
+import { browser } from "@wdio/globals";
 
-import { openExtensionPopup } from './support/customCommands'
+import { openExtensionPopup } from "./support/customCommands";
 
 export const config: WebdriverIO.Config = {
   // ...
   before: () => {
-    browser.addCommand('openExtensionPopup', openExtensionPopup)
-  }
-}
+    browser.addCommand("openExtensionPopup", openExtensionPopup);
+  },
+};
 ```
 
 Now, in your test, you can access the popup page via:
 
 ```ts
-await browser.openExtensionPopup('My Web Extension')
+await browser.openExtensionPopup("My Web Extension");
 ```

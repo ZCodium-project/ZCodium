@@ -8,40 +8,40 @@
 
 ## UI Operation Inventory
 
-| ID | UI 操作 | 期望行为 | 证据层 |
-| --- | --- | --- | --- |
-| GCD01 | 点击顶部 Git “提交或推送”主按钮 | dirty 仓库打开提交弹窗；按钮右侧不再出现三点下拉 | DOM / dialog |
-| GCD02 | 打开提交弹窗 | 显示标准 overlay；弹窗宽度为紧凑 `max-w-md`；顶部显示当前分支和 `+/-` 统计 | DOM / layout |
-| GCD03 | 弹窗内容加载完成 | 自动聚焦提交信息输入框 | activeElement |
-| GCD04 | 点击顶部当前分支 | 展开可切换分支列表；提交弹窗不显示分支 footer 操作 | DOM / branch list |
-| GCD05 | 手动输入提交信息 | 输入框保留焦点和输入内容 | DOM value |
-| GCD06 | 点击右下角 Sparkles 生成按钮 | 只生成并填充提交信息，不自动提交 | service / DOM value |
-| GCD07 | 切换“包含未暂存的更改” | checkbox 使用 shadcn 风格；开关会影响文件计数和后续 stage/commit scope | DOM / service payload |
-| GCD08 | 聚焦提交信息输入框时按 ArrowDown / ArrowUp | 下方 Command 选中动作在“提交 / 提交并推送 / 推送”之间切换 | DOM selected state |
-| GCD09 | 聚焦底部 Command 时按 ArrowDown / ArrowUp | 同样切换选中动作；不显示对号，只显示选中项快捷键 badge | DOM selected state |
-| GCD10 | 按主快捷键 + Enter | macOS 使用 Command+Enter，Windows/Linux 使用 Ctrl+Enter，触发当前选中动作 | keyboard / service call |
-| GCD11 | 选择“提交” | 必须手动提交；如果输入为空才先生成 Conventional Commit message 后提交 | service call / git state |
-| GCD12 | 选择“提交并推送” | 成功提交后立即 push 当前分支 | service call / git state |
-| GCD13 | clean 且 ahead 仓库点击主按钮 | 主按钮变为推送路径，打开推送弹窗 | DOM / service call |
+| ID    | UI 操作                                    | 期望行为                                                                   | 证据层                   |
+| ----- | ------------------------------------------ | -------------------------------------------------------------------------- | ------------------------ |
+| GCD01 | 点击顶部 Git “提交或推送”主按钮            | dirty 仓库打开提交弹窗；按钮右侧不再出现三点下拉                           | DOM / dialog             |
+| GCD02 | 打开提交弹窗                               | 显示标准 overlay；弹窗宽度为紧凑 `max-w-md`；顶部显示当前分支和 `+/-` 统计 | DOM / layout             |
+| GCD03 | 弹窗内容加载完成                           | 自动聚焦提交信息输入框                                                     | activeElement            |
+| GCD04 | 点击顶部当前分支                           | 展开可切换分支列表；提交弹窗不显示分支 footer 操作                         | DOM / branch list        |
+| GCD05 | 手动输入提交信息                           | 输入框保留焦点和输入内容                                                   | DOM value                |
+| GCD06 | 点击右下角 Sparkles 生成按钮               | 只生成并填充提交信息，不自动提交                                           | service / DOM value      |
+| GCD07 | 切换“包含未暂存的更改”                     | checkbox 使用 shadcn 风格；开关会影响文件计数和后续 stage/commit scope     | DOM / service payload    |
+| GCD08 | 聚焦提交信息输入框时按 ArrowDown / ArrowUp | 下方 Command 选中动作在“提交 / 提交并推送 / 推送”之间切换                  | DOM selected state       |
+| GCD09 | 聚焦底部 Command 时按 ArrowDown / ArrowUp  | 同样切换选中动作；不显示对号，只显示选中项快捷键 badge                     | DOM selected state       |
+| GCD10 | 按主快捷键 + Enter                         | macOS 使用 Command+Enter，Windows/Linux 使用 Ctrl+Enter，触发当前选中动作  | keyboard / service call  |
+| GCD11 | 选择“提交”                                 | 必须手动提交；如果输入为空才先生成 Conventional Commit message 后提交      | service call / git state |
+| GCD12 | 选择“提交并推送”                           | 成功提交后立即 push 当前分支                                               | service call / git state |
+| GCD13 | clean 且 ahead 仓库点击主按钮              | 主按钮变为推送路径，打开推送弹窗                                           | DOM / service call       |
 
 ## Pruning Decisions
 
-| Candidate | Decision | Reason |
-| --- | --- | --- |
-| GCD01/GCD02/GCD03/GCD04/GCD05/GCD07/GCD08/GCD09 | accepted | 纯 UI / 本地 Git 状态可稳定构造，不需要 provider 请求或远端 remote |
-| GCD06 | planned | 需要 case-local provider replay 或 manual capture；不能混进纯 UI case |
-| GCD10 | planned | 需要验证平台快捷键映射和动作触发；适合单独做 no-push commit service 断言 |
-| GCD11 | planned | 会改变 Git 历史，应单独构造 disposable repo 并断言 commit message / staged paths |
-| GCD12/GCD13 | planned | 需要 remote/upstream fixture，不能和提交弹窗基础 UI 混测 |
+| Candidate                                       | Decision | Reason                                                                           |
+| ----------------------------------------------- | -------- | -------------------------------------------------------------------------------- |
+| GCD01/GCD02/GCD03/GCD04/GCD05/GCD07/GCD08/GCD09 | accepted | 纯 UI / 本地 Git 状态可稳定构造，不需要 provider 请求或远端 remote               |
+| GCD06                                           | planned  | 需要 case-local provider replay 或 manual capture；不能混进纯 UI case            |
+| GCD10                                           | planned  | 需要验证平台快捷键映射和动作触发；适合单独做 no-push commit service 断言         |
+| GCD11                                           | planned  | 会改变 Git 历史，应单独构造 disposable repo 并断言 commit message / staged paths |
+| GCD12/GCD13                                     | planned  | 需要 remote/upstream fixture，不能和提交弹窗基础 UI 混测                         |
 
 ## E2E Case Plan
 
-| Case | Path | Status | Setup | Action | Assert |
-| --- | --- | --- | --- | --- | --- |
-| GCD-UI-01 | `packages/desktop/test/e2e/git/git-commit-dialog-ui-flow.test.ts` | formal | WDIO 启动前把默认 workspace 初始化为 Git repo，包含 staged、unstaged 和第二个本地分支 | 打开提交弹窗，输入提交信息，切换 checkbox，方向键切换 Command，展开分支列表 | 弹窗 overlay 存在，输入框自动聚焦，按钮 / checkbox / Command / branch list 状态符合预期 |
-| GCD-GEN-01 | 待定 | planned | case-local provider replay + dirty repo | 点击 Sparkles 生成 | 输入框填入 Conventional Commit message，未触发 commit |
-| GCD-COMMIT-01 | 待定 | planned | disposable repo + no remote | 手动输入 message，Cmd/Ctrl+Enter 触发“提交” | Git 历史新增 commit；只 stage 当前 scope 文件 |
-| GCD-PUSH-01 | 待定 | planned | disposable bare remote + ahead branch | clean ahead 点击主按钮 | 打开推送弹窗并执行 push / set-upstream |
+| Case          | Path                                                              | Status  | Setup                                                                                 | Action                                                                      | Assert                                                                                  |
+| ------------- | ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| GCD-UI-01     | `packages/desktop/test/e2e/git/git-commit-dialog-ui-flow.test.ts` | formal  | WDIO 启动前把默认 workspace 初始化为 Git repo，包含 staged、unstaged 和第二个本地分支 | 打开提交弹窗，输入提交信息，切换 checkbox，方向键切换 Command，展开分支列表 | 弹窗 overlay 存在，输入框自动聚焦，按钮 / checkbox / Command / branch list 状态符合预期 |
+| GCD-GEN-01    | 待定                                                              | planned | case-local provider replay + dirty repo                                               | 点击 Sparkles 生成                                                          | 输入框填入 Conventional Commit message，未触发 commit                                   |
+| GCD-COMMIT-01 | 待定                                                              | planned | disposable repo + no remote                                                           | 手动输入 message，Cmd/Ctrl+Enter 触发“提交”                                 | Git 历史新增 commit；只 stage 当前 scope 文件                                           |
+| GCD-PUSH-01   | 待定                                                              | planned | disposable bare remote + ahead branch                                                 | clean ahead 点击主按钮                                                      | 打开推送弹窗并执行 push / set-upstream                                                  |
 
 ## Handoff Notes
 

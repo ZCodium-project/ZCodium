@@ -95,10 +95,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": [
-          "E2E_CHANGES_GROUP_UNRESOLVED_PATH",
-          "toolu_tge07_write"
-        ],
+        "bodyIncludes": ["E2E_CHANGES_GROUP_UNRESOLVED_PATH", "toolu_tge07_write"],
         "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": { "statusCode": 200, "text": "upstream-e2e-ok" }
@@ -116,7 +113,11 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": ["E2E_CHANGES_GROUP_UNRESOLVED_PATH", "toolu_tge07_write", "CRITICAL: Respond with TEXT ONLY"],
+        "bodyIncludes": [
+          "E2E_CHANGES_GROUP_UNRESOLVED_PATH",
+          "toolu_tge07_write",
+          "CRITICAL: Respond with TEXT ONLY"
+        ],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

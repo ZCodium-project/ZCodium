@@ -129,8 +129,7 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await clickV4Stop();
     const snapshot = await waitForV4ConversationState(
       (candidate) =>
-        candidate.state !== "streaming" &&
-        candidate.targetObjective?.includes(goal) === true,
+        candidate.state !== "streaming" && candidate.targetObjective?.includes(goal) === true,
       "MR-GOAL-05 Stop 后 goal work 没有结束",
       30000,
     );
@@ -198,13 +197,10 @@ describe("会话区 Goal Run 正式 E2E", () => {
         timeoutMsg: "MR-GOAL-07 goal queue item 没有撤回到 composer",
       },
     );
-    await browser.waitUntil(
-      async () => (await getV4ComposerText())?.includes(second) === true,
-      {
-        timeout: 30000,
-        timeoutMsg: "MR-GOAL-07 编辑项没有撤回到 V4 composer",
-      },
-    );
+    await browser.waitUntil(async () => (await getV4ComposerText())?.includes(second) === true, {
+      timeout: 30000,
+      timeoutMsg: "MR-GOAL-07 编辑项没有撤回到 V4 composer",
+    });
     // MR-GOAL-07 只覆盖 held queue CRUD，不与 active goal streaming 的 revision
     // CAS 做交叉。先在 idle held queue 完成删除，再发送撤回编辑后的 goal；否则
     // target/title 流式投影可能恰好推进 revision，把一次删除点击裁决为 stale。
@@ -231,10 +227,7 @@ describe("会话区 Goal Run 正式 E2E", () => {
     const goal = goalSlowMarker(8);
 
     await sendV4Prompt("/compact");
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "running" },
-      30000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "running" }, 30000);
     await sendV4Prompt(goalPrompt(goal));
     const queue = await waitForQueueCount(1);
 
@@ -278,8 +271,7 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await selectV4TaskById(sessionA.taskId as string);
     const restoredA = await waitForV4ConversationState(
       (snapshot) =>
-        snapshot.taskId === sessionA.taskId &&
-        snapshot.targetObjective?.includes(goal) === true,
+        snapshot.taskId === sessionA.taskId && snapshot.targetObjective?.includes(goal) === true,
       "MR-GOAL-10 没有恢复 session A 的 paused goal",
       30000,
     );
@@ -360,27 +352,13 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await waitForVerifierRequest(goal);
     await sendQueuedPromptAndWait(simplePrompt(textOne), textOne);
     await sendQueuedPromptAndWait(goalPrompt(queuedGoal), queuedGoal);
-    const compactBefore = await countUpstreamRequestsContaining(
-      COMPACT_REQUEST_SENTINEL,
-    );
+    const compactBefore = await countUpstreamRequestsContaining(COMPACT_REQUEST_SENTINEL);
     await sendQueuedPromptAndWait("/compact", "/compact");
     await sendQueuedPromptAndWait(simplePrompt(textTwo), textTwo);
-    const queue = await waitForQueueOrderContaining([
-      textOne,
-      queuedGoal,
-      "/compact",
-      textTwo,
-    ]);
+    const queue = await waitForQueueOrderContaining([textOne, queuedGoal, "/compact", textTwo]);
 
-    expect(queue.map((item) => item.kind)).toEqual([
-      "text",
-      "goal",
-      "compact",
-      "text",
-    ]);
-    expect(
-      await countUpstreamRequestsContaining(COMPACT_REQUEST_SENTINEL),
-    ).toBe(compactBefore);
+    expect(queue.map((item) => item.kind)).toEqual(["text", "goal", "compact", "text"]);
+    expect(await countUpstreamRequestsContaining(COMPACT_REQUEST_SENTINEL)).toBe(compactBefore);
     await assertVisibleV4UserMessagesNotContaining("/compact");
   });
 
@@ -407,16 +385,10 @@ describe("会话区 Goal Run 正式 E2E", () => {
     const goal = goalFastMarker(16);
 
     await sendV4Prompt("/compact");
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "running" },
-      30000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "running" }, 30000);
     await sendV4Prompt(goalPrompt(goal));
     await waitForQueueContaining(goal);
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "success" },
-      90000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "success" }, 90000);
     await waitForUpstreamRequestContaining(goal, 90000);
     await waitForV4ConversationState(
       (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -461,10 +433,7 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await waitForV4Fork();
 
     await sendV4Prompt("/compact");
-    await waitForV4CompactMarker(
-      { origin: "manual", status: "success" },
-      90000,
-    );
+    await waitForV4CompactMarker({ origin: "manual", status: "success" }, 90000);
   });
 
   it("MR-GOAL-19 edit latest 普通 query 保持既有 goal scope", async function () {
@@ -480,9 +449,7 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await editFirstV4UserQuery(simplePrompt(afterEdit));
     await waitForUpstreamRequestContaining(afterEdit, 45000);
     const existingGoal = await waitForV4ConversationState(
-      (snapshot) =>
-        snapshot.state === "idle" &&
-        snapshot.targetObjective?.includes(goal) === true,
+      (snapshot) => snapshot.state === "idle" && snapshot.targetObjective?.includes(goal) === true,
       "MR-GOAL-19 edit 普通 query 后 existing goal scope 丢失",
       90000,
     );
@@ -585,11 +552,9 @@ describe("会话区 Goal Run 正式 E2E", () => {
     await browser.pause(500);
 
     expect(snapshot.targetStatus).toBe("paused");
-    expect(
-      await countUpstreamRequestsContaining(
-        "Verify whether the active session goal",
-      ),
-    ).toBe(verifierBefore);
+    expect(await countUpstreamRequestsContaining("Verify whether the active session goal")).toBe(
+      verifierBefore,
+    );
   });
 });
 
@@ -655,8 +620,7 @@ async function sendQueuedPromptAndWait(prompt: string, marker: string) {
 function waitForGoalObjective(marker: string) {
   return waitForV4ConversationState(
     (snapshot) =>
-      snapshot.state === "streaming" &&
-      snapshot.targetObjective?.includes(marker) === true,
+      snapshot.state === "streaming" && snapshot.targetObjective?.includes(marker) === true,
     `${marker} 没有进入 active goal work`,
     45000,
   );
@@ -737,8 +701,7 @@ async function waitForVerifierRequest(marker: string) {
   );
   return waitForV4ConversationState(
     (snapshot) =>
-      snapshot.state === "streaming" &&
-      snapshot.targetObjective?.includes(marker) === true,
+      snapshot.state === "streaming" && snapshot.targetObjective?.includes(marker) === true,
     `${marker} verifier 没有保持 completion-blocking 状态`,
     30000,
   );
@@ -746,8 +709,7 @@ async function waitForVerifierRequest(marker: string) {
 
 function waitForHeldQueue(expectedCount: number) {
   return waitForV4ConversationState(
-    (snapshot) =>
-      snapshot.state !== "streaming" && snapshot.queueCount === expectedCount,
+    (snapshot) => snapshot.state !== "streaming" && snapshot.queueCount === expectedCount,
     `Stop 后没有保留 ${expectedCount} 条 held queue`,
     30000,
   );

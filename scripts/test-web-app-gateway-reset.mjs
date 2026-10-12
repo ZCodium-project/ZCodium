@@ -26,7 +26,10 @@ try {
   await mkdir(dataDir, { recursive: true });
   await mkdir(workspaceDir, { recursive: true });
   await mkdir(webDistDir, { recursive: true });
-  await writeFile(join(webDistDir, "index.html"), "<!doctype html><html><body>ZCode test</body></html>\n");
+  await writeFile(
+    join(webDistDir, "index.html"),
+    "<!doctype html><html><body>ZCode test</body></html>\n",
+  );
   await writeFile(agentEntry, "module.exports = {};\n");
   await writeFile(
     injectResetEntry,
@@ -200,7 +203,9 @@ async function waitForHealthzStatus(port, expectedStatus, timeoutMs) {
 async function assertHealthzStatus(port, expectedStatus) {
   const result = await requestHealthz(port);
   if (result.statusCode !== expectedStatus) {
-    throw new Error(`healthz returned ${result.statusCode}, expected ${expectedStatus}: ${result.body}`);
+    throw new Error(
+      `healthz returned ${result.statusCode}, expected ${expectedStatus}: ${result.body}`,
+    );
   }
   if (expectedStatus === 200 && !result.body.includes('"ok":true')) {
     throw new Error(`unexpected healthz body: ${result.body}`);

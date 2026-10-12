@@ -45,13 +45,7 @@ export function startDraftSessionPrewarm(params: {
   /** 预热会话初始 config（全局「上次选择」，同步解析）；让投影首帧即全局、不闪。 */
   resolveInitialConfig?: () => Partial<SessionConfigState> | undefined;
 }): DraftPrewarmController {
-  const {
-    workspaceKey,
-    dispatchCommand,
-    onReady,
-    onSettled,
-    resolveInitialConfig,
-  } = params;
+  const { workspaceKey, dispatchCommand, onReady, onSettled, resolveInitialConfig } = params;
   let disposed = false;
   let promotionState: "draft" | "pending" | "promoted" | "discarded" = "draft";
   let createdSessionId: string | null = null;

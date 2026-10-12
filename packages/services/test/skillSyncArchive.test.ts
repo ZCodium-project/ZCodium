@@ -20,9 +20,7 @@ describe("skill sync archive", () => {
     await writeFile(join(skillDir, "SKILL.md"), "---\nname: review\n---\nbody");
     await writeFile(join(skillDir, "notes.txt"), "hello");
 
-    const archive = await createSkillSyncArchive([
-      { sourcePath: skillDir, archivePath: "review" },
-    ]);
+    const archive = await createSkillSyncArchive([{ sourcePath: skillDir, archivePath: "review" }]);
     const output = join(root, "out");
     await extractSkillSyncArchive(archive, output);
 
@@ -92,9 +90,7 @@ describe("skill sync archive", () => {
     await mkdir(skillDir, { recursive: true });
     await writeFile(join(skillDir, "SKILL.md"), "---\nname: review\n---\nbody");
 
-    const archive = await createSkillSyncArchive([
-      { sourcePath: skillDir, archivePath: "review" },
-    ]);
+    const archive = await createSkillSyncArchive([{ sourcePath: skillDir, archivePath: "review" }]);
     const corruptedArchive = Uint8Array.from(archive);
     corruptedArchive[corruptedArchive.length - 1] ^= 0xff;
 

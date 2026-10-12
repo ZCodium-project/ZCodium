@@ -1,8 +1,4 @@
-import {
-  ALL_BOT_WORKSPACES,
-  type BotConfig,
-  type BotWorkspaceRef,
-} from "@zcode/shared";
+import { ALL_BOT_WORKSPACES, type BotConfig, type BotWorkspaceRef } from "@zcode/shared";
 
 export function getWorkspaceKey(workspacePath: string, workspaceIdentity?: string): string {
   return workspaceIdentity?.trim() || workspacePath;
@@ -12,7 +8,10 @@ export function getWorkspaceLabel(workspacePath: string): string {
   return workspacePath.split(/[\\/]/u).filter(Boolean).at(-1) ?? workspacePath;
 }
 
-export function createWorkspaceRef(workspacePath: string, workspaceIdentity?: string): BotWorkspaceRef {
+export function createWorkspaceRef(
+  workspacePath: string,
+  workspaceIdentity?: string,
+): BotWorkspaceRef {
   const id = getWorkspaceKey(workspacePath, workspaceIdentity);
   return {
     id,
@@ -34,7 +33,10 @@ export function normalizeAllowedWorkspaces(allowedWorkspaces: readonly string[])
   return [...new Set(workspaceIds)];
 }
 
-export function isWorkspaceAllowed(workspaceId: string, allowedWorkspaces: readonly string[]): boolean {
+export function isWorkspaceAllowed(
+  workspaceId: string,
+  allowedWorkspaces: readonly string[],
+): boolean {
   return isAllWorkspacesAllowed(allowedWorkspaces) || allowedWorkspaces.includes(workspaceId);
 }
 
@@ -58,7 +60,9 @@ function resolveCanonicalWorkspaceId(
   const samePathWorkspaces = workspaces.filter((workspace) => workspace.workspacePath === trimmed);
   const exactWorkspace = workspaces.find((workspace) => workspace.id === trimmed);
   if (exactWorkspace) {
-    const identityCandidates = samePathWorkspaces.filter((workspace) => workspace.workspaceIdentity);
+    const identityCandidates = samePathWorkspaces.filter(
+      (workspace) => workspace.workspaceIdentity,
+    );
     if (!exactWorkspace.workspaceIdentity && identityCandidates.length === 1) {
       return identityCandidates[0]!.id;
     }
@@ -77,7 +81,9 @@ export function normalizeConfiguredAllowedWorkspaces(
   }
   return [
     ...new Set(
-      normalized.map((workspaceId) => resolveCanonicalWorkspaceId(workspaceId, workspaces) ?? workspaceId),
+      normalized.map(
+        (workspaceId) => resolveCanonicalWorkspaceId(workspaceId, workspaces) ?? workspaceId,
+      ),
     ),
   ];
 }

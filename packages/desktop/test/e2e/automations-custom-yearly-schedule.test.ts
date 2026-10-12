@@ -63,11 +63,9 @@ describe("定时任务自定义年度月/日选择器 E2E", () => {
     await setInputValueByTestIdDom(TID_AUTOMATION_FORM_TITLE, title, {
       timeoutMsg: "定时任务标题输入没有出现",
     });
-    await setInputValueByTestIdDom(
-      TID_AUTOMATION_FORM_PROMPT,
-      "每年生成一次年度总结",
-      { timeoutMsg: "定时任务 prompt 输入没有出现" },
-    );
+    await setInputValueByTestIdDom(TID_AUTOMATION_FORM_PROMPT, "每年生成一次年度总结", {
+      timeoutMsg: "定时任务 prompt 输入没有出现",
+    });
 
     // 3) 先显式添加调度行。新建任务默认没有 schedule，频率选择器只属于已添加的行。
     await clickTestIdByWebDriver(TID_AUTOMATION_SCHEDULE_ADD, {
@@ -175,9 +173,9 @@ async function selectRadixOption(
 /** 读取某个 test id 元素的可见文本。 */
 async function readTestIdText(currentTestId: string): Promise<string> {
   return browser.execute((tid) => {
-    const el = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-testid]"),
-    ).find((item) => item.dataset.testid === tid);
+    const el = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+      (item) => item.dataset.testid === tid,
+    );
     return el?.textContent?.trim() ?? "";
   }, currentTestId);
 }

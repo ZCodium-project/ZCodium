@@ -3,10 +3,7 @@ import {
   capabilityRelationNames,
   type CapabilityRelationType,
 } from "@/data/productCapabilityMap.js";
-import {
-  relationTypes,
-  type EdgeScope,
-} from "@/capability-map/capabilityMapTypes.js";
+import { relationTypes, type EdgeScope } from "@/capability-map/capabilityMapTypes.js";
 
 export function CapabilityMapToolbar({
   edgeScope,
@@ -42,14 +39,10 @@ export function CapabilityMapToolbar({
           />
         </label>
         <label className="min-w-44">
-          <span className="mb-1 block text-ui-sm font-medium text-foreground-subtle">
-            关系范围
-          </span>
+          <span className="mb-1 block text-ui-sm font-medium text-foreground-subtle">关系范围</span>
           <select
             className="h-8 w-full rounded-lg border border-input-border bg-input px-2 text-ui-base text-foreground outline-none focus:border-input-border-focused focus:bg-input-focused"
-            onChange={(event) =>
-              onEdgeScopeChange(event.target.value as EdgeScope)
-            }
+            onChange={(event) => onEdgeScopeChange(event.target.value as EdgeScope)}
             value={edgeScope}
           >
             <option value="all">全部关系</option>
@@ -57,9 +50,7 @@ export function CapabilityMapToolbar({
           </select>
         </label>
         <fieldset className="min-w-0">
-          <legend className="mb-1 text-ui-sm font-medium text-foreground-subtle">
-            连线类型
-          </legend>
+          <legend className="mb-1 text-ui-sm font-medium text-foreground-subtle">连线类型</legend>
           <div className="flex flex-wrap gap-1.5">
             {relationTypes.map((type) => (
               <label

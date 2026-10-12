@@ -104,11 +104,7 @@ async function getCustomElicitationInput() {
   return input;
 }
 
-async function waitForElicitationPage(
-  pageText: string,
-  questionText: string,
-  timeout = 60000,
-) {
+async function waitForElicitationPage(pageText: string, questionText: string, timeout = 60000) {
   let latest = "";
   try {
     await browser.waitUntil(

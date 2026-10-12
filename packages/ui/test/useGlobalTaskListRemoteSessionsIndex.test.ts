@@ -28,9 +28,7 @@ import {
 const REMOTE_IDENTITY = "host-a:/remote-ws";
 const REMOTE_SESSION_ID = "remote-session-1";
 
-function createSession(
-  overrides: Partial<SessionSummary> = {},
-): SessionSummary {
+function createSession(overrides: Partial<SessionSummary> = {}): SessionSummary {
   return {
     sessionId: "s-local-1",
     workspaceId: "ws-1",
@@ -44,10 +42,7 @@ function createSession(
   };
 }
 
-function createTaskMeta(
-  taskId: string,
-  overrides: Partial<ZCodeTaskMeta> = {},
-): ZCodeTaskMeta {
+function createTaskMeta(taskId: string, overrides: Partial<ZCodeTaskMeta> = {}): ZCodeTaskMeta {
   return {
     taskId,
     traceId: `trace-${taskId}`,
@@ -137,10 +132,7 @@ async function flushMicrotasks() {
   await Promise.resolve();
 }
 
-function snapshotFrame(
-  workspaceId: string,
-  sessions: SessionSummary[],
-): SessionsIndexTopicFrame {
+function snapshotFrame(workspaceId: string, sessions: SessionSummary[]): SessionsIndexTopicFrame {
   return {
     topic: `sessions-index/${workspaceId}`,
     subscriptionId: `sub-${workspaceId}`,
@@ -212,22 +204,19 @@ function v4Handshake(connectionId: string) {
       auth: {},
     })),
     initializeConversationV4: vi.fn(async () => {}),
-    resyncSessionsIndexV4: vi.fn(
-      async (params: { subscriptionId: string }) => ({
-        ack: {
-          subscriptionId: params.subscriptionId,
-          mode: "snapshot" as const,
-          logEpoch: "e1",
-        },
-      }),
-    ),
+    resyncSessionsIndexV4: vi.fn(async (params: { subscriptionId: string }) => ({
+      ack: {
+        subscriptionId: params.subscriptionId,
+        mode: "snapshot" as const,
+        logEpoch: "e1",
+      },
+    })),
     onAgentRuntimeRestarted: runtimeRestarts.event,
   };
 }
 
 function createEndpointServices(options: EndpointMockOptions) {
-  const frameListeners: Array<(frame: SessionsIndexTopicWireFrame) => void> =
-    [];
+  const frameListeners: Array<(frame: SessionsIndexTopicWireFrame) => void> = [];
   const listTaskList = vi.fn(async () => ({
     items: [],
     total: 0,
@@ -235,8 +224,7 @@ function createEndpointServices(options: EndpointMockOptions) {
   }));
   const subscribeSessionsIndexV4 = vi.fn(
     async (params: { workspacePath: string; workspaceIdentity?: string }) => {
-      const workspaceKey =
-        params.workspaceIdentity?.trim() || params.workspacePath;
+      const workspaceKey = params.workspaceIdentity?.trim() || params.workspacePath;
       const subscriptionId = options.sessionsByWorkspaceKey
         ? `sub-${workspaceKey}`
         : `sub-${options.workspaceId}`;
@@ -245,8 +233,7 @@ function createEndpointServices(options: EndpointMockOptions) {
         mode: "snapshot" as const,
         logEpoch: "e1",
       };
-      await (options.subscribeGatesByWorkspaceKey?.[workspaceKey] ??
-        options.subscribeGate);
+      await (options.subscribeGatesByWorkspaceKey?.[workspaceKey] ?? options.subscribeGate);
       const initial = {
         ...snapshotFrame(
           workspaceKey,
@@ -255,8 +242,7 @@ function createEndpointServices(options: EndpointMockOptions) {
         subscriptionId,
         topic: `sessions-index/${workspaceKey}`,
       };
-      for (const listener of frameListeners)
-        listener(physicalFrame(initial, "initial"));
+      for (const listener of frameListeners) listener(physicalFrame(initial, "initial"));
       return { ack };
     },
   );
@@ -265,19 +251,15 @@ function createEndpointServices(options: EndpointMockOptions) {
     workspacePath: string;
     workspaceIdentity?: string;
   }): ZCodeTaskMeta[] => {
-    const workspaceKey =
-      params.workspaceIdentity?.trim() || params.workspacePath;
-    const sessions =
-      options.sessionsByWorkspaceKey?.[workspaceKey] ?? options.sessions;
+    const workspaceKey = params.workspaceIdentity?.trim() || params.workspacePath;
+    const sessions = options.sessionsByWorkspaceKey?.[workspaceKey] ?? options.sessions;
     return sessions.map((session) =>
       createTaskMeta(session.sessionId, {
         createdAt: session.createdAt,
         title: session.title,
         updatedAt: session.lastActivityAt,
         workspacePath: params.workspacePath,
-        ...(params.workspaceIdentity
-          ? { workspaceIdentity: params.workspaceIdentity }
-          : {}),
+        ...(params.workspaceIdentity ? { workspaceIdentity: params.workspaceIdentity } : {}),
       }),
     );
   };
@@ -290,8 +272,7 @@ function createEndpointServices(options: EndpointMockOptions) {
       limit?: number;
     }) => {
       const rows = params.workspaceScopes.flatMap((scope) => {
-        const sourceRows =
-          options.activeTaskMetas ?? defaultTaskMetasForScope(scope);
+        const sourceRows = options.activeTaskMetas ?? defaultTaskMetasForScope(scope);
         const filtered = sourceRows.filter((task) => {
           const pinned = pinnedIds.has(task.taskId);
           if (params.kind === "pinned") return pinned;
@@ -328,23 +309,17 @@ function createEndpointServices(options: EndpointMockOptions) {
     },
     zcodeTaskService: {
       listTaskList,
-      listPinnedTaskIds: vi.fn(
-        async (): Promise<string[]> => options.pinnedTaskIds ?? [],
-      ),
+      listPinnedTaskIds: vi.fn(async (): Promise<string[]> => options.pinnedTaskIds ?? []),
       listArchivedTasks: vi.fn(async (): Promise<ZCodeTaskMeta[]> => []),
       listTasks: vi.fn(
         async (params: { workspacePath: string; workspaceIdentity?: string }) =>
           options.activeTaskMetas ??
-          defaultTaskMetasForScope(params).filter(
-            (task) => !pinnedIds.has(task.taskId),
-          ),
+          defaultTaskMetasForScope(params).filter((task) => !pinnedIds.has(task.taskId)),
       ),
       listPinnedTasks: vi.fn(
         async (params: { workspacePath: string; workspaceIdentity?: string }) =>
           options.pinnedTaskMetas ??
-          defaultTaskMetasForScope(params).filter((task) =>
-            pinnedIds.has(task.taskId),
-          ),
+          defaultTaskMetasForScope(params).filter((task) => pinnedIds.has(task.taskId)),
       ),
       onDynamicWorkspaceEvent: () => () => ({ dispose() {} }),
     },
@@ -428,8 +403,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     useZCodeSessionStore.setState({ workspaces: {} });
     delete (globalThis as { document?: unknown }).document;
     delete (globalThis as { window?: unknown }).window;
-    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown })
-      .IS_REACT_ACT_ENVIRONMENT;
+    delete (globalThis as { IS_REACT_ACT_ENVIRONMENT?: unknown }).IS_REACT_ACT_ENVIRONMENT;
   });
 
   it("remote A 已就绪后分步追加并移除 ACK 延迟的 remote B，不重启 A", async () => {
@@ -518,26 +492,17 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     const root: Root = createRoot(installMinimalDom());
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: base.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: base.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
     expect(mac.subscribeSessionsIndexV4).toHaveBeenCalledTimes(2);
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-mac-project",
-      "s-mac",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-mac-project", "s-mac"]);
 
     const macSourceKey = buildWorkspaceSessionsIndexSourceKey(macScope);
-    const macProjectSourceKey =
-      buildWorkspaceSessionsIndexSourceKey(macProjectScope);
+    const macProjectSourceKey = buildWorkspaceSessionsIndexSourceKey(macProjectScope);
     const macRevisionBefore = latest?.sourceRevisionByScopeKey[macSourceKey];
-    const macProjectRevisionBefore =
-      latest?.sourceRevisionByScopeKey[macProjectSourceKey];
+    const macProjectRevisionBefore = latest?.sourceRevisionByScopeKey[macProjectSourceKey];
     await act(async () => {
       const macDelta: SessionsIndexTopicFrame = {
         topic: `sessions-index/${macIdentity}`,
@@ -559,25 +524,16 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
           ],
         },
       };
-      for (const listener of mac.frameListeners)
-        listener(physicalFrame(macDelta));
+      for (const listener of mac.frameListeners) listener(physicalFrame(macDelta));
       await flushMicrotasks();
     });
-    expect(latest?.sourceRevisionByScopeKey[macSourceKey]).not.toBe(
-      macRevisionBefore,
-    );
-    expect(latest?.sourceRevisionByScopeKey[macProjectSourceKey]).toBe(
-      macProjectRevisionBefore,
-    );
+    expect(latest?.sourceRevisionByScopeKey[macSourceKey]).not.toBe(macRevisionBefore);
+    expect(latest?.sourceRevisionByScopeKey[macProjectSourceKey]).toBe(macProjectRevisionBefore);
 
     scopes = [macScope, macProjectScope, zcodeScope];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: base.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: base.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -586,19 +542,12 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     expect(mac.unsubscribeSessionsIndexV4).not.toHaveBeenCalled();
     expect(zcode.subscribeSessionsIndexV4).toHaveBeenCalledTimes(1);
     expect(latest?.hydratingEndpointKeys).toEqual(["remote-zcode"]);
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-mac-project",
-      "s-mac",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-mac-project", "s-mac"]);
 
     scopes = [macScope, macProjectScope, zcodeScope, zcodeProjectScope];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: base.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: base.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -620,20 +569,13 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     scopes = [macScope, macProjectScope];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: base.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: base.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
     expect(zcode.unsubscribeSessionsIndexV4).toHaveBeenCalledTimes(2);
     expect(mac.unsubscribeSessionsIndexV4).not.toHaveBeenCalled();
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-mac-project",
-      "s-mac",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-mac-project", "s-mac"]);
 
     await act(async () => {
       root.unmount();
@@ -684,11 +626,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     const root: Root = createRoot(installMinimalDom());
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -696,11 +634,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     scopes = [localScope, remoteScope];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -714,19 +648,13 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     scopes = [localScope];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
     expect(remote.unsubscribeSessionsIndexV4).toHaveBeenCalledTimes(1);
     expect(local.unsubscribeSessionsIndexV4).not.toHaveBeenCalled();
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-local-stable",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-local-stable"]);
 
     await act(async () => {
       root.unmount();
@@ -793,39 +721,27 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     const root: Root = createRoot(installMinimalDom());
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
     await act(async () => {
       await flushMicrotasks();
     });
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-pinned-a",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-pinned-a"]);
 
     const renderCountBeforeScopeAdd = renderStates.length;
     workspaceTabs = [workspaceA, workspaceB];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
 
     const scopeAddStates = renderStates.slice(renderCountBeforeScopeAdd);
     expect(scopeAddStates.length).toBeGreaterThan(0);
-    expect(
-      scopeAddStates.every((taskIds) => taskIds.includes("s-pinned-a")),
-    ).toBe(true);
+    expect(scopeAddStates.every((taskIds) => taskIds.includes("s-pinned-a"))).toBe(true);
 
     await act(async () => {
       addedWorkspaceAck.resolve();
@@ -834,10 +750,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     await act(async () => {
       await flushMicrotasks();
     });
-    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual([
-      "s-pinned-b",
-      "s-pinned-a",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.taskId)).toEqual(["s-pinned-b", "s-pinned-a"]);
 
     await act(async () => {
       root.unmount();
@@ -902,11 +815,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     const root: Root = createRoot(installMinimalDom());
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -920,11 +829,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     ];
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -1019,11 +924,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     const root: Root = createRoot(installMinimalDom());
     await act(async () => {
       root.render(
-        createElement(
-          ServiceProvider,
-          { services: local.services },
-          createElement(Probe),
-        ),
+        createElement(ServiceProvider, { services: local.services }, createElement(Probe)),
       );
       await flushMicrotasks();
     });
@@ -1050,10 +951,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
 
     // 聚合列表：remote(20) 在 local(10) 之前；Renderer 不再调用 endpoint task service。
     const items = latest?.items ?? [];
-    expect(items.map((task) => task.taskId)).toEqual([
-      "s-remote-1",
-      "s-local-1",
-    ]);
+    expect(items.map((task) => task.taskId)).toEqual(["s-remote-1", "s-local-1"]);
     expect(local.listTaskList).not.toHaveBeenCalled();
     expect(remote.listTaskList).not.toHaveBeenCalled();
 
@@ -1073,9 +971,9 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     await act(async () => {
       await flushMicrotasks();
     });
-    expect(
-      (latest?.items ?? []).find((task) => task.taskId === "s-remote-1")?.title,
-    ).toBe("Renamed remote");
+    expect((latest?.items ?? []).find((task) => task.taskId === "s-remote-1")?.title).toBe(
+      "Renamed remote",
+    );
 
     act(() => {
       root.unmount();
@@ -1242,9 +1140,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
       expect.objectContaining({ workspacePath: "/workspace-a" }),
     );
     expect(latest?.items).toHaveLength(21);
-    expect((latest?.items ?? []).map((item) => item.value)).toContain(
-      "alpha-old-target",
-    );
+    expect((latest?.items ?? []).map((item) => item.value)).toContain("alpha-old-target");
 
     await act(async () => {
       renderProbe("same-authority-workspaces");
@@ -1259,23 +1155,19 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
       expect.objectContaining({ workspacePath: "/workspace-b" }),
     );
     expect(latest?.items).toHaveLength(40);
-    expect(
-      (latest?.items ?? []).filter((item) => item.description === "workspace-a"),
-    ).toHaveLength(20);
-    expect(
-      (latest?.items ?? []).filter((item) => item.description === "workspace-b"),
-    ).toHaveLength(20);
-    expect((latest?.items ?? []).map((item) => item.value)).not.toContain(
-      "beta-old-target",
+    expect((latest?.items ?? []).filter((item) => item.description === "workspace-a")).toHaveLength(
+      20,
     );
+    expect((latest?.items ?? []).filter((item) => item.description === "workspace-b")).toHaveLength(
+      20,
+    );
+    expect((latest?.items ?? []).map((item) => item.value)).not.toContain("beta-old-target");
 
     await act(async () => {
       renderProbe("same-authority-workspaces", "beta archived target");
       await flushMicrotasks();
     });
-    expect((latest?.items ?? []).map((item) => item.value)).toEqual([
-      "beta-old-target",
-    ]);
+    expect((latest?.items ?? []).map((item) => item.value)).toEqual(["beta-old-target"]);
 
     act(() => {
       root.unmount();

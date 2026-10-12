@@ -18,14 +18,7 @@ export interface CronCreateAutomationSummary {
   maxRuns?: number;
 }
 
-const SCHEDULE_RULE_UNITS = new Set([
-  "minute",
-  "hourly",
-  "daily",
-  "weekly",
-  "monthly",
-  "yearly",
-]);
+const SCHEDULE_RULE_UNITS = new Set(["minute", "hourly", "daily", "weekly", "monthly", "yearly"]);
 
 function isScheduleRule(value: unknown): value is ZCodeAutomationScheduleRule {
   // 宽松结构校验：输出可能来自协议或历史工具结果，字段宽松地放行后由 describe 层兜底。
@@ -38,9 +31,7 @@ function isScheduleRule(value: unknown): value is ZCodeAutomationScheduleRule {
 }
 
 function normalizeToolName(value: unknown): string {
-  return typeof value === "string"
-    ? value.toLowerCase().replace(/[^a-z0-9]/gu, "")
-    : "";
+  return typeof value === "string" ? value.toLowerCase().replace(/[^a-z0-9]/gu, "") : "";
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -116,8 +107,7 @@ export function readCronCreateAutomationOutputSummary(
   const scheduleRule = isScheduleRule(automation.scheduleRule)
     ? (automation.scheduleRule as ZCodeAutomationScheduleRule)
     : undefined;
-  const recurring =
-    typeof automation.recurring === "boolean" ? automation.recurring : undefined;
+  const recurring = typeof automation.recurring === "boolean" ? automation.recurring : undefined;
   const maxRuns =
     typeof automation.maxRuns === "number" && Number.isFinite(automation.maxRuns)
       ? automation.maxRuns

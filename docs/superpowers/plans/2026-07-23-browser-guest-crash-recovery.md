@@ -23,10 +23,12 @@
 ### Task 1: Electron webview 异常退出类型与失败回归
 
 **Files:**
+
 - Modify: `packages/ui/src/electron-webview.d.ts`
 - Modify: `packages/ui/test/UnifiedBrowserView.test.ts`
 
 **Interfaces:**
+
 - Produces: `ElectronWebviewRenderProcessGoneEvent`，包含 `details.reason` 与 `details.exitCode`。
 - Consumes: Electron 本地文档 `docs/electron/docs/api/webview-tag.md` 与 `structures/render-process-gone-details.md`。
 
@@ -50,11 +52,13 @@ Expected: 新用例 FAIL，因为 Electron webview 类型和 `UnifiedBrowserView
 ### Task 2: 最小 guest replacement 与 URL 恢复
 
 **Files:**
+
 - Modify: `packages/ui/src/browser-use/UnifiedBrowserView.tsx`
 - Modify: `packages/ui/src/browser-use/BrowserViewportSurface.tsx`
 - Modify: `packages/ui/src/embeddedBrowserHelpers.ts`
 
 **Interfaces:**
+
 - Produces: `isRecoverableBrowserGuestExitReason(reason: string): boolean`。
 - Produces: `BrowserViewportSurface` 的 `webviewGeneration: number` 参数，作为 `<webview>` React key。
 - Consumes: `UnifiedBrowserView` 既有 `browserKey`、`initialUrl`、`onUrlChange`、`browserViewAttachGuest`。
@@ -96,10 +100,12 @@ Expected: 全部通过，且可恢复/不可恢复分支都有断言。
 ### Task 3: browser-use URL 进入 workspace 隔离内存
 
 **Files:**
+
 - Modify: `packages/ui/src/app-shell/AnimatedSidePanePanel.tsx`
 - Modify: `packages/ui/test/UnifiedBrowserView.test.ts`
 
 **Interfaces:**
+
 - Consumes: `browserRestoreUrls: Record<sidePaneTabId, string>` 与
   `onBrowserUrlChange(sidePaneTabId, url)`。
 - Produces: browser-use `UnifiedBrowserView` 的 `initialUrl` / `onUrlChange` wiring。
@@ -123,6 +129,7 @@ Expected: 三个文件全部通过。
 ### Task 3.5: main 进程替代 guest 绑定竞态
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/browserView/browserGuestManager.ts`
 - Modify: `packages/desktop/test/browserGuestManager.test.ts`
 
@@ -144,10 +151,12 @@ Expected: 三个文件全部通过。
 ### Task 4: 证据、矩阵与仓库门禁
 
 **Files:**
+
 - Modify: `docs/testing/browser-use-codex-parity-coverage-matrix.md`
 - Modify: `docs/testing/conversation-session-e2e-coverage-matrix.md`
 
 **Interfaces:**
+
 - Consumes: BCP-207/208、J07 与实际测试结果。
 
 - [x] **Step 1: 更新覆盖状态**

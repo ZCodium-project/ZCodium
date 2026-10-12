@@ -209,6 +209,7 @@ resolveInteraction(fullAccess) → session FIFO → registry + broker claim（Ho
 `$` 起始标记与命令正文放在同一滚动视口内，滚动离开首行后一起消失，回到顶部后重新出现；不得固定在命令中段旁。
 
 键盘路径：存在长命令展开按钮时，默认第一项权限选项按 Shift+Tab 返回命令按钮，按钮按 Tab 回到第一项；展开后继续 Shift+Tab 可进入命令滚动视口。展开/滚动不得提交授权。短命令没有按钮时，既有选项循环保持不变。
+
 ## Group task scope
 
 Feishu/Lark group tasks use `SessionInfo.permission.scope = "session"` before tool execution. The first trusted group input initializes an empty session ruleset; later inputs retain only that task's explicit approvals. Session-scoped tasks do not read or write project approval memory. Existing private/Desktop tasks without this marker retain project semantics. An explicit owner mode change remains session configuration; message text and model output never set the marker or grant permissions.

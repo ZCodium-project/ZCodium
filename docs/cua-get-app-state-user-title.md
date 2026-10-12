@@ -9,7 +9,7 @@
 | Change layer     | validation + presentation                                                                           |
 | Operating mode   | planning                                                                                            |
 | Primary seeds    | `apps/zcode-cli/packages/core/src/mcp/index.ts`、`packages/ui/src/ToolCallBlocks/renderers/cua.tsx` |
-| Out of scope     | 修改 Computer Use Helper 权限边界、改变 `get_app_state` 的观察结果、要求其他 CUA 工具提供标题                |
+| Out of scope     | 修改 Computer Use Helper 权限边界、改变 `get_app_state` 的观察结果、要求其他 CUA 工具提供标题       |
 
 ## Product Contract
 
@@ -71,12 +71,12 @@ Model tool contract -----> model emits { title, app_ref, ... }
 
 ## Must-Preserve Invariants
 
-| Invariant                                    | Surfaces/modes                           | Proof needed                           |
-| -------------------------------------------- | ---------------------------------------- | -------------------------------------- |
-| 只有官方 CUA `get_app_state` 被要求 title    | local/current/legacy server names        | bridge 单测覆盖 CUA 与普通 MCP 边界    |
-| `title` 不发送给上游 CUA                     | Agent runtime                            | `McpPort.callTool` 参数断言            |
-| 旧会话没有 title 仍可读                      | Desktop/Web/Mobile history               | renderer fallback 单测                 |
-| 模型 title 在工具卡优先于固定 app 文案       | Desktop/Web/Mobile conversation          | renderer summary 单测                  |
+| Invariant                                             | Surfaces/modes                           | Proof needed                           |
+| ----------------------------------------------------- | ---------------------------------------- | -------------------------------------- |
+| 只有官方 CUA `get_app_state` 被要求 title             | local/current/legacy server names        | bridge 单测覆盖 CUA 与普通 MCP 边界    |
+| `title` 不发送给上游 CUA                              | Agent runtime                            | `McpPort.callTool` 参数断言            |
+| 旧会话没有 title 仍可读                               | Desktop/Web/Mobile history               | renderer fallback 单测                 |
+| 模型 title 在工具卡优先于固定 app 文案                | Desktop/Web/Mobile conversation          | renderer summary 单测                  |
 | Computer Use Helper 权限和 remote attachment 语义不变 | macOS desktop-local / mobile shared host | 无 broker、protocol、delivery 文件改动 |
 
 ## Codegraph Evidence

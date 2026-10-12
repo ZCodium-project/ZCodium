@@ -12,20 +12,20 @@
 
 `IModelProviderService` 不是一个可以整体替换的领域服务。它同时承载配置设置、模型选择、账号套餐、连通性工具和 Host→Worker 迁移桥。新链路按用途退出旧方法：
 
-| 旧方法                                                        | 当前主要用途                                         | 目标归属                                                                                               |
-| ------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `getAll` / `getAllCached`                                     | 设置页、模型选择、用量 UI、旧执行同步                | Settings View 或 Selection View；不再区分“触发远端同步”和“只读缓存”                                    |
-| `save` / `delete`                                             | 设置页与 API Key 登录表单写 Provider                 | `ProviderSettingsService` 写 Personal Config                                                           |
-| `getDisplayOrder` / `saveDisplayOrder`                        | 设置页与选择器排序                                   | ProviderConfig / ModelConfig 自身有序 Overlay；旧独立 Preference 退出                                  |
-| `resolveWorkspaceModelSelection`                              | 旧 Provider、Workspace Preference 和配置文件混合解析 | 已删除；统一 ZCode Agent 的回显只使用 prepare 回包、App Recent 与 Model Selection View                  |
-| `getEndpointSuggestions` / `getModelsByEndpoint`              | 旧 Add Provider 表单的 Endpoint 建议与远端模型探测   | 当前设置表单已改为显式填写 Provider Config；两个无生产调用方的旧接口及 `client/configs` 查询实现已删除 |
-| `getCatalogProviders`                                         | 设置页读取旧 Catalog                                 | Official Config 取代 Catalog 后退出                                                                    |
-| `testModelConnectivity`                                       | 设置页显式连通性测试                                 | 独立 Connectivity Service，结果不进入 Registry                                                         |
-| `refreshPresetProviders`                                      | 同步远端 Builtin/Preset 并改写旧 Store               | Official Config Source / Account Access Source 各自刷新后退出                                          |
-| `refreshCodingPlanApiKey` / `clearCodingPlanApiKey`           | 登录、重连和套餐切换                                 | Account Request Auth / Account Access Service                                                          |
-| `setProviderRuntimeHeaders`                                   | Start Plan 一次性安全校验 Header 和临时 Header       | 已删除；一次性 Header 只通过请求级 Runtime Header response 传递                                       |
-| `getProviderRegistrySnapshot`                         | 设置连通性测试及少量旧兼容调用                     | 本地启动门禁和模型选择已改读 Selection View；完整 Snapshot 仅保留剩余执行兼容，最终退出            |
-| `applyToProvider`                                             | 把旧选择与完整 Provider 配置同步给 Agent             | 已删除；Submission 携带 Selection、Worker 自建 Registry                                                  |
+| 旧方法                                              | 当前主要用途                                         | 目标归属                                                                                               |
+| --------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `getAll` / `getAllCached`                           | 设置页、模型选择、用量 UI、旧执行同步                | Settings View 或 Selection View；不再区分“触发远端同步”和“只读缓存”                                    |
+| `save` / `delete`                                   | 设置页与 API Key 登录表单写 Provider                 | `ProviderSettingsService` 写 Personal Config                                                           |
+| `getDisplayOrder` / `saveDisplayOrder`              | 设置页与选择器排序                                   | ProviderConfig / ModelConfig 自身有序 Overlay；旧独立 Preference 退出                                  |
+| `resolveWorkspaceModelSelection`                    | 旧 Provider、Workspace Preference 和配置文件混合解析 | 已删除；统一 ZCode Agent 的回显只使用 prepare 回包、App Recent 与 Model Selection View                 |
+| `getEndpointSuggestions` / `getModelsByEndpoint`    | 旧 Add Provider 表单的 Endpoint 建议与远端模型探测   | 当前设置表单已改为显式填写 Provider Config；两个无生产调用方的旧接口及 `client/configs` 查询实现已删除 |
+| `getCatalogProviders`                               | 设置页读取旧 Catalog                                 | Official Config 取代 Catalog 后退出                                                                    |
+| `testModelConnectivity`                             | 设置页显式连通性测试                                 | 独立 Connectivity Service，结果不进入 Registry                                                         |
+| `refreshPresetProviders`                            | 同步远端 Builtin/Preset 并改写旧 Store               | Official Config Source / Account Access Source 各自刷新后退出                                          |
+| `refreshCodingPlanApiKey` / `clearCodingPlanApiKey` | 登录、重连和套餐切换                                 | Account Request Auth / Account Access Service                                                          |
+| `setProviderRuntimeHeaders`                         | Start Plan 一次性安全校验 Header 和临时 Header       | 已删除；一次性 Header 只通过请求级 Runtime Header response 传递                                        |
+| `getProviderRegistrySnapshot`                       | 设置连通性测试及少量旧兼容调用                       | 本地启动门禁和模型选择已改读 Selection View；完整 Snapshot 仅保留剩余执行兼容，最终退出                |
+| `applyToProvider`                                   | 把旧选择与完整 Provider 配置同步给 Agent             | 已删除；Submission 携带 Selection、Worker 自建 Registry                                                |
 
 旧 Preset 同步的网络失败 fallback 已停止创建 Start Plan。API Key Provider 的兼容兜底暂时保留；Account
 Provider 必须由账号连接与权益事实形成 Account Overlay，不能由本地模型白名单推断。

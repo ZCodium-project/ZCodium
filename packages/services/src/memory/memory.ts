@@ -4,8 +4,7 @@ import { createServiceDescriptor } from "../descriptors.js";
 
 export const PROJECT_MEMORY_PREVIEW_LIMIT_EXCEEDED_ERROR_CODE =
   "PROJECT_MEMORY_PREVIEW_LIMIT_EXCEEDED";
-export const PROJECT_MEMORY_FILE_CHANGED_ERROR_CODE =
-  "PROJECT_MEMORY_FILE_CHANGED";
+export const PROJECT_MEMORY_FILE_CHANGED_ERROR_CODE = "PROJECT_MEMORY_FILE_CHANGED";
 
 export interface ProjectMemoryFileSummary {
   name: string;
@@ -46,10 +45,7 @@ export interface IMemoryService {
   /**
    * 清除 memory 内容
    */
-  clearMemory(params: {
-    workspacePath: string;
-    agentId: string;
-  }): Promise<void>;
+  clearMemory(params: { workspacePath: string; agentId: string }): Promise<void>;
 
   /**
    * 获取用户级 memory 目录路径，并确保目录存在
@@ -66,6 +62,4 @@ export interface IMemoryService {
   }): Promise<{ content: string; updatedAt: number }>;
 }
 
-export const IMemoryService = createServiceDescriptor<IMemoryService>(
-  ServiceChannels.Memory,
-);
+export const IMemoryService = createServiceDescriptor<IMemoryService>(ServiceChannels.Memory);

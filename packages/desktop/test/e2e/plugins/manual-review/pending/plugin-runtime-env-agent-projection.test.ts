@@ -52,16 +52,8 @@ import {
 } from "../../../helpers/plugin-runtime-env-agent.js";
 
 const CASE_TIMEOUT_MS = 240000;
-const VIDEO_ARTIFACT_DIR = join(
-  process.cwd(),
-  ".e2e-artifacts",
-  "plugin-management",
-  "plm-lc-010",
-);
-const VIDEO_ARTIFACT_PATH = join(
-  VIDEO_ARTIFACT_DIR,
-  "plugin-runtime-env-agent-projection.webm",
-);
+const VIDEO_ARTIFACT_DIR = join(process.cwd(), ".e2e-artifacts", "plugin-management", "plm-lc-010");
+const VIDEO_ARTIFACT_PATH = join(VIDEO_ARTIFACT_DIR, "plugin-runtime-env-agent-projection.webm");
 const VIDEO_MANIFEST_PATH = join(
   VIDEO_ARTIFACT_DIR,
   "plugin-runtime-env-agent-projection.recording.json",
@@ -78,9 +70,7 @@ describe("PLM-LC-010 插件 secret env 与 agent 资源投影 E2E", () => {
     requirePluginManualReview();
     const secret = process.env[PLUGIN_RUNTIME_ENV_VARIABLE]?.trim();
     if (!secret) {
-      throw new Error(
-        `${PLUGIN_RUNTIME_ENV_VARIABLE} must be injected by the E2E runner`,
-      );
+      throw new Error(`${PLUGIN_RUNTIME_ENV_VARIABLE} must be injected by the E2E runner`);
     }
 
     const fixture = await createPluginRuntimeEnvFixture(secret);
@@ -97,15 +87,13 @@ describe("PLM-LC-010 插件 secret env 与 agent 资源投影 E2E", () => {
       await waitUntilPluginOverview(
         (overview) =>
           overview.marketplaces.some(
-            (marketplace) =>
-              marketplace.id === PLUGIN_RUNTIME_ENV_MARKETPLACE_ID,
+            (marketplace) => marketplace.id === PLUGIN_RUNTIME_ENV_MARKETPLACE_ID,
           ),
         "Plugin runtime env marketplace was not persisted after the UI submission",
         60000,
       );
       await browser.waitUntil(
-        async () =>
-          !(await hasPluginControl("plugin-store-add-source-dialog")),
+        async () => !(await hasPluginControl("plugin-store-add-source-dialog")),
         {
           timeout: 60000,
           timeoutMsg:
@@ -128,28 +116,19 @@ describe("PLM-LC-010 插件 secret env 与 agent 资源投影 E2E", () => {
       await clickTestIdByDom(TID_TASK_SETTINGS_BUTTON);
       await waitForTestIdByDom(TID_SETTINGS_PAGE, { timeout: 15000 });
       await clickTestIdByDom(testId(TID_SETTINGS_SECTION_NAV, "subagents"));
-      await waitForTestIdByDom(
-        testId(TID_SUBAGENT_ROW, PLUGIN_RUNTIME_ENV_AGENT_NAME),
-        {
-          timeout: 30000,
-        },
-      );
+      await waitForTestIdByDom(testId(TID_SUBAGENT_ROW, PLUGIN_RUNTIME_ENV_AGENT_NAME), {
+        timeout: 30000,
+      });
       const agentRows = await browser.execute(
         (canonicalTestId, bareTestId) => ({
-          bare: document.querySelectorAll(`[data-testid="${bareTestId}"]`)
-            .length,
-          canonical: document.querySelectorAll(
-            `[data-testid="${canonicalTestId}"]`,
-          ).length,
+          bare: document.querySelectorAll(`[data-testid="${bareTestId}"]`).length,
+          canonical: document.querySelectorAll(`[data-testid="${canonicalTestId}"]`).length,
         }),
         testId(TID_SUBAGENT_ROW, PLUGIN_RUNTIME_ENV_AGENT_NAME),
         testId(TID_SUBAGENT_ROW, PLUGIN_RUNTIME_ENV_AGENT_BARE_NAME),
       );
       expect(agentRows).toEqual({ bare: 0, canonical: 1 });
-      await capturePluginManualReview(
-        "PLM-LC-010",
-        "single-plugin-agent-resource",
-      );
+      await capturePluginManualReview("PLM-LC-010", "single-plugin-agent-resource");
 
       await clickTestIdByDom(TID_SETTINGS_BACK_BUTTON);
       await prepareV4ConversationE2E();
@@ -158,13 +137,9 @@ describe("PLM-LC-010 插件 secret env 与 agent 资源投影 E2E", () => {
         `${runMarker}: Call ${PLUGIN_RUNTIME_ENV_TOOL_NAME} once, then reply with exactly upstream-e2e-ok.`,
       );
 
-      const initialRequest = await findUpstreamRequestContaining(
-        runMarker,
-        60000,
-        {
-          advertisedToolName: PLUGIN_RUNTIME_ENV_TOOL_NAME,
-        },
-      );
+      const initialRequest = await findUpstreamRequestContaining(runMarker, 60000, {
+        advertisedToolName: PLUGIN_RUNTIME_ENV_TOOL_NAME,
+      });
       expect(initialRequest).not.toBeNull();
       expect(
         captureArtifactAdvertisesToolName(
@@ -181,24 +156,17 @@ describe("PLM-LC-010 插件 secret env 与 agent 资源投影 E2E", () => {
       expect(finalRequest).not.toBeNull();
       expect(JSON.stringify(finalRequest?.requestJson)).not.toContain(secret);
       await waitForV4Pane(
-        (snapshot) =>
-          !snapshot.canStop &&
-          snapshot.timelineText.includes("upstream-e2e-ok"),
+        (snapshot) => !snapshot.canStop && snapshot.timelineText.includes("upstream-e2e-ok"),
         "Plugin secret env case did not visibly reach the deterministic final response",
         60000,
       );
-      await capturePluginManualReview(
-        "PLM-LC-010",
-        "mcp-secret-env-resolved",
-      );
+      await capturePluginManualReview("PLM-LC-010", "mcp-secret-env-resolved");
     } finally {
       const recordingResult = await recording.stop({
         tailDurationMs: 1_000,
         timeoutMs: 60_000,
       });
-      expect(recordingResult.captureMode).toBe(
-        ELECTRON_WINDOW_RECORDING_CAPTURE_MODE,
-      );
+      expect(recordingResult.captureMode).toBe(ELECTRON_WINDOW_RECORDING_CAPTURE_MODE);
       expect(recordingResult.frameCount).toBeGreaterThan(1);
       expect(recordingResult.captureError).toBeUndefined();
       await writeFile(

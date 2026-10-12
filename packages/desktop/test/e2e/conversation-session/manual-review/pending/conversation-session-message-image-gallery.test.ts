@@ -17,25 +17,12 @@ import { startConversationModelProviderReplayServer } from "../../../helpers/mod
 
 const CASE_NAME = "conversation-session-message-image-gallery";
 const MARKER = "E2E_MESSAGE_IMAGE_GALLERY";
-const IMAGE_DIR = join(
-  DEFAULT_WORKSPACE,
-  ".zcode-e2e",
-  "message-image-gallery",
-);
-const IMAGE_NAMES = [
-  "one.svg",
-  "two.svg",
-  "three.svg",
-  "standalone.svg",
-] as const;
-const SAVED_IMAGE_PATH = join(
-  tmpdir(),
-  `zcode-e2e-message-image-gallery-${Date.now()}.svg`,
-);
+const IMAGE_DIR = join(DEFAULT_WORKSPACE, ".zcode-e2e", "message-image-gallery");
+const IMAGE_NAMES = ["one.svg", "two.svg", "three.svg", "standalone.svg"] as const;
+const SAVED_IMAGE_PATH = join(tmpdir(), `zcode-e2e-message-image-gallery-${Date.now()}.svg`);
 
-let replayServer: Awaited<
-  ReturnType<typeof startConversationModelProviderReplayServer>
-> | null = null;
+let replayServer: Awaited<ReturnType<typeof startConversationModelProviderReplayServer>> | null =
+  null;
 let showSaveDialogMock: ElectronMock | null = null;
 
 describe("会话区消息图片画廊与共享预览 E2E", () => {
@@ -74,9 +61,7 @@ describe("会话区消息图片画廊与共享预览 E2E", () => {
     expect(snapshot.standaloneCount).toBe(1);
     expect(snapshot.galleryHorizontalOverflow).toBe(false);
     expect(snapshot.documentHorizontalOverflow).toBe(false);
-    expect(snapshot.groupedHeights.every((height) => height === 176)).toBe(
-      true,
-    );
+    expect(snapshot.groupedHeights.every((height) => height === 176)).toBe(true);
     expect(snapshot.radii.every((radius) => radius === "12px")).toBe(true);
     expect(snapshot.standaloneAtMostHalfWidth).toBe(true);
 
@@ -161,10 +146,7 @@ describe("会话区消息图片画廊与共享预览 E2E", () => {
   });
 
   it("MIG08: 下载当前本地预览图片通过 native Save As 原样落盘", async () => {
-    showSaveDialogMock = await browser.electron.mock(
-      "dialog",
-      "showSaveDialog",
-    );
+    showSaveDialogMock = await browser.electron.mock("dialog", "showSaveDialog");
     await showSaveDialogMock.mockResolvedValueOnce({
       canceled: false,
       filePath: SAVED_IMAGE_PATH,
@@ -214,11 +196,7 @@ async function setRendererViewport(width: number, height: number) {
     width,
   });
   await browser.waitUntil(
-    async () =>
-      browser.execute(
-        (expectedWidth) => window.innerWidth === expectedWidth,
-        width,
-      ),
+    async () => browser.execute((expectedWidth) => window.innerWidth === expectedWidth, width),
     { timeout: 10000, timeoutMsg: `renderer viewport 没有收敛到 ${width}px` },
   );
 }
@@ -227,10 +205,7 @@ async function clearRendererViewport() {
   await sendRendererEmulationCommand("Emulation.clearDeviceMetricsOverride");
 }
 
-async function sendRendererEmulationCommand(
-  method: string,
-  params: Record<string, unknown> = {},
-) {
+async function sendRendererEmulationCommand(method: string, params: Record<string, unknown> = {}) {
   const sent = await browser.electron.execute(
     async (electron, command, commandParams) => {
       const window = electron.BrowserWindow.getAllWindows().find(
@@ -267,9 +242,7 @@ async function waitForImagesLoaded() {
     async () =>
       browser.execute(() => {
         const images = Array.from(
-          document.querySelectorAll<HTMLImageElement>(
-            "img[data-markdown-image]",
-          ),
+          document.querySelectorAll<HTMLImageElement>("img[data-markdown-image]"),
         ).filter((image) => image.alt.startsWith("MIG "));
         return (
           images.length === 4 &&
@@ -293,49 +266,29 @@ async function readGroupedThumbnailSource(index: number) {
 
 async function readGalleryLayout() {
   return browser.execute(() => {
-    const gallery = document.querySelector<HTMLElement>(
-      "[data-markdown-image-gallery]",
-    );
+    const gallery = document.querySelector<HTMLElement>("[data-markdown-image-gallery]");
     const grouped = Array.from(
-      gallery?.querySelectorAll<HTMLButtonElement>(
-        "[data-markdown-image-trigger]",
-      ) ?? [],
+      gallery?.querySelectorAll<HTMLButtonElement>("[data-markdown-image-trigger]") ?? [],
     );
     const all = Array.from(
-      document.querySelectorAll<HTMLButtonElement>(
-        "[data-markdown-image-trigger]",
-      ),
-    ).filter((button) =>
-      button.querySelector("img")?.getAttribute("alt")?.startsWith("MIG "),
-    );
-    const standalone = all.filter(
-      (button) => !button.closest("[data-markdown-image-gallery]"),
-    );
+      document.querySelectorAll<HTMLButtonElement>("[data-markdown-image-trigger]"),
+    ).filter((button) => button.querySelector("img")?.getAttribute("alt")?.startsWith("MIG "));
+    const standalone = all.filter((button) => !button.closest("[data-markdown-image-gallery]"));
     const galleryRect = gallery?.getBoundingClientRect();
     return {
-      galleryCount: document.querySelectorAll("[data-markdown-image-gallery]")
-        .length,
+      galleryCount: document.querySelectorAll("[data-markdown-image-gallery]").length,
       groupedCount: grouped.length,
       standaloneCount: standalone.length,
-      groupedHeights: grouped.map((button) =>
-        Math.round(button.getBoundingClientRect().height),
-      ),
+      groupedHeights: grouped.map((button) => Math.round(button.getBoundingClientRect().height)),
       radii: all.map(
-        (button) =>
-          getComputedStyle(button.querySelector("img") as HTMLImageElement)
-            .borderRadius,
+        (button) => getComputedStyle(button.querySelector("img") as HTMLImageElement).borderRadius,
       ),
       standaloneAtMostHalfWidth: standalone.every(
-        (button) =>
-          button.getBoundingClientRect().width <=
-          (galleryRect?.width ?? 0) / 2 + 1,
+        (button) => button.getBoundingClientRect().width <= (galleryRect?.width ?? 0) / 2 + 1,
       ),
-      galleryHorizontalOverflow: Boolean(
-        gallery && gallery.scrollWidth > gallery.clientWidth + 1,
-      ),
+      galleryHorizontalOverflow: Boolean(gallery && gallery.scrollWidth > gallery.clientWidth + 1),
       documentHorizontalOverflow:
-        document.documentElement.scrollWidth >
-        document.documentElement.clientWidth + 1,
+        document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     };
   });
 }
@@ -349,25 +302,19 @@ async function waitForResponsiveColumns(expectedColumns: number) {
   await browser.waitUntil(
     async () => {
       latest = await browser.execute(() => {
-        const gallery = document.querySelector<HTMLElement>(
-          "[data-markdown-image-gallery]",
-        );
+        const gallery = document.querySelector<HTMLElement>("[data-markdown-image-gallery]");
         const triggers = Array.from(
-          gallery?.querySelectorAll<HTMLElement>(
-            "[data-markdown-image-trigger]",
-          ) ?? [],
+          gallery?.querySelectorAll<HTMLElement>("[data-markdown-image-trigger]") ?? [],
         );
-        const columns = new Set(
-          triggers.map((item) => Math.round(item.getBoundingClientRect().x)),
-        ).size;
+        const columns = new Set(triggers.map((item) => Math.round(item.getBoundingClientRect().x)))
+          .size;
         return {
           columns,
           galleryHorizontalOverflow: Boolean(
             gallery && gallery.scrollWidth > gallery.clientWidth + 1,
           ),
           documentHorizontalOverflow:
-            document.documentElement.scrollWidth >
-            document.documentElement.clientWidth + 1,
+            document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
         };
       });
       return latest.columns === expectedColumns;
@@ -400,14 +347,11 @@ async function clickGroupedThumbnail(index: number) {
 async function clickStandaloneThumbnail() {
   const clicked = await browser.execute(() => {
     const button = Array.from(
-      document.querySelectorAll<HTMLButtonElement>(
-        "[data-markdown-image-trigger]",
-      ),
+      document.querySelectorAll<HTMLButtonElement>("[data-markdown-image-trigger]"),
     ).find(
       (candidate) =>
         !candidate.closest("[data-markdown-image-gallery]") &&
-        candidate.querySelector("img")?.getAttribute("alt") ===
-          "MIG standalone",
+        candidate.querySelector("img")?.getAttribute("alt") === "MIG standalone",
     );
     button?.click();
     return Boolean(button);
@@ -422,12 +366,11 @@ async function clickStandaloneThumbnail() {
 async function countPreviewNavigationButtons() {
   return browser.execute(() => {
     const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
-    return Array.from(
-      dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-    ).filter((button) =>
-      /^(Previous image|Next image|上一张图片|下一张图片)$/u.test(
-        button.getAttribute("aria-label") ?? "",
-      ),
+    return Array.from(dialog?.querySelectorAll<HTMLButtonElement>("button") ?? []).filter(
+      (button) =>
+        /^(Previous image|Next image|上一张图片|下一张图片)$/u.test(
+          button.getAttribute("aria-label") ?? "",
+        ),
     ).length;
   });
 }
@@ -455,12 +398,8 @@ async function clickButtonByLabels(labels: string[]) {
     async () => {
       const result = await browser.execute((expectedLabels) => {
         const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
-        const buttons = Array.from(
-          dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [],
-        );
-        const labels = buttons.map(
-          (button) => button.getAttribute("aria-label") ?? "",
-        );
+        const buttons = Array.from(dialog?.querySelectorAll<HTMLButtonElement>("button") ?? []);
+        const labels = buttons.map((button) => button.getAttribute("aria-label") ?? "");
         const target = buttons.find((button) =>
           expectedLabels.includes(button.getAttribute("aria-label") ?? ""),
         );

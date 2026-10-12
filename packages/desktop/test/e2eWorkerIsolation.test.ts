@@ -46,7 +46,9 @@ describe("desktop e2e worker isolation", () => {
 
     applyE2EWorkerModelRetryEnv(
       env,
-      ["./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts"],
+      [
+        "./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts",
+      ],
       undefined,
     );
     expect(env.ZCODE_MODEL_RETRY_MAX_RETRIES).toBe("0");
@@ -56,16 +58,16 @@ describe("desktop e2e worker isolation", () => {
 
     applyE2EWorkerModelRetryEnv(
       env,
-      ["./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts"],
+      [
+        "./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts",
+      ],
       "4",
     );
     expect(env.ZCODE_MODEL_RETRY_MAX_RETRIES).toBe("0");
 
     applyE2EWorkerModelRetryEnv(
       env,
-      [
-        "./test/e2e/conversation-session/conversation-session-model-switch-restore-repro.test.ts",
-      ],
+      ["./test/e2e/conversation-session/conversation-session-model-switch-restore-repro.test.ts"],
       "4",
     );
     expect(env.ZCODE_MODEL_RETRY_MAX_RETRIES).toBe("0");
@@ -82,7 +84,9 @@ describe("desktop e2e worker isolation", () => {
 
     applyE2EWorkerReplayProxyEnv(
       env,
-      ["./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts"],
+      [
+        "./test/e2e/conversation-session/conversation-session-background-subagent-rate-limit.test.ts",
+      ],
       "http://127.0.0.1:43123",
       {
         httpProxy: "http://configured-proxy:8080",
@@ -108,7 +112,9 @@ describe("desktop e2e worker isolation", () => {
 
     applyE2EWorkerReplayProxyEnv(
       env,
-      ["./test/e2e/conversation-session/conversation-session-thought-level-session-isolation.test.ts"],
+      [
+        "./test/e2e/conversation-session/conversation-session-thought-level-session-isolation.test.ts",
+      ],
       "http://127.0.0.1:43125",
       {
         httpProxy: "http://configured-proxy:8080",
@@ -157,9 +163,7 @@ describe("desktop e2e worker isolation", () => {
       ]),
     ).toBeUndefined();
     expect(
-      resolveE2EWorkerModelStreamIdleTimeoutMs([
-        "./test/e2e/conversation-session/smoke.test.ts",
-      ]),
+      resolveE2EWorkerModelStreamIdleTimeoutMs(["./test/e2e/conversation-session/smoke.test.ts"]),
     ).toBeUndefined();
   });
 

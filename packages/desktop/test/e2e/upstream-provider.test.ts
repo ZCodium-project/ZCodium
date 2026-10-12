@@ -1,7 +1,4 @@
-import {
-  UPSTREAM_MODEL,
-  UPSTREAM_THOUGHT_LEVEL,
-} from "./helpers/upstream-provider.js";
+import { UPSTREAM_MODEL, UPSTREAM_THOUGHT_LEVEL } from "./helpers/upstream-provider.js";
 import {
   assertUpstreamRequestCapture,
   assertUpstreamThoughtLevelCapture,

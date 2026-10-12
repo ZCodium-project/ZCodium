@@ -13,8 +13,8 @@ The Vite server is started by the WebdriverIO testrunner and configured so that 
 
 WebdriverIO has built-in support for the following frameworks:
 
-- [__Nuxt__](https://nuxt.com/): WebdriverIO's testrunner detects a Nuxt application and automatically sets up your project composables and helps mock out the Nuxt backend, read more in the [Nuxt docs](/docs/component-testing/vue#testing-vue-components-in-nuxt)
-- [__TailwindCSS__](https://tailwindcss.com/): WebdriverIO's testrunner detects if you are using TailwindCSS and loads the environment properly into the test page
+- [**Nuxt**](https://nuxt.com/): WebdriverIO's testrunner detects a Nuxt application and automatically sets up your project composables and helps mock out the Nuxt backend, read more in the [Nuxt docs](/docs/component-testing/vue#testing-vue-components-in-nuxt)
+- [**TailwindCSS**](https://tailwindcss.com/): WebdriverIO's testrunner detects if you are using TailwindCSS and loads the environment properly into the test page
 
 ## Setup
 
@@ -30,7 +30,7 @@ Once the configuration wizard starts, pick `browser` for running unit and compon
 
 :::info
 
-__Note:__ WebdriverIO by default will run browser tests in CI headlessly, e.g. a `CI` environment variable is set to `'1'` or `'true'`. You can manually configure this behavior using the [`headless`](/docs/runner#headless) option for the runner.
+**Note:** WebdriverIO by default will run browser tests in CI headlessly, e.g. a `CI` environment variable is set to `'1'` or `'true'`. You can manually configure this behavior using the [`headless`](/docs/runner#headless) option for the runner.
 
 :::
 
@@ -59,7 +59,7 @@ You can mix Testing Library primitives with WebdriverIO commands as you wish, e.
 https://github.com/webdriverio/example-recipes/blob/fd54f94306ed8e7b40f967739164dfe4d6d76b41/component-testing/svelte-example.js
 ```
 
-__Note:__ using render methods from Testing Library helps remove created components between the tests. If you don't use Testing Library ensure to attach your test components to a container that gets cleaned up between tests.
+**Note:** using render methods from Testing Library helps remove created components between the tests. If you don't use Testing Library ensure to attach your test components to a container that gets cleaned up between tests.
 
 ## Setup Scripts
 
@@ -67,35 +67,34 @@ You can set up your tests by running arbitrary scripts in Node.js or in the brow
 
 ```js wdio.conf.js
 export const config = {
-    // ...
-    mochaOpts: {
-        ui: 'tdd',
-        // provide a setup script to run in the browser
-        require: './__fixtures__/setup.js'
-    },
-    before: () => {
-        // set up test environment in Node.js
-    }
-    // ...
-}
+  // ...
+  mochaOpts: {
+    ui: "tdd",
+    // provide a setup script to run in the browser
+    require: "./__fixtures__/setup.js",
+  },
+  before: () => {
+    // set up test environment in Node.js
+  },
+  // ...
+};
 ```
 
 For example, if you like to mock all [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/fetch) calls in your test with the following set-up script:
 
 ```js ./fixtures/setup.js
-import { fn } from '@wdio/browser-runner'
+import { fn } from "@wdio/browser-runner";
 
 // run code before all tests are loaded
-window.fetch = fn()
+window.fetch = fn();
 
 export const mochaGlobalSetup = () => {
-    // run code after test file is loaded
-}
+  // run code after test file is loaded
+};
 
 export const mochaGlobalTeardown = () => {
-    // run code after spec file was executed
-}
-
+  // run code after spec file was executed
+};
 ```
 
 Now in your tests you can provide custom response values for all browser requests. Read more on global fixtures in the [Mocha docs](https://mochajs.org/#global-fixtures).
@@ -130,11 +129,14 @@ If you have a [Selenium Grid](https://www.selenium.dev/documentation/grid/) set 
 
 ```ts title=wdio.conf.ts
 export const config: WebdriverIO.Config = {
-    runner: ['browser', {
-        // network IP of the machine that runs the WebdriverIO process
-        host: 'http://172.168.0.2'
-    }]
-}
+  runner: [
+    "browser",
+    {
+      // network IP of the machine that runs the WebdriverIO process
+      host: "http://172.168.0.2",
+    },
+  ],
+};
 ```
 
 This will ensure the browser correctly opens the right server instance hosted on the instance that runs the WebdriverIO tests.

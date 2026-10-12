@@ -9,7 +9,9 @@ import {
 
 describe("resolveOffPeakDispatchKind（D50 绑定首跑分支）", () => {
   it("conversationId 已回填 → 续跑；仅 sessionId → 绑定首跑；两者皆空 → 新建 session", () => {
-    expect(resolveOffPeakDispatchKind({ conversationId: "sess", sessionId: "sess" })).toBe("resume");
+    expect(resolveOffPeakDispatchKind({ conversationId: "sess", sessionId: "sess" })).toBe(
+      "resume",
+    );
     expect(resolveOffPeakDispatchKind({ sessionId: "sess" })).toBe("bound-first-run");
     expect(resolveOffPeakDispatchKind({})).toBe("init");
     expect(resolveOffPeakDispatchKind({ sessionId: "  " })).toBe("init");
@@ -21,7 +23,9 @@ describe("assertBoundSessionDispatchable", () => {
     expect(() =>
       assertBoundSessionDispatchable({ sessionId: "sess", deleted: true, running: false }),
     ).toThrow(OffPeakBoundSessionDeletedError);
-    expect(new OffPeakBoundSessionDeletedError("sess")).toBeInstanceOf(OffPeakPermanentDispatchError);
+    expect(new OffPeakBoundSessionDeletedError("sess")).toBeInstanceOf(
+      OffPeakPermanentDispatchError,
+    );
   });
 
   it("会话正忙 → transient busy，且不是 permanent", () => {

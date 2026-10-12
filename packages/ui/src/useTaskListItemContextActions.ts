@@ -25,10 +25,7 @@ interface TaskListItemContextActionsResult {
   handleOpenProviderConfig: () => Promise<void>;
 }
 
-export function resolveProviderConfigOpenTargetPath(
-  path: string,
-  exists: boolean,
-): string {
+export function resolveProviderConfigOpenTargetPath(path: string, exists: boolean): string {
   if (exists) {
     return path;
   }
@@ -37,10 +34,7 @@ export function resolveProviderConfigOpenTargetPath(
   // 用户既看不到承载配置的目录，也没法就地补齐文件。这里改成回退打开父目录，
   // 保留“前往配置”的导航语义，并避免把一个不存在的文件路径直接交给编辑器。
   const trimmedPath = path.replace(/[\\/]+$/, "");
-  const lastSeparatorIndex = Math.max(
-    trimmedPath.lastIndexOf("/"),
-    trimmedPath.lastIndexOf("\\"),
-  );
+  const lastSeparatorIndex = Math.max(trimmedPath.lastIndexOf("/"), trimmedPath.lastIndexOf("\\"));
 
   if (lastSeparatorIndex < 0) {
     return path;
@@ -74,10 +68,7 @@ export function useTaskListItemContextActions({
   taskId: string;
   provider?: ZCodeProvider;
   intl: {
-    formatMessage: (
-      desc: { id: string },
-      values?: Record<string, string>,
-    ) => string;
+    formatMessage: (desc: { id: string }, values?: Record<string, string>) => string;
   };
   loadTaskPaths?: boolean;
   loadProviderConfig?: boolean;
@@ -117,31 +108,26 @@ export function useTaskListItemContextActions({
     },
   );
 
-  const handleCopyText = useCallback(
-    async (label: string, value: string | null) => {
-      if (!value) {
-        return;
-      }
+  const handleCopyText = useCallback(async (label: string, value: string | null) => {
+    if (!value) {
+      return;
+    }
 
-      try {
-        await navigator.clipboard.writeText(value);
-        logger.info(`[TaskListItem] ${label} 已复制: ${value}`);
-      } catch (error) {
-        logger.warn("[TaskListItem] 复制文本失败", {
-          label,
-          value,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    },
-    [],
-  );
+    try {
+      await navigator.clipboard.writeText(value);
+      logger.info(`[TaskListItem] ${label} 已复制: ${value}`);
+    } catch (error) {
+      logger.warn("[TaskListItem] 复制文本失败", {
+        label,
+        value,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, []);
 
   const handleOpenTaskPathInFileManager = useCallback(async () => {
     const hasRemoteWorkspaceScope = Boolean(
-      remoteSessionId ||
-        workspaceIdentity?.trim() ||
-        workspaceOpenTarget.isRemoteWorkspace,
+      remoteSessionId || workspaceIdentity?.trim() || workspaceOpenTarget.isRemoteWorkspace,
     );
     if (hasRemoteWorkspaceScope) {
       if (workspaceOpenTarget.remoteTarget?.kind !== "wsl") {
@@ -217,18 +203,13 @@ export function useTaskListItemContextActions({
       const editors = await platform.getInstalledEditors();
       const sortedEditors = sortInstalledEditorsForOpenWith(editors);
       const preferredEditor =
-        sortedEditors.find((editor) => editor.id === preferredEditorId) ??
-        sortedEditors[0] ??
-        null;
+        sortedEditors.find((editor) => editor.id === preferredEditorId) ?? sortedEditors[0] ?? null;
 
       // Bugfix: task 右键菜单位于侧边栏，拿不到 Header 里的 selectedEditor 本地状态。
       // 如果这里直接硬编码某个编辑器，Header 和侧边栏会对“Go to config”走出两条不同路径。
       // 这里改为读取持久化的 editor 偏好，和 Header editor 按钮共用同一份用户选择。
       if (preferredEditor) {
-        const result = await platform.openInEditor(
-          preferredEditor.id,
-          openTargetPath,
-        );
+        const result = await platform.openInEditor(preferredEditor.id, openTargetPath);
         if (result.success) {
           return;
         }
@@ -253,13 +234,7 @@ export function useTaskListItemContextActions({
         error: error instanceof Error ? error.message : String(error),
       });
     }
-  }, [
-    platform,
-    providerConfigFile.exists,
-    providerConfigFile.path,
-    taskId,
-    taskProvider,
-  ]);
+  }, [platform, providerConfigFile.exists, providerConfigFile.path, taskId, taskProvider]);
 
   return {
     taskSessionFile,
@@ -289,10 +264,7 @@ function isWindowsLike(): boolean {
 }
 
 function getFileManagerLabel(intl: {
-  formatMessage: (
-    desc: { id: string },
-    values?: Record<string, string>,
-  ) => string;
+  formatMessage: (desc: { id: string }, values?: Record<string, string>) => string;
 }) {
   if (isMacLike()) {
     return intl.formatMessage({ id: "appHeader.openInFinder" });

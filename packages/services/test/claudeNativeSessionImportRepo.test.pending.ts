@@ -100,9 +100,8 @@ describe("ClaudeNativeSessionImportRepo", () => {
       "utf-8",
     );
 
-    const { ClaudeNativeSessionImportRepo } = await import(
-      "#src/session/claude-native/claudeNativeSessionImportRepo.js"
-    );
+    const { ClaudeNativeSessionImportRepo } =
+      await import("#src/session/claude-native/claudeNativeSessionImportRepo.js");
     const { getWorkspaceHash } = await import("#src/paths.js");
 
     const repo = new ClaudeNativeSessionImportRepo();
@@ -123,8 +122,7 @@ describe("ClaudeNativeSessionImportRepo", () => {
       },
     ]);
 
-    const workspaceIdentity =
-      "remote:ssh:demo-host:22:demo:/repo/import-demo";
+    const workspaceIdentity = "remote:ssh:demo-host:22:demo:/repo/import-demo";
     const copied = await repo.copySessionFileToWorkspace({
       workspacePath,
       workspaceIdentity,
@@ -150,7 +148,9 @@ describe("ClaudeNativeSessionImportRepo", () => {
       createdOutputPaths: [expectedOutputPath],
     });
     expect(existsSync(expectedOutputPath)).toBe(true);
-    expect(readFileSync(expectedOutputPath, "utf-8")).toBe(readFileSync(recentSessionPath, "utf-8"));
+    expect(readFileSync(expectedOutputPath, "utf-8")).toBe(
+      readFileSync(recentSessionPath, "utf-8"),
+    );
   });
 
   it("不传 workspacePath 时会返回多个 workspace 的候选 session", async () => {
@@ -201,9 +201,8 @@ describe("ClaudeNativeSessionImportRepo", () => {
     const sessionDateB = new Date("2026-04-16T10:00:00.000Z");
     utimesSync(sessionPathB, sessionDateB, sessionDateB);
 
-    const { ClaudeNativeSessionImportRepo } = await import(
-      "#src/session/claude-native/claudeNativeSessionImportRepo.js"
-    );
+    const { ClaudeNativeSessionImportRepo } =
+      await import("#src/session/claude-native/claudeNativeSessionImportRepo.js");
 
     const repo = new ClaudeNativeSessionImportRepo();
     const candidates = await repo.scanImportableSessions({
@@ -274,9 +273,8 @@ describe("ClaudeNativeSessionImportRepo", () => {
       },
     ]);
 
-    const { ClaudeNativeSessionImportRepo } = await import(
-      "#src/session/claude-native/claudeNativeSessionImportRepo.js"
-    );
+    const { ClaudeNativeSessionImportRepo } =
+      await import("#src/session/claude-native/claudeNativeSessionImportRepo.js");
     const repo = new ClaudeNativeSessionImportRepo();
 
     await expect(repo.scanImportableSessions({})).resolves.toEqual([
@@ -340,9 +338,8 @@ describe("ClaudeNativeSessionImportRepo", () => {
       },
     ]);
 
-    const { ClaudeNativeSessionImportRepo } = await import(
-      "#src/session/claude-native/claudeNativeSessionImportRepo.js"
-    );
+    const { ClaudeNativeSessionImportRepo } =
+      await import("#src/session/claude-native/claudeNativeSessionImportRepo.js");
     const repo = new ClaudeNativeSessionImportRepo();
 
     await expect(repo.scanImportableSessions({ workspacePath })).resolves.toEqual([

@@ -21,10 +21,7 @@
           "E2E_ASK_USER_QUESTION_ANSWER_VISIBLE",
           "E2E_TOOL_CROSS_PRODUCT_ASK_USER_QUESTION"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,
@@ -70,10 +67,7 @@
           "E2E_TOOL_CROSS_PRODUCT_ASK_USER_QUESTION",
           "toolu_e2e_tool_cross_product_ask_user_question"
         ],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "CRITICAL: Respond with TEXT ONLY"
-        ]
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": {
         "statusCode": 200,

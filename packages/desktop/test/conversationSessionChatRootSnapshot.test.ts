@@ -154,13 +154,13 @@ describe("V4 ChatRootSnapshot task Goal and stop semantics", () => {
       },
     });
 
-    expect(readTaskStoreSnapshotInBrowser("task-active", "workspace").snapshot.taskMeta).toMatchObject(
-      {
-        targetId: "goal-active",
-        targetObjective: "修复 active goal",
-        targetStatus: "active",
-      },
-    );
+    expect(
+      readTaskStoreSnapshotInBrowser("task-active", "workspace").snapshot.taskMeta,
+    ).toMatchObject({
+      targetId: "goal-active",
+      targetObjective: "修复 active goal",
+      targetStatus: "active",
+    });
   });
 
   it("reads a completed Goal from task-list cache fallback", () => {

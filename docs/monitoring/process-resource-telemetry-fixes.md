@@ -9,12 +9,12 @@
 
 ## UI Surface Matrix
 
-| 场景 / 入口 | 共享实现与权威 owner | 校验与副作用 | 模式 / 隔离 |
-| --- | --- | --- | --- |
-| 桌面连接独立 Server | connectServerRemote → Host connection handle | server-info 能力决定旁路订阅 | 无能力仍连接；不改变 workspace 草稿或任务 |
-| 桌面本地及 SSH/WSL/Docker | Host services → main 遥测出口 | 配套进程维持订阅 | 不改对应 UI、运行态或 settings |
-| 多窗口同 Server Bash | CLI 单命令 owner → main | 完成标识校验、有界去重、ARMS 投影 | 不因连接数增加事件数 |
-| 手机远控 attachment | Agent connection scope | 遥测事件保持空 | continuous/replayable 恢复语义不变 |
+| 场景 / 入口               | 共享实现与权威 owner                         | 校验与副作用                      | 模式 / 隔离                               |
+| ------------------------- | -------------------------------------------- | --------------------------------- | ----------------------------------------- |
+| 桌面连接独立 Server       | connectServerRemote → Host connection handle | server-info 能力决定旁路订阅      | 无能力仍连接；不改变 workspace 草稿或任务 |
+| 桌面本地及 SSH/WSL/Docker | Host services → main 遥测出口                | 配套进程维持订阅                  | 不改对应 UI、运行态或 settings            |
+| 多窗口同 Server Bash      | CLI 单命令 owner → main                      | 完成标识校验、有界去重、ARMS 投影 | 不因连接数增加事件数                      |
+| 手机远控 attachment       | Agent connection scope                       | 遥测事件保持空                    | continuous/replayable 恢复语义不变        |
 
 ## Shared And Divergent Behavior
 
@@ -23,15 +23,15 @@ UI、候选项、默认值、持久化均无改动。共享 Host 转发与 main 
 
 ## Feature Relationships / State Owners And Commit Sinks
 
-| 级别 | 链路 / owner | 原因与依据 |
-| --- | --- | --- |
-| must-inspect | shared server-info → 两种 Server → Host helper/index | 新能力的声明、解析与订阅门禁须一致 |
-| must-inspect | CLI Bash owner → shared protocol → services/Host → main | completionToken 在 fan-out 前生成，在唯一出口去重 |
-| must-inspect | Host 环境身份 → CLI/MCP 来源 → window aggregator | 隔离 key 贯穿，白名单投影不泄露身份 |
-| must-inspect | CLI source → external app totals | 到达时刻属于原读数；交付不能延长有效期 |
-| should-inspect | Host self heap / renderer heap | 同 tick 最大值与交付清空规则一致 |
-| invariant-only | terminal attachment / task realtime / CommandInbox | 无新会话订阅、队列、snapshot 或 replay 状态 |
-| evidence-only | telemetry tests / CI guard | 用触发场景断言验证契约，测试通过不外推实机 |
+| 级别           | 链路 / owner                                            | 原因与依据                                        |
+| -------------- | ------------------------------------------------------- | ------------------------------------------------- |
+| must-inspect   | shared server-info → 两种 Server → Host helper/index    | 新能力的声明、解析与订阅门禁须一致                |
+| must-inspect   | CLI Bash owner → shared protocol → services/Host → main | completionToken 在 fan-out 前生成，在唯一出口去重 |
+| must-inspect   | Host 环境身份 → CLI/MCP 来源 → window aggregator        | 隔离 key 贯穿，白名单投影不泄露身份               |
+| must-inspect   | CLI source → external app totals                        | 到达时刻属于原读数；交付不能延长有效期            |
+| should-inspect | Host self heap / renderer heap                          | 同 tick 最大值与交付清空规则一致                  |
+| invariant-only | terminal attachment / task realtime / CommandInbox      | 无新会话订阅、队列、snapshot 或 replay 状态       |
+| evidence-only  | telemetry tests / CI guard                              | 用触发场景断言验证契约，测试通过不外推实机        |
 
 ## Must-Preserve Invariants
 
@@ -60,15 +60,15 @@ ingestToolExecResource 的协议生产者与白名单出口。未将所有静态
 
 ## Planning Handoff / Accepted Cases
 
-| Case | 设置与动作 | 断言 | 证据 / 状态 |
-| --- | --- | --- | --- |
-| PRT-031 | 旧/新 server-info，建立 Host 遥测订阅 | 缺能力无订阅且服务端存活；有能力四条旁路正常 | schema / Host / localhost WS 集成通过；旧 Core 探针 exit 0 |
-| PRT-032 | 同一完成标识经不同 Host 重复到达；相同指标不同标识 | 前者一次、后者分别上报；集合有界且重置清空 | 协议 / CLI / main 回归通过；上限与 reset 已验证 |
-| PRT-033 | chat/aux 错相位，aux 停更，周期与退出 flush | 按组新读数交付；旧读数两个周期后退出总量 | 受控时钟回归通过，含同组实例到期和 CLI/MCP 预算 |
-| PRT-034 | 同规格不同环境及同环境多实例，CLI 与 MCP | 不跨环境相加；同环境合计；最终属性无身份 | Host / source / window / 出口回归通过 |
-| PRT-035 | 同 tick 两 Host heap 高→低、低→高 | 最大值一致，下一 tick 不重交 | selfHeap / 集成回归通过 |
-| PRT-036 | 实际来源路径、禁用调用与豁免 | 全部受保护，合法按需采样豁免仍有效 | guard / repo hygiene 通过，73 文件 / 2 项生效豁免 |
-| PRT-037 | 正则内反引号、字符类、除法、注释及模板 | 真调用命中，真注释忽略，整仓无状态漂移 | guard 31 项回归通过，含真实稳定性源码 |
+| Case    | 设置与动作                                         | 断言                                         | 证据 / 状态                                                |
+| ------- | -------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| PRT-031 | 旧/新 server-info，建立 Host 遥测订阅              | 缺能力无订阅且服务端存活；有能力四条旁路正常 | schema / Host / localhost WS 集成通过；旧 Core 探针 exit 0 |
+| PRT-032 | 同一完成标识经不同 Host 重复到达；相同指标不同标识 | 前者一次、后者分别上报；集合有界且重置清空   | 协议 / CLI / main 回归通过；上限与 reset 已验证            |
+| PRT-033 | chat/aux 错相位，aux 停更，周期与退出 flush        | 按组新读数交付；旧读数两个周期后退出总量     | 受控时钟回归通过，含同组实例到期和 CLI/MCP 预算            |
+| PRT-034 | 同规格不同环境及同环境多实例，CLI 与 MCP           | 不跨环境相加；同环境合计；最终属性无身份     | Host / source / window / 出口回归通过                      |
+| PRT-035 | 同 tick 两 Host heap 高→低、低→高                  | 最大值一致，下一 tick 不重交                 | selfHeap / 集成回归通过                                    |
+| PRT-036 | 实际来源路径、禁用调用与豁免                       | 全部受保护，合法按需采样豁免仍有效           | guard / repo hygiene 通过，73 文件 / 2 项生效豁免          |
+| PRT-037 | 正则内反引号、字符类、除法、注释及模板             | 真调用命中，真注释忽略，整仓无状态漂移       | guard 31 项回归通过，含真实稳定性源码                      |
 
 ## Dimensions / Pruning / Matrix Backfill
 

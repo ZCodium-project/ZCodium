@@ -66,9 +66,7 @@ describe("会话区 Goal Interruptions E2E", () => {
       30000,
     );
 
-    await sendPrompt(
-      `${nextMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    );
+    await sendPrompt(`${nextMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`);
     await waitForComposerText("", "goal verifier stop 后下一轮发送没有清空输入框");
     await waitForUpstreamRequestContaining(nextMarker, 30000);
     await waitForAssistantMessageContaining(E2E_REPLY_TOKEN);
@@ -131,9 +129,7 @@ describe("会话区 Goal Interruptions E2E", () => {
     );
     await waitForCompactMarkerStatus("completed", "manual", startedMarker.inputId);
 
-    await sendPrompt(
-      `${nextMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`,
-    );
+    await sendPrompt(`${nextMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`);
     await waitForComposerText("", "goal verifier compact 后下一轮发送没有清空输入框");
     await waitForUpstreamRequest(
       {

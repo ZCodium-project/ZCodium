@@ -116,9 +116,8 @@ describe("ConversationBackgroundWorkTrigger", () => {
 // 按钮（取消的三个入口之一）——这正是拆分前把它塞进 bashCount 所保住的那件事。
 describe("getComposerBackgroundWorkCounts with dwf workflow runs", () => {
   it("counts running workflow runs as their own type instead of Bash", async () => {
-    const { getComposerBackgroundWorkCounts } = await import(
-      "@/v4/composer/ConversationBackgroundWorkTrigger.js"
-    );
+    const { getComposerBackgroundWorkCounts } =
+      await import("@/v4/composer/ConversationBackgroundWorkTrigger.js");
 
     expect(
       getComposerBackgroundWorkCounts(
@@ -133,9 +132,8 @@ describe("getComposerBackgroundWorkCounts with dwf workflow runs", () => {
   });
 
   it("ignores settled workflow runs", async () => {
-    const { getComposerBackgroundWorkCounts } = await import(
-      "@/v4/composer/ConversationBackgroundWorkTrigger.js"
-    );
+    const { getComposerBackgroundWorkCounts } =
+      await import("@/v4/composer/ConversationBackgroundWorkTrigger.js");
 
     expect(
       getComposerBackgroundWorkCounts([

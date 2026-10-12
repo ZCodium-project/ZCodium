@@ -95,10 +95,7 @@
         "method": "POST",
         "pathIncludes": "/chat/completions",
         "lastUserMessageIncludes": ["E2E_PASTED_IMAGE_EDGE_BMP_IMAGE_"],
-        "bodyIncludes": [
-          "e2e-image-edge-vision-model",
-          "data:image/bmp;base64,"
-        ],
+        "bodyIncludes": ["e2e-image-edge-vision-model", "data:image/bmp;base64,"],
         "bodyExcludes": ["[Image: source:", "Generate a concise title"]
       },
       "response": {
@@ -126,11 +123,7 @@
           "deepseek-v4-flash",
           "Media omitted from provider request because the selected model does not support image input."
         ],
-        "bodyExcludes": [
-          "data:image",
-          "[Image: source:",
-          "Generate a concise title"
-        ]
+        "bodyExcludes": ["data:image", "[Image: source:", "Generate a concise title"]
       },
       "response": {
         "statusCode": 200,

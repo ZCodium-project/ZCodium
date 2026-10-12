@@ -89,10 +89,7 @@ interface ReadAppBoundKeyOptions {
   ) => Promise<HelperProcessResult>;
   userDataDir: string;
   trustedPowerShellPath?: string;
-  verifySignature?: (
-    helperPath: string,
-    appExecutablePath: string,
-  ) => Promise<boolean | string>;
+  verifySignature?: (helperPath: string, appExecutablePath: string) => Promise<boolean | string>;
 }
 
 function toSafeProcessError(error: unknown): { code?: string; name: string } {

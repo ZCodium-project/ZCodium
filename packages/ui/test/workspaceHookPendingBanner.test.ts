@@ -71,9 +71,7 @@ vi.mock("@/v4/V4ConversationContext.js", () => ({
 }));
 
 // 模拟 workspaceHookReviewCommands 的 sendWorkspaceHookCommand
-const sendWorkspaceHookCommandMock = vi.hoisted(() =>
-  vi.fn(async () => ({ accepted: true })),
-);
+const sendWorkspaceHookCommandMock = vi.hoisted(() => vi.fn(async () => ({ accepted: true })));
 
 vi.mock("@/settings/workspaceHookReviewCommands.js", () => ({
   sendWorkspaceHookCommand: sendWorkspaceHookCommandMock,

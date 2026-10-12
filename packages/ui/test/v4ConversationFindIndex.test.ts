@@ -119,12 +119,8 @@ describe("buildConversationFindIndex", () => {
   });
 
   it("feature enabled 时不索引隐藏的 code-comment 协议原文", () => {
-    const directive =
-      '::code-comment{title="Hidden title" body="Hidden body" file="src/main.ts"}';
-    const renderUnits = units([
-      turnHeader(1),
-      assistantText(2, `visible text\n${directive}`),
-    ]);
+    const directive = '::code-comment{title="Hidden title" body="Hidden body" file="src/main.ts"}';
+    const renderUnits = units([turnHeader(1), assistantText(2, `visible text\n${directive}`)]);
 
     expect(buildConversationFindIndex(renderUnits, "Hidden body").matchCount).toBe(1);
     expect(
@@ -171,9 +167,7 @@ describe("buildConversationFindIndex", () => {
       ]),
       "alpha",
     );
-    const activeKey = getConversationFindMatchKey(
-      resolveConversationFindActiveMatch(initial, 1),
-    );
+    const activeKey = getConversationFindMatchKey(resolveConversationFindActiveMatch(initial, 1));
     const prepended = buildConversationFindIndex(
       units([
         turnHeader(1, "turn-1"),

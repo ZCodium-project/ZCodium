@@ -44,77 +44,102 @@ Default: `false`
 This example shows how to add a new command that returns the current URL and title as one result. The scope (`this`) is a [`WebdriverIO.Browser`](/docs/api/browser) object.
 
 ```js
-browser.addCommand('getUrlAndTitle', async function (customVar) {
-    // `this` refers to the `browser` scope
-    return {
-        url: await this.getUrl(),
-        title: await this.getTitle(),
-        customVar: customVar
-    }
-})
+browser.addCommand("getUrlAndTitle", async function (customVar) {
+  // `this` refers to the `browser` scope
+  return {
+    url: await this.getUrl(),
+    title: await this.getTitle(),
+    customVar: customVar,
+  };
+});
 ```
 
 Additionally, you can extend the element instance with your own set of commands, by passing `true` as the final argument. The scope (`this`) in this case is a [`WebdriverIO.Element`](/docs/api/element) object.
 
 ```js
-browser.addCommand("waitAndClick", async function () {
+browser.addCommand(
+  "waitAndClick",
+  async function () {
     // `this` is return value of $(selector)
-    await this.waitForDisplayed()
-    await this.click()
-}, { attachToElement: true })
+    await this.waitForDisplayed();
+    await this.click();
+  },
+  { attachToElement: true },
+);
 ```
 
 By default, element custom commands wait for the element to exist before calling the custom command. Even though most of the time this is desired, if not, it can be disabled with `disableImplicitWait`:
 
 ```js
-browser.addCommand("waitAndClick", async function () {
+browser.addCommand(
+  "waitAndClick",
+  async function () {
     // `this` is return value of $(selector)
-    await this.waitForExists()
-    await this.click()
-}, { attachToElement: true, disableElementImplicitWait: true })
+    await this.waitForExists();
+    await this.click();
+  },
+  { attachToElement: true, disableElementImplicitWait: true },
+);
 ```
 
-
-Custom commands give you the opportunity to bundle a specific sequence of commands you use frequently as a single call. You can define custom commands at any point in your test suite; just make sure that the command is defined *before* its first use. (The `before` hook in your `wdio.conf.js` is one good place to create them.)
+Custom commands give you the opportunity to bundle a specific sequence of commands you use frequently as a single call. You can define custom commands at any point in your test suite; just make sure that the command is defined _before_ its first use. (The `before` hook in your `wdio.conf.js` is one good place to create them.)
 
 Once defined, you can use them as follows:
 
 ```js
-it('should use my custom command', async () => {
-    await browser.url('http://www.github.com')
-    const result = await browser.getUrlAndTitle('foobar')
+it("should use my custom command", async () => {
+  await browser.url("http://www.github.com");
+  const result = await browser.getUrlAndTitle("foobar");
 
-    assert.strictEqual(result.url, 'https://github.com/')
-    assert.strictEqual(result.title, 'GitHub · Where software is built')
-    assert.strictEqual(result.customVar, 'foobar')
-})
+  assert.strictEqual(result.url, "https://github.com/");
+  assert.strictEqual(result.title, "GitHub · Where software is built");
+  assert.strictEqual(result.customVar, "foobar");
+});
 ```
 
-__Note:__ If you register a custom command to the `browser` scope, the command won't be accessible for elements. Likewise, if you register a command to the element scope, it won't be accessible in the `browser` scope:
+**Note:** If you register a custom command to the `browser` scope, the command won't be accessible for elements. Likewise, if you register a command to the element scope, it won't be accessible in the `browser` scope:
 
 ```js
-browser.addCommand("myCustomBrowserCommand", () => { return 1 })
-const elem = await $('body')
-console.log(typeof browser.myCustomBrowserCommand) // outputs "function"
-console.log(typeof elem.myCustomBrowserCommand()) // outputs "undefined"
+browser.addCommand("myCustomBrowserCommand", () => {
+  return 1;
+});
+const elem = await $("body");
+console.log(typeof browser.myCustomBrowserCommand); // outputs "function"
+console.log(typeof elem.myCustomBrowserCommand()); // outputs "undefined"
 
-browser.addCommand("myCustomElementCommand", () => { return 1 }, { attachToElement: true })
-const elem2 = await $('body')
-console.log(typeof browser.myCustomElementCommand) // outputs "undefined"
-console.log(await elem2.myCustomElementCommand('foobar')) // outputs "1"
+browser.addCommand(
+  "myCustomElementCommand",
+  () => {
+    return 1;
+  },
+  { attachToElement: true },
+);
+const elem2 = await $("body");
+console.log(typeof browser.myCustomElementCommand); // outputs "undefined"
+console.log(await elem2.myCustomElementCommand("foobar")); // outputs "1"
 
-const elem3 = await $('body')
-elem3.addCommand("myCustomElementCommand2", () => { return 2 })
-console.log(typeof browser.myCustomElementCommand2) // outputs "undefined"
-console.log(await elem3.myCustomElementCommand2('foobar')) // outputs "2"
+const elem3 = await $("body");
+elem3.addCommand("myCustomElementCommand2", () => {
+  return 2;
+});
+console.log(typeof browser.myCustomElementCommand2); // outputs "undefined"
+console.log(await elem3.myCustomElementCommand2("foobar")); // outputs "2"
 ```
 
-__Note:__ If you need to chain a custom command, the command should end with `$`,
+**Note:** If you need to chain a custom command, the command should end with `$`,
 
 ```js
-browser.addCommand("user$", (locator) => { return ele })
-browser.addCommand("user$", (locator) => { return ele }, { attachToElement: true })
-await browser.user$('foo').user$('bar').click()
+browser.addCommand("user$", (locator) => {
+  return ele;
+});
+browser.addCommand(
+  "user$",
+  (locator) => {
+    return ele;
+  },
+  { attachToElement: true },
+);
+await browser.user$("foo").user$("bar").click();
 ```
 
 Be careful to not overload the `browser` scope with too many custom commands.
@@ -170,14 +195,14 @@ With TypeScript, it's easy to extend WebdriverIO interfaces. Add types to your c
 1. Create a type definition file (e.g., `./src/types/wdio.d.ts`)
 2. a. If using a module-style type definition file (using import/export and `declare global WebdriverIO` in the type definition file), make sure to include the file path in the `tsconfig.json` `include` property.
 
-   b. If using ambient-style type definition files (no import/export in type definition files and `declare namespace WebdriverIO` for custom commands), make sure the `tsconfig.json` does *not* contain any `include` section, since this will cause all type definition files not listed in the `include` section to not be recognized by TypeScript.
+   b. If using ambient-style type definition files (no import/export in type definition files and `declare namespace WebdriverIO` for custom commands), make sure the `tsconfig.json` does _not_ contain any `include` section, since this will cause all type definition files not listed in the `include` section to not be recognized by TypeScript.
 
 <Tabs
-  defaultValue="modules"
-  values={[
-    {label: 'Modules (using import/export)', value: 'modules'},
-    {label: 'Ambient Type Definitions (no tsconfig include)', value: 'ambient'},
-  ]
+defaultValue="modules"
+values={[
+{label: 'Modules (using import/export)', value: 'modules'},
+{label: 'Ambient Type Definitions (no tsconfig include)', value: 'ambient'},
+]
 }>
 <TabItem value="modules">
 
@@ -206,29 +231,29 @@ With TypeScript, it's easy to extend WebdriverIO interfaces. Add types to your c
 3. Add definitions for your commands according to your execution mode.
 
 <Tabs
-  defaultValue="modules"
-  values={[
-    {label: 'Modules (using import/export)', value: 'modules'},
-    {label: 'Ambient Type Definitions', value: 'ambient'},
-  ]
+defaultValue="modules"
+values={[
+{label: 'Modules (using import/export)', value: 'modules'},
+{label: 'Ambient Type Definitions', value: 'ambient'},
+]
 }>
 <TabItem value="modules">
 
 ```typescript
 declare global {
-    namespace WebdriverIO {
-        interface Browser {
-            browserCustomCommand: (arg: any) => Promise<void>
-        }
-
-        interface MultiRemoteBrowser {
-            browserCustomCommand: (arg: any) => Promise<void>
-        }
-
-        interface Element {
-            elementCustomCommand: (arg: any) => Promise<number>
-        }
+  namespace WebdriverIO {
+    interface Browser {
+      browserCustomCommand: (arg: any) => Promise<void>;
     }
+
+    interface MultiRemoteBrowser {
+      browserCustomCommand: (arg: any) => Promise<void>;
+    }
+
+    interface Element {
+      elementCustomCommand: (arg: any) => Promise<number>;
+    }
+  }
 }
 ```
 
@@ -237,17 +262,17 @@ declare global {
 
 ```typescript
 declare namespace WebdriverIO {
-    interface Browser {
-        browserCustomCommand: (arg: any) => Promise<void>
-    }
+  interface Browser {
+    browserCustomCommand: (arg: any) => Promise<void>;
+  }
 
-    interface MultiRemoteBrowser {
-        browserCustomCommand: (arg: any) => Promise<void>
-    }
+  interface MultiRemoteBrowser {
+    browserCustomCommand: (arg: any) => Promise<void>;
+  }
 
-    interface Element {
-        elementCustomCommand: (arg: any) => Promise<number>
-    }
+  interface Element {
+    elementCustomCommand: (arg: any) => Promise<number>;
+  }
 }
 ```
 
@@ -261,20 +286,20 @@ If you use external libraries (e.g., to do database calls) that support promises
 When returning the promise, WebdriverIO ensures that it doesn't continue with the next command until the promise is resolved. If the promise gets rejected, the command will throw an error.
 
 ```js
-browser.addCommand('makeRequest', async (url) => {
-    const response = await fetch(url)
-    return await response.json()
-})
+browser.addCommand("makeRequest", async (url) => {
+  const response = await fetch(url);
+  return await response.json();
+});
 ```
 
 Then, just use it in your WDIO test specs:
 
 ```js
-it('execute external library in a sync way', async () => {
-    await browser.url('...')
-    const body = await browser.makeRequest('http://...')
-    console.log(body) // returns response body
-})
+it("execute external library in a sync way", async () => {
+  await browser.url("...");
+  const body = await browser.makeRequest("http://...");
+  console.log(body); // returns response body
+});
 ```
 
 **Note:** The result of your custom command is the result of the promise you return.
@@ -365,30 +390,37 @@ await elem.click({ force: true })
 If you are using the WebDriver protocol and run tests on a platform that supports additional commands not defined by any of the protocol definitions in [`@wdio/protocols`](https://github.com/webdriverio/webdriverio/tree/main/packages/wdio-protocols/src/protocols) you can manually add them through the `addCommand` interface. The `webdriver` package offers a command wrapper that allows to register these new endpoints in the same way as other commands, providing the same parameter checks and error handling. To register this new endpoint import the command wrapper and register a new command with it as follows:
 
 ```js
-import { command } from 'webdriver'
+import { command } from "webdriver";
 
-browser.addCommand('myNewCommand', command('POST', '/session/:sessionId/foobar/:someId', {
-    command: 'myNewCommand',
-    description: 'a new WebDriver command',
-    ref: 'https://vendor.com/commands/#myNewCommand',
-    variables: [{
-        name: 'someId',
-        description: 'some id to something'
-    }],
-    parameters: [{
-        name: 'foo',
-        type: 'string',
-        description: 'a valid parameter',
-        required: true
-    }]
-}))
+browser.addCommand(
+  "myNewCommand",
+  command("POST", "/session/:sessionId/foobar/:someId", {
+    command: "myNewCommand",
+    description: "a new WebDriver command",
+    ref: "https://vendor.com/commands/#myNewCommand",
+    variables: [
+      {
+        name: "someId",
+        description: "some id to something",
+      },
+    ],
+    parameters: [
+      {
+        name: "foo",
+        type: "string",
+        description: "a valid parameter",
+        required: true,
+      },
+    ],
+  }),
+);
 ```
 
 Calling this command with invalid parameters results in the same error handling as predefined protocol commands, e.g.:
 
 ```js
 // call command without required url parameter and payload
-await browser.myNewCommand()
+await browser.myNewCommand();
 
 /**
  * results in the following error:

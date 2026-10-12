@@ -195,9 +195,7 @@ export function InstalledPluginDetailPanel({
         </DetailSection>
 
         {pluginWarnings.length > 0 ? (
-          <DetailSection
-            title={intl.formatMessage({ id: "settings.plugins.detail.warnings" })}
-          >
+          <DetailSection title={intl.formatMessage({ id: "settings.plugins.detail.warnings" })}>
             <PluginWarningList warnings={pluginWarnings} />
           </DetailSection>
         ) : null}
@@ -317,9 +315,7 @@ export function PluginWarningList({ warnings }: { warnings: ZCodePluginDiagnosti
           className="flex min-w-0 items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2"
         >
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-warning" aria-hidden="true" />
-          <span className="min-w-0 break-all text-ui-sm text-foreground">
-            {diagnostic.message}
-          </span>
+          <span className="min-w-0 break-all text-ui-sm text-foreground">{diagnostic.message}</span>
         </li>
       ))}
     </ul>

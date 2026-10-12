@@ -37,11 +37,7 @@ describe("CommandCenterScopeButton", () => {
   it("点击时触发 onClick", () => {
     const onClick = vi.fn();
     render(
-      createElement(
-        CommandCenterScopeButton,
-        { active: false, label: "命令", onClick },
-        null,
-      ),
+      createElement(CommandCenterScopeButton, { active: false, label: "命令", onClick }, null),
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "命令" }));
@@ -73,13 +69,7 @@ describe("CommandCenterScopeButton", () => {
 
 describe("CommandCenterConversationTimestamp", () => {
   it("使用 text-ui-sm 而非 text-ui-xs", () => {
-    render(
-      createElement(
-        CommandCenterConversationTimestamp,
-        null,
-        "2小时前",
-      ),
-    );
+    render(createElement(CommandCenterConversationTimestamp, null, "2小时前"));
 
     const span = screen.getByText("2小时前");
     expect(span.className).toContain("text-ui-sm");
@@ -87,7 +77,9 @@ describe("CommandCenterConversationTimestamp", () => {
   });
 });
 
-function makeEntry(overrides: Partial<CommandCenterSearchHistoryEntry> = {}): CommandCenterSearchHistoryEntry {
+function makeEntry(
+  overrides: Partial<CommandCenterSearchHistoryEntry> = {},
+): CommandCenterSearchHistoryEntry {
   return {
     query: "登录",
     scope: "all",
@@ -97,9 +89,7 @@ function makeEntry(overrides: Partial<CommandCenterSearchHistoryEntry> = {}): Co
 }
 
 describe("CommandCenterSearchHistory", () => {
-  function renderHistory(
-    overrides: Record<string, unknown> = {},
-  ) {
+  function renderHistory(overrides: Record<string, unknown> = {}) {
     const props = {
       entries: [makeEntry()],
       expanded: false,

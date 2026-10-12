@@ -86,7 +86,10 @@ function buildNativeConfigPath(
   return join(baseDir, ...descriptor.configDirSegments, descriptor.fileName);
 }
 
-function buildClaudeSettingsFilePath(scope: Exclude<McpScope, "common">, workspacePath?: string): string {
+function buildClaudeSettingsFilePath(
+  scope: Exclude<McpScope, "common">,
+  workspacePath?: string,
+): string {
   return buildNativeConfigPath("claudeclimcp", scope, workspacePath);
 }
 
@@ -118,7 +121,9 @@ function shouldWriteClaudeServerToState(
   return normalizePathForLookup(existing.file.filePath) === normalizePathForLookup(stateFilePath);
 }
 
-export async function readClaudeUserServers(workspacePath?: string): Promise<NativeMcpServerRecord[]> {
+export async function readClaudeUserServers(
+  workspacePath?: string,
+): Promise<NativeMcpServerRecord[]> {
   const legacyFilePath = buildNativeConfigPath("claudeclimcp", "user");
   const legacyRoot = await readJsonObject(legacyFilePath);
   const settingsServers = normalizeServerMap(legacyRoot?.mcpServers);
@@ -161,7 +166,9 @@ export async function readClaudeUserServers(workspacePath?: string): Promise<Nat
   return result;
 }
 
-export async function readClaudeWorkspaceServers(workspacePath?: string): Promise<NativeMcpServerRecord[]> {
+export async function readClaudeWorkspaceServers(
+  workspacePath?: string,
+): Promise<NativeMcpServerRecord[]> {
   if (!workspacePath) {
     return [];
   }
@@ -231,8 +238,14 @@ async function writeClaudeUserServers(
     delete settingsServers[payload.name];
   }
 
-  await writeTextAtomic(settingsFilePath, JSON.stringify({ ...settingsRoot, mcpServers: settingsServers }, null, 2) + "\n");
-  await writeTextAtomic(stateFilePath, JSON.stringify({ ...stateRoot, mcpServers: stateServers }, null, 2) + "\n");
+  await writeTextAtomic(
+    settingsFilePath,
+    JSON.stringify({ ...settingsRoot, mcpServers: settingsServers }, null, 2) + "\n",
+  );
+  await writeTextAtomic(
+    stateFilePath,
+    JSON.stringify({ ...stateRoot, mcpServers: stateServers }, null, 2) + "\n",
+  );
 }
 
 async function writeClaudeWorkspaceServers(
@@ -271,8 +284,14 @@ async function writeClaudeWorkspaceServers(
   nextProjectState.mcpServers = projectServers;
   const nextProjectsRoot = { ...projectsRoot, [payload.projectPath]: nextProjectState };
 
-  await writeTextAtomic(settingsFilePath, JSON.stringify({ ...settingsRoot, mcpServers: workspaceServers }, null, 2) + "\n");
-  await writeTextAtomic(stateFilePath, JSON.stringify({ ...stateRoot, projects: nextProjectsRoot }, null, 2) + "\n");
+  await writeTextAtomic(
+    settingsFilePath,
+    JSON.stringify({ ...settingsRoot, mcpServers: workspaceServers }, null, 2) + "\n",
+  );
+  await writeTextAtomic(
+    stateFilePath,
+    JSON.stringify({ ...stateRoot, projects: nextProjectsRoot }, null, 2) + "\n",
+  );
 }
 
 export async function writeClaudeServers(

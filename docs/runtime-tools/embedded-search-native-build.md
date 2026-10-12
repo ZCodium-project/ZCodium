@@ -156,10 +156,10 @@ producer 仍可作为显式人工流程使用：在对应平台的 producer runn
 
 `scripts/prepare-native-search-tools.mjs` 是 desktop `prepare:native-search`、SEA、server-cli staging 与 remote 资产准备共用的唯一入口。来源由 `resolveNativeSearchArtifactSource(env)` 一次判定，调用方不自行判断：
 
-| 条件 | 来源 | 行为 |
-| --- | --- | --- |
-| 设置了 `NATIVE_SEARCH_TOOLS_DOWNLOAD_BASE_URL`，或 `resolveIntranetDepsBaseUrl(env)` 能解析出地址 | `intranet` | 原样调用 `downloadNativeSearchTools`：URL、代理、SHA-256、bundle meta 与缓存跳过语义均不变；remote Linux/macOS 仍分别执行既有的 `download-native-search-tools.mjs` 与 legacy rg13 `download-ripgrep.mjs` 命令 |
-| 内网依赖源未配置（解析抛错或为空） | `repository` | 先校验 `apps/zcode-cli/dependencies/native-search` 中本次 plan 全部归档的 SHA-256，再逐个解包、做目标架构校验并写 bundle meta；不下载、不回退镜像 |
+| 条件                                                                                              | 来源         | 行为                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 设置了 `NATIVE_SEARCH_TOOLS_DOWNLOAD_BASE_URL`，或 `resolveIntranetDepsBaseUrl(env)` 能解析出地址 | `intranet`   | 原样调用 `downloadNativeSearchTools`：URL、代理、SHA-256、bundle meta 与缓存跳过语义均不变；remote Linux/macOS 仍分别执行既有的 `download-native-search-tools.mjs` 与 legacy rg13 `download-ripgrep.mjs` 命令 |
+| 内网依赖源未配置（解析抛错或为空）                                                                | `repository` | 先校验 `apps/zcode-cli/dependencies/native-search` 中本次 plan 全部归档的 SHA-256，再逐个解包、做目标架构校验并写 bundle meta；不下载、不回退镜像                                                             |
 
 - 本仓库的 `intranetDefaults.mjs` 带默认内网地址，因此默认总是 `intranet`，内网构建与 CI 行为不变；仓库归档只在依赖源确实未配置的环境（例如导出后的开源树）生效。
 - 仓库归档与内网镜像同名、同 SHA-256，release plan 同时给出 `downloadUrl`（仅 `intranet`）与 `archivePath`；两种来源不能混用或互为失败兜底，任一路径校验失败都直接终止。

@@ -23,9 +23,9 @@ python scripts/recalc.py <workbook> [timeout_seconds]
 `workbook` is positional; `timeout_seconds` is optional and defaults to 60.
 Exit codes:
 
-| Code | Meaning |
-|---|---|
-| `0` | LibreOffice ran to completion. The JSON on stdout decides success vs `errors_found` vs hard error. |
+| Code     | Meaning                                                                                                                            |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `0`      | LibreOffice ran to completion. The JSON on stdout decides success vs `errors_found` vs hard error.                                 |
 | non-zero | The wrapper itself failed (LibreOffice missing, file unreadable, timeout exceeded). The JSON on stdout will be `{"error": "..."}`. |
 
 The wrapped soffice invocation already saves the recalculated values back
@@ -83,15 +83,15 @@ failure) and only then on `status`.
 
 Alphabetical, matching the tokens scanned in `scripts/recalc.py`:
 
-| Marker | Diagnosis | First fix |
-|---|---|---|
-| `#DIV/0!` | Denominator evaluated to zero (or empty) | Wrap with `IFERROR(num/denom, 0)` or `IF(denom=0, "", num/denom)`; verify the upstream feed is not zero-padded |
-| `#N/A` | Lookup target missing in `VLOOKUP` / `MATCH` / `XLOOKUP` | Check key whitespace, case, type (`123` vs `"123"`); confirm the lookup column is contiguous |
-| `#NAME?` | Function name typo or missing add-in | Check spelling (`SUMM` / `VLOKUP`); LibreOffice ships add-ins separately from MS Excel |
-| `#NULL!` | Range intersection is empty (a literal space was used between two ranges) | Replace the space with a comma or colon; run `recalc.py` again to confirm |
-| `#NUM!` | Numeric out of bounds (`LOG(-1)`, IRR not converging, integer overflow) | Inspect the function args; clamp or use `IFERROR` for known boundary cases |
-| `#REF!` | A referenced cell or sheet was deleted | Search the workbook for the broken reference; never bulk-delete columns without first running `Find: =` to enumerate dependents |
-| `#VALUE!` | Type mismatch (text where a number is expected, or vice versa) | Coerce with `VALUE()` / `TEXT()`; for batch fixes set `engine="openpyxl"` and convert the column with pandas before resaving |
+| Marker    | Diagnosis                                                                 | First fix                                                                                                                       |
+| --------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `#DIV/0!` | Denominator evaluated to zero (or empty)                                  | Wrap with `IFERROR(num/denom, 0)` or `IF(denom=0, "", num/denom)`; verify the upstream feed is not zero-padded                  |
+| `#N/A`    | Lookup target missing in `VLOOKUP` / `MATCH` / `XLOOKUP`                  | Check key whitespace, case, type (`123` vs `"123"`); confirm the lookup column is contiguous                                    |
+| `#NAME?`  | Function name typo or missing add-in                                      | Check spelling (`SUMM` / `VLOKUP`); LibreOffice ships add-ins separately from MS Excel                                          |
+| `#NULL!`  | Range intersection is empty (a literal space was used between two ranges) | Replace the space with a comma or colon; run `recalc.py` again to confirm                                                       |
+| `#NUM!`   | Numeric out of bounds (`LOG(-1)`, IRR not converging, integer overflow)   | Inspect the function args; clamp or use `IFERROR` for known boundary cases                                                      |
+| `#REF!`   | A referenced cell or sheet was deleted                                    | Search the workbook for the broken reference; never bulk-delete columns without first running `Find: =` to enumerate dependents |
+| `#VALUE!` | Type mismatch (text where a number is expected, or vice versa)            | Coerce with `VALUE()` / `TEXT()`; for batch fixes set `engine="openpyxl"` and convert the column with pandas before resaving    |
 
 Each class only ever appears in `error_summary` if at least one cell on
 the sheet contains the literal marker — recalc cannot infer "this looks
@@ -104,10 +104,10 @@ like it might be wrong" beyond the seven tokens.
 the script writes the module to the user profile and never touches it
 again:
 
-| Platform | Path |
-|---|---|
-| Linux | `~/.config/libreoffice/4/user/basic/Standard/Module1.xba` |
-| macOS | `~/Library/Application Support/LibreOffice/4/user/basic/Standard/Module1.xba` |
+| Platform | Path                                                                          |
+| -------- | ----------------------------------------------------------------------------- |
+| Linux    | `~/.config/libreoffice/4/user/basic/Standard/Module1.xba`                     |
+| macOS    | `~/Library/Application Support/LibreOffice/4/user/basic/Standard/Module1.xba` |
 
 The XML payload is byte-fixed inside `recalc.py` — keep it untouched.
 LibreOffice resolves the macro by literal name (`Standard.Module1
@@ -121,10 +121,10 @@ _basic()` is a no-op — safe to re-run.
 `recalc.py` wraps the soffice command with the platform-specific timeout
 binary so a hung LibreOffice never blocks the caller forever:
 
-| Platform | Wrapper |
-|---|---|
-| Linux | `timeout <sec> soffice ...` (`coreutils` is always present) |
-| macOS with `coreutils` | `gtimeout <sec> soffice ...` (`brew install coreutils`) |
+| Platform                  | Wrapper                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| Linux                     | `timeout <sec> soffice ...` (`coreutils` is always present)                  |
+| macOS with `coreutils`    | `gtimeout <sec> soffice ...` (`brew install coreutils`)                      |
 | macOS without `coreutils` | no wrapper; the wall-clock timeout falls back to `subprocess.run(timeout=…)` |
 
 The third path still terminates the soffice process tree, but the JSON
@@ -171,12 +171,12 @@ Long-running batch jobs (hundreds of workbooks per hour) can swap
 daemon that keeps a single LibreOffice process alive and accepts requests
 over UNO's socket protocol.
 
-| Tradeoff | `soffice` per call (default) | `unoserver` daemon |
-|---|---|---|
-| Memory | Released after each call | ~250 MB resident permanently |
-| Cold start | 1.5–3 s per call | None after first start |
-| Concurrency | Serial unless you orchestrate | Pool inside the daemon |
-| Setup | Zero | `pip install unoserver` + systemd unit / launchd plist |
+| Tradeoff    | `soffice` per call (default)  | `unoserver` daemon                                     |
+| ----------- | ----------------------------- | ------------------------------------------------------ |
+| Memory      | Released after each call      | ~250 MB resident permanently                           |
+| Cold start  | 1.5–3 s per call              | None after first start                                 |
+| Concurrency | Serial unless you orchestrate | Pool inside the daemon                                 |
+| Setup       | Zero                          | `pip install unoserver` + systemd unit / launchd plist |
 
 The default in this skill stays `soffice` because it is zero-config and
 reproducible across machines. Switch to `unoserver` only when the
@@ -188,10 +188,10 @@ In environments where LibreOffice cannot be installed (CI containers,
 serverless, Apple Silicon hosts without the cask), pure-Python
 calculators can recompute a subset of Excel functions:
 
-| Library | Coverage | Notable gaps |
-|---|---|---|
-| [`xlcalculator`](https://github.com/bradbase/xlcalculator) | ~140 of the most common functions (math, stats, lookup, text, date) | Array formulas, pivot tables, data validation, custom functions |
-| [`formulas`](https://github.com/vinci1it2000/formulas) | Wider function set, dependency-graph based | Slower on large workbooks; charts and conditional formatting unsupported |
+| Library                                                    | Coverage                                                            | Notable gaps                                                             |
+| ---------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [`xlcalculator`](https://github.com/bradbase/xlcalculator) | ~140 of the most common functions (math, stats, lookup, text, date) | Array formulas, pivot tables, data validation, custom functions          |
+| [`formulas`](https://github.com/vinci1it2000/formulas)     | Wider function set, dependency-graph based                          | Slower on large workbooks; charts and conditional formatting unsupported |
 
 ```python
 from xlcalculator import ModelCompiler, Evaluator
@@ -247,7 +247,7 @@ non-deterministic across versions; the right place to absorb them is
 inside `recalc.py`, not in every downstream caller.
 
 **Downstream readers are still affected.** The fallback patches
-`recalc.py` itself, but a *caller* who later does
+`recalc.py` itself, but a _caller_ who later does
 `load_workbook(path)` on the same post-recalc file will hit the same
 `TypeError`. Open with `load_workbook(path, read_only=True,
 data_only=True)` instead — the streaming reader bypasses the merged-cell
@@ -298,4 +298,3 @@ Agent rule:
   workbook with openpyxl unless you have a separate round-trip verification.
 - If both openpyxl and raw XML fallback fail, inspect with
   `scripts/office/unpack.py` and resave the workbook with Excel/LibreOffice.
-

@@ -31,10 +31,7 @@ export function shouldSyncWebRemoteControlTaskSnapshot({
 
 export function logDeferredWebRemoteControlTaskSnapshot(
   logger: {
-    debug: (
-      message: string,
-      details: DeferredWebRemoteControlTaskSnapshotLogOptions,
-    ) => void;
+    debug: (message: string, details: DeferredWebRemoteControlTaskSnapshotLogOptions) => void;
   },
   details: DeferredWebRemoteControlTaskSnapshotLogOptions,
 ): void {

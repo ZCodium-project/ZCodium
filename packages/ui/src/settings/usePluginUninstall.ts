@@ -1,8 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type {
-  ZCodeInstalledPluginSummary,
-  ZCodePluginInfo,
-} from "@zcode/shared";
+import type { ZCodeInstalledPluginSummary, ZCodePluginInfo } from "@zcode/shared";
 import type { IPluginManagementService } from "@zcode/services";
 import { usePluginManagementStore } from "@/store/pluginManagementStore.js";
 

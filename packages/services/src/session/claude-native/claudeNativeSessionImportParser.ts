@@ -3,10 +3,7 @@ import { stat } from "node:fs/promises";
 import type { JsonLineRecord } from "#src/session/claude-native/jsonLineRecord.js";
 import { readJsonLinesFile } from "#src/session/claude-native/sessionHistoryJsonl.js";
 import { deriveSessionTitle } from "#src/session/sessionTitle.js";
-import {
-  isObjectRecord,
-  readTrimmedString,
-} from "#src/session/claude-native/jsonLineRecord.js";
+import { isObjectRecord, readTrimmedString } from "#src/session/claude-native/jsonLineRecord.js";
 import type { ClaudeNativeImportedSessionSource } from "#src/session/claude-native/claudeNativeImportedSessionTypes.js";
 
 const IDE_OPENED_FILE_TAG_RE = /<ide_opened_file>[\s\S]*?<\/ide_opened_file>/gi;
@@ -87,7 +84,9 @@ function readEntryModel(entry: JsonLineRecord): string | undefined {
 function isClaudeNativeSidechainEntry(entry: JsonLineRecord): boolean {
   const message = isObjectRecord(entry.message) ? entry.message : undefined;
   const request = isObjectRecord(entry.request) ? entry.request : undefined;
-  return entry.isSidechain === true || message?.isSidechain === true || request?.isSidechain === true;
+  return (
+    entry.isSidechain === true || message?.isSidechain === true || request?.isSidechain === true
+  );
 }
 
 export function hasClaudeNativeSidechainMarker(entries: readonly JsonLineRecord[]): boolean {
@@ -345,9 +344,7 @@ export function parseClaudeNativeSessionRecords(params: {
   flushPendingAssistant();
 
   if (messages.length === 0) {
-    throw new Error(
-      `[claude-native] Claude 原生 session ${params.sessionId} 没有可导入的可见消息`,
-    );
+    throw new Error(`[claude-native] Claude 原生 session ${params.sessionId} 没有可导入的可见消息`);
   }
 
   return {

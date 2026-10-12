@@ -77,13 +77,13 @@ ExitPlanMode terminal / row.removed / snapshot
 
 ## 状态所有权
 
-| 状态 | 权威来源 | 生命周期 |
-| --- | --- | --- |
-| 计划正文与流式状态 | parent conversation projection 的 `ToolCallRow` | 跟随父 session |
-| 计划目录 | CLI 当前有效 projection 的终态 `ExitPlanMode` query | 跟随父分支；edit/retry 裁枝后刷新 |
-| plan detail tab 与激活项 | renderer workspace Side Pane memory | 当前窗口；不落盘 |
-| tab 稳定身份 | `workspaceIdentity?.trim() \|\| workspacePath` + parent session + tool call | 当前窗口 |
-| 最近一份非空计划正文 | plan detail 组件本地展示 fallback | tab 挂载期 |
+| 状态                     | 权威来源                                                                    | 生命周期                          |
+| ------------------------ | --------------------------------------------------------------------------- | --------------------------------- |
+| 计划正文与流式状态       | parent conversation projection 的 `ToolCallRow`                             | 跟随父 session                    |
+| 计划目录                 | CLI 当前有效 projection 的终态 `ExitPlanMode` query                         | 跟随父分支；edit/retry 裁枝后刷新 |
+| plan detail tab 与激活项 | renderer workspace Side Pane memory                                         | 当前窗口；不落盘                  |
+| tab 稳定身份             | `workspaceIdentity?.trim() \|\| workspacePath` + parent session + tool call | 当前窗口                          |
+| 最近一份非空计划正文     | plan detail 组件本地展示 fallback                                           | tab 挂载期                        |
 
 ## 交互与可访问性
 
@@ -106,17 +106,17 @@ ExitPlanMode terminal / row.removed / snapshot
 
 ## Case 与剪枝
 
-| Case | 场景                                           | 预期                                                                                                                        | 决策     |
-| ---- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------- |
-| S06  | 完整 `ExitPlanMode` 计划                       | 卡片紧凑显示“计划”和复制，不显示行数；卡片/底部“查看完整计划”胶囊按钮打开同一详情 tab；无反馈按钮                            | accepted |
-| S07  | `plan` 参数流式增长                            | 首个可解析片段即显示卡片，不展示流式计数动画；已打开详情同步增长并在终态一致                                                | accepted |
-| S08  | 同一父任务有多个历史计划                       | 每个 `toolCallId` 独立 tab；重复点击同一计划复用；切任务隐藏/恢复且不串 workspace                                           | accepted |
-| S09  | Electron、桌面 Web、手机 Web、明暗主题与中英文 | 共享卡片和 Side Pane 语义；手机复用既有 replayable 投影与抽屉，不另起 runtime                                               | accepted |
-| S10  | 普通助手回复与 `ExitPlanMode` 已持久化后重启   | canonical `assistant_response` 仍按 UI/transcript 可见语义恢复；计划 tool row 保留完整 `plan` 并以只读 interrupted 历史展示 | accepted |
-| S11  | 同一轮存在 assistant 正文与 `ExitPlanMode`     | 轮尾复制内容为全部 assistant 正文后追加完整计划 Markdown；不受卡片裁切影响，不混入其他工具结果                              | accepted |
-| S12  | 计划后仍有 assistant、tool 或 reasoning 输出     | 计划卡片保持在原 `ExitPlanMode` row；“已工作”展开顺序等于 CLI row 全序，不固定到当前轮底部                                  | accepted |
-| S13  | 当前有效分支存在多个已结束计划                   | 右上角“计划”按最新优先列出全部计划；标题取 Markdown H1/首个非空行；点击打开对应 Side Pane                                  | accepted |
+| Case | 场景                                              | 预期                                                                                                                        | 决策     |
+| ---- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------- |
+| S06  | 完整 `ExitPlanMode` 计划                          | 卡片紧凑显示“计划”和复制，不显示行数；卡片/底部“查看完整计划”胶囊按钮打开同一详情 tab；无反馈按钮                           | accepted |
+| S07  | `plan` 参数流式增长                               | 首个可解析片段即显示卡片，不展示流式计数动画；已打开详情同步增长并在终态一致                                                | accepted |
+| S08  | 同一父任务有多个历史计划                          | 每个 `toolCallId` 独立 tab；重复点击同一计划复用；切任务隐藏/恢复且不串 workspace                                           | accepted |
+| S09  | Electron、桌面 Web、手机 Web、明暗主题与中英文    | 共享卡片和 Side Pane 语义；手机复用既有 replayable 投影与抽屉，不另起 runtime                                               | accepted |
+| S10  | 普通助手回复与 `ExitPlanMode` 已持久化后重启      | canonical `assistant_response` 仍按 UI/transcript 可见语义恢复；计划 tool row 保留完整 `plan` 并以只读 interrupted 历史展示 | accepted |
+| S11  | 同一轮存在 assistant 正文与 `ExitPlanMode`        | 轮尾复制内容为全部 assistant 正文后追加完整计划 Markdown；不受卡片裁切影响，不混入其他工具结果                              | accepted |
+| S12  | 计划后仍有 assistant、tool 或 reasoning 输出      | 计划卡片保持在原 `ExitPlanMode` row；“已工作”展开顺序等于 CLI row 全序，不固定到当前轮底部                                  | accepted |
+| S13  | 当前有效分支存在多个已结束计划                    | 右上角“计划”按最新优先列出全部计划；标题取 Markdown H1/首个非空行；点击打开对应 Side Pane                                   | accepted |
 | S14  | 计划处于流式/审批中，随后终态；或 edit/retry 裁枝 | 非终态不进摘要；终态后出现；`row.removed` 后从目录移除；迟到 query 不恢复旧计划                                             | accepted |
-| S15  | 冷恢复、桌面 continuous、手机 remote replayable | 复用同一 CLI 全量投影 query 和 shared-host attachment；返回同一有效集合，不新增 runtime、owner、queue 或 replay 分支       | accepted |
+| S15  | 冷恢复、桌面 continuous、手机 remote replayable   | 复用同一 CLI 全量投影 query 和 shared-host attachment；返回同一有效集合，不新增 runtime、owner、queue 或 replay 分支        | accepted |
 
 剪枝：不把 `model × permission mode × goal × fork × queue` 与计划详情做笛卡尔积，因为详情和目录都只读既有 projection，不发送 session command。`success/error/cancelled` 共用同一终态过滤实现，组件测试枚举即可；远程 snapshot/gap 的恢复正确性继续由既有 replayable case 负责，S15 只证明 query 路由与 workspace identity 不串联。

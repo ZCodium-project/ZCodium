@@ -79,10 +79,7 @@ export function App() {
   };
 
   const refreshSelectedRun = async (runId: string) => {
-    const [run, lines] = await Promise.all([
-      fetchRun(runId),
-      fetchRawLines(runId).catch(() => []),
-    ]);
+    const [run, lines] = await Promise.all([fetchRun(runId), fetchRawLines(runId).catch(() => [])]);
     setSelectedRun(run);
     setRawLines(lines);
     setRuns((current) => current.map((item) => (item.id === run.id ? run : item)));

@@ -45,7 +45,7 @@ describe("会话区 file tools 原子写权限 E2E", () => {
   it("Write 和 Edit 修改可执行脚本后应保留 POSIX 执行位", async function () {
     if (process.platform === "win32") {
       // win32 下无法测试 POSIX 执行位，跳过该 case 并记为成功
-      return
+      return;
     }
     this.timeout(180000);
 

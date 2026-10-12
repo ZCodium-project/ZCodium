@@ -38,7 +38,8 @@ frame.write_excel("clean_mau.xlsx", worksheet="clean")
 > query). The moment the deliverable contains derived values, switch to
 > openpyxl on the write side and emit each derivation as `=` formulas.
 > The large-file pattern in §6 shows the polars-read + openpyxl-write
-> + `=SUMIF(...)` shape end-to-end.
+>
+> - `=SUMIF(...)` shape end-to-end.
 
 `schema_overrides` is the polars equivalent of pandas's `dtype` kwarg
 and is the recommended way to suppress column-by-column type-inference
@@ -272,11 +273,11 @@ The pattern above uses regular `Workbook()`; on a 400k-row raw sheet
 it can take minutes. Three accelerated variants — pick by what the
 output workbook still needs to do:
 
-| Need | Writer | Why |
-|---|---|---|
-| Output is the terminal artefact (no later openpyxl edits) | `xlsxwriter` (SKILL.md §3.3) | Fastest writer; cannot be reopened with openpyxl for further edits. Formulas must be written via `write_formula(...)`. |
-| Need to keep editing with openpyxl after the bulk write | `openpyxl.Workbook(write_only=True)` + `WriteOnlyCell` | Streams rows to disk; ~4× faster than the default writer. Can be reopened normally. Cannot use `cell()` random access during the bulk phase. |
-| Output is small enough that openpyxl works but pivot / chart authoring is the slow part | Default `Workbook()` + chunked `append()` in batches of 10k–50k | Lets you interleave pivot / chart objects with row writes. |
+| Need                                                                                    | Writer                                                          | Why                                                                                                                                          |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Output is the terminal artefact (no later openpyxl edits)                               | `xlsxwriter` (SKILL.md §3.3)                                    | Fastest writer; cannot be reopened with openpyxl for further edits. Formulas must be written via `write_formula(...)`.                       |
+| Need to keep editing with openpyxl after the bulk write                                 | `openpyxl.Workbook(write_only=True)` + `WriteOnlyCell`          | Streams rows to disk; ~4× faster than the default writer. Can be reopened normally. Cannot use `cell()` random access during the bulk phase. |
+| Output is small enough that openpyxl works but pivot / chart authoring is the slow part | Default `Workbook()` + chunked `append()` in batches of 10k–50k | Lets you interleave pivot / chart objects with row writes.                                                                                   |
 
 All three keep the **full** raw row count — that is the invariant. The
 choice is purely about how the bytes get to disk faster.
@@ -304,10 +305,10 @@ book.save("filled_template.xlsx")
 Both `=SUMIF` and pivot tables belong to the formula-first regime —
 both refresh when the raw data changes. Choose by structure complexity:
 
-| Structure | Pick | Why |
-|---|---|---|
-| Single-axis aggregation (one key column → one metric) | `=SUMIF` / `=COUNTIF` / `=AVERAGEIF` in openpyxl | Pure formula; no Excel-specific objects to round-trip; survives any reopen / save cycle. |
-| Multi-axis cross-tab, multiple metrics per cell, drill-down with slicers | Pivot table | `=SUMIFS` matrices become unmaintainable past 2 axes; pivots also expose slicers / timelines for interactive filtering. |
+| Structure                                                                | Pick                                             | Why                                                                                                                     |
+| ------------------------------------------------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Single-axis aggregation (one key column → one metric)                    | `=SUMIF` / `=COUNTIF` / `=AVERAGEIF` in openpyxl | Pure formula; no Excel-specific objects to round-trip; survives any reopen / save cycle.                                |
+| Multi-axis cross-tab, multiple metrics per cell, drill-down with slicers | Pivot table                                      | `=SUMIFS` matrices become unmaintainable past 2 axes; pivots also expose slicers / timelines for interactive filtering. |
 
 > **openpyxl cannot create pivot tables or slicers from scratch.** It
 > can preserve them if they already exist in a loaded workbook (via a
@@ -317,7 +318,7 @@ both refresh when the raw data changes. Choose by structure complexity:
 >
 > **(a) Template inheritance (recommended).** Author a
 > `template.xlsx` once in Excel or LibreOffice with the pivot table
-> and slicers already built and pointed at a named range that *will*
+> and slicers already built and pointed at a named range that _will_
 > hold the data. Each run:
 >
 > ```python
@@ -354,10 +355,10 @@ both refresh when the raw data changes. Choose by structure complexity:
 In a container without LibreOffice:
 
 - `scripts/recalc.py` will exit non-zero with `"soffice: command not
-  found"` — wrap calls in a `try / except` and fall back to
+found"` — wrap calls in a `try / except` and fall back to
   `xlcalculator` (§3) for an approximate recalc.
 - Pre-validate every input cheaply with `openpyxl.load_workbook(path,
-  read_only=True)` before mutating; corrupt files fail fast (~50 ms)
+read_only=True)` before mutating; corrupt files fail fast (~50 ms)
   instead of after a multi-minute polars read.
 - Cache the LibreOffice user profile between CI runs so the macro at
   `~/.config/libreoffice/.../basic/Standard/Module1.xba` does not
@@ -377,13 +378,13 @@ When to switch:
 
 What breaks during the migration:
 
-| pandas behavior | polars behavior | Action |
-|---|---|---|
-| `pd.NaT` for missing dates | polars uses `null` with explicit type | Use `pl.col("d").is_null()` instead of `pd.isna` |
-| Auto-convert object columns to dates | polars never auto-converts | Pass `try_parse_dates=True` to `read_excel` or coerce explicitly |
-| Datetime tz handled by `dt.tz_localize` | polars uses `dt.replace_time_zone` | Update tz-handling code |
-| `dtype="float64"` permissive | polars rejects mixed-type columns at read | Use `schema_overrides={col: pl.Float64}` |
-| `to_excel` writes formulas | polars `write_excel` does not | Switch to openpyxl on the write side (§6) |
+| pandas behavior                         | polars behavior                           | Action                                                           |
+| --------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
+| `pd.NaT` for missing dates              | polars uses `null` with explicit type     | Use `pl.col("d").is_null()` instead of `pd.isna`                 |
+| Auto-convert object columns to dates    | polars never auto-converts                | Pass `try_parse_dates=True` to `read_excel` or coerce explicitly |
+| Datetime tz handled by `dt.tz_localize` | polars uses `dt.replace_time_zone`        | Update tz-handling code                                          |
+| `dtype="float64"` permissive            | polars rejects mixed-type columns at read | Use `schema_overrides={col: pl.Float64}`                         |
+| `to_excel` writes formulas              | polars `write_excel` does not             | Switch to openpyxl on the write side (§6)                        |
 
 Rule of thumb: keep both libraries available, default to pandas,
 upgrade to polars when one of the trigger conditions above hits.

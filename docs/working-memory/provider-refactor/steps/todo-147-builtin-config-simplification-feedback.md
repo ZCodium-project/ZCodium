@@ -39,10 +39,10 @@
 
 修改第一条 `modelMatch: ".*"` 的通用 Model 规则：
 
-| 配置字段 | 当前值 | 已确认目标值 |
-| --- | --- | --- |
-| `properties.contextWindow` | `200000` | `1000000` |
-| `optionSpecs.maxOutputTokens.max` | `32000` | `128000` |
+| 配置字段                          | 当前值   | 已确认目标值 |
+| --------------------------------- | -------- | ------------ |
+| `properties.contextWindow`        | `200000` | `1000000`    |
+| `optionSpecs.maxOutputTokens.max` | `32000`  | `128000`     |
 
 - 依据用户本次裁决，以这两个值作为主流默认基线。
 - 此处 output 指 Model Config 的最大输出上限；不新增“每次请求默认输出 128000”的策略，不增加另一套请求默认值。

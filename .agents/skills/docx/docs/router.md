@@ -59,16 +59,16 @@ User asks for a DOCX task
 
 After selecting a route, run the matching gate level before proceeding.
 
-| Route              | Gate level |
-|--------------------|------------|
-| READ_CONTENT       | read       |
-| READ_STRUCTURE     | read       |
-| READ_RENDERED      | render     |
-| COMPARE_TWO_DOCX   | read       |
-| CREATE_DOCX        | full       |
-| APPLY_TEMPLATE     | full       |
-| EDIT_FILL_DOCX     | full       |
-| REPAIR_LAYOUT      | full       |
+| Route            | Gate level |
+| ---------------- | ---------- |
+| READ_CONTENT     | read       |
+| READ_STRUCTURE   | read       |
+| READ_RENDERED    | render     |
+| COMPARE_TWO_DOCX | read       |
+| CREATE_DOCX      | full       |
+| APPLY_TEMPLATE   | full       |
+| EDIT_FILL_DOCX   | full       |
+| REPAIR_LAYOUT    | full       |
 
 ```bash
 # macOS / Linux / WSL
@@ -86,31 +86,39 @@ escalate to render or full when the selected route requires it.
 ## Route boundaries
 
 ### CREATE_DOCX
+
 Use when there is no source DOCX to preserve as a document object. Markdown / HTML / LaTeX /
 business brief source still belongs here after normalization.
 
 ### APPLY_TEMPLATE
+
 Use when the user’s real ask is “make this content become that document system”. This includes school
 templates, 公文格式, house style, and multi-section institutional layouts.
 
 ### EDIT_FILL_DOCX
+
 Use when the source DOCX stays the same document and the user wants content mutation. If the real
 source is Markdown / LaTeX and the DOCX is just a stale render, do not edit in place; regenerate.
 
 ### READ_CONTENT
+
 Use for meaning. Do not answer TOC, section, numbering, or page-layout questions here.
 
 ### READ_STRUCTURE
+
 Use for Word/OpenXML truth. This is the default diagnosis route before template-sensitive mutation.
 
 ### READ_RENDERED
+
 Use when the user asks what the pages actually look like. Rendered pages judge correctness; XML only
 explains causes.
 
 ### REPAIR_LAYOUT
+
 Use when the complaint is visual and the goal is correction, not just inspection.
 
 ### COMPARE_TWO_DOCX
+
 Use when the user asks for a before/after or source/template difference analysis.
 
 ## Common misroutes

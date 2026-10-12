@@ -60,22 +60,22 @@ This is an in-process runtime refresh rule only. It does not change the provider
 
 ## Expected Behavior
 
-| Input model ID | Unknown, non-official provider result |
-| --- | --- |
-| `glm-5.2` | `supportsImages: false` |
-| `vendor/glm-5.2` | `supportsImages: false` |
-| `glm-5.2[1m]` | `supportsImages: false` |
-| `glm-5.2-[1m]` | `supportsImages: false` |
-| `glm-5.2-variant` | capability remains unknown |
-| `vendor/glm-5.2-variant` | capability remains unknown |
-| `glm-5.2-variant[1m]` | capability remains unknown |
-| `glm-5.2-highspeed` | `supportsImages: false` |
-| `vendor/GLM-5.2-Highspeed[1m]` | `supportsImages: false` |
-| `glm-5.2-highspeed-plus` | capability remains unknown |
-| `vendor/GLM-5.3-Highspeed` | `supportsImages: false` |
-| `glm-5.2-variant/other-model` | `supportsImages: false` |
-| `glm-5.1` | `supportsImages: false` |
-| `private-glm-next` | `supportsImages: false` |
+| Input model ID                 | Unknown, non-official provider result |
+| ------------------------------ | ------------------------------------- |
+| `glm-5.2`                      | `supportsImages: false`               |
+| `vendor/glm-5.2`               | `supportsImages: false`               |
+| `glm-5.2[1m]`                  | `supportsImages: false`               |
+| `glm-5.2-[1m]`                 | `supportsImages: false`               |
+| `glm-5.2-variant`              | capability remains unknown            |
+| `vendor/glm-5.2-variant`       | capability remains unknown            |
+| `glm-5.2-variant[1m]`          | capability remains unknown            |
+| `glm-5.2-highspeed`            | `supportsImages: false`               |
+| `vendor/GLM-5.2-Highspeed[1m]` | `supportsImages: false`               |
+| `glm-5.2-highspeed-plus`       | capability remains unknown            |
+| `vendor/GLM-5.3-Highspeed`     | `supportsImages: false`               |
+| `glm-5.2-variant/other-model`  | `supportsImages: false`               |
+| `glm-5.1`                      | `supportsImages: false`               |
+| `private-glm-next`             | `supportsImages: false`               |
 
 Leaving the capability unknown prevents only the capability projection from stripping images. The subsequent media-budget projection may omit historical media or reject oversized current media before any provider request; only retained media reaches the provider.
 

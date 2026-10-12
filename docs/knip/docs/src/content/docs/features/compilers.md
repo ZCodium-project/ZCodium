@@ -81,7 +81,7 @@ Here's an example, minimal compiler for CSS files:
 ```ts title="knip.ts"
 export default {
   compilers: {
-    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
+    css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join("\n"),
   },
 };
 ```
@@ -96,11 +96,11 @@ Tailwind CSS and SASS/SCSS compilers are included.
 Another example, in case the built-in MDX compiler is not enough:
 
 ```ts
-import { compile } from '@mdx-js/mdx';
+import { compile } from "@mdx-js/mdx";
 
 export default {
   compilers: {
-    mdx: async text => (await compile(text)).toString(),
+    mdx: async (text) => (await compile(text)).toString(),
   },
 };
 ```
@@ -111,8 +111,8 @@ In a Svelte project, the compiler is automatically enabled. Override and use
 Svelte's compiler for better results if the built-in "compiler" is not enough:
 
 ```ts
-import type { KnipConfig } from 'knip';
-import { compile } from 'svelte/compiler';
+import type { KnipConfig } from "knip";
+import { compile } from "svelte/compiler";
 
 export default {
   compilers: {
@@ -127,12 +127,8 @@ In a Vue project, the compiler is automatically enabled. Override and use Vue's
 parser for better results if the built-in "compiler" is not enough:
 
 ```ts
-import type { KnipConfig } from 'knip';
-import {
-  parse,
-  type SFCScriptBlock,
-  type SFCStyleBlock,
-} from 'vue/compiler-sfc';
+import type { KnipConfig } from "knip";
+import { parse, type SFCScriptBlock, type SFCStyleBlock } from "vue/compiler-sfc";
 
 function getScriptBlockContent(block: SFCScriptBlock | null): string[] {
   if (!block) return [];
@@ -147,7 +143,7 @@ function getStyleBlockContent(block: SFCStyleBlock | null): string[] {
 }
 
 function getStyleImports(content: string): string {
-  return [...content.matchAll(/(?<=@)import[^;]+/g)].join('\n');
+  return [...content.matchAll(/(?<=@)import[^;]+/g)].join("\n");
 }
 
 const config = {
@@ -158,7 +154,7 @@ const config = {
         ...getScriptBlockContent(descriptor.script),
         ...getScriptBlockContent(descriptor.scriptSetup),
         ...descriptor.styles.flatMap(getStyleBlockContent).map(getStyleImports),
-      ].join('\n');
+      ].join("\n");
     },
   },
 } satisfies KnipConfig;

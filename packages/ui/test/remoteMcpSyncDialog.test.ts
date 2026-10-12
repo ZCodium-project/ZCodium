@@ -78,10 +78,7 @@ vi.mock("@/components/ui/dialog.js", () => ({
 vi.mock("@/i18n/IntlProvider.js", () => ({
   useZCodeIntl: () => ({
     intl: {
-      formatMessage: (
-        { id }: { id: string },
-        values?: Record<string, string | number>,
-      ) => {
+      formatMessage: ({ id }: { id: string }, values?: Record<string, string | number>) => {
         const messages: Record<string, string> = {
           "settings.mcp.remoteSync.title": "Sync MCP servers to remote target",
           "settings.mcp.remoteSync.warningTitle": "MCP data and environment availability",
@@ -187,9 +184,7 @@ describe("RemoteMcpSyncDialog helpers", () => {
       { id: "context7-id", exists: false },
       { id: "docs-id", exists: true },
     ]);
-    expect(Array.from(resolveDefaultRemoteMcpSyncSelection(rows))).toEqual([
-      "context7-id",
-    ]);
+    expect(Array.from(resolveDefaultRemoteMcpSyncSelection(rows))).toEqual(["context7-id"]);
   });
 
   it("filters remote existing MCP rows when the existing filter is disabled", () => {
@@ -284,8 +279,7 @@ describe("RemoteMcpSyncDialog", () => {
     );
 
     const dialogContentClass =
-      html.match(/<div class="([^"]*max-h-\[min\(720px,calc\(100dvh-2rem\)\)\][^"]*)"/u)?.[1] ??
-      "";
+      html.match(/<div class="([^"]*max-h-\[min\(720px,calc\(100dvh-2rem\)\)\][^"]*)"/u)?.[1] ?? "";
     expect(dialogContentClass.split(/\s+/u)).toEqual(
       expect.arrayContaining([
         "h-[min(720px,calc(100dvh-2rem))]",

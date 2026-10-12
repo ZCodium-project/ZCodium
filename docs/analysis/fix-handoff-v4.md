@@ -103,10 +103,10 @@ tryAcquire(authz-lock:<hash>, maxWaitMs≈0)          // 独立锁文件,不锁�
 
 ### PR 序列(顺序不可颠倒)
 
-| PR | 内容 |
-|---|---|
-| PR1 | localhost-callback:state 不匹配不 poison promise;匹配 state 的 error=access_denied 立即 settle。oauth.ts:invalidateCredentials 各分支、授权/刷新事件补 warn 级日志(不含 token 明文) |
-| PR2 | Phase 2:独立授权锁 + fresh DCR 事务内存化 + 锁内原子发布 + pending_authorization 共享键 + caller 预算与事务寿命分离 + 真 abort。**修根因 2**。注意:PR2 落地时 Phase 1 仍是现 provider,交互路径先挂到新 Phase 2 编排上 |
+| PR  | 内容                                                                                                                                                                                                                                                                       |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PR1 | localhost-callback:state 不匹配不 poison promise;匹配 state 的 error=access_denied 立即 settle。oauth.ts:invalidateCredentials 各分支、授权/刷新事件补 warn 级日志(不含 token 明文)                                                                                        |
+| PR2 | Phase 2:独立授权锁 + fresh DCR 事务内存化 + 锁内原子发布 + pending_authorization 共享键 + caller 预算与事务寿命分离 + 真 abort。**修根因 2**。注意:PR2 落地时 Phase 1 仍是现 provider,交互路径先挂到新 Phase 2 编排上                                                      |
 | PR3 | Phase 1 换纯 AuthProvider + refreshUnderLock(锁+合并+确定性错误 CAS 失效)+ obtained_at/expires_at 迁移 + discovery TTL + 403 unionScope 传递 + Phase2→1 交接。**修根因 1**。PR3 必须在 PR2 之后:Phase 1 换纯 AuthProvider 后 SDK 不再自发交互授权,PR2 未就位则用户无法授权 |
 
 ## 3. 执行契约

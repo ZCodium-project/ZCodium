@@ -228,15 +228,15 @@ interface TimelineEntityBase {
 
 建议的实体类型：
 
-| Entity | 说明 |
-| --- | --- |
-| `UserIntent` | 真实用户输入、queue drain 后的用户输入、model-only continuation、background notification wake |
-| `ProductTurn` | 用户可见或 model-only 的逻辑轮次容器 |
-| `AssistantSegment` | 一段 assistant role 输出。一个 product turn 可有多个 segment |
-| `WorkActivity` | tool、reasoning、subagent、compact 等 assistant work 内活动 |
-| `TimelineBoundary` | goalVerify、fork、modelChange 等轮次边界 |
-| `QueueItem` | 未来用户意图，不是 transcript |
-| `BackgroundWork` | detached Bash/subagent runtime work，归属父 session，不是 queue |
+| Entity             | 说明                                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| `UserIntent`       | 真实用户输入、queue drain 后的用户输入、model-only continuation、background notification wake |
+| `ProductTurn`      | 用户可见或 model-only 的逻辑轮次容器                                                          |
+| `AssistantSegment` | 一段 assistant role 输出。一个 product turn 可有多个 segment                                  |
+| `WorkActivity`     | tool、reasoning、subagent、compact 等 assistant work 内活动                                   |
+| `TimelineBoundary` | goalVerify、fork、modelChange 等轮次边界                                                      |
+| `QueueItem`        | 未来用户意图，不是 transcript                                                                 |
+| `BackgroundWork`   | detached Bash/subagent runtime work，归属父 session，不是 queue                               |
 
 ## Lane 与 Placement
 
@@ -538,10 +538,7 @@ interface ResolvedTimelineSnapshot {
   controls: SessionActionAvailability;
 }
 
-type TimelineNode =
-  | ResolvedTurnNode
-  | ResolvedBoundaryNode
-  | ResolvedMaintenanceNode;
+type TimelineNode = ResolvedTurnNode | ResolvedBoundaryNode | ResolvedMaintenanceNode;
 
 interface ResolvedTurnNode {
   productTurnId: string;
@@ -650,13 +647,13 @@ Task list/search index: ~/.zcode/v2/tasks-index.sqlite
 
 真实 CLI DB 才是会话正文权威库。本次检查到的规模：
 
-| Store | Count / Schema fact |
-| --- | --- |
-| `session` | 2,989 rows |
-| `message` | 26,942 rows，`data` 为 JSON，物理列已有 `sequence` |
-| `part` | 96,112 rows，`data` 为 JSON，物理列已有 `sequence` |
-| `session_entry` | 1,402 rows，主要为 `target_completion_verification` 和 `runtime/bash_shell_selection` |
-| app `follow_up_queue` | 当前 0 rows，结构为 `session_id + position + payload`，不是 transcript 顺序源 |
+| Store                 | Count / Schema fact                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| `session`             | 2,989 rows                                                                            |
+| `message`             | 26,942 rows，`data` 为 JSON，物理列已有 `sequence`                                    |
+| `part`                | 96,112 rows，`data` 为 JSON，物理列已有 `sequence`                                    |
+| `session_entry`       | 1,402 rows，主要为 `target_completion_verification` 和 `runtime/bash_shell_selection` |
+| app `follow_up_queue` | 当前 0 rows，结构为 `session_id + position + payload`，不是 transcript 顺序源         |
 
 `message` / `part` 的 repository 读取顺序当前是：
 
@@ -689,23 +686,23 @@ NULL sequence rows observed after migration
 
 语义字段覆盖也明显不足：
 
-| Field / fact | Count |
-| --- | ---: |
-| `message.data.semantics` | 569 / 26,942 |
-| `message.data.anchor` | 432 / 26,942 |
+| Field / fact                 |        Count |
+| ---------------------------- | -----------: |
+| `message.data.semantics`     | 569 / 26,942 |
+| `message.data.anchor`        | 432 / 26,942 |
 | `message.data.anchor.turnId` | 425 / 26,942 |
-| `part.type = timeline` | 45 / 96,112 |
-| timeline `anchorMessageId` | 21 / 45 |
-| timeline `anchorTurnId` | 10 / 45 |
+| `part.type = timeline`       |  45 / 96,112 |
+| timeline `anchorMessageId`   |      21 / 45 |
+| timeline `anchorTurnId`      |      10 / 45 |
 
 timeline 类型分布：
 
-| `timelineType` | Count |
-| --- | ---: |
-| `model_change` | 24 |
-| `goal_verification` | 10 |
-| `session_fork` | 6 |
-| `context_compaction` | 5 |
+| `timelineType`       | Count |
+| -------------------- | ----: |
+| `model_change`       |    24 |
+| `goal_verification`  |    10 |
+| `session_fork`       |     6 |
+| `context_compaction` |     5 |
 
 这解释了 goal verify、fork、compact 等 marker 为什么容易漂：真实数据里很多 marker 没有足够 anchor，resolver 若只按 append 位置、timestamp 或当前 turn 推断，就会在冷恢复、late event、fork copy、queue drain 后出现错位。
 

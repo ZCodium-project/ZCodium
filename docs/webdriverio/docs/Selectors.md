@@ -8,29 +8,23 @@ The [WebDriver Protocol](https://w3c.github.io/webdriver/) provides several sele
 While there are so many different selectors available, only a few of them provide a resilient way to find the right element. For example, given the following button:
 
 ```html
-<button
-  id="main"
-  class="btn btn-large"
-  name="submission"
-  role="button"
-  data-testid="submit"
->
+<button id="main" class="btn btn-large" name="submission" role="button" data-testid="submit">
   Submit
 </button>
 ```
 
-We __do__ and __do not__ recommend the following selectors:
+We **do** and **do not** recommend the following selectors:
 
-| Selector | Recommended | Notes |
-| -------- | ----------- | ----- |
-| `$('button')` | 🚨 Never | Worst - too generic, no context. |
-| `$('.btn.btn-large')` | 🚨 Never | Bad. Coupled to styling. Highly subject to change. |
-| `$('#main')` | ⚠️ Sparingly | Better. But still coupled to styling or JS event listeners. |
-| `$(() => document.queryElement('button'))` | ⚠️ Sparingly | Effective querying, complex to write. |
-| `$('button[name="submission"]')` | ⚠️ Sparingly | Coupled to the `name` attribute which has HTML semantics. |
-| `$('button[data-testid="submit"]')` | ✅ Good | Requires additional attribute, not connected to a11y. |
-| `$('aria/Submit')` | ✅ Good | Good. Resembles how the user interacts with the page. It is recommended to use translation files so your tests don't break when translations are updated. Note: This selector can be slower than others on large pages. |
-| `$('button=Submit')` | ✅ Always | Best. Resembles how the user interacts with the page and is fast. It is recommended to use translation files so your tests don't break when translations are updated. |
+| Selector                                   | Recommended  | Notes                                                                                                                                                                                                                   |
+| ------------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$('button')`                              | 🚨 Never     | Worst - too generic, no context.                                                                                                                                                                                        |
+| `$('.btn.btn-large')`                      | 🚨 Never     | Bad. Coupled to styling. Highly subject to change.                                                                                                                                                                      |
+| `$('#main')`                               | ⚠️ Sparingly | Better. But still coupled to styling or JS event listeners.                                                                                                                                                             |
+| `$(() => document.queryElement('button'))` | ⚠️ Sparingly | Effective querying, complex to write.                                                                                                                                                                                   |
+| `$('button[name="submission"]')`           | ⚠️ Sparingly | Coupled to the `name` attribute which has HTML semantics.                                                                                                                                                               |
+| `$('button[data-testid="submit"]')`        | ✅ Good      | Requires additional attribute, not connected to a11y.                                                                                                                                                                   |
+| `$('aria/Submit')`                         | ✅ Good      | Good. Resembles how the user interacts with the page. It is recommended to use translation files so your tests don't break when translations are updated. Note: This selector can be slower than others on large pages. |
+| `$('button=Submit')`                       | ✅ Always    | Best. Resembles how the user interacts with the page and is fast. It is recommended to use translation files so your tests don't break when translations are updated.                                                   |
 
 ## CSS Query Selector
 
@@ -67,12 +61,12 @@ You can query the element from the example above by also calling:
 https://github.com/webdriverio/example-recipes/blob/e8b147e88e7a38351b0918b4f7efbd9ae292201d/selectors/example.js#L24-L26
 ```
 
-__Note:__ You can't mix multiple selector strategies in one selector. Use multiple chained element queries to reach the same goal, e.g.:
+**Note:** You can't mix multiple selector strategies in one selector. Use multiple chained element queries to reach the same goal, e.g.:
 
 ```js
-const elem = await $('header h1*=Welcome') // doesn't work!!!
+const elem = await $("header h1*=Welcome"); // doesn't work!!!
 // use instead
-const elem = await $('header').$('*=driver')
+const elem = await $("header").$("*=driver");
 ```
 
 ## Element with certain text
@@ -109,12 +103,12 @@ You can query this element by calling:
 https://github.com/webdriverio/example-recipes/blob/13eddfac6f18a2a4812cc09ed7aa5e468f392060/selectors/example.js#L49-L67
 ```
 
-__Note:__ You can't mix multiple selector strategies in one selector. Use multiple chained element queries to reach the same goal, e.g.:
+**Note:** You can't mix multiple selector strategies in one selector. Use multiple chained element queries to reach the same goal, e.g.:
 
 ```js
-const elem = await $('header h1*=Welcome') // doesn't work!!!
+const elem = await $("header h1*=Welcome"); // doesn't work!!!
 // use instead
-const elem = await $('header').$('h1*=Welcome')
+const elem = await $("header").$("h1*=Welcome");
 ```
 
 ## Tag Name
@@ -143,7 +137,7 @@ https://github.com/webdriverio/example-recipes/blob/e8b147e88e7a38351b0918b4f7ef
 https://github.com/webdriverio/example-recipes/blob/e8b147e88e7a38351b0918b4f7efbd9ae292201d/selectors/example.js#L68-L69
 ```
 
-__Note:__ This selector strategy it deprecated and only works in old browser that are run by the JSONWireProtocol protocol or by using Appium.
+**Note:** This selector strategy it deprecated and only works in old browser that are run by the JSONWireProtocol protocol or by using Appium.
 
 ## xPath
 
@@ -249,12 +243,12 @@ Current supported selector syntaxes for ID are:
 
 ```js
 //css locator
-const button = await $('#someid')
+const button = await $("#someid");
 //xpath locator
-const button = await $('//*[@id="someid"]')
+const button = await $('//*[@id="someid"]');
 //id strategy
 // Note: works only in Appium or similar frameworks which supports locator strategy "ID"
-const button = await $('id=resource-id/iosname')
+const button = await $("id=resource-id/iosname");
 ```
 
 ## JS Function
@@ -295,7 +289,7 @@ https://github.com/webdriverio/example-recipes/blob/e8b147e88e7a38351b0918b4f7ef
 
 ## Mobile Selectors
 
-For hybrid mobile testing, it's important that the automation server is in the correct *context* before executing commands. For automating gestures, the driver ideally should be set to native context. But to select elements from the DOM, the driver will need to be set to the platform's webview context. Only *then* can the methods mentioned above can be used.
+For hybrid mobile testing, it's important that the automation server is in the correct _context_ before executing commands. For automating gestures, the driver ideally should be set to native context. But to select elements from the DOM, the driver will need to be set to the platform's webview context. Only _then_ can the methods mentioned above can be used.
 
 For native mobile testing, there is no switching between contexts, as you have to use mobile strategies and use the underlying device automation technology directly. This is especially useful when a test needs some fine-grained control over finding elements.
 
@@ -304,9 +298,9 @@ For native mobile testing, there is no switching between contexts, as you have t
 Android’s UI Automator framework provides a number of ways to find elements. You can use the [UI Automator API](https://developer.android.com/tools/testing-support-library/index.html#uia-apis), in particular the [UiSelector class](https://developer.android.com/reference/androidx/test/uiautomator/UiSelector) to locate elements. In Appium you send the Java code, as a string, to the server, which executes it in the application’s environment, returning the element or elements.
 
 ```js
-const selector = 'new UiSelector().text("Cancel").className("android.widget.Button")'
-const button = await $(`android=${selector}`)
-await button.click()
+const selector = 'new UiSelector().text("Cancel").className("android.widget.Button")';
+const button = await $(`android=${selector}`);
+await button.click();
 ```
 
 ### Android DataMatcher and ViewMatcher (Espresso only)
@@ -315,21 +309,21 @@ Android's DataMatcher strategy provides a way to find elements by [Data Matcher]
 
 ```js
 const menuItem = await $({
-  "name": "hasEntry",
-  "args": ["title", "ViewTitle"]
-})
-await menuItem.click()
+  name: "hasEntry",
+  args: ["title", "ViewTitle"],
+});
+await menuItem.click();
 ```
 
 And similarly [View Matcher](https://developer.android.com/reference/android/support/test/espresso/ViewInteraction)
 
 ```js
 const menuItem = await $({
-  "name": "hasEntry",
-  "args": ["title", "ViewTitle"],
-  "class": "androidx.test.espresso.matcher.ViewMatchers"
-})
-await menuItem.click()
+  name: "hasEntry",
+  args: ["title", "ViewTitle"],
+  class: "androidx.test.espresso.matcher.ViewMatchers",
+});
+await menuItem.click();
 ```
 
 ### Android View Tag (Espresso only)
@@ -337,8 +331,8 @@ await menuItem.click()
 The view tag strategy provides a convenient way to find elements by their [tag](https://developer.android.com/reference/android/support/test/espresso/matcher/ViewMatchers.html#withTagValue%28org.hamcrest.Matcher%3Cjava.lang.Object%3E%29).
 
 ```js
-const elem = await $('-android viewtag:tag_identifier')
-await elem.click()
+const elem = await $("-android viewtag:tag_identifier");
+await elem.click();
 ```
 
 ### iOS UIAutomation
@@ -348,9 +342,9 @@ When automating an iOS application, Apple’s [UI Automation framework](https://
 This JavaScript [API](https://developer.apple.com/library/ios/documentation/DeveloperTools/Reference/UIAutomationRef/index.html#//apple_ref/doc/uid/TP40009771) has methods to access to the view and everything on it.
 
 ```js
-const selector = 'UIATarget.localTarget().frontMostApp().mainWindow().buttons()[0]'
-const button = await $(`ios=${selector}`)
-await button.click()
+const selector = "UIATarget.localTarget().frontMostApp().mainWindow().buttons()[0]";
+const button = await $(`ios=${selector}`);
+await button.click();
 ```
 
 You can also use predicate searching within iOS UI Automation in Appium to refine element selection even further. See [here](https://github.com/appium/appium/blob/master/docs/en/writing-running-appium/ios/ios-predicate.md) for details.
@@ -368,9 +362,9 @@ await switch.click()
 And [class chains](https://github.com/facebook/WebDriverAgent/wiki/Class-Chain-Queries-Construction-Rules):
 
 ```js
-const selector = '**/XCUIElementTypeCell[`name BEGINSWITH "D"`]/**/XCUIElementTypeButton'
-const button = await $(`-ios class chain:${selector}`)
-await button.click()
+const selector = '**/XCUIElementTypeCell[`name BEGINSWITH "D"`]/**/XCUIElementTypeButton';
+const button = await $(`-ios class chain:${selector}`);
+await button.click();
 ```
 
 ### Accessibility ID
@@ -383,8 +377,8 @@ The `accessibility id` locator strategy is designed to read a unique identifier 
 For both platforms, getting an element (or multiple elements) by their `accessibility id` is usually the best method. It is also the preferred way over the deprecated `name` strategy.
 
 ```js
-const elem = await $('~my_accessibility_identifier')
-await elem.click()
+const elem = await $("~my_accessibility_identifier");
+await elem.click();
 ```
 
 ### Class Name
@@ -397,11 +391,11 @@ The `class name` strategy is a `string` representing a UI element on the current
 
 ```js
 // iOS example
-await $('UIATextField').click()
+await $("UIATextField").click();
 // Android example
-await $('android.widget.DatePicker').click()
+await $("android.widget.DatePicker").click();
 // Youi.tv example
-await $('CYIPushButtonView').click()
+await $("CYIPushButtonView").click();
 ```
 
 ## Chain Selectors
@@ -436,20 +430,20 @@ And you want to add product B to the cart, it would be difficult to do that just
 With selector chaining, it's way easier. Simply narrow down the desired element step by step:
 
 ```js
-await $('.row .entry:nth-child(2)').$('button*=Add').click()
+await $(".row .entry:nth-child(2)").$("button*=Add").click();
 ```
 
 ### Appium Image Selector
 
-Using the  `-image` locator strategy, it is possible to send an Appium an image file representing an element you want to access.
+Using the `-image` locator strategy, it is possible to send an Appium an image file representing an element you want to access.
 
 Supported file formats `jpg,png,gif,bmp,svg`
 
 Full reference can be found [here](https://github.com/appium/appium/blob/master/packages/images-plugin/docs/find-by-image.md)
 
 ```js
-const elem = await $('./file/path/of/image/test.jpg')
-await elem.click()
+const elem = await $("./file/path/of/image/test.jpg");
+await elem.click();
 ```
 
 **Note**: The way how Appium works with this selector is that it will internally make a (app)screenshot and use the provided image selector
@@ -467,28 +461,24 @@ WebdriverIO provides a way to select React components based on the component nam
 
 These commands allow you to select components off the [React VirtualDOM](https://reactjs.org/docs/faq-internals.html) and return either a single WebdriverIO Element or an array of elements (depending on which function is used).
 
-**Note**: The commands `react$` and `react$$` are similar in functionality, except that `react$$` will return *all* matching instances as an array of WebdriverIO elements, and `react$` will return the first found instance.
+**Note**: The commands `react$` and `react$$` are similar in functionality, except that `react$$` will return _all_ matching instances as an array of WebdriverIO elements, and `react$` will return the first found instance.
 
 #### Basic example
 
 ```jsx
 // index.jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 
 function MyComponent() {
-    return (
-        <div>
-            MyComponent
-        </div>
-    )
+  return <div>MyComponent</div>;
 }
 
 function App() {
-    return (<MyComponent />)
+  return <MyComponent />;
 }
 
-ReactDOM.render(<App />, document.querySelector('#root'))
+ReactDOM.render(<App />, document.querySelector("#root"));
 ```
 
 In the above code there is a simple `MyComponent` instance inside the application, which React is rendering inside a HTML element with `id="root"`.
@@ -496,7 +486,7 @@ In the above code there is a simple `MyComponent` instance inside the applicatio
 With the `browser.react$` command, you can select an instance of `MyComponent`:
 
 ```js
-const myCmp = await browser.react$('MyComponent')
+const myCmp = await browser.react$("MyComponent");
 ```
 
 Now that you have the WebdriverIO element stored in `myCmp` variable, you can execute element commands against it.
@@ -507,43 +497,39 @@ The library that WebdriverIO uses internally allows to filter your selection by 
 
 ```jsx
 // index.jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 
 function MyComponent(props) {
-    return (
-        <div>
-            Hello { props.name || 'World' }!
-        </div>
-    )
+  return <div>Hello {props.name || "World"}!</div>;
 }
 
 function App() {
-    return (
-        <div>
-            <MyComponent name="WebdriverIO" />
-            <MyComponent />
-        </div>
-    )
+  return (
+    <div>
+      <MyComponent name="WebdriverIO" />
+      <MyComponent />
+    </div>
+  );
 }
 
-ReactDOM.render(<App />, document.querySelector('#root'))
+ReactDOM.render(<App />, document.querySelector("#root"));
 ```
 
 If you want to select the instance of `MyComponent` that has a prop `name` as `WebdriverIO`, you can execute the command like so:
 
 ```js
-const myCmp = await browser.react$('MyComponent', {
-    props: { name: 'WebdriverIO' }
-})
+const myCmp = await browser.react$("MyComponent", {
+  props: { name: "WebdriverIO" },
+});
 ```
 
 If you wanted to filter our selection by state, the `browser` command would looks something like so:
 
 ```js
-const myCmp = await browser.react$('MyComponent', {
-    state: { myState: 'some value' }
-})
+const myCmp = await browser.react$("MyComponent", {
+  state: { myState: "some value" },
+});
 ```
 
 #### Dealing with `React.Fragment`
@@ -552,40 +538,35 @@ When using the `react$` command to select React [fragments](https://reactjs.org/
 
 ```jsx
 // index.jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 
 function MyComponent() {
-    return (
-        <React.Fragment>
-            <div>
-                MyComponent
-            </div>
-            <div>
-                MyComponent
-            </div>
-        </React.Fragment>
-    )
+  return (
+    <React.Fragment>
+      <div>MyComponent</div>
+      <div>MyComponent</div>
+    </React.Fragment>
+  );
 }
 
 function App() {
-    return (<MyComponent />)
+  return <MyComponent />;
 }
 
-ReactDOM.render(<App />, document.querySelector('#root'))
+ReactDOM.render(<App />, document.querySelector("#root"));
 ```
 
 Given the above example, this is how the commands would work:
 
 ```js
-await browser.react$('MyComponent') // returns the WebdriverIO Element for the first <div />
-await browser.react$$('MyComponent') // returns the WebdriverIO Elements for the array [<div />, <div />]
+await browser.react$("MyComponent"); // returns the WebdriverIO Element for the first <div />
+await browser.react$$("MyComponent"); // returns the WebdriverIO Elements for the array [<div />, <div />]
 ```
 
 **Note:** If you have multiple instances of `MyComponent` and you use `react$$` to select these fragment components, you will be returned an one-dimensional array of all the nodes. In other words, if you have 3 `<MyComponent />` instances, you will be returned an array with six WebdriverIO elements.
 
 ## Custom Selector Strategies
-
 
 If your app requires a specific way to fetch elements you can define yourself a custom selector strategy that you can use with `custom$` and `custom$$`. For that register your strategy once in the beginning of the test, e.g. in a `before` hook:
 

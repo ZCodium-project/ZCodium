@@ -6,10 +6,10 @@
 
 记录整次引导曝光和结束时的选择，复用公共业务埋点链路。
 
-| 事件 | element_name | event_region | event_type | event_text |
-| --- | --- | --- | --- | --- |
-| 引导曝光 | onboarding_expose | app.onboarding | expose | 空字符串 |
-| 引导结束 | onboarding_end | app.onboarding | ck | 操作时按钮文案或关闭入口的本地化标签，必填 |
+| 事件     | element_name      | event_region   | event_type | event_text                                 |
+| -------- | ----------------- | -------------- | ---------- | ------------------------------------------ |
+| 引导曝光 | onboarding_expose | app.onboarding | expose     | 空字符串                                   |
+| 引导结束 | onboarding_end    | app.onboarding | ck         | 操作时按钮文案或关闭入口的本地化标签，必填 |
 
 埋点表中的 `event_element` 对应现有请求字段 `element_name`，调用参数为 `elementName`，不新增同义字段。结束事件的 event_text 必须使用点击时用户看到的按钮文案，与按钮复用相同的 i18n 翻译结果，不写死中文、英文或翻译 key；随选择快照一起捕获，避免异步保存期间切换语言导致文案不一致。统计操作类型以固定英文 exit_action 为准。
 
@@ -42,15 +42,15 @@
 
 曝光事件使用空对象。结束事件固定包含以下字段：
 
-| 字段 | 逻辑取值 | 含义 |
-| --- | --- | --- |
-| work_direction | 下表枚举 / null | 已展示页面的当前工作方向；跳过且未重选为 null |
-| ui_mode | work / code / null | 办公 / 编程；未展示或跳过且未重选为 null |
-| proactive_task_recommendations_enabled | boolean / null | 主动任务推荐勾选状态，仅办公模式展示 |
-| workspace_memory_enabled | boolean / null | 工作区记忆勾选状态 |
-| claude_code_history_migration_selected | boolean / null | 迁移会话数据勾选状态，不表示迁移完成 |
-| exit_action | start / skip / close | 结束入口 |
-| exit_step | 1 / 2 / 3 | 结束时所在页；start / skip 为 3，close 可为任意页 |
+| 字段                                   | 逻辑取值             | 含义                                              |
+| -------------------------------------- | -------------------- | ------------------------------------------------- |
+| work_direction                         | 下表枚举 / null      | 已展示页面的当前工作方向；跳过且未重选为 null     |
+| ui_mode                                | work / code / null   | 办公 / 编程；未展示或跳过且未重选为 null          |
+| proactive_task_recommendations_enabled | boolean / null       | 主动任务推荐勾选状态，仅办公模式展示              |
+| workspace_memory_enabled               | boolean / null       | 工作区记忆勾选状态                                |
+| claude_code_history_migration_selected | boolean / null       | 迁移会话数据勾选状态，不表示迁移完成              |
+| exit_action                            | start / skip / close | 结束入口                                          |
+| exit_step                              | 1 / 2 / 3            | 结束时所在页；start / skip 为 3，close 可为任意页 |
 
 模式只在埋点边界映射：内部 `office -> work`、`coding -> code`；不更名 settings、store 或 record 中的模式。
 
@@ -62,20 +62,20 @@ close 同样记录当前选择，不要求当前页先点下一步：例如首�
 
 ### 工作方向映射
 
-| 中文文案 | 内部 occupation | work_direction |
-| --- | --- | --- |
-| 软件开发/数据/AI | developer | software_data_ai |
-| 创业/自由职业/OPC | independent | entrepreneurship_freelance_opc |
-| 测试/运维/安全 | infrastructure | qa_operations_security |
-| 产品/项目/解决方案 | product | product_project_solutions |
-| UI/UX/视觉设计 | design | ui_ux_visual_design |
-| 学生/教师/科研 | student | education_research |
-| 金融/财务/咨询 | finance | finance_accounting_consulting |
-| 自媒体/内容创作 | creator | media_content_creation |
-| 运营/电商/客户服务 | operations | business_operations_ecommerce_customer_service |
-| 市场营销/品牌/公关 | marketing | marketing_brand_pr |
-| 法律/行政/人力资源 | legal | legal_administration_hr |
-| 其他职业 | other | other |
+| 中文文案           | 内部 occupation | work_direction                                 |
+| ------------------ | --------------- | ---------------------------------------------- |
+| 软件开发/数据/AI   | developer       | software_data_ai                               |
+| 创业/自由职业/OPC  | independent     | entrepreneurship_freelance_opc                 |
+| 测试/运维/安全     | infrastructure  | qa_operations_security                         |
+| 产品/项目/解决方案 | product         | product_project_solutions                      |
+| UI/UX/视觉设计     | design          | ui_ux_visual_design                            |
+| 学生/教师/科研     | student         | education_research                             |
+| 金融/财务/咨询     | finance         | finance_accounting_consulting                  |
+| 自媒体/内容创作    | creator         | media_content_creation                         |
+| 运营/电商/客户服务 | operations      | business_operations_ecommerce_customer_service |
+| 市场营销/品牌/公关 | marketing       | marketing_brand_pr                             |
+| 法律/行政/人力资源 | legal           | legal_administration_hr                        |
+| 其他职业           | other           | other                                          |
 
 不修改内部职业枚举。显示文案或语言变化不能改变上报枚举。other 只表示明确选择其他职业，不能替代未作答。
 
@@ -142,12 +142,12 @@ UI 通过现有平台抽象调用，Web/手机沿用自身适配器能力，不�
 
 `OccupationOnboarding` 保持选择状态的唯一 owner；`useOnboardingTelemetry` 仅在 layout effect 中记录实际展示的步骤、当前模式和同次结束去重，不持久化第二份答案。保存入口先冻结快照，settings 成功后发送 end；close 直接发送。结束后将步骤复位，避免重开时沿用上次已展示范围。
 
-| 用例 | 设置与操作 | 断言 | 自动化位置 |
-| --- | --- | --- | --- |
-| ONBT-01 | 首次自动/手动打开、StrictMode、切页、重开 | 每次实际打开一次曝光，未展示无曝光 | UI occupationOnboardingTelemetry.test.ts |
-| ONBT-02 | 三步选择后 start/skip，保存失败重试 | 成功后一次 end，点击时的答案和语言保持，迁移意愿不等于成功 | 同上 |
-| ONBT-03 | 任意页关闭、返回改模式再关闭 | close 与页码正确，未展示/失效偏好为空，不保存 | 同上 |
-| ONBT-04 | 公共 Core 上报匿名/登录事件 | 顶层 user_id/device_mid，重建 Core 后设备标识一致 | services telemetryService.test.ts |
-| ONBT-05 | 桌面真实引导重开，close/start/skip | 实际请求体与接收端事件，身份及字段完整 | 用户手动验证 |
+| 用例    | 设置与操作                                | 断言                                                       | 自动化位置                               |
+| ------- | ----------------------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
+| ONBT-01 | 首次自动/手动打开、StrictMode、切页、重开 | 每次实际打开一次曝光，未展示无曝光                         | UI occupationOnboardingTelemetry.test.ts |
+| ONBT-02 | 三步选择后 start/skip，保存失败重试       | 成功后一次 end，点击时的答案和语言保持，迁移意愿不等于成功 | 同上                                     |
+| ONBT-03 | 任意页关闭、返回改模式再关闭              | close 与页码正确，未展示/失效偏好为空，不保存              | 同上                                     |
+| ONBT-04 | 公共 Core 上报匿名/登录事件               | 顶层 user_id/device_mid，重建 Core 后设备标识一致          | services telemetryService.test.ts        |
+| ONBT-05 | 桌面真实引导重开，close/start/skip        | 实际请求体与接收端事件，身份及字段完整                     | 用户手动验证                             |
 
 本次按用户要求不以 E2E 为验收项，使用组件交互测试与公共 Core 请求体测试验证代码；真实客户端及生产接收端由用户手动验证，尚未验收。Web/手机继续复用原平台适配器能力，未新增独立上传出口。

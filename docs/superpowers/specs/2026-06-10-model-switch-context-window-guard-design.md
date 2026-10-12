@@ -10,14 +10,14 @@ V4 composer 当前直接执行 `switchModelConfig`，没有恢复 legacy toolbar
 
 ## Clarification log
 
-| 日期 | 问题 | 用户裁决 | 固定边界 |
-| --- | --- | --- | --- |
-| 2026-07-15 | 目标窗口不足且 task 正在运行时，是拒绝切换还是等待/抢占？ | 提供“立即停止并压缩” | 用户确认后停止当前 foreground work，不保留一个等待当前轮自然结束的隐式 UI intent |
-| 2026-07-15 | 已有 queue 是否阻止 guard compact？ | 不阻止，点击后直接压缩 | guard compact 越过已有 queue；queue 内容和相对顺序不删除、不修改 |
-| 2026-07-15 | guard 是否改变普通 `/compact`？ | 否 | 仅模型切换 guard 使用抢占语义；A08/B13 的普通 `/compact` FIFO 语义保留 |
-| 2026-07-15 | 成功后 queue 如何恢复？ | 恢复操作前状态 | 原来 `autoDrain=true` 则模型切换落稳后继续消费；原来 held 则继续 held |
-| 2026-07-15 | compact 失败或仍超窗怎么办？ | 保持安全停态 | 不切模型；已停止的 turn 不恢复；queue 保留并保持 held |
-| 2026-07-15 | 已有 auto compact 怎么办？ | 不重复压缩 | 等已有 compact 终态后复核 usage，不中断、不创建第二个 compact |
+| 日期       | 问题                                                      | 用户裁决               | 固定边界                                                                         |
+| ---------- | --------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------- |
+| 2026-07-15 | 目标窗口不足且 task 正在运行时，是拒绝切换还是等待/抢占？ | 提供“立即停止并压缩”   | 用户确认后停止当前 foreground work，不保留一个等待当前轮自然结束的隐式 UI intent |
+| 2026-07-15 | 已有 queue 是否阻止 guard compact？                       | 不阻止，点击后直接压缩 | guard compact 越过已有 queue；queue 内容和相对顺序不删除、不修改                 |
+| 2026-07-15 | guard 是否改变普通 `/compact`？                           | 否                     | 仅模型切换 guard 使用抢占语义；A08/B13 的普通 `/compact` FIFO 语义保留           |
+| 2026-07-15 | 成功后 queue 如何恢复？                                   | 恢复操作前状态         | 原来 `autoDrain=true` 则模型切换落稳后继续消费；原来 held 则继续 held            |
+| 2026-07-15 | compact 失败或仍超窗怎么办？                              | 保持安全停态           | 不切模型；已停止的 turn 不恢复；queue 保留并保持 held                            |
+| 2026-07-15 | 已有 auto compact 怎么办？                                | 不重复压缩             | 等已有 compact 终态后复核 usage，不中断、不创建第二个 compact                    |
 
 ## Goals
 
@@ -42,12 +42,12 @@ V4 composer 当前直接执行 `switchModelConfig`，没有恢复 legacy toolbar
 
 ## Domain scope and high-risk cross-products
 
-| Domain | State owner | 本次责任 | 高风险交叉 |
-| --- | --- | --- | --- |
-| V4 composer/model config | `packages/ui/src/v4/SessionPane.tsx` + CLI `switchModelConfig` | 解析用户目标、显示确认、消费权威投影、提交最终模型切换 | 迟到选择、revision CAS、custom/native provider metadata |
-| Context usage/compact | CLI session runtime + V4 projection | 以当前模型执行 compact，产出 marker 和 fresh usage | compact ACK 不等于完成、重复 compact、失败/取消 |
-| Stop/queue | CLI command core | 冻结 auto-drain、停止 foreground work、保留 queue、使 guard compact 抢占 FIFO | stop 终态迟到、held queue、运行中新增输入、goal pause |
-| Client delivery | shared host/CLI session | desktop continuous 与 mobile replayable 观察同一命令事实 | 重连、另一端改模型、`workspaceIdentity`/`remoteSessionId` 隔离 |
+| Domain                   | State owner                                                    | 本次责任                                                                      | 高风险交叉                                                     |
+| ------------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| V4 composer/model config | `packages/ui/src/v4/SessionPane.tsx` + CLI `switchModelConfig` | 解析用户目标、显示确认、消费权威投影、提交最终模型切换                        | 迟到选择、revision CAS、custom/native provider metadata        |
+| Context usage/compact    | CLI session runtime + V4 projection                            | 以当前模型执行 compact，产出 marker 和 fresh usage                            | compact ACK 不等于完成、重复 compact、失败/取消                |
+| Stop/queue               | CLI command core                                               | 冻结 auto-drain、停止 foreground work、保留 queue、使 guard compact 抢占 FIFO | stop 终态迟到、held queue、运行中新增输入、goal pause          |
+| Client delivery          | shared host/CLI session                                        | desktop continuous 与 mobile replayable 观察同一命令事实                      | 重连、另一端改模型、`workspaceIdentity`/`remoteSessionId` 隔离 |
 
 ## Concept map and current facts
 
@@ -146,15 +146,15 @@ desktop-continuous / web-remote-replayable renderer
 
 ## Dimensions and pruning
 
-| Dimension | Equivalence classes | 处理 |
-| --- | --- | --- |
-| Session phase | draft / completed / running / compacting | draft pruned；completed、running accepted；已有 auto compact 复用 N14 |
-| Queue | empty / auto-drain queue / held queue | 三类保留；数量 `1/2/3+` 由“内容与相对顺序不变”不变量折叠，代表值取 2 |
-| Guard result | cancel / compact success fits / success still too large / failed or usage unknown | cancel、fits、fail-closed 都必须证明 |
-| Client | desktop continuous / mobile replayable | 产品语义相同但投影证据分开；不把 replay gap 逻辑扩散到 desktop |
-| Provider | native / custom / mapped runtime id / metadata unknown | resolver 用单测做 pairwise；E2E 取可控的 native fixture |
-| Active work | assistant output / tool or goal foreground / independent background work | 共用既有 Stop foreground 不变量；background work 不因本 guard 扩大停止范围 |
-| Workspace | local / SSH-WSL-Docker identity | command 按 session 隔离；remote 用 `workspaceIdentity + remoteSessionId` 聚焦验证，不全量叉乘 OS/provider |
+| Dimension     | Equivalence classes                                                               | 处理                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Session phase | draft / completed / running / compacting                                          | draft pruned；completed、running accepted；已有 auto compact 复用 N14                                     |
+| Queue         | empty / auto-drain queue / held queue                                             | 三类保留；数量 `1/2/3+` 由“内容与相对顺序不变”不变量折叠，代表值取 2                                      |
+| Guard result  | cancel / compact success fits / success still too large / failed or usage unknown | cancel、fits、fail-closed 都必须证明                                                                      |
+| Client        | desktop continuous / mobile replayable                                            | 产品语义相同但投影证据分开；不把 replay gap 逻辑扩散到 desktop                                            |
+| Provider      | native / custom / mapped runtime id / metadata unknown                            | resolver 用单测做 pairwise；E2E 取可控的 native fixture                                                   |
+| Active work   | assistant output / tool or goal foreground / independent background work          | 共用既有 Stop foreground 不变量；background work 不因本 guard 扩大停止范围                                |
+| Workspace     | local / SSH-WSL-Docker identity                                                   | command 按 session 隔离；remote 用 `workspaceIdentity + remoteSessionId` 聚焦验证，不全量叉乘 OS/provider |
 
 Pruning decisions：
 
@@ -167,15 +167,15 @@ Pruning decisions：
 
 ## Accepted cases
 
-| ID | Setup | Action | Assertions | Evidence |
-| --- | --- | --- | --- | --- |
-| N05 | completed、queue=0、used 超过目标预算 | 选择目标并取消/确认 | 取消不变；确认用旧模型 compact；fresh usage 合格后才切换 | dialog、compact request/marker、snapshot usage/config |
-| N09 | running、queue=0、used 超预算 | 点击“立即停止并压缩” | foreground turn interrupted；guard compact 随后启动；成功后切模型 | stop/compact timeline、provider request model、config projection |
-| N10 | running、queue=2、autoDrain=true | 确认 guard | queue 内容/顺序不变；compact 抢在 queue 前；切换后恢复 auto-drain，queue 用目标模型消费 | CLI queue projection、request order、model config |
-| N11 | completed/interrupted、queue=2、autoDrain=false | 确认 guard | 不弹 held queue clear/keep；compact 立即启动；queue 保持 held，模型切换不触发消费 | inputRouting、queue IDs/order、compact/config projection |
-| N12 | running 或 completed、compact failed/cancelled、usage unknown 或仍超预算 | 确认 guard | 不切模型；已停止 turn 不恢复；queue 保留且 held；给出明确提示 | failed marker、usage/config、queue autoDrain |
-| N13 | guard 已确认，compact 等待/运行中 | 同 session 新选模型、切 task 或另一端更新 config | 旧 selection token 不得迟到切错模型/task；新选择以最新 config/revision 为准 | command/revision、session-scoped projection、两端最终 config |
-| N14 | auto compact 已在运行且目标模型上下文不足 | 选择模型 | 不停止、不发第二个 compact；等待现有 compact 后复核并执行最新有效选择 | single compact lifecycle、pending selection、config CAS |
+| ID  | Setup                                                                    | Action                                           | Assertions                                                                              | Evidence                                                         |
+| --- | ------------------------------------------------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| N05 | completed、queue=0、used 超过目标预算                                    | 选择目标并取消/确认                              | 取消不变；确认用旧模型 compact；fresh usage 合格后才切换                                | dialog、compact request/marker、snapshot usage/config            |
+| N09 | running、queue=0、used 超预算                                            | 点击“立即停止并压缩”                             | foreground turn interrupted；guard compact 随后启动；成功后切模型                       | stop/compact timeline、provider request model、config projection |
+| N10 | running、queue=2、autoDrain=true                                         | 确认 guard                                       | queue 内容/顺序不变；compact 抢在 queue 前；切换后恢复 auto-drain，queue 用目标模型消费 | CLI queue projection、request order、model config                |
+| N11 | completed/interrupted、queue=2、autoDrain=false                          | 确认 guard                                       | 不弹 held queue clear/keep；compact 立即启动；queue 保持 held，模型切换不触发消费       | inputRouting、queue IDs/order、compact/config projection         |
+| N12 | running 或 completed、compact failed/cancelled、usage unknown 或仍超预算 | 确认 guard                                       | 不切模型；已停止 turn 不恢复；queue 保留且 held；给出明确提示                           | failed marker、usage/config、queue autoDrain                     |
+| N13 | guard 已确认，compact 等待/运行中                                        | 同 session 新选模型、切 task 或另一端更新 config | 旧 selection token 不得迟到切错模型/task；新选择以最新 config/revision 为准             | command/revision、session-scoped projection、两端最终 config     |
+| N14 | auto compact 已在运行且目标模型上下文不足                                | 选择模型                                         | 不停止、不发第二个 compact；等待现有 compact 后复核并执行最新有效选择                   | single compact lifecycle、pending selection、config CAS          |
 
 ## Error handling
 

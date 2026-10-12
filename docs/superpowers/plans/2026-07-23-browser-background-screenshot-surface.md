@@ -89,6 +89,7 @@
 ### Task 1: 冻结 BCP-213 与跨进程平台合同
 
 **Files:**
+
 - Modify: `docs/testing/browser-use-codex-parity-coverage-matrix.md:108-111`
 - Modify: `packages/shared/src/platform.ts:52-68`
 - Modify: `packages/shared/src/platform.ts:535-566`
@@ -100,20 +101,19 @@
 - Test: `packages/desktop/test/preloadDisposer.test.ts`
 
 **Interfaces:**
+
 - Consumes: 既有 `BrowserViewOperationPayload`、`BrowserViewportSize`、`IPlatformService`、`PlatformChannels`。
 - Produces:
 
 ```ts
-export interface BrowserViewScreenshotSurfacePreparePayload
-  extends BrowserViewOperationPayload {
+export interface BrowserViewScreenshotSurfacePreparePayload extends BrowserViewOperationPayload {
   requestId: string;
   webContentsId: number;
   viewport: BrowserViewportSize;
   timeoutMs?: number;
 }
 
-export interface BrowserViewScreenshotSurfaceReadyPayload
-  extends BrowserViewScreenshotSurfacePreparePayload {}
+export interface BrowserViewScreenshotSurfaceReadyPayload extends BrowserViewScreenshotSurfacePreparePayload {}
 
 export type BrowserViewScreenshotSurfaceReleasePayload = Omit<
   BrowserViewScreenshotSurfacePreparePayload,
@@ -300,6 +300,7 @@ Expected: commit 成功，且不包含并发 crash-recovery 任务的文件。
 ### Task 2: Main 侧截图表面协调器与可信 ready 入口
 
 **Files:**
+
 - Create: `packages/desktop/src/main/browserView/browserScreenshotSurfaceCoordinator.ts`
 - Create: `packages/desktop/test/browserScreenshotSurfaceCoordinator.test.ts`
 - Modify: `packages/desktop/src/main/desktopBrowserViewIpc.ts:1-65`
@@ -307,6 +308,7 @@ Expected: commit 成功，且不包含并发 crash-recovery 任务的文件。
 - Modify: `packages/desktop/test/desktopBrowserViewIpc.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的三个 payload、Electron sender `webContents.id`、可信 `BrowserWindow.fromWebContents(event.sender)`。
 - Produces:
 
@@ -332,8 +334,7 @@ export interface BrowserScreenshotSurfaceCoordinator {
   }): Promise<BrowserScreenshotSurfaceLease>;
 }
 
-export class DesktopBrowserScreenshotSurfaceCoordinator
-  implements BrowserScreenshotSurfaceCoordinator {
+export class DesktopBrowserScreenshotSurfaceCoordinator implements BrowserScreenshotSurfaceCoordinator {
   constructor(options: {
     timeoutMs?: number;
     sendPrepare(windowId: number, payload: BrowserViewScreenshotSurfacePreparePayload): boolean;
@@ -438,8 +439,7 @@ it("只把可信 sender window 的 screenshot surface ready 交给协调器", as
   const reportReady = vi.fn();
   const sender = { id: 700 };
   h.fromWebContents.mockReturnValue({ id: 17, isDestroyed: () => false });
-  const { registerBrowserViewIpcHandlers } =
-    await import("../src/main/desktopBrowserViewIpc.js");
+  const { registerBrowserViewIpcHandlers } = await import("../src/main/desktopBrowserViewIpc.js");
   registerBrowserViewIpcHandlers(undefined, undefined, reportReady);
   const handler = h.listeners.get(PlatformChannels.BrowserViewScreenshotSurfaceReady);
   const payload = {
@@ -487,14 +487,10 @@ Expected: FAIL，至少包含
 ```ts
 import { BROWSER_SCREENSHOT_SURFACE_PREPARE_TIMEOUT_MS } from "@zcode/shared";
 
-const DEFAULT_SCREENSHOT_SURFACE_TIMEOUT_MS =
-  BROWSER_SCREENSHOT_SURFACE_PREPARE_TIMEOUT_MS;
+const DEFAULT_SCREENSHOT_SURFACE_TIMEOUT_MS = BROWSER_SCREENSHOT_SURFACE_PREPARE_TIMEOUT_MS;
 const VIEWPORT_TOLERANCE_PX = 1;
 
-function sameViewport(
-  expected: BrowserViewportSize,
-  actual: BrowserViewportSize,
-): boolean {
+function sameViewport(expected: BrowserViewportSize, actual: BrowserViewportSize): boolean {
   return (
     Math.abs(expected.width - actual.width) <= VIEWPORT_TOLERANCE_PX &&
     Math.abs(expected.height - actual.height) <= VIEWPORT_TOLERANCE_PX
@@ -525,16 +521,16 @@ function releaseOnce(callback: () => void): () => void {
 `handleReady` 必须逐项比较：
 
 ```ts
-entry.windowId === input.windowId
-entry.senderWebContentsId === undefined || entry.senderWebContentsId === input.senderWebContentsId
-entry.payload.requestId === input.payload.requestId
-entry.payload.workspaceKey === input.payload.workspaceKey
-entry.payload.sessionId === input.payload.sessionId
-entry.payload.browserId === input.payload.browserId
-entry.payload.browserGeneration === input.payload.browserGeneration
-entry.payload.tabId === input.payload.tabId
-entry.payload.webContentsId === input.payload.webContentsId
-sameViewport(entry.payload.viewport, input.payload.viewport)
+entry.windowId === input.windowId;
+entry.senderWebContentsId === undefined || entry.senderWebContentsId === input.senderWebContentsId;
+entry.payload.requestId === input.payload.requestId;
+entry.payload.workspaceKey === input.payload.workspaceKey;
+entry.payload.sessionId === input.payload.sessionId;
+entry.payload.browserId === input.payload.browserId;
+entry.payload.browserGeneration === input.payload.browserGeneration;
+entry.payload.tabId === input.payload.tabId;
+entry.payload.webContentsId === input.payload.webContentsId;
+sameViewport(entry.payload.viewport, input.payload.viewport);
 ```
 
 第一次可信 ready 将 `senderWebContentsId` 冻结为当前 sender；后续来自其他 renderer 的 ready 必须忽略。
@@ -580,6 +576,7 @@ git commit -m "feat(browser-use): coordinate screenshot surfaces"
 ### Task 3: BrowserGuestManager 截图前门禁
 
 **Files:**
+
 - Modify: `packages/desktop/src/main/browserView/browserGuestManager.ts:18-115`
 - Modify: `packages/desktop/src/main/browserView/browserGuestManager.ts:220-252`
 - Modify: `packages/desktop/src/main/browserView/browserGuestManager.ts:808-860`
@@ -588,6 +585,7 @@ git commit -m "feat(browser-use): coordinate screenshot surfaces"
 - Test: `packages/desktop/test/browserGuestManager.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 的 `BrowserScreenshotSurfaceCoordinator` 和 `BrowserScreenshotSurfaceLease`。
 - Produces: `BrowserGuestManager` constructor 第七个可选依赖：
 
@@ -631,19 +629,18 @@ it("background screenshot 必须 prepare ready 后才进入 CDP，并在 settle 
   const order: string[] = [];
   const release = vi.fn(() => order.push("release"));
   const coordinator = {
-    prepare: vi.fn(async (input: {
-      webContentsId: number;
-      viewport: { width: number; height: number };
-    }) => {
-      order.push("prepare");
-      expect(input.webContentsId).toBe(209);
-      expect(input.viewport).toEqual({ width: 800, height: 600 });
-      return {
-        webContentsId: 209,
-        viewport: { width: 800, height: 600 },
-        release,
-      };
-    }),
+    prepare: vi.fn(
+      async (input: { webContentsId: number; viewport: { width: number; height: number } }) => {
+        order.push("prepare");
+        expect(input.webContentsId).toBe(209);
+        expect(input.viewport).toEqual({ width: 800, height: 600 });
+        return {
+          webContentsId: 209,
+          viewport: { width: 800, height: 600 },
+          release,
+        };
+      },
+    ),
   };
   const guest = guestRegistry.get(209)!;
   const sendCommand = guest.debugger.sendCommand;
@@ -687,7 +684,13 @@ it("prepare 失败时返回 backend_unavailable 且不调用 Page.captureScreens
     }),
   };
   const mgr = new BrowserGuestManager(
-    undefined, undefined, undefined, undefined, undefined, undefined, coordinator,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    coordinator,
   );
   mgr.attachGuest("tab-210", 210);
   await expect(mgr.execute("tab-210", { method: "screenshot" })).resolves.toMatchObject({
@@ -710,7 +713,13 @@ it("prepare 期间 abort 返回 cancelled，协调器收到同一 signal", async
     ),
   };
   const mgr = new BrowserGuestManager(
-    undefined, undefined, undefined, undefined, undefined, undefined, coordinator,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    coordinator,
   );
   mgr.attachGuest("tab-211", 211);
   const controller = new AbortController();
@@ -806,14 +815,7 @@ Bugfix 中文注释放在该方法上方，明确说明：inactive `display:none
 
 ```ts
 const execution = screenshotCommand
-  ? this.executeScreenshotWithPreparedSurface(
-      context,
-      tab,
-      guest,
-      command,
-      running,
-      startedAt,
-    )
+  ? this.executeScreenshotWithPreparedSurface(context, tab, guest, command, running, startedAt)
   : executeBrowserCommandOnView(this.toControlledView(guest), command, {
       signal: running.controller.signal,
     });
@@ -845,21 +847,20 @@ backpressure 测试额外断言：第一次 outer abort 后 lease 尚未 release
 在 `packages/desktop/src/main/index.ts` 的 `BrowserGuestManager` 之前创建：
 
 ```ts
-const browserScreenshotSurfaceCoordinator =
-  new DesktopBrowserScreenshotSurfaceCoordinator({
-    sendPrepare: (windowId, payload) => {
-      const win = BrowserWindow.fromId(windowId);
-      if (!win || win.isDestroyed()) return false;
-      win.webContents.send(PlatformChannels.BrowserViewScreenshotSurfacePrepare, payload);
-      return true;
-    },
-    sendRelease: (windowId, payload) => {
-      const win = BrowserWindow.fromId(windowId);
-      if (!win || win.isDestroyed()) return;
-      win.webContents.send(PlatformChannels.BrowserViewScreenshotSurfaceRelease, payload);
-    },
-    log: (message) => logger.debug(message),
-  });
+const browserScreenshotSurfaceCoordinator = new DesktopBrowserScreenshotSurfaceCoordinator({
+  sendPrepare: (windowId, payload) => {
+    const win = BrowserWindow.fromId(windowId);
+    if (!win || win.isDestroyed()) return false;
+    win.webContents.send(PlatformChannels.BrowserViewScreenshotSurfacePrepare, payload);
+    return true;
+  },
+  sendRelease: (windowId, payload) => {
+    const win = BrowserWindow.fromId(windowId);
+    if (!win || win.isDestroyed()) return;
+    win.webContents.send(PlatformChannels.BrowserViewScreenshotSurfaceRelease, payload);
+  },
+  log: (message) => logger.debug(message),
+});
 ```
 
 作为 `BrowserGuestManager` 第七个参数传入。在 `registerPlatformIpcHandlers` options 加入：
@@ -897,6 +898,7 @@ git commit -m "fix(browser-use): gate screenshots on compositor readiness"
 ### Task 4: Renderer 后台 capture layer 与稳定帧 ACK
 
 **Files:**
+
 - Create: `packages/ui/src/browser-use/BrowserUseSidePaneContent.tsx`
 - Create: `packages/ui/src/browser-use/useBrowserScreenshotSurfaceRequest.ts`
 - Create: `packages/ui/src/browser-use/useBrowserScreenshotSurfaceReady.ts`
@@ -907,6 +909,7 @@ git commit -m "fix(browser-use): gate screenshots on compositor readiness"
 - Modify: `packages/ui/test/UnifiedBrowserView.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的 prepare/release payload；现有 `BrowserUseSidePaneTab`、`UnifiedBrowserView`、Radix `TabsContent`。
 - Produces:
 
@@ -1010,9 +1013,7 @@ it("inactive browser-use prepare 时进入底层 capture layer，但不改变 ac
       }),
     ),
   );
-  expect(
-    view.container.querySelector('[data-browser-use-tab-id="tab-1"]'),
-  ).toHaveClass("hidden");
+  expect(view.container.querySelector('[data-browser-use-tab-id="tab-1"]')).toHaveClass("hidden");
 });
 ```
 
@@ -1093,10 +1094,7 @@ function roundViewport(width: number, height: number): BrowserViewportSize | nul
 }
 
 function withinOnePixel(left: BrowserViewportSize, right: BrowserViewportSize): boolean {
-  return (
-    Math.abs(left.width - right.width) <= 1 &&
-    Math.abs(left.height - right.height) <= 1
-  );
+  return Math.abs(left.width - right.width) <= 1 && Math.abs(left.height - right.height) <= 1;
 }
 
 function readSurfaceViewport(
@@ -1162,8 +1160,7 @@ export function findScreenshotSurfaceTab(
   payload: BrowserViewScreenshotSurfacePreparePayload,
 ): BrowserUseSidePaneTab | undefined {
   return tabs.find(
-    (tab): tab is BrowserUseSidePaneTab =>
-      tab.type === "browser-use" && matchesTab(tab, payload),
+    (tab): tab is BrowserUseSidePaneTab => tab.type === "browser-use" && matchesTab(tab, payload),
   );
 }
 
@@ -1196,9 +1193,7 @@ prepare 仅在 `findScreenshotSurfaceTab(tabs, payload)` 命中时设置 request
   aria-hidden={!isSelected}
   inert={!isSelected ? true : undefined}
   data-browser-use-tab-id={tab.tabId}
-  data-browser-screenshot-surface-state={
-    screenshotSurfaceRequest ? "preparing" : undefined
-  }
+  data-browser-screenshot-surface-state={screenshotSurfaceRequest ? "preparing" : undefined}
   className={cn(
     "h-full min-h-0 bg-background",
     isSelected
@@ -1252,15 +1247,13 @@ const screenshotSurfaceTab = screenshotSurfaceRequest
 让 `Tabs` 保持：
 
 ```tsx
-className="relative h-full gap-0"
+className = "relative h-full gap-0";
 ```
 
 把 `TabsList` 后的所有内容包进：
 
 ```tsx
-<div className="relative min-h-0 flex-1 isolate">
-  {sidePaneTabContents}
-</div>
+<div className="relative min-h-0 flex-1 isolate">{sidePaneTabContents}</div>
 ```
 
 其中 `sidePaneTabContents` 在 return 前由当前 `AnimatedSidePanePanel.tsx:1017-1160` 的
@@ -1293,7 +1286,7 @@ if (tab.type === "browser-use") {
 非 browser-use `TabsContent` 统一为：
 
 ```tsx
-className="relative z-10 h-full min-h-0 data-[state=inactive]:hidden"
+className = "relative z-10 h-full min-h-0 data-[state=inactive]:hidden";
 ```
 
 `tab.type === "browser-use"` 在 generic `TabsContent` 之外提前分支，渲染
@@ -1352,15 +1345,17 @@ git commit -m "fix(browser-use): compose inactive tabs before screenshots"
 ### Task 5: 真实 Electron compositor 回归烟测
 
 **Files:**
+
 - Create: `packages/desktop/scripts/browser-screenshot-surface-smoke.mjs`
 - Modify: `packages/desktop/package.json:8-30`
 
 **Interfaces:**
+
 - Consumes: Electron 41 `app`、`BrowserWindow`、`<webview>`、guest `webContents.debugger`、`nativeImage`。
 - Produces: package script `test:browser-screenshot-surface-smoke`；成功时 stdout 只打印：
 
 ```json
-{"width":1274,"height":720,"periodicRepeat":false,"corners":"distinct"}
+{ "width": 1274, "height": 720, "periodicRepeat": false, "corners": "distinct" }
 ```
 
 - [ ] **Step 1: 创建真实 Electron smoke 脚本**
@@ -1441,11 +1436,13 @@ git commit -m "test(browser-use): cover background screenshot compositor"
 ### Task 6: 全链路运行时复验、静态门禁与最终提交
 
 **Files:**
+
 - Modify only if evidence requires: files already listed in Tasks 1-5
 - Verify: `docs/superpowers/specs/2026-07-23-browser-background-screenshot-surface-design.md`
 - Verify: `docs/testing/browser-use-codex-parity-coverage-matrix.md`
 
 **Interfaces:**
+
 - Consumes: Tasks 1-5 的完整实现和 smoke 命令。
 - Produces: 用户场景的运行时证据、全仓 typecheck/lint、干净且可审计的最终 commit chain。
 

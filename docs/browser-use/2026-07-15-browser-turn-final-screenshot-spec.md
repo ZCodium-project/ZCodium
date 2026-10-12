@@ -17,17 +17,17 @@
 
 ## 2. 已确认边界
 
-| 维度         | 结论                                                                                                      |
-| ------------ | --------------------------------------------------------------------------------------------------------- |
-| 触发来源     | 仅 Node REPL 内成功执行、且 response meta 关联具体 tab 的 Browser API                                     |
-| 不计入触发   | `agent.browsers.list()`、documentation、capability 查询、失败调用                                         |
-| 已有显式图片 | 不跳过自动截图；显式图片保留在原工具结果中，轮尾仍追加当前 active tab 的最终状态截图                      |
-| tab 选择     | 完成时重新读取 browser tabs，只截当前 `active=true` 的 tab；这里的 `active` 是 main 给出的 effective active（含后台回退），不等于「UI 当前可见」 |
-| 轮次终态     | 只在正常完成时尝试；Stop、取消、失败均跳过                                                                |
-| 展示位置     | 同轮内容区最后：最终 assistant/Website 等预览卡和 file diff 摘要之后、消息操作栏之前；不回挂既有工具卡    |
-| 展示样式     | 复用 Node REPL 工具结果截图的图片渲染逻辑、尺寸、左对齐、圆角、紧贴图片的 border 和大图查看器             |
+| 维度         | 结论                                                                                                                                                                         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 触发来源     | 仅 Node REPL 内成功执行、且 response meta 关联具体 tab 的 Browser API                                                                                                        |
+| 不计入触发   | `agent.browsers.list()`、documentation、capability 查询、失败调用                                                                                                            |
+| 已有显式图片 | 不跳过自动截图；显式图片保留在原工具结果中，轮尾仍追加当前 active tab 的最终状态截图                                                                                         |
+| tab 选择     | 完成时重新读取 browser tabs，只截当前 `active=true` 的 tab；这里的 `active` 是 main 给出的 effective active（含后台回退），不等于「UI 当前可见」                             |
+| 轮次终态     | 只在正常完成时尝试；Stop、取消、失败均跳过                                                                                                                                   |
+| 展示位置     | 同轮内容区最后：最终 assistant/Website 等预览卡和 file diff 摘要之后、消息操作栏之前；不回挂既有工具卡                                                                       |
+| 展示样式     | 复用 Node REPL 工具结果截图的图片渲染逻辑、尺寸、左对齐、圆角、紧贴图片的 border 和大图查看器                                                                                |
 | 失败策略     | browser 已关闭、scope 内已无存活 tab、截图失败，或压缩后仍超预算时静默跳过，并使用 service/runtime logger 留日志；scope 内还有存活 tab 时不会走本行，effective active 必非空 |
-| 模型上下文   | 自动截图不进入 message history/provider content，不增加模型 tool call                                     |
+| 模型上下文   | 自动截图不进入 message history/provider content，不增加模型 tool call                                                                                                        |
 
 ## 3. 状态与时序
 

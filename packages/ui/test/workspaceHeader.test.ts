@@ -65,11 +65,20 @@ describe("WorkspaceHeader", () => {
   }
 
   it("releases native control spacing when the side pane owns the right edge", async () => {
-    const html = await renderWorkspaceHeader({ isDesktop: true, isWindowsDesktop: true, reserveWindowControls: false });
+    const html = await renderWorkspaceHeader({
+      isDesktop: true,
+      isWindowsDesktop: true,
+      reserveWindowControls: false,
+    });
     expect(html).not.toContain("padding-right:");
     expect(html).not.toContain("pr-0");
     expect(html).toContain("p-2");
-    const linux = await renderWorkspaceHeader({ isDesktop: true, isMacDesktop: false, isWindowsDesktop: false, reserveWindowControls: false });
+    const linux = await renderWorkspaceHeader({
+      isDesktop: true,
+      isMacDesktop: false,
+      isWindowsDesktop: false,
+      reserveWindowControls: false,
+    });
     expect(linux).not.toContain("pr-[120px]");
   });
 
@@ -120,20 +129,23 @@ describe("WorkspaceHeader", () => {
   it.each([
     ["Windows", true],
     ["Linux", false],
-  ])("applies the platform caption menu policy in the draft header on %s", async (_platform, isWindowsDesktop) => {
-    const html = await renderWorkspaceHeader({
-      variant: "draft",
-      activeTaskId: null,
-      activeTaskTitle: "New task",
-      isDesktop: true,
-      isMacDesktop: false,
-      isWindowsDesktop,
-    });
+  ])(
+    "applies the platform caption menu policy in the draft header on %s",
+    async (_platform, isWindowsDesktop) => {
+      const html = await renderWorkspaceHeader({
+        variant: "draft",
+        activeTaskId: null,
+        activeTaskTitle: "New task",
+        isDesktop: true,
+        isMacDesktop: false,
+        isWindowsDesktop,
+      });
 
-    expect(html).not.toContain('data-testid="windows-caption-menu"');
-    expect(html).toContain('data-window-controls="true"');
-    expect(html).not.toContain('data-testid="workspace-header-title"');
-  });
+      expect(html).not.toContain('data-testid="windows-caption-menu"');
+      expect(html).toContain('data-window-controls="true"');
+      expect(html).not.toContain('data-testid="workspace-header-title"');
+    },
+  );
 
   it("uses inline Linux controls without legacy caption spacing", async () => {
     const html = await renderWorkspaceHeader({
@@ -172,6 +184,5 @@ describe("WorkspaceHeader", () => {
     expect(html).not.toContain("padding-right:");
 
     expect(html).toContain('data-caption-spacing="false"');
-
   });
 });

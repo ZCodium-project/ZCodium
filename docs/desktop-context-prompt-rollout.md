@@ -6,6 +6,7 @@
 ## 1. 背景：什么是 Desktop Context Prompt
 
 服务端通过 `/api/v1/client/configs` 下发单功能灰度：`data.configs.desktopContextPrompt.enabled`。
+
 - `enabled: true`：Agent 以 **desktop surface** 启动，系统提示注入 `::code-comment{...}` 指令段
   （`apps/zcode-cli/packages/core/src/context/sections/desktop.ts`），助手输出内联 code-comment。
 - `enabled: false` 或未下发：Agent 以 **terminal surface** 启动，跳过该段，输出普通 terminal prompt。
@@ -112,11 +113,11 @@ app.whenReady
 
 ### 超时 / 延迟语义
 
-| 场景 | 首 Host 延迟 |
-|---|---|
+| 场景                          | 首 Host 延迟                           |
+| ----------------------------- | -------------------------------------- |
 | 快网/缓存命中（请求 < 500ms） | ~0ms（gate 在 dom-ready 前已 resolve） |
-| 慢网（请求 > 2s） | 最多 +2s（fail-open 用 `false` 继续） |
-| 首 Host 之后的所有 fork | ~0ms（latch 已 resolve；读 live 快照） |
+| 慢网（请求 > 2s）             | 最多 +2s（fail-open 用 `false` 继续）  |
+| 首 Host 之后的所有 fork       | ~0ms（latch 已 resolve；读 live 快照） |
 
 慢网下的 +2s 加在"首次打开工作区"前，不在窗口显示前。已确认为可接受 trade-off。
 
@@ -130,17 +131,17 @@ app.whenReady
 
 ## 6. 测试覆盖索引
 
-| 文件 | 覆盖 |
-|---|---|
+| 文件                                                        | 覆盖                                                                                                                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `packages/desktop/test/desktopContextPromptRollout.test.ts` | rollout 解析、TTL、inFlight 去重、3s 超时；`awaitFirstDecision` 慢响应/超时回退/并发；**CR-01 集成式**（慢响应 `enabled=true` + bounded await → 同步读快照为真值） |
-| `packages/desktop/test/desktopWindowLifecycle.test.ts` | Local dom-ready → spawn 流程；**gate 未 resolve 前不 spawn，resolve 后 spawn** |
-| `packages/desktop/test/desktopRemoteSessions.test.ts` | Remote 各 fork 点；**gate 阻塞 spawn、resolve 后完成 session**；**gate await 期间 teardown → re-check 拦截、不 spawn** |
+| `packages/desktop/test/desktopWindowLifecycle.test.ts`      | Local dom-ready → spawn 流程；**gate 未 resolve 前不 spawn，resolve 后 spawn**                                                                                     |
+| `packages/desktop/test/desktopRemoteSessions.test.ts`       | Remote 各 fork 点；**gate 阻塞 spawn、resolve 后完成 session**；**gate await 期间 teardown → re-check 拦截、不 spawn**                                             |
 
 ## 7. 相关常量 / 环境变量
 
-| 名称 | 位置 | 说明 |
-|---|---|---|
-| `ZCODE_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV` | `packages/shared/src/runtimeEnv.ts` | Main→Host 的 env 名（`"0"`/`"1"`） |
-| `DESKTOP_CONTEXT_PROMPT_REQUEST_TIMEOUT_MS` | `desktopContextPromptRollout.ts:9` | 单次请求超时 3s |
-| `DESKTOP_CONTEXT_PROMPT_CACHE_TTL_MS` | `desktopContextPromptRollout.ts:10` | 成功缓存 TTL 1h |
-| `DESKTOP_FIRST_HOST_SPAWN_DECISION_TIMEOUT_MS` | `packages/desktop/src/main/index.ts` | 首 Host 门禁超时 2s |
+| 名称                                           | 位置                                 | 说明                               |
+| ---------------------------------------------- | ------------------------------------ | ---------------------------------- |
+| `ZCODE_DESKTOP_CONTEXT_PROMPT_ENABLED_ENV`     | `packages/shared/src/runtimeEnv.ts`  | Main→Host 的 env 名（`"0"`/`"1"`） |
+| `DESKTOP_CONTEXT_PROMPT_REQUEST_TIMEOUT_MS`    | `desktopContextPromptRollout.ts:9`   | 单次请求超时 3s                    |
+| `DESKTOP_CONTEXT_PROMPT_CACHE_TTL_MS`          | `desktopContextPromptRollout.ts:10`  | 成功缓存 TTL 1h                    |
+| `DESKTOP_FIRST_HOST_SPAWN_DECISION_TIMEOUT_MS` | `packages/desktop/src/main/index.ts` | 首 Host 门禁超时 2s                |

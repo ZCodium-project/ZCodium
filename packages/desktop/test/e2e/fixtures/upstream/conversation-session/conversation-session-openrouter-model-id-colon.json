@@ -38,10 +38,7 @@
         "method": "POST",
         "pathIncludes": "/chat/completions",
         "lastUserMessageIncludes": ["E2E_OPENROUTER_MODEL_ID_COLON"],
-        "bodyIncludes": [
-          "E2E_OPENROUTER_MODEL_ID_COLON",
-          "nvidia/nemotron-3-ultra-550b-a55b:free"
-        ],
+        "bodyIncludes": ["E2E_OPENROUTER_MODEL_ID_COLON", "nvidia/nemotron-3-ultra-550b-a55b:free"],
         "bodyExcludes": ["Generate a concise title"]
       },
       "response": {

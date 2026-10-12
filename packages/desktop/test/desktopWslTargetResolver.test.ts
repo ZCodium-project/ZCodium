@@ -9,10 +9,7 @@ describe("desktopWslTargetResolver", () => {
     const resolveTarget = createCanonicalWslTargetResolver({ createBackend, ttlMs: 5_000 });
     const requested = { kind: "wsl" as const, distro: " ubuntu " };
 
-    const [first, second] = await Promise.all([
-      resolveTarget(requested),
-      resolveTarget(requested),
-    ]);
+    const [first, second] = await Promise.all([resolveTarget(requested), resolveTarget(requested)]);
 
     expect(first).toEqual({ kind: "wsl", distro: "Ubuntu", user: "dev" });
     expect(second).toEqual(first);

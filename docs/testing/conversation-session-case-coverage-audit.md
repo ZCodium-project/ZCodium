@@ -229,61 +229,61 @@ spec/manifest/fixture 路径失败，而不是只给汇总数字。
 
 这不是产品完成定义，只是防止统计漂移的基线：
 
-| 指标 | 当前值 |
-| --- | ---: |
-| 主路径 A-J case | 163 |
-| 主路径 accepted | 163 |
-| 主路径 undefined | 0 |
-| 主路径 covered | 113 |
-| 自动化缩写 | 93 |
-| 被 coverage matrix 引用的 spec | 62 |
-| 有测试声明的 spec | 93 |
-| referenced spec skip/only | 0 |
-| 新增外部故障 product case | 37 |
-| 外部故障 alias | 3 |
-| 外部故障 infra case | 4 |
-| Fault 覆盖矩阵 row | 40 |
-| Fault 覆盖矩阵 covered | 0 |
-| Fault 覆盖矩阵 decision-needed | 37 |
-| Fault 覆盖矩阵 missing accepted | 3 |
-| 待决策 backlog row | 37 |
-| 待决策 E2E roadmap row | 87 |
-| 待决策 E2E roadmap expected row | 87 |
-| 待决策 E2E roadmap blocked-by-product-decision | 37 |
-| 待决策 E2E roadmap ready-to-write | 29 |
-| 待决策 E2E roadmap implemented | 21 |
-| 决策工作单覆盖 row | 37 |
-| 协议题总数 | 37 |
-| 协议题 answered | 0 |
-| 协议题 unanswered | 37 |
-| Answer draft row | 37 |
-| Answer draft answered | 0 |
-| Answer draft pending placeholder | 37 |
-| Answer draft missing question row | 0 |
-| Answer draft ready-to-backfill case | 0 |
-| Answer draft placeholder-only case | 37 |
-| Answer draft partial case | 0 |
-| Answer draft missing case | 0 |
-| Backfill workflow draft-ready case | 0 |
-| Backfill workflow worksheet-ready case | 0 |
-| Backfill workflow source-backfill-needed case | 0 |
-| Decision workflow board case | 37 |
-| 决策 ready case | 0 |
-| 决策 blocked case | 37 |
-| Review queue case | 37 |
-| Review queue next | N01, N02, N03 |
-| Generated Markdown doc | 6 |
-| Generated Markdown stale | 0 |
-| Generated Markdown missing | 0 |
-| Compact P0 协议题 | 0 |
-| Network/SSE 协议题 | 16 |
-| Recovery/Isolation 协议题 | 21 |
-| 合并去重后 product case | 200 |
-| 合并去重后已覆盖 | 113 |
-| 合并去重后仍待产品决策 / 自动化 | 87 |
-| Completion gate required | no |
-| Completion gate coverage complete | no |
-| Completion gate covered | 113/200 |
-| Completion gate decision-needed | 37 |
+| 指标                                           |        当前值 |
+| ---------------------------------------------- | ------------: |
+| 主路径 A-J case                                |           163 |
+| 主路径 accepted                                |           163 |
+| 主路径 undefined                               |             0 |
+| 主路径 covered                                 |           113 |
+| 自动化缩写                                     |            93 |
+| 被 coverage matrix 引用的 spec                 |            62 |
+| 有测试声明的 spec                              |            93 |
+| referenced spec skip/only                      |             0 |
+| 新增外部故障 product case                      |            37 |
+| 外部故障 alias                                 |             3 |
+| 外部故障 infra case                            |             4 |
+| Fault 覆盖矩阵 row                             |            40 |
+| Fault 覆盖矩阵 covered                         |             0 |
+| Fault 覆盖矩阵 decision-needed                 |            37 |
+| Fault 覆盖矩阵 missing accepted                |             3 |
+| 待决策 backlog row                             |            37 |
+| 待决策 E2E roadmap row                         |            87 |
+| 待决策 E2E roadmap expected row                |            87 |
+| 待决策 E2E roadmap blocked-by-product-decision |            37 |
+| 待决策 E2E roadmap ready-to-write              |            29 |
+| 待决策 E2E roadmap implemented                 |            21 |
+| 决策工作单覆盖 row                             |            37 |
+| 协议题总数                                     |            37 |
+| 协议题 answered                                |             0 |
+| 协议题 unanswered                              |            37 |
+| Answer draft row                               |            37 |
+| Answer draft answered                          |             0 |
+| Answer draft pending placeholder               |            37 |
+| Answer draft missing question row              |             0 |
+| Answer draft ready-to-backfill case            |             0 |
+| Answer draft placeholder-only case             |            37 |
+| Answer draft partial case                      |             0 |
+| Answer draft missing case                      |             0 |
+| Backfill workflow draft-ready case             |             0 |
+| Backfill workflow worksheet-ready case         |             0 |
+| Backfill workflow source-backfill-needed case  |             0 |
+| Decision workflow board case                   |            37 |
+| 决策 ready case                                |             0 |
+| 决策 blocked case                              |            37 |
+| Review queue case                              |            37 |
+| Review queue next                              | N01, N02, N03 |
+| Generated Markdown doc                         |             6 |
+| Generated Markdown stale                       |             0 |
+| Generated Markdown missing                     |             0 |
+| Compact P0 协议题                              |             0 |
+| Network/SSE 协议题                             |            16 |
+| Recovery/Isolation 协议题                      |            21 |
+| 合并去重后 product case                        |           200 |
+| 合并去重后已覆盖                               |           113 |
+| 合并去重后仍待产品决策 / 自动化                |            87 |
+| Completion gate required                       |            no |
+| Completion gate coverage complete              |            no |
+| Completion gate covered                        |       113/200 |
+| Completion gate decision-needed                |            37 |
 
 以后新增产品语义时，必须先进入 catalog，再让本 audit 报出新的缺口；对应 E2E 或产品决策补齐后，再更新覆盖矩阵。只要某条 case 还不能写稳定断言，它必须同时出现在 decision backlog，方便产品 review 和剪枝。

@@ -53,9 +53,7 @@ describe("会话内相对时间一次性定时任务 E2E", () => {
     await approveV4Permission();
     await waitForV4Pane(
       (snapshot) =>
-        snapshot.sessionId !== null &&
-        snapshot.sessionId !== "draft" &&
-        !snapshot.canStop,
+        snapshot.sessionId !== null && snapshot.sessionId !== "draft" && !snapshot.canStop,
       "会话内相对时间 CronCreate 没有完成",
       90000,
     );
@@ -67,8 +65,7 @@ describe("会话内相对时间一次性定时任务 E2E", () => {
       timeoutMsg: "会话内没有渲染相对时间 CronCreate 定时任务卡片",
     });
     await browser.waitUntil(
-      async () =>
-        (await readTestIdText(TID_CRON_CREATE_CARD)).includes(AUTOMATION_TITLE),
+      async () => (await readTestIdText(TID_CRON_CREATE_CARD)).includes(AUTOMATION_TITLE),
       {
         timeout: 10000,
         timeoutMsg: `CronCreate 卡片没有显示定时任务标题：${AUTOMATION_TITLE}`,
@@ -81,8 +78,7 @@ describe("会话内相对时间一次性定时任务 E2E", () => {
       timeoutMsg: "CronCreate 卡片没有可点击的「去到定时任务」按钮",
     });
     await browser.waitUntil(
-      async () =>
-        (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
+      async () => (await readTestIdValue(TID_AUTOMATION_FORM_TITLE)) === AUTOMATION_TITLE,
       {
         timeout: 15000,
         timeoutMsg: `任务详情没有回显会话创建的标题：${AUTOMATION_TITLE}`,
@@ -118,7 +114,7 @@ describe("会话内相对时间一次性定时任务 E2E", () => {
 
 /** Settings header 的 Automations breadcrumb 是任务详情返回列表的真实入口。 */
 async function clickAutomationsBreadcrumbBack(): Promise<void> {
-  const buttons = await browser.$$('nav[aria-label] button');
+  const buttons = await browser.$$("nav[aria-label] button");
   for (const button of buttons) {
     if (/Automations|自动化/u.test(await button.getText())) {
       await button.click();
@@ -131,9 +127,9 @@ async function clickAutomationsBreadcrumbBack(): Promise<void> {
 /** 读取某个 test id 元素的可见文本。 */
 async function readTestIdText(currentTestId: string): Promise<string> {
   return browser.execute((tid) => {
-    const el = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-testid]"),
-    ).find((item) => item.dataset.testid === tid);
+    const el = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]")).find(
+      (item) => item.dataset.testid === tid,
+    );
     return el?.textContent?.trim() ?? "";
   }, currentTestId);
 }

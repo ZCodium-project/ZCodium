@@ -106,6 +106,7 @@ fork host process ──────────→
 - **Remote 模式**：构造时不发 `Initialize`，等 `registerChannel` 全部完成后调 `server.ready()` 手动发送
 
 涉及文件：
+
 - `packages/rpc/src/channels.ts` — `ChannelServer` 构造函数加 `deferInit` 参数，新增 `ready()` 方法
 - `packages/rpc/src/logging-middleware.ts` — `LoggingChannelServer` 透传 `ready()`
 - `packages/desktop/src/host/index.ts` — remote 模式传 `deferInit=true`，服务注册后调 `server.ready()`

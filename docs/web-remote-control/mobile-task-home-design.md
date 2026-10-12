@@ -246,7 +246,7 @@ interface WebRemoteControlMobileShellProps {
 
 1. 设置 switching 状态。
 2. 调用 `switcher.switchWorkspace(taskWorkspaceKey, { taskId: task.taskId,
-   mobileNavigationIntent: "chat", markTaskReadExpectedUnreadAt: task.unreadAt })`。
+mobileNavigationIntent: "chat", markTaskReadExpectedUnreadAt: task.unreadAt })`。
 3. Web 端连接目标 workspace 的 shared-host bridge 后，使用目标 bridge 的
    `workspacePath/workspaceIdentity` 和首页快照中的 `unreadAt` 调用
    `setTaskUnread(..., false, expectedUnreadAt)`；失败只记录日志，不得阻止任务打开。
@@ -367,12 +367,12 @@ workflowActivity?: SessionWorkflowActivity;
 
 这条优先级必须覆盖所有冲突方向，而不是只修 `running`：
 
-| sessions-index activity | 旧 runtime / 持久缓存 | 手机展示 |
-| --- | --- | --- |
-| `prewarming` / `running` | `completed` / `failed` / `error` | `running` |
-| `completedSuccess` / `completedInterrupted` | live / `failed` / `running` | `completed` |
-| `error` | live / `completed` / `running` | `error` |
-| 缺失或兼容 `draft` | 任意 | 保持现有 runtime → 持久终态 fallback |
+| sessions-index activity                     | 旧 runtime / 持久缓存            | 手机展示                             |
+| ------------------------------------------- | -------------------------------- | ------------------------------------ |
+| `prewarming` / `running`                    | `completed` / `failed` / `error` | `running`                            |
+| `completedSuccess` / `completedInterrupted` | live / `failed` / `running`      | `completed`                          |
+| `error`                                     | live / `completed` / `running`   | `error`                              |
+| 缺失或兼容 `draft`                          | 任意                             | 保持现有 runtime → 持久终态 fallback |
 
 因此 sessions-index 新帧既能把旧 `completed/error` cache 推进为 `running`，也能把旧 live cache 收口为
 `completed/error`。手机首页不自行合并这些来源。

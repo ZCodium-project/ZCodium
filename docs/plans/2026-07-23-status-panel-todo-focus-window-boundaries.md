@@ -4,7 +4,7 @@
 
 | Field                 | Value                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Change                | 恢复原设计定义的 Status Panel Todo 精简窗口，而不是固定前 4 条后整体展开                                 |
+| Change                | 恢复原设计定义的 Status Panel Todo 精简窗口，而不是固定前 4 条后整体展开                                   |
 | User-visible surfaces | V4 `ConversationStatusPanel` 的“进程”区块                                                                  |
 | Existing docs         | `docs/ui/chat-summary-panel.md`、SP case catalog / coverage matrix                                         |
 | Existing code owners  | `ConversationStatusPanel.tsx` renderer-local 展示状态；`conversationStatusPanelModel.ts` 保留完整 snapshot |
@@ -12,11 +12,11 @@
 
 ## Clarification Log
 
-| Round | Question                               | User answer                    | Boundary fixed                                       | Follow-up needed |
-| ----- | -------------------------------------- | ------------------------------ | ---------------------------------------------------- | ---------------- |
-| 1     | 是否恢复“显示 4 条”                    | 确认恢复                       | 先发现 V4 曾硬截断 4 条                              | no               |
+| Round | Question                               | User answer                  | Boundary fixed                                       | Follow-up needed |
+| ----- | -------------------------------------- | ---------------------------- | ---------------------------------------------------- | ---------------- |
+| 1     | 是否恢复“显示 4 条”                    | 确认恢复                     | 先发现 V4 曾硬截断 4 条                              | no               |
 | 2     | 简化为前 4 条 + 显示更多是否等同旧设计 | 用户指出与原设计定义差异很大 | 简化实现判定为 bug-candidate                         | no               |
-| 3     | 是否按原设计交互完成             | “确认，使用 goal 完成”         | 采用 `>6` 聚焦 3 条、上下独立折叠、snapshot 更新重置 | no               |
+| 3     | 是否按原设计交互完成                   | “确认，使用 goal 完成”       | 采用 `>6` 聚焦 3 条、上下独立折叠、snapshot 更新重置 | no               |
 
 ## Boundary Decisions
 

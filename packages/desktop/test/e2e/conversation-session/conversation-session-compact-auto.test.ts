@@ -31,9 +31,7 @@ import {
 
 const COMPACT_REQUEST_SENTINEL = "CRITICAL: Respond with TEXT ONLY";
 const ADJACENT_AUTO_COMPACT_MARKER = "E2E_ADJACENT_AUTOCOMPACT";
-const AUTO_COMPACT_RUNTIME_ROOT = resolveE2ERuntimePath(
-  "conversation-session-compact-auto",
-);
+const AUTO_COMPACT_RUNTIME_ROOT = resolveE2ERuntimePath("conversation-session-compact-auto");
 const ADJACENT_AUTO_COMPACT_FILE_PATH = resolveE2ERuntimePath(
   "conversation-session-compact-auto",
   "adjacent-autocompact.txt",
@@ -66,9 +64,7 @@ describe("会话区 Auto Compact E2E", () => {
     await sendV4Prompt(seedPrompt);
     await waitForV4ComposerText("", "auto compact 第一轮发送后输入框没有清空");
     await waitForV4UserMessageContaining(seedPrompt);
-    await waitForUpstreamRequestContaining(
-      `E2E_AUTO_COMPACT_CONTEXT_SEED_${runId}`,
-    );
+    await waitForUpstreamRequestContaining(`E2E_AUTO_COMPACT_CONTEXT_SEED_${runId}`);
     await waitForV4ConversationState(
       (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
       "auto compact 第一轮没有完成",
@@ -84,10 +80,7 @@ describe("会话区 Auto Compact E2E", () => {
     const compactRowIdsBefore = await getV4AutoCompactRowIds();
     const pendingPrompt = `E2E_AUTO_COMPACT_PENDING_TEXT_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
     await sendV4Prompt(pendingPrompt);
-    await waitForV4ComposerText(
-      "",
-      "auto compact pending 文本发送后输入框没有清空",
-    );
+    await waitForV4ComposerText("", "auto compact pending 文本发送后输入框没有清空");
 
     await waitForNewV4AutoCompactSuccess(compactRowIdsBefore, 30000);
     await browser.waitUntil(
@@ -103,13 +96,10 @@ describe("会话区 Auto Compact E2E", () => {
       },
     );
     await browser.waitUntil(
-      async () =>
-        (await countUpstreamRequestsContainingAll([])) ===
-        modelRequestsBefore + 2,
+      async () => (await countUpstreamRequestsContainingAll([])) === modelRequestsBefore + 2,
       {
         timeout: 90000,
-        timeoutMsg:
-          "auto compact 成功后没有继续发起原 pending 文本的主模型请求",
+        timeoutMsg: "auto compact 成功后没有继续发起原 pending 文本的主模型请求",
       },
     );
     await waitForAssistantMessageCount(
@@ -159,13 +149,8 @@ async function assertAdjacentAutoCompactMarkersRemainStructured(runId: number) {
   ]);
   const toolPrompt = `${ADJACENT_AUTO_COMPACT_MARKER}_TOOL_${runId}: Read ${ADJACENT_AUTO_COMPACT_FILE_PATH}, then reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
   await sendV4Prompt(toolPrompt);
-  await waitForV4ComposerText(
-    "",
-    "adjacent auto compact 工具轮发送后输入框没有清空",
-  );
-  await waitForV4UserMessageContaining(
-    `${ADJACENT_AUTO_COMPACT_MARKER}_TOOL_${runId}`,
-  );
+  await waitForV4ComposerText("", "adjacent auto compact 工具轮发送后输入框没有清空");
+  await waitForV4UserMessageContaining(`${ADJACENT_AUTO_COMPACT_MARKER}_TOOL_${runId}`);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
     "adjacent auto compact 工具轮没有完成",
@@ -176,23 +161,15 @@ async function assertAdjacentAutoCompactMarkersRemainStructured(runId: number) {
     "adjacent auto compact 没有触发第一轮 mid_turn compact",
     30000,
   );
-  const midTurnMarker = await waitForNewV4AutoCompactSuccess(
-    existingRowIds,
-    30000,
-  );
+  const midTurnMarker = await waitForNewV4AutoCompactSuccess(existingRowIds, 30000);
 
   const rowIdsBeforeFollowup = new Set(existingRowIds);
   expect(midTurnMarker.rowId).not.toBeNull();
   rowIdsBeforeFollowup.add(midTurnMarker.rowId as number);
   const followupPrompt = `${ADJACENT_AUTO_COMPACT_MARKER}_FOLLOWUP_${runId}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
   await sendV4Prompt(followupPrompt);
-  await waitForV4ComposerText(
-    "",
-    "adjacent auto compact 追问发送后输入框没有清空",
-  );
-  await waitForV4UserMessageContaining(
-    `${ADJACENT_AUTO_COMPACT_MARKER}_FOLLOWUP_${runId}`,
-  );
+  await waitForV4ComposerText("", "adjacent auto compact 追问发送后输入框没有清空");
+  await waitForV4UserMessageContaining(`${ADJACENT_AUTO_COMPACT_MARKER}_FOLLOWUP_${runId}`);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
     "adjacent auto compact 追问轮没有完成",
@@ -203,10 +180,7 @@ async function assertAdjacentAutoCompactMarkersRemainStructured(runId: number) {
     "adjacent auto compact 没有触发第二轮 pre_request compact",
     30000,
   );
-  const preRequestMarker = await waitForNewV4AutoCompactSuccess(
-    rowIdsBeforeFollowup,
-    30000,
-  );
+  const preRequestMarker = await waitForNewV4AutoCompactSuccess(rowIdsBeforeFollowup, 30000);
   expect(preRequestMarker.rowId).not.toBe(midTurnMarker.rowId);
 }
 
@@ -219,10 +193,7 @@ async function assertAutoCompactBeforeAutoDrainText(runId: number) {
   const queuedPrompt = `${queuedMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
   await sendV4Prompt(runningPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact drain 文本场景首轮发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact drain 文本场景首轮发送后输入框没有清空");
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "streaming",
     "auto compact drain 文本场景首轮没有进入 streaming",
@@ -231,19 +202,12 @@ async function assertAutoCompactBeforeAutoDrainText(runId: number) {
 
   const compactRowIdsBefore = await getV4AutoCompactRowIds();
   await sendV4Prompt(queuedPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact drain 文本队列发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact drain 文本队列发送后输入框没有清空");
   await waitForQueueContaining(queuedMarker);
   const queue = await waitForQueueCount(1);
   expect(queue[0]?.kind).toBe("text");
 
-  await waitForAutoCompactPrefixBeforeAction(
-    queuedMarker,
-    requestStartIndex,
-    compactRowIdsBefore,
-  );
+  await waitForAutoCompactPrefixBeforeAction(queuedMarker, requestStartIndex, compactRowIdsBefore);
   await waitForV4UserMessageContaining(queuedPrompt);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -261,10 +225,7 @@ async function assertAutoCompactBeforeAutoDrainGoal(runId: number) {
   const goalPrompt = `/goal ${goalMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
   await sendV4Prompt(runningPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact drain goal 场景首轮发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact drain goal 场景首轮发送后输入框没有清空");
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "streaming",
     "auto compact drain goal 场景首轮没有进入 streaming",
@@ -273,19 +234,12 @@ async function assertAutoCompactBeforeAutoDrainGoal(runId: number) {
 
   const compactRowIdsBefore = await getV4AutoCompactRowIds();
   await sendV4Prompt(goalPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact drain goal 队列发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact drain goal 队列发送后输入框没有清空");
   await waitForQueueContaining(goalMarker);
   const queue = await waitForQueueCount(1);
   expect(queue[0]?.kind).toBe("goal");
 
-  await waitForAutoCompactPrefixBeforeAction(
-    goalMarker,
-    requestStartIndex,
-    compactRowIdsBefore,
-  );
+  await waitForAutoCompactPrefixBeforeAction(goalMarker, requestStartIndex, compactRowIdsBefore);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
     "auto compact 后 goal 队首没有被消费并回到 idle",
@@ -305,10 +259,7 @@ async function assertAutoCompactBeforeEditRerun(runId: number) {
   const editedPrompt = `${editMarker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
 
   await sendV4Prompt(contextPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact edit context 发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact edit context 发送后输入框没有清空");
   await waitForUpstreamRequestContaining(contextMarker, 30000);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -317,10 +268,7 @@ async function assertAutoCompactBeforeEditRerun(runId: number) {
   );
 
   await sendV4Prompt(secondContextPrompt);
-  await waitForV4ComposerText(
-    "",
-    "auto compact edit second context 发送后输入框没有清空",
-  );
+  await waitForV4ComposerText("", "auto compact edit second context 发送后输入框没有清空");
   await waitForUpstreamRequestContaining(secondContextMarker, 30000);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -340,11 +288,7 @@ async function assertAutoCompactBeforeEditRerun(runId: number) {
   const requestStartIndex = await getUpstreamRequestStartIndex();
   const compactRowIdsBefore = await getV4AutoCompactRowIds();
   await editFirstV4UserQuery(editedPrompt);
-  await waitForAutoCompactPrefixBeforeAction(
-    editMarker,
-    requestStartIndex,
-    compactRowIdsBefore,
-  );
+  await waitForAutoCompactPrefixBeforeAction(editMarker, requestStartIndex, compactRowIdsBefore);
   await waitForV4UserMessageContaining(editMarker);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -357,10 +301,7 @@ async function seedAutoCompactHistory(runId: number, scope: string) {
   const marker = `E2E_AUTO_COMPACT_CONTEXT_SEED_WARMUP_${scope}_${runId}`;
   const prompt = `${marker}: Reply with exactly "${E2E_REPLY_TOKEN}" and no other text.`;
   await sendV4Prompt(prompt);
-  await waitForV4ComposerText(
-    "",
-    `${scope} auto compact warmup 后输入框没有清空`,
-  );
+  await waitForV4ComposerText("", `${scope} auto compact warmup 后输入框没有清空`);
   await waitForUpstreamRequestContaining(marker, 30000);
   await waitForV4ConversationState(
     (snapshot) => snapshot.state === "idle" && snapshot.queueCount === 0,
@@ -475,10 +416,7 @@ async function waitForCompactRequestCount(
   );
 }
 
-async function waitForAssistantMessageCount(
-  expectedCount: number,
-  timeoutMsg: string,
-) {
+async function waitForAssistantMessageCount(expectedCount: number, timeoutMsg: string) {
   let latestCount = 0;
   await browser.waitUntil(
     async () => {

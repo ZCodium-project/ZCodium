@@ -15,13 +15,13 @@ is an input I can change", and three signaling links of increasing
 risk. The anti-pattern column captures the way each color is most often
 misused in the wild.
 
-| Color | RGB | Meaning | Anti-pattern |
-|---|---|---|---|
-| Black | `0,0,0` | Every formula and computed result | Setting `=A1+B1` to blue makes the reviewer think it is a manual input |
-| Blue | `0,0,255` | Hard-coded inputs and scenario assumptions | Setting `=Sheet2!A1` (a sheet link) to blue makes it look like an assumption |
-| Green | `0,128,0` | Same-workbook cross-sheet links | Setting `=[Other.xlsx]Sheet1!A1` to green hides the external dependency signal |
-| Red | `255,0,0` | Cross-file external links | Setting same-sheet `=A1` to red implies a fake external dependency |
-| Yellow (fill) | `255,255,0` background | Critical assumptions awaiting review | Coloring every cell yellow drowns out the cells that actually need a second look |
+| Color         | RGB                    | Meaning                                    | Anti-pattern                                                                     |
+| ------------- | ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- |
+| Black         | `0,0,0`                | Every formula and computed result          | Setting `=A1+B1` to blue makes the reviewer think it is a manual input           |
+| Blue          | `0,0,255`              | Hard-coded inputs and scenario assumptions | Setting `=Sheet2!A1` (a sheet link) to blue makes it look like an assumption     |
+| Green         | `0,128,0`              | Same-workbook cross-sheet links            | Setting `=[Other.xlsx]Sheet1!A1` to green hides the external dependency signal   |
+| Red           | `255,0,0`              | Cross-file external links                  | Setting same-sheet `=A1` to red implies a fake external dependency               |
+| Yellow (fill) | `255,255,0` background | Critical assumptions awaiting review       | Coloring every cell yellow drowns out the cells that actually need a second look |
 
 Why "Black first": when a reviewer opens a model the first thing they
 look for is whether any formula was accidentally typed as a number.
@@ -33,15 +33,15 @@ Default formats unless the existing template specifies otherwise.
 "Rationale" is what to point at when a reviewer asks why a column looks
 the way it does.
 
-| Type | Format | Rationale |
-|---|---|---|
-| Year | text (`"FY2025"`) | Numeric `2025` gets thousands-separated to `2,025` by the corporate template; storing as text disables the auto-format |
-| Currency | `$#,##0` or `¥#,##0` with the unit (`mm` / `bn` / `k`) in the header | The unit belongs in one place per column, not repeated on every cell — header `ARR (¥mm)` keeps the cells uncluttered |
-| Zero | `"$#,##0;($#,##0);-"` (or the `0.0%` equivalent) | A literal `0` reads as data; an em-dash reads as "zero by intent" — separates a missing value from a real zero |
-| Percentage | `0.0%` | One decimal is enough for reviewer scanning; `0.00%` reads as false precision, `0%` loses sign on small movements |
-| Multiple | `0.0x` | Used for valuation multiples (EV/EBITDA, P/S, P/E) and ratio-style headers like `Token unit price 1.2x` |
-| Negative | `(123)` (parentheses) | Accounting convention; minus signs blend into table grids and read as dashes at small font sizes |
-| Hardcode | `Source: …` annotation in the next column or as a cell comment (see §3) | Reviewer can audit every input back to its source without scrolling around |
+| Type       | Format                                                                  | Rationale                                                                                                              |
+| ---------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Year       | text (`"FY2025"`)                                                       | Numeric `2025` gets thousands-separated to `2,025` by the corporate template; storing as text disables the auto-format |
+| Currency   | `$#,##0` or `¥#,##0` with the unit (`mm` / `bn` / `k`) in the header    | The unit belongs in one place per column, not repeated on every cell — header `ARR (¥mm)` keeps the cells uncluttered  |
+| Zero       | `"$#,##0;($#,##0);-"` (or the `0.0%` equivalent)                        | A literal `0` reads as data; an em-dash reads as "zero by intent" — separates a missing value from a real zero         |
+| Percentage | `0.0%`                                                                  | One decimal is enough for reviewer scanning; `0.00%` reads as false precision, `0%` loses sign on small movements      |
+| Multiple   | `0.0x`                                                                  | Used for valuation multiples (EV/EBITDA, P/S, P/E) and ratio-style headers like `Token unit price 1.2x`                |
+| Negative   | `(123)` (parentheses)                                                   | Accounting convention; minus signs blend into table grids and read as dashes at small font sizes                       |
+| Hardcode   | `Source: …` annotation in the next column or as a cell comment (see §3) | Reviewer can audit every input back to its source without scrolling around                                             |
 
 MiniMax-flavored sample headers: `ARR (¥mm)` / `Tokens (bn)` / `MAU
 (mm)` / `Token unit price 1.2x` / `MAU YoY 0.0%`. Keep the unit in the
@@ -59,13 +59,13 @@ Source: <system or document>, <date>, <locator>, <URL optional>
 
 Five reference examples, spanning the source types reviewers see most:
 
-| Source type | Example string |
-|---|---|
-| 10-K filing | `Source: AAPL 10-K FY2024, 2024-11-01, "Net sales by segment" table, https://www.sec.gov/...` |
-| 10-Q filing | `Source: AAPL 10-Q FY2025 Q2, 2025-05-02, "Operating expenses" line 12` |
-| Internal BI dashboard | `Source: MiniMax internal BI - MAU Dashboard, 2025-09-30, "moonshot-mau" view` |
-| Interview transcript | `Source: User interview INT-2025-117, 2025-09-12, interviewee Z, page 4` |
-| Market data terminal | `Source: Wind Terminal, 2025-08-15, AAPL.O closing price` / `Source: Bloomberg, 2025-08-15, AAPL US Equity PX_LAST` |
+| Source type           | Example string                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 10-K filing           | `Source: AAPL 10-K FY2024, 2024-11-01, "Net sales by segment" table, https://www.sec.gov/...`                       |
+| 10-Q filing           | `Source: AAPL 10-Q FY2025 Q2, 2025-05-02, "Operating expenses" line 12`                                             |
+| Internal BI dashboard | `Source: MiniMax internal BI - MAU Dashboard, 2025-09-30, "moonshot-mau" view`                                      |
+| Interview transcript  | `Source: User interview INT-2025-117, 2025-09-12, interviewee Z, page 4`                                            |
+| Market data terminal  | `Source: Wind Terminal, 2025-08-15, AAPL.O closing price` / `Source: Bloomberg, 2025-08-15, AAPL US Equity PX_LAST` |
 
 Date format is ISO `YYYY-MM-DD`; the locator must let a reader find the
 exact cell in the source within ~30 seconds.
@@ -84,7 +84,7 @@ data. The four sub-rules below build on top of this principle and add
 checks the model passes **before** running `scripts/recalc.py`.
 recalc only catches errors that have already crystallised into a
 `#REF!` / `#DIV/0!` marker; these checks catch the class of bugs that
-produce a *wrong but not erroring* number.
+produce a _wrong but not erroring_ number.
 
 **This rule applies regardless of how the value was computed during
 authoring.** Even if pandas / polars / numpy / a one-line list
@@ -129,13 +129,13 @@ data block.
 
 Before delivery, replace the lead inputs with edge cases and recalc:
 
-| Input | Why test |
-|---|---|
-| `0` | Catches `#DIV/0!` and "any percentage of zero is still zero" semantics |
-| Negative | Catches `LOG(<0)`, `SQRT(<0)`, and IRR convergence failures |
-| Very large | Catches integer overflow in xlsxwriter and float underflow in `LOG10` chains |
-| `NaN` (blank) | Catches `IFERROR` gaps and pandas → openpyxl conversion losses |
-| Empty string | Catches `VALUE("")` failures and silent string concatenation |
+| Input         | Why test                                                                     |
+| ------------- | ---------------------------------------------------------------------------- |
+| `0`           | Catches `#DIV/0!` and "any percentage of zero is still zero" semantics       |
+| Negative      | Catches `LOG(<0)`, `SQRT(<0)`, and IRR convergence failures                  |
+| Very large    | Catches integer overflow in xlsxwriter and float underflow in `LOG10` chains |
+| `NaN` (blank) | Catches `IFERROR` gaps and pandas → openpyxl conversion losses               |
+| Empty string  | Catches `VALUE("")` failures and silent string concatenation                 |
 
 Run `scripts/recalc.py` after each substitution. A real `errors_found`
 JSON is the cheapest signal — far cheaper than a reviewer noticing a
@@ -182,7 +182,7 @@ the checklist below before changing a single cell:
 - **Number formats** — copy the existing format string verbatim;
   reformatting a cell will replace it.
 - **Conditional formatting** — list the rules with `for cf in
-  sheet.conditional_formatting:` before editing the range; insertions
+sheet.conditional_formatting:` before editing the range; insertions
   shift the rule's anchor.
 
 Customer template conventions always override this skill's defaults.
@@ -192,7 +192,7 @@ Customer template conventions always override this skill's defaults.
 These rules apply to the Python that drives openpyxl / xlsxwriter, not
 to the Excel files themselves.
 
-- **No tutorial comments.** Comments explain *why*, not *what* — the
+- **No tutorial comments.** Comments explain _why_, not _what_ — the
   reader knows what `book.save("foo.xlsx")` does.
 - **No `print` debugging in committed code.** Use `logging.debug` or
   return values; `print` lines pollute downstream stdout that callers

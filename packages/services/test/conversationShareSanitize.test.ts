@@ -40,7 +40,10 @@ describe("sanitizeConversationShareIssues", () => {
     ]);
 
     expect(result.issues).toHaveLength(1);
-    expect(result.issues[0]).toMatchObject({ code: "artifact_type_not_allowed", scope: "artifact" });
+    expect(result.issues[0]).toMatchObject({
+      code: "artifact_type_not_allowed",
+      scope: "artifact",
+    });
     expect(result.issues[0]).not.toHaveProperty("artifactDisplayName");
     expect(result.omittedIssueCount).toBe(0);
   });

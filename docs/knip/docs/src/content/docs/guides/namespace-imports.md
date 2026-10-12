@@ -10,16 +10,16 @@ to Knip. Here's a guide to better understand how Knip handles such exports.
 We start off by having two exports:
 
 ```ts title="my-namespace.js"
-export const version = 'v5';
-export const getRocket = () => '🚀';
+export const version = "v5";
+export const getRocket = () => "🚀";
 ```
 
 The next snippet shows how to import all the exports above on a namespace. All
 exports of the `my-namespace.js` module will be members on the `NS` object:
 
 ```ts title="my-module.ts"
-import * as NS from './my-namespace.js';
-import send from 'stats';
+import * as NS from "./my-namespace.js";
+import send from "stats";
 send(NS);
 ```
 
@@ -28,7 +28,7 @@ The intention of export usage is not always clear. In the example above is
 to be reported as unused. The same goes for the next example:
 
 ```ts title="my-module.ts"
-import * as NS from './my-namespace.js';
+import * as NS from "./my-namespace.js";
 
 export { NS };
 ```
@@ -40,7 +40,7 @@ individual exports are considered separately again and `getRocket` will be
 marked as unused:
 
 ```ts title="index.ts"
-import { NS } from './my-module.js';
+import { NS } from "./my-module.js";
 
 const version = NS.version;
 ```
@@ -69,8 +69,8 @@ export const end = 1;
 In the following cases all exports of `my-namespace.ts` are considered used:
 
 ```ts title="index.ts"
-import * as NS from './my-namespace.js';
-import send from 'stats';
+import * as NS from "./my-namespace.js";
+import send from "stats";
 
 send(NS);
 
@@ -100,7 +100,7 @@ export = NS;
 However, this is no longer the case when one of the properties is accessed:
 
 ```ts title="index.js"
-import * as NS from './namespace.js';
+import * as NS from "./namespace.js";
 
 const begin = NS.start;
 

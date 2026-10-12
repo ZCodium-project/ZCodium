@@ -41,10 +41,7 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_FILE_SUMMARY_COLD_START"],
-        "bodyExcludes": [
-          "Generate a concise title",
-          "toolu_file_summary_cold_start_write"
-        ]
+        "bodyExcludes": ["Generate a concise title", "toolu_file_summary_cold_start_write"]
       },
       "response": {
         "statusCode": 200,

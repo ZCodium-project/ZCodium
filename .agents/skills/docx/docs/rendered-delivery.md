@@ -45,14 +45,14 @@ The issue file is a JSON array. Each item describes a single observed visual pro
 
 Supported `issueClass` values:
 
-| Issue class | Use when |
-| --- | --- |
-| `toc_layout_or_update` | TOC looks stale, misaligned, missing entries, or paginates incorrectly |
-| `header_footer_mismatch` | header/footer appearance differs across pages or sections |
-| `page_number_wrong` | visible page numbers are missing, duplicated, restarted, or inconsistent |
-| `extra_blank_page` | a rendered page looks unexpectedly blank |
-| `template_fidelity` | the output no longer visually follows the target template system |
-| `layout_overflow_or_clipping` | body/table/image content clips, overflows, or collides visually |
+| Issue class                   | Use when                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `toc_layout_or_update`        | TOC looks stale, misaligned, missing entries, or paginates incorrectly   |
+| `header_footer_mismatch`      | header/footer appearance differs across pages or sections                |
+| `page_number_wrong`           | visible page numbers are missing, duplicated, restarted, or inconsistent |
+| `extra_blank_page`            | a rendered page looks unexpectedly blank                                 |
+| `template_fidelity`           | the output no longer visually follows the target template system         |
+| `layout_overflow_or_clipping` | body/table/image content clips, overflows, or collides visually          |
 
 ## Output contract
 
@@ -106,14 +106,14 @@ Every issue block under `## Page issue summary` must contain:
 The report intentionally aligns visual problems to structure causes instead of treating them as two
 separate deliverables.
 
-| Symptom family | Typical structure alignment |
-| --- | --- |
-| TOC drift | TOC field count, heading outline-level risks, section transitions |
-| Header/footer mismatch | per-section header/footer references, titlePg, even/odd header flags |
-| Page-number issues | PAGE / NUMPAGES / SECTIONPAGES fields, section count, titlePg |
-| Blank page | section break types, title-page sections |
-| Template fidelity drift | section graph, missing styles, direct-format contamination |
-| Overflow / clipping | direct formatting, table density, drawing density |
+| Symptom family          | Typical structure alignment                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| TOC drift               | TOC field count, heading outline-level risks, section transitions    |
+| Header/footer mismatch  | per-section header/footer references, titlePg, even/odd header flags |
+| Page-number issues      | PAGE / NUMPAGES / SECTIONPAGES fields, section count, titlePg        |
+| Blank page              | section break types, title-page sections                             |
+| Template fidelity drift | section graph, missing styles, direct-format contamination           |
+| Overflow / clipping     | direct formatting, table density, drawing density                    |
 
 ## REPAIR_LAYOUT usage
 

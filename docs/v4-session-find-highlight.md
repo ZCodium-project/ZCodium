@@ -44,4 +44,3 @@ Command Center result
 - CSS 使用 `--color-find-highlight` 和 `--color-find-highlight-active`，不新增颜色 token。
 - CSS Highlight API 不可用时保留计数与滚动能力，不实现 `<mark>` fallback。
 - Command Center 跳转高亮不打开 Cmd/Ctrl+F 查找框，也不写入 `conversationFindQuery`。
-

@@ -165,7 +165,9 @@ function webSocketDataByteLength(data: unknown): number {
   return new TextEncoder().encode(String(data)).byteLength;
 }
 
-async function parseRelayMessage(data: unknown): Promise<WebRemoteControlRelayIncomingMessage | null> {
+async function parseRelayMessage(
+  data: unknown,
+): Promise<WebRemoteControlRelayIncomingMessage | null> {
   try {
     const text = await readWebSocketData(data);
     if (text === null) return null;
@@ -176,7 +178,10 @@ async function parseRelayMessage(data: unknown): Promise<WebRemoteControlRelayIn
   }
 }
 
-function createFailure(reason: WebRemoteControlFailure["reason"], message?: string): WebRemoteControlFailure {
+function createFailure(
+  reason: WebRemoteControlFailure["reason"],
+  message?: string,
+): WebRemoteControlFailure {
   return { reason, message };
 }
 
@@ -446,7 +451,9 @@ export class WebRemoteControlTerminalTransport {
   }
 
   private async handleMessage(data: unknown): Promise<void> {
-    if (webSocketDataByteLength(data) > WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS.maxPhysicalFrameBytes) {
+    if (
+      webSocketDataByteLength(data) > WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS.maxPhysicalFrameBytes
+    ) {
       this.options.onRawTransportFault?.("remote.rpcFrame.envelopeTooLarge");
       return;
     }
@@ -681,12 +688,10 @@ export class WebRemoteControlTerminalTransport {
     this.staleWaitingRecoveryTimer = setTimeout(() => {
       this.staleWaitingRecoveryTimer = undefined;
       if (
-        (
-          this.state === "paired" ||
+        (this.state === "paired" ||
           this.state === "reconnecting" ||
           this.state === "connecting" ||
-          this.state === "authenticating"
-        ) &&
+          this.state === "authenticating") &&
         this.staleWaitingCount > 0
       ) {
         this.reconnectAfterStaleWaiting();
@@ -742,9 +747,7 @@ export class WebRemoteControlTerminalTransport {
     if (this.reconnectTimer) {
       return;
     }
-    const delayMs = options?.immediate
-      ? 0
-      : Math.min(10_000, 500 * 2 ** this.reconnectAttempt);
+    const delayMs = options?.immediate ? 0 : Math.min(10_000, 500 * 2 ** this.reconnectAttempt);
     this.reconnectAttempt += 1;
     this.setState("reconnecting");
     this.emitDiagnostic({ type: "recover-scheduled", state: this.state });
@@ -937,8 +940,7 @@ export class WebRemoteControlTerminalTransport {
       }
       this.lastPairStatusDiagnostic = nextPairStatusDiagnostic;
     }
-    const visibilityState =
-      typeof document === "undefined" ? "unknown" : document.visibilityState;
+    const visibilityState = typeof document === "undefined" ? "unknown" : document.visibilityState;
     const hiddenDurationMs =
       this.hiddenStartedAt && visibilityState !== "hidden"
         ? Date.now() - this.hiddenStartedAt
@@ -987,9 +989,7 @@ function isRecoverableRelayRequestFailure(
   );
 }
 
-export function createWebRemoteControlRelayRequestRecovery(
-  recoverConnection: () => Promise<void>,
-) {
+export function createWebRemoteControlRelayRequestRecovery(recoverConnection: () => Promise<void>) {
   let recoveryPromise: Promise<void> | undefined;
 
   async function recoverRelayRequestPath(): Promise<void> {
@@ -1077,10 +1077,7 @@ export function createWebRemoteControlAppPayloadRequester({
         // Bugfix: remote session 关闭这类异步 bridge error 会带合成 requestId，
         // 但它不是某个 pending request 的响应。只有真正命中 pending 时才消费，
         // 否则交给上层按 bridge 失效事件触发重连/降级 UI。
-        return rejectRequest(
-          payload.requestId,
-          createFailure(payload.reason, payload.error),
-        );
+        return rejectRequest(payload.requestId, createFailure(payload.reason, payload.error));
       }
 
       for (const [requestId, request] of pending) {

@@ -180,9 +180,9 @@ describe("tabStore", () => {
       },
     });
 
-    const reusedTab = store.getState().tabs.find(
-      (tab) => isWorkspaceTab(tab) && tab.workspacePath === "/workspace/demo",
-    );
+    const reusedTab = store
+      .getState()
+      .tabs.find((tab) => isWorkspaceTab(tab) && tab.workspacePath === "/workspace/demo");
 
     expect(reusedTab && isWorkspaceTab(reusedTab) ? reusedTab.remoteSessionId : null).toBe(
       "remote-session-1",
@@ -226,11 +226,12 @@ describe("tabStore", () => {
     store.getState().addTab("/tmp/b");
     store.getState().addTab("/tmp/c");
 
-    expect(store.getState().tabs.filter(isWorkspaceTab).map((tab) => tab.workspacePath)).toEqual([
-      "/tmp/c",
-      "/tmp/b",
-      "/tmp/a",
-    ]);
+    expect(
+      store
+        .getState()
+        .tabs.filter(isWorkspaceTab)
+        .map((tab) => tab.workspacePath),
+    ).toEqual(["/tmp/c", "/tmp/b", "/tmp/a"]);
   });
 
   it("keeps the current focus while making an imported workspace visible", () => {
@@ -253,10 +254,12 @@ describe("tabStore", () => {
     expect(store.getState().activeWorkspacePath).toBe("/tmp/current");
     expect(store.getState().activeWorkspaceIdentity).toBe(workspaceIdentity);
     expect(store.getState().expandedWorkspacePaths.has("/tmp/imported")).toBe(true);
-    expect(store.getState().tabs.filter(isWorkspaceTab).map((tab) => tab.workspacePath)).toEqual([
-      "/tmp/imported",
-      "/tmp/current",
-    ]);
+    expect(
+      store
+        .getState()
+        .tabs.filter(isWorkspaceTab)
+        .map((tab) => tab.workspacePath),
+    ).toEqual(["/tmp/imported", "/tmp/current"]);
   });
 
   it("preserves manual workspace collapse when switching active tabs", () => {
@@ -314,10 +317,12 @@ describe("tabStore", () => {
     store.getState().reorderWorkspaceTabs(1, 0);
 
     expect(store.getState().tabs.map((tab) => tab.label)).toEqual(["a", "settings", "b"]);
-    expect(store.getState().tabs.filter(isWorkspaceTab).map((tab) => tab.workspacePath)).toEqual([
-      "/tmp/a",
-      "/tmp/b",
-    ]);
+    expect(
+      store
+        .getState()
+        .tabs.filter(isWorkspaceTab)
+        .map((tab) => tab.workspacePath),
+    ).toEqual(["/tmp/a", "/tmp/b"]);
   });
 
   it("reopens a collapsed workspace without toggling it shut again", () => {

@@ -9,15 +9,15 @@
 
 ## 功能摘要
 
-| 字段 | 结论 |
-| --- | --- |
-| 改动层级 | presentation、validation、commit-effect |
-| 输入 | 已持久化 Assistant text row 中的 `::code-comment{...}` |
-| 输出 | 正文投影文本 + turn-local 单行代码审查卡片组 |
-| 点击效果 | 直接打开 workspace-scoped `code-review` CodeViewer，定位行并用现有评论样式展示只读模型评论；不要求文件处于 Git 变更中 |
+| 字段       | 结论                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 改动层级   | presentation、validation、commit-effect                                                                                            |
+| 输入       | 已持久化 Assistant text row 中的 `::code-comment{...}`                                                                             |
+| 输出       | 正文投影文本 + turn-local 单行代码审查卡片组                                                                                       |
+| 点击效果   | 直接打开 workspace-scoped `code-review` CodeViewer，定位行并用现有评论样式展示只读模型评论；不要求文件处于 Git 变更中              |
 | 灰度 owner | Renderer Root capability `assistantCodeCommentCardsEnabled`，默认 `false`；Desktop 与手机 `/remote` workspace bridge 显式为 `true` |
-| 恢复 | 从原始 row text 确定性重建，不持久化独立卡片状态 |
-| 不涉及 | 卡片生成阶段文件存在性检查、Assistant Preview Cards 15→10 配额、Composer code-comment 草稿、Git diff 与历史 diff 快照 |
+| 恢复       | 从原始 row text 确定性重建，不持久化独立卡片状态                                                                                   |
+| 不涉及     | 卡片生成阶段文件存在性检查、Assistant Preview Cards 15→10 配额、Composer code-comment 草稿、Git diff 与历史 diff 快照              |
 
 ## Directive 契约
 
@@ -58,10 +58,10 @@ raw assistant text rows
 
 ## 灰度语义
 
-| 开关 | 正文 | 卡片 | 原因 |
-| --- | --- | --- | --- |
-| `false`（默认） | 保留当前原始 directive | 不显示 | 兼容已启动且仍可能输出 directive 的 Desktop Agent，避免评论被静默丢弃 |
-| `true` | 隐藏完整有效 directive；流式半截不闪现 | 显示 | 灰度用户获得结构化审查体验 |
+| 开关            | 正文                                   | 卡片   | 原因                                                                  |
+| --------------- | -------------------------------------- | ------ | --------------------------------------------------------------------- |
+| `false`（默认） | 保留当前原始 directive                 | 不显示 | 兼容已启动且仍可能输出 directive 的 Desktop Agent，避免评论被静默丢弃 |
+| `true`          | 隐藏完整有效 directive；流式半截不闪现 | 显示   | 灰度用户获得结构化审查体验                                            |
 
 后续若要求“关闭时也绝不展示原始 directive”，必须让同一能力开关同时控制 Desktop context 的 directive 输出要求；仅在 Renderer 隐藏而不控制 Agent 输出是不安全的。
 
@@ -135,36 +135,36 @@ card click
 
 ## UI Surface Matrix
 
-| 场景 | UI 入口 | 展示 owner | gating | 点击/提交 | 权威状态 | 模式边界 | 必须隔离 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Assistant 正文 | `AssistantTextRowView` / `MessageResponse` | 原始 row 的纯投影 | feature flag + directive 合法性 | 无 | session row text | desktop continuous 与 mobile replayable 同规则重建 | 不修改 row/snapshot |
-| 审查卡片 | `AssistantCodeCommentCards` | turn-local 派生 model | latest terminal row（complete / interrupted）、50 条上限 | 打开 `CodeReviewCodeViewerSource` | 无独立持久化 | 手机使用既有 side-pane overlay | 不占文件预览额度，不写 Composer store |
-| 只读 Code Review | `PreviewPane` / `CodeViewer` / `CommentAnnotation` | source.review + workspace 文件内容 | workspace scope + 文件读取；行范围按实际内容裁决 | 复用 code-viewer tab、更新锚点并滚动 | workspace-scoped File Service | local/remote service 注入不同，UI 语义相同 | 不读写 Git，不创建 Composer 评论，不切 workspace |
+| 场景             | UI 入口                                            | 展示 owner                         | gating                                                   | 点击/提交                            | 权威状态                      | 模式边界                                           | 必须隔离                                         |
+| ---------------- | -------------------------------------------------- | ---------------------------------- | -------------------------------------------------------- | ------------------------------------ | ----------------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| Assistant 正文   | `AssistantTextRowView` / `MessageResponse`         | 原始 row 的纯投影                  | feature flag + directive 合法性                          | 无                                   | session row text              | desktop continuous 与 mobile replayable 同规则重建 | 不修改 row/snapshot                              |
+| 审查卡片         | `AssistantCodeCommentCards`                        | turn-local 派生 model              | latest terminal row（complete / interrupted）、50 条上限 | 打开 `CodeReviewCodeViewerSource`    | 无独立持久化                  | 手机使用既有 side-pane overlay                     | 不占文件预览额度，不写 Composer store            |
+| 只读 Code Review | `PreviewPane` / `CodeViewer` / `CommentAnnotation` | source.review + workspace 文件内容 | workspace scope + 文件读取；行范围按实际内容裁决         | 复用 code-viewer tab、更新锚点并滚动 | workspace-scoped File Service | local/remote service 注入不同，UI 语义相同         | 不读写 Git，不创建 Composer 评论，不切 workspace |
 
 ## 影响简报
 
-| Rank | 关系 | 结论 |
-| --- | --- | --- |
-| must-inspect | raw Assistant rows -> Markdown projection | directive 删除不能破坏 GFM、流式容错、复制与搜索 |
-| must-inspect | turn projection -> code-comment cards | latest terminal row 上展示；流式只隐藏未闭合尾部，cold resume 确定性重建 |
-| must-inspect | card click -> Code Review source | source key、workspace service、只读评论适配和行定位属于同一导航事务 |
-| should-inspect | Desktop context prompt | 灰度关闭时仍可能输出 directive，不能静默删除 |
-| conditional | remote/mobile | 复用 workspace-scoped File Service 和既有 code-viewer overlay，不改变 replayable 恢复 |
-| invariant-only | Composer code comments | 用户向 Agent 附加代码评论的 store/event 不复用、不修改 |
-| invariant-only | Assistant Preview Cards | 不调用 fileChanges/stat，不共享 15→10 配额；code-comment 点击后才读取目标文件 |
+| Rank           | 关系                                      | 结论                                                                                  |
+| -------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| must-inspect   | raw Assistant rows -> Markdown projection | directive 删除不能破坏 GFM、流式容错、复制与搜索                                      |
+| must-inspect   | turn projection -> code-comment cards     | latest terminal row 上展示；流式只隐藏未闭合尾部，cold resume 确定性重建              |
+| must-inspect   | card click -> Code Review source          | source key、workspace service、只读评论适配和行定位属于同一导航事务                   |
+| should-inspect | Desktop context prompt                    | 灰度关闭时仍可能输出 directive，不能静默删除                                          |
+| conditional    | remote/mobile                             | 复用 workspace-scoped File Service 和既有 code-viewer overlay，不改变 replayable 恢复 |
+| invariant-only | Composer code comments                    | 用户向 Agent 附加代码评论的 store/event 不复用、不修改                                |
+| invariant-only | Assistant Preview Cards                   | 不调用 fileChanges/stat，不共享 15→10 配额；code-comment 点击后才读取目标文件         |
 
 当前工具环境没有 codegraph，影响分析使用 feature graph 声明、精确源码调用方和 focused tests 作为证据；实现后更新图谱 code seeds 并运行完整图谱校验。
 
 ## 用例与剪枝
 
-| ID | Setup | Action | Assertions | 状态 |
-| --- | --- | --- | --- | --- |
-| ACC01 | 开关开启，complete turn 含两条合法 directive | 渲染与框选卡片文字 | 正文无原始语法；卡片按正序以单行展示 priority/title/path/range，不展示 body；文字可选择且框选不触发导航 | accepted |
-| ACC02 | workspace 中存在目标文件和合法行范围 | 点击卡片 | 打开 `code-review` CodeViewer、高亮并滚动目标范围；用现有评论样式只读展示 body；没有添加/删除交互且不写 Composer store | accepted |
-| ACC03 | 开关关闭 | 渲染同一文本 | 不展示卡片，原始 directive 保持现状 | accepted |
-| ACC04 | streaming 半截、已闭合 directive、complete、interrupted、failed | 推进状态 | 流式半截不闪现；流式期间不出卡；complete/interrupted 才出卡；failed 整轮和非法终态恢复正文 | accepted |
-| ACC05 | 已持久化历史 turn | cold resume/虚拟行重挂 | 从 row text 重建同一正文与卡片，不新增 RPC | accepted |
-| ACC06 | 文件无 Git 变更、没有行号、行号越界、文件不存在，或同一文件有多条评论 | 点击 | Git 状态不影响打开；无行号/越界时在顶部展示只读评论且越界有提示；缺失文件显示读取错误；同文件复用 code-review tab 并更新锚点，不切换 workspace | accepted |
+| ID    | Setup                                                                                                                                                   | Action                   | Assertions                                                                                                                                                                                        | 状态     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ACC01 | 开关开启，complete turn 含两条合法 directive                                                                                                            | 渲染与框选卡片文字       | 正文无原始语法；卡片按正序以单行展示 priority/title/path/range，不展示 body；文字可选择且框选不触发导航                                                                                           | accepted |
+| ACC02 | workspace 中存在目标文件和合法行范围                                                                                                                    | 点击卡片                 | 打开 `code-review` CodeViewer、高亮并滚动目标范围；用现有评论样式只读展示 body；没有添加/删除交互且不写 Composer store                                                                            | accepted |
+| ACC03 | 开关关闭                                                                                                                                                | 渲染同一文本             | 不展示卡片，原始 directive 保持现状                                                                                                                                                               | accepted |
+| ACC04 | streaming 半截、已闭合 directive、complete、interrupted、failed                                                                                         | 推进状态                 | 流式半截不闪现；流式期间不出卡；complete/interrupted 才出卡；failed 整轮和非法终态恢复正文                                                                                                        | accepted |
+| ACC05 | 已持久化历史 turn                                                                                                                                       | cold resume/虚拟行重挂   | 从 row text 重建同一正文与卡片，不新增 RPC                                                                                                                                                        | accepted |
+| ACC06 | 文件无 Git 变更、没有行号、行号越界、文件不存在，或同一文件有多条评论                                                                                   | 点击                     | Git 状态不影响打开；无行号/越界时在顶部展示只读评论且越界有提示；缺失文件显示读取错误；同文件复用 code-review tab 并更新锚点，不切换 workspace                                                    | accepted |
 | ACC07 | Desktop Host 已持久化含合法 directive 的终态 turn，手机通过 external relay 或 token/WebSocket `/remote` bridge hydration，并切换 local/remote workspace | 查看同一 turn 并点击卡片 | 两条手机 bridge Root 都开启 capability；正文不泄露原始 directive，卡片与 Desktop 确定性一致；workspace 切换后仍开启且导航保留 `workspaceIdentity` / `remoteSessionId`；普通 Web Server 入口仍关闭 | accepted |
 
 剪枝：首版不做 Git diff 或历史 diff snapshot；不把 desktop/web/mobile 与所有 priority/path/source 做全排列；Windows/UNC 路径由 focused tests 覆盖，Desktop local 作为首批窗口 E2E 代表。E2E fixture 只需准备真实存在/缺失的 workspace 代码文件，不要求 Git 变更，也不 fake 卡片生成阶段的文件存在性检查。

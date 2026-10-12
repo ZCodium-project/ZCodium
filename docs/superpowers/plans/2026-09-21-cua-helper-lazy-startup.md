@@ -46,32 +46,34 @@
 
 **z-code 仓库**
 
-| 文件 | 动作 | 职责 |
-| --- | --- | --- |
-| `packages/services/src/node.ts` | Modify | resolveSpawnEnv 懒分支（Task 1/6）、getStatus win32（Task 7）、删尸体（Task 9） |
-| `packages/services/src/cua-permission-broker/stableCuaTransport.ts` | Create | 稳定 pipe 名 singleton + win32 recipe 解析缓存（Task 5） |
-| `packages/services/test/cuaPermissionBrokerProductAgentEnv.test.ts` | Modify | 各任务对应测试收敛 |
-| `packages/services/test/agentProxyEnv.test.ts` | Verify-only | 其源码文本守卫锚定 `resolveSpawnEnv: async (`，不得破坏 |
+| 文件                                                                | 动作        | 职责                                                                            |
+| ------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| `packages/services/src/node.ts`                                     | Modify      | resolveSpawnEnv 懒分支（Task 1/6）、getStatus win32（Task 7）、删尸体（Task 9） |
+| `packages/services/src/cua-permission-broker/stableCuaTransport.ts` | Create      | 稳定 pipe 名 singleton + win32 recipe 解析缓存（Task 5）                        |
+| `packages/services/test/cuaPermissionBrokerProductAgentEnv.test.ts` | Modify      | 各任务对应测试收敛                                                              |
+| `packages/services/test/agentProxyEnv.test.ts`                      | Verify-only | 其源码文本守卫锚定 `resolveSpawnEnv: async (`，不得破坏                         |
 
 **zcode-cua 仓库**
 
-| 文件 | 动作 | 职责 |
-| --- | --- | --- |
-| `src/tools/computer-use-runtime.ts` | Modify | `ensureStandaloneHelperLaunched` 增加 win32 fork 分支（Task 3） |
-| `src/broker/helperConstants.ts` | Modify | 新增 `ZCODE_CUA_WIN_HELPER_RECIPE_ENV` 常量（Task 3） |
-| `src/broker/server/cuaProductMcpResolver.ts` | Modify | 删除 `warmHelperForBuiltInPlugin` 预热（Task 3） |
-| `test/computer-use-runtime.win-fork.test.ts` | Create | win32 fork 分支单测（Task 3） |
-| `dist/**` | Rebuild | 同 commit 重建（Task 4） |
+| 文件                                         | 动作    | 职责                                                            |
+| -------------------------------------------- | ------- | --------------------------------------------------------------- |
+| `src/tools/computer-use-runtime.ts`          | Modify  | `ensureStandaloneHelperLaunched` 增加 win32 fork 分支（Task 3） |
+| `src/broker/helperConstants.ts`              | Modify  | 新增 `ZCODE_CUA_WIN_HELPER_RECIPE_ENV` 常量（Task 3）           |
+| `src/broker/server/cuaProductMcpResolver.ts` | Modify  | 删除 `warmHelperForBuiltInPlugin` 预热（Task 3）                |
+| `test/computer-use-runtime.win-fork.test.ts` | Create  | win32 fork 分支单测（Task 3）                                   |
+| `dist/**`                                    | Rebuild | 同 commit 重建（Task 4）                                        |
 
 ---
 
 ### Task 1: resolveSpawnEnv 的 darwin 分支前移（MR1）
 
 **Files:**
+
 - Modify: `packages/services/src/node.ts:2175-2186`
 - Test: `packages/services/test/agentProxyEnv.test.ts`（追加一个 source-guard 测试）
 
 **Interfaces:**
+
 - Consumes: `defaultCuaProductHelperLifecycle.peek()`、`isDefaultCuaProductHelperCurrent`、`getOrCreateDefaultCuaProductHelper`（全部已存在，签名不变）。
 - Produces: spawn 侧 helper 选择语义——darwin 恒 `undefined`；win32 暂维持现状（Task 6 改）。
 
@@ -81,10 +83,7 @@
 
 ```ts
 describe("node.ts lazy CUA spawn helper selection", () => {
-  const source = readFileSync(
-    resolve(__dirname, "../src/node.ts"),
-    "utf8",
-  );
+  const source = readFileSync(resolve(__dirname, "../src/node.ts"), "utf8");
   const spawnEnvStart = source.indexOf("resolveSpawnEnv: async (");
 
   it("locates the resolveSpawnEnv closure at all", () => {
@@ -113,27 +112,27 @@ Expected: 新增 case FAIL（现状是 peeked 分支在 darwin 判定之前）�
 把 `node.ts:2176-2186` 现状：
 
 ```ts
-      const peekedHelper = defaultCuaProductHelperLifecycle.peek()?.helper;
-      const helper = !cuaPluginEnabled
-        ? undefined
-        : peekedHelper && isDefaultCuaProductHelperCurrent(peekedHelper)
-          ? peekedHelper
-          : process.platform === "darwin"
-            ? undefined
-            : await getOrCreateDefaultCuaProductHelper(context);
+const peekedHelper = defaultCuaProductHelperLifecycle.peek()?.helper;
+const helper = !cuaPluginEnabled
+  ? undefined
+  : peekedHelper && isDefaultCuaProductHelperCurrent(peekedHelper)
+    ? peekedHelper
+    : process.platform === "darwin"
+      ? undefined
+      : await getOrCreateDefaultCuaProductHelper(context);
 ```
 
 改为（darwin 短路提到最前，注释块同步替换为指向新 spec 的单行）：
 
 ```ts
-      const peekedHelper = defaultCuaProductHelperLifecycle.peek()?.helper;
-      const helper = !cuaPluginEnabled
-        ? undefined
-        : process.platform === "darwin"
-          ? undefined
-          : peekedHelper && isDefaultCuaProductHelperCurrent(peekedHelper)
-            ? peekedHelper
-            : await getOrCreateDefaultCuaProductHelper(context);
+const peekedHelper = defaultCuaProductHelperLifecycle.peek()?.helper;
+const helper = !cuaPluginEnabled
+  ? undefined
+  : process.platform === "darwin"
+    ? undefined
+    : peekedHelper && isDefaultCuaProductHelperCurrent(peekedHelper)
+      ? peekedHelper
+      : await getOrCreateDefaultCuaProductHelper(context);
 ```
 
 同时把上方 `// M7 懒启动：…` 注释块替换为一行：
@@ -198,12 +197,14 @@ git push -u origin feat/cua-helper-lazy-startup
 **仓库：** `/Users/dev/.codex/worktrees/cua-refactor/zcode-cua`，**新建分支** `feat/win-lazy-fork`（基于 origin/main，浅克隆先 `git fetch --deepen=300`）。
 
 **Files:**
+
 - Modify: `src/tools/computer-use-runtime.ts`
 - Modify: `src/broker/helperConstants.ts`
 - Modify: `src/broker/server/cuaProductMcpResolver.ts:390-409`（`warmHelperForBuiltInPlugin` 及其调用点）
 - Create: `test/computer-use-runtime.win-fork.test.ts`
 
 **Interfaces:**
+
 - Produces: `ensureStandaloneHelperLaunched(socketPath, env, options?)` 的 win32 行为（options 形参供测试注入 fork 实现）；`ZCODE_CUA_WIN_HELPER_RECIPE_ENV = "ZCODE_CUA_WIN_HELPER_RECIPE"`（helperConstants 导出）。
 
 - [ ] **Step 1: helperConstants 加常量**
@@ -250,17 +251,25 @@ describe("ensureStandaloneHelperLaunched win32 fork", () => {
 
   it("no-ops on invalid recipe JSON", async () => {
     const { fork, calls } = makeForkSpy();
-    await __testing.ensureStandaloneHelperLaunched("\\\\.\\pipe\\zcode-cua-x", {
-      [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: "{not-json",
-    }, { fork });
+    await __testing.ensureStandaloneHelperLaunched(
+      "\\\\.\\pipe\\zcode-cua-x",
+      {
+        [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: "{not-json",
+      },
+      { fork },
+    );
     expect(calls()).toHaveLength(0);
   });
 
   it("forks with the stable pipe, host pid and addon env", async () => {
     const { fork, calls } = makeForkSpy();
-    await __testing.ensureStandaloneHelperLaunched("\\\\.\\pipe\\zcode-cua-x", {
-      [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: JSON.stringify(RECIPE),
-    }, { fork });
+    await __testing.ensureStandaloneHelperLaunched(
+      "\\\\.\\pipe\\zcode-cua-x",
+      {
+        [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: JSON.stringify(RECIPE),
+      },
+      { fork },
+    );
     expect(calls()).toHaveLength(1);
     const [command, argv, options] = calls()[0] as [string, string[], Record<string, unknown>];
     expect(command).toBe(RECIPE.command);
@@ -282,11 +291,17 @@ describe("ensureStandaloneHelperLaunched win32 fork", () => {
   });
 
   it("swallows fork failures so the warmup retry reports the real error", async () => {
-    const fork = vi.fn(() => { throw new Error("EBUSY"); }) as never;
+    const fork = vi.fn(() => {
+      throw new Error("EBUSY");
+    }) as never;
     await expect(
-      __testing.ensureStandaloneHelperLaunched("\\\\.\\pipe\\zcode-cua-x", {
-        [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: JSON.stringify(RECIPE),
-      }, { fork }),
+      __testing.ensureStandaloneHelperLaunched(
+        "\\\\.\\pipe\\zcode-cua-x",
+        {
+          [ZCODE_CUA_WIN_HELPER_RECIPE_ENV]: JSON.stringify(RECIPE),
+        },
+        { fork },
+      ),
     ).resolves.toBeUndefined();
   });
 });
@@ -329,8 +344,12 @@ async function ensureWindowsHelperForked(
   const raw = env[ZCODE_CUA_WIN_HELPER_RECIPE_ENV]?.trim();
   if (!raw) return;
   let recipe: {
-    command: string; entryPath: string; root: string;
-    addonPath: string; commandEnv: Record<string, string>; hostPid: number;
+    command: string;
+    entryPath: string;
+    root: string;
+    addonPath: string;
+    commandEnv: Record<string, string>;
+    hostPid: number;
   };
   try {
     recipe = JSON.parse(raw);
@@ -338,12 +357,18 @@ async function ensureWindowsHelperForked(
     return;
   }
   if (
-    typeof recipe.command !== "string" || !recipe.command ||
-    typeof recipe.entryPath !== "string" || !recipe.entryPath ||
-    typeof recipe.root !== "string" || !recipe.root ||
-    typeof recipe.addonPath !== "string" || !recipe.addonPath ||
-    !recipe.commandEnv || typeof recipe.commandEnv !== "object" ||
-    !Number.isInteger(recipe.hostPid) || recipe.hostPid <= 0
+    typeof recipe.command !== "string" ||
+    !recipe.command ||
+    typeof recipe.entryPath !== "string" ||
+    !recipe.entryPath ||
+    typeof recipe.root !== "string" ||
+    !recipe.root ||
+    typeof recipe.addonPath !== "string" ||
+    !recipe.addonPath ||
+    !recipe.commandEnv ||
+    typeof recipe.commandEnv !== "object" ||
+    !Number.isInteger(recipe.hostPid) ||
+    recipe.hostPid <= 0
   ) {
     return;
   }
@@ -434,10 +459,12 @@ git -C /Users/dev/.codex/worktrees/cua-refactor/zcode-cua push -u origin feat/wi
 ### Task 4: z-code——稳定 pipe 名与 recipe 模块
 
 **Files:**
+
 - Create: `packages/services/src/cua-permission-broker/stableCuaTransport.ts`
 - Create: `packages/services/test/stableCuaTransport.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `getStableCuaPipeName(): string`——进程级 singleton，首次调用用 `mintBrokerSocketPath({ env: process.env })` 铸造（与 `windowsCuaHelperHostSupport.ts` 的 `defaultSocketPathFactory` 同源，import 路径 `@zcode/zcode-cua/broker/socketPath`，照抄该文件现有 import）。
   - `resolveStableCuaWinRecipe(): Promise<StableCuaWinRecipe | null>`——`{ command, entryPath, root, addonPath, commandEnv }`；内部 `resolveWindowsCuaRuntime()`（`#src/cua-permission-broker/windowsCuaDevRuntime.js`），成功缓存、失败返回 null 并 warn 一次；并发调用共享同一 in-flight promise。
@@ -447,9 +474,8 @@ git -C /Users/dev/.codex/worktrees/cua-refactor/zcode-cua push -u origin feat/wi
 ```ts
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { getStableCuaPipeName, __resetStableCuaTransportForTest } = await import(
-  "../src/cua-permission-broker/stableCuaTransport.js"
-);
+const { getStableCuaPipeName, __resetStableCuaTransportForTest } =
+  await import("../src/cua-permission-broker/stableCuaTransport.js");
 
 describe("stableCuaTransport", () => {
   afterEach(() => __resetStableCuaTransportForTest());
@@ -464,9 +490,8 @@ describe("stableCuaTransport", () => {
     vi.doMock("../src/cua-permission-broker/windowsCuaDevRuntime.js", () => ({
       resolveWindowsCuaRuntime: vi.fn().mockRejectedValue(new Error("unsupported-platform")),
     }));
-    const { resolveStableCuaWinRecipe } = await import(
-      "../src/cua-permission-broker/stableCuaTransport.js"
-    );
+    const { resolveStableCuaWinRecipe } =
+      await import("../src/cua-permission-broker/stableCuaTransport.js");
     expect(await resolveStableCuaWinRecipe()).toBeNull();
     vi.doUnmock("../src/cua-permission-broker/windowsCuaDevRuntime.js");
   });
@@ -560,10 +585,12 @@ EOF
 ### Task 5: z-code——spawn env win32 懒分支
 
 **Files:**
+
 - Modify: `packages/services/src/node.ts:2175-2225`（Task 1 改后的块）
 - Test: `packages/services/test/agentProxyEnv.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 4 的 `getStableCuaPipeName` / `resolveStableCuaWinRecipe`；既有 `resolveBrokerSocketPath`、`BROKER_SOCKET_ENV`、`ZCODE_CUA_PLUGIN_AUTHORITY_ENV_KEY`、`BROKER_UNAVAILABLE_ENV`、`randomBytes`。
 - Produces: win32 spawn 不再调用 `getOrCreateDefaultCuaProductHelper`；env 含 `ZCODE_CUA_BROKER_SOCKET`、`ZCODE_CUA_PLUGIN_AUTHORITY`、`ZCODE_CUA_WIN_HELPER_RECIPE`。
 
@@ -572,15 +599,15 @@ EOF
 `agentProxyEnv.test.ts` 的 lazy describe 里追加：
 
 ```ts
-  it("keeps win32 spawn off the acquire path (MC-4)", () => {
-    expect(spawnEnvStart).toBeGreaterThanOrEqual(0);
-    const cuaBlock = source.slice(spawnEnvStart, spawnEnvStart + 6000);
-    expect(cuaBlock).toContain("getStableCuaPipeName()");
-    expect(cuaBlock.indexOf("getStableCuaPipeName()")).toBeLessThan(
-      cuaBlock.indexOf("getOrCreateDefaultCuaProductHelper(context)"),
-    );
-    expect(cuaBlock).toContain("ZCODE_CUA_WIN_HELPER_RECIPE");
-  });
+it("keeps win32 spawn off the acquire path (MC-4)", () => {
+  expect(spawnEnvStart).toBeGreaterThanOrEqual(0);
+  const cuaBlock = source.slice(spawnEnvStart, spawnEnvStart + 6000);
+  expect(cuaBlock).toContain("getStableCuaPipeName()");
+  expect(cuaBlock.indexOf("getStableCuaPipeName()")).toBeLessThan(
+    cuaBlock.indexOf("getOrCreateDefaultCuaProductHelper(context)"),
+  );
+  expect(cuaBlock).toContain("ZCODE_CUA_WIN_HELPER_RECIPE");
+});
 ```
 
 （`getOrCreateDefaultCuaProductHelper(context)` 字面此后不再出现在 resolveSpawnEnv 块内——indexOf 返回 -1 时 LessThan 判定天然成立且语义正确。）
@@ -600,30 +627,33 @@ Task 1 改后，把 helper 选择与后续消费整体删除（不再有过渡�
 懒注入分支改为两平台通用（替换现有 `if (!helper && cuaPluginEnabled && process.platform === "darwin")` 块）：
 
 ```ts
-      let cuaProductHelperEnv: Record<string, string> = {};
-      if (!helper && cuaPluginEnabled && (process.platform === "darwin" || process.platform === "win32")) {
-        const brokerSocket =
-          process.platform === "win32" ? getStableCuaPipeName() : resolveBrokerSocketPath();
-        cuaProductHelperEnv = {
-          [BROKER_SOCKET_ENV]: brokerSocket,
-          [ZCODE_CUA_PLUGIN_AUTHORITY_ENV_KEY]: randomBytes(16).toString("hex"),
-        };
-        if (process.platform === "win32") {
-          const recipe = await resolveStableCuaWinRecipe();
-          if (recipe) {
-            cuaProductHelperEnv["ZCODE_CUA_WIN_HELPER_RECIPE"] = JSON.stringify({
-              ...recipe,
-              hostPid: process.pid,
-            });
-          } else {
-            cuaProductHelperEnv = {
-              [BROKER_UNAVAILABLE_ENV]:
-                "broker_unavailable: windows helper recipe could not be resolved",
-            };
-          }
-        }
-        cuaProductHelperWorkspaceRegistry.setEnabled(context, false);
-      }
+let cuaProductHelperEnv: Record<string, string> = {};
+if (
+  !helper &&
+  cuaPluginEnabled &&
+  (process.platform === "darwin" || process.platform === "win32")
+) {
+  const brokerSocket =
+    process.platform === "win32" ? getStableCuaPipeName() : resolveBrokerSocketPath();
+  cuaProductHelperEnv = {
+    [BROKER_SOCKET_ENV]: brokerSocket,
+    [ZCODE_CUA_PLUGIN_AUTHORITY_ENV_KEY]: randomBytes(16).toString("hex"),
+  };
+  if (process.platform === "win32") {
+    const recipe = await resolveStableCuaWinRecipe();
+    if (recipe) {
+      cuaProductHelperEnv["ZCODE_CUA_WIN_HELPER_RECIPE"] = JSON.stringify({
+        ...recipe,
+        hostPid: process.pid,
+      });
+    } else {
+      cuaProductHelperEnv = {
+        [BROKER_UNAVAILABLE_ENV]: "broker_unavailable: windows helper recipe could not be resolved",
+      };
+    }
+  }
+  cuaProductHelperWorkspaceRegistry.setEnabled(context, false);
+}
 ```
 
 后续 `else if (cuaProductHelperHost && helper) { …buildCuaProductHelperAgentEnv… }` 等分支已随变量删除（见上）。`randomBytes` 已在现状懒分支使用（node.ts:2203），无需补 import。顶部补 import：`getStableCuaPipeName`、`resolveStableCuaWinRecipe`（`#src/cua-permission-broker/stableCuaTransport.js`）。
@@ -666,9 +696,11 @@ EOF
 ### Task 6: z-code——getStatus win32 对齐（MC-9）
 
 **Files:**
+
 - Modify: `packages/services/src/node.ts:1894-1971`（getStatus）与 `node.ts:1037-1055`（win32 host 创建处注入 mintSocketPath）
 
 **Interfaces:**
+
 - Consumes: Task 4 的 `getStableCuaPipeName`；既有 `probeStableCuaHelperSocket`、`getOrCreateDefaultCuaProductHelper`、`callBrokerMethod`。
 - Produces: win32 getStatus = probe → host fork（stable pipe）→ permission_status 真值 → idle 降级。
 
@@ -681,43 +713,43 @@ EOF
 2. getStatus 开头的平台短路替换：
 
 ```ts
-      if (process.platform !== "darwin" && process.platform !== "win32") {
-        return {
-          available: false,
-          reason: "CUA permissions are only available on macOS and Windows.",
-        };
-      }
+if (process.platform !== "darwin" && process.platform !== "win32") {
+  return {
+    available: false,
+    reason: "CUA permissions are only available on macOS and Windows.",
+  };
+}
 ```
 
 3. darwin 独占的 `launchStandaloneCuaHelperForStatus` 调用处（约 1929-1932）改为平台分派：
 
 ```ts
-        let stable = await probeStableCuaHelperSocket();
-        if (!stable) {
-          stable =
-            process.platform === "darwin"
-              ? await launchStandaloneCuaHelperForStatus()
-              : await launchWindowsCuaHelperForStatus();
-        }
+let stable = await probeStableCuaHelperSocket();
+if (!stable) {
+  stable =
+    process.platform === "darwin"
+      ? await launchStandaloneCuaHelperForStatus()
+      : await launchWindowsCuaHelperForStatus();
+}
 ```
 
 4. 新增 `launchWindowsCuaHelperForStatus`（放在 `launchStandaloneCuaHelperForStatus` 之后，同层闭包）：
 
 ```ts
-  const launchWindowsCuaHelperForStatus = async (): Promise<string | null> => {
-    try {
-      const managed = await getOrCreateDefaultCuaProductHelper(undefined);
-      if (managed) void managed.host.start().catch(() => {});
-    } catch {
-      // 拉起 best-effort；失败由下面的轮询超时统一降级。
-    }
-    for (let attempt = 0; attempt < 50; attempt += 1) {
-      const ready = await probeStableCuaHelperSocket();
-      if (ready) return ready;
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    return null;
-  };
+const launchWindowsCuaHelperForStatus = async (): Promise<string | null> => {
+  try {
+    const managed = await getOrCreateDefaultCuaProductHelper(undefined);
+    if (managed) void managed.host.start().catch(() => {});
+  } catch {
+    // 拉起 best-effort；失败由下面的轮询超时统一降级。
+  }
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const ready = await probeStableCuaHelperSocket();
+    if (ready) return ready;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return null;
+};
 ```
 
 （`probeStableCuaHelperSocket` 用 `createConnection`，named pipe 同样适用，无需改。）
@@ -755,6 +787,7 @@ EOF
 ### Task 7: z-code——producer pin bump
 
 **Files:**
+
 - Modify（脚本自动）: `apps/zcode-cli/packages/zcode-cua-plugin/upstream.json`、`pnpm-workspace.yaml`、`pnpm-lock.yaml` 等 bump 脚本触达面。
 
 - [ ] **Step 1: 确认 producer 分支已 push**
@@ -803,15 +836,18 @@ EOF
 ### Task 8: z-code——删除 spawn 侧尸体与测试收敛
 
 **Files:**
+
 - Modify: `packages/services/src/node.ts`（`buildCuaProductHelperAgentEnv` 1123-1281、常量 566、相关 import）
 - Modify: `packages/services/test/cuaPermissionBrokerProductAgentEnv.test.ts`（收敛 Task 5 记录的红名单）
 
 **Interfaces:**
+
 - Produces: `buildCuaProductHelperAgentEnv` 从 node.ts 导出面删除；`CUA_PRODUCT_HELPER_SPAWN_READY_DEADLINE_MS` 删除。`getOrCreateDefaultCuaProductHelper` 保留（getStatus/restartHelper/resolver 仍用）。
 
 - [ ] **Step 1: 定位全部引用**
 
 Run:
+
 ```bash
 rg -n "buildCuaProductHelperAgentEnv|CUA_PRODUCT_HELPER_SPAWN_READY_DEADLINE_MS|trackCuaProductHelperStartup|cuaProductHelperAgentEnvRetryAt|cuaProductHelperReservedSpawns|cuaProductHelperTransportSpawns" packages/ apps/ --type ts | rg -v node_modules
 ```
@@ -866,6 +902,7 @@ ZCODE_CUA_DEV_MODE=1 pnpm run dev:desktop
 ```
 
 按 [本地跑 CUA Helper](../../docs/cua-permission-broker/local-dev-helper-runbook.md) 验证：
+
 1. app 启动后 Activity Monitor 无 "ZCode Computer Use" 进程（懒启动未被触发）。
 2. 新开对话让模型调 computer-use → Helper 进程出现、调用成功（MC-2）。
 3. 在设置页完成一次权限授权流后再 spawn 新 agent → 新 agent env 里 `ZCODE_CUA_BROKER_SOCKET` 为稳定路径而非随机（MC-3；可用 dev 日志核对）。
@@ -884,6 +921,7 @@ ZCODE_CUA_DEV_MODE=1 pnpm run dev:desktop
 ### Task 10: 收尾——spec 状态与 push
 
 **Files:**
+
 - Modify: `docs/cua-permission-broker/2026-09-21-cua-helper-lazy-startup-spec.md`（状态节改为已实现 + 实测结论）
 
 - [ ] **Step 1: 更新 spec §状态**

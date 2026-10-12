@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable max-lines -- 本地 fake 官方 MCP server，工具定义与场景响应集中在一个自测脚本里。 */
 /*
  * 本地自测用的 fake 官方 Server MCP（Streamable HTTP）。
  *
@@ -75,11 +76,13 @@ const QUALIFIED_TOOL_NAME = `mcp__plugin_${PLUGIN_NAME}_${MCP_KEY}__${TOOL_NAME}
 const IN_BAND_TOOL_FAILURES = {
   "tool-quota": {
     error_code: "quota_exceeded",
-    message: "daily quota exceeded for bucket search_image (5/5), retry tomorrow or upgrade your coding plan",
+    message:
+      "daily quota exceeded for bucket search_image (5/5), retry tomorrow or upgrade your coding plan",
   },
   "tool-plan-required": {
     error_code: "coding_plan_required",
-    message: "a coding plan is required to use MCP tools, please purchase or configure a coding plan and retry",
+    message:
+      "a coding plan is required to use MCP tools, please purchase or configure a coding plan and retry",
   },
 };
 
@@ -201,9 +204,9 @@ const server = createServer((request, response) => {
         (rpcMethod === "initialize"
           ? "  ← initialize 不带是正常的（此时服务端还没下发）"
           : // GET 探测始终被 405，不参与 session 语义，因此不对它报缺失。
-          state.sessionId && !seenSessionId && request.method !== "GET"
-          ? "  ⚠ 服务端已下发但客户端未回传"
-          : ""),
+            state.sessionId && !seenSessionId && request.method !== "GET"
+            ? "  ⚠ 服务端已下发但客户端未回传"
+            : ""),
     );
 
     // 路由：与 zcode-server 的 gin 路由树同形，把线上两个易错点在本地复现。

@@ -26,8 +26,6 @@ describe("model provider Coding Plan i18n", () => {
       "Amount due",
     );
     expect(zhCN["settings.modelProvider.codingPlan.paymentDialog.payAmount"]).toBe("实付金额");
-    expect(zhCN["settings.modelProvider.codingPlan.paymentDialog.ruleTitle"]).toBe(
-      "账号使用规范",
-    );
+    expect(zhCN["settings.modelProvider.codingPlan.paymentDialog.ruleTitle"]).toBe("账号使用规范");
   });
 });

@@ -212,9 +212,8 @@ vi.mock("electron", () => ({
   },
 }));
 
-const { createElectronBrowserWebmRecorder } = await import(
-  "../src/main/browserView/electronBrowserWebmRecorder.js"
-);
+const { createElectronBrowserWebmRecorder } =
+  await import("../src/main/browserView/electronBrowserWebmRecorder.js");
 
 const tempRoots: string[] = [];
 
@@ -342,9 +341,9 @@ describe("createElectronBrowserWebmRecorder", () => {
     const root = await createTempRoot();
     renderer = { startedMimeType: "video/mp4;codecs=avc1" };
 
-    await expect(
-      startRecorder({ outputPath: join(root, "mime.webm") }),
-    ).rejects.toThrow(/unexpected MediaRecorder MIME type: video\/mp4;codecs=avc1/u);
+    await expect(startRecorder({ outputPath: join(root, "mime.webm") })).rejects.toThrow(
+      /unexpected MediaRecorder MIME type: video\/mp4;codecs=avc1/u,
+    );
 
     expect(windows.at(-1)?.isDestroyed()).toBe(true);
     expect(ports.at(-1)?.port1.closed).toBe(true);
@@ -496,13 +495,21 @@ describe("createElectronBrowserWebmRecorder", () => {
       video: frame,
     });
     // 其它 renderer 冒用同一个 session、索要音频、或只声明非视频请求，都不得拿到 guest 画面。
-    expect(ask({ frame: { id: "someone-else" }, videoRequested: true, audioRequested: false })).toEqual({});
-    expect(ask({ frame: recorderMainFrame, videoRequested: true, audioRequested: true })).toEqual({});
-    expect(ask({ frame: recorderMainFrame, videoRequested: false, audioRequested: false })).toEqual({});
+    expect(
+      ask({ frame: { id: "someone-else" }, videoRequested: true, audioRequested: false }),
+    ).toEqual({});
+    expect(ask({ frame: recorderMainFrame, videoRequested: true, audioRequested: true })).toEqual(
+      {},
+    );
+    expect(ask({ frame: recorderMainFrame, videoRequested: false, audioRequested: false })).toEqual(
+      {},
+    );
 
     await recorder.cancel();
     // 回收之后即使 handler 仍被持有，也不再授予画面。
-    expect(ask({ frame: recorderMainFrame, videoRequested: true, audioRequested: false })).toEqual({});
+    expect(ask({ frame: recorderMainFrame, videoRequested: true, audioRequested: false })).toEqual(
+      {},
+    );
   });
 
   it("目标 frame 在录制期间销毁后不再授予画面", async () => {
@@ -556,4 +563,3 @@ describe("createElectronBrowserWebmRecorder", () => {
     });
   });
 });
-

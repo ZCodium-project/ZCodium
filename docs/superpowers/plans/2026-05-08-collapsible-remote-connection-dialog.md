@@ -13,6 +13,7 @@
 ### Task 1: Add Pure State Semantics Test
 
 **Files:**
+
 - Create: `packages/ui/src/lib/remoteConnectionDialogState.ts`
 - Test: `packages/ui/test/remoteConnectionDialogState.test.ts`
 
@@ -89,9 +90,7 @@ export interface RemoteConnectionDialogSnapshot {
   connectedSessionId: string | null;
 }
 
-export function isRemoteConnectionFlowActive(
-  snapshot: RemoteConnectionDialogSnapshot,
-): boolean {
+export function isRemoteConnectionFlowActive(snapshot: RemoteConnectionDialogSnapshot): boolean {
   return snapshot.loading || Boolean(snapshot.connectedSessionId);
 }
 
@@ -119,6 +118,7 @@ Expected: PASS.
 ### Task 2: Make SSHDialog Minimize-Aware
 
 **Files:**
+
 - Modify: `packages/ui/src/SSHDialog.tsx`
 - Modify: `packages/ui/src/RemoteConnectionWizardChrome.tsx`
 - Modify: `packages/ui/src/i18n/locales/zh-CN.ts`
@@ -133,6 +133,7 @@ Expected: PASS.
 ### Task 3: Mount One Global Dialog From Root
 
 **Files:**
+
 - Modify: `packages/ui/src/Root.tsx`
 - Modify: `packages/ui/src/root/RootWorkspaceContent.tsx`
 - Modify: `packages/ui/src/app-shell/types.ts`
@@ -147,6 +148,7 @@ Expected: PASS.
 ### Task 4: Add Entry Indicators
 
 **Files:**
+
 - Modify: `packages/ui/src/ProjectSelector.tsx`
 - Modify: `packages/ui/src/WorkspaceSidebar.tsx`
 
@@ -158,6 +160,7 @@ Expected: PASS.
 ### Task 5: Docs and Verification
 
 **Files:**
+
 - Create: `docs/collapsible-remote-connection-dialog.md`
 
 - [ ] Document the global mounting decision, minimize semantics, and two indicator locations.

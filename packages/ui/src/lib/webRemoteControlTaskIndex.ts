@@ -10,10 +10,7 @@ import { buildTaskWorkspaceKey } from "@/lib/taskQueryCache.js";
 import { compareTaskListItemsWithRunningFirst } from "@/lib/taskListOrdering.js";
 import { isLiveTaskRuntimeStatus } from "@/lib/taskRuntimeDisplayStatus.js";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
-import {
-  getTaskListRowActivity,
-  type TaskListRowActivity,
-} from "@/v4/taskListRowActivity.js";
+import { getTaskListRowActivity, type TaskListRowActivity } from "@/v4/taskListRowActivity.js";
 
 export interface WebRemoteControlWorkspaceTaskGroup {
   workspaceKey: string;
@@ -54,8 +51,8 @@ function isRemoteWebRemoteControlWorkspaceTarget(
 ): boolean {
   return Boolean(
     workspace.kind === "remote" ||
-      workspace.workspaceIdentity?.trim() ||
-      workspace.remoteSessionId?.trim(),
+    workspace.workspaceIdentity?.trim() ||
+    workspace.remoteSessionId?.trim(),
   );
 }
 
@@ -228,12 +225,7 @@ export function buildWebRemoteControlTaskTargets({
 
 export function compareWebRemoteControlTasksByTime(sortBy: WebRemoteControlTaskIndexSortBy) {
   return (left: WebRemoteControlTaskTarget, right: WebRemoteControlTaskTarget): number => {
-    return compareTaskListItemsWithRunningFirst(
-      left,
-      right,
-      sortBy,
-      isWebRemoteControlTaskRunning,
-    );
+    return compareTaskListItemsWithRunningFirst(left, right, sortBy, isWebRemoteControlTaskRunning);
   };
 }
 

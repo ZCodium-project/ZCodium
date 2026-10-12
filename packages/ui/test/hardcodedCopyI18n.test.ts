@@ -4,10 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { GoalState } from "@zcode/shared/zcode-protocol-v4";
-import {
-  CodeBlockCopyButton,
-  CodeBlockWrapButton,
-} from "@/components/ai-elements/code-block.js";
+import { CodeBlockCopyButton, CodeBlockWrapButton } from "@/components/ai-elements/code-block.js";
 import { Spinner } from "@/components/ui/spinner.js";
 import { TooltipProvider } from "@/components/ui/tooltip.js";
 import { ConversationGoalBanner } from "@/v4/ConversationGoalBanner.js";
@@ -39,9 +36,7 @@ function goal(overrides: Partial<GoalState> = {}): GoalState {
 
 describe("硬编码文案 i18n 回归", () => {
   it("ConversationGoalBanner 的「目标」标签走 i18n", () => {
-    const html = renderToStaticMarkup(
-      createElement(ConversationGoalBanner, { goal: goal() }),
-    );
+    const html = renderToStaticMarkup(createElement(ConversationGoalBanner, { goal: goal() }));
     expect(html).toContain(">Goal<");
     expect(html).not.toContain("目标");
   });

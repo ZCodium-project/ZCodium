@@ -553,9 +553,7 @@ function collectTimingInvariantIssues(capture) {
       const post = numericValue(detail.post_compact_tokens);
       const truePost = numericValue(detail.true_post_compact_tokens);
       const ratio = numericValue(detail.compact_ratio);
-      if (
-        [pre, post, truePost].some((value) => value !== null && value < 0)
-      ) {
+      if ([pre, post, truePost].some((value) => value !== null && value < 0)) {
         issues.report.push(`report[${index}] compaction token watermarks>=0`);
       }
       if (

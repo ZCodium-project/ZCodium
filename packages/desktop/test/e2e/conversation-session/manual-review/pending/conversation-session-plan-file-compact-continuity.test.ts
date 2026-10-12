@@ -20,8 +20,7 @@ const PROMPT_MARKER = "E2E_PLAN_FILE_COMPACT_CONTINUITY";
 const ENTER_MARKER = "E2E_PLAN_FILE_COMPACT_ENTER_PLAN";
 const EXIT_MARKER = "E2E_PLAN_FILE_COMPACT_EXIT_PLAN";
 const PLAN_MARKER = "E2E_PLAN_FILE_COMPACT_PLAN_BODY";
-const APPROVED_PLAN_TEXT =
-  `${PLAN_MARKER}: 1. Persist the approved plan under .zcode/plans. 2. Preserve the plan through manual compact via plan_file_reference.`;
+const APPROVED_PLAN_TEXT = `${PLAN_MARKER}: 1. Persist the approved plan under .zcode/plans. 2. Preserve the plan through manual compact via plan_file_reference.`;
 const CHECKPOINT_MARKER = "E2E_PLAN_FILE_COMPACT_CHECKPOINT";
 const AFTER_COMPACT_MARKER = "E2E_PLAN_FILE_COMPACT_AFTER";
 const EXIT_TOOL_CALL_ID = "toolu_e2e_plan_file_compact_exit_plan_mode";
@@ -65,12 +64,7 @@ describe("conversation session plan file compact continuity", () => {
     if (!sessionId) {
       throw new Error("plan file compact case sessionId 为空");
     }
-    const planFilePath = join(
-      DEFAULT_WORKSPACE,
-      ".zcode",
-      "plans",
-      `plan-${sessionId}.md`,
-    );
+    const planFilePath = join(DEFAULT_WORKSPACE, ".zcode", "plans", `plan-${sessionId}.md`);
 
     await waitForUpstreamRequest(
       {
@@ -99,11 +93,7 @@ describe("conversation session plan file compact continuity", () => {
 
     await waitForUpstreamRequest(
       {
-        includes: [
-          EXIT_TOOL_CALL_ID,
-          APPROVED_PLAN_TEXT,
-          "User has approved your plan",
-        ],
+        includes: [EXIT_TOOL_CALL_ID, APPROVED_PLAN_TEXT, "User has approved your plan"],
         excludes: ["Generate a concise title", COMPACT_REQUEST_SENTINEL],
       },
       "plan file compact approval continuation request",
@@ -180,19 +170,12 @@ describe("conversation session plan file compact continuity", () => {
       APPROVED_PLAN_TEXT,
       PLAN_RELEVANCE_SENTINEL,
     ]);
-    expect(captureContainsText(postCompactRequest?.requestJson, planFilePath)).toBe(
-      true,
-    );
-    expect(captureContainsText(postCompactRequest?.requestJson, APPROVED_PLAN_TEXT)).toBe(
-      true,
-    );
+    expect(captureContainsText(postCompactRequest?.requestJson, planFilePath)).toBe(true);
+    expect(captureContainsText(postCompactRequest?.requestJson, APPROVED_PLAN_TEXT)).toBe(true);
   });
 });
 
-async function waitForElicitationDialogContaining(
-  text: string,
-  timeoutMs: number,
-) {
+async function waitForElicitationDialogContaining(text: string, timeoutMs: number) {
   const expectedTexts = expandElicitationDialogTextAlternatives(text);
   let latestDialogText = "";
   await browser.waitUntil(
@@ -200,17 +183,13 @@ async function waitForElicitationDialogContaining(
       // 修复原因：ExitPlanMode 的批准/忽略选项渲染在 footer，body 只包含计划正文。
       // 旧等待只查 body，会在真实弹窗已出现时继续等到超时。
       latestDialogText = await browser.execute(() => {
-        const body = document.querySelector<HTMLElement>(
-          "[data-elicitation-dialog-body='true']",
-        );
+        const body = document.querySelector<HTMLElement>("[data-elicitation-dialog-body='true']");
         const footer = document.querySelector<HTMLElement>(
           "[data-elicitation-dialog-footer='true']",
         );
         return [body?.innerText, footer?.innerText].filter(Boolean).join("\n");
       });
-      return expectedTexts.some((expectedText) =>
-        latestDialogText.includes(expectedText),
-      );
+      return expectedTexts.some((expectedText) => latestDialogText.includes(expectedText));
     },
     {
       timeout: timeoutMs,
@@ -232,9 +211,7 @@ function expandElicitationDialogTextAlternatives(text: string) {
 }
 
 async function approvePlanWithoutFeedback() {
-  const approveButton = await $(
-    "//button[contains(., 'Approve') or contains(., '批准')]",
-  );
+  const approveButton = await $("//button[contains(., 'Approve') or contains(., '批准')]");
   await approveButton.waitForEnabled({ timeout: 30000 });
   await approveButton.click();
 }
@@ -282,9 +259,7 @@ async function expectNoVisibleChatErrorBanner() {
     const errorActionLabels = ["复制完整错误", "Copy full error", "提交反馈", "Feedback"];
     const hasErrorActions = Array.from(
       composerRegion.querySelectorAll<HTMLButtonElement>("button"),
-    ).some((button) =>
-      errorActionLabels.some((label) => button.innerText.includes(label)),
-    );
+    ).some((button) => errorActionLabels.some((label) => button.innerText.includes(label)));
     return hasErrorActions ? composerRegion.innerText : "";
   });
   expect(bannerText).toBe("");
@@ -292,13 +267,14 @@ async function expectNoVisibleChatErrorBanner() {
 
 async function readLatestUpstreamRequestContaining(includes: string[]) {
   const artifact = await readCaptureArtifact();
-  return [...artifact.records].reverse().find(
-    (record) =>
-      record.method === "POST" &&
-      (record.path.includes("/messages") ||
-        record.path.includes("/chat/completions")) &&
-      includes.every((text) => captureContainsText(record.requestJson, text)),
-  );
+  return [...artifact.records]
+    .reverse()
+    .find(
+      (record) =>
+        record.method === "POST" &&
+        (record.path.includes("/messages") || record.path.includes("/chat/completions")) &&
+        includes.every((text) => captureContainsText(record.requestJson, text)),
+    );
 }
 
 async function readCaptureArtifact(): Promise<E2ENetworkCaptureArtifact> {

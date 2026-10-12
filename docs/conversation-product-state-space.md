@@ -121,7 +121,7 @@ completion-blocking active work：
 | verifierTerminal=manualCancel                                   | target→paused、autoDrain=false；不自动消费 queue                                                                                                                         |
 | activeWork=goalVerifier + stop                                  | 按投影携带的 `foregroundExecutionId` 取消同一 goal execution；verifier→continuation 阶段切换不改变 execution 身份；已切到无关新 execution 时 noop                        |
 | CLI restart + admitted nonterminal input                        | explicit discarded；`queue/guide` 静默结算，只有未进 transcript 的 `startNow`/`unknown` 提示确认重发；不自动重放                                                         |
-| accepted input ACK + projection silent                          | 宽限期后对当前 owned subscription single-flight resync；权威 queue/user row 到达后收口；不补造 UI 事实、不自动重发                                                    |
+| accepted input ACK + projection silent                          | 宽限期后对当前 owned subscription single-flight resync；权威 queue/user row 到达后收口；不补造 UI 事实、不自动重发                                                       |
 | sendQueuedNow                                                   | reserve -> stop barrier -> promote；成功才 remove，失败原位保留                                                                                                          |
 | collaborationMode=plan + goal command                           | UI admission reject；toast；保留 composer 原文；不创建 session、不发 command                                                                                             |
 

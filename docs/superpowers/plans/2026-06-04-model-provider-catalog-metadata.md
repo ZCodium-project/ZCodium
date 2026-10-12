@@ -17,6 +17,7 @@
 ### Task 1: Shared Schema And Projection
 
 **Files:**
+
 - Modify: `packages/shared/src/model-provider-types.ts`
 - Modify: `packages/shared/src/zcode-protocol/index.ts`
 - Test: `packages/shared/test/zcodeProtocol.test.ts`
@@ -42,6 +43,7 @@ Expected: PASS.
 ### Task 2: Service Storage, Catalog Sources, And Display Order
 
 **Files:**
+
 - Modify: `packages/services/src/model-provider/modelProvider.ts`
 - Modify: `packages/services/src/model-provider/modelProviderService.ts`
 - Modify: `packages/services/src/model-provider/modelProviderServiceStorage.ts`
@@ -69,6 +71,7 @@ Expected: PASS.
 ### Task 3: UI Model Editing And Provider Ordering
 
 **Files:**
+
 - Modify: `packages/ui/src/lib/modelProviderOrdering.ts`
 - Modify: `packages/ui/src/hooks/useModelProviders.ts`
 - Modify: `packages/ui/src/settings/model-provider-section/AddProviderCard.tsx`
@@ -104,6 +107,7 @@ Expected: PASS.
 ### Task 4: Documentation And Required Verification
 
 **Files:**
+
 - Create or update: `docs/model-provider-catalog-metadata.md`
 
 - [ ] **Step 1: Document implementation boundary**
@@ -113,6 +117,7 @@ Record local China catalog source, future CDN migration point, v2 store migratio
 - [ ] **Step 2: Run code verification**
 
 Run:
+
 - `pnpm vitest run packages/shared/test/zcodeProtocol.test.ts packages/services/test/modelProviderService.test.ts packages/ui/test/chatInputToolbarModelGroups.test.ts packages/ui/test/modelProviderCodingPlan.test.ts`
 - `pnpm typecheck`
 - `pnpm lint`
@@ -122,6 +127,7 @@ Expected: all commands exit 0.
 ### Task 5: Desktop Manual Verification
 
 **Files:**
+
 - Runtime only; no source edits unless bugs are found.
 
 - [ ] **Step 1: Start desktop app**
@@ -132,6 +138,7 @@ Use `computer-use` to interact with the desktop UI.
 - [ ] **Step 2: Settings page provider CRUD**
 
 Verify:
+
 - China catalog provider import.
 - models.dev provider import still works.
 - custom provider create/edit/delete.
@@ -143,6 +150,7 @@ Verify:
 - [ ] **Step 3: Chat runtime verification**
 
 Verify:
+
 - Chat model selector reads latest provider metadata.
 - Switching provider/model updates the next sent message.
 - Switching thought/reasoning level updates the next sent message.
@@ -155,6 +163,7 @@ For any failure, use systematic debugging: collect logs/CDP evidence, identify r
 ### Task 6: Commit
 
 **Files:**
+
 - All changed implementation, tests, docs, catalog files.
 
 - [ ] **Step 1: Inspect diff and status**

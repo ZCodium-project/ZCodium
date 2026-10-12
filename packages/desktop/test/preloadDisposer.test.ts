@@ -222,10 +222,12 @@ describe("preload IPC disposer", () => {
       releaseHandler,
     );
 
-    for (const handler of listeners.get(PlatformChannels.BrowserViewScreenshotSurfacePrepare) ?? []) {
+    for (const handler of listeners.get(PlatformChannels.BrowserViewScreenshotSurfacePrepare) ??
+      []) {
       handler({}, payload);
     }
-    for (const handler of listeners.get(PlatformChannels.BrowserViewScreenshotSurfaceRelease) ?? []) {
+    for (const handler of listeners.get(PlatformChannels.BrowserViewScreenshotSurfaceRelease) ??
+      []) {
       handler({}, releasePayload);
     }
     expect(prepare).toHaveBeenCalledTimes(1);

@@ -62,10 +62,7 @@ describe("conversation session ExitPlanMode session switch restore", () => {
     }
     const injection = await injectExitPlanStreamingPreview(sourceTaskId);
     expect(injection).toEqual({ ok: true });
-    const streamingPreview = await waitForToolCallBlockByToolCallId(
-      EXIT_TOOL_CALL_ID,
-      30_000,
-    );
+    const streamingPreview = await waitForToolCallBlockByToolCallId(EXIT_TOOL_CALL_ID, 30_000);
     expect(streamingPreview.text).not.toContain(PLAN_MARKER);
 
     await startNewTask();
@@ -149,9 +146,8 @@ async function injectExitPlanStreamingPreview(taskId: string) {
         setState?: (partial: RendererStoreState) => void;
       };
 
-      const storeApi = (
-        window as Window & { __zcodeSessionStoreE2E?: RendererStore }
-      ).__zcodeSessionStoreE2E;
+      const storeApi = (window as Window & { __zcodeSessionStoreE2E?: RendererStore })
+        .__zcodeSessionStoreE2E;
       const state = storeApi?.getState?.();
       if (!state?.workspaces || !storeApi?.setState) {
         return { ok: false, reason: "store-api-missing" };

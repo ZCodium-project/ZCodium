@@ -125,12 +125,12 @@ contextBridge.executeInMainWorld({
         this: typeof Notification,
         deprecatedCallback?: NotificationPermissionCallback | undefined,
       ): Promise<NotificationPermission> {
-        const settled = Promise.resolve(
-          nativeRequestPermission.call(Notification),
-        ).then((status: NotificationPermission) => {
-          permissionState = status;
-          return status;
-        });
+        const settled = Promise.resolve(nativeRequestPermission.call(Notification)).then(
+          (status: NotificationPermission) => {
+            permissionState = status;
+            return status;
+          },
+        );
         if (typeof deprecatedCallback === "function") {
           void settled.then(
             (status) => deprecatedCallback(status),

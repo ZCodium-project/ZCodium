@@ -20,7 +20,5 @@ export function isSshFormalSpec(spec) {
 export function resolveEnvironmentGatedFormalSpecExcludes({ env, targeted }) {
   // 修复原因：SSH P0 依赖真实服务器，默认全量在无凭据时纳入只会把环境缺失
   // 误记为三个产品失败；显式定向运行仍保留 helper 的缺变量 fail-closed 提示。
-  return !targeted && !hasRequiredSshE2EEnvironment(env)
-    ? [SSH_FORMAL_SPEC_GLOB]
-    : [];
+  return !targeted && !hasRequiredSshE2EEnvironment(env) ? [SSH_FORMAL_SPEC_GLOB] : [];
 }

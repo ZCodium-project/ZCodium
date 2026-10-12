@@ -31,13 +31,13 @@
         "paths": {
           "anthropic": "/anthropic/v1/messages",
           "openai-compatible": "/v1/chat/completions",
-          "openai": "/v1/responses"
-        }
+          "openai": "/v1/responses",
+        },
       },
       "defaultKind": "openai-compatible",
-      "models": []
-    }
-  ]
+      "models": [],
+    },
+  ],
 }
 ```
 
@@ -63,11 +63,11 @@ provider 里做 per-kind `baseURL` 覆盖。
   "defaultKind": "anthropic",
   "modalities": {
     "input": ["text", "image", "video", "audio"],
-    "output": ["text"]
+    "output": ["text"],
   },
   "contextWindow": 200000,
   "maxOutputTokens": 64000,
-  "reasoning": {}
+  "reasoning": {},
 }
 ```
 
@@ -100,8 +100,8 @@ const supportsVideo = model.modalities.input.includes("video");
   "id": "claude-sonnet",
   "modelIdByKind": {
     "anthropic": "claude-sonnet-4-5-20250929",
-    "openai-compatible": "anthropic/claude-sonnet-4.5"
-  }
+    "openai-compatible": "anthropic/claude-sonnet-4.5",
+  },
 }
 ```
 
@@ -121,26 +121,26 @@ const supportsVideo = model.modalities.input.includes("video");
           "set": [
             {
               "path": ["thinking"],
-              "value": { "type": "disabled" }
-            }
-          ]
+              "value": { "type": "disabled" },
+            },
+          ],
         },
         "openai-compatible": {
           "set": [
             {
               "path": ["thinking", "type"],
-              "value": "disabled"
-            }
-          ]
+              "value": "disabled",
+            },
+          ],
         },
         "openai": {
           "set": [
             {
               "path": ["reasoningEffort"],
-              "value": "none"
-            }
-          ]
-        }
+              "value": "none",
+            },
+          ],
+        },
       },
       "medium": {
         "anthropic": {
@@ -149,30 +149,30 @@ const supportsVideo = model.modalities.input.includes("video");
               "path": ["thinking"],
               "value": {
                 "type": "enabled",
-                "budgetTokens": 8000
-              }
-            }
-          ]
+                "budgetTokens": 8000,
+              },
+            },
+          ],
         },
         "openai-compatible": {
           "set": [
             {
               "path": ["reasoningEffort"],
-              "value": "medium"
-            }
-          ]
+              "value": "medium",
+            },
+          ],
         },
         "openai": {
           "set": [
             {
               "path": ["reasoningEffort"],
-              "value": "medium"
-            }
-          ]
-        }
-      }
-    }
-  }
+              "value": "medium",
+            },
+          ],
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -222,26 +222,26 @@ provider options。
       "set": [
         {
           "path": ["thinking"],
-          "value": { "type": "disabled" }
-        }
-      ]
+          "value": { "type": "disabled" },
+        },
+      ],
     },
     "openai": {
       "set": [
         {
           "path": ["reasoningEffort"],
-          "value": "none"
-        }
-      ]
+          "value": "none",
+        },
+      ],
     },
     "openai-compatible": {
       "unset": [
         {
-          "path": ["reasoningEffort"]
-        }
-      ]
-    }
-  }
+          "path": ["reasoningEffort"],
+        },
+      ],
+    },
+  },
 }
 ```
 
@@ -292,9 +292,7 @@ interface ReasoningSpec {
   levels: Record<string, ReasoningLevelPatchByKind>;
 }
 
-type ReasoningLevelPatchByKind = Partial<
-  Record<ModelProviderKind, ProviderOptionsPatch>
->;
+type ReasoningLevelPatchByKind = Partial<Record<ModelProviderKind, ProviderOptionsPatch>>;
 
 interface ProviderOptionsPatch {
   set?: FieldSetPatch[];
@@ -324,8 +322,8 @@ interface FieldUnsetPatch {
         "baseURL": "https://api.z.ai",
         "paths": {
           "anthropic": "/api/anthropic/v1/messages",
-          "openai-compatible": "/api/coding/v1/chat/completions"
-        }
+          "openai-compatible": "/api/coding/v1/chat/completions",
+        },
       },
       "defaultKind": "openai-compatible",
       "models": [
@@ -336,7 +334,7 @@ interface FieldUnsetPatch {
           "defaultKind": "openai-compatible",
           "modalities": {
             "input": ["text", "image"],
-            "output": ["text"]
+            "output": ["text"],
           },
           "contextWindow": 1000000,
           "maxOutputTokens": 128000,
@@ -348,18 +346,18 @@ interface FieldUnsetPatch {
                   "set": [
                     {
                       "path": ["thinking"],
-                      "value": { "type": "disabled" }
-                    }
-                  ]
+                      "value": { "type": "disabled" },
+                    },
+                  ],
                 },
                 "openai-compatible": {
                   "set": [
                     {
                       "path": ["reasoningEffort"],
-                      "value": "none"
-                    }
-                  ]
-                }
+                      "value": "none",
+                    },
+                  ],
+                },
               },
               "high": {
                 "anthropic": {
@@ -368,19 +366,19 @@ interface FieldUnsetPatch {
                       "path": ["thinking"],
                       "value": {
                         "type": "enabled",
-                        "budgetTokens": 16000
-                      }
-                    }
-                  ]
+                        "budgetTokens": 16000,
+                      },
+                    },
+                  ],
                 },
                 "openai-compatible": {
                   "set": [
                     {
                       "path": ["reasoningEffort"],
-                      "value": "high"
-                    }
-                  ]
-                }
+                      "value": "high",
+                    },
+                  ],
+                },
               },
               "max": {
                 "anthropic": {
@@ -389,26 +387,26 @@ interface FieldUnsetPatch {
                       "path": ["thinking"],
                       "value": {
                         "type": "enabled",
-                        "budgetTokens": 32000
-                      }
-                    }
-                  ]
+                        "budgetTokens": 32000,
+                      },
+                    },
+                  ],
                 },
                 "openai-compatible": {
                   "set": [
                     {
                       "path": ["reasoningEffort"],
-                      "value": "max"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      ]
-    }
-  ]
+                      "value": "max",
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+  ],
 }
 ```
 
@@ -435,7 +433,7 @@ Chat Completions 请求中生成：
 ```jsonc
 {
   "stream": true,
-  "stream_options": { "include_usage": true }
+  "stream_options": { "include_usage": true },
 }
 ```
 
@@ -448,10 +446,10 @@ Chat Completions 请求中生成：
       "kind": "openai-compatible",
       "options": {
         "baseURL": "https://api.example.test/v1",
-        "includeUsage": false
-      }
-    }
-  }
+        "includeUsage": false,
+      },
+    },
+  },
 }
 ```
 

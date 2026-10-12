@@ -5,10 +5,7 @@ import type {
   ZCodeTaskChangeSummary,
   Locale,
 } from "@zcode/shared";
-import {
-  getCompactToolCallSummary,
-  getPermissionRequestPreview,
-} from "@zcode/shared";
+import { getCompactToolCallSummary, getPermissionRequestPreview } from "@zcode/shared";
 import { normalizeBotMessageLocale } from "./messages.js";
 
 export interface BotReplyToolCallState {
@@ -162,7 +159,9 @@ function formatCompactSummaryDetail(
 ): string | undefined {
   const parts: string[] = [];
   if (summary.secondaryText) {
-    parts.push(formatMarkdownInlineCode(truncateMiddleText(normalizeInlineText(summary.secondaryText))));
+    parts.push(
+      formatMarkdownInlineCode(truncateMiddleText(normalizeInlineText(summary.secondaryText))),
+    );
   }
   if (summary.changeStat) {
     const stat = formatBotDiffCount(summary.changeStat);
@@ -206,7 +205,10 @@ function formatPermissionRequestTitle(
     titleWithoutEdit && titleWithoutEdit !== preview.title
       ? titleWithoutEdit
       : preview.filePaths.length === 1 || preview.fileChanges.length === 1
-        ? toWorkspaceRelativePath((preview.filePaths[0] ?? preview.fileChanges[0]?.path)!, options?.workspacePath)
+        ? toWorkspaceRelativePath(
+            (preview.filePaths[0] ?? preview.fileChanges[0]?.path)!,
+            options?.workspacePath,
+          )
         : "";
   return targetText ? `${label} ${targetText}` : label;
 }
@@ -221,14 +223,19 @@ function formatEditPermissionKindLabel(
     request.description,
     isRecord(request.raw) && typeof request.raw.kind === "string" ? request.raw.kind : undefined,
     isRecord(request.raw) && typeof request.raw.title === "string" ? request.raw.title : undefined,
-  ].filter((value): value is string => typeof value === "string").join(" ");
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
   const normalizedText = rawText.trim().toLowerCase();
   const fileChangeType = preview.fileChange?.type;
 
   if (/\b(delete|deleted|remove|removed|erase|erased|unlink|rm)\b/u.test(normalizedText)) {
     return t(locale, "editDeleting");
   }
-  if (fileChangeType === "add" || /\b(write|wrote|create|created|add|added|save|saved|new)\b/u.test(normalizedText)) {
+  if (
+    fileChangeType === "add" ||
+    /\b(write|wrote|create|created|add|added|save|saved|new)\b/u.test(normalizedText)
+  ) {
     return t(locale, "editWriting");
   }
   if (/\b(update|updating|updated)\b/u.test(normalizedText)) {
@@ -261,7 +268,8 @@ function formatToolStatus(
   locale?: Locale,
 ): string {
   if (status === "completed") return t(locale, "completed");
-  if (status === "failed") return `${t(locale, "failed")}${error ? `: ${truncateText(normalizeInlineText(error))}` : ""}`;
+  if (status === "failed")
+    return `${t(locale, "failed")}${error ? `: ${truncateText(normalizeInlineText(error))}` : ""}`;
   if (status === "denied") return t(locale, "denied");
   if (status === "in_progress") return t(locale, "inProgress");
   return t(locale, "pending");
@@ -318,9 +326,10 @@ export function formatBotPermissionRequestSummary(
   if (preview.command) {
     return `${header}\n${formatMarkdownInlineCode(truncateMiddleText(preview.command))}`;
   }
-  const previewFilePaths = preview.filePaths.length > 0
-    ? preview.filePaths
-    : preview.fileChanges.map((change) => change.path);
+  const previewFilePaths =
+    preview.filePaths.length > 0
+      ? preview.filePaths
+      : preview.fileChanges.map((change) => change.path);
   if (previewFilePaths.length > 0) {
     const paths = previewFilePaths
       .slice(0, 3)
@@ -332,13 +341,10 @@ export function formatBotPermissionRequestSummary(
   return header;
 }
 
-export function isBotToolCallReplyTerminal(
-  status?: BotReplyToolCallState["status"],
-): boolean {
-  return status === "completed" ||
-    status === "failed" ||
-    status === "denied" ||
-    status === "stopped";
+export function isBotToolCallReplyTerminal(status?: BotReplyToolCallState["status"]): boolean {
+  return (
+    status === "completed" || status === "failed" || status === "denied" || status === "stopped"
+  );
 }
 
 function formatBotChangeSummary(
@@ -357,7 +363,9 @@ function formatBotChangeSummary(
     lines.push(`- ${formatMarkdownInlineCode(file.path)} (${formatBotDiffCount(file)})`);
   }
   if (changeSummary.files.length > MAX_TOOL_SUMMARY_ITEMS) {
-    lines.push(`- ${t(options?.locale, "moreFiles").replace("{count}", String(changeSummary.files.length - MAX_TOOL_SUMMARY_ITEMS))}`);
+    lines.push(
+      `- ${t(options?.locale, "moreFiles").replace("{count}", String(changeSummary.files.length - MAX_TOOL_SUMMARY_ITEMS))}`,
+    );
   }
   return lines.join("\n");
 }

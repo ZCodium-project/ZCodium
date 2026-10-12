@@ -8,13 +8,13 @@
 > 上位：`2026-07-07-browser-use-cdp-node-repl-spec.md`；依赖 T1 `NodeReplSession`。
 > 范围：把 `NodeReplSession` 引擎包装成 agent 的三个内置工具（`js`/`js_reset`/`js_add_node_module_dir`）。通用基建，与 browser 解耦。
 
-## 1. 工具（内置，无 mcp__ 前缀）
+## 1. 工具（内置，无 mcp\_\_ 前缀）
 
-| 工具名 | 入参 | 输出 | 语义 |
-|---|---|---|---|
-| `js` | `{ code: string }` | `{ result?, logs, error? }` | 在该 session 的持久 REPL 执行代码 |
-| `js_reset` | `{}` | `{ ok: true }` | 重建 context，清空跨调用状态 |
-| `js_add_node_module_dir` | `{ dir: string }` | `{ ok: true, dirs: string[] }` | 追加模块解析目录 |
+| 工具名                   | 入参               | 输出                           | 语义                              |
+| ------------------------ | ------------------ | ------------------------------ | --------------------------------- |
+| `js`                     | `{ code: string }` | `{ result?, logs, error? }`    | 在该 session 的持久 REPL 执行代码 |
+| `js_reset`               | `{}`               | `{ ok: true }`                 | 重建 context，清空跨调用状态      |
+| `js_add_node_module_dir` | `{ dir: string }`  | `{ ok: true, dirs: string[] }` | 追加模块解析目录                  |
 
 ## 2. 三段式落点
 
@@ -61,9 +61,9 @@
 | ------------ | ------------------------------------------------------------------------------------------------------- |
 | 用户可见目标 | 普通用户只看到“正在做什么、是否完成、得到什么结果”，不暴露工具实现名或原始协议结构                      |
 | 摘要标题     | 新发起的 `js` 必须提供 `input.title`，UI 优先原样展示；仅旧记录缺失标题时按状态显示兜底文案             |
-| 操作图标     | 浏览器操作卡片使用 Lucide `square-mouse-pointer`，表达网页指向与点击语义                               |
+| 操作图标     | 浏览器操作卡片使用 Lucide `square-mouse-pointer`，表达网页指向与点击语义                                |
 | 结果层级     | 展开工具后先展示结果；执行代码和错误栈收进二级“查看执行细节”                                            |
-| 结果清理     | 专用卡片移除投影文本中的 `=> ` 完成值标记；底层结果、持久化内容与模型通信保持原样                        |
+| 结果清理     | 专用卡片移除投影文本中的 `=> ` 完成值标记；底层结果、持久化内容与模型通信保持原样                       |
 | 结果呈现     | 保留内层“结果”标题与结果区边框；移除包裹结果、图片和执行详情的最外层卡片；复制和换行操作继续保留        |
 | 详情入口     | “查看执行细节”默认使用弱提示文字色，hover 时变为主文字色；所有状态保持透明背景                          |
 | 代码清理     | 执行内容移除输入开头的空白行，同时保留首个有效行自身的缩进                                              |
@@ -98,8 +98,8 @@
 | NRP-UI-06 | `js_reset` completed                | 显示“已重置操作环境”，不展开成功 JSON                                            | accepted |
 | NRP-UI-07 | `js_add_node_module_dir` completed  | 显示“已配置运行目录”及目标目录，不展开成功 JSON                                  | accepted |
 | NRP-UI-08 | 桌面或手机、明暗主题、中英文 locale | 复用同一纵向布局和语义 token，静态文案随 locale 变化                             | accepted |
-| NRP-UI-09 | 浏览器操作工具摘要                  | 使用 Lucide `square-mouse-pointer`，其他工具图标不受影响                          | accepted |
-| NRP-UI-10 | 新发起的 `js` 调用                  | 工具契约要求提供用户可读 `title`；流式与完成态均优先显示该标题                    | accepted |
+| NRP-UI-09 | 浏览器操作工具摘要                  | 使用 Lucide `square-mouse-pointer`，其他工具图标不受影响                         | accepted |
+| NRP-UI-10 | 新发起的 `js` 调用                  | 工具契约要求提供用户可读 `title`；流式与完成态均优先显示该标题                   | accepted |
 | NRP-UI-11 | 已投影的完成值文本以 `=> ` 开头     | 用户结果只显示正文，不显示技术标记；其他工具和底层结果不受影响                   | accepted |
 | NRP-UI-12 | 展开普通文本结果                    | 显示“结果”标题、正文和操作按钮，保留结果区边框；不显示最外层卡片                 | accepted |
 | NRP-UI-13 | hover“查看执行细节”                 | 文字由弱提示色变为主文字色，不出现背景色                                         | accepted |

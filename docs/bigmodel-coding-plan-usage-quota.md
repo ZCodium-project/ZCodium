@@ -66,19 +66,19 @@ authorization: <完整 API key>
 
 字段语义：
 
-| 字段 | 说明 |
-|---|---|
-| `data.level` | GLM Coding Plan 套餐等级，例如 `lite`、`pro`、`max` |
-| `unit=3` | 小时维度，`number` 表示小时数 |
-| `unit=5` | 月维度，`number` 表示月数 |
-| `unit=6` | 周维度，`number` 表示周数 |
-| `TOKENS_LIMIT + unit=3 + number=5` | 5 小时 prompt 池 |
-| `TOKENS_LIMIT + unit=6 + number=1` | 1 周 prompt 池；部分账号不会返回，前端应隐藏缺失项 |
-| `TIME_LIMIT + unit=5 + number=1` | MCP / 工具类月额度池 |
-| `TIME_LIMIT.remaining` | 工具类剩余额度 |
-| `TIME_LIMIT.percentage` | 工具类额度已用比例 |
-| `TIME_LIMIT.nextResetTime` | 工具类额度下次重置时间，毫秒时间戳 |
-| `TIME_LIMIT.usageDetails` | 工具类额度的分项用量，例如联网搜索、网页读取、开源仓库 MCP |
+| 字段                               | 说明                                                       |
+| ---------------------------------- | ---------------------------------------------------------- |
+| `data.level`                       | GLM Coding Plan 套餐等级，例如 `lite`、`pro`、`max`        |
+| `unit=3`                           | 小时维度，`number` 表示小时数                              |
+| `unit=5`                           | 月维度，`number` 表示月数                                  |
+| `unit=6`                           | 周维度，`number` 表示周数                                  |
+| `TOKENS_LIMIT + unit=3 + number=5` | 5 小时 prompt 池                                           |
+| `TOKENS_LIMIT + unit=6 + number=1` | 1 周 prompt 池；部分账号不会返回，前端应隐藏缺失项         |
+| `TIME_LIMIT + unit=5 + number=1`   | MCP / 工具类月额度池                                       |
+| `TIME_LIMIT.remaining`             | 工具类剩余额度                                             |
+| `TIME_LIMIT.percentage`            | 工具类额度已用比例                                         |
+| `TIME_LIMIT.nextResetTime`         | 工具类额度下次重置时间，毫秒时间戳                         |
+| `TIME_LIMIT.usageDetails`          | 工具类额度的分项用量，例如联网搜索、网页读取、开源仓库 MCP |
 
 `nextResetTime` 是可选字段。前端不能用它判断额度项是否有效；字段缺失时仅隐藏该项的重置时间。
 
@@ -87,10 +87,10 @@ authorization: <完整 API key>
 前端只把接口返回的 `level` 作为当前真实套餐等级。套餐说明用于帮助用户理解，不作为接口返回值的替代来源：
 
 | 等级 | 每 5 小时 prompt 池 | MCP / 工具类月额度 | 并发优先级 |
-|---|---:|---:|---|
-| Lite | 约 120 次 | 100 次/月 | 低 |
-| Pro | 约 600 次 | 1000 次/月 | 中 |
-| Max | 约 2400 次 | 4000 次/月 | 高 |
+| ---- | ------------------: | -----------------: | ---------- |
+| Lite |           约 120 次 |          100 次/月 | 低         |
+| Pro  |           约 600 次 |         1000 次/月 | 中         |
+| Max  |          约 2400 次 |         4000 次/月 | 高         |
 
 这些数值可能随平台策略调整，最新说明以 Z.AI / BigModel 官方用量说明为准。
 
@@ -120,12 +120,12 @@ Coding Plan 剩余额度在 Model Provider、侧边栏和输入框 context 面�
 Coding Plan 的「用量统计」继续复用 `getCodingPlanUsageSnapshot` / `useCodingPlanUsageStats`
 这条入口和缓存策略，但内部数据源对齐 BigModel 官方个人用量页：
 
-| 页面区域 | 接口 | 说明 |
-|---|---|---|
-| 剩余额度卡 | `/api/monitor/usage/quota/limit` | 只用于 5 小时、周、MCP 月额度。`percentage` 表示已使用百分比；ZCode 的 `Usage remaining` 视图必须统一反转成剩余百分比。 |
-| Token 活动 | `/api/monitor/credit-usage/activity` | 返回 365 天活动序列和累计统计。用于「Token 活动」热力图，以及累计 Tokens、峰值 Tokens、累计使用时长、连续天数等概览。 |
-| 用量趋势 / 使用详情 | `/api/monitor/credit-usage/usage-detail` | 按 `usageType=MODEL/MCP` 分别返回模型与工具的积分/Token/调用序列、Cache 命中率、积分总数、日均积分。 |
-| 系统健康度 | `/api/monitor/usage/model-performance-day` | 返回 Max&Pro / Lite 高峰期平均 Decode 速度，用于系统健康度折线图。 |
+| 页面区域            | 接口                                       | 说明                                                                                                                    |
+| ------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| 剩余额度卡          | `/api/monitor/usage/quota/limit`           | 只用于 5 小时、周、MCP 月额度。`percentage` 表示已使用百分比；ZCode 的 `Usage remaining` 视图必须统一反转成剩余百分比。 |
+| Token 活动          | `/api/monitor/credit-usage/activity`       | 返回 365 天活动序列和累计统计。用于「Token 活动」热力图，以及累计 Tokens、峰值 Tokens、累计使用时长、连续天数等概览。   |
+| 用量趋势 / 使用详情 | `/api/monitor/credit-usage/usage-detail`   | 按 `usageType=MODEL/MCP` 分别返回模型与工具的积分/Token/调用序列、Cache 命中率、积分总数、日均积分。                    |
+| 系统健康度          | `/api/monitor/usage/model-performance-day` | 返回 Max&Pro / Lite 高峰期平均 Decode 速度，用于系统健康度折线图。                                                      |
 
 旧 `/api/monitor/usage/model-usage` 和 `/api/monitor/usage/tool-usage` 不再作为
 Coding Plan 设置页主数据源。它们最多只能作为后端未返回新版 credit 数据时的兼容 fallback，
@@ -133,23 +133,23 @@ Coding Plan 设置页主数据源。它们最多只能作为后端未返回新�
 
 Coding Plan 不跟随设置页顶部 `All / 30d / 7d` 这个 App Usage 分析维度。该维度只用于本地使用统计视图；Coding Plan 使用独立的「使用详情」范围：
 
-| 使用详情范围 | 请求时间范围 | 服务层返回 `granularity` | 服务层返回 `x_time` |
-|---|---|---|---|
-| 当日 | 当天 00:00:00 至 23:59:59 | `hour` | `00:00:00` 至 `23:00:00` |
-| 7日 | 最近 7 个自然日 | `day` | 连续 `YYYY-MM-DD` 日期 |
-| 30日 | 最近 30 个自然日 | `day` | 连续 `YYYY-MM-DD` 日期 |
-| 自定义日期 | 用户选中的自然日范围，最长 30 天 | `day` | 连续 `YYYY-MM-DD` 日期 |
+| 使用详情范围 | 请求时间范围                     | 服务层返回 `granularity` | 服务层返回 `x_time`      |
+| ------------ | -------------------------------- | ------------------------ | ------------------------ |
+| 当日         | 当天 00:00:00 至 23:59:59        | `hour`                   | `00:00:00` 至 `23:00:00` |
+| 7日          | 最近 7 个自然日                  | `day`                    | 连续 `YYYY-MM-DD` 日期   |
+| 30日         | 最近 30 个自然日                 | `day`                    | 连续 `YYYY-MM-DD` 日期   |
+| 自定义日期   | 用户选中的自然日范围，最长 30 天 | `day`                    | 连续 `YYYY-MM-DD` 日期   |
 
 服务层会按返回的 `x_time` 对齐模型和工具 series；monitor 缺少某个时间桶时补 0，前端图表只按 `x_time` 的 index 消费数据，不再自行推断时间轴。
 
 「使用详情」图表必须按 BigModel 官方个人用量页拆成两级 tab：
 
-| 一级 tab | 二级 tab | 图表口径 | 数据来源 |
-|---|---|---|---|
-| 积分消耗 | 模型 | 模型积分消耗 | `usageType=MODEL` 的 `totalCreditsUsage`，缺失时合并 cached / uncached / output credits |
-| 积分消耗 | 工具 | 工具积分消耗 | `usageType=MCP` 的 `creditsUsage` |
-| 用量消耗 | 模型 | Token 用量 | `usageType=MODEL` 的 `totalTokensUsage`，缺失时合并 cached / uncached / output tokens |
-| 用量消耗 | 工具 | 调用次数 | `usageType=MCP` 的 `mcpCallCount` / `usageCount` |
+| 一级 tab | 二级 tab | 图表口径     | 数据来源                                                                                |
+| -------- | -------- | ------------ | --------------------------------------------------------------------------------------- |
+| 积分消耗 | 模型     | 模型积分消耗 | `usageType=MODEL` 的 `totalCreditsUsage`，缺失时合并 cached / uncached / output credits |
+| 积分消耗 | 工具     | 工具积分消耗 | `usageType=MCP` 的 `creditsUsage`                                                       |
+| 用量消耗 | 模型     | Token 用量   | `usageType=MODEL` 的 `totalTokensUsage`，缺失时合并 cached / uncached / output tokens   |
+| 用量消耗 | 工具     | 调用次数     | `usageType=MCP` 的 `mcpCallCount` / `usageCount`                                        |
 
 「使用详情」图表形态对齐 BigModel 官方个人用量页：
 
@@ -174,18 +174,18 @@ Coding Plan 不跟随设置页顶部 `All / 30d / 7d` 这个 App Usage 分析维
 `credit-usage/activity` 不受 `当日 / 7日 / 30日` 范围影响，固定读取最近 365 个自然日，
 由前端在同一份 52 周网格上切换：
 
-| Token 活动 tab | 单元格口径 | Hover 文案 |
-|---|---|---|
-| 每日 | 当日 Token 与消息/调用轮次 | `{date}\n{tokens} tokens · {turns} 轮消息` |
-| 每周 | 单列 7 天合计，第一行为周日 | `{date} 当周\n{tokens} tokens · {turns} 轮消息` |
-| 累计 | 截至该周的累计值，hover 仍高亮整列 | `截至 {date} 当周累计\n{tokens} tokens · {turns} 轮消息` |
+| Token 活动 tab | 单元格口径                         | Hover 文案                                               |
+| -------------- | ---------------------------------- | -------------------------------------------------------- |
+| 每日           | 当日 Token 与消息/调用轮次         | `{date}\n{tokens} tokens · {turns} 轮消息`               |
+| 每周           | 单列 7 天合计，第一行为周日        | `{date} 当周\n{tokens} tokens · {turns} 轮消息`          |
+| 累计           | 截至该周的累计值，hover 仍高亮整列 | `截至 {date} 当周累计\n{tokens} tokens · {turns} 轮消息` |
 
 「系统健康度」使用独立范围，不跟随「使用详情」：
 
-| 系统健康度范围 | 请求时间范围 | 页面展示 |
-|---|---|---|
-| 近7天 | 最近 7 个自然日 | 默认选中 |
-| 近30天 | 最近 30 个自然日 | 用户手动切换 |
+| 系统健康度范围 | 请求时间范围     | 页面展示     |
+| -------------- | ---------------- | ------------ |
+| 近7天          | 最近 7 个自然日  | 默认选中     |
+| 近30天         | 最近 30 个自然日 | 用户手动切换 |
 
 系统健康度折线图展示两条 series：
 

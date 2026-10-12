@@ -11,12 +11,12 @@ You can easily integrate accessibility tests in your WebdriverIO test suites usi
 
 TestMu AI Accessibility Testing helps you identify and fix accessibility issues in your web applications. The following are the key advantages:
 
-* Seamlessly integrates with your existing WebdriverIO test automation.
-* Automated accessibility scanning during test execution.
-* Comprehensive WCAG compliance reporting.
-* Detailed issue tracking with remediation guidance.
-* Support for multiple WCAG standards (WCAG 2.0, WCAG 2.1, WCAG 2.2).
-* Real-time accessibility insights in the TestMu AI dashboard.
+- Seamlessly integrates with your existing WebdriverIO test automation.
+- Automated accessibility scanning during test execution.
+- Comprehensive WCAG compliance reporting.
+- Detailed issue tracking with remediation guidance.
+- Support for multiple WCAG standards (WCAG 2.0, WCAG 2.1, WCAG 2.2).
+- Real-time accessibility insights in the TestMu AI dashboard.
 
 ## Get Started with TestMu AI Accessibility Testing
 
@@ -32,30 +32,35 @@ npm install --save-dev @lambdatest/wdio-lambdatest-service
 
 ```javascript
 exports.config = {
-    //...
-    user: process.env.LT_USERNAME || '<lambdatest_username>',
-    key: process.env.LT_ACCESS_KEY || '<lambdatest_access_key>',
+  //...
+  user: process.env.LT_USERNAME || "<lambdatest_username>",
+  key: process.env.LT_ACCESS_KEY || "<lambdatest_access_key>",
 
-    capabilities: [{
-        browserName: 'chrome',
-        'LT:Options': {
-            platform: 'Windows 10',
-            version: 'latest',
-            accessibility: true, // Enable accessibility testing
-            accessibilityOptions: {
-                wcagVersion: 'wcag21a', // WCAG version (wcag20, wcag21a, wcag21aa, wcag22aa)
-                bestPractice: false,
-                needsReview: true
-            }
-        }
-    }],
+  capabilities: [
+    {
+      browserName: "chrome",
+      "LT:Options": {
+        platform: "Windows 10",
+        version: "latest",
+        accessibility: true, // Enable accessibility testing
+        accessibilityOptions: {
+          wcagVersion: "wcag21a", // WCAG version (wcag20, wcag21a, wcag21aa, wcag22aa)
+          bestPractice: false,
+          needsReview: true,
+        },
+      },
+    },
+  ],
 
-    services: [
-        ['lambdatest', {
-            tunnel: false
-        }]
+  services: [
+    [
+      "lambdatest",
+      {
+        tunnel: false,
+      },
     ],
-    //...
+  ],
+  //...
 };
 ```
 
@@ -69,15 +74,15 @@ npx wdio run wdio.conf.js
 
 The `accessibilityOptions` object supports the following parameters:
 
-* **wcagVersion**: Specify the WCAG standard version to test against
+- **wcagVersion**: Specify the WCAG standard version to test against
   - `wcag20` - WCAG 2.0 Level A
   - `wcag21a` - WCAG 2.1 Level A
   - `wcag21aa` - WCAG 2.1 Level AA (default)
   - `wcag22aa` - WCAG 2.2 Level AA
 
-* **bestPractice**: Include best practice recommendations (default: `false`)
+- **bestPractice**: Include best practice recommendations (default: `false`)
 
-* **needsReview**: Include issues that need manual review (default: `true`)
+- **needsReview**: Include issues that need manual review (default: `true`)
 
 ## Viewing Accessibility Reports
 

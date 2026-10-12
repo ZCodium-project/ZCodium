@@ -21,10 +21,12 @@
 ### Task 1: 用 source contract 复现同步/异步模式不匹配
 
 **Files:**
+
 - Modify: `packages/desktop/test/windowsChromeAppBoundKey.test.ts`
 - Test: `packages/desktop/test/windowsChromeAppBoundKey.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Program.cs` 中的 `CreatePipeServer`、`ConnectPipeClient` 和 `WaitForConnection` 源码。
 - Produces: BS-030 native source contract，锁定服务端 `PipeOptions.Asynchronous`、客户端 `PipeOptions.None` 和现有异步等待调用。
 
@@ -66,10 +68,12 @@ Expected: 新增测试在 `expect(serverSource).toContain("PipeOptions.Asynchron
 ### Task 2: 最小化修复服务端管道打开模式
 
 **Files:**
+
 - Modify: `packages/desktop/native/windows-browser-import-helper/Program.cs:1054-1062`
 - Test: `packages/desktop/test/windowsChromeAppBoundKey.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 的 BS-030 source contract。
 - Produces: 仍由 `CreatePipeServer(string, bool, bool)` 返回的异步服务端 `NamedPipeServerStream`；方法签名和调用方不变。
 
@@ -132,6 +136,7 @@ source contract automated；helper compiled；签名实机待复验
 ### Task 3: 机械验证、清理与交付
 
 **Files:**
+
 - Delete: `.tmp-controller-lifecycle-probe.ps1`
 - Delete: `.tmp-controller-lifecycle-probe-result.txt`
 - Delete: `.tmp-cross-account-path-probe.ps1`
@@ -142,6 +147,7 @@ source contract automated；helper compiled；签名实机待复验
 - Verify: repository-wide TypeScript and lint targets
 
 **Interfaces:**
+
 - Consumes: Tasks 1-2 的测试、helper 源码和更新后的 BS-030 状态。
 - Produces: 无临时探针、可审查的 bugfix commit 和已推送分支。
 

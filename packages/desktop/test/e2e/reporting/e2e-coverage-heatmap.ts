@@ -70,9 +70,7 @@ const DOMAIN_COVERAGE_PATHS: Record<CoverageHeatmapDomain, string[]> = {
   cli: ["cli", "coverage-final.json"],
 };
 
-const DOMAIN_ORDER = Object.keys(
-  DOMAIN_COVERAGE_PATHS,
-) as CoverageHeatmapDomain[];
+const DOMAIN_ORDER = Object.keys(DOMAIN_COVERAGE_PATHS) as CoverageHeatmapDomain[];
 
 export function writeE2ECoverageHeatmap(
   options: WriteCoverageHeatmapOptions,
@@ -90,10 +88,7 @@ export function writeE2ECoverageHeatmap(
   return {
     dataJson,
     domainCount: data.domains.length,
-    fileCount: data.domains.reduce(
-      (total, domain) => total + domain.files.length,
-      0,
-    ),
+    fileCount: data.domains.reduce((total, domain) => total + domain.files.length, 0),
     htmlIndex,
   };
 }
@@ -102,10 +97,7 @@ export function buildCoverageHeatmapData(
   options: WriteCoverageHeatmapOptions,
 ): CoverageHeatmapData {
   const domains = DOMAIN_ORDER.flatMap((domain) => {
-    const coveragePath = resolve(
-      options.coverageDir,
-      ...DOMAIN_COVERAGE_PATHS[domain],
-    );
+    const coveragePath = resolve(options.coverageDir, ...DOMAIN_COVERAGE_PATHS[domain]);
     if (!existsSync(coveragePath)) return [];
     const coverage = readCoverageFile(coveragePath);
     if (!coverage) return [];
@@ -121,10 +113,7 @@ export function buildCoverageHeatmapData(
 
 function readCoverageFile(path: string) {
   try {
-    return JSON.parse(readFileSync(path, "utf-8")) as Record<
-      string,
-      IstanbulFileCoverage
-    >;
+    return JSON.parse(readFileSync(path, "utf-8")) as Record<string, IstanbulFileCoverage>;
   } catch {
     return undefined;
   }
@@ -136,15 +125,10 @@ function buildDomainData(
   repoRoot: string,
 ): CoverageHeatmapDomainData {
   const files = Object.entries(coverage)
-    .map(([coveragePath, fileCoverage]) =>
-      buildFileData(coveragePath, fileCoverage, repoRoot),
-    )
+    .map(([coveragePath, fileCoverage]) => buildFileData(coveragePath, fileCoverage, repoRoot))
     .sort((left, right) => left.path.localeCompare(right.path));
   return {
-    coveredFunctions: files.reduce(
-      (total, file) => total + file.coveredFunctions,
-      0,
-    ),
+    coveredFunctions: files.reduce((total, file) => total + file.coveredFunctions, 0),
     domain,
     files,
     functionHits: files.reduce((total, file) => total + file.functionHits, 0),
@@ -159,27 +143,21 @@ function buildFileData(
 ): CoverageHeatmapFile {
   const counters = fileCoverage.f ?? {};
   const functionMap = fileCoverage.fnMap ?? {};
-  const normalizedPath = normalizeCoveragePath(
-    fileCoverage.path ?? coveragePath,
-    repoRoot,
-  );
+  const normalizedPath = normalizeCoveragePath(fileCoverage.path ?? coveragePath, repoRoot);
   const functionHits = Object.values(counters).reduce(
     (total, hits) => total + normalizeHits(hits),
     0,
   );
-  const hottestEntry = Object.entries(counters).reduce<
-    [string, number] | undefined
-  >((hottest, entry) => {
-    const normalized: [string, number] = [entry[0], normalizeHits(entry[1])];
-    return !hottest || normalized[1] > hottest[1] ? normalized : hottest;
-  }, undefined);
+  const hottestEntry = Object.entries(counters).reduce<[string, number] | undefined>(
+    (hottest, entry) => {
+      const normalized: [string, number] = [entry[0], normalizeHits(entry[1])];
+      return !hottest || normalized[1] > hottest[1] ? normalized : hottest;
+    },
+    undefined,
+  );
   const hottestFunction =
     hottestEntry && hottestEntry[1] > 0
-      ? buildHottestFunction(
-          hottestEntry,
-          functionMap[hottestEntry[0]],
-          normalizedPath,
-        )
+      ? buildHottestFunction(hottestEntry, functionMap[hottestEntry[0]], normalizedPath)
       : undefined;
 
   return {

@@ -105,7 +105,9 @@ describe("embeddedBrowserSitePermissions 管理器", () => {
     await writeEmbeddedBrowserSitePermission("https://b.com", "media", "allow");
     await removeEmbeddedBrowserSitePermissionOrigin("https://a.com");
 
-    expect(getEmbeddedBrowserSitePermissionSnapshot()).toEqual({ "https://b.com": { media: "allow" } });
+    expect(getEmbeddedBrowserSitePermissionSnapshot()).toEqual({
+      "https://b.com": { media: "allow" },
+    });
     // 站点记录删空后 origin 键一并移除，快照不残留空对象
     expect(getEmbeddedBrowserSitePermission("https://a.com", "media")).toBeUndefined();
   });

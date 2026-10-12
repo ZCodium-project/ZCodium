@@ -6,7 +6,9 @@ import {
 } from "@zcode/shared/workspaceFileEntriesCodec";
 import { createSyncWorkspaceFileSearchFilterBackend } from "@/workspace-file-search/workspaceFileSearchFilterBackend.js";
 
-function entry(partial: Partial<WorkspaceFileEntry> & { relativePath: string }): WorkspaceFileEntry {
+function entry(
+  partial: Partial<WorkspaceFileEntry> & { relativePath: string },
+): WorkspaceFileEntry {
   return {
     name: partial.relativePath.split("/").pop() ?? partial.relativePath,
     path: partial.path ?? `x:/ws/${partial.relativePath}`,
@@ -52,9 +54,9 @@ describe("workspace file search filter backend", () => {
       "x:/ws",
     );
 
-    await expect(
-      backend.filter("target", { requireQuery: false, limit: 10 }),
-    ).resolves.toEqual([entry({ relativePath: "src/target.ts" })]);
+    await expect(backend.filter("target", { requireQuery: false, limit: 10 })).resolves.toEqual([
+      entry({ relativePath: "src/target.ts" }),
+    ]);
 
     // 空 query + requireQuery:false 走默认排序（文件先于目录）。
     const emptyQuery = await backend.filter("", { requireQuery: false, limit: 10 });

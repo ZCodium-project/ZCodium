@@ -43,9 +43,7 @@ const demoSkills = [
 
 describe("skillSourceFilter", () => {
   it("把 .zcode/skills 和官方 plugin cache 识别为 ZCode Agent 技能来源", () => {
-    expect(resolveSkillSourceType("/tmp/workspace/.zcode/skills/my-skill/SKILL.md")).toBe(
-      "glm",
-    );
+    expect(resolveSkillSourceType("/tmp/workspace/.zcode/skills/my-skill/SKILL.md")).toBe("glm");
     expect(
       resolveSkillSourceType(
         "/tmp/home/.zcode/cli/plugins/cache/zcode-plugins-official/document-skills/0.1.0/skills/pdf/SKILL.md",

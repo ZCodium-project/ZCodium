@@ -86,11 +86,9 @@ describe("会话区模型切换与 Compact 交集 E2E", () => {
       90000,
     );
 
-    await selectUpstreamConfig(
-      SECONDARY_COMPACT_MODEL,
-      UPSTREAM_SECONDARY_THOUGHT_LEVEL,
-      { proveModelWithCapture: true },
-    );
+    await selectUpstreamConfig(SECONDARY_COMPACT_MODEL, UPSTREAM_SECONDARY_THOUGHT_LEVEL, {
+      proveModelWithCapture: true,
+    });
 
     const manualCompactInputIdsBefore = await getManualCompactInputIds();
     const requestStartIndex = await getUpstreamRequestStartIndex();
@@ -190,10 +188,9 @@ async function expectToolbarConfig(
   const labelCandidates = Object.values(thoughtLabel)
     .map((value) => value.replace(/\s+/g, " ").trim().toLowerCase())
     .filter(Boolean);
-  const expectedLabels = [
-    thoughtLevel,
-    ...getUpstreamThoughtLevelLabels(thoughtLevel),
-  ].map((label) => label.replace(/\s+/g, " ").trim().toLowerCase());
+  const expectedLabels = [thoughtLevel, ...getUpstreamThoughtLevelLabels(thoughtLevel)].map(
+    (label) => label.replace(/\s+/g, " ").trim().toLowerCase(),
+  );
   if (!labelCandidates.some((label) => expectedLabels.includes(label))) {
     throw new Error(
       `思考深度未精确匹配 ${thoughtLevel}: ${JSON.stringify({
@@ -295,25 +292,31 @@ interface OpenDialogSnapshot {
 }
 
 function readOpenDialogSnapshot(): Promise<OpenDialogSnapshot> {
-  return browser.execute((titleZh, titleEn) => {
-    const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
-    const bodyText = normalizeText(document.body.innerText).slice(0, 2000);
-    const dialogs = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).map(
-      (dialog) => ({
-        ariaLabel: dialog.getAttribute("aria-label") ?? "",
-        text: normalizeText(dialog.innerText).slice(0, 1000),
-      }),
-    );
-    return {
-      bodyText,
-      buttonLabels: Array.from(document.querySelectorAll<HTMLButtonElement>("button")).map(
-        (button) => normalizeText(button.innerText),
-      ),
-      dialogs,
-      hasModelSwitchCompressionDialog: bodyText.includes(titleZh) || bodyText.includes(titleEn),
-      hasOverlay: Boolean(document.querySelector('[data-slot="dialog-overlay"][data-state="open"]')),
-    };
-  }, MODEL_SWITCH_GUARD_TITLE_ZH, MODEL_SWITCH_GUARD_TITLE_EN);
+  return browser.execute(
+    (titleZh, titleEn) => {
+      const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
+      const bodyText = normalizeText(document.body.innerText).slice(0, 2000);
+      const dialogs = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).map(
+        (dialog) => ({
+          ariaLabel: dialog.getAttribute("aria-label") ?? "",
+          text: normalizeText(dialog.innerText).slice(0, 1000),
+        }),
+      );
+      return {
+        bodyText,
+        buttonLabels: Array.from(document.querySelectorAll<HTMLButtonElement>("button")).map(
+          (button) => normalizeText(button.innerText),
+        ),
+        dialogs,
+        hasModelSwitchCompressionDialog: bodyText.includes(titleZh) || bodyText.includes(titleEn),
+        hasOverlay: Boolean(
+          document.querySelector('[data-slot="dialog-overlay"][data-state="open"]'),
+        ),
+      };
+    },
+    MODEL_SWITCH_GUARD_TITLE_ZH,
+    MODEL_SWITCH_GUARD_TITLE_EN,
+  );
 }
 
 async function getManualCompactInputIds() {
@@ -350,7 +353,9 @@ async function waitForNewManualCompactMarker(
     isExpectedManualCompactMarker(candidate, statusSet, existingInputIds, inputId),
   );
   if (!marker) {
-    throw new Error(`新的 manual compact marker statuses=${statuses.join(",")} 在等待完成后仍不存在`);
+    throw new Error(
+      `新的 manual compact marker statuses=${statuses.join(",")} 在等待完成后仍不存在`,
+    );
   }
   return marker;
 }

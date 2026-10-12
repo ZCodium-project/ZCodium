@@ -25,10 +25,10 @@ This means that you might have light text on a white background or dark text on 
 
 ```js
 await driver.ocrClickOnText({
-    haystack: { height: 44, width: 1108, x: 129, y: 590 },
-    text: "WebdriverIO?",
-    // // With the default contrast of 0.25, the text is not found
-    contrast: 1,
+  haystack: { height: 44, width: 1108, x: 129, y: 590 },
+  text: "WebdriverIO?",
+  // // With the default contrast of 0.25, the text is not found
+  contrast: 1,
 });
 ```
 

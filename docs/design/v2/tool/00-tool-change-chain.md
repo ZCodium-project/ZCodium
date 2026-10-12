@@ -226,6 +226,7 @@ Host 闲时派发 -> prompt-turn.ts / server-operations.ts turn denylist（+Send
 `isOffPeakCreateRestrictedTurn` 的 denylist 兜底只认 OffPeakCreate 哨兵。工具 schema、权限、超时不变；
 automation 轮与普通轮不受影响。测试：`core/tests/off-peak-tool.test.ts`、
 `bootstrap/tests/offpeak-prompt-turn-disallowlist.test.ts`、`bootstrap/tests/v4-native-commands.test.ts`。
+
 #### 2026-09-08 原生验证发现的入口校验问题
 
 话题原文回查与历史附件选择均以 `conversationInputIntent` 为权威来源。仅当该字段不存在时兼容 `inputIntent`；权威字段存在但无有效话题记录时，不得从同条消息的旧字段恢复记录。相同消息上两个字段冲突时只采纳权威记录，正文与 synthetic 背景仍不能注入来源身份。

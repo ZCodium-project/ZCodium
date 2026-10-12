@@ -378,9 +378,9 @@ describe("conversation telemetry parity comparator", () => {
     (
       reasoningActual.report[0] as { event_extra_detail: Record<string, unknown> }
     ).event_extra_detail.duration_ms = "25";
-    expect(compareConversationTelemetryParity(reasoningExpected, reasoningActual).differences).toEqual(
-      [],
-    );
+    expect(
+      compareConversationTelemetryParity(reasoningExpected, reasoningActual).differences,
+    ).toEqual([]);
 
     const generationExpected = structuredClone(reasoningExpected);
     const generationActual = structuredClone(reasoningActual);
@@ -390,7 +390,9 @@ describe("conversation telemetry parity comparator", () => {
     (
       generationActual.report[0] as { event_extra_detail: Record<string, unknown> }
     ).event_extra_detail.step_type = "generation";
-    expect(compareConversationTelemetryParity(generationExpected, generationActual).differences).toEqual([
+    expect(
+      compareConversationTelemetryParity(generationExpected, generationActual).differences,
+    ).toEqual([
       expect.objectContaining({
         category: "TIMING_INVARIANT_MISMATCH",
         path: "report[0].event_extra_detail.duration_ms",
@@ -416,12 +418,20 @@ describe("conversation telemetry parity comparator", () => {
         {
           name: "perf_ui_tool_call_detail",
           value: 80,
-          properties: { event_name: "perf_ui_tool_call_detail", metric_value: "80", total_ms: "80" },
+          properties: {
+            event_name: "perf_ui_tool_call_detail",
+            metric_value: "80",
+            total_ms: "80",
+          },
         },
         {
           name: "perf_ui_stream_stall",
           value: 3990,
-          properties: { event_name: "perf_ui_stream_stall", metric_value: "3990", stall_ms: "3990" },
+          properties: {
+            event_name: "perf_ui_stream_stall",
+            metric_value: "3990",
+            stall_ms: "3990",
+          },
         },
       ],
     };
@@ -442,12 +452,20 @@ describe("conversation telemetry parity comparator", () => {
         {
           name: "perf_ui_tool_call_detail",
           value: 20,
-          properties: { event_name: "perf_ui_tool_call_detail", metric_value: "20", total_ms: "20" },
+          properties: {
+            event_name: "perf_ui_tool_call_detail",
+            metric_value: "20",
+            total_ms: "20",
+          },
         },
         {
           name: "perf_ui_stream_stall",
           value: 4010,
-          properties: { event_name: "perf_ui_stream_stall", metric_value: "4010", stall_ms: "4010" },
+          properties: {
+            event_name: "perf_ui_stream_stall",
+            metric_value: "4010",
+            stall_ms: "4010",
+          },
         },
       ],
     };

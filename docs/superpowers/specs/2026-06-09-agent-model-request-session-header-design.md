@@ -52,14 +52,14 @@ runtime.taskType ──→ session-type ──┐
 工作区请求 scope ──→ other ────────┘
 ```
 
-| 请求所属范围 | `x-zcode-session-type` |
-| --- | --- |
-| interactive、fork、workflow parent | `main` |
-| subagent child | `subagent` |
-| selection side chat（含 `/side`、`/btw`） | `side_chat` |
-| workflow child、nested workflow child | `other` |
+| 请求所属范围                                                                    | `x-zcode-session-type`       |
+| ------------------------------------------------------------------------------- | ---------------------------- |
+| interactive、fork、workflow parent                                              | `main`                       |
+| subagent child                                                                  | `subagent`                   |
+| selection side chat（含 `/side`、`/btw`）                                       | `side_chat`                  |
+| workflow child、nested workflow child                                           | `other`                      |
 | 会话内 compact、goal verification、session/goal title、Memory、工具内部模型请求 | 继承上述宿主分类，与用途无关 |
-| 工作区级 Repo Wiki、Git 文案、连接测试等独立请求 | `other` |
+| 工作区级 Repo Wiki、Git 文案、连接测试等独立请求                                | `other`                      |
 
 工作区级请求可能借用已有会话的 runtime，但不属于该会话；其模型创建入口显式指定
 `scope: "workspace"`，仅影响本模型句柄的归因分类，不修改 runtime 配置或传给 provider factory。

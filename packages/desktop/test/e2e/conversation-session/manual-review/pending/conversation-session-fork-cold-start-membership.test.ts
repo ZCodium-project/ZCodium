@@ -34,14 +34,11 @@ describe("TSL19/TSL28：fork child Project row 与冷启动 membership", () => {
     this.timeout(CASE_TIMEOUT_MS);
 
     await prepareV4ConversationE2E();
-    await sendV4Prompt(
-      `${PARENT_MARKER}: Reply with exactly "${PARENT_REPLY}" and no other text.`,
-    );
+    await sendV4Prompt(`${PARENT_MARKER}: Reply with exactly "${PARENT_REPLY}" and no other text.`);
     await waitForV4TimelineContaining(PARENT_REPLY, 60_000);
     const parent = await waitForV4Pane(
       (snapshot) =>
-        !snapshot.canStop &&
-        Boolean(snapshot.sessionId && snapshot.sessionId !== "draft"),
+        !snapshot.canStop && Boolean(snapshot.sessionId && snapshot.sessionId !== "draft"),
       "TSL19 parent 没有完成并绑定 session",
       60_000,
     );
@@ -52,9 +49,7 @@ describe("TSL19/TSL28：fork child Project row 与冷启动 membership", () => {
     const child = await waitForV4Pane(
       (snapshot) =>
         Boolean(
-          snapshot.sessionId &&
-          snapshot.sessionId !== "draft" &&
-          snapshot.sessionId !== parentId,
+          snapshot.sessionId && snapshot.sessionId !== "draft" && snapshot.sessionId !== parentId,
         ),
       "TSL19 fork 后没有切换到 child",
       60_000,
@@ -106,17 +101,15 @@ describe("TSL19/TSL28：fork child Project row 与冷启动 membership", () => {
       timeout: 15_000,
       timeoutMsg: "TSL19 冷启动后 composer 不可输入",
     });
-    expect(
-      await waitForV4MentionOptionPrefix(`session:${childId}`, 30_000),
-    ).toBe(`session:${childId}`);
+    expect(await waitForV4MentionOptionPrefix(`session:${childId}`, 30_000)).toBe(
+      `session:${childId}`,
+    );
   });
 });
 
 async function waitForPersistedProjectTask(taskId: string): Promise<void> {
   await browser.waitUntil(
-    () =>
-      readWorkspaceTaskIds().filter((candidate) => candidate === taskId)
-        .length === 1,
+    () => readWorkspaceTaskIds().filter((candidate) => candidate === taskId).length === 1,
     {
       timeout: 30_000,
       timeoutMsg: `TSL28 fork child 没有写入唯一 tasks-index row: ${taskId}`,
@@ -124,16 +117,12 @@ async function waitForPersistedProjectTask(taskId: string): Promise<void> {
   );
 }
 
-async function waitForSingleProjectRow(
-  taskId: string,
-  timeoutMsg: string,
-): Promise<void> {
+async function waitForSingleProjectRow(taskId: string, timeoutMsg: string): Promise<void> {
   await browser.waitUntil(
     () =>
       browser.execute(
         (taskItemTestId) =>
-          document.querySelectorAll(`[data-testid="${taskItemTestId}"]`)
-            .length === 1,
+          document.querySelectorAll(`[data-testid="${taskItemTestId}"]`).length === 1,
         testId(TID_TASK_ITEM, taskId),
       ),
     {
@@ -145,17 +134,12 @@ async function waitForSingleProjectRow(
 
 function readWorkspaceTaskIds(): string[] {
   // Node 当前内置 SQLite 只提供 DatabaseSync；E2E 轮询每次都立即关闭只读句柄。
-  const database = new DatabaseSync(
-    join(homedir(), ".zcode", "v2", "tasks-index.sqlite"),
-    {
-      readOnly: true,
-    },
-  );
+  const database = new DatabaseSync(join(homedir(), ".zcode", "v2", "tasks-index.sqlite"), {
+    readOnly: true,
+  });
   try {
     const rows = database
-      .prepare(
-        "select task_id from tasks where workspace_key = ? and deleted = 0 order by task_id",
-      )
+      .prepare("select task_id from tasks where workspace_key = ? and deleted = 0 order by task_id")
       .all(DEFAULT_WORKSPACE) as Array<{ task_id: string }>;
     return rows.map((row) => row.task_id);
   } finally {
@@ -175,18 +159,13 @@ function readCliSession(sessionId: string): {
   taskType: string | null;
 } | null {
   // Node 当前内置 SQLite 只提供 DatabaseSync；E2E 只读一次并立即关闭句柄。
-  const database = new DatabaseSync(
-    join(homedir(), ".zcode", "cli", "db", "db.sqlite"),
-    {
-      readOnly: true,
-    },
-  );
+  const database = new DatabaseSync(join(homedir(), ".zcode", "cli", "db", "db.sqlite"), {
+    readOnly: true,
+  });
   try {
     const row = database
       .prepare("select parent_id, task_type from session where id = ?")
-      .get(sessionId) as
-      | { parent_id: string | null; task_type: string | null }
-      | undefined;
+      .get(sessionId) as { parent_id: string | null; task_type: string | null } | undefined;
     return row ? { parentId: row.parent_id, taskType: row.task_type } : null;
   } finally {
     database.close();

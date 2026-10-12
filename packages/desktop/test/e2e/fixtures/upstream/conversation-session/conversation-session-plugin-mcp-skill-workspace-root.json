@@ -41,7 +41,10 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/messages",
-        "bodyIncludes": ["E2E_PLUGIN_MCP_PING_WORKSPACE_ROOT", "toolu_e2e_plugin_mcp_ping_workspace_root"],
+        "bodyIncludes": [
+          "E2E_PLUGIN_MCP_PING_WORKSPACE_ROOT",
+          "toolu_e2e_plugin_mcp_ping_workspace_root"
+        ],
         "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
       },
       "response": { "statusCode": 200, "text": "upstream-e2e-ok" }

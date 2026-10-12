@@ -11,8 +11,7 @@ import {
 vi.mock("@/v4/SessionPane.js", async () => {
   const React = await import("react");
   return {
-    SessionPane: () =>
-      React.createElement("div", { "data-testid": "mock-session-pane" }),
+    SessionPane: () => React.createElement("div", { "data-testid": "mock-session-pane" }),
   };
 });
 
@@ -74,30 +73,20 @@ describe("WorkbenchLeafPane inactive visual state", () => {
     expect(inactiveMarkup).toContain("pointer-events-none");
     expect(inactiveMarkup).toContain("z-30");
     expect(activeMarkup).not.toContain('data-v4-pane-inactive-overlay="true"');
-    expect(singlePaneMarkup).not.toContain(
-      'data-v4-pane-inactive-overlay="true"',
-    );
+    expect(singlePaneMarkup).not.toContain('data-v4-pane-inactive-overlay="true"');
   });
 });
 
 describe("resolvePaneActiveSelectionSideChatSessionId", () => {
   it("routes the active auxiliary child to a split pane that owns the shell active task", () => {
     expect(
-      resolvePaneActiveSelectionSideChatSessionId(
-        "sess-split",
-        "sess-split",
-        "sess-side",
-      ),
+      resolvePaneActiveSelectionSideChatSessionId("sess-split", "sess-split", "sess-side"),
     ).toBe("sess-side");
   });
 
   it("does not leak the active auxiliary child to another pane", () => {
     expect(
-      resolvePaneActiveSelectionSideChatSessionId(
-        "sess-primary",
-        "sess-split",
-        "sess-side",
-      ),
+      resolvePaneActiveSelectionSideChatSessionId("sess-primary", "sess-split", "sess-side"),
     ).toBeNull();
   });
 });

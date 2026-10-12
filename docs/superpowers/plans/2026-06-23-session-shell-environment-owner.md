@@ -63,9 +63,7 @@ export function applySessionShellEnvironment(
   options?: { refreshPreConversationContext?: boolean },
 ): void;
 
-export function getContextSourceShellDisplayName(
-  runtime: AgentRuntimeInternal,
-): string | undefined;
+export function getContextSourceShellDisplayName(runtime: AgentRuntimeInternal): string | undefined;
 
 export function applySessionShellToEnvInfo<T extends { shell?: string }>(
   envInfo: T | undefined,
@@ -142,6 +140,7 @@ runtime.initializeSessionShellEnvironmentIfNeeded(candidate)
 ### Task 1: Introduce Session Shell Environment Owner
 
 **Files:**
+
 - Create: `apps/zcode-cli/packages/core/src/runtime/methods/context-history-entries.ts`
 - Create: `apps/zcode-cli/packages/core/src/runtime/methods/context-refresh.ts`
 - Create: `apps/zcode-cli/packages/core/src/runtime/methods/session-shell-environment.ts`
@@ -151,6 +150,7 @@ runtime.initializeSessionShellEnvironmentIfNeeded(candidate)
 - Test: `apps/zcode-cli/packages/core/tests/runtime-trace.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionShellSelection`
 - Produces: `SessionShellEnvironment`, `getSessionShellEnvironment()`, `initializeSessionShellEnvironmentIfNeeded()`, `applySessionShellEnvironment()`, `getContextSourceShellDisplayName()`, `applySessionShellToEnvInfo()`
 
@@ -287,7 +287,8 @@ export function refreshContextModelSnapshot(runtime: AgentRuntimeInternal): void
   }
 
   runtime.contextBuilder = runtime.createContextBuilderFromSnapshot(
-    runtime.contextSourceSnapshot ?? runtime.createConfigOnlyContextSnapshot(runtime.workingDirectory),
+    runtime.contextSourceSnapshot ??
+      runtime.createConfigOnlyContextSnapshot(runtime.workingDirectory),
     runtime.memoryContext,
   );
   const effectiveContextResult = runtime.contextBuilder.build();
@@ -461,6 +462,7 @@ Expected: runtime trace tests pass. The new test proves the owner API initialize
 ### Task 2: Move Runtime Context Mutation Into The Owner
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/config.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/context.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/agent-runtime.ts`
@@ -468,6 +470,7 @@ Expected: runtime trace tests pass. The new test proves the owner API initialize
 - Test: `apps/zcode-cli/packages/core/tests/runtime-trace.test.ts`
 
 **Interfaces:**
+
 - Consumes: owner functions from Task 1
 - Produces: public runtime method `initializeSessionShellEnvironmentIfNeeded(selection): boolean`
 
@@ -573,6 +576,7 @@ Expected: runtime trace and context builder tests pass.
 ### Task 3: Move Snapshot Persistence And Resume Restore Into The Owner
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/session-shell-environment.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/bash-shell-snapshot.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/events.ts`
@@ -580,6 +584,7 @@ Expected: runtime trace and context builder tests pass.
 - Test: `apps/zcode-cli/packages/core/tests/runtime-persistence.test.ts`
 
 **Interfaces:**
+
 - Consumes: `readPersistedBashShellSelectionSnapshot()`, `resolveBashShellSnapshotForResume()`, `persistBashShellSelectionSnapshot()`
 - Produces: `persistSessionShellEnvironmentSnapshot(runtime, traceContext)`, `restoreSessionShellEnvironmentSelectionForResume(runtime, options)`, and `announceSessionShellEnvironmentDriftAfterResume(runtime, options)`
 
@@ -721,6 +726,7 @@ Expected: tests cover restored snapshot, stale snapshot fallback, legacy session
 ### Task 4: Collapse Bootstrap And Protocol Initialization Around Runtime Owner
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/bootstrap/src/app/create-app.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/app/types.ts`
 - Modify: `apps/zcode-cli/packages/bootstrap/src/app/input-facade.ts`
@@ -732,6 +738,7 @@ Expected: tests cover restored snapshot, stale snapshot fallback, legacy session
 - Test: `apps/zcode-cli/packages/bootstrap/tests/zcode-protocol.test.ts`
 
 **Interfaces:**
+
 - Consumes: `runtime.initializeSessionShellEnvironmentIfNeeded(candidate)`
 - Produces: one user execution boundary implementation with no local duplicate prepared flag
 
@@ -847,6 +854,7 @@ Expected: protocol tests pass.
 ### Task 5: Remove Runtime `bashShellOverride` As A State Source
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/types.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/agent-runtime.ts`
 - Modify: `apps/zcode-cli/packages/core/src/runtime/internal-methods.ts`
@@ -858,6 +866,7 @@ Expected: protocol tests pass.
 - Test: `apps/zcode-cli/packages/core/tests/bash-handler.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ExecutionShellSelection`
 - Produces: only one runtime field: `bashShellSelection`
 
@@ -949,10 +958,12 @@ Expected: no hits in core/bootstrap runtime state. Hits in contracts/adapters ar
 ### Task 6: Update Explore Inheritance Through The Owner
 
 **Files:**
+
 - Modify: `apps/zcode-cli/packages/core/src/runtime/methods/subagent.ts`
 - Test: `apps/zcode-cli/packages/core/tests/subagent-explore.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getSessionShellEnvironment()`
 - Produces: child `envInfo.shell` and child `bashShellSelection` from the same parent environment
 
@@ -1005,10 +1016,12 @@ Expected: Explore child prompt shell and Bash execution selection both inherit p
 ### Task 7: Update Documentation And Remove Superseded Mental Model
 
 **Files:**
+
 - Modify: `docs/runtime-tools/bash-effective-shell-snapshot.md`
 - Modify: `docs/superpowers/plans/2026-06-19-bash-effective-shell-snapshot.md`
 
 **Interfaces:**
+
 - Produces: docs that name the single owner and mark old plan as historical
 
 - [ ] **Step 1: Update runtime tool spec**
@@ -1055,9 +1068,11 @@ Expected: docs mention `bashShellOverride` only as a removed runtime concept or 
 ### Task 8: Full Verification
 
 **Files:**
+
 - No source edits unless tests reveal a missed migration.
 
 **Interfaces:**
+
 - Produces: verified refactor with same behavior and lower complexity
 
 - [ ] **Step 1: Run focused package tests**

@@ -7,13 +7,13 @@ Lexical 编辑器、模式选择、模型选择器、思考深度、context usag
 
 ## 新旧分界（硬约束：UI 用老的，逻辑新写）
 
-| 层 | 来源 | 说明 |
-| --- | --- | --- |
-| `LexicalChatInput`（packages/ui/src/LexicalChatInput.tsx） | 从 `b44d4a87a^` 原样恢复 | provider 读存活的 `v4/activeTaskProvider`；`ChatComposerPasteEvent` 收口本文件；保留 `enableMentionPanel` 开关；slash command 固定读取 CLI workspace catalog |
-| `ChatPromptEditor` / `ChatPromptActionMenu` / `usePromptEditorDragState`（packages/ui/src/prompt-editor/） | 原样恢复 | 纯 props 展示壳；`onSubmit` 返回值透传（false=保留草稿）是唯一行为适配 |
-| `CatalogSlashCommandPlugin`（packages/ui/src/prompt-editor/） | 初期迁移组件，现已删除 | 宿主静态 command 目录通道已退役，当前只保留读取 CLI workspace slash catalog 的 `SlashCommandPlugin` |
-| `V4ComposerToolbar`（packages/ui/src/v4/composer/） | 新写 wiring | 复用 ModelConfigSelect / ChatModeSwitchControl / ThoughtLevelCycleControl / ChatContextUsage 展示件；当前值读 v4 `snapshot.config` / `snapshot.usage`；写路径 v4 命令 |
-| `ConversationComposer`（packages/ui/src/v4/） | 全新重写 | 发送键状态机 + held choice + Stop + dock 布局 |
+| 层                                                                                                         | 来源                     | 说明                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LexicalChatInput`（packages/ui/src/LexicalChatInput.tsx）                                                 | 从 `b44d4a87a^` 原样恢复 | provider 读存活的 `v4/activeTaskProvider`；`ChatComposerPasteEvent` 收口本文件；保留 `enableMentionPanel` 开关；slash command 固定读取 CLI workspace catalog          |
+| `ChatPromptEditor` / `ChatPromptActionMenu` / `usePromptEditorDragState`（packages/ui/src/prompt-editor/） | 原样恢复                 | 纯 props 展示壳；`onSubmit` 返回值透传（false=保留草稿）是唯一行为适配                                                                                                |
+| `CatalogSlashCommandPlugin`（packages/ui/src/prompt-editor/）                                              | 初期迁移组件，现已删除   | 宿主静态 command 目录通道已退役，当前只保留读取 CLI workspace slash catalog 的 `SlashCommandPlugin`                                                                   |
+| `V4ComposerToolbar`（packages/ui/src/v4/composer/）                                                        | 新写 wiring              | 复用 ModelConfigSelect / ChatModeSwitchControl / ThoughtLevelCycleControl / ChatContextUsage 展示件；当前值读 v4 `snapshot.config` / `snapshot.usage`；写路径 v4 命令 |
+| `ConversationComposer`（packages/ui/src/v4/）                                                              | 全新重写                 | 发送键状态机 + held choice + Stop + dock 布局                                                                                                                         |
 
 ## 数据面接线
 

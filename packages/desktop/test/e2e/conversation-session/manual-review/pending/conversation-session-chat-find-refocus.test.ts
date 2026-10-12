@@ -3,10 +3,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { TID_CHAT_MESSAGES, TID_GIT_PANE } from "@zcode/shared";
 import { Key } from "webdriverio";
-import {
-  DEFAULT_WORKSPACE,
-  clearAppData,
-} from "../../../helpers/desktop-app.js";
+import { DEFAULT_WORKSPACE, clearAppData } from "../../../helpers/desktop-app.js";
 import { prepareConversationE2E } from "../../../helpers/conversation-session.js";
 
 const FIND_MARKER = "E2E_CHAT_FIND_REFOCUS_NEEDLE";
@@ -16,10 +13,7 @@ const FILE_CHANGE_FIXTURE_PATH = join(DEFAULT_WORKSPACE, FILE_CHANGE_FIXTURE_NAM
 const GIT_BINARY = process.env.ZCODE_GIT_BINARY?.trim() || "git";
 const CONVERSATION_FIND_PLACEHOLDERS = ["Search messages...", "搜索消息..."];
 const FILE_CHANGE_FIND_PLACEHOLDERS = ["Search file changes...", "搜索文件变更..."];
-const FIND_PLACEHOLDERS = [
-  ...CONVERSATION_FIND_PLACEHOLDERS,
-  ...FILE_CHANGE_FIND_PLACEHOLDERS,
-];
+const FIND_PLACEHOLDERS = [...CONVERSATION_FIND_PLACEHOLDERS, ...FILE_CHANGE_FIND_PLACEHOLDERS];
 const PREVIOUS_LABELS = ["Previous result", "上一个结果"];
 const NEXT_LABELS = ["Next result", "下一个结果"];
 const FILE_CHANGE_SCOPE_LABELS = ["Search file changes", "搜索文件变更"];
@@ -56,9 +50,7 @@ describe("会话区单命中重复查找重新聚焦 E2E", () => {
     for (const action of ["next", "previous", "enter", "shift-enter"] as const) {
       await scrollFileChangeFindMatchAway();
       await triggerFindNavigation(action);
-      await waitForFileChangeFindCentered(
-        `文件变更 ${action} 没有把唯一命中重新居中`,
-      );
+      await waitForFileChangeFindCentered(`文件变更 ${action} 没有把唯一命中重新居中`);
     }
   });
 });
@@ -183,14 +175,7 @@ async function injectLongCompletedConversation() {
         updatedAt: now,
         workspacePath,
       });
-      store.setTaskRuntimeState(
-        workspacePath,
-        injectedTaskId,
-        "idle",
-        null,
-        undefined,
-        "glm",
-      );
+      store.setTaskRuntimeState(workspacePath, injectedTaskId, "idle", null, undefined, "glm");
       store.setTaskMessages(workspacePath, injectedTaskId, [
         {
           id: "e2e-chat-find-user",
@@ -236,9 +221,7 @@ async function injectLongCompletedConversation() {
 
 async function openConversationFind() {
   await browser.execute(() => {
-    const isApple = /Mac|iPhone|iPad|iPod/.test(
-      `${navigator.platform} ${navigator.userAgent}`,
-    );
+    const isApple = /Mac|iPhone|iPad|iPod/.test(`${navigator.platform} ${navigator.userAgent}`);
     window.dispatchEvent(
       new KeyboardEvent("keydown", {
         bubbles: true,
@@ -255,8 +238,8 @@ async function openConversationFind() {
     () =>
       browser.execute(
         (placeholders) =>
-          Array.from(document.querySelectorAll<HTMLInputElement>("input")).some(
-            (input) => placeholders.includes(input.placeholder),
+          Array.from(document.querySelectorAll<HTMLInputElement>("input")).some((input) =>
+            placeholders.includes(input.placeholder),
           ),
         FIND_PLACEHOLDERS,
       ),
@@ -270,17 +253,14 @@ async function openConversationFind() {
 async function setFindQuery(placeholders: readonly string[], query: string) {
   const updated = await browser.execute(
     (placeholders, nextQuery) => {
-      const input = Array.from(
-        document.querySelectorAll<HTMLInputElement>("input"),
-      ).find((candidate) => placeholders.includes(candidate.placeholder));
+      const input = Array.from(document.querySelectorAll<HTMLInputElement>("input")).find(
+        (candidate) => placeholders.includes(candidate.placeholder),
+      );
       if (!input) {
         return false;
       }
 
-      const valueSetter = Object.getOwnPropertyDescriptor(
-        HTMLInputElement.prototype,
-        "value",
-      )?.set;
+      const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
       input.focus();
       valueSetter?.call(input, nextQuery);
       input.dispatchEvent(
@@ -311,8 +291,7 @@ async function switchFindScopeToFileChanges() {
   await browser.waitUntil(
     () =>
       browser.execute(
-        (gitPaneTestId) =>
-          Boolean(document.querySelector(`[data-testid="${gitPaneTestId}"]`)),
+        (gitPaneTestId) => Boolean(document.querySelector(`[data-testid="${gitPaneTestId}"]`)),
         TID_GIT_PANE,
       ),
     {
@@ -325,9 +304,7 @@ async function switchFindScopeToFileChanges() {
     () =>
       browser.execute(
         (gitPaneTestId, refreshLabels) => {
-          const pane = document.querySelector<HTMLElement>(
-            `[data-testid="${gitPaneTestId}"]`,
-          );
+          const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
           const refreshButton = Array.from(
             pane?.querySelectorAll<HTMLButtonElement>("button") ?? [],
           ).find((button) => refreshLabels.includes(button.textContent?.trim() ?? ""));
@@ -373,9 +350,7 @@ async function switchFindScopeToFileChanges() {
 
 function getGitPaneDiagnostics() {
   return browser.execute((gitPaneTestId) => {
-    const pane = document.querySelector<HTMLElement>(
-      `[data-testid="${gitPaneTestId}"]`,
-    );
+    const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
     return {
       buttons: Array.from(pane?.querySelectorAll<HTMLButtonElement>("button") ?? []).map(
         (button) => ({
@@ -384,8 +359,7 @@ function getGitPaneDiagnostics() {
           text: button.textContent?.trim() ?? "",
         }),
       ),
-      rowCount:
-        pane?.querySelectorAll("[data-git-pane-change-virtual-row]").length ?? 0,
+      rowCount: pane?.querySelectorAll("[data-git-pane-change-virtual-row]").length ?? 0,
       text: pane?.innerText ?? "",
     };
   }, TID_GIT_PANE);
@@ -393,13 +367,8 @@ function getGitPaneDiagnostics() {
 
 async function scrollFindMatchAway() {
   const scrolled = await browser.execute((messagesTestId) => {
-    const root = document.querySelector<HTMLElement>(
-      `[data-testid="${messagesTestId}"]`,
-    );
-    const viewport =
-      root?.firstElementChild instanceof HTMLElement
-        ? root.firstElementChild
-        : null;
+    const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
+    const viewport = root?.firstElementChild instanceof HTMLElement ? root.firstElementChild : null;
     if (!viewport) {
       return false;
     }
@@ -421,9 +390,7 @@ async function scrollFindMatchAway() {
   );
 }
 
-async function triggerFindNavigation(
-  action: "next" | "previous" | "enter" | "shift-enter",
-) {
+async function triggerFindNavigation(action: "next" | "previous" | "enter" | "shift-enter") {
   if (action === "next" || action === "previous") {
     const labels = action === "previous" ? PREVIOUS_LABELS : NEXT_LABELS;
     for (const label of labels) {
@@ -487,21 +454,23 @@ async function waitForFindCentered(timeoutMsg: string) {
 }
 
 async function scrollFileChangeFindMatchAway() {
-  const scrolled = await browser.execute((gitPaneTestId, fixtureName) => {
-    const pane = document.querySelector<HTMLElement>(
-      `[data-testid="${gitPaneTestId}"]`,
-    );
-    const row = Array.from(
-      pane?.querySelectorAll<HTMLElement>("[data-git-pane-change-virtual-row]") ?? [],
-    ).find((candidate) => candidate.innerText.includes(fixtureName));
-    const viewport = row?.parentElement?.parentElement;
-    if (!(viewport instanceof HTMLElement)) {
-      return false;
-    }
-    viewport.scrollTop = 0;
-    viewport.dispatchEvent(new Event("scroll", { bubbles: true }));
-    return true;
-  }, TID_GIT_PANE, FILE_CHANGE_FIXTURE_NAME);
+  const scrolled = await browser.execute(
+    (gitPaneTestId, fixtureName) => {
+      const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
+      const row = Array.from(
+        pane?.querySelectorAll<HTMLElement>("[data-git-pane-change-virtual-row]") ?? [],
+      ).find((candidate) => candidate.innerText.includes(fixtureName));
+      const viewport = row?.parentElement?.parentElement;
+      if (!(viewport instanceof HTMLElement)) {
+        return false;
+      }
+      viewport.scrollTop = 0;
+      viewport.dispatchEvent(new Event("scroll", { bubbles: true }));
+      return true;
+    },
+    TID_GIT_PANE,
+    FILE_CHANGE_FIXTURE_NAME,
+  );
   expect(scrolled).toBe(true);
 
   await browser.waitUntil(
@@ -556,12 +525,10 @@ interface FileChangeFindSnapshot extends FindSnapshot {
 function getFileChangeFindSnapshot(): Promise<FileChangeFindSnapshot> {
   return browser.execute(
     (gitPaneTestId, placeholders, fixtureName, marker) => {
-      const pane = document.querySelector<HTMLElement>(
-        `[data-testid="${gitPaneTestId}"]`,
+      const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
+      const input = Array.from(document.querySelectorAll<HTMLInputElement>("input")).find(
+        (candidate) => placeholders.includes(candidate.placeholder),
       );
-      const input = Array.from(
-        document.querySelectorAll<HTMLInputElement>("input"),
-      ).find((candidate) => placeholders.includes(candidate.placeholder));
       const row = Array.from(
         pane?.querySelectorAll<HTMLElement>("[data-git-pane-change-virtual-row]") ?? [],
       ).find((candidate) => candidate.innerText.includes(fixtureName));
@@ -614,16 +581,12 @@ function getFileChangeFindSnapshot(): Promise<FileChangeFindSnapshot> {
 function getFindSnapshot(): Promise<FindSnapshot> {
   return browser.execute(
     (messagesTestId, placeholders, marker) => {
-      const root = document.querySelector<HTMLElement>(
-        `[data-testid="${messagesTestId}"]`,
+      const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
+      const input = Array.from(document.querySelectorAll<HTMLInputElement>("input")).find(
+        (candidate) => placeholders.includes(candidate.placeholder),
       );
-      const input = Array.from(
-        document.querySelectorAll<HTMLInputElement>("input"),
-      ).find((candidate) => placeholders.includes(candidate.placeholder));
       const viewport =
-        root?.firstElementChild instanceof HTMLElement
-          ? root.firstElementChild
-          : null;
+        root?.firstElementChild instanceof HTMLElement ? root.firstElementChild : null;
       if (!input || !viewport || !root) {
         return {
           counter: "",

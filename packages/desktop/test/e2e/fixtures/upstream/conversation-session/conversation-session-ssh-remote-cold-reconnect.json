@@ -6,18 +6,46 @@
     {
       "id": "ssh-cold-reconnect-title",
       "description": "SSH cold reconnect task 标题辅助响应。",
-      "metadata": { "kind": "common", "timingPolicy": "fast-text", "source": "synthetic", "syntheticReason": "标题不属于冷恢复断言。" },
+      "metadata": {
+        "kind": "common",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "标题不属于冷恢复断言。"
+      },
       "maxMatches": 4,
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "bodyIncludes": ["Generate a concise title", "E2E_SSH_P0_COLD_RECONNECT"] },
-      "response": { "statusCode": 200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-cold-title\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"{\\\"title\\\":\\\"SSH cold reconnect\"}\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-cold-title\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "bodyIncludes": ["Generate a concise title", "E2E_SSH_P0_COLD_RECONNECT"]
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-cold-title\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"{\\\"title\\\":\\\"SSH cold reconnect\"}\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-cold-title\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     },
     {
       "id": "ssh-cold-reconnect-main",
       "description": "SSH cold reconnect 首发和续发的通用响应。",
-      "metadata": { "kind": "main", "timingPolicy": "slow-stream", "source": "synthetic", "syntheticReason": "首发与冷恢复续发都只需要稳定完成，用 task history 断言路由。" },
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "slow-stream",
+        "source": "synthetic",
+        "syntheticReason": "首发与冷恢复续发都只需要稳定完成，用 task history 断言路由。"
+      },
       "maxMatches": 10,
-      "match": { "method": "POST", "pathIncludes": "/chat/completions", "bodyIncludes": ["E2E_SSH_P0_COLD_RECONNECT_"], "bodyExcludes": ["Generate a concise title"] },
-      "response": { "statusCode": 200, "delayMs": 1200, "headers": { "content-type": "text/event-stream; charset=utf-8" }, "body": "data: {\"id\":\"ssh-cold-main\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_COLD_RECONNECT_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-cold-main\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n" }
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/chat/completions",
+        "bodyIncludes": ["E2E_SSH_P0_COLD_RECONNECT_"],
+        "bodyExcludes": ["Generate a concise title"]
+      },
+      "response": {
+        "statusCode": 200,
+        "delayMs": 1200,
+        "headers": { "content-type": "text/event-stream; charset=utf-8" },
+        "body": "data: {\"id\":\"ssh-cold-main\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"SSH_P0_COLD_RECONNECT_REPLY\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"ssh-cold-main\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"e2e-ssh-remote-lifecycle-model\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"
+      }
     }
   ]
 }

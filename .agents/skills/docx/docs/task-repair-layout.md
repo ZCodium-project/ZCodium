@@ -10,6 +10,7 @@ job is to fix the visual outcome rather than merely inspect it.
 - optional target screenshot or template reference
 
 Normalize the complaint into one or more issue classes:
+
 - `extra_blank_page`
 - `header_footer_mismatch`
 - `section_restart_wrong`
@@ -24,6 +25,7 @@ Normalize the complaint into one or more issue classes:
 ## Evidence profile
 
 Fixed sequence:
+
 1. rendered truth first
 2. structure truth second
 3. rendered truth again after repair
@@ -52,6 +54,7 @@ Use `rendered-delivery.md` and `scripts/rendered_report.py` for both passes. The
 - recommended checks
 
 Typical repair classes:
+
 - `extra_blank_page`
 - `header_footer_mismatch`
 - `page_number_wrong`

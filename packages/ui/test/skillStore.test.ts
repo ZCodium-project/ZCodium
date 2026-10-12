@@ -207,5 +207,4 @@ describe("skillStore", () => {
     expect(useSkillStore.getState().loadedProvider).toBe("glm");
     expect(useSkillStore.getState().skills.map((skill) => skill.name)).toEqual(["code-review"]);
   });
-
 });

@@ -407,4 +407,3 @@ Use this only as a substitute for `scripts/recalc.py`. When LibreOffice
 is reachable, the recalc path is still preferable because it computes
 every formula in the workbook (not just the ones you happen to enumerate
 in `cell_values`) and surfaces the seven error tokens.
-

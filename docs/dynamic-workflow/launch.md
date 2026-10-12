@@ -11,14 +11,14 @@ A workflow run begins in one of six places. Each one ends in the same `port.subm
 `port.amend` call on the run service, and from there the runs are indistinguishable: same
 journal, same notifications, same cancel and resume, same run pane.
 
-| Surface | Who starts it | Confirmation | Where the run lands |
-|---|---|---|---|
-| `CreateWorkflow` tool, inline `script` | the model | the confirmation window | the current session |
-| `CreateWorkflow` tool, `saved` source | the model | the confirmation window, with a saved-source badge | the current session |
-| `AmendWorkflow` tool | the model | none when the run being amended is this session's own; the confirmation window otherwise (see "Amending this session's runs") | the current session |
-| 「运行」 (Run) on the hub page | the user | none: the click is the consent | a new, empty session in the workflow's project |
-| Configure on the run card or the run pane (a new run of the same script under new settings; one change starts none, see below) | the user | none: the click on Apply is the consent | the session that owns the run |
-| `/dwf resume`, the run pane's Resume, `ResumeWorkflowRun` | the user or the model | none | the session that owns the run |
+| Surface                                                                                                                        | Who starts it         | Confirmation                                                                                                                  | Where the run lands                            |
+| ------------------------------------------------------------------------------------------------------------------------------ | --------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `CreateWorkflow` tool, inline `script`                                                                                         | the model             | the confirmation window                                                                                                       | the current session                            |
+| `CreateWorkflow` tool, `saved` source                                                                                          | the model             | the confirmation window, with a saved-source badge                                                                            | the current session                            |
+| `AmendWorkflow` tool                                                                                                           | the model             | none when the run being amended is this session's own; the confirmation window otherwise (see "Amending this session's runs") | the current session                            |
+| 「运行」 (Run) on the hub page                                                                                                 | the user              | none: the click is the consent                                                                                                | a new, empty session in the workflow's project |
+| Configure on the run card or the run pane (a new run of the same script under new settings; one change starts none, see below) | the user              | none: the click on Apply is the consent                                                                                       | the session that owns the run                  |
+| `/dwf resume`, the run pane's Resume, `ResumeWorkflowRun`                                                                      | the user or the model | none                                                                                                                          | the session that owns the run                  |
 
 Two clients bypass the window on purpose: the terminal UI and headless `-p` runs. See "The
 approval bypass".
@@ -57,23 +57,25 @@ exemptions are specified in `docs/dynamic-workflow/authoring.md`, "The skill gat
 
 ```ts
 interface CreateWorkflowInput {
-  name?: string;          // display label; defaults to the saved workflow's name
-  script?: string;        // the script, inline
-  saved?: {               // or: a saved workflow, by name
+  name?: string; // display label; defaults to the saved workflow's name
+  script?: string; // the script, inline
+  saved?: {
+    // or: a saved workflow, by name
     name: string;
     args?: Record<string, unknown>;
-    scope?: "project" | "global";   // disambiguation only
-    path?: string;                  // filled in by the tool, never by the model
+    scope?: "project" | "global"; // disambiguation only
+    path?: string; // filled in by the tool, never by the model
   };
-  path?: string;          // or: a script file on disk (see "Script files")
-  args?: Record<string, unknown>;  // values for the arguments a `path` file declares; with `saved`, use `saved.args`
-  max_concurrency?: number;  // at most this many subagents work at once, above or below the default; omitted = the default parallelism
-  subagent_model?: string;   // the run's subagents work on this model; omitted = the session's model
-  adjustable_settings?: {    // filled in by the tool, never by the model (see "Adjusting the settings in the window")
-    subagent_model: boolean;       // this host can resolve a model choice
-    concurrency_ceiling?: number;  // the default parallelism D, when the run port can say (wire name predates the default)
+  path?: string; // or: a script file on disk (see "Script files")
+  args?: Record<string, unknown>; // values for the arguments a `path` file declares; with `saved`, use `saved.args`
+  max_concurrency?: number; // at most this many subagents work at once, above or below the default; omitted = the default parallelism
+  subagent_model?: string; // the run's subagents work on this model; omitted = the session's model
+  adjustable_settings?: {
+    // filled in by the tool, never by the model (see "Adjusting the settings in the window")
+    subagent_model: boolean; // this host can resolve a model choice
+    concurrency_ceiling?: number; // the default parallelism D, when the run port can say (wire name predates the default)
   };
-  model_bindings?: Record<string, string>;  // filled in by the tool: each model name the script uses → canonical (see "Models the script names")
+  model_bindings?: Record<string, string>; // filled in by the tool: each model name the script uses → canonical (see "Models the script names")
 }
 ```
 
@@ -129,7 +131,7 @@ window trustworthy: everything downstream of step 3 sees one and the same script
 3. `resolveInput`: the only disk read. For an inline script this is the identity function.
    For `saved` it reads the file, validates the arguments against the declaration, and
    rewrites the input to `{ name: input.name ?? savedName, script, saved: { name, args,
-   path, scope } }`, where `script` is the saved body byte for byte and `scope` is the
+path, scope } }`, where `script` is the saved body byte for byte and `scope` is the
    archive the lookup hit. A failure here (unknown name, malformed file, bad arguments)
    returns a structured error to the model before any hook or dialog. The same step floors
    `max_concurrency` to a whole number of at least 1 (the port floors it again on the way to
@@ -176,11 +178,11 @@ The catalog port reads the live registry view on every call, never a copy taken 
 session was assembled, so a provider the user added or removed mid-session is visible to the
 next `CreateWorkflow`. Against that listing, `subagent_model` resolves by specificity:
 
-| What the field says | What it resolves to |
-|---|---|
-| `providerId/modelId` | that entry |
-| a bare `modelId` configured under exactly one provider | that entry |
-| a bare `modelId` configured under several providers | the session's own model when it is one of them; otherwise a failure naming all of them |
+| What the field says                                    | What it resolves to                                                                    |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `providerId/modelId`                                   | that entry                                                                             |
+| a bare `modelId` configured under exactly one provider | that entry                                                                             |
+| a bare `modelId` configured under several providers    | the session's own model when it is one of them; otherwise a failure naming all of them |
 
 Provider and model ids compare case-insensitively, since a registry publishes no display
 name distinct from the id, and the canonical string is written in the catalog's own spelling
@@ -297,22 +299,23 @@ predecessor keeps its own figure (`apps/zcode-cli/packages/dynamic-workflow/docs
 
 ```ts
 interface AmendWorkflowInput {
-  run_id: string;    // the run to amend: any run of this project, settled or still running
-  script?: string;   // the whole revised script, inline
-  path?: string;     // or: the revised script's file, usually the predecessor's own script file
-                     // neither = keep the predecessor's script
-  name?: string;     // display label; defaults to the predecessor's name
-  predecessor?: {    // filled in by the tool, never by the model (see below)
+  run_id: string; // the run to amend: any run of this project, settled or still running
+  script?: string; // the whole revised script, inline
+  path?: string; // or: the revised script's file, usually the predecessor's own script file
+  // neither = keep the predecessor's script
+  name?: string; // display label; defaults to the predecessor's name
+  predecessor?: {
+    // filled in by the tool, never by the model (see below)
     name?: string;
     status: "pending" | "running" | "completed" | "errored" | "stopped";
     stop_reason?: "user" | "model" | "provider" | "interrupted" | "superseded";
     owned_by_this_session: boolean;
-    script_inherited?: true;  // the call gave neither source; `script` now holds the predecessor's
+    script_inherited?: true; // the call gave neither source; `script` now holds the predecessor's
   };
-  max_concurrency?: number | null;  // omit = keep the predecessor's limit; null = remove it; a number = set it
-  subagent_model?: string | null;   // omit = keep the predecessor's model; null = back to the session model; a string = set it
-  adjustable_settings?: { subagent_model: boolean; concurrency_ceiling?: number };  // filled in by the tool, as on CreateWorkflow
-  model_bindings?: Record<string, string>;  // filled in by the tool, as on CreateWorkflow
+  max_concurrency?: number | null; // omit = keep the predecessor's limit; null = remove it; a number = set it
+  subagent_model?: string | null; // omit = keep the predecessor's model; null = back to the session model; a string = set it
+  adjustable_settings?: { subagent_model: boolean; concurrency_ceiling?: number }; // filled in by the tool, as on CreateWorkflow
+  model_bindings?: Record<string, string>; // filled in by the tool, as on CreateWorkflow
 }
 ```
 
@@ -400,11 +403,11 @@ a live run touches no script and writes no draft at all.
 Each failure says what to pass instead. The first two come before any hook or window, the
 third at `prepareApproval`, still before the window:
 
-| Case | Result |
-|---|---|
-| the predecessor's record has no script (it predates script persistence) | `workflow_amend_script_unavailable`: pass the whole script, as `script` or as a `path` |
-| the host has no run port, or its port cannot read scripts | `workflow_amend_script_unavailable`, with the same next step |
-| the inherited script no longer compiles against the current facade | the diagnostics, led by a sentence saying the script was the predecessor's, inherited because both `script` and `path` were omitted; the lines are file-anchored and the note names the file to edit and pass back as `path`, as for any script with a file; nothing is stopped or created |
+| Case                                                                    | Result                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| the predecessor's record has no script (it predates script persistence) | `workflow_amend_script_unavailable`: pass the whole script, as `script` or as a `path`                                                                                                                                                                                                     |
+| the host has no run port, or its port cannot read scripts               | `workflow_amend_script_unavailable`, with the same next step                                                                                                                                                                                                                               |
+| the inherited script no longer compiles against the current facade      | the diagnostics, led by a sentence saying the script was the predecessor's, inherited because both `script` and `path` were omitted; the lines are file-anchored and the note names the file to edit and pass back as `path`, as for any script with a file; nothing is stopped or created |
 
 The lead sentence matters for the same reason as the inherited model's failure above: the
 model did not write the failing lines in this call, and without it would read the
@@ -440,20 +443,20 @@ The handler then calls the run port's `retuneConcurrency` in place of `port.amen
 whose port has no `retuneConcurrency` has no such route at all, and every call lands as the
 amendment it would have been before this existed, window and all.
 
-Here `max_concurrency` is the one place the tri-state is *not* normalized: the resolved input
+Here `max_concurrency` is the one place the tri-state is _not_ normalized: the resolved input
 carries the number or `null`, and `null` travels to the port as itself. The route's own
 `unchanged` is raised here too, before any hook, whenever the default parallelism is readable —
 the requested value, floored, against the bound already in force. Where the host cannot name
 the default, `null` cannot be turned into a number to compare, so this net lets the call
 through and the port answers `unchanged` instead.
 
-| The call | What happens |
-|---|---|
-| only `max_concurrency`, run held live, value differs from the bound in force | retuned in place |
-| only `max_concurrency`, run held live, same value | `unchanged`: a structured failure naming the bound already in force, raised before any hook or window; nothing is written and nothing is stopped |
-| only `max_concurrency`, run not held live (settled, another process's, or pending with no engine yet) | the amendment, unchanged |
-| anything else present | the amendment, unchanged |
-| the run settles between the check and the call | the port answers `not_live`; what follows depends on who owns the run (below) |
+| The call                                                                                              | What happens                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| only `max_concurrency`, run held live, value differs from the bound in force                          | retuned in place                                                                                                                                 |
+| only `max_concurrency`, run held live, same value                                                     | `unchanged`: a structured failure naming the bound already in force, raised before any hook or window; nothing is written and nothing is stopped |
+| only `max_concurrency`, run not held live (settled, another process's, or pending with no engine yet) | the amendment, unchanged                                                                                                                         |
+| anything else present                                                                                 | the amendment, unchanged                                                                                                                         |
+| the run settles between the check and the call                                                        | the port answers `not_live`; what follows depends on who owns the run (below)                                                                    |
 
 The third row is reached in two ways: `resolveInput` already sees a status that is not live, or
 the status says live and the port answers `not_live` anyway. They end in the same place, so the
@@ -478,12 +481,12 @@ amendment would have needed a window. The question is the window rule's own pred
 `isAmendWorkflowOwnedPredecessor` in contracts, which the permission service also calls — one
 function, so "this session's own run, not stopped by the user" cannot come to mean two things:
 
-| Situation | Result |
-|---|---|
-| the predicate holds: this session's own run, not stopped by the user | the handler makes the amendment, reading the predecessor's script and compiling it at that point instead of at step 2, and reporting a missing or non-compiling script as the amendment's own refusal. Nothing is skipped: an amendment of this session's own run opens no window either |
-| the predicate fails and the run has settled | refused, `workflow_run_settled`, naming the run and saying to call again |
-| the predicate fails and the run is still `pending` or `running`, so this agent simply never held it | refused, `workflow_run_not_retunable`, with the same advice |
-| the run is gone from the port entirely | `run_not_found`, worded as `resolveInput`'s own: nothing was stopped or created, pass an existing run's id or start one with `CreateWorkflow` |
+| Situation                                                                                           | Result                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the predicate holds: this session's own run, not stopped by the user                                | the handler makes the amendment, reading the predecessor's script and compiling it at that point instead of at step 2, and reporting a missing or non-compiling script as the amendment's own refusal. Nothing is skipped: an amendment of this session's own run opens no window either |
+| the predicate fails and the run has settled                                                         | refused, `workflow_run_settled`, naming the run and saying to call again                                                                                                                                                                                                                 |
+| the predicate fails and the run is still `pending` or `running`, so this agent simply never held it | refused, `workflow_run_not_retunable`, with the same advice                                                                                                                                                                                                                              |
+| the run is gone from the port entirely                                                              | `run_not_found`, worded as `resolveInput`'s own: nothing was stopped or created, pass an existing run's id or start one with `CreateWorkflow`                                                                                                                                            |
 
 Both refusals exist for one reason: a retune shows no window, so nothing was approved, and that
 approval of nothing must not be stretched into a new run of a script this user has not read. The
@@ -519,11 +522,11 @@ was already in the background-task tracker under its own id and stays there, so 
 and a numeric log code from `AMEND_WORKFLOW_ERROR_CODE` — and each says that nothing was
 stopped, created or changed, then what to pass instead:
 
-| Code | Log | Says |
-|---|---|---|
-| `workflow_retune_unchanged` | 27 | the bound already in force (or that the run has none and runs at the default parallelism), and to pass a different `max_concurrency`, or a revised script if an amendment was meant |
-| `workflow_run_settled` | 28 | the run settled before the new limit could take hold, and to call `AmendWorkflow` again for a new run of it under that limit |
-| `workflow_run_not_retunable` | 29 | the run is not being executed by this agent, so its parallelism cannot be changed in place, with the same next step |
+| Code                         | Log | Says                                                                                                                                                                                |
+| ---------------------------- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workflow_retune_unchanged`  | 27  | the bound already in force (or that the run has none and runs at the default parallelism), and to pass a different `max_concurrency`, or a revised script if an amendment was meant |
+| `workflow_run_settled`       | 28  | the run settled before the new limit could take hold, and to call `AmendWorkflow` again for a new run of it under that limit                                                        |
+| `workflow_run_not_retunable` | 29  | the run is not being executed by this agent, so its parallelism cannot be changed in place, with the same next step                                                                 |
 
 ### From call to run
 
@@ -654,11 +657,12 @@ journal and its subagents, and grows by the body the model wrote.
 
 ```ts
 interface FillWorkflowHoleInput {
-  run_id: string;    // the run that is waiting
-  hole_id: string;   // the hole's site id from the notification, e.g. `hole#21b40fca`
-  script?: string;   // the body: the statements of the hole's function, inline
-  path?: string;     // or: a file holding those statements — usually the fill file of a rejected attempt
-  hole?: {           // filled in by the tool, never by the model
+  run_id: string; // the run that is waiting
+  hole_id: string; // the hole's site id from the notification, e.g. `hole#21b40fca`
+  script?: string; // the body: the statements of the hole's function, inline
+  path?: string; // or: a file holding those statements — usually the fill file of a rejected attempt
+  hole?: {
+    // filled in by the tool, never by the model
     name: string;
     type: string;
     draft_path?: string;
@@ -682,13 +686,13 @@ without the resolver's input (which never reaches a row), and the run card takes
 newest display for its run id (`docs/dynamic-workflow/presentation.md`, "Holes on the
 timeline").
 
-| Refusal | Meaning |
-|---|---|
-| `run_not_found` | no run row |
-| `hole_not_waiting` | the run is not in flight, or the hole is not one it is waiting at (already filled, not yet reached, unknown id); the message says which, and for a stopped run points at `ResumeWorkflowRun`, after which the hole asks again |
-| `fill_unchanged` | a `path` whose bytes equal the last rejected attempt for this hole: the forgotten edit, caught before any window |
-| diagnostics | the effective script does not compile, or the body names a model the run has no binding for (9011); see "The fill file" and "Models the script names" |
-| `fill_ids_unstable` | the compiled effective script renumbered an existing site: a host fault, never the model's; the hole stays waiting |
+| Refusal             | Meaning                                                                                                                                                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run_not_found`     | no run row                                                                                                                                                                                                                    |
+| `hole_not_waiting`  | the run is not in flight, or the hole is not one it is waiting at (already filled, not yet reached, unknown id); the message says which, and for a stopped run points at `ResumeWorkflowRun`, after which the hole asks again |
+| `fill_unchanged`    | a `path` whose bytes equal the last rejected attempt for this hole: the forgotten edit, caught before any window                                                                                                              |
+| diagnostics         | the effective script does not compile, or the body names a model the run has no binding for (9011); see "The fill file" and "Models the script names"                                                                         |
+| `fill_ids_unstable` | the compiled effective script renumbered an existing site: a host fault, never the model's; the hole stays waiting                                                                                                            |
 
 ### The fill file
 
@@ -766,14 +770,14 @@ runs of the same name, so "approved this name before" does not mean "approved th
 
 Inside the always-ask branch the order is fixed:
 
-| Check | Result |
-|---|---|
-| mode is `auto` | deny (`mode.auto.unimplemented`) |
-| tool is in `disallowedTools` | deny |
-| a project deny rule matches | deny |
-| a session allow rule matches | allow, no event, no window (`rule.session.allow`) |
+| Check                                                                  | Result                                                    |
+| ---------------------------------------------------------------------- | --------------------------------------------------------- |
+| mode is `auto`                                                         | deny (`mode.auto.unimplemented`)                          |
+| tool is in `disallowedTools`                                           | deny                                                      |
+| a project deny rule matches                                            | deny                                                      |
+| a session allow rule matches                                           | allow, no event, no window (`rule.session.allow`)         |
 | `AmendWorkflow` of a run this session started, not stopped by the user | allow, no event, no window (`rule.session.workflowOwner`) |
-| otherwise | ask (`tool.alwaysAsk`) |
+| otherwise                                                              | ask (`tool.alwaysAsk`)                                    |
 
 Project allow rules and `allowedTools` are never consulted for an always-ask tool. A
 `PreToolUse` hook's `allow` cannot erase the ask; a hook's `ask` can turn either session
@@ -785,15 +789,15 @@ dialog and the first answer wins.
 The dialog's own header reads "Permission required" / 「需要权限」. Below it the workflow
 block:
 
-| Part | Content |
-|---|---|
-| Title | "Run this workflow?" / 「运行此工作流？」 for `CreateWorkflow`, "Amend this workflow?" / 「调整此工作流？」 for `AmendWorkflow`, then the workflow name and the phase count ("N phases" / 「N 个阶段」). Nothing else in the header: a script that reached the window has compiled. |
-| Lineage row | `AmendWorkflow` only: "Amends run" / 「调整 run」 plus the run id, "script unchanged" / 「脚本不变」 when `predecessor.script_inherited` says the call kept the predecessor's script, and "still running, will be stopped" / 「仍在运行，将被停止」 when the predecessor is in flight. With the script kept, the timeline and the script fold show the predecessor's script, which is what will run. |
-| Run settings | Two lines, "Subagents run on {model}" / 「子代理运行在 {model}」 and "At most {n} subagents at once" / 「最多 {n} 个子代理同时运行」, in the order model then bound. When the input carries `adjustable_settings` the two lines are always drawn and the value in each is a control the user can change before approving (see "Adjusting the settings in the window"): the model line shows the session model when the call set none, the bound line the default parallelism when the call set none. When the input carries no block (an older agent), the lines appear only for the fields the call set, as plain text, and nothing is adjustable. Either way what is being approved is "run under these conditions"; for an amend the lines show the inherited values too, because `resolveInput` has already written them into the input. The model is named by its **resolved label**, not by the canonical value `resolveInput` produced: "GLM-5.3-Flash · thinking High" / 「GLM-5.3-Flash · 思考 高」. The label rule (`describeWorkflowSubagentModel`, shared with the run card and the run pane) is: a builtin provider family shows the model id alone, a custom provider shows "{provider name}/{model id}", a provider the session's model listing cannot resolve falls back to the model id, and the provider id is never shown, because for a team plan it is a UUID. The canonical value stays reachable in a tooltip, so what will actually be used is still legible. The lines speak only of the subagents: the main agent keeps the session model whatever they say. When the input carries `model_bindings` the window does not list them: which model each named subagent uses is the authoring model's choice, written in the script the window shows, and listing every binding with a control would turn one decision ("run this") into many. The model line then reads "By default, subagents run on {model}" / 「子代理默认运行在 {model}」, because it no longer speaks for every subagent; the run pane names each subagent's own model once the run starts. |
-| Saved-source badge | "Saved workflow" / 「已保存的工作流」 · scope, the saved name, its path, and an arguments grid labelled 「实参」, when the source is `saved`. |
-| Timeline | the phase timeline built from the display payload's graph (`docs/dynamic-workflow/presentation.md`). It is always open and cannot be collapsed; nothing in it is clickable. |
-| Script | a collapsible, closed by default ("Show full script" / 「显示完整脚本」), a TypeScript code block with line numbers inside a height-capped scroll area. |
-| Origin badge | 「子智能体」 (subagent) next to the title when the ask was mirrored from a subagent. |
+| Part               | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title              | "Run this workflow?" / 「运行此工作流？」 for `CreateWorkflow`, "Amend this workflow?" / 「调整此工作流？」 for `AmendWorkflow`, then the workflow name and the phase count ("N phases" / 「N 个阶段」). Nothing else in the header: a script that reached the window has compiled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Lineage row        | `AmendWorkflow` only: "Amends run" / 「调整 run」 plus the run id, "script unchanged" / 「脚本不变」 when `predecessor.script_inherited` says the call kept the predecessor's script, and "still running, will be stopped" / 「仍在运行，将被停止」 when the predecessor is in flight. With the script kept, the timeline and the script fold show the predecessor's script, which is what will run.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Run settings       | Two lines, "Subagents run on {model}" / 「子代理运行在 {model}」 and "At most {n} subagents at once" / 「最多 {n} 个子代理同时运行」, in the order model then bound. When the input carries `adjustable_settings` the two lines are always drawn and the value in each is a control the user can change before approving (see "Adjusting the settings in the window"): the model line shows the session model when the call set none, the bound line the default parallelism when the call set none. When the input carries no block (an older agent), the lines appear only for the fields the call set, as plain text, and nothing is adjustable. Either way what is being approved is "run under these conditions"; for an amend the lines show the inherited values too, because `resolveInput` has already written them into the input. The model is named by its **resolved label**, not by the canonical value `resolveInput` produced: "GLM-5.3-Flash · thinking High" / 「GLM-5.3-Flash · 思考 高」. The label rule (`describeWorkflowSubagentModel`, shared with the run card and the run pane) is: a builtin provider family shows the model id alone, a custom provider shows "{provider name}/{model id}", a provider the session's model listing cannot resolve falls back to the model id, and the provider id is never shown, because for a team plan it is a UUID. The canonical value stays reachable in a tooltip, so what will actually be used is still legible. The lines speak only of the subagents: the main agent keeps the session model whatever they say. When the input carries `model_bindings` the window does not list them: which model each named subagent uses is the authoring model's choice, written in the script the window shows, and listing every binding with a control would turn one decision ("run this") into many. The model line then reads "By default, subagents run on {model}" / 「子代理默认运行在 {model}」, because it no longer speaks for every subagent; the run pane names each subagent's own model once the run starts. |
+| Saved-source badge | "Saved workflow" / 「已保存的工作流」 · scope, the saved name, its path, and an arguments grid labelled 「实参」, when the source is `saved`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Timeline           | the phase timeline built from the display payload's graph (`docs/dynamic-workflow/presentation.md`). It is always open and cannot be collapsed; nothing in it is clickable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Script             | a collapsible, closed by default ("Show full script" / 「显示完整脚本」), a TypeScript code block with line numbers inside a height-capped scroll area.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Origin badge       | 「子智能体」 (subagent) next to the title when the ask was mirrored from a subagent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 A script with no steps has no graph; then the timeline is omitted and the script starts
 open, because the code is the only content. The window renders the tool's `reason` string
@@ -809,12 +813,12 @@ invisible to an old client.
 
 ### The options
 
-| # | Button | Wire option | Effect |
-|---|---|---|---|
-| 1 | "Allow" / 「允许」, described as 「仅允许这一次」, or 「按调整后的设置运行一次」 / "Run once with the adjusted settings" once a setting was changed | `allow_once` | run once, under the adjusted settings when there are any |
-| 2 | "Always allow in this session" / 「本会话内始终允许」, described as 「本会话内运行工作流不再询问」, or 「本次按调整后的设置运行；之后的工作流不再询问，各用各的设置」 / "This run with the adjusted settings; later runs are not asked and carry their own" once a setting was changed | `allowSession` | run, under the adjusted settings when there are any, and stop asking for this tool in this session |
-| 3 | "Deny" / 「拒绝」 | `deny` | standard permission denial; the model is told the run was not approved |
-| 4 | the feedback row, placeholder "Describe how the workflow should change…" / 「描述这个工作流应该怎么改…」 | `workflowRefine` | Refine: deny plus feedback (below) |
+| #   | Button                                                                                                                                                                                                                                                                                 | Wire option      | Effect                                                                                             |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------- |
+| 1   | "Allow" / 「允许」, described as 「仅允许这一次」, or 「按调整后的设置运行一次」 / "Run once with the adjusted settings" once a setting was changed                                                                                                                                    | `allow_once`     | run once, under the adjusted settings when there are any                                           |
+| 2   | "Always allow in this session" / 「本会话内始终允许」, described as 「本会话内运行工作流不再询问」, or 「本次按调整后的设置运行；之后的工作流不再询问，各用各的设置」 / "This run with the adjusted settings; later runs are not asked and carry their own" once a setting was changed | `allowSession`   | run, under the adjusted settings when there are any, and stop asking for this tool in this session |
+| 3   | "Deny" / 「拒绝」                                                                                                                                                                                                                                                                      | `deny`           | standard permission denial; the model is told the run was not approved                             |
+| 4   | the feedback row, placeholder "Describe how the workflow should change…" / 「描述这个工作流应该怎么改…」                                                                                                                                                                               | `workflowRefine` | Refine: deny plus feedback (below)                                                                 |
 
 Keys 1, 2 and 3 answer immediately; 4 selects the feedback row. Arrow keys and Tab move
 between buttons and the row; Enter confirms the selection, and Enter inside the row
@@ -882,12 +886,12 @@ hands the result to the executor as the broker result's `inputAdjustments`. The 
 applies them after the permission grant and before the handler, through the tool's
 `applyInputAdjustments`:
 
-| Field | Value | Effect on the input |
-|---|---|---|
-| `subagent_model` | a string | resolved against the model catalog exactly as `resolveInput` resolves the field; the canonical string the window sends hits the first tier. A failure fails the call the way an unresolvable model fails it in `resolveInput`, before anything starts, and names the candidates |
-| `subagent_model` | `null` | the key is removed: the session model |
-| `max_concurrency` | a number | floored to a whole number of at least 1; no upper limit |
-| `max_concurrency` | `null` | the key is removed: the default parallelism |
+| Field             | Value    | Effect on the input                                                                                                                                                                                                                                                             |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `subagent_model`  | a string | resolved against the model catalog exactly as `resolveInput` resolves the field; the canonical string the window sends hits the first tier. A failure fails the call the way an unresolvable model fails it in `resolveInput`, before anything starts, and names the candidates |
+| `subagent_model`  | `null`   | the key is removed: the session model                                                                                                                                                                                                                                           |
+| `max_concurrency` | a number | floored to a whole number of at least 1; no upper limit                                                                                                                                                                                                                         |
+| `max_concurrency` | `null`   | the key is removed: the default parallelism                                                                                                                                                                                                                                     |
 
 After this step the input has the shape `resolveInput` produces, so the handler, the run port
 and the journal need nothing new: the model rides on the `run-launched` event and the bound on
@@ -929,13 +933,13 @@ so the model revises and resubmits, which opens a new window. It is never consen
    button list and makes it the feedback row's target.
 2. The answer arrives as `{ optionId: "workflowRefine", freeText }`. The broker maps a
    non-empty `freeText` to `{ decision: "deny", reason: freeText, reasonSource:
-   "workflow_refine_feedback" }`. Empty text, or the same option id on another tool, is a
+"workflow_refine_feedback" }`. Empty text, or the same option id on another tool, is a
    plain deny.
 3. The executor writes the tool result as "The workflow run was not approved by the user."
    and attaches the feedback as a follow-up user input.
 4. The runtime steers the active turn with that input as a `guide` delivery, persisted as
    an ordinary user message. The provider sees `assistant tool_use → tool_result → user
-   feedback`, in that order.
+feedback`, in that order.
 
 Windows without a Refine option (`SaveWorkflow`) show the generic feedback row instead,
 whose text becomes the deny reason.
@@ -972,11 +976,11 @@ let the model start arbitrary new code without a window.
 
 The rule is read from the journal, through the `predecessor` block `resolveInput` filled in:
 
-| Predecessor | Result |
-|---|---|
-| `parent_session_id` is this session and `stop_reason` is not `user` | allow, `rule.session.workflowOwner`, in every mode |
-| `parent_session_id` is this session but the user stopped it | ask: the user ended that run on purpose, and a revision of it is a new decision |
-| another session's run | ask |
+| Predecessor                                                         | Result                                                                          |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `parent_session_id` is this session and `stop_reason` is not `user` | allow, `rule.session.workflowOwner`, in every mode                              |
+| `parent_session_id` is this session but the user stopped it         | ask: the user ended that run on purpose, and a revision of it is a new decision |
+| another session's run                                               | ask                                                                             |
 
 A hub launch owns the session it created, so amending it from that session is free. A run
 that was itself an amendment is owned by the session that amended, so a chain of revisions
@@ -1005,23 +1009,23 @@ the lineage row says the script is unchanged.
 
 These places do not show the window, on purpose:
 
-| Place | Why |
-|---|---|
-| 「运行」 on the hub page | the user is looking at a workflow they saved, has filled in its arguments, and pressed Run; the click is the consent. The launch goes through `startSavedWorkflowRun`, not the tool executor, so the tool's gate is untouched. |
-| Apply in the Configure popover | the user is looking at the run, chose its new settings and read what applying does; the click is the consent. The change goes through `amendWorkflowRunSettings`, not the tool executor, and it runs the script the user already approved. |
-| a retune of a live run's parallelism, from either caller | it starts nothing. No script is read, compiled or executed; one number moves, up or down, on a run that is already executing approved code ("Changing only the parallelism of a live run"). |
-| the terminal UI and headless `-p` | the terminal user is already in a command-line context; friction outweighs protection. The bypass lives in the client's permission responder, not in core. |
-| workflow child sessions | a subagent does not launch, revise or steer runs: that is the main agent's job, and the window would ask the user about a run nobody in the conversation proposed. `CreateWorkflow`, `AmendWorkflow`, `SaveWorkflow`, `ResumeWorkflowRun` and `ResolveWorkflowQuestion` are removed from a child's tool set; the child gets a clean tool-disallowed error. `ListSavedWorkflows`, `ListWorkflowRuns` and `GetWorkflowRun` stay available. The subagent's other asks and its questions are not exempt: they reach the user ("Permissions inside a run"). |
+| Place                                                    | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 「运行」 on the hub page                                 | the user is looking at a workflow they saved, has filled in its arguments, and pressed Run; the click is the consent. The launch goes through `startSavedWorkflowRun`, not the tool executor, so the tool's gate is untouched.                                                                                                                                                                                                                                                                                                                         |
+| Apply in the Configure popover                           | the user is looking at the run, chose its new settings and read what applying does; the click is the consent. The change goes through `amendWorkflowRunSettings`, not the tool executor, and it runs the script the user already approved.                                                                                                                                                                                                                                                                                                             |
+| a retune of a live run's parallelism, from either caller | it starts nothing. No script is read, compiled or executed; one number moves, up or down, on a run that is already executing approved code ("Changing only the parallelism of a live run").                                                                                                                                                                                                                                                                                                                                                            |
+| the terminal UI and headless `-p`                        | the terminal user is already in a command-line context; friction outweighs protection. The bypass lives in the client's permission responder, not in core.                                                                                                                                                                                                                                                                                                                                                                                             |
+| workflow child sessions                                  | a subagent does not launch, revise or steer runs: that is the main agent's job, and the window would ask the user about a run nobody in the conversation proposed. `CreateWorkflow`, `AmendWorkflow`, `SaveWorkflow`, `ResumeWorkflowRun` and `ResolveWorkflowQuestion` are removed from a child's tool set; the child gets a clean tool-disallowed error. `ListSavedWorkflows`, `ListWorkflowRuns` and `GetWorkflowRun` stay available. The subagent's other asks and its questions are not exempt: they reach the user ("Permissions inside a run"). |
 
 ### Other clients
 
-| Client | What it sees |
-|---|---|
-| desktop, web, phone remote (v4) | the window as described |
-| legacy v3 desktop | a plain ask with only Allow once and Deny; the `display` and options policy are stripped because the old schemas are strict and would drop the whole event otherwise. The script is still in the input. |
-| bots / IM | a text summary; the session option is classified as a generic "always allow" |
-| terminal UI | no window: auto-allow (below) |
-| headless | no window: auto-allow (below) |
+| Client                          | What it sees                                                                                                                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| desktop, web, phone remote (v4) | the window as described                                                                                                                                                                                 |
+| legacy v3 desktop               | a plain ask with only Allow once and Deny; the `display` and options policy are stripped because the old schemas are strict and would drop the whole event otherwise. The script is still in the input. |
+| bots / IM                       | a text summary; the session option is classified as a generic "always allow"                                                                                                                            |
+| terminal UI                     | no window: auto-allow (below)                                                                                                                                                                           |
+| headless                        | no window: auto-allow (below)                                                                                                                                                                           |
 
 ## Permissions inside a run
 
@@ -1116,8 +1120,15 @@ edits; `.dwf.ts` (not `.ts`) lets a scan tell workflows from sources without ope
 interface SavedWorkflowMeta {
   description: string;
   whenToUse?: string;
-  args?: Record<string, { type: "string" | "number" | "boolean" | "json";
-                          description?: string; required?: boolean; default?: unknown }>;
+  args?: Record<
+    string,
+    {
+      type: "string" | "number" | "boolean" | "json";
+      description?: string;
+      required?: boolean;
+      default?: unknown;
+    }
+  >;
 }
 ```
 
@@ -1138,10 +1149,10 @@ A name matches `^[A-Za-z0-9_.-]+$`, is at most 64 characters, and is not made on
 dots. Every operation validates the name before joining it into a path; the pattern is the
 path-traversal defense.
 
-| Scope | Directory | Visible from |
-|---|---|---|
-| `project` | `<cwd>/.zcode/workflows/` | this project |
-| `global` | `~/.zcode/workflows/` (the agent process's home directory) | every project on this machine |
+| Scope     | Directory                                                  | Visible from                  |
+| --------- | ---------------------------------------------------------- | ----------------------------- |
+| `project` | `<cwd>/.zcode/workflows/`                                  | this project                  |
+| `global`  | `~/.zcode/workflows/` (the agent process's home directory) | every project on this machine |
 
 Lookups run over the roots in that order and the first hit wins: a project workflow hides
 a global one of the same name. A lookup or listing may instead be directed at one scope;
@@ -1157,10 +1168,10 @@ interface SaveWorkflowInput {
   description: string;
   whenToUse?: string;
   args?: SavedWorkflowArgsDeclaration;
-  script?: string;                      // body only, no metadata block
-  script_path?: string;                 // or: the file holding the body (a draft, usually)
-  scope: "project" | "global";          // required, no default
-  run_id?: string;                      // provenance: the run this workflow was distilled from
+  script?: string; // body only, no metadata block
+  script_path?: string; // or: the file holding the body (a draft, usually)
+  scope: "project" | "global"; // required, no default
+  run_id?: string; // provenance: the run this workflow was distilled from
   // filled in by resolveInput, never by the model:
   path?: string;
   overwrite?: boolean;
@@ -1206,9 +1217,13 @@ The call follows the same lifecycle as `CreateWorkflow`:
 
 ```ts
 interface SaveWorkflowOutput {
-  diagnostics; ok; response;
-  name: string; scope: "project" | "global"; path: string;
-  overwritten?: boolean;      // only when a file was written
+  diagnostics;
+  ok;
+  response;
+  name: string;
+  scope: "project" | "global";
+  path: string;
+  overwritten?: boolean; // only when a file was written
 }
 ```
 
@@ -1324,11 +1339,11 @@ in practice that line is a comment banner. Every inline submission mints a new f
 including one the model should have made by `path`: a draft is never overwritten behind the
 model's back.
 
-| Source | What is written | When |
-|---|---|---|
-| inline `script` | the script, byte for byte | in the handler, before the compile result is read, so a draft that fails to compile is on disk for editing; the handler runs for every inline call, since a non-compiling script skips the window |
+| Source                            | What is written                                                                               | When                                                                                                                                                                                                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| inline `script`                   | the script, byte for byte                                                                     | in the handler, before the compile result is read, so a draft that fails to compile is on disk for editing; the handler runs for every inline call, since a non-compiling script skips the window                                                                    |
 | `saved` (tool call or hub launch) | the saved file, byte for byte, metadata block included, so `args` keep validating on resubmit | in `resolveInput`, right after the one read of the saved file, so the copy is the bytes just read and no second read can diverge from them; the normalized `saved` block records the copy's path as `draft`. The definition itself is never edited on a run's behalf |
-| `path` | nothing; the file is already the working copy | — |
+| `path`                            | nothing; the file is already the working copy                                                 | —                                                                                                                                                                                                                                                                    |
 
 The write is best effort. A project directory that cannot be written (a read-only checkout,
 `.zcode` being a plain file) does not fail the call: the tool proceeds without a file, the
@@ -1350,12 +1365,12 @@ file exists to avoid.
 
 Only bytes the model authored in that call count:
 
-| Draft | Recorded as written? |
-|---|---|
-| inline `script` on `CreateWorkflow` / `AmendWorkflow` | yes |
-| the copy of a `saved` workflow | no; it carries a metadata block and a body the model may never have seen |
+| Draft                                                          | Recorded as written?                                                     |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| inline `script` on `CreateWorkflow` / `AmendWorkflow`          | yes                                                                      |
+| the copy of a `saved` workflow                                 | no; it carries a metadata block and a body the model may never have seen |
 | the fresh draft of an amend that kept the predecessor's script | no; the script may come from another session or from before a compaction |
-| a hub launch, or the GUI's Configure workflow | no; no model call wrote it |
+| a hub launch, or the GUI's Configure workflow                  | no; no model call wrote it                                               |
 
 Everything else about the guard holds. A draft edited by anyone else after the submission
 has a later modification time, so the `Edit` is refused as stale and the model reads it
@@ -1485,14 +1500,14 @@ load shows 「读取工作流失败：{error}」.
 
 A card is a fixed-height cell in a two-column grid:
 
-| Part | Content |
-|---|---|
-| Name | one truncated line |
-| Description | two clamped lines |
-| Last run | 「尚未运行」 (never), or 「已完成」 / 「出错」 / 「运行中」 / 「已停止」 with a relative time, each with its own icon and colour |
-| Arguments | up to three monospace chips of argument names, then `+N` |
-| 「运行」 (Run) | an outline button; see "Direct launch from the hub" |
-| ⋯ menu | 「查看详情」 (open), 「在对话里修订」 (revise in chat), 「复制路径」 (copy path), then 「提升为全局」 for a project workflow or 「移到项目…」 for a global one, a separator, and 「删除工作流」 in red |
+| Part           | Content                                                                                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Name           | one truncated line                                                                                                                                                                                     |
+| Description    | two clamped lines                                                                                                                                                                                      |
+| Last run       | 「尚未运行」 (never), or 「已完成」 / 「出错」 / 「运行中」 / 「已停止」 with a relative time, each with its own icon and colour                                                                       |
+| Arguments      | up to three monospace chips of argument names, then `+N`                                                                                                                                               |
+| 「运行」 (Run) | an outline button; see "Direct launch from the hub"                                                                                                                                                    |
+| ⋯ menu         | 「查看详情」 (open), 「在对话里修订」 (revise in chat), 「复制路径」 (copy path), then 「提升为全局」 for a project workflow or 「移到项目…」 for a global one, a separator, and 「删除工作流」 in red |
 
 Clicking anywhere else on the card, or Enter/Space, opens the detail page. Cards of remote
 projects have no scope item: a promoted copy would land in the remote machine's home
@@ -1507,15 +1522,15 @@ The detail page replaces the list. Its breadcrumb is 自动化 › project (or �
 the section crumb returns to the list. Every action on the page targets the workflow's own
 project, never the active one.
 
-| Part | Content |
-|---|---|
-| Header | the name, the description, a primary 「运行」 button and a ⋯ menu (revise, copy path, the scope item, delete) |
-| 「最近产物」 (latest artifacts) | the artifact chips of the newest completed run that published any, clickable into that run's session |
-| Tabs | 「定义」 (definition) and 「运行历史」 (run history, with the count); the file path with a copy button on the right |
-| Definition: 「基本信息」 | 「说明」 (description, required), 「使用时机」 (when to use, with the help 「给 ZCode 的路由提示：什么场景该选这个工作流。」), and a 「参数」 table (name, type, required, default, description) with add and remove. Row errors: 「参数需要名字」, 「参数名重复」, 「默认值与类型不符」. |
-| Save bar | appears only when the form differs from the file: 「放弃更改」 and 「保存元数据」. Saving rewrites the metadata block and leaves the script byte for byte (the note says so: 「只改写文件顶部的元数据，脚本正文保持原样。」). |
-| Definition: 「脚本」 | the script, read-only, with a copy button and the note 「脚本只读。要改脚本，在对话里让 ZCode 修订后另存一版。」 |
-| Run history | one row per run of this name: status word, start time, a project column for global workflows, `duration · tokens`, `key=value` argument chips, artifact chips, and 「查看实例」 (open run) |
+| Part                            | Content                                                                                                                                                                                                                                                                                   |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header                          | the name, the description, a primary 「运行」 button and a ⋯ menu (revise, copy path, the scope item, delete)                                                                                                                                                                             |
+| 「最近产物」 (latest artifacts) | the artifact chips of the newest completed run that published any, clickable into that run's session                                                                                                                                                                                      |
+| Tabs                            | 「定义」 (definition) and 「运行历史」 (run history, with the count); the file path with a copy button on the right                                                                                                                                                                       |
+| Definition: 「基本信息」        | 「说明」 (description, required), 「使用时机」 (when to use, with the help 「给 ZCode 的路由提示：什么场景该选这个工作流。」), and a 「参数」 table (name, type, required, default, description) with add and remove. Row errors: 「参数需要名字」, 「参数名重复」, 「默认值与类型不符」. |
+| Save bar                        | appears only when the form differs from the file: 「放弃更改」 and 「保存元数据」. Saving rewrites the metadata block and leaves the script byte for byte (the note says so: 「只改写文件顶部的元数据，脚本正文保持原样。」).                                                             |
+| Definition: 「脚本」            | the script, read-only, with a copy button and the note 「脚本只读。要改脚本，在对话里让 ZCode 修订后另存一版。」                                                                                                                                                                          |
+| Run history                     | one row per run of this name: status word, start time, a project column for global workflows, `duration · tokens`, `key=value` argument chips, artifact chips, and 「查看实例」 (open run)                                                                                                |
 
 「查看实例」 needs the run's parent session id and tool call id, and for a global workflow
 the run's project must be open; it switches to that session and opens the run pane. The
@@ -1540,11 +1555,11 @@ that name returns to the list.
 「通过对话创建」 and 「在对话里修订」 start a new task in the workflow's project with a
 prefilled draft, not a sent message; the user finishes the sentence:
 
-| Action | Draft (zh) |
-|---|---|
-| create, project | 「帮我设计一个工作流，跑通后保存到本项目：」 |
-| create, global | 「帮我设计一个工作流，跑通后用 SaveWorkflow 保存为全局工作流（scope: "global"）：」 |
-| revise | 「请修订已保存的工作流「{name}」（{path}）：」, plus 「它是全局工作流，保存时保持 scope: "global"。」 for a global one |
+| Action          | Draft (zh)                                                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| create, project | 「帮我设计一个工作流，跑通后保存到本项目：」                                                                           |
+| create, global  | 「帮我设计一个工作流，跑通后用 SaveWorkflow 保存为全局工作流（scope: "global"）：」                                    |
+| revise          | 「请修订已保存的工作流「{name}」（{path}）：」, plus 「它是全局工作流，保存时保持 scope: "global"。」 for a global one |
 
 For the global group these land in the active local project, or the first local project.
 
@@ -1556,8 +1571,7 @@ that project whose first user message is sent immediately:
 > Promote the saved project workflow "{name}" ({path}) to a global workflow. … 1. read the
 > file and understand its structure; 2. find every reference to this repository (paths,
 > commands, layout, conventions, branch names); 3. turn them into `args` declarations with
-> descriptions and sensible defaults, or neutral wording, keeping the causal structure;
-> 4. save with `SaveWorkflow` and `scope: "global"`, keeping or improving the name, without
+> descriptions and sensible defaults, or neutral wording, keeping the causal structure; 4. save with `SaveWorkflow` and `scope: "global"`, keeping or improving the name, without
 > touching the original file; 5. summarize what was generalized. If the workflow is
 > inherently bound to this project, explain why and stop.
 
@@ -1582,16 +1596,16 @@ workspace-level, session-less protocol methods.
 All schemas are strict; `scope` defaults to `project`; for `global` the `workspace` field
 names the runtime that does the work, whose path is not read.
 
-| Method | Params | Result |
-|---|---|---|
-| `workflows/list` | `{ workspace, scope? }` | `{ workflows, invalid, dir }`; `dir` is the scanned directory, returned even when it does not exist, so the GUI can watch it |
-| `workflows/get` | `{ workspace, name, scope? }` | `{ ok: true, name, path, scope, meta, script }` or a failure |
-| `workflows/updateMeta` | `{ workspace, name, meta, scope? }` | `{ ok: true, path }`; reads the script back and rewrites the file with the new metadata |
-| `workflows/delete` | `{ workspace, name, scope? }` | `{ ok: true, path }` |
-| `workflows/runs` | `{ workspace, name?, limit ≤ 50, scope? }` | `{ runs, truncated? }`; `project` filters by `cwd`, `global` drops the filter and adds `cwd` to each row; rows carry `runId, name?, status, stopReason?, createdAt, updatedAt, spentTokens, parentSessionId?, toolCallId?, args?, cwd?, artifacts?` (at most 8) |
-| `workflows/move` | `{ workspace, name }` | `{ ok: true, from, to }` or `{ ok: false, reason: invalid_name \| not_found \| target_exists \| read_error \| write_error, path?, detail? }` |
-| `workflows/save` | `{ workspace, runId, name, meta, scope?, overwrite? }` | `{ ok: true, name, scope, path, overwritten, shadowing? }` or `{ ok: false, reason: invalid_name \| run_not_found \| script_missing \| target_exists \| compile_failed \| write_error, path?, detail? }` |
-| `workflows/forRun` | `{ workspace, runId, candidates? }` | `{ entry?, match?: candidate \| script \| name, runArgs? }` |
+| Method                 | Params                                                 | Result                                                                                                                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workflows/list`       | `{ workspace, scope? }`                                | `{ workflows, invalid, dir }`; `dir` is the scanned directory, returned even when it does not exist, so the GUI can watch it                                                                                                                                    |
+| `workflows/get`        | `{ workspace, name, scope? }`                          | `{ ok: true, name, path, scope, meta, script }` or a failure                                                                                                                                                                                                    |
+| `workflows/updateMeta` | `{ workspace, name, meta, scope? }`                    | `{ ok: true, path }`; reads the script back and rewrites the file with the new metadata                                                                                                                                                                         |
+| `workflows/delete`     | `{ workspace, name, scope? }`                          | `{ ok: true, path }`                                                                                                                                                                                                                                            |
+| `workflows/runs`       | `{ workspace, name?, limit ≤ 50, scope? }`             | `{ runs, truncated? }`; `project` filters by `cwd`, `global` drops the filter and adds `cwd` to each row; rows carry `runId, name?, status, stopReason?, createdAt, updatedAt, spentTokens, parentSessionId?, toolCallId?, args?, cwd?, artifacts?` (at most 8) |
+| `workflows/move`       | `{ workspace, name }`                                  | `{ ok: true, from, to }` or `{ ok: false, reason: invalid_name \| not_found \| target_exists \| read_error \| write_error, path?, detail? }`                                                                                                                    |
+| `workflows/save`       | `{ workspace, runId, name, meta, scope?, overwrite? }` | `{ ok: true, name, scope, path, overwritten, shadowing? }` or `{ ok: false, reason: invalid_name \| run_not_found \| script_missing \| target_exists \| compile_failed \| write_error, path?, detail? }`                                                        |
+| `workflows/forRun`     | `{ workspace, runId, candidates? }`                    | `{ entry?, match?: candidate \| script \| name, runArgs? }`                                                                                                                                                                                                     |
 
 Failures of `get`, `updateMeta` and `delete` share one shape: `{ ok: false, reason:
 "invalid_name" | "not_found" | "parse_error" | "read_error", detail? }`. The handlers use
@@ -1646,14 +1660,14 @@ A project workflow with no declared arguments starts immediately on click; a fai
 appears as a toast. A project workflow with arguments, and every global workflow (it needs a
 target project), opens the dialog:
 
-| Part | Content |
-|---|---|
-| Header | a workflow icon, the name in monospace, a scope badge 「全局」 / 「项目」, and the description |
-| 「运行于」 (Run in) | global workflows only: a select over the open local projects, defaulting to the active one. With none open the select is replaced by 「打开一个本地项目以运行」 and Run is disabled. |
-| Arguments | one field per declaration: a switch for `boolean`, a monospace textarea for `json`, a number input for `number`, a text input otherwise; a 「必填」 (required) badge; the description. Errors under the field: 「必填」, 「需要一个数字」, 「不是合法的 JSON」. Blank optional fields are omitted; blank required fields without a default fail. |
-| Note | 「将立即在 {project} 的新会话中运行」 |
-| Footer | 「取消」 and 「运行」, the latter showing a spinner while pending |
-| Error area | appears when the launch is rejected: the reason text, then the agent's message in a monospace block (for `compile_failed`, the diagnostics) |
+| Part                | Content                                                                                                                                                                                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Header              | a workflow icon, the name in monospace, a scope badge 「全局」 / 「项目」, and the description                                                                                                                                                                                                                                                   |
+| 「运行于」 (Run in) | global workflows only: a select over the open local projects, defaulting to the active one. With none open the select is replaced by 「打开一个本地项目以运行」 and Run is disabled.                                                                                                                                                             |
+| Arguments           | one field per declaration: a switch for `boolean`, a monospace textarea for `json`, a number input for `number`, a text input otherwise; a 「必填」 (required) badge; the description. Errors under the field: 「必填」, 「需要一个数字」, 「不是合法的 JSON」. Blank optional fields are omitted; blank required fields without a default fail. |
+| Note                | 「将立即在 {project} 的新会话中运行」                                                                                                                                                                                                                                                                                                            |
+| Footer              | 「取消」 and 「运行」, the latter showing a spinner while pending                                                                                                                                                                                                                                                                                |
+| Error area          | appears when the launch is rejected: the reason text, then the agent's message in a monospace block (for `compile_failed`, the diagnostics)                                                                                                                                                                                                      |
 
 ### The launcher
 
@@ -1685,16 +1699,16 @@ revision. The app registers the capability only when the run port exists; otherw
 client gets the capability-unsupported fault. The runtime method `startSavedWorkflowRun`
 does the work, in this order:
 
-| Step | On failure |
-|---|---|
-| The session has an active or queued turn | `session_busy` |
-| Resolve the saved workflow (directed by `scope` when given) and validate the arguments; this is the same code `CreateWorkflow` uses, not a copy | `invalid_name`, `not_found` (a malformed file is reported as `not_found` with a message naming the file), `invalid_args` |
-| Compile; any diagnostic rejects | `compile_failed`, diagnostics in the message, capped at 2,000 characters |
-| Resolve the model names the script uses ("Models the script names") with the same code `CreateWorkflow` uses; an unresolved name is a 9011 diagnostic and rejects like one | `compile_failed` |
-| The run port is present | `start_failed` |
-| Persist the session with the workflow name as its title. The protocol's session record mirrors the runtime's persisted fact on the next session event, so the new session leaves draft state and enters `session/list` and the sessions index (the sidebar) without a first prompt | |
-| Mint `toolCallId = launch-<uuid>` and `port.submit({ scriptText, cwd, name, args, modelBindings?, parentSessionId, toolCallId, trace })` | `start_failed`; the persisted empty session is what the GUI deletes |
-| Record the launch turn (below) and register the run in the background-task tracker with a synthetic `CreateWorkflow` tool call `{ id: toolCallId, name: "CreateWorkflow", input: { name, saved: { name, scope, args? } } }` | logged only; the run is already in flight and can be cancelled from the pane |
+| Step                                                                                                                                                                                                                                                                               | On failure                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| The session has an active or queued turn                                                                                                                                                                                                                                           | `session_busy`                                                                                                           |
+| Resolve the saved workflow (directed by `scope` when given) and validate the arguments; this is the same code `CreateWorkflow` uses, not a copy                                                                                                                                    | `invalid_name`, `not_found` (a malformed file is reported as `not_found` with a message naming the file), `invalid_args` |
+| Compile; any diagnostic rejects                                                                                                                                                                                                                                                    | `compile_failed`, diagnostics in the message, capped at 2,000 characters                                                 |
+| Resolve the model names the script uses ("Models the script names") with the same code `CreateWorkflow` uses; an unresolved name is a 9011 diagnostic and rejects like one                                                                                                         | `compile_failed`                                                                                                         |
+| The run port is present                                                                                                                                                                                                                                                            | `start_failed`                                                                                                           |
+| Persist the session with the workflow name as its title. The protocol's session record mirrors the runtime's persisted fact on the next session event, so the new session leaves draft state and enters `session/list` and the sessions index (the sidebar) without a first prompt |                                                                                                                          |
+| Mint `toolCallId = launch-<uuid>` and `port.submit({ scriptText, cwd, name, args, modelBindings?, parentSessionId, toolCallId, trace })`                                                                                                                                           | `start_failed`; the persisted empty session is what the GUI deletes                                                      |
+| Record the launch turn (below) and register the run in the background-task tracker with a synthetic `CreateWorkflow` tool call `{ id: toolCallId, name: "CreateWorkflow", input: { name, saved: { name, scope, args? } } }`                                                        | logged only; the run is already in flight and can be cancelled from the pane                                             |
 
 Up to and including compilation nothing is persisted. The synthetic tool call is what lets
 notifications, cancel, resume and the run pane treat a launched run exactly like a
@@ -1707,7 +1721,7 @@ message (synthetic source `workflow_launch`, semantics `real_user`) whose text i
 model:
 
 > Started the saved workflow "{name}" ({scope}) from the workflows hub as run {runId}.
-> Arguments: ```json …``` Progress and results arrive as background notifications; do not
+> Arguments: `json …` Progress and results arrive as background notifications; do not
 > start it again.
 
 The turn and the message both carry the launch metadata, so live projection and cold
@@ -1715,11 +1729,15 @@ restore produce the same rows:
 
 ```ts
 interface WorkflowLaunchMeta {
-  runId; toolCallId; name; scope: "project" | "global"; path;
-  args?: Record<string, unknown>;   // replaced by a placeholder over 4 KB
-  description?: string;             // ≤ 500 chars
-  display?: CreateWorkflowDisplay;  // the compiled graph, same shape as the tool row's
-  script?: string;                  // ≤ 256,000 chars
+  runId;
+  toolCallId;
+  name;
+  scope: "project" | "global";
+  path;
+  args?: Record<string, unknown>; // replaced by a placeholder over 4 KB
+  description?: string; // ≤ 500 chars
+  display?: CreateWorkflowDisplay; // the compiled graph, same shape as the tool row's
+  script?: string; // ≤ 256,000 chars
 }
 ```
 
@@ -1762,10 +1780,10 @@ sets on a run, the model its subagents run on and how many of them work at once,
 model turn. It has two outcomes, and which one Apply takes is decided by what the user
 changed:
 
-| What Apply carries | Outcome |
-|---|---|
-| only `maxConcurrency`, on a run the agent holds live (always a running one; a pending one only once its engine exists) | the run is **retuned in place**: same run id, no new run, nothing stopped, the finished and the in-flight work all kept |
-| anything else: a model change, either change on a run that has settled, both at once | an **amendment that keeps the script**: the agent starts a new run of the run's recorded script under the new settings, imports everything the old run finished as a cache, and supersedes the old run, as an `AmendWorkflow` call that omits both `script` and `path` would |
+| What Apply carries                                                                                                     | Outcome                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| only `maxConcurrency`, on a run the agent holds live (always a running one; a pending one only once its engine exists) | the run is **retuned in place**: same run id, no new run, nothing stopped, the finished and the in-flight work all kept                                                                                                                                                      |
+| anything else: a model change, either change on a run that has settled, both at once                                   | an **amendment that keeps the script**: the agent starts a new run of the run's recorded script under the new settings, imports everything the old run finished as a cache, and supersedes the old run, as an `AmendWorkflow` call that omits both `script` and `path` would |
 
 The popover says which of the two applying will do before the user applies. The route is the
 one the tool takes for the same change, through the same port method, so a user and a model
@@ -1775,14 +1793,14 @@ and the transcript look is in `docs/dynamic-workflow/presentation.md` ("The sett
 
 ### Which runs can be configured
 
-| Run | Configure | Why |
-|---|---|---|
-| pending or running | yes | the main case: throttle the run, which is applied in place, or move its subagents to another model, which is an amendment |
-| stopped and resumable | yes | a resume with changed settings; Resume alone keeps the same run |
-| errored | yes | a retry under another model is the usual repair |
-| stopped by an amendment (superseded) | no | its successor is the live run and carries the button |
-| completed | no | every ask would replay from the cache, so nothing would run under the new settings |
-| not in the run projection | no | the pane has no settings to show |
+| Run                                  | Configure | Why                                                                                                                       |
+| ------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------- |
+| pending or running                   | yes       | the main case: throttle the run, which is applied in place, or move its subagents to another model, which is an amendment |
+| stopped and resumable                | yes       | a resume with changed settings; Resume alone keeps the same run                                                           |
+| errored                              | yes       | a retry under another model is the usual repair                                                                           |
+| stopped by an amendment (superseded) | no        | its successor is the live run and carries the button                                                                      |
+| completed                            | no        | every ask would replay from the cache, so nothing would run under the new settings                                        |
+| not in the run projection            | no        | the pane has no settings to show                                                                                          |
 
 The button needs a host callback, like Resume: a read-only session and a host with the gray
 release off (see "Gray release: the `dynamicWorkflow` feature key") get none. An agent without the
@@ -1795,9 +1813,9 @@ carries no base revision, like `cancelBackgroundWork` and `resumeWorkflowRun`.
 
 ```ts
 interface AmendWorkflowRunSettingsPayload {
-  workId: string;                    // ≡ runId, as for cancel and resume
-  subagentModel?: string | null;     // omit = keep; null = back to the session model; "providerId/modelId[$level]" = set
-  maxConcurrency?: number | null;    // omit = keep; null = back to the default parallelism; n = set (floored to at least 1, no upper limit)
+  workId: string; // ≡ runId, as for cancel and resume
+  subagentModel?: string | null; // omit = keep; null = back to the session model; "providerId/modelId[$level]" = set
+  maxConcurrency?: number | null; // omit = keep; null = back to the default parallelism; n = set (floored to at least 1, no upper limit)
 }
 // accepted: { type: "amendWorkflowRunSettings", runId, toolCallId, supersededRunId? }
 // rejected: fault.command.workflowRunSettingsRejected.<reason>, with a message
@@ -1812,16 +1830,16 @@ payload carried and no `supersededRunId`, since nothing was started and nothing 
 That is how the client tells a retune from an amendment without a second field for it — an
 answer naming a run id the caller did not send is a new run.
 
-| Reason | When | Popover line |
-|---|---|---|
-| `not_found` | no run with this id belongs to this session | "This run is not in this conversation's records." |
-| `not_configurable` | the run completed, or an amendment already replaced it | "This run can no longer be configured." |
-| `unchanged` | after resolution, neither setting differs from the run's own | "These are the run's current settings." |
-| `script_missing` | the run has no stored script, or the host cannot read it | "This run has no stored script, so its settings cannot be changed here." Only the amendment reads a script, so a live run with no stored script can still have its parallelism retuned |
-| `model_unavailable` | the model cannot be resolved against this agent's model catalog | "That model is not available on this agent now." |
-| `compile_failed` | the stored script no longer compiles against the current facade | the resume wording: ask the agent to amend the workflow; the diagnostics under it |
-| `missing_boundaries` | the run's journal lacks the transcript boundaries the cache needs | "This run's records are too old to carry its finished work over." |
-| `start_failed` | the port is missing or the amendment threw | "The new run could not be started ({message})." |
+| Reason               | When                                                              | Popover line                                                                                                                                                                           |
+| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `not_found`          | no run with this id belongs to this session                       | "This run is not in this conversation's records."                                                                                                                                      |
+| `not_configurable`   | the run completed, or an amendment already replaced it            | "This run can no longer be configured."                                                                                                                                                |
+| `unchanged`          | after resolution, neither setting differs from the run's own      | "These are the run's current settings."                                                                                                                                                |
+| `script_missing`     | the run has no stored script, or the host cannot read it          | "This run has no stored script, so its settings cannot be changed here." Only the amendment reads a script, so a live run with no stored script can still have its parallelism retuned |
+| `model_unavailable`  | the model cannot be resolved against this agent's model catalog   | "That model is not available on this agent now."                                                                                                                                       |
+| `compile_failed`     | the stored script no longer compiles against the current facade   | the resume wording: ask the agent to amend the workflow; the diagnostics under it                                                                                                      |
+| `missing_boundaries` | the run's journal lacks the transcript boundaries the cache needs | "This run's records are too old to carry its finished work over."                                                                                                                      |
+| `start_failed`       | the port is missing or the amendment threw                        | "The new run could not be started ({message})."                                                                                                                                        |
 
 Nothing is stopped or created before every check has passed. The old run keeps running through
 any rejection.
@@ -1832,20 +1850,20 @@ any rejection.
 the second caller of both `port.retuneConcurrency` and `port.amend`, beside the tool handler,
 and shares the tool's resolution code rather than copying it:
 
-| Step | On failure |
-|---|---|
-| Read the run with `port.getTask`; it must exist and its parent session must be this session | `not_found` |
-| A completed run, or one with `supersededBy`, is refused | `not_configurable` |
-| Resolve `subagentModel` with the tool's tri-state rule against the snapshot's model and the model catalog (`resolveAmendSubagentModelChoice`) | `model_unavailable` |
-| Resolve `maxConcurrency` with the tool's tri-state rule against the snapshot's limit and the default parallelism (`resolveAmendMaxConcurrency`); a value equal to the default counts as no limit | |
-| Compare with the run's own settings; if neither changed, refuse | `unchanged` |
-| **The fork.** Only the bound changed → `port.retuneConcurrency({ runId, maxConcurrency })`, the popover's `null` travelling on as itself: on `ok` mint `toolCallId = settings-<uuid>`, queue the settings turn from the answer's `previous`, `maxConcurrency` and `defaultConcurrency`, and reply with the same `runId` and no `supersededRunId`, registering nothing new in the background-task tracker; on `unchanged` refuse; on `not_live` (settled, or pending with no engine yet) carry on down this table | `unchanged` |
-| Read the stored script with `port.getScript` | `script_missing` |
-| Compile the script (`analyzeScript`) | `compile_failed` |
-| Rebind the script's model names from the snapshot's `modelBindings` ("Models the script names"): the script is the run's own, so every name it uses was bound at launch and keeps that binding, resolved again against the catalog | `model_unavailable` |
-| Mint `toolCallId = settings-<uuid>` and call `port.amend` with the script, the predecessor id, `cwd`, the resolved settings, the model bindings, the new script's phase tables, the parent session id, the tool call id and `inheritArgs: true` | `missing_boundaries`, `not_found`; a throw is `start_failed` |
-| Register the new run in the background-task tracker with a synthetic `AmendWorkflow` tool call `{ id: toolCallId, name: "AmendWorkflow", input: { run_id, name } }` | logged only |
-| Queue the settings turn (below) and return the accepted result | logged only |
+| Step                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | On failure                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Read the run with `port.getTask`; it must exist and its parent session must be this session                                                                                                                                                                                                                                                                                                                                                                                                                      | `not_found`                                                  |
+| A completed run, or one with `supersededBy`, is refused                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `not_configurable`                                           |
+| Resolve `subagentModel` with the tool's tri-state rule against the snapshot's model and the model catalog (`resolveAmendSubagentModelChoice`)                                                                                                                                                                                                                                                                                                                                                                    | `model_unavailable`                                          |
+| Resolve `maxConcurrency` with the tool's tri-state rule against the snapshot's limit and the default parallelism (`resolveAmendMaxConcurrency`); a value equal to the default counts as no limit                                                                                                                                                                                                                                                                                                                 |                                                              |
+| Compare with the run's own settings; if neither changed, refuse                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `unchanged`                                                  |
+| **The fork.** Only the bound changed → `port.retuneConcurrency({ runId, maxConcurrency })`, the popover's `null` travelling on as itself: on `ok` mint `toolCallId = settings-<uuid>`, queue the settings turn from the answer's `previous`, `maxConcurrency` and `defaultConcurrency`, and reply with the same `runId` and no `supersededRunId`, registering nothing new in the background-task tracker; on `unchanged` refuse; on `not_live` (settled, or pending with no engine yet) carry on down this table | `unchanged`                                                  |
+| Read the stored script with `port.getScript`                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `script_missing`                                             |
+| Compile the script (`analyzeScript`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `compile_failed`                                             |
+| Rebind the script's model names from the snapshot's `modelBindings` ("Models the script names"): the script is the run's own, so every name it uses was bound at launch and keeps that binding, resolved again against the catalog                                                                                                                                                                                                                                                                               | `model_unavailable`                                          |
+| Mint `toolCallId = settings-<uuid>` and call `port.amend` with the script, the predecessor id, `cwd`, the resolved settings, the model bindings, the new script's phase tables, the parent session id, the tool call id and `inheritArgs: true`                                                                                                                                                                                                                                                                  | `missing_boundaries`, `not_found`; a throw is `start_failed` |
+| Register the new run in the background-task tracker with a synthetic `AmendWorkflow` tool call `{ id: toolCallId, name: "AmendWorkflow", input: { run_id, name } }`                                                                                                                                                                                                                                                                                                                                              | logged only                                                  |
+| Queue the settings turn (below) and return the accepted result                                                                                                                                                                                                                                                                                                                                                                                                                                                   | logged only                                                  |
 
 The script read moved below the fork on purpose: a retune runs no script, so a run whose
 record has none, or whose script no longer compiles, is still retunable. The model resolution
@@ -1871,15 +1889,19 @@ what changed:
 
 ```ts
 interface WorkflowLaunchMeta {
-  runId; toolCallId;                 // the new run; on a retune, the run that was retuned
-  name?;                             // always on a hub launch; on a settings turn only when the run has a name
-  scope?; path?; args?; description?; // hub launches only
-  display?: CreateWorkflowDisplay;   // the compiled graph of the script, as for a launch
+  runId;
+  toolCallId; // the new run; on a retune, the run that was retuned
+  name?; // always on a hub launch; on a settings turn only when the run has a name
+  scope?;
+  path?;
+  args?;
+  description?; // hub launches only
+  display?: CreateWorkflowDisplay; // the compiled graph of the script, as for a launch
   amend?: {
-    predecessorRunId?: string;                       // absent on a retune: there is no predecessor, the run is the same one
-    subagentModel?: { from?: string; to?: string };  // present when the model changed; absent end = the session model
+    predecessorRunId?: string; // absent on a retune: there is no predecessor, the run is the same one
+    subagentModel?: { from?: string; to?: string }; // present when the model changed; absent end = the session model
     maxConcurrency?: { from?: number; to?: number }; // present when the limit changed; absent end = the default parallelism
-    ceiling?: number;                                // the default parallelism D (wire name predates it), for "默认 13 → 4"
+    ceiling?: number; // the default parallelism D (wire name predates it), for "默认 13 → 4"
   };
 }
 ```
@@ -2005,10 +2027,10 @@ answer.
 
 ### `/dwf`
 
-| Command | Effect |
-|---|---|
-| `/dwf`, `/dwf list` | this session's runs (up to 20), one per line: `runId · label · status[/reason] · resumable · updated <time>`, plus a failure suffix |
-| `/dwf cancel [runId]` | cancels the run; without an id, cancels the single in-flight run or lists the candidates when there are several |
+| Command               | Effect                                                                                                                                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/dwf`, `/dwf list`   | this session's runs (up to 20), one per line: `runId · label · status[/reason] · resumable · updated <time>`, plus a failure suffix                                                                                                                             |
+| `/dwf cancel [runId]` | cancels the run; without an id, cancels the single in-flight run or lists the candidates when there are several                                                                                                                                                 |
 | `/dwf resume <runId>` | resumes through the server, which alone decides resumability; rejections are shown with their reason (`not_found`, `not_resumable`, `already_running`, `script_missing`, `script_mismatch`, `compile_failed`, the last one followed by the bounded diagnostics) |
 
 A client without the capability answers "Dynamic workflow runs are not available in this
@@ -2052,11 +2074,11 @@ every turn's text in order when there was more than one. A run with no workflow 
 behaves exactly as before. There is no timeout or separate wait flag; Ctrl-C exits, and the orphaned
 run is recorded as `stopped` (`interrupted`) and can be resumed.
 
-| Output format | Workflow progress |
-|---|---|
-| `stream-json` | one NDJSON line per progress event, `type: "workflow.run.progress"`, with the bounded payload verbatim and no `turnId` (these are out-of-turn events). The type is deliberately not part of the v3 protocol's event enum. |
-| `text` (the default) | `workflow <runId>: <transition>` lines on stderr: `started`, node phase changes (throttled to one per 400 ms), `log: …`, and the settlement with its status and error |
-| `json` | nothing; the contract is exactly one object |
+| Output format        | Workflow progress                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stream-json`        | one NDJSON line per progress event, `type: "workflow.run.progress"`, with the bounded payload verbatim and no `turnId` (these are out-of-turn events). The type is deliberately not part of the v3 protocol's event enum. |
+| `text` (the default) | `workflow <runId>: <transition>` lines on stderr: `started`, node phase changes (throttled to one per 400 ms), `log: …`, and the settlement with its status and error                                                     |
+| `json`               | nothing; the contract is exactly one object                                                                                                                                                                               |
 
 ### Single-executable builds
 
@@ -2084,16 +2106,25 @@ reported as an empty project.
 ### `ListWorkflowRuns`
 
 ```ts
-interface ListWorkflowRunsInput { limit?: number; statuses?: LifecycleStatus[] }
+interface ListWorkflowRunsInput {
+  limit?: number;
+  statuses?: LifecycleStatus[];
+}
 // LifecycleStatus = "pending" | "running" | "completed" | "errored" | "stopped"
 
 interface ListWorkflowRunsOutput {
   runs: {
-    runId; label; labelSource: "name" | "script";
-    status; stopReason?: "user" | "model" | "provider" | "interrupted" | "superseded";
-    resumedFrom?: string; supersededBy?: string;
-    ownedByThisSession: boolean; possiblyInterrupted?: true;
-    createdAt; updatedAt;            // epoch ms
+    runId;
+    label;
+    labelSource: "name" | "script";
+    status;
+    stopReason?: "user" | "model" | "provider" | "interrupted" | "superseded";
+    resumedFrom?: string;
+    supersededBy?: string;
+    ownedByThisSession: boolean;
+    possiblyInterrupted?: true;
+    createdAt;
+    updatedAt; // epoch ms
     spentTokens;
   }[];
   truncated?: true;
@@ -2342,12 +2373,16 @@ still available to workflow children, like the other read-only listings.
 
 ```ts
 interface ListModelsOutput {
-  current?: string;              // providerId/modelId of the session's own model
+  current?: string; // providerId/modelId of the session's own model
   models: {
-    id: string;                  // providerId/modelId
-    providerId; modelId; providerLabel?;
-    reasoningLevels: string[];   // empty when the model has none
-    defaultReasoningLevel?; contextWindow?; disabledReason?;
+    id: string; // providerId/modelId
+    providerId;
+    modelId;
+    providerLabel?;
+    reasoningLevels: string[]; // empty when the model has none
+    defaultReasoningLevel?;
+    contextWindow?;
+    disabledReason?;
   }[];
 }
 ```
@@ -2393,14 +2428,14 @@ offered.
 
 ### What each mode means
 
-The table describes the *effective* mode: the user's choice where one applies, otherwise the
+The table describes the _effective_ mode: the user's choice where one applies, otherwise the
 offered mode.
 
-| Mode | Behaviour in this version |
-|---|---|
-| `disabled` | No way to start a workflow. The ten workflow tools are not registered for the model, the `/workflow` command is absent from the slash catalog (so the composer's plus-menu entry and `/` panel entry disappear with it), the `dynamic-workflows` skill is not offered, and the automations page shows only 「自动化」 with no 「工作流」 tab. Runs that already exist keep rendering everywhere they did before: transcript cards, digests, completion cards, the run pane and its artifacts, the sidebar run line. Every Resume affordance is withheld (the run pane's, the transcript card footer's and the digest's) because each would start an engine; they share one supply point, the conversation context's resume callback. |
+| Mode       | Behaviour in this version                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `disabled` | No way to start a workflow. The ten workflow tools are not registered for the model, the `/workflow` command is absent from the slash catalog (so the composer's plus-menu entry and `/` panel entry disappear with it), the `dynamic-workflows` skill is not offered, and the automations page shows only 「自动化」 with no 「工作流」 tab. Runs that already exist keep rendering everywhere they did before: transcript cards, digests, completion cards, the run pane and its artifacts, the sidebar run line. Every Resume affordance is withheld (the run pane's, the transcript card footer's and the digest's) because each would start an engine; they share one supply point, the conversation context's resume callback.                                                                                                                                                                                                                  |
 | `onDemand` | Every door of `alwaysOn`, with the model-facing tool surface deferred. The `/workflow` command stays in the slash catalog (so the composer's plus-menu entry and `/` panel entry stay), the `dynamic-workflows` skill stays discoverable, the automations page keeps its 「工作流」 tab and every Resume affordance is offered; but the ten workflow tools are **not registered for the model, and the `Agent`/`Task` descriptions carry no CreateWorkflow line, until the session is activated** by its first `/workflow`, by a Resume or Configure of one of its runs, or by resuming a session whose records already hold a workflow. Once activated a session stays activated. See "On demand: activation". `enabled = mode !== "disabled"` (`isDynamicWorkflowModeEnabled` in `packages/shared/src/dynamic-workflow-feature.ts`) still answers every "is the feature offered at all" question; only the registration gate reads the mode itself. |
-| `alwaysOn` | Everything this document describes; the ten tools are registered from the session's first request. |
+| `alwaysOn` | Everything this document describes; the ten tools are registered from the session's first request.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 The key absent, malformed, or the request failed: `disabled`. A server that stops sending
 the key has turned the feature off; a stale "on" snapshot is never carried forward past a
@@ -2485,7 +2520,7 @@ authoring surface"); a session that never asks for a workflow never pays them. T
 stays listed because the command's `skills:` preamble has to be loadable the moment the
 command runs, and a listing is one line in a system reminder, not a per-request cost.
 
-**The state.** Each session has one boolean, *activated*, owned by the runtime. Under
+**The state.** Each session has one boolean, _activated_, owned by the runtime. Under
 `alwaysOn` it is true from construction. Under `onDemand` it starts false and becomes true
 at most once; nothing turns it back. The registration gate both `registerBuiltInTools` call
 sites share (`resolveRuntimeDynamicWorkflowToolsIncluded`) reads
@@ -2501,11 +2536,11 @@ from the runtime, never from the config object the app assembled.
 
 **What activates.**
 
-| Trigger | Where | Why |
-|---|---|---|
-| `/workflow …` submitted in this session | the input facade, when the builtin prompt resolver expands the command, before `executeTurn` | the turn that asked must already see `CreateWorkflow`; the user's command is the request |
-| `resumeWorkflowRun` or `amendWorkflowRunSettings` accepted for a run of this session, or a saved workflow launched into this session from the hub (`startSavedWorkflowRun`) | the runtime methods behind those commands, after the run is started and before its turn is queued | each starts an engine whose completion notification tells the model to use `GetWorkflowRun`; a model told that with no such tool would be stuck |
-| resume of a session whose records show a workflow | `resume.ts`, after the persisted messages are loaded, before the first turn | the activation entry is present; or, for sessions born under `alwaysOn` or before this rule, a persisted user message whose text is a `/workflow` command (user prompts persist as `displayInput`, the raw command), or any persisted tool call named one of the ten |
+| Trigger                                                                                                                                                                     | Where                                                                                             | Why                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/workflow …` submitted in this session                                                                                                                                     | the input facade, when the builtin prompt resolver expands the command, before `executeTurn`      | the turn that asked must already see `CreateWorkflow`; the user's command is the request                                                                                                                                                                             |
+| `resumeWorkflowRun` or `amendWorkflowRunSettings` accepted for a run of this session, or a saved workflow launched into this session from the hub (`startSavedWorkflowRun`) | the runtime methods behind those commands, after the run is started and before its turn is queued | each starts an engine whose completion notification tells the model to use `GetWorkflowRun`; a model told that with no such tool would be stuck                                                                                                                      |
+| resume of a session whose records show a workflow                                                                                                                           | `resume.ts`, after the persisted messages are loaded, before the first turn                       | the activation entry is present; or, for sessions born under `alwaysOn` or before this rule, a persisted user message whose text is a `/workflow` command (user prompts persist as `displayInput`, the raw command), or any persisted tool call named one of the ten |
 
 Nothing else activates. An explicit request in prose ("use a workflow to …") is not a
 trigger: before activation the model has no `CreateWorkflow`, so it does what it does under
@@ -2553,7 +2588,7 @@ Status: implemented. One app-wide setting, `dynamicWorkflowMode` in the shared s
 file, holds the user's choice. Absent means "follow the offer". It holds one of the three
 modes otherwise.
 
-**Precedence.** The server (or the local override) decides the *offer*: whether the feature
+**Precedence.** The server (or the local override) decides the _offer_: whether the feature
 is available (`offeredMode` is a known mode other than `disabled`, `isDynamicWorkflowOffered`)
 and which mode is the default. A snapshot without a readable `offeredMode` counts as not
 offered: it comes from an older Host (a newer UI bundle, such as the phone remote, attached
@@ -2578,11 +2613,11 @@ widths); the default 192 px column would shrink the select. The list opens below
 (`position="popper"`) at the trigger's width, and each option has an icon, a title and a
 description that wraps inside the list:
 
-| Value | Title | Description |
-|---|---|---|
-| `disabled` | 关闭 / Off | 禁用动态工作流。不能创建新的工作流，自动化页也不再显示「工作流」；对话历史中已有的工作流仍可正常查看。 |
-| `onDemand` | 通过命令启用 / On command | 只有输入 /workflow 命令才会运行新的工作流。 |
-| `alwaysOn` | 始终开启 / Always on | 除了 /workflow 命令，模型也会根据你的意图主动运行工作流。 |
+| Value      | Title                     | Description                                                                                            |
+| ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `disabled` | 关闭 / Off                | 禁用动态工作流。不能创建新的工作流，自动化页也不再显示「工作流」；对话历史中已有的工作流仍可正常查看。 |
+| `onDemand` | 通过命令启用 / On command | 只有输入 /workflow 命令才会运行新的工作流。                                                            |
+| `alwaysOn` | 始终开启 / Always on      | 除了 /workflow 命令，模型也会根据你的意图主动运行工作流。                                              |
 
 The option equal to the offered mode carries a 「默认」 (Default) tag; the trigger shows the
 effective mode's title only. The row is not rendered while the availability snapshot is
@@ -2633,11 +2668,11 @@ network call. When it holds one of the three values the resolver returns it with
 Main is the gatekeeper: in `buildHostProcessEnv` it always writes or deletes the key before
 the Host starts, never passes it through untouched, so the Host trusts whatever it sees.
 
-| Build | What Main writes into the Host env | Effect |
-|---|---|---|
-| unpackaged dev (`pnpm dev:desktop`) | the developer's shell value, if it is one of the three | any mode, for hand testing |
-| packaged preview (`ZCODE_PRODUCT_FLAVOR === "preview"`, production backend) | the literal `alwaysOn` | preview users always have the feature; the server key is ignored |
-| packaged production | nothing; an inherited value is removed | the override cannot work |
+| Build                                                                       | What Main writes into the Host env                     | Effect                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| unpackaged dev (`pnpm dev:desktop`)                                         | the developer's shell value, if it is one of the three | any mode, for hand testing                                       |
+| packaged preview (`ZCODE_PRODUCT_FLAVOR === "preview"`, production backend) | the literal `alwaysOn`                                 | preview users always have the feature; the server key is ignored |
+| packaged production                                                         | nothing; an inherited value is removed                 | the override cannot work                                         |
 
 Remote Hosts started over SSH, WSL and Docker receive the same value through
 `pickRemoteRuntimeEnv`, so a preview build's remote workspaces match its local ones. The Web
@@ -2679,44 +2714,44 @@ on start and after `/resume`, and the line naming a resumable run.
 
 What the terminal shows under `disabled`:
 
-| Surface | Behaviour |
-|---|---|
-| TUI `/` palette and `/help`, headless `-p "/help"` | no `/workflow` entry |
-| TUI `/workflow …` typed anyway | a local notice that dynamic workflows are disabled and how to restart with them; nothing is sent to the model |
-| TUI `/dwf`, `/dwf list`, `/dwf cancel` | unchanged: viewing and stopping a run start no engine |
-| TUI `/dwf resume <runId>` | refused with the same notice before the server is asked; a resume would start an engine |
-| headless `-p "/workflow …"` | the notice on stderr and exit code 1, before any app is created |
+| Surface                                            | Behaviour                                                                                                     |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| TUI `/` palette and `/help`, headless `-p "/help"` | no `/workflow` entry                                                                                          |
+| TUI `/workflow …` typed anyway                     | a local notice that dynamic workflows are disabled and how to restart with them; nothing is sent to the model |
+| TUI `/dwf`, `/dwf list`, `/dwf cancel`             | unchanged: viewing and stopping a run start no engine                                                         |
+| TUI `/dwf resume <runId>`                          | refused with the same notice before the server is asked; a resume would start an engine                       |
+| headless `-p "/workflow …"`                        | the notice on stderr and exit code 1, before any app is created                                               |
 
 ### Acceptance
 
-| ID | Setup → action → assertion |
-|---|---|
-| DWG-01 | `resolveDynamicWorkflowClientConfig`: remote `{mode:"alwaysOn"}` → enabled/remote; remote absent, `null`, or `{mode:"bogus"}` → disabled/default; env override set → override wins over remote; `onDemand` → enabled with `mode` preserved as `onDemand` |
-| DWG-02 | Host: policy sync sent with `enabled:true` and `mode` only when the snapshot is enabled; method-not-found from the CLI is ignored; create/resume/v4 createSession carry `dynamicWorkflowEnabled:true` and `dynamicWorkflowMode` only when enabled and omit both otherwise |
-| DWG-03 | CLI protocol server: no flag → none of the ten tools registered, `workflow` absent from the slash catalog, `/workflow` not expanded; flag on with mode absent or `alwaysOn` → all ten registered from the first request and the catalog pins `workflow` after `goal`; the legacy `Workflow` tool unaffected either way |
-| DWG-03b | CLI: the built-in tool set is registered from two places, session start and the embedded-search branch refresh (`refreshBranchAwareBuiltInTools`); both derive the gate from the same helper, so a disabled session stays without the ten tools after the refresh. Regression from the first real-app test, where the refresh re-added them |
-| DWG-03c | CLI: a protocol session with the gate off (which includes the server key being absent) gets an `Agent` tool description with no reference to CreateWorkflow; a session with the gate on, and a runtime where the config field is never set, keep the line |
-| DWG-04 | Core: a runtime whose config sets neither field (a subagent child, an in-process embedder) registers every tool; unset means on in core only. The standalone CLI never relies on it: without `--workflow-mode` the TUI and headless write `dynamicWorkflowEnabled: false`, and an absent server key always means off |
-| DWG-04b | Headless `-p` / `--prompt` / `--target`: `--resume` and `--continue` take the pair from this invocation's `--workflow-mode` (absent → disabled), never from the resumed session; an explicit `--disallowed-tools CreateWorkflow` still removes the tool under `alwaysOn`; `app-server --stdio` / `agent-server --stdio` receive no workflow field from the CLI entry |
-| DWG-05 | Desktop Main `buildHostProcessEnv`: dev + shell `disabled` → Host env `disabled`; dev + shell garbage → key absent; packaged preview + shell `disabled` → Host env `alwaysOn`; packaged production + shell `alwaysOn` → key absent |
-| DWG-06 | `pickRemoteRuntimeEnv` forwards the key when set |
-| DWG-07 | UI, disabled: automations page shows a plain 「自动化」 title and no workflow tab; a navigation request for the workflow tab lands on automations; the run pane, the transcript card and the digest of an existing run render but offer no Resume. Enabled: unchanged from before |
-| DWG-08 | Desktop E2E against a mock `/client/configs`: `disabled` → plus menu has no 「工作流」, `/` panel has no `workflow`, automations page has no tab; `alwaysOn` and `onDemand` → all three present |
-| DWG-09 | CLI protocol server, mode `onDemand`: the session starts with none of the ten tools and an `Agent` description without the CreateWorkflow line, while `workflow` is in the slash catalog and the `dynamic-workflows` skill is discoverable; submitting `/workflow …` activates before the turn's first model request, which carries all ten tools and the restored `Agent` line; the `runtime/dynamic_workflow_activation` entry is persisted; a later branch refresh keeps the ten; a second `/workflow` changes nothing; a prose request without the command leaves the surface as it was |
-| DWG-10 | CLI resume, mode `onDemand`: a session with the activation entry has the ten tools before its first turn; a session without the entry but with a persisted `/workflow` user message, or a persisted `CreateWorkflow` (any of the ten) tool call, is activated on resume and gains the entry; a session with neither stays deferred. Mode `alwaysOn`: activated regardless |
-| DWG-11 | v4 `resumeWorkflowRun` / `amendWorkflowRunSettings` accepted on an unactivated `onDemand` session, and a saved workflow launched into it from the hub, activate it before the following turn is queued; a rejected command activates nothing |
-| DWG-12 | Children: an `Agent` child spawned before activation has no workflow tools, one spawned after has them; a `workflow_child` is always activated and still loses the authoring tools through its disallow list |
-| DWG-13 | Compatibility: a CLI receiving `dynamicWorkflowEnabled:true` with no mode registers eagerly; a runtime with neither field (a child, an embedder) registers eagerly; a compaction after activation leaves the ten tools registered |
-| DWG-14 | Standalone CLI flag: the TUI and `-p` with no `--workflow-mode` create the app with `dynamicWorkflowEnabled:false, dynamicWorkflowToolsOnDemand:false`; `onDemand` → `true, true`; `alwaysOn` → `true, false`; every app the TUI creates (`/new`, `/resume`) carries the same pair; `--workflow-mode bogus` → exit 1 naming the three values, no app created |
-| DWG-15 | Flag scope: `--workflow-mode` with `app-server`, `agent-server`, `login`, `skills` → exit 1 with the scope error; with `-p`, `--target`, `tui` or no command → accepted |
-| DWG-16 | TUI under `disabled`: the `/` suggestions and `/help` have no `workflow`; `/workflow x` answers the disabled notice without calling `submitPrompt`; `/dwf list` and `/dwf cancel` work; `/dwf resume <id>` answers the notice without calling `resumeWorkflowRun`. Under `onDemand` and `alwaysOn`: `/workflow` is suggested and submitted as before |
-| DWG-17 | Headless under `disabled`: `-p "/workflow x"` → the notice on stderr, exit 1, no app created; `-p "/help"` lists no `/workflow`. With `--workflow-mode alwaysOn` the command rides the plain-prompt path and the settle-wait as before |
-| DWG-18 | `applyDynamicWorkflowUserMode`: offer `onDemand` + choice `alwaysOn` → mode `alwaysOn`, `offeredMode` `onDemand`, `userMode` `alwaysOn`; offer `disabled` + any choice → `disabled`, no `userMode`; no choice → the offer unchanged; an invalid stored value is ignored |
-| DWG-19 | Settings patch: `dynamicWorkflowMode: ""` deletes the stored value; a mode is stored as is; an unknown stored value does not break reading the file |
-| DWG-20 | Host: with a latched offer `alwaysOn`, a stored choice `onDemand` makes the next session create carry `dynamicWorkflowMode: "onDemand"` without a new server read; a choice `disabled` makes it carry no workflow fields; `syncDynamicWorkflowUserMode` re-sends the policy to every live workspace (`enabled: false` for `disabled`) only when the effective mode changed, in call order |
-| DWG-21 | Desktop-attached remote Host: without a local settings resolver it applies the last pushed value; the desktop pushes the settings value when it builds the remote workspace services and forwards later changes to live remote connections |
-| DWG-22 | UI Settings row: absent while loading, on failure, when the offer is `disabled`, and for a snapshot with no readable `offeredMode` (an older Host), where the hub's settings button is absent too; shows the effective mode; the 「默认」 tag sits on the offered mode; picking the offered mode writes `""`, picking another writes that mode; the store reloads after a change |
-| DWG-23 | Desktop E2E against a mock `/client/configs` sending `alwaysOn`: the row shows 始终开启 with the tag; choosing 关闭 removes the 「工作流」 title word and, in a new draft, the plus-menu entry; choosing 始终开启 again clears the stored value. Offer `disabled`: no row |
+| ID      | Setup → action → assertion                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DWG-01  | `resolveDynamicWorkflowClientConfig`: remote `{mode:"alwaysOn"}` → enabled/remote; remote absent, `null`, or `{mode:"bogus"}` → disabled/default; env override set → override wins over remote; `onDemand` → enabled with `mode` preserved as `onDemand`                                                                                                                                                                                                                                                                                                                                    |
+| DWG-02  | Host: policy sync sent with `enabled:true` and `mode` only when the snapshot is enabled; method-not-found from the CLI is ignored; create/resume/v4 createSession carry `dynamicWorkflowEnabled:true` and `dynamicWorkflowMode` only when enabled and omit both otherwise                                                                                                                                                                                                                                                                                                                   |
+| DWG-03  | CLI protocol server: no flag → none of the ten tools registered, `workflow` absent from the slash catalog, `/workflow` not expanded; flag on with mode absent or `alwaysOn` → all ten registered from the first request and the catalog pins `workflow` after `goal`; the legacy `Workflow` tool unaffected either way                                                                                                                                                                                                                                                                      |
+| DWG-03b | CLI: the built-in tool set is registered from two places, session start and the embedded-search branch refresh (`refreshBranchAwareBuiltInTools`); both derive the gate from the same helper, so a disabled session stays without the ten tools after the refresh. Regression from the first real-app test, where the refresh re-added them                                                                                                                                                                                                                                                 |
+| DWG-03c | CLI: a protocol session with the gate off (which includes the server key being absent) gets an `Agent` tool description with no reference to CreateWorkflow; a session with the gate on, and a runtime where the config field is never set, keep the line                                                                                                                                                                                                                                                                                                                                   |
+| DWG-04  | Core: a runtime whose config sets neither field (a subagent child, an in-process embedder) registers every tool; unset means on in core only. The standalone CLI never relies on it: without `--workflow-mode` the TUI and headless write `dynamicWorkflowEnabled: false`, and an absent server key always means off                                                                                                                                                                                                                                                                        |
+| DWG-04b | Headless `-p` / `--prompt` / `--target`: `--resume` and `--continue` take the pair from this invocation's `--workflow-mode` (absent → disabled), never from the resumed session; an explicit `--disallowed-tools CreateWorkflow` still removes the tool under `alwaysOn`; `app-server --stdio` / `agent-server --stdio` receive no workflow field from the CLI entry                                                                                                                                                                                                                        |
+| DWG-05  | Desktop Main `buildHostProcessEnv`: dev + shell `disabled` → Host env `disabled`; dev + shell garbage → key absent; packaged preview + shell `disabled` → Host env `alwaysOn`; packaged production + shell `alwaysOn` → key absent                                                                                                                                                                                                                                                                                                                                                          |
+| DWG-06  | `pickRemoteRuntimeEnv` forwards the key when set                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| DWG-07  | UI, disabled: automations page shows a plain 「自动化」 title and no workflow tab; a navigation request for the workflow tab lands on automations; the run pane, the transcript card and the digest of an existing run render but offer no Resume. Enabled: unchanged from before                                                                                                                                                                                                                                                                                                           |
+| DWG-08  | Desktop E2E against a mock `/client/configs`: `disabled` → plus menu has no 「工作流」, `/` panel has no `workflow`, automations page has no tab; `alwaysOn` and `onDemand` → all three present                                                                                                                                                                                                                                                                                                                                                                                             |
+| DWG-09  | CLI protocol server, mode `onDemand`: the session starts with none of the ten tools and an `Agent` description without the CreateWorkflow line, while `workflow` is in the slash catalog and the `dynamic-workflows` skill is discoverable; submitting `/workflow …` activates before the turn's first model request, which carries all ten tools and the restored `Agent` line; the `runtime/dynamic_workflow_activation` entry is persisted; a later branch refresh keeps the ten; a second `/workflow` changes nothing; a prose request without the command leaves the surface as it was |
+| DWG-10  | CLI resume, mode `onDemand`: a session with the activation entry has the ten tools before its first turn; a session without the entry but with a persisted `/workflow` user message, or a persisted `CreateWorkflow` (any of the ten) tool call, is activated on resume and gains the entry; a session with neither stays deferred. Mode `alwaysOn`: activated regardless                                                                                                                                                                                                                   |
+| DWG-11  | v4 `resumeWorkflowRun` / `amendWorkflowRunSettings` accepted on an unactivated `onDemand` session, and a saved workflow launched into it from the hub, activate it before the following turn is queued; a rejected command activates nothing                                                                                                                                                                                                                                                                                                                                                |
+| DWG-12  | Children: an `Agent` child spawned before activation has no workflow tools, one spawned after has them; a `workflow_child` is always activated and still loses the authoring tools through its disallow list                                                                                                                                                                                                                                                                                                                                                                                |
+| DWG-13  | Compatibility: a CLI receiving `dynamicWorkflowEnabled:true` with no mode registers eagerly; a runtime with neither field (a child, an embedder) registers eagerly; a compaction after activation leaves the ten tools registered                                                                                                                                                                                                                                                                                                                                                           |
+| DWG-14  | Standalone CLI flag: the TUI and `-p` with no `--workflow-mode` create the app with `dynamicWorkflowEnabled:false, dynamicWorkflowToolsOnDemand:false`; `onDemand` → `true, true`; `alwaysOn` → `true, false`; every app the TUI creates (`/new`, `/resume`) carries the same pair; `--workflow-mode bogus` → exit 1 naming the three values, no app created                                                                                                                                                                                                                                |
+| DWG-15  | Flag scope: `--workflow-mode` with `app-server`, `agent-server`, `login`, `skills` → exit 1 with the scope error; with `-p`, `--target`, `tui` or no command → accepted                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| DWG-16  | TUI under `disabled`: the `/` suggestions and `/help` have no `workflow`; `/workflow x` answers the disabled notice without calling `submitPrompt`; `/dwf list` and `/dwf cancel` work; `/dwf resume <id>` answers the notice without calling `resumeWorkflowRun`. Under `onDemand` and `alwaysOn`: `/workflow` is suggested and submitted as before                                                                                                                                                                                                                                        |
+| DWG-17  | Headless under `disabled`: `-p "/workflow x"` → the notice on stderr, exit 1, no app created; `-p "/help"` lists no `/workflow`. With `--workflow-mode alwaysOn` the command rides the plain-prompt path and the settle-wait as before                                                                                                                                                                                                                                                                                                                                                      |
+| DWG-18  | `applyDynamicWorkflowUserMode`: offer `onDemand` + choice `alwaysOn` → mode `alwaysOn`, `offeredMode` `onDemand`, `userMode` `alwaysOn`; offer `disabled` + any choice → `disabled`, no `userMode`; no choice → the offer unchanged; an invalid stored value is ignored                                                                                                                                                                                                                                                                                                                     |
+| DWG-19  | Settings patch: `dynamicWorkflowMode: ""` deletes the stored value; a mode is stored as is; an unknown stored value does not break reading the file                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| DWG-20  | Host: with a latched offer `alwaysOn`, a stored choice `onDemand` makes the next session create carry `dynamicWorkflowMode: "onDemand"` without a new server read; a choice `disabled` makes it carry no workflow fields; `syncDynamicWorkflowUserMode` re-sends the policy to every live workspace (`enabled: false` for `disabled`) only when the effective mode changed, in call order                                                                                                                                                                                                   |
+| DWG-21  | Desktop-attached remote Host: without a local settings resolver it applies the last pushed value; the desktop pushes the settings value when it builds the remote workspace services and forwards later changes to live remote connections                                                                                                                                                                                                                                                                                                                                                  |
+| DWG-22  | UI Settings row: absent while loading, on failure, when the offer is `disabled`, and for a snapshot with no readable `offeredMode` (an older Host), where the hub's settings button is absent too; shows the effective mode; the 「默认」 tag sits on the offered mode; picking the offered mode writes `""`, picking another writes that mode; the store reloads after a change                                                                                                                                                                                                            |
+| DWG-23  | Desktop E2E against a mock `/client/configs` sending `alwaysOn`: the row shows 始终开启 with the tag; choosing 关闭 removes the 「工作流」 title word and, in a new draft, the plus-menu entry; choosing 始终开启 again clears the stored value. Offer `disabled`: no row                                                                                                                                                                                                                                                                                                                   |
 
 ## Alternatives not taken
 

@@ -79,7 +79,7 @@ describe("desktop E2E container presets", () => {
     ).replaceAll("\r\n", "\n");
 
     expect(dockerPlan).toContain(
-      "| Spec | 迁移状态 |\n| --- | --- |\n<!-- conversation-session-verified-table-end -->",
+      "| Spec | 迁移状态 |\n| ---- | -------- |\n\n<!-- conversation-session-verified-table-end -->",
     );
 
     const spec = "./test/e2e/conversation-session/example.test.ts";

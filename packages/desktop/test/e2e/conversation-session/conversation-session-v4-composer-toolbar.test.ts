@@ -61,24 +61,21 @@ async function waitForOnlyComposerPickerOpen(picker: ComposerPicker, transition:
   let latest: unknown = null;
   await browser.waitUntil(
     async () => {
-      latest = await browser.execute(
-        (triggerIds) => {
-          const expanded = Object.fromEntries(
-            Object.entries(triggerIds).map(([key, testId]) => [
-              key,
-              document
-                .querySelector<HTMLElement>(`[data-testid="${testId}"]`)
-                ?.getAttribute("aria-expanded") ?? null,
-            ]),
-          );
-          return {
-            expanded,
-            listboxes: document.querySelectorAll('[role="listbox"]').length,
-            menus: document.querySelectorAll('[role="menu"]').length,
-          };
-        },
-        COMPOSER_PICKER_TRIGGER_IDS,
-      );
+      latest = await browser.execute((triggerIds) => {
+        const expanded = Object.fromEntries(
+          Object.entries(triggerIds).map(([key, testId]) => [
+            key,
+            document
+              .querySelector<HTMLElement>(`[data-testid="${testId}"]`)
+              ?.getAttribute("aria-expanded") ?? null,
+          ]),
+        );
+        return {
+          expanded,
+          listboxes: document.querySelectorAll('[role="listbox"]').length,
+          menus: document.querySelectorAll('[role="menu"]').length,
+        };
+      }, COMPOSER_PICKER_TRIGGER_IDS);
       const state = latest as {
         expanded: Record<ComposerPicker, string | null>;
         listboxes: number;

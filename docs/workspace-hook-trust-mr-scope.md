@@ -50,20 +50,20 @@ hooks 从可执行配置中剥离（一律忽略）；本 MR 在此之上建立�
 
 ## 2. 按模块明细
 
-| 模块 | 规模 | 核心内容 |
-| --- | --- | --- |
-| **bootstrap** | 46 files +6,879−337 | review flow 唯一生产入口 `requestReview`（controller L607：flow 复用/supervisor/串行队列/deadline 收口）；workspace 级 Settings pretrust RPC（v2 新增，无 session 场景，managed policy 校验后落盘）；`zcode hooks trust` CLI 域逻辑（status 对 corrupt 显式 `workspace_hooks_trust_store_corrupt`）；v4 protocol commands 接线 |
-| **core** | 31 files +3,480−358 | 信任域三件套（types/domain/records）；`evaluateWorkspaceHookEntry`（`effectiveRunnable = admitted && configuredEnabled && policy != deny`）；per-workspace coordinator（security revision、policy 订阅）；runtime admission（pending 上报 `{pendingCount,bundleDigest,workspaceIdentity}`）；runner 软门禁发 `HookRunBlocked`（reasonCode `workspace_hooks_pending_trust`，不阻塞 turn） |
-| **shared** | 30 files +2,625−55 | v4 协议：`zcode-protocol-v4/workspace-hook-review`（decision/target/payload）、snapshot/delta 增量字段 `workspaceHookAdmission`（additive, default null）；discovery 对齐；**store 文件 schema 单源** `workspace-hook-trust-store-file.ts`（CR-01 修复的落点） |
-| **ui** | 27 files +2,524−103 | `HooksSection`/`HooksList` 行内信任交互（未信任行：[信任]按钮 + 锁定关闭 Switch，无状态徽章/无批量动作）；`useWorkspaceHookInlineTrust`（RPC 必须路由到 target workspace 的 host，防越界）；`WorkspaceHookPendingBanner`（[去审核]/[忽略]，忽略为 renderer 本地 dismiss）；review store；reasonCode→i18n 映射 |
-| **services** | 18 files +1,575−240 | `hooksService` 读 workspace 配置 + trust store（v2 终态：完整 strict schema，与 runtime/adapters 同判；异步 ENOENT 区分）；workspace hook 设置模型（discovery→UI 行）；trust store corrupt 上报 `trustStoreCorrupt` |
-| **adapters** | 11 files +1,432−83 | 文件 trust store：原子写（temp+fsync+rename，Windows EPERM/EBUSY 有界重试）、文件锁+stale 清理、corrupt 改名恢复（`*.corrupt-<ts>`）、revoke 空数组拒绝、compact |
-| **contracts** | 6 files +724−2 | digest schema v1、review timeout、`WorkspaceHookTrustState`/admission class/reasonCode 枚举、effective state schema、bundle snapshot schema、review flow state、store 文件 schema（现为 shared re-export）、policy schema |
-| **cli** | 9 files +610−20 | `zcode hooks trust status|review|grant|revoke` 命令（--workspace/--hook-digest/--all-current/--bundle-digest/--json）；human 输出含 pending 的 grant 指引与 corrupt 的恢复指引 |
-| **desktop** | 5 files | HK05–HK07 正式 e2e + fixture helper + wdio.conf 冷启动接线 + case-local provider fixture/manifest |
-| **docs** | 13 files +5,005−27 | 主 spec `workspace-hook-trust.md`、语义权威 `workspace-hook-trust-persistent-only.md`、软门禁设计 `workspace-hook-trust-soft-gate.md`、用户指南（含 corrupt 恢复）、人工验收手册、conversation-session case catalog（HK05–07）+ coverage matrix、改动范围文档（本文件） |
-| **scripts** | 1 file +258 | `create-workspace-hook-trust-uat-fixture.mjs`：生成无害 UAT workspace（3 条声明 + executions.jsonl recorder），`--verify` 现场防漂移 |
-| **根/其他** | 2 files +137 | `pnpm-lock.yaml`（contracts 新增 `@zcode/shared` workspace 依赖）；`.agents/skills/feature-boundary-planner/references/zcode-feature-graph.yaml`（特性图登记） |
+| 模块          | 规模                | 核心内容                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **bootstrap** | 46 files +6,879−337 | review flow 唯一生产入口 `requestReview`（controller L607：flow 复用/supervisor/串行队列/deadline 收口）；workspace 级 Settings pretrust RPC（v2 新增，无 session 场景，managed policy 校验后落盘）；`zcode hooks trust` CLI 域逻辑（status 对 corrupt 显式 `workspace_hooks_trust_store_corrupt`）；v4 protocol commands 接线                                                           |
+| **core**      | 31 files +3,480−358 | 信任域三件套（types/domain/records）；`evaluateWorkspaceHookEntry`（`effectiveRunnable = admitted && configuredEnabled && policy != deny`）；per-workspace coordinator（security revision、policy 订阅）；runtime admission（pending 上报 `{pendingCount,bundleDigest,workspaceIdentity}`）；runner 软门禁发 `HookRunBlocked`（reasonCode `workspace_hooks_pending_trust`，不阻塞 turn） |
+| **shared**    | 30 files +2,625−55  | v4 协议：`zcode-protocol-v4/workspace-hook-review`（decision/target/payload）、snapshot/delta 增量字段 `workspaceHookAdmission`（additive, default null）；discovery 对齐；**store 文件 schema 单源** `workspace-hook-trust-store-file.ts`（CR-01 修复的落点）                                                                                                                           |
+| **ui**        | 27 files +2,524−103 | `HooksSection`/`HooksList` 行内信任交互（未信任行：[信任]按钮 + 锁定关闭 Switch，无状态徽章/无批量动作）；`useWorkspaceHookInlineTrust`（RPC 必须路由到 target workspace 的 host，防越界）；`WorkspaceHookPendingBanner`（[去审核]/[忽略]，忽略为 renderer 本地 dismiss）；review store；reasonCode→i18n 映射                                                                            |
+| **services**  | 18 files +1,575−240 | `hooksService` 读 workspace 配置 + trust store（v2 终态：完整 strict schema，与 runtime/adapters 同判；异步 ENOENT 区分）；workspace hook 设置模型（discovery→UI 行）；trust store corrupt 上报 `trustStoreCorrupt`                                                                                                                                                                      |
+| **adapters**  | 11 files +1,432−83  | 文件 trust store：原子写（temp+fsync+rename，Windows EPERM/EBUSY 有界重试）、文件锁+stale 清理、corrupt 改名恢复（`*.corrupt-<ts>`）、revoke 空数组拒绝、compact                                                                                                                                                                                                                         |
+| **contracts** | 6 files +724−2      | digest schema v1、review timeout、`WorkspaceHookTrustState`/admission class/reasonCode 枚举、effective state schema、bundle snapshot schema、review flow state、store 文件 schema（现为 shared re-export）、policy schema                                                                                                                                                                |
+| **cli**       | 9 files +610−20     | `zcode hooks trust status                                                                                                                                                                                                                                                                                                                                                                | review | grant | revoke` 命令（--workspace/--hook-digest/--all-current/--bundle-digest/--json）；human 输出含 pending 的 grant 指引与 corrupt 的恢复指引 |
+| **desktop**   | 5 files             | HK05–HK07 正式 e2e + fixture helper + wdio.conf 冷启动接线 + case-local provider fixture/manifest                                                                                                                                                                                                                                                                                        |
+| **docs**      | 13 files +5,005−27  | 主 spec `workspace-hook-trust.md`、语义权威 `workspace-hook-trust-persistent-only.md`、软门禁设计 `workspace-hook-trust-soft-gate.md`、用户指南（含 corrupt 恢复）、人工验收手册、conversation-session case catalog（HK05–07）+ coverage matrix、改动范围文档（本文件）                                                                                                                  |
+| **scripts**   | 1 file +258         | `create-workspace-hook-trust-uat-fixture.mjs`：生成无害 UAT workspace（3 条声明 + executions.jsonl recorder），`--verify` 现场防漂移                                                                                                                                                                                                                                                     |
+| **根/其他**   | 2 files +137        | `pnpm-lock.yaml`（contracts 新增 `@zcode/shared` workspace 依赖）；`.agents/skills/feature-boundary-planner/references/zcode-feature-graph.yaml`（特性图登记）                                                                                                                                                                                                                           |
 
 ## 3. 关键设计决策
 
@@ -83,12 +83,12 @@ hooks 从可执行配置中剥离（一律忽略）；本 MR 在此之上建立�
 
 ## 4. 测试与验证状态
 
-| 层 | 证据 |
-| --- | --- |
-| 单测/集成 | 2,800+ 用例：contracts/core/adapters/bootstrap/cli/services/shared/ui 全覆盖（含 CR-01 parity 9 用例红→绿、schema 损坏样本 12 用例、review controller 时序/并发/superseded） |
-| 桌面 E2E | HK05–HK07 manual-review pending spec，macOS replay 3/3 通过（`desktop-e2e-20260817093717062-p95687-5fe4ae6a35334d65`，staging 合入后复跑） |
-| typecheck/lint | shared/services/contracts/bootstrap/cli + desktop 全过 |
-| 人工验收 | `docs/testing/workspace-hook-trust-manual-acceptance.md`（UAT-01~05）+ UAT fixture 脚本 |
+| 层             | 证据                                                                                                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 单测/集成      | 2,800+ 用例：contracts/core/adapters/bootstrap/cli/services/shared/ui 全覆盖（含 CR-01 parity 9 用例红→绿、schema 损坏样本 12 用例、review controller 时序/并发/superseded） |
+| 桌面 E2E       | HK05–HK07 manual-review pending spec，macOS replay 3/3 通过（`desktop-e2e-20260817093717062-p95687-5fe4ae6a35334d65`，staging 合入后复跑）                                   |
+| typecheck/lint | shared/services/contracts/bootstrap/cli + desktop 全过                                                                                                                       |
+| 人工验收       | `docs/testing/workspace-hook-trust-manual-acceptance.md`（UAT-01~05）+ UAT fixture 脚本                                                                                      |
 
 **待补验证**（合并后跟进）：
 

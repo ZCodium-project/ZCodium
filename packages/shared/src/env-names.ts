@@ -45,9 +45,7 @@ export function emitLegacyEnvDeprecation(legacyName: string, newName: string): v
   if (warnedLegacyEnvKeys.has(legacyName)) return;
   warnedLegacyEnvKeys.add(legacyName);
   // 无统一 logger 可用的早期路径（bootstrap 前）也允许输出；进程级去重。
-  console.warn(
-    `[env] 环境变量 ${legacyName} 已更名为 ${newName}，旧名本版本仍兼容，请尽快迁移`,
-  );
+  console.warn(`[env] 环境变量 ${legacyName} 已更名为 ${newName}，旧名本版本仍兼容，请尽快迁移`);
 }
 
 export const RENAMED_EXTERNAL_ENV_KEYS = {

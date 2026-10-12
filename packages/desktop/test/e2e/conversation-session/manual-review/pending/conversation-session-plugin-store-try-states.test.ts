@@ -1,10 +1,7 @@
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { TID_V4_COMPOSER_INPUT } from "@zcode/shared";
-import {
-  clearAppData,
-  setInputValueByTestIdDom,
-} from "../../../helpers/desktop-app.js";
+import { clearAppData, setInputValueByTestIdDom } from "../../../helpers/desktop-app.js";
 import {
   ELECTRON_WINDOW_RECORDING_CAPTURE_MODE,
   startElectronWindowRecording,
@@ -37,10 +34,7 @@ const ARTIFACT_DIR = join(
   CASE_ID.toLowerCase(),
 );
 const VIDEO_PATH = join(ARTIFACT_DIR, "plugin-store-try-states.webm");
-const VIDEO_MANIFEST_PATH = join(
-  ARTIFACT_DIR,
-  "plugin-store-try-states.recording.json",
-);
+const VIDEO_MANIFEST_PATH = join(ARTIFACT_DIR, "plugin-store-try-states.recording.json");
 
 describe("PLG12 Plugin 商店试用状态视觉验收", () => {
   after(async () => {
@@ -89,11 +83,7 @@ describe("PLG12 Plugin 商店试用状态视觉验收", () => {
       });
       await expectTryDraft("enabled");
       await capturePluginManualReview(CASE_ID, "03-enabled-try-draft");
-      expect(
-        await countCapturedRequestsContaining(
-          PLUGIN_LIFECYCLE_EXAMPLE_PROMPT,
-        ),
-      ).toBe(0);
+      expect(await countCapturedRequestsContaining(PLUGIN_LIFECYCLE_EXAMPLE_PROMPT)).toBe(0);
 
       // disabled：仍允许生成同形草稿；disabled_in_session 只在真正发送时由 Agent 判定。
       await openPluginSettings();
@@ -109,11 +99,7 @@ describe("PLG12 Plugin 商店试用状态视觉验收", () => {
       });
       await expectTryDraft("disabled");
       await capturePluginManualReview(CASE_ID, "05-disabled-try-draft");
-      expect(
-        await countCapturedRequestsContaining(
-          PLUGIN_LIFECYCLE_EXAMPLE_PROMPT,
-        ),
-      ).toBe(0);
+      expect(await countCapturedRequestsContaining(PLUGIN_LIFECYCLE_EXAMPLE_PROMPT)).toBe(0);
 
       // 试用入口不能替代或关闭旧能力：返回 composer 后 @ Plugin 候选仍可打开。
       await setInputValueByTestIdDom(TID_V4_COMPOSER_INPUT, "@", {
@@ -128,9 +114,7 @@ describe("PLG12 Plugin 商店试用状态视觉验收", () => {
         tailDurationMs: 1_000,
         timeoutMs: 60_000,
       });
-      expect(recordingResult.captureMode).toBe(
-        ELECTRON_WINDOW_RECORDING_CAPTURE_MODE,
-      );
+      expect(recordingResult.captureMode).toBe(ELECTRON_WINDOW_RECORDING_CAPTURE_MODE);
       expect(recordingResult.frameCount).toBeGreaterThan(1);
       expect(recordingResult.captureError).toBeUndefined();
       await writeFile(
@@ -173,8 +157,7 @@ async function expectTryDraft(pluginState: "enabled" | "disabled"): Promise<void
     },
     {
       timeout: 30_000,
-      timeoutMsg:
-        `Plugin Store try did not prefill canonical Plugin reference and prompt for ${pluginState} Plugin`,
+      timeoutMsg: `Plugin Store try did not prefill canonical Plugin reference and prompt for ${pluginState} Plugin`,
     },
   );
 }
@@ -185,13 +168,8 @@ async function isPluginSettingsVisible(): Promise<boolean> {
   );
 }
 
-async function seedLifecycleMarketplaceCache(
-  marketplaceRoot: string,
-): Promise<void> {
-  const managedMarketplaceRoot = pluginStoragePath(
-    "marketplaces",
-    PLUGIN_LIFECYCLE_MARKETPLACE_ID,
-  );
+async function seedLifecycleMarketplaceCache(marketplaceRoot: string): Promise<void> {
+  const managedMarketplaceRoot = pluginStoragePath("marketplaces", PLUGIN_LIFECYCLE_MARKETPLACE_ID);
   await mkdir(dirname(managedMarketplaceRoot), { recursive: true });
   await cp(marketplaceRoot, managedMarketplaceRoot, {
     force: true,
@@ -202,10 +180,7 @@ async function seedLifecycleMarketplaceCache(
   // known record 存在但商店无法加载 manifest，因此这里补齐运行时缓存形态。
   await writeFile(
     join(managedMarketplaceRoot, "marketplace.json"),
-    await readFile(
-      join(marketplaceRoot, ".claude-plugin", "marketplace.json"),
-      "utf-8",
-    ),
+    await readFile(join(marketplaceRoot, ".claude-plugin", "marketplace.json"), "utf-8"),
     "utf-8",
   );
   await writeFile(

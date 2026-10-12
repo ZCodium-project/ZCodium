@@ -116,4 +116,3 @@ main 是 browser tab 生命周期的唯一权威，renderer 只是被动接收�
 `newTab` 107ms 完成（修复前为 10004ms 超时后删 tab），且设置页覆盖期间 navigate / playwright /
 screenshot 全部成功，说明 guest 拿到的不是不可用的 0×0 状态。退出设置页后 webview 仍存在、
 可见尺寸 385×216，侧栏 tab 标题同步为 `Example Domain`，内容完整保留。
-

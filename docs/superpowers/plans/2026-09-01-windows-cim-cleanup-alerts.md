@@ -22,10 +22,12 @@
 ### Task 1: Convert Windows process identity lookup to CIM-only
 
 **Files:**
+
 - Modify: `packages/services/src/process/windowsProcessListAsync.ts`
 - Test: `packages/services/test/processTreeTerminator.windows.test.ts`
 
 **Interfaces:**
+
 - Preserve `readWindowsProcessListAsync` and `verifyWindowsProcessIdentityAsync` signatures.
 - Remove WMIC-specific parser, timeout, reserve, and fallback branches.
 
@@ -54,10 +56,12 @@
 ### Task 2: Emit cleanup error only after final retry
 
 **Files:**
+
 - Modify: `packages/services/src/zcode-agent/zcodeAgentProcessManager.ts`
 - Test: `packages/services/test/zcodeAgentProcessManager.test.ts`
 
 **Interfaces:**
+
 - Preserve public `disposeWorkspace` and `disposeAllAndWait` behavior.
 - Keep the final rejected error unchanged for callers.
 
@@ -86,6 +90,7 @@
 ### Task 3: Update documentation and run verification
 
 **Files:**
+
 - Modify: `docs/desktop/agent-shutdown-latency.md`
 - Modify: `docs/windows-agent-process-cleanup-state-machine.md`
 

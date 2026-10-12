@@ -21,11 +21,13 @@
 ### Task 1: 暴露 task ready 权威事件
 
 **Files:**
+
 - Modify: `packages/services/src/session/zcodeTaskService.ts`
 - Modify: `packages/services/src/zcode-agent/zcodeTaskServiceAdapter.ts`
 - Test: `packages/services/test/zcodeLegacyTaskCompatTaskIndex.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ZCodeTaskIndexSyncer.onSessionReadyEvent`，事件原因是 `prompt_completed | prompt_failed`。
 - Produces: `ZCodeTaskReadyOutcome` 和 `IZCodeTaskService.onDynamicTaskReady(taskId): Event<ZCodeTaskReadyOutcome>`。
 
@@ -67,11 +69,13 @@
 ### Task 2: 以 ready 驱动唯一 active-run tracker
 
 **Files:**
+
 - Modify: `packages/desktop/src/host/hostWorkspaceTaskTracker.ts`
 - Modify: `packages/desktop/src/host/index.ts`
 - Test: `packages/desktop/test/hostWorkspaceTaskTracker.test.ts`
 
 **Interfaces:**
+
 - Consumes: `onDynamicTaskReady(taskId)` 和 task meta 中的 `workspacePath/workspaceIdentity`。
 - Produces: `begin(taskId, context)`、`finish(taskId, context)`、`getRunningTaskCount(context)`、`getTotalRunningTaskCount()`、`clearWorkspace(context)`；同一 workspace/task 重复 begin 幂等。
 
@@ -105,11 +109,13 @@
 ### Task 3: workspace release 清理 Host proxy 状态
 
 **Files:**
+
 - Create: `packages/desktop/src/host/hostRemoteWorkspaceProxyState.ts`
 - Modify: `packages/desktop/src/host/index.ts`
 - Test: `packages/desktop/test/hostRemoteWorkspaceProxyState.test.ts`
 
 **Interfaces:**
+
 - Consumes: `releaseWorkspacePreparation(context)` 成功结果和 `resolveWorkspaceKey(context)`。
 - Produces: workspace-keyed subscription disposable map，以及 release 后清理 task meta、ready subscription、tracker entry 和动态 workspace 订阅的行为。
 

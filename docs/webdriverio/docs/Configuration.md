@@ -138,7 +138,7 @@ Default:
 Specify custom `headers` to pass into every WebDriver request. If your Selenium Grid requires Basic Authentification we recommend to pass in an `Authorization` header through this option to authenticate your WebDriver requests, e.g.:
 
 ```ts wdio.conf.ts
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 // Read the username and password from environment variables
 const username = process.env.SELENIUM_GRID_USERNAME;
 const password = process.env.SELENIUM_GRID_PASSWORD;
@@ -146,15 +146,15 @@ const password = process.env.SELENIUM_GRID_PASSWORD;
 // Combine the username and password with a colon separator
 const credentials = `${username}:${password}`;
 // Encode the credentials using Base64
-const encodedCredentials = Buffer.from(credentials).toString('base64');
+const encodedCredentials = Buffer.from(credentials).toString("base64");
 
 export const config: WebdriverIO.Config = {
-    // ...
-    headers: {
-        Authorization: `Basic ${encodedCredentials}`
-    }
-    // ...
-}
+  // ...
+  headers: {
+    Authorization: `Basic ${encodedCredentials}`,
+  },
+  // ...
+};
 ```
 
 Type: `Object`<br />
@@ -165,14 +165,14 @@ Default: `{}`
 Function intercepting [HTTP request options](https://github.com/sindresorhus/got#options) before a WebDriver request is made
 
 Type: `(RequestOptions) => RequestOptions`<br />
-Default: *none*
+Default: _none_
 
 ### transformResponse
 
 Function intercepting HTTP response objects after a WebDriver response has arrived. The function is passed the original response object as the first and the corresponding `RequestOptions` as the second argument.
 
 Type: `(Response, RequestOptions) => Response`<br />
-Default: *none*
+Default: _none_
 
 ### strictSSL
 
@@ -200,8 +200,9 @@ Default: `process.env.WEBDRIVER_CACHE_DIR || os.tmpdir()`
 ### maskingPatterns
 
 For more secure logging, regular expressions set with `maskingPatterns` can obfuscate sensitive information from the log.
- - The string format is a regular expression with or without flags (e.g. `/.../i`) and comma-separated for multiple regular expressions.
- - For more details on masking patterns, see the [Masking Patterns section in the WDIO Logger README](https://github.com/webdriverio/webdriverio/blob/main/packages/wdio-logger/README.md#masking-patterns).
+
+- The string format is a regular expression with or without flags (e.g. `/.../i`) and comma-separated for multiple regular expressions.
+- For more details on masking patterns, see the [Masking Patterns section in the WDIO Logger README](https://github.com/webdriverio/webdriverio/blob/main/packages/wdio-logger/README.md#masking-patterns).
 
 Type: `String`<br />
 Default: `undefined`
@@ -210,7 +211,7 @@ Default: `undefined`
 
 ```js
 {
-    maskingPatterns: '/--key=([^ ]*)/i,/RESULT (.*)/'
+  maskingPatterns: "/--key=([^ ]*)/i,/RESULT (.*)/";
 }
 ```
 
@@ -227,50 +228,51 @@ Define the protocol you want to use for your browser automation. Currently only 
 If you want to automate the browser using a different automation technology, make you set this property to a path that resolves to a module that adheres to the following interface:
 
 ```ts
-import type { Capabilities } from '@wdio/types';
-import type { Client, AttachOptions } from 'webdriver';
+import type { Capabilities } from "@wdio/types";
+import type { Client, AttachOptions } from "webdriver";
 
 export default class YourAutomationLibrary {
-    /**
-     * Start a automation session and return a WebdriverIO [monad](https://github.com/webdriverio/webdriverio/blob/940cd30939864bdbdacb2e94ee6e8ada9b1cc74c/packages/wdio-utils/src/monad.ts)
-     * with respective automation commands. See the [webdriver](https://www.npmjs.com/package/webdriver) package
-     * as a reference implementation
-     *
-     * @param {Capabilities.RemoteConfig} options WebdriverIO options
-     * @param {Function} hook that allows to modify the client before it gets released from the function
-     * @param {PropertyDescriptorMap} userPrototype allows user to add custom protocol commands
-     * @param {Function} customCommandWrapper allows to modify the command execution
-     * @returns a WebdriverIO compatible client instance
-     */
-    static newSession(
-        options: Capabilities.RemoteConfig,
-        modifier?: (...args: any[]) => any,
-        userPrototype?: PropertyDescriptorMap,
-        customCommandWrapper?: (...args: any[]) => any
-    ): Promise<Client>;
+  /**
+   * Start a automation session and return a WebdriverIO [monad](https://github.com/webdriverio/webdriverio/blob/940cd30939864bdbdacb2e94ee6e8ada9b1cc74c/packages/wdio-utils/src/monad.ts)
+   * with respective automation commands. See the [webdriver](https://www.npmjs.com/package/webdriver) package
+   * as a reference implementation
+   *
+   * @param {Capabilities.RemoteConfig} options WebdriverIO options
+   * @param {Function} hook that allows to modify the client before it gets released from the function
+   * @param {PropertyDescriptorMap} userPrototype allows user to add custom protocol commands
+   * @param {Function} customCommandWrapper allows to modify the command execution
+   * @returns a WebdriverIO compatible client instance
+   */
+  static newSession(
+    options: Capabilities.RemoteConfig,
+    modifier?: (...args: any[]) => any,
+    userPrototype?: PropertyDescriptorMap,
+    customCommandWrapper?: (...args: any[]) => any,
+  ): Promise<Client>;
 
-    /**
-     * allows user to attach to existing sessions
-     * @optional
-     */
-    static attachToSession(
-        options?: AttachOptions,
-        modifier?: (...args: any[]) => any, userPrototype?: {},
-        commandWrapper?: (...args: any[]) => any
-    ): Client;
+  /**
+   * allows user to attach to existing sessions
+   * @optional
+   */
+  static attachToSession(
+    options?: AttachOptions,
+    modifier?: (...args: any[]) => any,
+    userPrototype?: {},
+    commandWrapper?: (...args: any[]) => any,
+  ): Client;
 
-    /**
-     * Changes The instance session id and browser capabilities for the new session
-     * directly into the passed in browser object
-     *
-     * @optional
-     * @param   {object} instance  the object we get from a new browser session.
-     * @returns {string}           the new session id of the browser
-     */
-    static reloadSession(
-        instance: Client,
-        newCapabilities?: WebdriverIO.Capabilitie
-    ): Promise<string>;
+  /**
+   * Changes The instance session id and browser capabilities for the new session
+   * directly into the passed in browser object
+   *
+   * @optional
+   * @param   {object} instance  the object we get from a new browser session.
+   * @returns {string}           the new session id of the browser
+   */
+  static reloadSession(
+    instance: Client,
+    newCapabilities?: WebdriverIO.Capabilitie,
+  ): Promise<string>;
 }
 ```
 
@@ -280,6 +282,7 @@ Default: `webdriver`
 ### baseUrl
 
 Shorten `url` command calls by setting a base URL.
+
 - If your `url` parameter starts with `/`, then `baseUrl` is prepended (except the `baseUrl` path, if it has one).
 - If your `url` parameter starts without a scheme or `/` (like `some/path`), then the full `baseUrl` is prepended directly.
 
@@ -288,7 +291,7 @@ Default: `null`
 
 ### waitforTimeout
 
-Default timeout for all `waitFor*` commands. (Note the lowercase `f` in the option name.) This timeout __only__ affects commands starting with `waitFor*` and their default wait time.
+Default timeout for all `waitFor*` commands. (Note the lowercase `f` in the option name.) This timeout **only** affects commands starting with `waitFor*` and their default wait time.
 
 To increase the timeout for a _test_, please see the framework docs.
 
@@ -307,12 +310,12 @@ Default: `100`
 If running on Sauce Labs, you can choose to run tests between different data centers: US or EU.
 To change your region to EU, add `region: 'eu'` to your config.
 
-__Note:__ This only has an effect if you provide `user` and `key` options that are connected to your Sauce Labs account.
+**Note:** This only has an effect if you provide `user` and `key` options that are connected to your Sauce Labs account.
 
 Type: `String`<br />
 Default: `us`
 
-*(only for vm and or em/simulators)*
+_(only for vm and or em/simulators)_
 
 ---
 
@@ -354,7 +357,7 @@ Default: `[{ 'wdio:maxInstances': 5, browserName: 'firefox' }]`
 
 Maximum number of total parallel running workers.
 
-__Note:__ that it may be a number as high as `100`, when the tests are being performed on some external vendors such as Sauce Labs's machines. There, the tests are not tested on a single machine, but rather, on multiple VMs. If the tests are to be run on a local development machine, use a number that is more reasonable, such as `3`, `4`, or `5`. Essentially, this is the number of browsers that will be concurrently started and running your tests at the same time, so it depends on how much RAM there is on your machine, and how many other apps are running on your machine.
+**Note:** that it may be a number as high as `100`, when the tests are being performed on some external vendors such as Sauce Labs's machines. There, the tests are not tested on a single machine, but rather, on multiple VMs. If the tests are to be run on a local development machine, use a number that is more reasonable, such as `3`, `4`, or `5`. Essentially, this is the number of browsers that will be concurrently started and running your tests at the same time, so it depends on how much RAM there is on your machine, and how many other apps are running on your machine.
 
 You can also apply `maxInstances` within your capability objects using the `wdio:maxInstances` capability. This will limit the amount of parallel sessions for that particular capability.
 
@@ -374,7 +377,7 @@ Inserts WebdriverIO's globals (e.g. `browser`, `$` and `$$`) into the global env
 If you set to `false`, you should import from `@wdio/globals`, e.g.:
 
 ```ts
-import { browser, $, $$, expect } from '@wdio/globals'
+import { browser, $, $$, expect } from "@wdio/globals";
 ```
 
 Note: WebdriverIO doesn't handle injection of test framework specific globals.
@@ -472,13 +475,15 @@ Example:
 
 ```js
 reporters: [
-    'dot',
-    'spec'
-    ['junit', {
-        outputDir: `${__dirname}/reports`,
-        otherOption: 'foobar'
-    }]
-]
+  "dot",
+  "spec"[
+    ("junit",
+    {
+      outputDir: `${__dirname}/reports`,
+      otherOption: "foobar",
+    })
+  ],
+];
 ```
 
 ### reporterSyncInterval
@@ -522,8 +527,8 @@ Overrides default snapshot path. For example, to store snapshots next to test fi
 
 ```ts title="wdio.conf.ts"
 export const config: WebdriverIO.Config = {
-    resolveSnapshotPath: (testPath, snapExtension) => testPath + snapExtension,
-}
+  resolveSnapshotPath: (testPath, snapExtension) => testPath + snapExtension,
+};
 ```
 
 Type: `(testPath: string, snapExtension: string) => string`<br />
@@ -531,7 +536,7 @@ Default: stores snapshot files in `__snapshots__` directory next to test file
 
 ### tsConfigPath
 
-WDIO uses `tsx` to compile TypeScript files.  Your TSConfig is automatically detected from the current working directory but you can specify a custom path here or by setting the TSX_TSCONFIG_PATH environment variable.
+WDIO uses `tsx` to compile TypeScript files. Your TSConfig is automatically detected from the current working directory but you can specify a custom path here or by setting the TSX_TSCONFIG_PATH environment variable.
 
 See the `tsx` docs: https://tsx.is/dev-api/node-cli#custom-tsconfig-json-path
 
@@ -608,7 +613,7 @@ Parameters:
 
 ### beforeHook
 
-Hook that gets executed *before* a hook within the suite starts (e.g. runs before calling beforeEach in Mocha)
+Hook that gets executed _before_ a hook within the suite starts (e.g. runs before calling beforeEach in Mocha)
 
 Parameters:
 
@@ -617,7 +622,7 @@ Parameters:
 
 ### afterHook
 
-Hook that gets executed *after* a hook within the suite ends (e.g. runs after calling afterEach in Mocha)
+Hook that gets executed _after_ a hook within the suite ends (e.g. runs after calling afterEach in Mocha)
 
 Parameters:
 

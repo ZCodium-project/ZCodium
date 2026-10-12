@@ -40,9 +40,7 @@ export function ChatModeSwitchControl({
       open={open}
       onOpenChange={onOpenChange}
       disabled={disabled}
-      tooltipTitle={
-        disabledReason ?? intl.formatMessage({ id: "chat.toolbar.mode.label" })
-      }
+      tooltipTitle={disabledReason ?? intl.formatMessage({ id: "chat.toolbar.mode.label" })}
       shortcutLabel={modeShortcutLabel}
       triggerRef={modeTriggerRef}
       triggerSize="default"
@@ -53,9 +51,7 @@ export function ChatModeSwitchControl({
             "size-7 justify-center gap-0 rounded-lg p-0 text-ui-base @xl/composer:h-7 @xl/composer:w-fit @xl/composer:justify-between @xl/composer:gap-1 @xl/composer:pl-2 @xl/composer:pr-1.5"
           : "gap-1 rounded-lg pl-2 pr-1.5 text-ui-base"
       }
-      indicatorClassName={
-        compactIconOnly ? "hidden @xl/composer:block" : undefined
-      }
+      indicatorClassName={compactIconOnly ? "hidden @xl/composer:block" : undefined}
       leadingIcon={SlidersHorizontalIcon}
       labelVisibilityClassName={labelVisibilityClassName}
       provider={selectedProvider}

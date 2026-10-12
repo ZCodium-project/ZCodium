@@ -2132,13 +2132,20 @@ describe("workflowRuns reducer · run-launched（声明阶段表）", () => {
       step(undefined, progress("run-started", started())),
       progress("run-launched", { inputId: "in-1", phaseNames: ["plan", "verify"] }),
     );
-    const settled = step(launched, progress("run-settled", { status: "stopped", stopReason: "user" }));
+    const settled = step(
+      launched,
+      progress("run-settled", { status: "stopped", stopReason: "user" }),
+    );
     const resumed = step(settled, progress("run-started", started()));
     expect(resumed.runs[0]?.phaseNames).toEqual(["plan", "verify"]);
     expect(
       reduceWorkflowRunsState(
         resumed,
-        progress("run-launched", { inputId: "in-1", phaseNames: ["plan", "verify"] }, { sequence: 3 }),
+        progress(
+          "run-launched",
+          { inputId: "in-1", phaseNames: ["plan", "verify"] },
+          { sequence: 3 },
+        ),
       ),
     ).toBeNull();
   });

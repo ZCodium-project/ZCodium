@@ -47,15 +47,15 @@
 
 调查基线：`86bbe157c88e8e599694afb53c39f6dac125ac08`。以下是设计依据，不是本项已实现内容。
 
-| 当前结构 | 未来必须调整的原因 | 代码入口 |
-| --- | --- | --- |
-| 每个域只有一个固定 Team Provider ID | Team A/B 共用 ID，无法在 Selection 中同时独立指定 | `packages/shared/src/model-provider-types.ts` |
-| 每个 Family 保存一项 connection selection | 表达的是互斥当前连接，而非多个账号实例 | `packages/shared/src/provider-family-connection-selection.ts` |
-| Settings 导航写入 connection selection | 浏览页面会改变执行侧事实 | `packages/ui/src/settings/ModelProviderSection.tsx` 的 `persistProviderFamilyModeForNavItem` |
-| Account Resolver 通过 current 限制执行范围 | 多个具体 Provider 并存后不再需要普通账号 current 门禁 | `packages/provider/src/resolver.ts`、`packages/services/src/model-provider/accountProviderConnectionResolver.ts` |
-| 请求鉴权读取当前兼容连接 | 即使 UI 选了 Team A，也不能在请求期改取 Team B 的凭据 | `accountProviderConnectionResolver.ts` 的 `resolveCurrentAccountAccess` |
-| 旧 Coding Plan 统一映射 Individual | 正确性依赖后续自动对应；删除对应后必须重订迁移策略 | `packages/shared/src/legacy-model-provider-identity.ts` |
-| Account 选择器按固定 Family/Plan 生成组标签 | 动态团队实例需要唯一 key、准确标签和同名模型来源区分 | `packages/ui/src/lib/modelSelectionGroups.ts`、`packages/ui/src/ModelConfigSelect.tsx` |
+| 当前结构                                    | 未来必须调整的原因                                    | 代码入口                                                                                                         |
+| ------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 每个域只有一个固定 Team Provider ID         | Team A/B 共用 ID，无法在 Selection 中同时独立指定     | `packages/shared/src/model-provider-types.ts`                                                                    |
+| 每个 Family 保存一项 connection selection   | 表达的是互斥当前连接，而非多个账号实例                | `packages/shared/src/provider-family-connection-selection.ts`                                                    |
+| Settings 导航写入 connection selection      | 浏览页面会改变执行侧事实                              | `packages/ui/src/settings/ModelProviderSection.tsx` 的 `persistProviderFamilyModeForNavItem`                     |
+| Account Resolver 通过 current 限制执行范围  | 多个具体 Provider 并存后不再需要普通账号 current 门禁 | `packages/provider/src/resolver.ts`、`packages/services/src/model-provider/accountProviderConnectionResolver.ts` |
+| 请求鉴权读取当前兼容连接                    | 即使 UI 选了 Team A，也不能在请求期改取 Team B 的凭据 | `accountProviderConnectionResolver.ts` 的 `resolveCurrentAccountAccess`                                          |
+| 旧 Coding Plan 统一映射 Individual          | 正确性依赖后续自动对应；删除对应后必须重订迁移策略    | `packages/shared/src/legacy-model-provider-identity.ts`                                                          |
+| Account 选择器按固定 Family/Plan 生成组标签 | 动态团队实例需要唯一 key、准确标签和同名模型来源区分  | `packages/ui/src/lib/modelSelectionGroups.ts`、`packages/ui/src/ModelConfigSelect.tsx`                           |
 
 ## 四、建议架构方向（尚未冻结实现）
 
@@ -114,12 +114,12 @@ ModelFactory 精确创建
 
 ### 5.1 不再依赖运行时自动对应
 
-| 原数据证据 | 建议处理方向 |
-| --- | --- |
-| 普通自定义/API Provider 明确身份 | 保留原身份，正常格式迁移 |
-| 明确个人或完整团队身份 | 迁到对应具体 Provider，不要求它当前有权益/模型可执行 |
-| 仅旧通用 Coding Plan ID，无具体归属 | 不能凭空恢复历史团队，必须裁决一次性归属策略 |
-| 旧 Team Provider 下的个人模型覆盖/排序 | 必须裁决归给哪个实例，不能默认复制到全部团队 |
+| 原数据证据                             | 建议处理方向                                         |
+| -------------------------------------- | ---------------------------------------------------- |
+| 普通自定义/API Provider 明确身份       | 保留原身份，正常格式迁移                             |
+| 明确个人或完整团队身份                 | 迁到对应具体 Provider，不要求它当前有权益/模型可执行 |
+| 仅旧通用 Coding Plan ID，无具体归属    | 不能凭空恢复历史团队，必须裁决一次性归属策略         |
+| 旧 Team Provider 下的个人模型覆盖/排序 | 必须裁决归给哪个实例，不能默认复制到全部团队         |
 
 候选方案：优先使用记录自身/可验证旧关联信息；不足时，把升级前保存的旧连接作为一次性迁移默认。该默认不代表历史真实执行归属，尚未获用户确认。仍无法确定时如何保留原记录与提示用户，另行裁决。
 

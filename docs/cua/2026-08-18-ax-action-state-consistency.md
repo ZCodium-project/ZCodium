@@ -4,9 +4,9 @@
 
 | Field            | Value                                                                                           |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
-| Developer intent | 让 ZCode consumer 只消费 producer 的动作回执，避免在 consumer 侧维护第二套 post-state 屏障        |
+| Developer intent | 让 ZCode consumer 只消费 producer 的动作回执，避免在 consumer 侧维护第二套 post-state 屏障      |
 | Capability       | Computer Use action receipt authority                                                           |
-| Change layer     | result projection / retry safety / media authority                                               |
+| Change layer     | result projection / retry safety / media authority                                              |
 | Operating mode   | planning + implementation-handoff                                                               |
 | Primary seeds    | Core MCP bridge、tool result serialization、media budget、official CUA bundled skill/provenance |
 | Out of scope     | conversation session 状态语义、remote owner/queue、Windows/Linux native 读回、人工接管 UI       |
@@ -56,19 +56,19 @@ zcode-cua MCP result -> official authority gate
 
 ## UI Surface Matrix
 
-| User scenario         | UI entry                  | Shared implementation                        | Display/draft owner                    | Validation/gating                           | Commit action      | Authority                 | Mode boundary                                     | Isolation                                |
-| --------------------- | ------------------------- | -------------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------ | ------------------------- | ------------------------------------------------- | ---------------------------------------- |
+| User scenario         | UI entry                  | Shared implementation                        | Display/draft owner                    | Validation/gating                         | Commit action      | Authority                 | Mode boundary                                     | Isolation                                |
+| --------------------- | ------------------------- | -------------------------------------------- | -------------------------------------- | ----------------------------------------- | ------------------ | ------------------------- | ------------------------------------------------- | ---------------------------------------- |
 | 主 Agent 操作桌面元素 | conversation CUA tool row | official MCP bridge + generic tool lifecycle | CLI model history / UI tool projection | official authority + receipt pass-through | MCP element write  | producer session + Helper | desktop local；mobile only attaches existing Host | 不修改 conversation snapshot/queue/owner |
-| 动作后需要确认        | 下一轮模型输入            | explicit `get_app_state`                     | CLI provider projection                | no replay unless `action_sent=false`       | full get_app_state | producer session          | continuous/replayable 共用既有工具结果            | relay/main 不拥有状态屏障                |
+| 动作后需要确认        | 下一轮模型输入            | explicit `get_app_state`                     | CLI provider projection                | no replay unless `action_sent=false`      | full get_app_state | producer session          | continuous/replayable 共用既有工具结果            | relay/main 不拥有状态屏障                |
 
 ## State Owners And Commit Sinks
 
-| State/fact                            | Display owner                | Authoritative owner           | Commit sink                            | Persistence/cache                |
-| ------------------------------------- | ---------------------------- | ----------------------------- | -------------------------------------- | -------------------------------- |
-| `state_id` 与 mutation epoch          | explicit observation result  | `zcode-cua` transport session | `get_app_state` / frame-producing tools | producer in-memory session       |
-| broker/Helper dispatch fact           | CUA action receipt           | `zcode-cua` + signed Helper   | per-server MCP/Broker RPC               | 既有 tool result/session history |
-| receipt 文本/structuredContent 投影   | provider tool-result history | generic MCP bridge            | tool executor serialization             | 既有 tool result/session history |
-| UI tool lifecycle                     | conversation row             | 既有 session event/projection | generic MCP tool lifecycle             | 既有 conversation persistence    |
+| State/fact                          | Display owner                | Authoritative owner           | Commit sink                             | Persistence/cache                |
+| ----------------------------------- | ---------------------------- | ----------------------------- | --------------------------------------- | -------------------------------- |
+| `state_id` 与 mutation epoch        | explicit observation result  | `zcode-cua` transport session | `get_app_state` / frame-producing tools | producer in-memory session       |
+| broker/Helper dispatch fact         | CUA action receipt           | `zcode-cua` + signed Helper   | per-server MCP/Broker RPC               | 既有 tool result/session history |
+| receipt 文本/structuredContent 投影 | provider tool-result history | generic MCP bridge            | tool executor serialization             | 既有 tool result/session history |
+| UI tool lifecycle                   | conversation row             | 既有 session event/projection | generic MCP tool lifecycle              | 既有 conversation persistence    |
 
 ## Must-Preserve Invariants
 
@@ -82,14 +82,14 @@ zcode-cua MCP result -> official authority gate
 
 ## Accepted Cases
 
-| Case ID        | Setup                                     | Action              | Assertions                                      | Evidence                    |
-| -------------- | ----------------------------------------- | ------------------- | ----------------------------------------------- | --------------------------- |
-| CUA-RCPT-01 | action receipt without post-state          | bridge/serialize    | 作为普通 MCP 文本投影，不合成 refresh_required | core bridge unit            |
-| CUA-RCPT-02 | receipt + structuredContent                | bridge              | structuredContent 作为普通 MCP 文本追加        | core bridge unit            |
-| CUA-RCPT-03 | receipt text 超预算                        | serialize           | 走通用 resultBudget truncation                 | core budget unit            |
-| CUA-RCPT-04 | possibly_sent                              | bridge              | retry_action=false，旧动作不重放               | producer + bridge unit      |
-| CUA-AX-SYNC-05 | image 被 request media budget 移除        | provider projection | 对应 image_ref 同时移除                         | media-budget unit           |
-| CUA-RCPT-06 | 第三方 MCP 仿造 receipt                    | bridge              | 不获得 final-raster official 特殊保护          | authority unit              |
+| Case ID        | Setup                              | Action              | Assertions                                     | Evidence               |
+| -------------- | ---------------------------------- | ------------------- | ---------------------------------------------- | ---------------------- |
+| CUA-RCPT-01    | action receipt without post-state  | bridge/serialize    | 作为普通 MCP 文本投影，不合成 refresh_required | core bridge unit       |
+| CUA-RCPT-02    | receipt + structuredContent        | bridge              | structuredContent 作为普通 MCP 文本追加        | core bridge unit       |
+| CUA-RCPT-03    | receipt text 超预算                | serialize           | 走通用 resultBudget truncation                 | core budget unit       |
+| CUA-RCPT-04    | possibly_sent                      | bridge              | retry_action=false，旧动作不重放               | producer + bridge unit |
+| CUA-AX-SYNC-05 | image 被 request media budget 移除 | provider projection | 对应 image_ref 同时移除                        | media-budget unit      |
+| CUA-RCPT-06    | 第三方 MCP 仿造 receipt            | bridge              | 不获得 final-raster official 特殊保护          | authority unit         |
 
 ## Impact And Handoff
 
@@ -113,7 +113,7 @@ zcode-cua MCP result -> official authority gate
 | producer 全量单测            | 230 files；2806 passed、23 skipped                                             | AX mutation epoch、单次派发、forced full observe、refresh barrier 与既有 frame/Zoom 回归通过 |
 | producer 静态门禁            | typecheck 通过；lint 0 error、14 条既有 warning                                | `0.5.6` 可发布代码路径通过                                                                   |
 | producer 真机压力            | 后台/并发前台 churn 30 次；真模型 5/5                                          | 未重复新增、未从 native error 重放；模型状态均同步或安全要求 refresh                         |
-| consumer action/frame 重点集 | 5 files；117 passed                                                            | receipt pass-through、generic budget、hook 追加与 final-raster 门禁均覆盖                   |
+| consumer action/frame 重点集 | 5 files；117 passed                                                            | receipt pass-through、generic budget、hook 追加与 final-raster 门禁均覆盖                    |
 | consumer Helper 兼容重点集   | 8 files；277 passed、1 skipped                                                 | `0.5.6` Helper 名称与 receipt/dispatch 语义已对齐                                            |
 | wrapper/provenance           | 13/13；host authority 1/1                                                      | 版本、skill bytes、producer SHA 与 runtime contract 一致                                     |
 | ZCode 全量单测               | 1309 files passed、1 skipped；11475 passed、12 skipped                         | consumer 与产品链路完整回归通过                                                              |

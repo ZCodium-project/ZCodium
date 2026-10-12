@@ -30,11 +30,11 @@ authorization: <API Key>
 
 额度卡片通过 quota 接口返回的 `limits[]` 中 `type`、`unit`、`number` 字段判断。
 
-| 看板卡片 | 匹配条件 |
-|---|---|
-| 5 小时额度 | `type === "TOKENS_LIMIT"` 且 `unit === 3` 且 `number === 5` |
-| Weekly 额度 | `type === "TOKENS_LIMIT"` 且 `unit === 6` |
-| MCP 额度 | `type === "TIME_LIMIT"` 且 `unit === 5` 且 `number === 1` |
+| 看板卡片    | 匹配条件                                                    |
+| ----------- | ----------------------------------------------------------- |
+| 5 小时额度  | `type === "TOKENS_LIMIT"` 且 `unit === 3` 且 `number === 5` |
+| Weekly 额度 | `type === "TOKENS_LIMIT"` 且 `unit === 6`                   |
+| MCP 额度    | `type === "TIME_LIMIT"` 且 `unit === 5` 且 `number === 1`   |
 
 ## 百分比展示
 

@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
-import {
-  readExternalEnvVar,
-  writeExternalEnvVar,
-} from "../src/env-names.js";
+import { readExternalEnvVar, writeExternalEnvVar } from "../src/env-names.js";
 
 test("读：新名 ZCODIUM_ 优先，旧名 ZCODE_ 兜底", () => {
   const both = { ZCODIUM_DATA_BASE_DIR: "/new", ZCODE_DATA_BASE_DIR: "/legacy" };

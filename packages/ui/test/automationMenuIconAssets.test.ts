@@ -40,22 +40,14 @@ describe("automation Lucide icon contract", () => {
 
     expect(automationsSectionSource).toContain("<AutomationEditActionIcon");
     expect(automationsSectionSource).toContain("<AutomationRunNowIcon");
-    expect(automationsSectionSource).toContain(
-      "paused: { icon: AutomationPausedIcon",
-    );
+    expect(automationsSectionSource).toContain("paused: { icon: AutomationPausedIcon");
   });
 
   it("取消任务与首页 Chat 暂停按钮使用同一枚实心 Square 图标", () => {
-    expect(automationIconsSource).toContain(
-      "export function AutomationCancelActionIcon",
-    );
+    expect(automationIconsSource).toContain("export function AutomationCancelActionIcon");
     expect(automationIconsSource).toContain('fill="currentColor"');
     expect(offPeakTaskListSource).toContain("<AutomationCancelActionIcon");
-    expect(offPeakTaskListSource).toContain(
-      'className="size-4 fill-current"',
-    );
-    expect(offPeakTaskListSource).not.toMatch(
-      /<X[\s\S]*offPeak\.action\.cancel/,
-    );
+    expect(offPeakTaskListSource).toContain('className="size-4 fill-current"');
+    expect(offPeakTaskListSource).not.toMatch(/<X[\s\S]*offPeak\.action\.cancel/);
   });
 });

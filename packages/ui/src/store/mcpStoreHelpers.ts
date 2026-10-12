@@ -46,7 +46,8 @@ export function loadPersistedConfig(): McpConfig {
 
 export function readLegacyCommonMcpServers(): Record<string, McpServerConfig> {
   const saved = safeReadJson<Record<string, unknown>>(MCP_CONFIG_KEY, {});
-  const legacyServers = (saved.mcp as { mcpServers?: Record<string, McpServerConfig> } | undefined)?.mcpServers;
+  const legacyServers = (saved.mcp as { mcpServers?: Record<string, McpServerConfig> } | undefined)
+    ?.mcpServers;
   return legacyServers && typeof legacyServers === "object" ? legacyServers : {};
 }
 
@@ -87,10 +88,16 @@ function toIdKey(value: string): string {
   return normalized || "default";
 }
 
-export function makeServerId(source: McpSource, name: string, projectPath?: string, directorySource?: NonNullable<NativeMcpServerRecord["location"]>["source"]): string {
-  const sourceKey = source === "zcodeagentmcp" && directorySource && directorySource !== "zcode"
-    ? `${source}-${directorySource}`
-    : source;
+export function makeServerId(
+  source: McpSource,
+  name: string,
+  projectPath?: string,
+  directorySource?: NonNullable<NativeMcpServerRecord["location"]>["source"],
+): string {
+  const sourceKey =
+    source === "zcodeagentmcp" && directorySource && directorySource !== "zcode"
+      ? `${source}-${directorySource}`
+      : source;
   return `${sourceKey}-${toIdKey(toScopeKey(projectPath))}-${toIdKey(name)}`;
 }
 
@@ -139,7 +146,12 @@ export function buildServerList(
   const servers: ZCodeMcpServer[] = [];
 
   for (const server of nativeServers) {
-    const serverId = makeServerId(server.source, server.name, server.projectPath, server.location?.source);
+    const serverId = makeServerId(
+      server.source,
+      server.name,
+      server.projectPath,
+      server.location?.source,
+    );
     if (!deletedPreload.has(serverId)) {
       servers.push(
         makeServer(

@@ -158,10 +158,7 @@
     "pixels": {
       "width": 878,
       "height": 1347,
-      "center": [
-        165,
-        331
-      ],
+      "center": [165, 331],
       "found": true
     },
     "e2eCasesPassed": 3,

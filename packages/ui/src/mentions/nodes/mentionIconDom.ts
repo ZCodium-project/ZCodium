@@ -7,10 +7,7 @@
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 export type MentionLucideIconNode = ReadonlyArray<
-  readonly [
-    "path" | "circle" | "rect",
-    Readonly<Record<string, string>>,
-  ]
+  readonly ["path" | "circle" | "rect", Readonly<Record<string, string>>]
 >;
 
 export const SKILL_MENTION_LUCIDE_ICON_NAME = "WandSparkles";

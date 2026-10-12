@@ -89,11 +89,13 @@ describe("pluginStore marketplace operation state", () => {
   it("initialize 会透传 workspaceIdentity 并记录已加载 identity", async () => {
     const service = createPluginsServiceMock();
 
-    await usePluginStore.getState().initialize(
-      "/tmp/plugin-workspace",
-      service,
-      "remote:ssh:demo-host:22:demo:/tmp/plugin-workspace",
-    );
+    await usePluginStore
+      .getState()
+      .initialize(
+        "/tmp/plugin-workspace",
+        service,
+        "remote:ssh:demo-host:22:demo:/tmp/plugin-workspace",
+      );
 
     expect(service.getOverview).toHaveBeenCalledWith({
       workspacePath: "/tmp/plugin-workspace",
@@ -130,13 +132,9 @@ describe("pluginStore marketplace operation state", () => {
       removeMarketplace: vi.fn(() => removeDeferred.promise),
     });
 
-    const pending = usePluginStore
-      .getState()
-      .removeMarketplace("anthropic-agent-skills", service);
+    const pending = usePluginStore.getState().removeMarketplace("anthropic-agent-skills", service);
 
-    expect(usePluginStore.getState().removingMarketplaceName).toBe(
-      "anthropic-agent-skills",
-    );
+    expect(usePluginStore.getState().removingMarketplaceName).toBe("anthropic-agent-skills");
 
     removeDeferred.resolve();
     await pending;

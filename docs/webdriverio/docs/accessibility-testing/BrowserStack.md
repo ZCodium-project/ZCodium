@@ -13,10 +13,10 @@ To use Automated tests in BrowserStack Accessibility Testing, your tests should 
 
 The following are the advantages of Automated tests:
 
-* Seamlessly integrates into your pre-existing automation test suite.
-* No code changes are required in test cases.
-* Requires zero additional maintenance for accessibility testing.
-* Understand historical trends and gain test-case insights.
+- Seamlessly integrates into your pre-existing automation test suite.
+- No code changes are required in test cases.
+- Requires zero additional maintenance for accessibility testing.
+- Understand historical trends and gain test-case insights.
 
 ## Get Started with BrowserStack Accessibility Testing
 
@@ -32,33 +32,35 @@ npm install --save-dev @wdio/browserstack-service
 
 ```javascript
 exports.config = {
-    //...
-    user: '<browserstack_username>' || process.env.BROWSERSTACK_USERNAME,
-    key: '<browserstack_access_key>' || process.env.BROWSERSTACK_ACCESS_KEY,
-    commonCapabilities: {
-      'bstack:options': {
-        projectName: "Your static project name goes here",
-        buildName: "Your static build/job name goes here"
-      }
+  //...
+  user: "<browserstack_username>" || process.env.BROWSERSTACK_USERNAME,
+  key: "<browserstack_access_key>" || process.env.BROWSERSTACK_ACCESS_KEY,
+  commonCapabilities: {
+    "bstack:options": {
+      projectName: "Your static project name goes here",
+      buildName: "Your static build/job name goes here",
     },
-    services: [
-      ['browserstack', {
+  },
+  services: [
+    [
+      "browserstack",
+      {
         accessibility: true,
         // Optional configuration options
         accessibilityOptions: {
-          'wcagVersion': 'wcag21a',
-          'includeIssueType': {
-            'bestPractice': false,
-            'needsReview': true
+          wcagVersion: "wcag21a",
+          includeIssueType: {
+            bestPractice: false,
+            needsReview: true,
           },
-          'includeTagsInTestingScope': ['Specify tags of test cases to be included'],
-          'excludeTagsInTestingScope': ['Specify tags of test cases to be excluded']
+          includeTagsInTestingScope: ["Specify tags of test cases to be included"],
+          excludeTagsInTestingScope: ["Specify tags of test cases to be excluded"],
         },
-      }]
+      },
     ],
-    //...
-  };
+  ],
+  //...
+};
 ```
 
 You can view detailed instructions [here](https://www.browserstack.com/docs/accessibility/automated-tests/get-started/webdriverio?utm_source=webdriverio&utm_medium=partnered&utm_campaign=documentation).
-

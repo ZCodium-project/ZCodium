@@ -7,7 +7,10 @@ import { isSharpRequiredByComputerUse } from "../scripts/sharp-package-assets.mj
 
 const roots: string[] = [];
 
-function createWorkspace(cuaManifest: Record<string, unknown> | null, location: "root" | "desktop") {
+function createWorkspace(
+  cuaManifest: Record<string, unknown> | null,
+  location: "root" | "desktop",
+) {
   const root = mkdtempSync(join(tmpdir(), "zcode-sharp-cua-"));
   roots.push(root);
   const desktopRoot = join(root, "packages", "desktop");

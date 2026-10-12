@@ -6,16 +6,16 @@
 
 ## 一、审计隐患回顾与优先级
 
-| 优先 | 进程 | 隐患 | 增长节奏 | 为什么排这里 |
-| --- | --- | --- | --- | --- |
-| **1** | agent CLI | `InMemorySessionEventStore` 把每个 `ModelStreaming`（逐 token）和 `ToolCallProgress` 事件永久驻留，append 还 `[...events, e]` 全量拷贝；无人调 `deleteSession` | **每 token 一条**，session 驻留期只增不减 | 唯一一个按 token 频率增长的点；所有长会话、所有用户都命中；桌面端 legacy `session/subscribe` 又把 session 钉死不回收，两者叠加就是"越用越大" |
-| 2 | main | `will-download` 监听挂 defaultSession，关窗时跳过清理 | 每关一窗 +N 闭包 | 一行修复，独立 MR |
-| 3 | main | `TaskRealtimeBus.streamBatches` 非终态 run 不删，还向新窗口重放 | 每次中断/断连 +1（≤512KB） | 几行修复，独立 MR |
-| 4 | renderer | shiki `tokensCache` 无淘汰，流式 Edit 每 chunk 一条 | 每个 Edit 工具输出 +N | 加 LRU，独立 MR |
-| 5 | renderer | task snapshot 内存缓存无上限 | 每打开一个 task +1 | 套用持久层已有的上限 |
-| 6 | host | bots per-task 订阅只靠流内终态释放 | 每次远端断连/崩溃 +1 | 抽 `releaseTaskWatch` |
-| 7 | agent CLI | subagent 子 session publisher 无父→子映射 | 每次 subagent +1 套 | 需父子映射 |
-| 8 | host/services | RPC 断连不回收 pty / fs.watch；session close 不清镜像表 | 每次断连 / 每 session | 结构性，需统一边界 |
+| 优先  | 进程          | 隐患                                                                                                                                                           | 增长节奏                                  | 为什么排这里                                                                                                                                 |
+| ----- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | agent CLI     | `InMemorySessionEventStore` 把每个 `ModelStreaming`（逐 token）和 `ToolCallProgress` 事件永久驻留，append 还 `[...events, e]` 全量拷贝；无人调 `deleteSession` | **每 token 一条**，session 驻留期只增不减 | 唯一一个按 token 频率增长的点；所有长会话、所有用户都命中；桌面端 legacy `session/subscribe` 又把 session 钉死不回收，两者叠加就是"越用越大" |
+| 2     | main          | `will-download` 监听挂 defaultSession，关窗时跳过清理                                                                                                          | 每关一窗 +N 闭包                          | 一行修复，独立 MR                                                                                                                            |
+| 3     | main          | `TaskRealtimeBus.streamBatches` 非终态 run 不删，还向新窗口重放                                                                                                | 每次中断/断连 +1（≤512KB）                | 几行修复，独立 MR                                                                                                                            |
+| 4     | renderer      | shiki `tokensCache` 无淘汰，流式 Edit 每 chunk 一条                                                                                                            | 每个 Edit 工具输出 +N                     | 加 LRU，独立 MR                                                                                                                              |
+| 5     | renderer      | task snapshot 内存缓存无上限                                                                                                                                   | 每打开一个 task +1                        | 套用持久层已有的上限                                                                                                                         |
+| 6     | host          | bots per-task 订阅只靠流内终态释放                                                                                                                             | 每次远端断连/崩溃 +1                      | 抽 `releaseTaskWatch`                                                                                                                        |
+| 7     | agent CLI     | subagent 子 session publisher 无父→子映射                                                                                                                      | 每次 subagent +1 套                       | 需父子映射                                                                                                                                   |
+| 8     | host/services | RPC 断连不回收 pty / fs.watch；session close 不清镜像表                                                                                                        | 每次断连 / 每 session                     | 结构性，需统一边界                                                                                                                           |
 
 2～5 是小改动，可与本项并行各开一个 MR；本文只规划第 1 项。
 
@@ -42,17 +42,17 @@
  合批为 model.streaming               CheckpointCreated
 ```
 
-| 合同 | 出处 | 对修法的约束 |
-| --- | --- | --- |
-| seq 单一来源 | `events.ts:79-82` 注释；`v4-gateway.ts:2375+ normalizeRuntimeEventSequence` 按 raw seq 连续 drain | 瞬态事件**仍必须经 store 分配 seq 并原样交给 live sink**；不能绕过 store |
-| `getLatestSequenceNumber()+1` 生成新事件 | `assistant-feedback-persistence.ts:53`、`v4-bridge.ts:457` | 序号必须来自独立单调计数器，不能取"最后一个仍驻留的事件" |
-| V4 冷恢复游标 | `v4-bridge.ts:1506-1516` 用 `max(events.sequenceNumber)` 作 `sourceEventSeq` | 裁剪后该值会偏小 → 改为 `getLatestSequenceNumber()` |
-| legacy 协议 seq | `server-operations.ts:800 getProtocolEventSeq` 通过重放全部事件取 lastSeq | 改为直接读 record 上的 `lastSeq`（`server-types.ts:63` 已有） |
-| V4 投影对流式事件的依赖 | `product-projection.ts:463` 只在 `isRunning()` 时消费 `ModelStreaming`；`cold-event-merge.ts:138` 把 `ModelStreaming/ModelComplete` 列为 TRANSCRIPT_DERIVED，已完成 turn 由 `transcript-hydration.ts:1480 synthesizeEventsFromMessages` 从持久化消息重新合成 | **进行中 turn** 的瞬态事件必须保留；**已完成且已持久化** turn 的瞬态事件是冗余的 |
-| `ModelComplete.content` 携带全文 | `contracts/src/events/session.events.ts:566` | 完成 turn 的文本不依赖 delta |
-| reducer / rewind / fork / checkpoint | `contracts/src/events/event-reducer.ts` 无 `ModelStreaming/ToolCallProgress` handler；各消费者只 filter 低频类型 | 不受裁剪影响 |
-| usage 统计 `firstTokenAt` | `usage-observability.ts:373` 用 per-turn `events` 数组 | 不受影响 |
-| legacy 回放行为变化 | `readProtocolSessionEvents` 会失去已完成 turn 的 `model.streaming` 合批 | 需确认 `session-mapper.ts` 对 `ModelComplete` 的映射携带全文（实现前第一件事） |
+| 合同                                     | 出处                                                                                                                                                                                                                                                         | 对修法的约束                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| seq 单一来源                             | `events.ts:79-82` 注释；`v4-gateway.ts:2375+ normalizeRuntimeEventSequence` 按 raw seq 连续 drain                                                                                                                                                            | 瞬态事件**仍必须经 store 分配 seq 并原样交给 live sink**；不能绕过 store         |
+| `getLatestSequenceNumber()+1` 生成新事件 | `assistant-feedback-persistence.ts:53`、`v4-bridge.ts:457`                                                                                                                                                                                                   | 序号必须来自独立单调计数器，不能取"最后一个仍驻留的事件"                         |
+| V4 冷恢复游标                            | `v4-bridge.ts:1506-1516` 用 `max(events.sequenceNumber)` 作 `sourceEventSeq`                                                                                                                                                                                 | 裁剪后该值会偏小 → 改为 `getLatestSequenceNumber()`                              |
+| legacy 协议 seq                          | `server-operations.ts:800 getProtocolEventSeq` 通过重放全部事件取 lastSeq                                                                                                                                                                                    | 改为直接读 record 上的 `lastSeq`（`server-types.ts:63` 已有）                    |
+| V4 投影对流式事件的依赖                  | `product-projection.ts:463` 只在 `isRunning()` 时消费 `ModelStreaming`；`cold-event-merge.ts:138` 把 `ModelStreaming/ModelComplete` 列为 TRANSCRIPT_DERIVED，已完成 turn 由 `transcript-hydration.ts:1480 synthesizeEventsFromMessages` 从持久化消息重新合成 | **进行中 turn** 的瞬态事件必须保留；**已完成且已持久化** turn 的瞬态事件是冗余的 |
+| `ModelComplete.content` 携带全文         | `contracts/src/events/session.events.ts:566`                                                                                                                                                                                                                 | 完成 turn 的文本不依赖 delta                                                     |
+| reducer / rewind / fork / checkpoint     | `contracts/src/events/event-reducer.ts` 无 `ModelStreaming/ToolCallProgress` handler；各消费者只 filter 低频类型                                                                                                                                             | 不受裁剪影响                                                                     |
+| usage 统计 `firstTokenAt`                | `usage-observability.ts:373` 用 per-turn `events` 数组                                                                                                                                                                                                       | 不受影响                                                                         |
+| legacy 回放行为变化                      | `readProtocolSessionEvents` 会失去已完成 turn 的 `model.streaming` 合批                                                                                                                                                                                      | 需确认 `session-mapper.ts` 对 `ModelComplete` 的映射携带全文（实现前第一件事）   |
 
 ## 三、分阶段方案
 
@@ -82,13 +82,13 @@
 
 ### 单元（先写）
 
-| 用例 | 断言 |
-| --- | --- |
+| 用例             | 断言                                                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | retention 状态机 | 瞬态事件在所属 turn 进行中 retain；`TurnStarted(T+1)` 后 `T` 桶淘汰；`T+1` 未结束前 `T+1` 桶保留；非瞬态永不淘汰；rewind 不触发淘汰 |
-| store：seq 单调 | 淘汰后 `getLatestSequenceNumber` 不回退；`append` 返回的 seq 严格递增 |
-| store：读路径 | `getEvents/getEventsAfter` 返回非瞬态 ∪ 窗口内瞬态，按 seq 排序；`deleteSession` 后 `getStats` 归零 |
-| store：性能 | append 10^5 次线性（防回到 O(n²)），用现有 `ZCODE_PERF_REPRO=1` 门控写法 |
-| Port 合同测试 | `describeSessionEventStoreContract(factory)` 同时跑 unbounded 与 turn-window 两种模式，保证接口语义一致 |
+| store：seq 单调  | 淘汰后 `getLatestSequenceNumber` 不回退；`append` 返回的 seq 严格递增                                                               |
+| store：读路径    | `getEvents/getEventsAfter` 返回非瞬态 ∪ 窗口内瞬态，按 seq 排序；`deleteSession` 后 `getStats` 归零                                 |
+| store：性能      | append 10^5 次线性（防回到 O(n²)），用现有 `ZCODE_PERF_REPRO=1` 门控写法                                                            |
+| Port 合同测试    | `describeSessionEventStoreContract(factory)` 同时跑 unbounded 与 turn-window 两种模式，保证接口语义一致                             |
 
 ### bootstrap 集成（现有 + 新增）
 
