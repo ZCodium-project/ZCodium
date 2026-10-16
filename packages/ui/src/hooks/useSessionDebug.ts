@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 import type { SessionDebugSnapshot } from "@zcode/shared";
-import { useServices } from "@/hooks/useServices.js";
+import { useOptionalServices } from "@/hooks/useServices.js";
 
 const REFRESH_INTERVAL_MS = 1000;
 const EMPTY_DEBUG = { rounds: [], networkEntries: [], cache: null };
@@ -15,7 +15,7 @@ type SessionDebugView = {
 const EMPTY_VIEW: SessionDebugView = { ...EMPTY_DEBUG, error: false };
 
 type SharedLoop = {
-  service: ReturnType<typeof useServices>["zcodeAgentService"];
+  service: NonNullable<ReturnType<typeof useOptionalServices>>["zcodeAgentService"];
   // workspacePath 只在守卫通过后进入循环（定位会话的必填项），此处保持非可选。
   params: { workspacePath: string; workspaceIdentity?: string; taskId: string };
   view: SessionDebugView;
@@ -99,15 +99,17 @@ export function useSessionDebug({
   taskId: string | null;
   enabled?: boolean;
 }) {
-  const { zcodeAgentService } = useServices();
+  // 用 optional 访问器：服务缺席（宿主未就绪 / 无 Provider 的测试环境）时速度展示
+  // 尽力而为地降级为不轮询，而不是让动作行渲染链路崩溃。
+  const zcodeAgentService = useOptionalServices()?.zcodeAgentService;
   // workspacePath 是 workspace 定位必填项（身份 key 兜底）；缺席时无法定位会话，不轮询。
-  const active = Boolean(enabled && taskId && workspacePath);
+  const active = Boolean(enabled && taskId && workspacePath && zcodeAgentService);
   const scopeKey = JSON.stringify([workspaceIdentity?.trim() || workspacePath, taskId]);
 
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
-      // active 蕴含 taskId 与 workspacePath 均存在，缺席时无法定位会话，不轮询。
-      if (!active || !taskId || !workspacePath) return () => {};
+      // active 蕴含 taskId、workspacePath 与服务实例均存在，缺席时无法定位会话，不轮询。
+      if (!active || !taskId || !workspacePath || !zcodeAgentService) return () => {};
       const loop = acquireLoop(scopeKey, zcodeAgentService, {
         workspacePath,
         workspaceIdentity,
@@ -123,5 +125,7 @@ export function useSessionDebug({
     [scopeKey],
   );
 
-  return useSyncExternalStore(subscribe, getSnapshot);
+  // 第三参（server snapshot）沿用同一读取函数：视图来自模块级 Map，SSR/测试渲染时
+  // 本就为空视图；上游各 useSyncExternalStore 调用点均显式传入 server snapshot。
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
