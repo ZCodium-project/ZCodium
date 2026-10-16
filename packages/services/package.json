@@ -13,7 +13,7 @@
     "./node": "./src/node.ts"
   },
   "scripts": {
-    "test": "tsx --test test/*.test.ts test/*.test.mjs",
+    "test": "vitest run --root ../.. packages/services",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix"
   },
