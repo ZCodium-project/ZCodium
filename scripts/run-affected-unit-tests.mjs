@@ -3,9 +3,10 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { delimiter, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 import { selectDefaultBranchRef } from "./affected-unit-test-baseline.mjs";
+import { resolvePnpmCliPath } from "./pnpm-cli-resolver.mjs";
 
 const CODE_EXTENSIONS = new Set([
   ".cjs",
@@ -20,29 +21,6 @@ const CODE_EXTENSIONS = new Set([
 ]);
 const CHANGED_DIFF_FILTER = "ACMRTUXB";
 const ZERO_SHA = /^0{40}$/u;
-
-function resolvePnpmCliPath(env) {
-  const npmExecPath = env.npm_execpath;
-  if (
-    npmExecPath &&
-    (npmExecPath.toLowerCase().includes("\\pnpm\\") || npmExecPath.toLowerCase().includes("/pnpm/"))
-  ) {
-    return npmExecPath;
-  }
-
-  const pathEntries = (env.PATH ?? env.Path ?? "")
-    .split(delimiter)
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-  for (const pathEntry of pathEntries) {
-    const candidate = join(pathEntry, "node_modules", "pnpm", "bin", "pnpm.cjs");
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return undefined;
-}
 
 function run(command, args, options = {}) {
   const spawnOptions = {
