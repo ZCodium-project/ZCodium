@@ -2209,7 +2209,7 @@ describe("ConversationTurnGroup assistant history status", () => {
     expect(realUserHtml).not.toContain("v4-retry-31");
   });
 
-  it("按复制、赞、踩、分叉顺序渲染反馈工具栏，手机远控常显", () => {
+  it("按复制、赞、踩、分叉顺序渲染反馈工具栏，动作行常驻", () => {
     const createdAt = new Date();
     createdAt.setHours(7, 15, 0, 0);
     const timeLabel = new Intl.DateTimeFormat("zh-CN", {
@@ -2250,7 +2250,8 @@ describe("ConversationTurnGroup assistant history status", () => {
     expect(forkIndex).toBeLessThan(timeIndex);
     expect(html).toContain("select-none text-ui-sm text-foreground-subtlest");
     expect(html).toContain('aria-pressed="false"');
-    expect(html).toContain("opacity-100");
+    // 动作行常驻：桌面与远控都不再做 hover 透明门控，也不保留远控专用常显类。
+    expect(html).not.toContain("opacity-100");
     expect(html).not.toContain("group-hover/assistant-turn:opacity-100");
   });
 
@@ -2267,7 +2268,7 @@ describe("ConversationTurnGroup assistant history status", () => {
     expect(renderUnit(units[0]!, { onFork })).toContain("v4-fork-4");
   });
 
-  it("reveals the completed assistant action toolbar from the assistant turn hover area", () => {
+  it("renders the completed assistant action toolbar always visible without hover gating", () => {
     const row = assistantTextRow(20);
     const html = renderUnit(
       baseUnit({
@@ -2290,7 +2291,9 @@ describe("ConversationTurnGroup assistant history status", () => {
     );
 
     expect(html).toContain("group/assistant-turn");
-    expect(html).toContain("group-hover/assistant-turn:opacity-100");
+    // 常驻语义：不再依赖 assistant-turn 悬停区做透明度揭示，也无 assistant-row 门控残留。
+    expect(html).not.toContain("group-hover/assistant-turn:opacity-100");
+    expect(html).not.toContain("opacity-0 transition-opacity");
     expect(html).not.toMatch(
       /class="[^"]*group\/assistant-row[^"]*"[^>]*><div class="[^"]*group-hover\/assistant-row:opacity-100/,
     );

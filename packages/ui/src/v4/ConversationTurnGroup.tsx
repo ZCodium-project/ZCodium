@@ -1680,29 +1680,20 @@ function ConversationTurnGroupImpl({
               compactForRemoteControl={context.compactForRemoteControl}
               feedback={readAssistantFeedback(latestAssistantTextRow)}
               sessionId={context.sessionId}
+              workspacePath={context.workspacePath}
+              workspaceIdentity={context.workspaceIdentity}
               onFork={canForkLatestAssistant ? onFork : undefined}
               onRetry={canRetryLatestAssistant ? onRetry : undefined}
               onFeedbackChange={onFeedbackChange}
               hookInvocations={unit.hookInvocations}
               turnId={unit.turnId}
               sourceCommandIds={deliverySourceCommandIds}
-              className={cn(
-                "flex items-center gap-1",
-                context.compactForRemoteControl
-                  ? "opacity-100"
-                  : "opacity-0 transition-opacity group-hover/assistant-turn:opacity-100 focus-within:opacity-100 has-[[data-bot-group-delivery]]:opacity-100",
-              )}
+              className="flex items-center gap-1"
             />
           ) : (hasHookActions || !unit.isRunning) && !canRenderAssistantActions ? (
             // 冲突合并曾把此兜底接到 Highspeed 页脚的 else，导致普通回复重复入口，
             // Highspeed 无正文轮又丢失入口；它只与普通操作栏互斥，页脚独立渲染。
-            <MessageActions
-              className={cn(
-                context.compactForRemoteControl
-                  ? "opacity-100"
-                  : "opacity-0 transition-opacity group-hover/assistant-turn:opacity-100 focus-within:opacity-100 has-[[data-bot-group-delivery]]:opacity-100",
-              )}
-            >
+            <MessageActions>
               {hasHookActions ? (
                 <ConversationHookDetailsAction rows={unit.hookInvocations} turnId={unit.turnId} />
               ) : null}
