@@ -128,6 +128,7 @@ import { ConnectedBotGroupDeliveryAction } from "@/v4/BotGroupDeliveryAction.js"
 import { formatModelChangeLabel } from "@/v4/composer/modelTriggerDisplay.js";
 import { formatMessageTimeLabel } from "@/v4/messageTimeLabel.js";
 import { useSessionDebug } from "@/hooks/useSessionDebug.js";
+import { formatSpeedLabels, shouldStartSessionDebugPolling } from "@/v4/speedLabels.js";
 import { parseConversationShareContext } from "@/lib/conversationShareContext.js";
 
 function RowShell({
@@ -1347,19 +1348,11 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
     workspacePath,
     workspaceIdentity,
     taskId: sessionId ?? null,
-    enabled: Boolean(sessionId) && Boolean(workspacePath),
+    enabled: shouldStartSessionDebugPolling({ sessionId, workspacePath }),
   });
   const producingRound = debug.rounds.find((round) => round.recordedAt >= createdAt);
   const numberFormat = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  const decodeLabel =
-    producingRound?.tokensPerSecond === null || producingRound?.tokensPerSecond === undefined
-      ? null
-      : numberFormat.format(producingRound.tokensPerSecond);
-  const prefillLabel =
-    producingRound?.prefillTokensPerSecond === null ||
-    producingRound?.prefillTokensPerSecond === undefined
-      ? null
-      : numberFormat.format(producingRound.prefillTokensPerSecond);
+  const { decodeLabel, prefillLabel } = formatSpeedLabels(producingRound, numberFormat);
   const [localFeedback, setLocalFeedback] = useState<AssistantMessageFeedback | null>(feedback);
   const copyLabel = intl.formatMessage({ id: "chat.message.copy" });
   const likeLabel = intl.formatMessage({
@@ -1477,6 +1470,16 @@ export const ConversationAssistantTextActions = memo(function ConversationAssist
       {timeLabel ? (
         <span className="select-none text-ui-sm text-foreground-subtlest">{timeLabel}</span>
       ) : null}
+      {prefillLabel ? (
+        <span className="select-none text-ui-sm text-foreground-subtlest">
+          ↑{prefillLabel} tok/s
+        </span>
+      ) : null}
+      {decodeLabel ? (
+        <span className="select-none text-ui-sm text-foreground-subtlest">
+          ↓{decodeLabel} tok/s
+        </span>
+      ) : null}
       {turnId ? (
         <ConnectedBotGroupDeliveryAction turnId={turnId} sourceCommandIds={sourceCommandIds} />
       ) : null}
@@ -1587,6 +1590,8 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           createdAt={row.createdAt}
           feedback={readAssistantFeedback(row)}
           sessionId={context.sessionId}
+          workspacePath={context.workspacePath}
+          workspaceIdentity={context.workspaceIdentity}
           onFork={onFork}
           onRetry={onRetry}
           onFeedbackChange={onFeedbackChange}

@@ -1680,6 +1680,8 @@ function ConversationTurnGroupImpl({
               compactForRemoteControl={context.compactForRemoteControl}
               feedback={readAssistantFeedback(latestAssistantTextRow)}
               sessionId={context.sessionId}
+              workspacePath={context.workspacePath}
+              workspaceIdentity={context.workspaceIdentity}
               onFork={canForkLatestAssistant ? onFork : undefined}
               onRetry={canRetryLatestAssistant ? onRetry : undefined}
               onFeedbackChange={onFeedbackChange}
