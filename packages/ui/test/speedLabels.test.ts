@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  formatSpeedLabels,
-  shouldStartSessionDebugPolling,
-} from "@/v4/speedLabels.js";
+import { formatSpeedLabels, shouldStartSessionDebugPolling } from "@/v4/speedLabels.js";
 
 const numberFormat = new Intl.NumberFormat("en", { maximumFractionDigits: 1 });
 
@@ -39,9 +36,9 @@ describe("shouldStartSessionDebugPolling", () => {
   });
 
   it("workspacePath 缺席（缺陷 ② 回归：调用点未传 props 时轮询恒不启动）", () => {
-    expect(
-      shouldStartSessionDebugPolling({ sessionId: "s", workspacePath: undefined }),
-    ).toBe(false);
+    expect(shouldStartSessionDebugPolling({ sessionId: "s", workspacePath: undefined })).toBe(
+      false,
+    );
   });
 
   it("sessionId 缺席不启动", () => {

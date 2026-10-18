@@ -120,10 +120,7 @@ export function useSessionDebug({
     [active, scopeKey, taskId, workspaceIdentity, workspacePath, zcodeAgentService],
   );
 
-  const getSnapshot = useCallback(
-    () => sharedLoops.get(scopeKey)?.view ?? EMPTY_VIEW,
-    [scopeKey],
-  );
+  const getSnapshot = useCallback(() => sharedLoops.get(scopeKey)?.view ?? EMPTY_VIEW, [scopeKey]);
 
   // 第三参（server snapshot）沿用同一读取函数：视图来自模块级 Map，SSR/测试渲染时
   // 本就为空视图；上游各 useSyncExternalStore 调用点均显式传入 server snapshot。
