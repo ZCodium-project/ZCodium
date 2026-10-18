@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   createOfficialMcpTrustedOriginRegistry,
@@ -237,8 +238,11 @@ describe("official MCP trust: host and agent must agree on the ZCode API origin"
 /* 上面的用例证明"注入之后两侧一致"，但证明不了 node.ts 真的注入了。
    createNodeServices 是 1200+ 行、107 个 import 的容器，resolveSpawnEnv 又是其中的内联闭包，
    为它搭 mock 不划算；这里退而对接线做源码断言，至少能挡住"整行被删/被接错解析器"。 */
+// 仓库根从本文件定位，不依赖 Node 进程 cwd：包内 vitest（--root ../..）运行时
+// cwd 是 packages/services，process.cwd() 拼仓库相对路径会解析失败。
+const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 describe("node.ts wires the authoritative origin into resolveSpawnEnv", () => {
-  const source = readFileSync(resolve(process.cwd(), "packages/services/src/node.ts"), "utf8");
+  const source = readFileSync(resolve(REPO_ROOT, "packages/services/src/node.ts"), "utf8");
   // 提取起点不写死参数列表：CUA 集成把闭包改成 `async (context) =>`（需要 workspace
   // registry），写死 `async () =>` 会让 slice 取到空串、两条断言变成永假的空匹配。
   const spawnEnvStart = source.indexOf("resolveSpawnEnv: async (");

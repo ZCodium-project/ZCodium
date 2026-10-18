@@ -2,11 +2,16 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Worker } from "node:worker_threads";
 import { once } from "node:events";
 import { build } from "esbuild";
 import { afterEach, describe, expect, it } from "vitest";
 import { runTasksDatabaseMigrations } from "../src/session/tasksDatabase/migrations.js";
+
+// 仓库根从本文件定位，不依赖 Node 进程 cwd：包内 vitest（--root ../..）运行时
+// cwd 是 packages/services，裸相对路径在 esbuild entryPoints/alias 里会解析失败。
+const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
 describe("DB109 App 库统一迁移", () => {
   const databases: DatabaseSync[] = [];
@@ -229,12 +234,14 @@ describe("DB109 App 库统一迁移", () => {
         CREATE TRIGGER count_conversion AFTER UPDATE OF model_selection ON automations
         BEGIN INSERT INTO migration_probe VALUES(1); END;`);
       const compiled = await build({
-        entryPoints: [resolve("packages/services/src/session/tasksDatabase/migrations.ts")],
+        entryPoints: [
+          resolve(REPO_ROOT, "packages/services/src/session/tasksDatabase/migrations.ts"),
+        ],
         bundle: true,
         write: false,
         platform: "node",
         format: "cjs",
-        alias: { "#src": resolve("packages/services/src") },
+        alias: { "#src": resolve(REPO_ROOT, "packages/services/src") },
       });
       const gate = new SharedArrayBuffer(4);
       for (let index = 0; index < 2; index++) {
