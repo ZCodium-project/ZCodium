@@ -7,9 +7,15 @@ import ts from "typescript";
 
 it("真实入口 JSX 在匿名时不渲染，登录后展示邀请好友和奖励徽标", async () => {
   const source = await readFile("packages/ui/src/WorkspaceSidebarFooter.tsx", "utf8");
-  const end = source.indexOf("{onLogin && !user");
-  const start = source.lastIndexOf("{user ? (", end);
-  const expression = source.slice(start, end).trim().slice(1, -1);
+  // #49 移除登录入口后，rewards 条目是自包含的 {user ? (<DropdownMenuItem>…) : null} 块；
+  // 按锚点切片并校验边界，标记漂移时给断言失败而不是转译期 SyntaxError。
+  const anchor = source.indexOf('data-testid="rewards-menu-item"');
+  const start = source.lastIndexOf("{user ? (", anchor);
+  const end = source.indexOf(") : null}", anchor);
+  expect(anchor).toBeGreaterThanOrEqual(0);
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(anchor);
+  const expression = `${source.slice(start + 1, end).trim()}) : null`;
   const script = ts.transpileModule(`const result = (${expression}); result;`, {
     compilerOptions: { jsx: ts.JsxEmit.React },
     fileName: "entry.tsx",
