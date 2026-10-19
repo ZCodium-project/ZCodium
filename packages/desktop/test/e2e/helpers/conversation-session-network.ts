@@ -21,6 +21,7 @@ export interface UpstreamToolResultSnapshot {
 
 export interface UpstreamRequestEvidence {
   fixtureId: string | null;
+  requestHost: string | null;
   path: string;
   requestJson: unknown;
   responseBodyBytes: number;
@@ -28,6 +29,7 @@ export interface UpstreamRequestEvidence {
   responseTextPreview: string | null;
   startedAt: string;
   status: E2ENetworkCaptureArtifact["records"][number]["status"];
+  statusCode: number | null;
 }
 
 export async function countUpstreamRequestsContaining(text: string) {
@@ -85,6 +87,7 @@ export async function getUpstreamRequestEvidence(
     )
     .map((record) => ({
       fixtureId: record.replay?.fixtureId ?? null,
+      requestHost: record.requestHeaders.host ?? null,
       path: record.path,
       requestJson: record.requestJson,
       responseBodyBytes: record.responseBodyBytes,
@@ -92,6 +95,7 @@ export async function getUpstreamRequestEvidence(
       responseTextPreview: record.responseTextPreview ?? null,
       startedAt: record.startedAt,
       status: record.status,
+      statusCode: record.statusCode ?? null,
     }));
 }
 
@@ -301,6 +305,21 @@ export function readUpstreamToolResultFromRequest(
   for (let messageIndex = messages.length - 1; messageIndex >= 0; messageIndex -= 1) {
     const message = messages[messageIndex];
     if (!message || typeof message !== "object") continue;
+    const openAiMessage = message as {
+      role?: unknown;
+      tool_call_id?: unknown;
+      content?: unknown;
+      is_error?: unknown;
+    };
+    if (openAiMessage.role === "tool" && openAiMessage.tool_call_id === toolCallId) {
+      // Chat Completions 使用独立 tool 消息，不放在 Anthropic content[].tool_result。
+      // 标准 OpenAI 没有错误布尔字段，调用方还须核对预期输出，不能仅凭 isError=false 判成功。
+      return {
+        content: readMessageContentText(openAiMessage.content),
+        isError: openAiMessage.is_error === true,
+        toolCallId,
+      };
+    }
     const content = (message as { content?: unknown }).content;
     if (!Array.isArray(content)) continue;
     for (let partIndex = content.length - 1; partIndex >= 0; partIndex -= 1) {

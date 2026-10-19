@@ -786,3 +786,66 @@ export const TID_START_PLAN_RECOMMENDATION_DIALOG = "start-plan-recommendation-d
 
 /** 用户反馈的诊断日志授权开关 */
 export const TID_FEEDBACK_LOGS_OPT_IN = "feedback-logs-opt-in";
+
+// 上游 v3.16.1 新增 test id / Test ids added by upstream v3.16.1
+/** 用户菜单中的登录操作 */
+export const TID_LOGIN_MENU_ITEM = "login-menu-item";
+
+/** 全局置顶任务区 */
+export const TID_PROJECT_PINNED_TASKS = "project-pinned-tasks";
+
+/** 新建连接表单头部的实时目标预览。 */
+export const TID_REMOTE_NEW_CONNECTION_PREVIEW = "remote-new-connection-preview";
+
+/** 远端 host 分组（data-host-id 为 host id） */
+export const TID_REMOTE_PROJECT_HOST = "remote-project-host";
+
+export const TID_SETTINGS_TOOL_SEARCH_OPTION = "settings-tool-search-option";
+
+/** 常规设置中的增强 Find/Grep 开关 */
+export const TID_SETTINGS_TOOL_SEARCH_SELECT = "settings-tool-search-select";
+
+/** 已关联 SSH config Host 的标签。 */
+export const TID_SSH_CONFIG_ALIAS_CHIP = "remote-ssh-config-alias-chip";
+
+/** 设置入口「从 SSH config 导入」按钮。 */
+export const TID_SSH_CONFIG_IMPORT = "remote-ssh-config-import";
+
+/** 项目行 hover 操作区 */
+export const TID_VIRTUAL_PROJECT_ACTIONS = "virtual-project-actions";
+
+/** 项目行菜单 / 右键动作前缀，见 virtualProjectActionTestId */
+export const TID_VIRTUAL_PROJECT_ACTION_PREFIX = "virtual-project";
+
+/** 项目分区新建项目按钮 */
+export const TID_VIRTUAL_PROJECT_ADD = "virtual-project-add";
+
+/** 项目行新建任务按钮（cwd = 项目主要目录） */
+export const TID_VIRTUAL_PROJECT_CREATE_TASK = "virtual-project-create-task";
+
+/** 项目行打开文件树按钮（多 root 时为下拉触发器） */
+export const TID_VIRTUAL_PROJECT_FILES = "virtual-project-files";
+
+/** 项目行更多菜单触发器 */
+export const TID_VIRTUAL_PROJECT_MENU = "virtual-project-menu";
+
+/** 任务分区新建任务按钮（全局新建，cwd 为默认执行目录） */
+export const TID_VIRTUAL_PROJECT_NEW_TASK = "virtual-project-new-task";
+
+/** 项目行（父级 section 带 data-project-id / data-project-name） */
+export const TID_VIRTUAL_PROJECT_ROW = "virtual-project-row";
+
+/** 项目行任务列表容器 */
+export const TID_VIRTUAL_PROJECT_TASKS = "virtual-project-tasks";
+
+/** 项目行展开/收起触发器（aria-expanded 表示任务列表是否展开） */
+export const TID_VIRTUAL_PROJECT_TOGGLE = "virtual-project-toggle";
+
+/** 项目行折叠态未读指示 */
+export const TID_VIRTUAL_PROJECT_UNREAD = "virtual-project-unread";
+
+/** 项目行动作 test id。 */
+export function virtualProjectActionTestId(actionId: string, context = false): string {
+  const scoped = context && (actionId.startsWith("files-") || actionId === "create-task");
+  return `${TID_VIRTUAL_PROJECT_ACTION_PREFIX}-${scoped ? "context-" : ""}${actionId}`;
+}

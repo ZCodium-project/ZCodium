@@ -238,6 +238,10 @@ Todo103 补充验收：DT-01 的替代任务使用当前 Model Selection View �
 
 DF-01 verification (2026-09-07): macOS Desktop WDIO passed (`desktop-e2e-20260907040958265-p60496-c535b8967f7e59a1`). HTTP 200/400 business failures, body/header log ID, update rejection, streaming circuit status, and localized error rendering are covered by 124 passing unit tests. Typecheck, Desktop E2E typecheck, and lint passed (43 warnings, 0 errors). Pending case is not promoted. Live Feishu, Windows/Linux, mobile devices, and delivery-failure DOM interaction remain unverified; existing connection-error DOM regression CF-01 passed in macOS Desktop WDIO.
 
+## R3 Bot 身份回归（A3）
+
+`BOT-E2E-RW-02`：pending；Host resolver + Bot bridge + Main 精确路由合同与 Bot service synthetic 场景。覆盖 stable/legacy、同路径跨 Source、权限 key、runtime 换代。执行证据见 `packages/desktop/.e2e-artifacts/bot-identity-fix-20260916/`；不包含真实第三方消息投递和手机 relay。
+
 ## Group collaboration additions
 
 | Case          | Status  | Required evidence                                                        |

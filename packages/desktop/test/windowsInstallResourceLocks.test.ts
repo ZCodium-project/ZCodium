@@ -9,14 +9,9 @@ import {
   resolveWindowsPackagedResourceLockMarkers,
   runWindowsUpdateProcessCleanup,
   snapshotWindowsPackagedResources,
-  WINDOWS_UPDATE_LOCK_RELEASE_GRACE_MS,
 } from "../src/main/windowsInstallResourceLocks.js";
 
 describe("windows install resource locks", () => {
-  it("uses a short release grace after the shared app shutdown barrier", () => {
-    expect(WINDOWS_UPDATE_LOCK_RELEASE_GRACE_MS).toBe(750);
-  });
-
   it.runIf(process.platform === "win32")(
     "does not report the PowerShell query process as a resource lock",
     async () => {

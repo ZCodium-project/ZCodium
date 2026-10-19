@@ -13,6 +13,7 @@
 现有规则继续有效：
 
 - 所有 `data-testid` 常量统一声明在 `packages/shared/src/test-ids.ts`。
+- `test-ids.ts` 的常量只从 `@zcode/shared/test-ids` 导入，根入口 `@zcode/shared` 不导出它们；工作流一族 `test-ids-workflow.ts` 仍从根入口导入。原因见 [pre-push 说明](testing/pre-push-hook.md) 的受影响单测一节。
 - 新增常量必须带中文注释。
 - UI 组件禁止硬编码 test id 字符串。
 - E2E 使用 `packages/desktop/test/e2e/helpers/selectors.ts` 的 `sel(tid)` 或等价 helper。
@@ -178,6 +179,32 @@ Tool call 当前不是独立消息，而是 assistant message 内部的结构化
 | `TID_CHAT_MODEL_SELECT_TRIGGER`         | 当前 session 模型选择器         | 无                     | `data-session-id`、`data-model-value`                     |
 | `TID_CHAT_MODEL_SELECT_GROUP`           | 当前 session 模型 provider 分组 | provider group key     | `data-model-provider-key`、`data-model-provider-selected` |
 | `TID_CHAT_THOUGHT_LEVEL_SELECT_TRIGGER` | 当前 session 思考深度选择器     | 无                     | `data-session-id`、`data-thought-level`                   |
+
+### 项目侧栏（2026-09 虚拟项目重构后）
+
+旧 workspace 侧栏节点（`workspace-item` / `workspace-list` / `workspace-close` /
+`workspace-file-tree-button` / `conversation-new-task`）已随 Group 视图与目录节点一起下线，
+对应常量已从 `test-ids.ts` 删除。E2E 通过项目 `<section>` 的 `data-project-id` /
+`data-project-name` 定位项目（老 workspace 首次迁移成同名单 root 项目，项目名 = 目录 basename），
+helper 见 `packages/desktop/test/e2e/helpers/project-sidebar.ts`。
+
+| 常量                                                       | 值                                                      | 用途                                                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `TID_PROJECT_SECTION` / `TID_CONVERSATION_SECTION`         | `project-section` / `conversation-section`              | 项目区 / 任务区分区容器（`data-slot="collapsible-trigger"` 带 aria-expanded）                                     |
+| `TID_VIRTUAL_PROJECT_ADD`                                  | `virtual-project-add`                                   | 项目区新建项目按钮                                                                                                |
+| `TID_VIRTUAL_PROJECT_NEW_TASK`                             | `virtual-project-new-task`                              | 任务区全局新建任务按钮                                                                                            |
+| `TID_VIRTUAL_PROJECT_ROW`                                  | `virtual-project-row`                                   | 项目行（父级 section 带 `data-project-id` / `data-project-name`）                                                 |
+| `TID_VIRTUAL_PROJECT_TOGGLE`                               | `virtual-project-toggle`                                | 项目行展开触发器，`aria-expanded` 表示任务列表是否展开                                                            |
+| `TID_VIRTUAL_PROJECT_UNREAD`                               | `virtual-project-unread`                                | 折叠态未读指示                                                                                                    |
+| `TID_VIRTUAL_PROJECT_TASKS`                                | `virtual-project-tasks`                                 | 项目行任务列表容器，内部任务行仍是 `TID_TASK_ITEM`                                                                |
+| `TID_VIRTUAL_PROJECT_ACTIONS` / `TID_VIRTUAL_PROJECT_MENU` | `virtual-project-actions` / `virtual-project-menu`      | hover 操作区与更多菜单触发器（Radix trigger，需 pointerdown 手势）                                                |
+| `TID_VIRTUAL_PROJECT_FILES`                                | `virtual-project-files`                                 | 打开主要目录文件树（多 root 时为下拉触发器）                                                                      |
+| `TID_VIRTUAL_PROJECT_CREATE_TASK`                          | `virtual-project-create-task`                           | 项目行新建任务（cwd = 主要目录）                                                                                  |
+| `virtualProjectActionTestId(id, context)`                  | `virtual-project-<id>` / `virtual-project-context-<id>` | 更多菜单 / 右键动作项：`edit`、`pin`、`delete`、`remove-entry`、`device-settings`、`create-task`、`files-<index>` |
+| `TID_PROJECT_PINNED_TASKS`                                 | `project-pinned-tasks`                                  | 全局置顶任务区                                                                                                    |
+| `TID_REMOTE_PROJECT_HOST`                                  | `remote-project-host`                                   | 远端 host 分组，`data-host-id` 为 host id；连接按钮图标 `lucide-plug`                                             |
+
+注意：`packages/ui/src/project-sidebar/*` 目前仍硬编码这些字符串，常量与实现同值；组件改用常量属于 src 侧收尾项。
 
 ## WDIO Page Object 要求
 

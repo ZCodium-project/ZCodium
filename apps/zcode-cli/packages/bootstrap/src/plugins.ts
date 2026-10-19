@@ -1252,6 +1252,7 @@ function inferComponentTypes(raw: Record<string, unknown>): string[] {
   if ("hooks" in raw) types.push("hook");
   if ("mcpServers" in raw) types.push("mcp");
   if ("lspServers" in raw) types.push("lsp");
+  if (Array.isArray(raw.componentTypes) && raw.componentTypes.includes("ui")) types.push("ui");
   return types;
 }
 
@@ -1267,6 +1268,7 @@ function inferComponentTypesFromMetadata(plugin: PluginMetadata): string[] {
     types.push("mcp");
   }
   if (plugin.hookDetails.length > 0) types.push("hook");
+  if (plugin.uiSurfaces?.length) types.push("ui");
   return types;
 }
 

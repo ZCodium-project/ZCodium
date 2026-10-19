@@ -226,7 +226,13 @@ export function createPluginUiBridgeService(
           "Plugin UI tool calls are unavailable in this runtime",
         );
       }
-      return dependencies.callMcpToolForUi(params, options);
+      const startedAt = Date.now();
+      try {
+        const result = await dependencies.callMcpToolForUi(params, options);
+        return result;
+      } catch (error) {
+        throw error;
+      }
     },
     async cancelToolCall(params) {
       // 没有 agent 依赖（web / 远程）时视为无可取消，不报错：取消是 best effort 的收尾动作。

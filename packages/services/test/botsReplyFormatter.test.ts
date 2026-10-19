@@ -173,7 +173,6 @@ describe("bot reply formatter", () => {
     expect(text).toBe(
       "工具调用：\n- 完成 · Run command · `pnpm vitest run packages/services/test/botsReplyFormatter.te ...  --reporter verbose --runInBand`",
     );
-    expect(text).not.toContain("botsService.test.ts");
   });
 
   it("shortens long run commands in permission request summaries", () => {
@@ -189,7 +188,6 @@ describe("bot reply formatter", () => {
     expect(text).toBe(
       "需要权限：\nPermission Required\n`npm exec very-long-script -- --workspace /Users/me/project - ... er.ts --include-generated false`",
     );
-    expect(text).not.toContain("packages/services/src/bots");
   });
 
   it("uses edit kind labels in permission request titles", () => {

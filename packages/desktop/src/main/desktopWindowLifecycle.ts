@@ -1,16 +1,21 @@
 import { getDatabaseStartupPortPayload } from "./databaseStartupRelay.js";
 import { randomUUID } from "node:crypto";
-import { app, BrowserWindow, Menu, MessageChannelMain } from "electron";
+import { app, BrowserWindow, Menu, MessageChannelMain, nativeImage } from "electron";
 import type { UtilityProcess as ElectronUtilityProcess } from "electron";
 import { HostMessageTypes, InternalChannels, PlatformChannels, type Locale } from "@zcode/shared";
 import { createBrowserWindow } from "./desktopWindowChrome.js";
 import type { HostInitMessage, WindowBootstrapOptions } from "./desktopHostProcess.js";
 import type { StartupWorkspaceWarmupTarget } from "./startupWorkspace.js";
+import type { RemoteAssetDirs } from "./desktopRuntimeEnv.js";
 import { handleDarwinWindowCloseRequest } from "./desktopDarwinCloseBehavior.js";
+import { applyDesktopTrayUnreadBadge } from "./desktopTray.js";
 import {
+  createWindowsTaskbarOverlayApplier,
   parseWindowUnreadCount,
-  sumWindowUnreadCounts,
-  syncAppUnreadBadge,
+  renderTaskbarBadgePixels,
+  maxWindowUnreadCounts,
+  syncUnreadBadgeForPlatform,
+  TASKBAR_BADGE_IMAGE_SIZE,
 } from "./unreadBadge.js";
 import { attachDesktopWindowSizePersistence, type DesktopWindowSize } from "./desktopWindowSize.js";
 import {
@@ -30,7 +35,9 @@ export function createWindow(options: {
   spawnHostProcess: (
     win: BrowserWindow,
     label: string,
-    initMessage: HostInitMessage,
+    // Main 在包装层统一注入 zcodeBuiltinProviderConfigFilePath（Electron 安装布局只有 Main 知道），
+    // 窗口生命周期只负责组装其余 InitLocal 字段。
+    initMessage: Omit<HostInitMessage, "zcodeBuiltinProviderConfigFilePath">,
   ) => ElectronUtilityProcess;
   disposeHostProcess: (
     child: ElectronUtilityProcess,
@@ -47,6 +54,7 @@ export function createWindow(options: {
   agentWarmupTargets?: readonly StartupWorkspaceWarmupTarget[];
   agentSpawnFallbackCwd: string;
   deviceMid: string;
+  remoteAssets?: RemoteAssetDirs;
   initialDesktopZoomLevel?: number;
   initialWindowSize?: DesktopWindowSize;
   currentApplicationLocale?: () => Locale;
@@ -200,6 +208,9 @@ export function createWindow(options: {
         // 同一窗口会后台索引所有已恢复 workspace，不只索引启动时的 active workspace。
         // fallback 必须跟随 local Host 生命周期常驻，否则非 active 历史目录被删除后会用失效 cwd 反复 spawn。
         agentSpawnFallbackCwd: options.agentSpawnFallbackCwd,
+        remoteAssets: options.remoteAssets,
+        // Host 的 X-Client-Language 以 Main 的实时界面语言为准；与后续变更消息同端口按序到达。
+        ...(options.currentApplicationLocale ? { locale: options.currentApplicationLocale() } : {}),
       });
       options.windowHostProcessMap.set(wcId, child);
       options.onHostProcessReady?.(wcId);
@@ -313,14 +324,29 @@ export function focusWorkspaceInExistingWindow(
   return { activated: false };
 }
 
+// Windows 任务栏 overlay 的 electron 侧装配：像素渲染在 unreadBadge.ts（纯逻辑，可单测），
+// 这里只负责 BrowserWindow 枚举与 nativeImage 构造。spec 见 docs/desktop/windows-taskbar-unread-badge.md
+const applyWindowsTaskbarOverlay = createWindowsTaskbarOverlayApplier({
+  getAllWindows: () => BrowserWindow.getAllWindows(),
+  createBadgeImage: (label) =>
+    nativeImage.createFromBitmap(Buffer.from(renderTaskbarBadgePixels(label)), {
+      width: TASKBAR_BADGE_IMAGE_SIZE,
+      height: TASKBAR_BADGE_IMAGE_SIZE,
+    }),
+});
+
 export function syncApplicationUnreadBadge(windowUnreadCountMap: Map<number, number>) {
-  syncAppUnreadBadge({
+  const totalUnreadCount = maxWindowUnreadCounts(windowUnreadCountMap);
+  syncUnreadBadgeForPlatform({
     platform: process.platform,
-    totalUnreadCount: sumWindowUnreadCounts(windowUnreadCountMap),
+    totalUnreadCount,
     setBadgeCount: (count) => {
       app.setBadgeCount(count);
     },
+    applyOverlay: applyWindowsTaskbarOverlay,
   });
+  // 托盘角标：Windows/Linux 托盘右上角小徽章（macOS 无托盘，由 Dock 角标承担）。
+  applyDesktopTrayUnreadBadge(totalUnreadCount);
 }
 
 export function handleWindowUnreadCountSync(

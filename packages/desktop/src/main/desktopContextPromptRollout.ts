@@ -85,6 +85,8 @@ export function createElectronDesktopContextPromptConfigFetcher(options: {
   appVersion: string;
   deviceMid: string;
   resolveEndpointOrigin: () => Promise<string>;
+  /** 当前界面语言；以前不传，X-Client-Language 固定为 unknown。 */
+  getClientLanguage: () => string;
 }): (signal: AbortSignal) => Promise<unknown> {
   return async (signal) => {
     // 审计版不连接官方服务：启动预热使用本地关闭态。
@@ -119,6 +121,7 @@ export function createElectronDesktopContextPromptConfigFetcher(options: {
       const sourceHeaders = buildZCodeSourceHeadersFromContext({
         appVersion: options.appVersion,
         arch: process.arch,
+        clientLanguage: options.getClientLanguage(),
         deviceMid: options.deviceMid,
         endpointOrigin,
         platform: process.platform,

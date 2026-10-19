@@ -98,7 +98,6 @@ describe("desktop E2E coverage heatmap", () => {
     expect(html).toContain('id="heat-grid"');
     expect(html).toContain("gridTemplateColumns");
     expect(html).toContain("每函数平均命中");
-    expect(html).not.toContain("binaryLayout");
     expect(html).not.toContain("面积表示函数数量");
     expect(html).not.toContain('id="granularity-select"');
     expect(html).not.toContain("父目录");

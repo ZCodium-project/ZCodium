@@ -2,8 +2,11 @@ import {
   TID_COMPOSER_REMOTE_CONNECTION,
   TID_COMPOSER_WORKSPACE_TRIGGER,
   TID_SSH_DIALOG,
-} from "@zcode/shared";
-import { clearAppData, clickTestIdByWebDriver } from "../../../helpers/desktop-app.js";
+} from "@zcode/shared/test-ids";
+import {
+  clearAppData,
+  clickTestIdByWebDriver,
+} from "../../../helpers/desktop-app.js";
 import { prepareConversationE2E } from "../../../helpers/conversation-session.js";
 
 describe("会话区远程连接弹窗与工作区菜单互斥 E2E", () => {
@@ -67,7 +70,8 @@ function readOverlaySnapshot() {
           remoteDialog.getClientRects().length > 0 &&
           getComputedStyle(remoteDialog).visibility !== "hidden",
         remoteMenuItemExists: remoteMenuItem !== null,
-        workspaceMenuExpanded: workspaceTrigger?.getAttribute("aria-expanded") ?? null,
+        workspaceMenuExpanded:
+          workspaceTrigger?.getAttribute("aria-expanded") ?? null,
       };
     },
     TID_COMPOSER_WORKSPACE_TRIGGER,

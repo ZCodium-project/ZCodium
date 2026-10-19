@@ -2,7 +2,7 @@ import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanupExpiredLogFiles, shouldDeleteExpiredLogFile } from "../src/main/logRetention.js";
+import { cleanupExpiredLogFiles } from "../src/main/logRetention.js";
 
 const TEST_NOW = new Date(2026, 3, 14, 12, 0, 0);
 
@@ -18,11 +18,6 @@ describe("main log retention", () => {
     tempDirs.push(dir);
     return dir;
   }
-
-  it("应保留当天在内最近 14 个自然日的日志", () => {
-    expect(shouldDeleteExpiredLogFile("2026-04-01.log", TEST_NOW)).toBe(false);
-    expect(shouldDeleteExpiredLogFile("2026-03-31.log", TEST_NOW)).toBe(true);
-  });
 
   it("启动清理时只删除过期日志文件，不影响其他文件", async () => {
     const logDir = await createTempDir();

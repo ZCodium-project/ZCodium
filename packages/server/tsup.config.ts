@@ -12,17 +12,18 @@ const { stageThirdPartyNotices } = await import(
 
 // tsup config 可能从不同 cwd 加载，基于配置文件自身目录解析仓库根 package.json。
 const rootPackageJsonPath = resolve(import.meta.dirname, "../../package.json");
-const { version: packageVersion } = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8"));
-// CI 发布时通过 ZCODE_APP_VERSION 注入完整审计版本（如 3.14.4-audit.20260929）。
-// 远端 server bundle 必须与桌面 app 使用同一 ZCODE_VERSION：否则部署后的远端版本检查
-// 与 remote manifest 的 appVersion 校验都会不匹配；本地构建回退 package.json 版本。
-const version = process.env.ZCODE_APP_VERSION?.trim() || packageVersion;
+const { version, zcodeCompatibility } = JSON.parse(readFileSync(rootPackageJsonPath, "utf-8")) as {
+  version: string;
+  zcodeCompatibility?: { minCompatibleVersion?: string };
+};
+const minCompatibleVersion = zcodeCompatibility?.minCompatibleVersion ?? version;
 
 const { environment: zcodeEnv, content: zcodeBuiltinProviderConfigJson } =
   await loadBuiltinProviderConfig();
 
 export const SERVER_HTTP_DEFINES = {
   __ZCODE_VERSION__: JSON.stringify(version),
+  __ZCODE_MIN_COMPATIBLE_VERSION__: JSON.stringify(minCompatibleVersion),
   __ZCODE_ENV__: JSON.stringify(zcodeEnv),
   __ZCODE_BUILTIN_PROVIDER_CONFIG_JSON__: JSON.stringify(zcodeBuiltinProviderConfigJson),
 };
@@ -65,6 +66,8 @@ export default defineConfig({
   outDir: "dist",
   format: "esm",
   platform: "node",
+  // node:sqlite 只有带前缀的内置入口；tsup 去掉 node: 会错误加载第三方 sqlite 包。
+  removeNodeProtocol: false,
   target: "node22",
   // workspace 包的 exports 指向 .ts 源码，node 运行时无法直接加载，需要 bundle 进来
   noExternal: [

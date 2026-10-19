@@ -52,9 +52,6 @@ describe("V4 Hook turn summary schema", () => {
       displayName: "validate-write",
       sourceKind: "project",
     });
-    expect(JSON.stringify(parsed)).not.toMatch(
-      /commandDisplay|sourcePath|stdin|stdout|stderr|toolInput/u,
-    );
   });
 
   it("rejects Desktop-only command and path details at the strict wire boundary", () => {

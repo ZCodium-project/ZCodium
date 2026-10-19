@@ -1,6 +1,11 @@
 import { open, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TID_CHAT_SUMMARY_PANEL, TID_GIT_PANE, TID_TASK_ITEM, testId } from "@zcode/shared";
+import {
+  TID_CHAT_SUMMARY_PANEL,
+  TID_GIT_PANE,
+  TID_TASK_ITEM,
+  testId,
+} from "@zcode/shared/test-ids";
 import type { ChainablePromiseElement } from "webdriverio";
 import {
   DEFAULT_WORKSPACE,
@@ -27,10 +32,13 @@ describe("SP13：status panel Git Changes 打开变更审阅", () => {
     this.timeout(CASE_TIMEOUT_MS);
 
     await waitForWorkspaceApp(DEFAULT_WORKSPACE, 45_000);
-    await waitForTestIdByDom(testId(TID_TASK_ITEM, PROVIDER_READINESS_HISTORY_SESSION_ID), {
-      timeout: 30_000,
-      timeoutMsg: "SP13 预置的只读历史 session 没有出现在任务列表",
-    });
+    await waitForTestIdByDom(
+      testId(TID_TASK_ITEM, PROVIDER_READINESS_HISTORY_SESSION_ID),
+      {
+        timeout: 30_000,
+        timeoutMsg: "SP13 预置的只读历史 session 没有出现在任务列表",
+      },
+    );
     await selectV4TaskById(PROVIDER_READINESS_HISTORY_SESSION_ID);
     await waitForExpandedStatusPanel();
 
@@ -162,13 +170,20 @@ async function clickStatusPanelChanges() {
   await changesButton.click();
 }
 
-async function findButtonByLabels(root: ChainablePromiseElement, labels: readonly string[]) {
+async function findButtonByLabels(
+  root: ChainablePromiseElement,
+  labels: readonly string[],
+) {
   const buttons = await root.$$("button");
   for (const button of buttons) {
     const text = (await button.getText()).trim();
     const firstLine = text.split(/\r?\n/u, 1)[0] ?? "";
     const ariaLabel = (await button.getAttribute("aria-label"))?.trim() ?? "";
-    if (labels.some((label) => ariaLabel === label || firstLine === label)) {
+    if (
+      labels.some(
+        (label) => ariaLabel === label || firstLine === label,
+      )
+    ) {
       return button;
     }
   }
@@ -177,7 +192,8 @@ async function findButtonByLabels(root: ChainablePromiseElement, labels: readonl
 
 function isGitPaneMounted() {
   return browser.execute(
-    (gitPaneTestId) => Boolean(document.querySelector(`[data-testid="${gitPaneTestId}"]`)),
+    (gitPaneTestId) =>
+      Boolean(document.querySelector(`[data-testid="${gitPaneTestId}"]`)),
     TID_GIT_PANE,
   );
 }
@@ -207,17 +223,25 @@ async function waitForGitReview() {
     );
   } catch (error) {
     latest = await readGitReviewSnapshot().catch(() => latest);
-    throw new Error(`SP13 Git review 断言失败: ${JSON.stringify(latest)}`, { cause: error });
+    throw new Error(
+      `SP13 Git review 断言失败: ${JSON.stringify(latest)}`,
+      { cause: error },
+    );
   }
   return readGitReviewSnapshot();
 }
 
 function readGitReviewSnapshot(): Promise<GitReviewSnapshot> {
   return browser.execute((gitPaneTestId) => {
-    const pane = document.querySelector<HTMLElement>(`[data-testid="${gitPaneTestId}"]`);
-    const sourceTrigger = pane?.querySelector<HTMLElement>('[data-slot="select-trigger"]');
+    const pane = document.querySelector<HTMLElement>(
+      `[data-testid="${gitPaneTestId}"]`,
+    );
+    const sourceTrigger = pane?.querySelector<HTMLElement>(
+      '[data-slot="select-trigger"]',
+    );
     return {
-      rowCount: pane?.querySelectorAll("[data-git-pane-change-virtual-row]").length ?? 0,
+      rowCount:
+        pane?.querySelectorAll("[data-git-pane-change-virtual-row]").length ?? 0,
       sourceLabel: sourceTrigger?.textContent?.trim() ?? "",
       text: pane?.innerText ?? "",
     };

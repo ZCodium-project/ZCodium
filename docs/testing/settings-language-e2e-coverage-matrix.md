@@ -2,25 +2,23 @@
 
 ## Scope
 
-Settings language coverage verifies that the General settings selector and sidebar quick picker share the supported locale preference and resolved UI locale.
+Settings language coverage verifies that the General settings language selector keeps locale preference and resolved UI locale separate.
 
 ## State Dimensions
 
-| Dimension                 | Values                                                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Platform locale source    | Electron `app.getPreferredSystemLanguages()` preferred list, Electron `app.getLocale()` fallback           |
-| User preference           | `system`, `zh-CN`, `en-US`, `fa-IR`                                                                        |
-| Persisted resolved locale | `zh-CN`, `en-US`, `fa-IR`                                                                                  |
-| UI surface                | Settings General selector, WorkspaceSidebarFooter quick picker, application chrome via `ZCodeIntlProvider` |
+| Dimension                 | Values                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Platform locale source    | Electron `app.getPreferredSystemLanguages()` preferred list, Electron `app.getLocale()` fallback |
+| User preference           | `system`, `zh-CN`, `en-US`                                                                       |
+| Persisted resolved locale | `zh-CN`, `en-US`                                                                                 |
+| UI surface                | Settings General section, application chrome driven by `ZCodeIntlProvider`                       |
 
 ## Accepted Cases
 
-| Case                                                            | Setup                                                                                                                            | Action                                               | Assertions                                                                                                                                   | Spec                                                                          |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| SL-01 system preferred Chinese with English app locale fallback | Mock preferred languages as `["zh-Hans-CN", "en-CN"]`, mock `app.getLocale()` as `en-US`, start from explicit English preference | Select `System default` in Settings General          | UI switches to Chinese, `setting.json` keeps `localePreference: "system"` and writes resolved `locale: "zh-CN"`                              | `packages/desktop/test/e2e/settings/settings-language-system-default.test.ts` |
-| SL-02 explicit language labels are autonyms                     | Current locale may be any supported locale                                                                                       | Open language selector                               | `中文简体`, `English`, and `فارسی` remain readable as language names                                                                         | Covered by UI regression `packages/ui/test/appearanceSettingsLayout.test.ts`  |
-| SL-03 sidebar quick picker exposes Persian                      | Signed-out workspace sidebar with zh-CN active                                                                                   | Open profile menu → language submenu; select `فارسی` | The `fa-IR` option is present and selection delegates `fa-IR` to the existing parent locale-preference handler; no login action is triggered | `packages/ui/test/browser/manual-review/pending/sidebar-user-id.test.mjs`     |
-| SL-04 sidebar footer has no account login entry                 | Signed-out workspace sidebar                                                                                                     | Open profile menu                                    | Footer menu contains preferences but no account login/connect item, even when provider authentication is available elsewhere                 | `packages/ui/test/browser/manual-review/pending/sidebar-user-id.test.mjs`     |
+| Case                                                            | Setup                                                                                                                            | Action                                      | Assertions                                                                                                      | Spec                                                                                    |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| SL-01 system preferred Chinese with English app locale fallback | Mock preferred languages as `["zh-Hans-CN", "en-CN"]`, mock `app.getLocale()` as `en-US`, start from explicit English preference | Select `System default` in Settings General | UI switches to Chinese, `setting.json` keeps `localePreference: "system"` and writes resolved `locale: "zh-CN"` | `packages/desktop/test/e2e/settings/settings-language-system-default.test.ts`           |
+| SL-02 explicit language labels are autonyms                     | Current locale may be English or Chinese                                                                                         | Open language selector                      | `中文简体` and `English` remain readable in their own language                                                  | Pending behavior coverage; the source-string guard was removed during unit-test cleanup |
 
 ## Pruned Cases
 

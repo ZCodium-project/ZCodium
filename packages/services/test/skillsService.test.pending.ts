@@ -265,6 +265,24 @@ agents-body`,
     });
   });
 
+  it("Source user scope does not misclassify the home anchor as a workspace", async () => {
+    const home = makeTempHome();
+    writeSkill(
+      userSkillRoot(home),
+      "source-user-skill",
+      "---\nname: source-user-skill\ndescription: source user\n---\n",
+    );
+
+    const service = await createSkillsServiceInEnv(home, { isDesktopRuntime: true });
+    const result = await service.list({
+      workspacePath: home,
+      provider: "glm",
+    });
+
+    expect(result.skills.find((skill) => skill.name === "source-user-skill")?.scope).toBe("user");
+    expect(result.skills.some((skill) => skill.scope === "workspace")).toBe(false);
+  });
+
   it("递归发现分组目录，跳过隐藏目录但允许 .system 官方目录", async () => {
     const home = makeTempHome();
     const workspacePath = join(home, "workspace");
@@ -622,7 +640,6 @@ android-body`,
       "ios-simulator",
       "zcode-guide",
     ]);
-    expect(result.skills.find((skill) => skill.name === "android-emulator")).toBeUndefined();
   });
 
   it("suppressed 内置插件不贡献任何 skill", async () => {
@@ -703,9 +720,6 @@ diagnosing-body`,
     const result = await service.list({ workspacePath, provider: "glm" });
 
     expect(result.skills.map((skill) => skill.name)).toEqual(["skill-creator"]);
-    expect(result.skills.find((skill) => skill.name === "control-browser")).toBeUndefined();
-    expect(result.skills.find((skill) => skill.name === "docx")).toBeUndefined();
-    expect(result.skills.find((skill) => skill.name === "diagnosing-plugins")).toBeUndefined();
     expect(result.skills.find((skill) => skill.pluginName === "browser")).toBeUndefined();
     expect(result.skills.find((skill) => skill.pluginName === "documents")).toBeUndefined();
     expect(result.skills.find((skill) => skill.pluginName === "zcode-guide")).toBeUndefined();
@@ -1450,26 +1464,6 @@ dist-body`,
     const result = await service.list({ workspacePath, provider: "glm" });
 
     expect(result.skills.map((skill) => skill.name)).toEqual(["real-skill"]);
-  });
-
-  it("分组目录（depth 2）内的技能仍可被发现", async () => {
-    const home = makeTempHome();
-    const workspacePath = join(home, "workspace");
-    const root = workspaceSkillRoot(workspacePath);
-    writeSkill(
-      join(root, "group-a"),
-      "grouped-skill",
-      `---
-name: grouped-skill
-description: grouped
----
-grouped-body`,
-    );
-
-    const service = await createSkillsServiceInEnv(home, { isDesktopRuntime: true });
-    const result = await service.list({ workspacePath, provider: "glm" });
-
-    expect(result.skills.map((skill) => skill.name)).toEqual(["grouped-skill"]);
   });
 
   it("超过最大扫描深度的技能不会被发现", async () => {

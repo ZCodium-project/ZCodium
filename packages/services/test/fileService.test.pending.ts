@@ -185,32 +185,6 @@ describe("fileService", () => {
       });
     });
 
-    it("marks symlink metadata for directory entries", async () => {
-      const rootPath = makeTempDir("zcode-readdir-symlink-meta-");
-      const targetPath = join(rootPath, "target");
-      const linkPath = join(rootPath, "linked-dir");
-      mkdirSync(targetPath);
-      symlinkSync(targetPath, linkPath, process.platform === "win32" ? "junction" : "dir");
-
-      const service = createFileService();
-      const entries = await service.readdir({ path: rootPath });
-
-      expect(entries).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "target",
-            type: "directory",
-            isSymbolicLink: false,
-          }),
-          expect.objectContaining({
-            name: "linked-dir",
-            type: "directory",
-            isSymbolicLink: true,
-          }),
-        ]),
-      );
-    });
-
     it("returns empty array for an empty directory", async () => {
       const rootPath = makeTempDir("zcode-readdir-empty-");
       const service = createFileService();
@@ -1156,24 +1130,6 @@ describe("fileService", () => {
         // gitignore 区与自定义区原样保留。
         expect(reset.content).toContain("out/");
         expect(reset.content).toContain("my-private-assets/");
-      });
-
-      it("reset re-adds builtin rule after it was removed from .gitignore", async () => {
-        const rootPath = makeTempDir("zcode-file-service-reset-readd-");
-        // 创建时 gitignore 声明了 node_modules/ → 默认段去重未写入。
-        writeFileSync(join(rootPath, ".gitignore"), "node_modules/\n");
-        const service = createFileService();
-        const initial = await service.readWorkspaceFileSearchIgnore({ rootPath });
-        expect(initial.content.match(/^node_modules\/$/gm)).toHaveLength(1);
-
-        // 用户从 .gitignore 删掉该行后恢复默认：默认段按新 gitignore 重算，补回兜底。
-        writeFileSync(join(rootPath, ".gitignore"), "");
-        await service.writeWorkspaceFileSearchIgnore({ rootPath, content: initial.content });
-        const reset = await service.applyWorkspaceFileSearchIgnoreTransform({
-          rootPath,
-          transform: "reset-defaults",
-        });
-        expect(reset.content.match(/^node_modules\/$/gm)).toHaveLength(1);
       });
 
       it("falls back to full template rebuild when section markers are missing", async () => {

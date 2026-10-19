@@ -1,8 +1,11 @@
 import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+
+const exec = promisify(execFile);
 
 export const PROVIDER_READINESS_HISTORY_SESSION_ID = "sess_e2e_provider_readiness_history";
 export const PROVIDER_READINESS_HISTORY_TITLE = "E2E_PROVIDER_READINESS_HISTORY 可读历史";
@@ -54,26 +57,22 @@ const DEFAULT_PROVIDER_READINESS_HISTORY_FIXTURE: ProviderReadinessHistoryFixtur
  * 不存在的 CLI-only 历史，并错误依赖 sessions-index 反向补齐 tasks-index。这里让两个事实源
  * 保持同一 task：tasks-index 提供侧栏 membership，真实只读订阅负责读取 CLI 历史正文。
  */
-export function seedProviderReadinessHistoryFixture(
+export async function seedProviderReadinessHistoryFixture(
   options: SeedProviderReadinessHistoryFixtureOptions,
-): void {
+): Promise<void> {
   const history = options.history ?? DEFAULT_PROVIDER_READINESS_HISTORY_FIXTURE;
-  execFileSync(
-    process.execPath,
-    [options.cliEntryPoint, "--cwd", options.workspacePath, "app-server", "--stdio"],
-    {
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        HOME: options.e2eHomeDir,
-        USERPROFILE: options.e2eHomeDir,
-        ZCODE_DATA_BASE_DIR: options.e2eHomeDir,
-      },
-      input: "",
-      timeout: 30_000,
-      windowsHide: true,
+  // 空 stdin 会在异步迁移完成前关闭协议；显式等待既有存储迁移命令，不启动会话运行态。
+  await exec(process.execPath, [options.cliEntryPoint, "storage-migrate"], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      HOME: options.e2eHomeDir,
+      USERPROFILE: options.e2eHomeDir,
+      ZCODE_DATA_BASE_DIR: options.e2eHomeDir,
     },
-  );
+    timeout: 30_000,
+    windowsHide: true,
+  });
 
   const databasePath = join(options.e2eHomeDir, ".zcode", "cli", "db", "db.sqlite");
   if (!existsSync(databasePath)) {

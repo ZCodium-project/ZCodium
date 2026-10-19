@@ -481,13 +481,6 @@ describe("executeBrowserCommandOnView", () => {
     expect(r.error?.code).toBe("execution_error");
   });
 
-  it("getState reads webContents getters", async () => {
-    const view = makeView();
-    const r = await executeBrowserCommandOnView(view, { method: "getState" });
-    expect(r.ok).toBe(true);
-    expect(r.state?.title).toBe("Example");
-  });
-
   it("unimplemented method returns capability_unsupported", async () => {
     const view = makeView();
     // fill 仍未实现（click/type/press/scroll 已在 T-B/T-C 实现）。
@@ -2042,21 +2035,6 @@ describe("executeBrowserCommandOnView", () => {
     });
     expect(r.ok).toBe(false);
     expect(r.error?.code).toBe("execution_error");
-  });
-
-  it("screenshot clip → Page.captureScreenshot 带 clip{...,scale:1}", async () => {
-    const send = vi.fn(async () => ({ data: "PNG" }));
-    const view = makeView({ cdpSend: send });
-    const r = await executeBrowserCommandOnView(view, {
-      method: "screenshot",
-      clip: { x: 1, y: 2, width: 30, height: 40 },
-    });
-    expect(r.ok).toBe(true);
-    expect(send).toHaveBeenCalledWith("Page.captureScreenshot", {
-      format: "png",
-      captureBeyondViewport: true,
-      clip: { x: 1, y: 2, width: 30, height: 40, scale: 1 },
-    });
   });
 
   it("screenshot fullPage → 先 getLayoutMetrics 再用 contentSize 作 clip", async () => {

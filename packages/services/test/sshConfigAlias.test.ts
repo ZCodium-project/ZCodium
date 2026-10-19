@@ -144,7 +144,6 @@ describe("sshConfigAlias fallback parser", () => {
       const aliasNames = aliases.map((item) => item.alias);
 
       expect(aliasNames).toEqual(["dev", "prod"]);
-      expect(aliases).toHaveLength(2);
       expect(aliases[0]).toMatchObject({
         alias: "dev",
         host: "dev.example.com",

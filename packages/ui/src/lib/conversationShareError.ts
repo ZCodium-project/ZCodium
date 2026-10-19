@@ -254,7 +254,7 @@ export function formatConversationShareErrorSummary(error: unknown): {
   };
 }
 
-const ISSUE_MESSAGE_IDS: Readonly<Record<ConversationShareFailureIssue["code"], string>> = {
+const ISSUE_MESSAGE_IDS: Readonly<Record<string, string>> = {
   artifact_type_not_allowed: "conversationShare.issue.artifactTypeNotAllowed",
   artifact_extension_missing: "conversationShare.issue.artifactExtensionMissing",
   artifact_outside_workspace: "conversationShare.issue.artifactOutsideWorkspace",
@@ -289,7 +289,7 @@ const ISSUE_MESSAGE_IDS: Readonly<Record<ConversationShareFailureIssue["code"], 
 export function resolveConversationShareIssueMessageId(
   issue: ConversationShareFailureIssue,
 ): string {
-  return ISSUE_MESSAGE_IDS[issue.code] ?? ISSUE_MESSAGE_IDS.unknown;
+  return ISSUE_MESSAGE_IDS[issue.code] ?? "conversationShare.issue.unknown";
 }
 
 /**

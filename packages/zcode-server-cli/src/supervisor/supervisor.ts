@@ -1,14 +1,20 @@
+import type { SourceServerRunningTask } from "@zcode/shared";
 /* oxlint-disable eslint(max-lines) -- Supervisor 集中维护生命周期、Core 代际和更新回滚状态机，启动恢复锁边界修复不应拆散其原子流程。 */
 
 import { type ChildProcess } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { createServiceLogger } from "@zcode/services/node";
+import { SOURCE_SERVER_UPDATE_RUNNING_TASKS_ERROR_CODE } from "@zcode/shared";
 import {
+  CORE_KILL_TIMEOUT_MS,
+  CORE_READY_TIMEOUT_MS,
+  CORE_STOP_GRACE_TIMEOUT_MS,
   coreMessageSchema,
   SERVER_CLI_PROTOCOL_VERSION,
   type ControlRequest,
   type LifecycleState,
   type ReleaseManifest,
+  type RuntimeIdentity,
   type ServerStatus,
 } from "../contracts.js";
 import { createControlServer, type ControlHandler } from "../ipc/controlServer.js";
@@ -34,10 +40,12 @@ export interface SupervisorOptions {
   layout?: ServerLayout;
   launcher: CoreLauncher;
   version: string;
+  /** 当前 Supervisor bundle 所属 immutable release；开发态入口允许缺失。 */
+  supervisorReleaseId?: string;
   serviceRegistered?: boolean;
-  /** 测试和诊断可缩短 ready 等待；生产默认保持 15 秒。 */
+  /** 测试和诊断可缩短 ready 等待；生产默认使用 CORE_READY_TIMEOUT_MS。 */
   coreReadyTimeoutMs?: number;
-  /** 测试可缩短 Core 优雅退出和强杀后的终态等待；生产分别默认 5 秒和 2 秒。 */
+  /** 测试可缩短 Core 优雅退出和强杀后的终态等待；生产默认使用 contracts 中的停止预算。 */
   coreStopGraceTimeoutMs?: number;
   coreKillTimeoutMs?: number;
   now?: () => number;
@@ -59,12 +67,15 @@ export class Supervisor {
   private port: number | null = null;
   private startedAt: number | null = null;
   private runningTaskCount = 0;
+  private runningTasks: SourceServerRunningTask[] | undefined;
   private lastExitReason: string | null = null;
   private readonly persistStatusSnapshot: () => Promise<void>;
   private lifecycleOperation:
     | { kind: LifecycleOperationKind; promise: Promise<unknown> }
     | undefined;
   private activeRelease: ReleaseManifest | null = null;
+  private coreVersion: string | undefined;
+  private coreReleaseId: string | undefined;
 
   public constructor(private readonly options: SupervisorOptions) {
     this.layout = options.layout ?? resolveServerLayout();
@@ -233,11 +244,13 @@ export class Supervisor {
             pid: core.pid,
           });
           core.kill("SIGKILL");
-          if (!settled) killTimer = setTimeout(fail, this.options.coreKillTimeoutMs ?? 2_000);
+          if (!settled) {
+            killTimer = setTimeout(fail, this.options.coreKillTimeoutMs ?? CORE_KILL_TIMEOUT_MS);
+          }
         };
         const graceTimer = setTimeout(() => {
           forceKill();
-        }, this.options.coreStopGraceTimeoutMs ?? 5_000);
+        }, this.options.coreStopGraceTimeoutMs ?? CORE_STOP_GRACE_TIMEOUT_MS);
         core.once("exit", finish);
         core.once("close", finish);
         core.once("error", handleError);
@@ -267,7 +280,11 @@ export class Supervisor {
     const pending = await this.releaseManager.readPending();
     if (!pending) throw new Error("No pending release is prepared");
     if (this.runningTaskCount > 0 && !force) {
-      throw new Error("Running tasks require --force for update");
+      throw new ControlRequestError(
+        SOURCE_SERVER_UPDATE_RUNNING_TASKS_ERROR_CODE,
+        "Running tasks require --force for update",
+        false,
+      );
     }
     const previous = await this.releaseManager.readCurrent();
     log.info("applying pending release", { version: pending.version, force });
@@ -279,7 +296,10 @@ export class Supervisor {
       this.activeRelease = pending;
       this.state = "starting";
       this.launchCore();
-      await waitForUpdateReady(() => this.state, this.options.coreReadyTimeoutMs ?? 15_000);
+      await waitForUpdateReady(
+        () => this.state,
+        this.options.coreReadyTimeoutMs ?? CORE_READY_TIMEOUT_MS,
+      );
       await this.releaseManager.completeUpdate();
       log.info("release applied", { version: pending.version });
       return { applied: true, version: pending.version };
@@ -315,7 +335,10 @@ export class Supervisor {
         this.state = "starting";
         this.launchCore();
         try {
-          await waitForUpdateReady(() => this.state, this.options.coreReadyTimeoutMs ?? 15_000);
+          await waitForUpdateReady(
+            () => this.state,
+            this.options.coreReadyTimeoutMs ?? CORE_READY_TIMEOUT_MS,
+          );
         } catch (rollbackError) {
           log.error("previous release rollback failed", rollbackError);
           // 旧 release ready 超时只改状态会让仍存活的 Core、PID 和 lock 与 stopped 脱节；复用 stopCore 等待 exit/close，失败则保持 stop-failed。
@@ -335,7 +358,9 @@ export class Supervisor {
       pid: this.core?.pid ?? null,
       port: this.port,
       host: this.host,
-      version: this.options.version,
+      // status.version 保持 Core/current release 的兼容语义；Supervisor 自身版本与 release
+      // 由独立 runtime-identity control 返回，避免向严格持久化 schema 增加字段击穿旧版回滚。
+      version: this.activeRelease?.version ?? this.options.version,
       generation: this.generation,
       startedAt: this.startedAt,
       lastExitReason: this.lastExitReason,
@@ -343,6 +368,19 @@ export class Supervisor {
       runningTaskCount: this.runningTaskCount,
       crashBudget: this.crashBudget.snapshot(),
       updatedAt: Date.now(),
+    };
+  }
+
+  private runtimeIdentity(): RuntimeIdentity {
+    return {
+      supervisorVersion: this.options.version,
+      ...(this.options.supervisorReleaseId
+        ? { supervisorReleaseId: this.options.supervisorReleaseId }
+        : {}),
+      ...(this.activeRelease?.version ? { activeReleaseVersion: this.activeRelease.version } : {}),
+      ...(this.activeRelease?.releaseId ? { activeReleaseId: this.activeRelease.releaseId } : {}),
+      ...(this.coreVersion ? { coreVersion: this.coreVersion } : {}),
+      ...(this.coreReleaseId ? { coreReleaseId: this.coreReleaseId } : {}),
     };
   }
 
@@ -431,6 +469,8 @@ export class Supervisor {
       this.port = message.port;
       this.generation = message.generation;
       this.startedAt = Date.now();
+      this.coreVersion = message.version;
+      this.coreReleaseId = message.releaseId;
       log.info("server core ready", {
         host: this.host,
         port: this.port,
@@ -438,6 +478,7 @@ export class Supervisor {
       });
     } else if (message.type === "heartbeat" || message.type === "task-activity") {
       this.runningTaskCount = message.runningTaskCount;
+      this.runningTasks = message.runningTasks;
       log.debug("core activity snapshot", {
         type: message.type,
         runningTaskCount: message.runningTaskCount,
@@ -463,6 +504,9 @@ export class Supervisor {
     this.port = null;
     this.startedAt = null;
     this.runningTaskCount = 0;
+    this.runningTasks = undefined;
+    this.coreVersion = undefined;
+    this.coreReleaseId = undefined;
   }
 
   private async handleControl(request: ControlRequest): Promise<unknown> {
@@ -471,6 +515,10 @@ export class Supervisor {
         return { protocolVersion: SERVER_CLI_PROTOCOL_VERSION };
       case "status":
         return this.status();
+      case "running-tasks":
+        return this.runningTasks ?? null;
+      case "runtime-identity":
+        return this.runtimeIdentity();
       case "stop":
         this.startAcknowledgedLifecycleOperation("stop", () =>
           this.stopInternal("control request"),

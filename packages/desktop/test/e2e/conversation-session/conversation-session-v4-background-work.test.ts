@@ -26,7 +26,8 @@ describe("v4 M4 门禁：cancelBackgroundWork", () => {
   it("后台 bash 启动 → 面板显示 running → 取消 → cancelled", async function () {
     this.timeout(120000);
     await prepareV4ConversationE2E();
-    await setV4ElectronWindowSize(1280, 900);
+    // 与窄屏共用可容纳的内容高度，只改变待测的宽度断点，避免宿主屏幕截断。
+    await setV4ElectronWindowSize(1280, 800);
 
     // 首轮触发 run_in_background 的 Bash tool_use。若出现权限弹窗则批准（best-effort）。
     await sendV4Prompt("E2E_V4_BGWORK 起一个后台任务");

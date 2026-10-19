@@ -70,7 +70,8 @@ async function addFormalCase(
   await writeJson(
     root,
     `packages/desktop/test/e2e/fixtures/upstream/conversation-session/${caseName}.json`,
-    { version: 1, fixtures: [providerEntry(defaultRequest)] },
+    // 准入新增身份校验后，合法夹具也须携带归属，避免无关拒绝掩盖本场景断言。
+    { version: 1, caseName, spec: defaultManifest.spec, fixtures: [providerEntry(defaultRequest)] },
   );
   await writeJson(
     root,
@@ -100,7 +101,10 @@ test("uses the TypeScript AST for documented imports and template-expression cal
 
   const result = await inspect(root);
 
-  assert.ok(result.formal.admitted.some((item) => item.caseName === "documented-import"));
+  assert.ok(
+    result.formal.admitted.some((item) => item.caseName === "documented-import"),
+    JSON.stringify(result.formal.rejected),
+  );
   assert.ok(codes(result, "template-call").includes("LEGACY_PREPARE_CALL"));
 });
 
@@ -259,7 +263,10 @@ test("only allows explicit common requests from canonical common.json", async ()
 
   const result = await inspect(root);
 
-  assert.ok(result.formal.admitted.some((item) => item.caseName === "canonical-common-valid"));
+  assert.ok(
+    result.formal.admitted.some((item) => item.caseName === "canonical-common-valid"),
+    JSON.stringify(result.formal.rejected),
+  );
   assert.ok(codes(result, "canonical-common-wrong-kind").includes("UNAUTHORIZED_COMMON_REQUEST"));
   assert.ok(codes(result, "third-party-common").includes("UNAUTHORIZED_COMMON_REQUEST"));
   assert.ok(codes(result, "duplicate-manifest-request").includes("DUPLICATE_MANIFEST_REQUEST_ID"));

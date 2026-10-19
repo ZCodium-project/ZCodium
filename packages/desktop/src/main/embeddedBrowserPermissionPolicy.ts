@@ -248,8 +248,10 @@ export async function applyEmbeddedBrowserPermissionPolicy(
     // select-* 监听独占把关（未选择不授权）。蓝牙不在 check 枚举里，不受影响。
     if (DEVICE_CHECK_PERMISSIONS.has(permission)) return true;
     if (!PROMPT_PERMISSIONS.has(permission)) return false;
-    if (getEmbeddedBrowserSitePermission(requestingOrigin, permission) === "allow") return true;
-    return sessionAllow.get(requestingOrigin)?.has(permission) === true;
+    // Electron check 可能传入带尾部斜杠或路径的 URL；必须与 request 使用相同的 origin 键。
+    const origin = originFromUrl(requestingOrigin);
+    if (getEmbeddedBrowserSitePermission(origin, permission) === "allow") return true;
+    return sessionAllow.get(origin)?.has(permission) === true;
   });
 
   // 实测语义修正：setDevicePermissionHandler 返回 false 会把 requestDevice 直接拦死

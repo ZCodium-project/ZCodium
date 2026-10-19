@@ -2,67 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   getRemoteRuntimeToolsForPlatform,
   normalizeRemoteResourcePackageSelection,
-  REMOTE_RESOURCE_PACKAGE_IDS,
   remoteTargetSchema,
 } from "@zcode/shared";
 
-const retiredProtocolPrefix = `${"a"}${"cp"}`;
-const retiredProxyRuntimePackageId = `${retiredProtocolPrefix}-proxy-runtime`;
-
 describe("remote resource packages", () => {
-  it("defaults to active ZCode remote resource packages", () => {
-    expect(REMOTE_RESOURCE_PACKAGE_IDS).toEqual([
-      "server-bundle",
-      "node-runtime",
-      "node-pty",
-      "glm",
-      "bfs",
-      "ripgrep",
-      "ugrep",
-    ]);
-    expect(normalizeRemoteResourcePackageSelection()).toEqual([
-      "server-bundle",
-      "node-runtime",
-      "node-pty",
-      "glm",
-      "bfs",
-      "ripgrep",
-      "ugrep",
-    ]);
-    expect(normalizeRemoteResourcePackageSelection()).not.toContain(
-      `${retiredProtocolPrefix}-claude`,
-    );
-  });
-
   it("ignores historical selections and always returns active packages", () => {
     expect(
       normalizeRemoteResourcePackageSelection({
         selectedPackageIds: ["glm"],
-      }),
-    ).toEqual(["server-bundle", "node-runtime", "node-pty", "glm", "bfs", "ripgrep", "ugrep"]);
-  });
-
-  it("ignores legacy third-party resource package selections", () => {
-    const selectedPackageIds = normalizeRemoteResourcePackageSelection({
-      selectedPackageIds: [`${retiredProtocolPrefix}-codex`],
-    });
-
-    expect(selectedPackageIds).toEqual([
-      "server-bundle",
-      "node-runtime",
-      "node-pty",
-      "glm",
-      "bfs",
-      "ripgrep",
-      "ugrep",
-    ]);
-    expect(selectedPackageIds).not.toContain(retiredProxyRuntimePackageId);
-  });
-
-  it("ignores retired proxy runtime selection", () => {
-    expect(
-      normalizeRemoteResourcePackageSelection({
-        selectedPackageIds: [retiredProxyRuntimePackageId],
       }),
     ).toEqual(["server-bundle", "node-runtime", "node-pty", "glm", "bfs", "ripgrep", "ugrep"]);
   });

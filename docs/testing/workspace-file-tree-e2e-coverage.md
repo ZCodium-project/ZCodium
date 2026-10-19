@@ -9,6 +9,8 @@
 | `workspace-file-tree-compact-hierarchy` | `packages/desktop/test/e2e/workspace-file-tree/workspace-file-tree-compact-hierarchy.test.ts` | 多层空目录压缩后，后代目录与内容不缩进，后代目录也不吸顶                             | 使用真实 workspace 文件构造两级 compact folders；展开后断言后代每层增加 `12px`、层级引导线 depth 正确，滚动后父级与后代目录都进入无额外间隙的 sticky folders。                         |
 | `workspace-file-tree-shared-search`     | `packages/desktop/test/e2e/workspace-file-tree/workspace-file-tree-shared-search.test.ts`     | 左侧文件树搜索深层 Java / workspace 文件时，经常搜不到 `@` 能引用的文件              | 构造未展开的深层源码文件，左侧文件树输入类名或相对路径可命中；搜索态与 `@` 使用同一 `listWorkspaceFiles` 候选和 fuzzy 排序，点击文件打开 `PreviewPane`，不会向 Composer 插入 mention。 |
 
+- MR !2897 / CR-01：打开、关闭并等待退场完成后，文件面板业务内容必须卸载；再次打开重新加载。减少动态效果路径立即卸载。目录 watcher 释放及未触发的 debounce 取消由数据层单测核对。
+
 ## Coverage Decisions
 
 | Decision                                              | Status   | Reason                                                                                                                                                               |

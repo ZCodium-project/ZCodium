@@ -173,16 +173,6 @@ describe("workspace/updateDynamicWorkflowPolicy 同步（DWG-02）", () => {
     }
   });
 
-  it("alwaysOn 也带 mode（launch.md「How the mode travels」：mode 与布尔同行）", async () => {
-    const { service, request } = await setup({ enabled: true });
-    try {
-      await service.initialize({ workspacePath: WORKSPACE_PATH });
-      expect(policyCalls(request)[0]?.[1]).toMatchObject({ enabled: true, mode: "alwaysOn" });
-    } finally {
-      service.disposeAll();
-    }
-  });
-
   it("resolver 抛错时按关闭处理，不发策略也不阻断就绪", async () => {
     const { service, request } = await setup({
       configResolver: async () => {

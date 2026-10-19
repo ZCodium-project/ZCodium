@@ -146,6 +146,13 @@
 
 DF-01 verification (2026-09-07): macOS Desktop WDIO passed (`desktop-e2e-20260907040958265-p60496-c535b8967f7e59a1`). HTTP 200/400 business failures, body/header log ID, update rejection, streaming circuit status, and localized error rendering are covered by 124 passing unit tests. Typecheck, Desktop E2E typecheck, and lint passed (43 warnings, 0 errors). Pending case is not promoted. Live Feishu, Windows/Linux, mobile devices, and delivery-failure DOM interaction remain unverified; existing connection-error DOM regression CF-01 passed in macOS Desktop WDIO.
 
+## BOT-E2E-RW-02：R3 stable / legacy Bot 身份
+
+- accepted：已握手 Source 与当前窗口远程 session 在线，回退快照仍是 legacy；以 stable 和 legacy Bot context 分别请求模型/任务入口。
+- 断言：两个入口归一到同一 stable scope；不误报断线、不调用本机 task、不额外建 Host/Agent；只授权的旧身份升级后仍限制为同一 Source。
+- 对照：同 path 不同 Source、重绑旧线路、preferred Profile 与在线线路不同、断线/重连换代、并发 task/model lookup、迟到 port 和 dispose。
+- 主证据为真实模块串联探针及 Bot service synthetic E2E；不声称真实飞书/Telegram 投递已验证。
+
 ## Feishu group collaboration (accepted, pending automation)
 
 - BOT-E2E-GR-01: two enabled groups and private chat retain separate task/configuration; member commands cannot switch tasks or approve. Group prompts carry trusted source to canonical admission; no legacy sendPrompt.

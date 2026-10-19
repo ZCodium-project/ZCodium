@@ -24,12 +24,13 @@ import {
   type ModelSelectionConfiguredDefaultSource,
   type ProviderSettingsConnectivityTester,
 } from "./providerFacadeServices.js";
-import type { RemoteModelCatalogExecutor } from "./remoteModelCatalog.js";
+import { createServiceLogger } from "#src/logger/serviceLogger.js";
+
+const log = createServiceLogger("provider-runtime");
 
 export interface ProviderRuntimeOptions extends ProviderConfigRuntimeOptions {
   readonly accountSource?: RefreshableProviderSource<AccountProviderConfigSnapshot>;
   readonly testConnectivity?: ProviderSettingsConnectivityTester;
-  readonly listRemoteModels?: RemoteModelCatalogExecutor;
 }
 
 export interface ProviderRuntimeDependencies {
@@ -37,7 +38,6 @@ export interface ProviderRuntimeDependencies {
   readonly accountSource?: RefreshableProviderSource<AccountProviderConfigSnapshot>;
   readonly disposeAccountSource?: () => void;
   readonly testConnectivity?: ProviderSettingsConnectivityTester;
-  readonly listRemoteModels?: RemoteModelCatalogExecutor;
   readonly modelSelectionConfiguredDefaultSource?: ModelSelectionConfiguredDefaultSource;
   readonly disposeModelSelectionConfiguredDefaultSource?: () => void;
 }
@@ -108,7 +108,6 @@ export class ProviderRuntime {
       settingsFacade,
       ensureReady,
       dependencies.testConnectivity,
-      dependencies.listRemoteModels,
     );
     this.#modelSelectionRuntime = createModelSelectionService(
       createNodeModelSelectionFacade(this.registryService),
@@ -183,22 +182,27 @@ function createSettingsMutationTarget(
       ),
     refresh: (reason) => registryService.refresh(reason),
     refreshSources: async (reason) => {
-      const sourceResults = await Promise.allSettled([
+      const [builtinResult, accountResult] = await Promise.allSettled([
         configRuntime.refreshZCodeBuiltin({ force: true }),
         accountSource.refresh?.(reason) ?? Promise.resolve(),
       ]);
+      // 远端更新失败不代表本地配置不可用；此前统一抛错会让套餐切换回滚，
+      // 并掩盖真正的账号失败。只降级远端更新，Config/Registry 和权益错误仍保留。
+      if (builtinResult.status === "rejected") {
+        log.warn(undefined, "Builtin 远端更新失败，继续使用本地配置", {
+          reason,
+          error: builtinResult.reason,
+        });
+      }
       const snapshot = await registryService.refresh(reason);
-      const failed = sourceResults.find(
-        (result): result is PromiseRejectedResult => result.status === "rejected",
-      );
-      if (failed) throw failed.reason;
+      if (accountResult.status === "rejected") throw accountResult.reason;
       return snapshot;
     },
   };
 }
 
 export function createProviderRuntime(options: ProviderRuntimeOptions): ProviderRuntime {
-  const { accountSource, testConnectivity, listRemoteModels, ...configRuntimeOptions } = options;
+  const { accountSource, testConnectivity, ...configRuntimeOptions } = options;
   const configRuntime = createProviderConfigRuntime(configRuntimeOptions);
   const modelSelectionConfiguredDefaultSource = new NodeModelSelectionConfigRepository({
     personalRepository: configRuntime.personalRepository,
@@ -207,7 +211,6 @@ export function createProviderRuntime(options: ProviderRuntimeOptions): Provider
     configRuntime,
     accountSource,
     testConnectivity,
-    listRemoteModels,
     modelSelectionConfiguredDefaultSource,
     disposeModelSelectionConfiguredDefaultSource: () =>
       modelSelectionConfiguredDefaultSource.dispose(),

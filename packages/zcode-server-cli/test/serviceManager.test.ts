@@ -1,11 +1,48 @@
 import { describe, expect, it } from "vitest";
 import {
   createServiceDescriptor,
+  isServiceManagerAvailable,
   registerService,
   unregisterService,
 } from "../src/platform/serviceManager.js";
 
 describe("service manager adapters", () => {
+  it("probes the Linux user service manager without registering a unit", async () => {
+    const calls: Array<{
+      command: string;
+      args: readonly string[];
+      timeoutMs: number | undefined;
+    }> = [];
+    await expect(
+      isServiceManagerAvailable("linux", {
+        run: async () => undefined,
+        runResult: async (command, args, options) => {
+          calls.push({ command, args, timeoutMs: options?.timeoutMs });
+          return { exitCode: 0, stderr: "" };
+        },
+      }),
+    ).resolves.toBe(true);
+    expect(calls).toEqual([
+      {
+        command: "systemctl",
+        args: ["--user", "show-environment"],
+        timeoutMs: 2_000,
+      },
+    ]);
+  });
+
+  it("treats an inaccessible user service manager as a fallback capability", async () => {
+    await expect(
+      isServiceManagerAvailable("linux", {
+        run: async () => undefined,
+        runResult: async () => ({
+          exitCode: 1,
+          stderr: "Failed to connect to bus",
+        }),
+      }),
+    ).resolves.toBe(false);
+  });
+
   it("maps all supported platforms to their native registration commands", async () => {
     const calls: Array<{ command: string; args: readonly string[] }> = [];
     const executor = {
@@ -119,7 +156,10 @@ describe("service manager adapters", () => {
     await expect(
       unregisterService(descriptor, "C:/zcode/service/task.json", {
         run: async () => undefined,
-        runResult: async () => ({ exitCode: 0x80070005, stderr: "Access is denied." }),
+        runResult: async () => ({
+          exitCode: 0x80070005,
+          stderr: "Access is denied.",
+        }),
       }),
     ).rejects.toThrow(/failed \(2147942405\)/);
   });

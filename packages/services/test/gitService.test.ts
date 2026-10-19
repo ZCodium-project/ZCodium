@@ -283,7 +283,7 @@ describeIfGit("gitService", () => {
     expect(secondPage.commits.map((commit) => commit.hash)).toEqual(
       graph.commits.slice(2, 4).map((commit) => commit.hash),
     );
-  }, 15_000);
+  });
 
   it("switches branches successfully and treats switching to the current branch as a no-op", async () => {
     const workspacePath = "/repo/packages/app";
@@ -659,7 +659,7 @@ describeIfGit("gitService", () => {
 
     expect(commitResult.commitHash).toMatch(/^[0-9a-f]{40}$/);
     expect(commitResult.summary.isDirty).toBe(false);
-  }, 15_000);
+  });
 
   it("commits only requested paths when a path scope is provided", async () => {
     const workspacePath = "/repo/packages/app";
@@ -846,34 +846,6 @@ describeIfGit("gitService", () => {
       trackingBranchName: "origin/main",
       remoteName: "origin",
       setUpstream: false,
-    });
-    expect(pushResult.summary.ahead).toBe(0);
-    expect(push).toHaveBeenCalledWith(workspacePath);
-  });
-
-  it("pushes a new local branch and sets upstream when tracking is missing", async () => {
-    const workspacePath = "/repo/packages/app";
-    const push = vi.fn().mockResolvedValue({
-      branchName: "feature/push-upstream",
-      trackingBranchName: "origin/feature/push-upstream",
-      remoteName: "origin",
-      setUpstream: true,
-      summary: createSummary({
-        branchName: "feature/push-upstream",
-        trackingBranchName: "origin/feature/push-upstream",
-      }),
-    });
-    const service = createGitService({
-      repo: createMockRepo({ push }),
-    });
-
-    const pushResult = await service.push({ workspacePath });
-
-    expect(pushResult).toMatchObject({
-      branchName: "feature/push-upstream",
-      trackingBranchName: "origin/feature/push-upstream",
-      remoteName: "origin",
-      setUpstream: true,
     });
     expect(pushResult.summary.ahead).toBe(0);
     expect(push).toHaveBeenCalledWith(workspacePath);

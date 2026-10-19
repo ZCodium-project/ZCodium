@@ -5,7 +5,6 @@ import {
   ZCODE_WORKFLOWS_RUNS_MAX_LIMIT,
   zcodeProtocolMethods,
   zcodeSavedWorkflowMetaSchema,
-  zcodeSavedWorkflowScopeSchema,
   zcodeWorkflowsDeleteParamsSchema,
   zcodeWorkflowsDeleteResultSchema,
   zcodeWorkflowsGetParamsSchema,
@@ -36,13 +35,6 @@ describe("zcode-protocol saved workflows", () => {
     expect(zcodeProtocolMethods.workflowsDelete).toBe("workflows/delete");
     expect(zcodeProtocolMethods.workflowsRuns).toBe("workflows/runs");
     expect(zcodeProtocolMethods.workflowsMove).toBe("workflows/move");
-  });
-
-  it("scope 枚举两档：project / global，拒绝别的值", () => {
-    expect(zcodeSavedWorkflowScopeSchema.parse("project")).toBe("project");
-    expect(zcodeSavedWorkflowScopeSchema.parse("global")).toBe("global");
-    // skills / subagents 那一档叫 user，本特性有意分道——不接受 user。
-    expect(() => zcodeSavedWorkflowScopeSchema.parse("user")).toThrow();
   });
 
   it("list：结果里的条目不含脚本正文，坏文件单列 invalid，dir 必填", () => {

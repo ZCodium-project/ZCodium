@@ -26,11 +26,11 @@
     },
     {
       "id": "ssh-settings-overlay-a-follow",
-      "description": "workspace A 续发响应；延迟 15s 给用例留出「运行中打开并关闭设置页」的窗口。",
+      "description": "续发写出首个流片段后等待开关设置页及运行态断言，显式释放后结束任务。",
       "kind": "main",
       "source": "synthetic",
-      "timingPolicy": "slow-stream",
-      "syntheticReason": "复现用户在任务运行中开关设置页，随后任务完成的时序。"
+      "timingPolicy": "controlled-stream",
+      "syntheticReason": "确保设置页覆盖与返回都发生在远端任务运行期间，释放后验证侧栏订阅正确收口。"
     }
   ]
 }

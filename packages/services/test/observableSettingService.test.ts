@@ -7,7 +7,6 @@ function createBaseSettingService(update: ISettingService["update"]): ISettingSe
     get: vi.fn(),
     update,
     updateDataBaseDir: vi.fn(),
-    ensureDefaultProject: vi.fn(),
   };
 }
 

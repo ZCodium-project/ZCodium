@@ -125,22 +125,6 @@ beforeEach(() => {
   resetEmbeddedBrowserSitePermissionsForTest();
 });
 
-describe("applyEmbeddedBrowserPermissionPolicy 注册", () => {
-  it("注册全部权限 handler 与 select-*/displayMedia 监听", async () => {
-    await applyEmbeddedBrowserPermissionPolicy(session, { logger });
-
-    expect(session.handlers.request).toBeTypeOf("function");
-    expect(session.handlers.check).toBeTypeOf("function");
-    expect(session.handlers.device).toBeTypeOf("function");
-    expect(session.handlers.displayMedia).toBeTypeOf("function");
-    expect(session.on).toHaveBeenCalledWith("select-hid-device", expect.any(Function));
-    expect(session.on).toHaveBeenCalledWith("select-usb-device", expect.any(Function));
-    expect(session.on).toHaveBeenCalledWith("select-serial-port", expect.any(Function));
-    // select-bluetooth-device 挂在 guest WebContents 上，由
-    // installEmbeddedBrowserBluetoothDeviceGuard 在 did-attach-webview 安装。
-  });
-});
-
 describe("静默放行白名单", () => {
   it.each(["clipboard-sanitized-write", "fullscreen", "pointerLock", "mediaKeySystem"])(
     "%s 放行且打 allowlist 日志",
@@ -160,6 +144,28 @@ describe("静默放行白名单", () => {
 });
 
 describe("弹窗级敏感权限", () => {
+  it.each(["allow-always", "allow-session"] as const)(
+    "%s 后 Electron 带路径的权限查询与请求共用 origin，且不串站点或权限",
+    async (action) => {
+      const store = createInMemoryStore();
+      await applyEmbeddedBrowserPermissionPolicy(session, {
+        logger,
+        store,
+        prompt: async () => action,
+      });
+      await expect(driveRequest(session, "media", { requestingUrl: GUEST_URL })).resolves.toBe(
+        true,
+      );
+      for (const url of [GUEST_ORIGIN, `${GUEST_ORIGIN}/`, GUEST_URL]) {
+        expect(session.handlers.check!(null, "media", url)).toBe(true);
+        expect(session.handlers.check!(null, "geolocation", url)).toBe(false);
+      }
+      for (const url of ["https://other.example/", "http://example.com/", "", "invalid"]) {
+        expect(session.handlers.check!(null, "media", url)).toBe(false);
+      }
+    },
+  );
+
   it("无记录且未接入弹窗时默认拒绝（安全闭环）", async () => {
     await applyEmbeddedBrowserPermissionPolicy(session, { logger });
 

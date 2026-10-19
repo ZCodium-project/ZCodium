@@ -92,6 +92,11 @@ function toPluginInfo(plugin: PluginMetadata, configResult?: ConfigResult): ZCod
       })),
     })),
     declaredMcpServerNames: plugin.declaredMcpServerNames,
+    ...(plugin.uiSurfaces?.length ? { uiSurfaces: plugin.uiSurfaces.map((surface) => ({
+      pluginId: plugin.id, pluginName: plugin.name, id: surface.id, title: surface.title,
+      ...(surface.icon ? { icon: surface.icon } : {}), server: surface.server,
+      resourceUri: surface.resourceUri, availability: surface.availability,
+    })) } : {}),
     mcpServerNames: plugin.mcpServerNames,
     ...(hostMcpServerNames.length > 0 ? { hostMcpServerNames } : {}),
     hookDetails: plugin.hookDetails,

@@ -1,4 +1,5 @@
-import { app, Menu, Tray } from "electron";
+import { app, Menu, nativeImage, Tray } from "electron";
+import type { NativeImage } from "electron";
 import { join } from "node:path";
 import {
   DesktopCommandIds,
@@ -8,9 +9,27 @@ import {
   type DesktopCommandId,
   type Locale,
 } from "@zcode/shared";
+import {
+  blendBadgeIntoBitmap,
+  renderTaskbarBadgePixels,
+  resolveBadgeOverlayLabel,
+} from "./unreadBadge.js";
 
 let desktopTray: Tray | null = null;
 let rebuildDesktopTrayContextMenu: (() => void) | null = null;
+let trayLogger: { warn: (...args: unknown[]) => void } | null = null;
+
+// 托盘红点合成参数：画布 32×32，Logo 满幅；Logo 是圆角方块，右上直角处天然有约
+// 4×4 的透明缺口，9×9 红点（画布 10、radius 4）圆心 (28.5, 3.5) 嵌进缺口，
+// 与图片上边缘、右边缘正切，最外缘再往外就会被画布裁掉。
+// spec 见 docs/desktop/windows-taskbar-unread-badge.md
+const TRAY_IMAGE_SIZE = 32;
+const TRAY_BADGE_SIZE = 10;
+const TRAY_BADGE_ORIGIN_X = 24;
+const TRAY_BADGE_ORIGIN_Y = -1;
+
+let trayBaseImage: NativeImage | null = null;
+const trayBadgeImageCache = new Map<string, NativeImage>();
 
 export function resolveDesktopTrayIconPath(platform: NodeJS.Platform = process.platform) {
   // Linux 托盘只接受 PNG（.ico 不会渲染）；打包态 icon.png 已由 extraResources 无条件放入
@@ -50,6 +69,7 @@ export function createDesktopTray(options: {
     options.logger.warn("[desktop-tray] failed to create tray icon", error);
     return null;
   }
+  trayLogger = options.logger;
 
   const getLabel = (id: (typeof desktopMenuMessageIds)[keyof typeof desktopMenuMessageIds]) =>
     getDesktopMenuMessage(options.getLocale(), id);
@@ -120,4 +140,86 @@ export function createDesktopTray(options: {
 
 export function updateWindowsDesktopTrayMenu() {
   rebuildDesktopTrayContextMenu?.();
+}
+
+function loadTrayBaseImage(): NativeImage | null {
+  if (trayBaseImage && !trayBaseImage.isEmpty()) {
+    return trayBaseImage;
+  }
+
+  try {
+    trayBaseImage = nativeImage.createFromPath(resolveDesktopTrayIconPath());
+  } catch (error) {
+    trayLogger?.warn("[desktop-tray] failed to load tray base image for badge", error);
+    return null;
+  }
+  return trayBaseImage.isEmpty() ? null : trayBaseImage;
+}
+
+function composeTrayBadgeImage(label: string, baseImage: NativeImage): NativeImage | null {
+  const cached = trayBadgeImageCache.get(label);
+  if (cached) {
+    return cached;
+  }
+
+  const resized = baseImage.resize({ width: TRAY_IMAGE_SIZE, height: TRAY_IMAGE_SIZE });
+  const bitmap = resized.toBitmap();
+  // 位深防御：toBitmap 尺寸与预期不符时放弃合成，保持无红点底图，避免托盘出花屏。
+  if (bitmap.length !== TRAY_IMAGE_SIZE * TRAY_IMAGE_SIZE * 4) {
+    trayLogger?.warn(
+      `[desktop-tray] unexpected tray bitmap size ${bitmap.length}, skip badge compose`,
+    );
+    return null;
+  }
+
+  const canvas = new Uint8Array(bitmap);
+  // 托盘实际显示仅 16×16，数字不可读：只画红点提示"有未读"，数量看任务栏气泡/任务列表。
+  // 红点嵌进 Logo 圆角留下的右上透明缺口，边缘与圆弧相切（见顶部常量注释）。
+  const badge = renderTaskbarBadgePixels(label, {
+    size: TRAY_BADGE_SIZE,
+    glyphScale: 1,
+    padding: 0,
+    dot: true,
+  });
+  blendBadgeIntoBitmap({
+    base: canvas,
+    size: TRAY_IMAGE_SIZE,
+    badge,
+    badgeSize: TRAY_BADGE_SIZE,
+    originX: TRAY_BADGE_ORIGIN_X,
+    originY: TRAY_BADGE_ORIGIN_Y,
+  });
+  const image = nativeImage.createFromBitmap(Buffer.from(canvas), {
+    width: TRAY_IMAGE_SIZE,
+    height: TRAY_IMAGE_SIZE,
+  });
+  trayBadgeImageCache.set(label, image);
+  return image;
+}
+
+// 未读计数变化时同步托盘角标：非零在图标右上角贴数字徽章，零恢复原图。
+// macOS 无托盘（createDesktopTray 返回 null），由 Dock 角标承担，这里天然 no-op。
+export function applyDesktopTrayUnreadBadge(totalUnreadCount: number): void {
+  if (!desktopTray) {
+    return;
+  }
+
+  const label = resolveBadgeOverlayLabel(totalUnreadCount);
+  if (!label) {
+    const base = loadTrayBaseImage();
+    if (base) {
+      desktopTray.setImage(base);
+    }
+    return;
+  }
+
+  const base = loadTrayBaseImage();
+  if (!base) {
+    return;
+  }
+
+  const image = composeTrayBadgeImage(label, base);
+  if (image) {
+    desktopTray.setImage(image);
+  }
 }

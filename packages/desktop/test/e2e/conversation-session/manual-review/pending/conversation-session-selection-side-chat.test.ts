@@ -4,7 +4,7 @@ import {
   TID_V4_COMPOSER_SEND,
   TID_V4_SESSION_PANE,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import { clearAppData } from "../../../helpers/desktop-app.js";
 import {
   prepareV4ConversationE2E,
@@ -448,7 +448,7 @@ async function clickAddSidePaneItem(
     async () => browser.execute(dispatchActivationScript, "[data-side-pane-add-trigger]"),
     { timeout: 15000, timeoutMsg: "Side Pane 新增标签按钮不存在" },
   );
-  const itemSelector = `[data-side-pane-add-item="${itemId}"]`;
+  const itemSelector = `[data-state="active"] [data-side-pane-open-tab-item="${itemId}"]`;
   await browser.waitUntil(
     async () =>
       browser.execute((selector) => Boolean(document.querySelector(selector)), itemSelector),

@@ -3,7 +3,6 @@
 import { describe, expect, it } from "vitest";
 import {
   buildRemoteWorkspaceIdentity,
-  isRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
 } from "../src/remote-workspace-identity.js";
 
@@ -98,10 +97,5 @@ describe("parseRemoteWorkspaceIdentity", () => {
     expect(parseRemoteWorkspaceIdentity("remote::host:22:u:/x")).toBeNull();
     expect(parseRemoteWorkspaceIdentity("remote:")).toBeNull();
     expect(parseRemoteWorkspaceIdentity("")).toBeNull();
-  });
-
-  it("isRemoteWorkspaceIdentity 与 parse 判定一致", () => {
-    expect(isRemoteWorkspaceIdentity("remote:ssh:host:22:root:/srv/app")).toBe(true);
-    expect(isRemoteWorkspaceIdentity("/Users/dev/ws")).toBe(false);
   });
 });

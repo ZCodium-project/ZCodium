@@ -9,6 +9,7 @@ import type {
 } from "./index.js";
 import type { OAuthStateRegistration } from "./oauth.js";
 import type {
+  WebRemoteControlAuthStateChange,
   WebRemoteControlContext,
   WebRemoteControlReconnectWorkspaceRequest,
   WebRemoteControlReconnectWorkspaceResult,
@@ -20,9 +21,9 @@ import type {
 import type { AppSettings, Locale } from "./protocol.js";
 import type { StorageCleanRequest, StorageCleanResult, StorageUsageSnapshot } from "./storage.js";
 import type {
+  BotRemoteWorkspaceReconnectedEvent,
   CancelPendingRemoteConnectionRequest,
   BindRemoteWorkspaceSessionContextRequest,
-  BotRemoteWorkspaceReconnectedEvent,
   BrowserViewScreenshotSurfacePreparePayload,
   BrowserViewScreenshotSurfaceReadyPayload,
   BrowserViewScreenshotSurfaceReleasePayload,
@@ -54,6 +55,7 @@ import type {
   OpenInEditorOptions,
   PostUpdateReleaseNotesPayload,
   RemoteSessionClosedEvent,
+  RemoteSessionReconnectedEvent,
   SSHConfigAliasOption,
   TaskNotificationPayload,
   WSLDistro,
@@ -167,6 +169,14 @@ export const ServiceChannels = {
   HighspeedCard: "highspeed-card",
   /** Onboarding 完成记录服务（本地持久化，后续上传服务器） */
   OnboardingRecord: "onboarding-record",
+  Project: "project",
+  TaskGroups: "task-groups",
+  RemoteProjects: "remote-projects",
+  WindowProject: "window-project",
+  WindowRemoteProjects: "window-remote-projects",
+  WindowProjectChanges: "window-project-changes",
+  SourceServerWorkspace: "source-server-workspace",
+  SourceServerManagement: "source-server-management",
 } as const;
 
 export type ServiceChannelName = (typeof ServiceChannels)[keyof typeof ServiceChannels];
@@ -465,6 +475,11 @@ export const PlatformChannels = {
   MigrateLegacyCommonMcp: "zcode:migrate-legacy-common-mcp",
   /** Renderer → Main：获取当前设备的稳定标识符（deviceMid） */
   GetDeviceId: "zcode:get-device-id",
+  PluginSandboxExecutionActive: "zcode:plugin-sandbox-execution-active",
+  SelectDirectories: "zcode:select-directories",
+  RemoteSessionReconnected: "zcode:remote-session-reconnected",
+  RequestSourceSettingsAttachment: "zcode:request-source-settings-attachment",
+  WebRemoteControlAuthStateChanged: "zcode:web-remote-control-auth-state-changed",
 } as const;
 
 export type PlatformChannelName = (typeof PlatformChannels)[keyof typeof PlatformChannels];
@@ -545,6 +560,7 @@ export const InternalChannels = {
   TaskNotificationSound: "zcode:task-notification-sound",
   /** main → 宿主 renderer：插件 UI 沙箱的 MessagePort 组（port2[]），payload { sandboxId, initId, names } */
   PluginSandboxPorts: "zcode:plugin-sandbox-ports",
+  SourceSettingsServicePort: "zcode:source-settings-service-port",
 } as const;
 
 /** @deprecated `/ws` 已忽略该头；保留常量仅供旧客户端兼容。 */
@@ -617,6 +633,9 @@ export const HostMessageTypes = {
   ResourceUsageSnapshotRequest: "resource-usage-snapshot-request",
   ResourceUsageSnapshotCancel: "resource-usage-snapshot-cancel",
   NetworkCapture: "network-capture",
+  PrepareProjectWorkspace: "prepare-project-workspace",
+  CancelRemoteWorkspaceBind: "cancel-remote-workspace-bind",
+  ApplicationLocaleChanged: "application-locale-changed",
 } as const;
 
 /** host process → main process 的反馈消息类型 */
@@ -713,6 +732,10 @@ export const HostResponseTypes = {
   ProviderProvisioningSourceChanged: "provider-provisioning-source-changed",
   /** host → main：一次 Remote Environment 同步执行完毕。 */
   ProviderProvisioningExecutionResult: "provider-provisioning-execution-result",
+  ProjectWorkspacePrepared: "project-workspace-prepared",
+  RemoteWorkspaceContextBound: "remote-workspace-context-bound",
+  RemoteWorkspaceContextBindFailed: "remote-workspace-context-bind-failed",
+  RemoteWorkspaceReconnected: "remote-workspace-reconnected",
 } as const;
 
 // ============================================================================
@@ -1243,4 +1266,21 @@ export interface PlatformChannelMap {
     request: DesktopTitleBarTheme;
     response: void;
   };
+  [PlatformChannels.SelectDirectories]: {
+    request: void;
+    response: string[];
+  };
+  [PlatformChannels.RemoteSessionReconnected]: {
+    request: RemoteSessionReconnectedEvent;
+    response: void;
+  };
+  [PlatformChannels.RequestSourceSettingsAttachment]: {
+    request: { sourceServerId: string };
+    response: { attachmentId: string };
+  };
+  [PlatformChannels.WebRemoteControlAuthStateChanged]: {
+    request: WebRemoteControlAuthStateChange;
+    response: void;
+  };
+
 }

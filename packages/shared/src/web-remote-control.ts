@@ -1036,3 +1036,8 @@ export type RelayDesktopControlEvent =
   | WebRemoteControlWorkspaceControlResponse
   | WebRemoteControlWindowControlRequest
   | WebRemoteControlWindowControlResponse;
+
+/** Renderer → Main：OAuth 会话变化通知，不携带凭据。 */
+export interface WebRemoteControlAuthStateChange {
+  state: "signed-in" | "signed-out";
+}

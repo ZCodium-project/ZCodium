@@ -1,3 +1,5 @@
+import { DEFAULT_WORKSPACE } from "../helpers/desktop-app.js";
+import { openWorkspaceDraftFromSidebar } from "../helpers/workspace-agent-warmup.js";
 // NSE01-NSE04/NSE09：增强 Find/Grep 只在根 Session runtime 物化时读取全局设置。
 import {
   TID_SETTINGS_BACK_BUTTON,
@@ -7,7 +9,7 @@ import {
   TID_TASK_SETTINGS_BUTTON,
   TID_TOOL_SUMMARY_TRIGGER,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import { clearAppData, clickTestIdByDom, readSettings } from "../helpers/desktop-app.js";
 import {
   expandAssistantHistoriesWithContent,
@@ -21,7 +23,6 @@ import {
   prepareV4ConversationE2E,
   selectV4TaskById,
   sendV4Prompt,
-  startNewV4Draft,
   waitForV4Pane,
   waitForV4TimelineContaining,
 } from "../helpers/v4-conversation.js";
@@ -66,7 +67,8 @@ describe("增强 Find 与 Grep Session 生命周期", () => {
     assertEnabledOutput(activeOutput);
     expect(readRgVersion(activeOutput)).toBe(expectedRgVersion);
 
-    await startNewV4Draft();
+    // 冷恢复夹具固定在项目目录；全局新建会创建独立 cwd，不能复用该目录的记录器。
+    await openWorkspaceDraftFromSidebar(DEFAULT_WORKSPACE);
     await sendV4Prompt("E2E_NSE_DISABLED_NEW 检查关闭增强搜索后的新会话");
     expect(await approveV4Permission()).toBe(true);
     await waitForV4TimelineContaining("E2E_NSE_DISABLED_NEW_DONE", 60_000);

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   buildServerRemoteWorkspaceIdentity,
-  isRemoteWorkspaceIdentity,
   parseRemoteWorkspaceIdentity,
 } from "../src/remote-workspace-identity.js";
 import { hostIncomingMessageSchema, remoteTargetSchema } from "../src/validation.js";
@@ -53,9 +52,9 @@ describe("server remote target", () => {
     expect(identity).toBe("remote:server:studio-server-01:/Users/dev/ZCodeProject");
     expect(parseRemoteWorkspaceIdentity(identity)).toEqual({
       kind: "server",
+      sourceServerId: "studio-server-01",
       workspacePath: "/Users/dev/ZCodeProject",
     });
-    expect(isRemoteWorkspaceIdentity(identity)).toBe(true);
   });
 
   it("rejects malformed server targets and identities", () => {

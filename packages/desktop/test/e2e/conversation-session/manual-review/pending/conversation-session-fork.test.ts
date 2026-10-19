@@ -2,8 +2,11 @@ import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { TID_CHAT_MESSAGE_FORK_BUTTON } from "@zcode/shared";
-import { clearAppData, clickTestIdByDom } from "../../../helpers/desktop-app.js";
+import { TID_CHAT_MESSAGE_FORK_BUTTON } from "@zcode/shared/test-ids";
+import {
+  clearAppData,
+  clickTestIdByDom,
+} from "../../../helpers/desktop-app.js";
 import { waitForUpstreamNetworkCapture } from "../../../helpers/upstream-capture.js";
 import {
   E2E_REPLY_TOKEN,
@@ -53,7 +56,9 @@ describe("会话区 Fork E2E", () => {
     await waitForAssistantMessageContaining(E2E_REPLY_TOKEN);
     await waitForChatState(
       (snapshot) =>
-        snapshot.state === "idle" && isRuntimeCompleted(snapshot) && snapshot.queueCount === 0,
+        snapshot.state === "idle" &&
+        isRuntimeCompleted(snapshot) &&
+        snapshot.queueCount === 0,
       "fork 前会话没有回到 idle",
       90000,
     );
@@ -61,7 +66,9 @@ describe("会话区 Fork E2E", () => {
     const userForkButton = await getForkButtonForUserContaining(prompt);
     expect(userForkButton?.exists).not.toBe(true);
 
-    const forkButton = await waitForForkButtonForAssistantContaining(E2E_REPLY_TOKEN);
+    const forkButton = await waitForForkButtonForAssistantContaining(
+      E2E_REPLY_TOKEN,
+    );
     expect(forkButton.exists).toBe(true);
     expect(forkButton.disabled || forkButton.ariaDisabled).toBe(false);
 
@@ -174,11 +181,15 @@ describe("会话区 Fork E2E", () => {
     );
     // 修复原因：本 case 为避免额外可见 /goal query，target 通过 sqlite 直接注入。
     // FK/E07 的父 target 前置条件以 session_target 持久化行作为 source of truth。
-    const parentTargetBeforeFork = readSessionTargetForE2E(sourceSessionId ?? "");
+    const parentTargetBeforeFork = readSessionTargetForE2E(
+      sourceSessionId ?? "",
+    );
     expect(parentTargetBeforeFork?.objective).toContain(goalMarker);
     expect(parentTargetBeforeFork?.status).toBe("paused");
 
-    const forkButton = await waitForForkButtonForAssistantMessageId(seedAssistantMessageId);
+    const forkButton = await waitForForkButtonForAssistantMessageId(
+      seedAssistantMessageId,
+    );
     expect(forkButton.exists).toBe(true);
     expect(forkButton.disabled || forkButton.ariaDisabled).toBe(false);
 
@@ -194,7 +205,9 @@ describe("会话区 Fork E2E", () => {
       30000,
     );
 
-    expect(forkedSnapshot.sessionId || forkedSnapshot.taskId).not.toBe(sourceSessionId);
+    expect(forkedSnapshot.sessionId || forkedSnapshot.taskId).not.toBe(
+      sourceSessionId,
+    );
     expect(forkedSnapshot.queueCount).toBe(0);
     expect(await getQueueItems()).toHaveLength(0);
     expect(forkedSnapshot.targetObjective).toContain(goalMarker);
@@ -284,7 +297,9 @@ describe("会话区 Fork E2E", () => {
     expect(getSnapshotSessionId(forkedSnapshot)).not.toBe(sourceSessionId);
     await waitForUserMessageContaining(editedPrompt);
     await assertVisibleUserMessagesNotContaining(originalMarker);
-    expect((await getMessages()).map((message) => message.text).join("\n")).toContain(editedMarker);
+    expect(
+      (await getMessages()).map((message) => message.text).join("\n"),
+    ).toContain(editedMarker);
   });
 });
 
@@ -295,7 +310,9 @@ function getSnapshotSessionId(snapshot: ChatSnapshot): string | null {
 }
 
 function isRuntimeCompleted(snapshot: ChatSnapshot): boolean {
-  return snapshot.runtimeStatus === "completed" && snapshot.activeInputId === null;
+  return (
+    snapshot.runtimeStatus === "completed" && snapshot.activeInputId === null
+  );
 }
 
 async function setSessionTargetForE2E(
@@ -332,10 +349,9 @@ async function setSessionTargetForE2E(
         time_updated = excluded.time_updated
       `,
     ).run(sessionId, targetId, objective, status, now, now);
-    db.prepare("update session set time_updated = max(time_updated, ?) where id = ?").run(
-      now,
-      sessionId,
-    );
+    db.prepare(
+      "update session set time_updated = max(time_updated, ?) where id = ?",
+    ).run(now, sessionId);
   } finally {
     db.close();
   }
@@ -374,8 +390,9 @@ async function upsertRendererSessionTargetForE2E(
         };
       };
 
-      const storeApi = (window as Window & { __zcodeSessionStoreE2E?: RendererStore })
-        .__zcodeSessionStoreE2E;
+      const storeApi = (
+        window as Window & { __zcodeSessionStoreE2E?: RendererStore }
+      ).__zcodeSessionStoreE2E;
       const state = storeApi?.getState?.();
       if (!state?.upsertOptimisticTaskListItem) {
         return { ok: false, reason: "store-api-missing" };
@@ -384,7 +401,9 @@ async function upsertRendererSessionTargetForE2E(
       const workspaceEntry = Object.entries(state.workspaces ?? {}).find(
         ([, workspace]) =>
           Boolean(workspace.optimisticTaskListByTaskId?.[taskIdArg]) ||
-          Boolean(workspace.taskListCache?.some((task) => task.taskId === taskIdArg)),
+          Boolean(
+            workspace.taskListCache?.some((task) => task.taskId === taskIdArg),
+          ),
       );
       if (!workspaceEntry) {
         return { ok: false, reason: "task-workspace-not-found" };
@@ -483,8 +502,9 @@ async function injectRendererQueuedPromptForE2E(
         };
       };
 
-      const storeApi = (window as Window & { __zcodeSessionStoreE2E?: RendererStore })
-        .__zcodeSessionStoreE2E;
+      const storeApi = (
+        window as Window & { __zcodeSessionStoreE2E?: RendererStore }
+      ).__zcodeSessionStoreE2E;
       const state = storeApi?.getState?.();
       if (!state?.enqueueTaskQueuedPrompt || !state.setTaskStopRequested) {
         return { ok: false, reason: "store-api-missing" };
@@ -494,7 +514,9 @@ async function injectRendererQueuedPromptForE2E(
         ([, workspace]) =>
           workspace.activeTaskId === taskIdArg ||
           Boolean(workspace.optimisticTaskListByTaskId?.[taskIdArg]) ||
-          Boolean(workspace.taskListCache?.some((task) => task.taskId === taskIdArg)),
+          Boolean(
+            workspace.taskListCache?.some((task) => task.taskId === taskIdArg),
+          ),
       );
       if (!workspaceEntry) {
         return { ok: false, reason: "task-workspace-not-found" };
@@ -522,7 +544,12 @@ async function injectRendererQueuedPromptForE2E(
         },
         workspaceIdentity,
       );
-      state.setTaskStopRequested(workspacePath, taskIdArg, false, workspaceIdentity);
+      state.setTaskStopRequested(
+        workspacePath,
+        taskIdArg,
+        false,
+        workspaceIdentity,
+      );
 
       return {
         ok: true,
@@ -536,19 +563,26 @@ async function injectRendererQueuedPromptForE2E(
   )) as RendererQueueInjectionResult;
 
   if (!result.ok || !result.promptId) {
-    throw new Error(`fork goal queue 注入失败: ${JSON.stringify(result)}`);
+    throw new Error(
+      `fork goal queue 注入失败: ${JSON.stringify(result)}`,
+    );
   }
   return result as RendererQueueInjectionResult & { promptId: string };
 }
 
-function readSessionTargetForE2E(sessionId: string): { objective: string; status: string } | null {
+function readSessionTargetForE2E(
+  sessionId: string,
+): { objective: string; status: string } | null {
   const dbPath = join(homedir(), ".zcode", "cli", "db", "db.sqlite");
   const db = new DatabaseSync(dbPath);
   try {
     return (
       (db
-        .prepare("select objective, status from session_target where session_id = ?")
-        .get(sessionId) as { objective: string; status: string } | undefined) ?? null
+        .prepare(
+          "select objective, status from session_target where session_id = ?",
+        )
+        .get(sessionId) as { objective: string; status: string } | undefined) ??
+      null
     );
   } finally {
     db.close();
@@ -611,7 +645,9 @@ async function waitForVisibleUserMessagesNotContaining(text: string) {
     },
     {
       timeout: 30000,
-      timeoutMsg: `可见 user 消息仍包含 ${text}; latest=${JSON.stringify(latestMessages)}`,
+      timeoutMsg: `可见 user 消息仍包含 ${text}; latest=${JSON.stringify(
+        latestMessages,
+      )}`,
     },
   );
 }
@@ -648,7 +684,9 @@ async function waitForForkButtonForAssistantMessageId(messageId: string) {
   const button = await getForkButtonForAssistantMessageId(messageId);
   if (!button.exists || button.disabled || button.ariaDisabled) {
     throw new Error(
-      `assistant fork 按钮在等待后仍不可用: ${messageId}; latest=${JSON.stringify(button)}`,
+      `assistant fork 按钮在等待后仍不可用: ${messageId}; latest=${JSON.stringify(
+        button,
+      )}`,
     );
   }
   return button;
@@ -663,13 +701,20 @@ function getForkButtonForAssistantMessageId(messageId: string): Promise<{
   return browser.execute(
     (forkButtonPrefix, targetMessageId) => {
       const button = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(`[data-testid^="${forkButtonPrefix}-"]`),
-      ).find((candidate) => candidate.getAttribute("data-message-id") === targetMessageId);
+        document.querySelectorAll<HTMLButtonElement>(
+          `[data-testid^="${forkButtonPrefix}-"]`,
+        ),
+      ).find(
+        (candidate) =>
+          candidate.getAttribute("data-message-id") === targetMessageId,
+      );
       return {
         ariaDisabled: button?.getAttribute("aria-disabled") === "true",
         disabled: button?.disabled ?? false,
         exists: Boolean(button),
-        testId: button?.getAttribute("data-testid") ?? `${forkButtonPrefix}-${targetMessageId}`,
+        testId:
+          button?.getAttribute("data-testid") ??
+          `${forkButtonPrefix}-${targetMessageId}`,
       };
     },
     TID_CHAT_MESSAGE_FORK_BUTTON,

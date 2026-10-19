@@ -179,6 +179,28 @@ publisher(parent) -> parent timeline/index/legacy delivery
 
 ## 冷恢复、列表隔离与用户输入准入（3.12.2）
 
+### 远端子会话的项目目录解析
+
+子会话不进入主任务索引，不能用 childSessionId 查询主任务项目归属来决定能否订阅。
+Host 使用同一 Agent 的只读 `session/list(sessionIds)` 查询持久化类型与父子关系；
+仅确认 `subagent_child` 后沿父链找到主任务，再由现有项目服务校验项目、Host 和目录。
+子会话未单独保存 workspace identity 时，CLI 精确 ID 查询只在 child cwd 相同且持久化父链证明
+属于请求 workspace 后返回；显式的不同身份仍拒绝。普通列表继续排除 child，查询不回写身份或激活 runtime。
+每个会话必须与当前 attachment 的 workspace identity 和 cwd 相符；父关系缺失、成环或跨工作区时拒绝。
+普通远端主任务仍必须有项目，不按 ID 前缀或旧索引行识别子会话，不补建子会话 task 行，也不扩大目录范围。
+
+```text
+桌面 continuous / 手机 replayable → 同一 Host → Agent 持久化会话类型
+  ├─ 主任务 → 原项目目录校验
+  └─ 子会话 → 校验持久化父链身份 → 所属主任务项目目录校验
+```
+
+父子关系只由 CLI 会话存储持有，项目归属只由 Host 项目库持有；查询不新增缓存、队列或 runtime，
+冷恢复与运行中订阅使用同一路径。回归覆盖远端运行中/已完成 child、重订阅、两种 clientMode、
+旧 child 索引、无项目主任务，以及父链缺失、成环和跨 workspace 的拒绝。
+
+### 冷恢复类型与主列表隔离
+
 根因：3.12.1 回收 detached child publisher 后，打开详情进入冷恢复；bootstrap 创建
 record 时遗漏持久化 taskType，默认 interactive，sessions-index 将 child 当主任务广播。
 

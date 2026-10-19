@@ -149,7 +149,6 @@ export const zcodeSessionInfoSchema = z
     target: zcodeSessionGoalSchema.nullable().optional(),
     createdAt: timestampMsSchema,
     updatedAt: timestampMsSchema,
-    archivedAt: timestampMsSchema.optional(),
   })
   .strict();
 export type ZCodeSessionInfo = z.infer<typeof zcodeSessionInfoSchema>;

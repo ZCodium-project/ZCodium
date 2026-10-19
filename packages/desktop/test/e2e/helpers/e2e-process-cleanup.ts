@@ -11,6 +11,7 @@ export interface E2EProcessInfo {
 }
 
 export interface E2EProcessCleanupIdentity {
+  chromiumProfileRootDir?: string;
   currentPid?: number;
   homeDir: string;
   /**
@@ -185,6 +186,13 @@ export function isCurrentE2EProcessCleanupRoot(
 
   const runId = identity.runId?.trim();
   if (runId && isCommandMarkerPresent(command, buildE2ERunIdArg(runId))) {
+    return true;
+  }
+
+  // Bug 原因：main 改名后丢失启动参数，Chromium 子进程只保留 run cache 下的
+  // profile，不包含 HOME；用当前 run 独占的 profile 路径找回父链，避免漏清 main。
+  const chromiumProfileRootDir = identity.chromiumProfileRootDir?.trim();
+  if (chromiumProfileRootDir && isCommandPathPresent(command, chromiumProfileRootDir)) {
     return true;
   }
 

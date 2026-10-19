@@ -12,7 +12,7 @@
 
 ## 覆盖范围
 
-- 桌面端：`packages/desktop/src/main/webRemoteControlTransport.ts`
+- 桌面端：`packages/desktop/src/main/web-remote-relay/webRemoteControlTransport.ts`
 
 ## 日志内容
 

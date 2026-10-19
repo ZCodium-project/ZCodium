@@ -191,11 +191,14 @@ describe("plugins protocol contracts", () => {
     try {
       await writeTestFile(
         join(root, ".zcode", "config.json"),
-        JSON.stringify({ plugins: { dirs: [pluginRoot] } }),
+        JSON.stringify({ plugins: { dirs: [pluginRoot], enabledPlugins: { "workspace-demo@inline": false } } }),
       );
       await writeTestFile(
         join(pluginRoot, ".claude-plugin", "plugin.json"),
-        JSON.stringify({ name: "workspace-demo" }),
+        JSON.stringify({
+          name: "workspace-demo", mcpServers: { panel: { command: "node", args: ["panel.mjs"] } },
+          ui: { surfaces: [{ id: "panel", title: "Panel", server: "panel", resourceUri: "ui://demo/panel", availability: "session" }] },
+        }),
       );
 
       const result = await listPlugins({} as ZCodeProtocolAgentServerContext, {
@@ -205,7 +208,10 @@ describe("plugins protocol contracts", () => {
       expect(result.plugins.find((plugin) => plugin.id === "workspace-demo@inline")).toMatchObject({
         rootPath: pluginRoot,
         rootSource: "workspace",
+        enabled: false,
+        uiSurfaces: [{ pluginId: "workspace-demo@inline", pluginName: "workspace-demo", id: "panel", title: "Panel", server: "plugin:workspace-demo:panel", resourceUri: "ui://demo/panel", availability: "session" }],
       });
+      expect(() => zcodePluginsListResultSchema.parse(result)).not.toThrow();
     } finally {
       await rm(root, { force: true, recursive: true });
     }

@@ -8,16 +8,6 @@ import {
 import { resolveServerLayout, stablePathId } from "../src/runtime/paths.js";
 
 describe("user service descriptors", () => {
-  it.each([
-    ["darwin", "launchd"],
-    ["linux", "systemd"],
-    ["win32", "task-scheduler"],
-  ] as const)("creates a stable %s descriptor", (platform, kind) => {
-    const descriptor = createServiceDescriptor({ platform, command: "/opt/zcode/bin/zcode" });
-    expect(descriptor.kind).toBe(kind);
-    expect(descriptor.content).toContain("zcode");
-  });
-
   it.each(["darwin", "linux", "win32"] as const)(
     "pins the %s daemon descriptor to the data-root stable launcher and explicit server root",
     (platform) => {

@@ -130,3 +130,95 @@ PLM-LC-018/019/020：`plugins/manual-review/pending/plugin-localization-creator.
 `plugin-picker-order.test.mjs` 的 `PLUGIN-CREATOR-ICON` 用例覆盖 catalog 无远端 icon 时打开候选并插入标签，
 1200/390、中英、深浅主题；Session 消息及个人市场同名隔离由 `pluginCreatorMentionIcon.test.ts` 覆盖。
 状态为 manual-review，不自动转正；不向真实模型发送测试消息。
+
+## 插件市场交互与分类（2026-10-12）
+
+- 2026-10-15 应用插件组内展开回归：`plugin-store-mode-order.test.mjs` 的 `PLM-UI-GROUP` 覆盖公开/社区/个人、默认展示 8 张、原位 8→6→8、其他分类保留、搜索清空和来源往返保留手动选择、键盘操作及宽窄视口的中英/深浅主题。此项为真实浏览器组件交互验证，不代表真实手机远控或 Electron 安装生命周期验证；继续保留 manual-review/pending。
+
+- PLM-LC-001/002：`plugin-management-discovery-presentation.test.ts` 在 macOS Electron 通过，run `desktop-e2e-20261011-170738-518`。覆盖分段搜索、展开/折叠、卡片详情、市场内管理往返与宽窄视口展示。
+- PLM-UI-001：`plugin-management-ui-market.test.ts` 在 macOS Electron 中通过，run `desktop-e2e-20261011-170634-701`。覆盖真实安装、已有会话打开 MCP 资源、沙箱握手、关闭不卸载、Side Pane 市场内管理、项目暂停与全局/另一项目隔离、启用后打开、恢复继承和取消/确认卸载。Fixture 静态校验通过；保留 manual-review/pending，不自动晋级。
+- 默认推荐浏览器用例：两组已通过，包含未收录开发插件排除、鼠标与键盘打开、标签去重、宽窄视口和双语言主题。
+- 原 PLM-STRIP-CLIP 的图标条已删除；对应浏览器测试现覆盖卡片行内更新、焦点可达、管理入口及无横向溢出，8 组通过；另有 UI 详情图片放大、Escape 关闭与焦点返回 2 组通过。原先的历史验证仅代表当时界面。
+- 分类与模式排序浏览器回归 18/18 通过：当前分段搜索、默认展开、office 模式、缺包投影及官方文档顺序；保留失败刷新断言。
+- 暂未完成真实手机远控、Windows/Linux Electron 验证；窄视口结果不代替这些验证。
+- 静态验证：根目录与 CLI 各包 typecheck、root lint、architecture --changed 通过。Root lint 保留既有 warning，架构 0 违规。插件相关 UI 单测 224/224、额外 UI 打开和标签/启动凭据等定向集合通过；CLI bootstrap 生命周期与协议 64/64、目录解析 4/4 通过。
+- 截图位于 `packages/desktop/.e2e-artifacts/plugin-management/plm-ui-001/`：`real-ui-sandbox.png`、`side-pane-market.png`、`project-override.png`。沙箱图片使用确定性测试页面，不代表默认推荐插件。
+- 插件目录仓库：239 项测试中 219 通过、20 跳过；27 个插件通过校验与发布构建，目录迁移前后所有 ZIP 的路径、字节数和 sha256 相同。尚未发布远端目录。
+
+### Review 修复回归（2026-10-12）
+
+- 全局与 scoped 插件投影、远程同步、Source 用户配置、查询合并、错误保留和旧查询失效：`pluginManagementProjectionSync.test.ts` 8/8；包含真实 `useCuaComposerEntry` hook 随市场暂停而隐藏的接线断言。相关 store、错误归属、远程同步、导航和详情组件合计 67/67，启动凭据夹具 5/5。
+- 浏览器卡片/详情 12/12：新增已安装 UI 的独立详情按钮，暂停态查看详情不触发打开或启用；覆盖键盘与 390 中文暗色 / 1200 英文亮色组合。
+- PLM-UI-001：run `desktop-e2e-20261012-050628-695` 通过；真实安装的已启用/暂停 UI 都可独立进入详情，不写启用状态，不新增 UI tab。
+- PLM-LC-001/002：run `desktop-e2e-20261012-050703-560` 通过，补充主导航返回聊天且不落入旧设置管理页。
+- WPL-015：run `desktop-e2e-20261012-051242-142` 通过，市场安装后回聊天，再进入 User / Workspace 管理；保存、覆盖、清除字段、暂停及恢复继承均保留原断言。旧脚本的启动就绪、面包屑和菜单恢复入口已同步为当前交互。
+- PLM-LC-018：run `desktop-e2e-20261012-051408-560` 通过；离开市场回聊天、从侧栏重进仍命中刷新节流，官方目录更新时间保持不变。
+- 根 typecheck、lint、architecture 检查通过。真实手机远控、跨版本混装、Windows/Linux Electron 和公网刷新 smoke 未执行；Source/远程同步目前是 store/service mock 回归，不冒充远程端到端验证。所有用例继续 pending，未晋级。
+
+### 第二轮 Review 故障注入
+
+- 插件测试集 241/241 通过。新增次要投影永不返回/拒绝、远程必要能力不被投影阻塞、项目 A 不刷新项目 B 或远程 surface；安装与恢复的诊断错误不失效草稿或刷新技能，成功时仍收尾。
+- PLM-UI-001 run `desktop-e2e-20261012-053949-887` 通过：同时移除原始与 managed 源包，真实安装错误可见且未生成安装记录；恢复源包后重试成功，后续完整 UI 沙箱、项目覆盖、继承和卸载回归通过。
+- PLM-UI-001 run `desktop-e2e-20261012-090553-480`、`desktop-e2e-20261012-092305-636`（启动页文案对齐原型后）通过；用例全程录屏为 `plm-ui-001.webm`，并输出步骤时间点 `plm-ui-001.chapters.json`：市场头部与 Side Pane 启动页对齐原型后回归；按 PRD 章节输出 01–15 编号截图（`.e2e-artifacts/plugin-management/plm-ui-001/`），截图前等待有限时长动画结束。回放模型无 high 思考档，运行时设 `E2E_PROVIDER_THOUGHT_LEVEL=` 并显式指定 case fixture。
+- root typecheck、lint（0 errors / 222 warnings）、architecture（0 违规）及 E2E typecheck 通过。平台与混装验证限制不变。
+
+### 打开 UI 收敛到会话右侧市场（2026-10-12）
+
+- 规则：主导航市场的卡片与管理页行整行进入详情，没有「打开」「详情」按钮，详情主按钮为「立即试用」；会话右侧市场的卡片、详情、管理页行多一个「打开」（暂停态「启用」，先启用再打开）。
+- 浏览器卡片/详情 14/14：新增 `PLM-UI-MAIN-NAV`（主导航无打开、整行进详情、详情为立即试用）；`PLM-UI-DETAILS` 改为键盘回车整卡进详情。
+- PLM-UI-001 run `desktop-e2e-20261012-104955-651`、`desktop-e2e-20261012-105655-477`、`desktop-e2e-20261012-105824-912` 通过；步骤截图 06–16 改为主导航无打开 → 右侧市场打开 → 右侧管理页打开 → 项目暂停后右侧「启用」并打开 → 管理页整行进详情恢复继承。用例在主导航断言前关闭右侧市场标签：会话视图后台保持挂载，两份市场并存会让按 testid 取到隐藏的那份。
+- 已知偶发：`desktop-e2e-20261012-105221-558` 在主导航第二次进入管理页时等待 `plugin-store-manage` 超时，随后 3 次连跑未复现，原因未定位。
+
+### 服务端 UI 推荐（2026-10-13）
+
+- `side-pane-plugin-menu.test.mjs` 不再替换静态名单模块，改为请求配置响应并通过真实公开配置解析器。
+- 1200px / 英文 / Zai Light 和 390px / 中文 / Zai Dark 两组通过：推荐交集、重复项去重、未收录开发插件与未知面板排除、启动页/菜单、键盘打开，以及空配置/请求失败回归。
+- 可选 `ZCODE_UI_RECOMMENDATIONS_LIVE_CONFIG_URL` 接入真实测试环境配置；本次接口返回 5 条推荐并完成展示和打开参数断言。工作区面板仍由 fixture 提供，不代表真实安装或沙箱运行验收。
+- 真实 Host 配置服务连接测试接口：并行读取仅发一次请求，后续读取命中缓存，5 条插件/面板身份与已校验发布包一致。
+- Nacos 测试配置保留原有 16 项，只追加 `uiPluginRecommendations`；使用原 MD5 发布、精确回读，并核对公共接口返回。生产配置未修改。
+- 未重跑各插件的真实安装与沙箱运行，也未做 Windows/Linux 或真实手机远控实机验证。用例保留 pending，不晋级。
+
+### 推荐区安装与启用（2026-10-13）
+
+- 推荐曝光改用完整目录，未安装与禁用条目仍显示；配置顺序和完整身份去重保持稳定。
+- `useRecommendedUiPlugins` 回归覆盖用户级安装、项目级启用、重复点击、失败重试、服务切换与会话切走再切回后的迟到结果隔离；复用现有插件管理 store。
+- `side-pane-plugin-menu.test.mjs` 增加启动页和加号菜单的“安装 → 启用 → 再次点击打开”流程，成功后断言没有自动打开；同时断言实际服务请求的 user/workspace scope。安装与启用时菜单保持打开。
+- 浏览器夹具模拟安装服务与面板目录；真实 staging 只用于验证推荐配置响应。此轮不重复真实插件安装、沙箱、Windows/Linux 或手机设备验收。
+
+### 推荐加载态（2026-10-13）
+
+- 受控浏览器请求复现：配置尚未返回时旧实现已经显示“No recommended UI plugins yet”。
+- 现在配置与完整目录任一仍在加载时显示骨架。浏览器用请求闸门分别释放配置和目录，断言中途不出现空态；另覆盖加号菜单从加载到空配置，以及失败结束加载。宽窄视口与双主题沿用同一组用例。
+
+### 生命周期埋点（2026-10-15）
+
+| Case        | 场景                   | 用例                                                               | 验证                    | 状态               |
+| ----------- | ---------------------- | ------------------------------------------------------------------ | ----------------------- | ------------------ |
+| PLM-TEL-001 | 插件安装最终结果与隐私 | `plugins/manual-review/pending/plugin-lifecycle-telemetry.test.ts` | macOS Electron 回放通过 | pending，未加入 CI |
+
+验证批次 `desktop-e2e-20261015031949530-p54859-5f1860f2585df3f1`：真实商店详情安装成功，最终 HTTP 出口仅一条 install 结果，含 event_id 和 duration_ms，无 operation_id 和路径。手机白名单、远端同步结果与 MCP 归属由定向单测验证；Windows/Linux 和真实远端安装未运行。
+
+### 后台初始化与执行（2026-10-15）
+
+| Case                        | 场景                                                                                                                                | 入口                                                                                 | 边界                                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| PLM-UI-BACKGROUND           | 无锚点/隐藏 tab 冷启动、最小化后首次创建与执行、session 空闲时仍执行且不销毁、删除释放                                              | `mcp-apps-host-e2e.mjs --background-only`                                            | 真实 Electron、生产 owner/Agent/沙箱；受控页面，未晋升 CI                                        |
+| PLM-UI-BACKGROUND-ADMISSION | 无卡片挂载和 conversation 订阅的真实工具结果首次创建、后台运行、返回复用；双窗口不同会话的同插件实例保留与释放                      | `mcp-apps-host-e2e.mjs --background-only`                                            | macOS Electron 通过；同窗口并发准入和不同会话键隔离另以单测覆盖，未晋升 CI                       |
+| PLM-UI-VISIBILITY           | 保活侧栏收起、切标签、离开聊天/工作区时不可见且不拦点击；后台工作、编辑状态及实例保留，恢复交互                                     | `mcp-apps-host-e2e.mjs --managed-only`                                               | macOS Electron 深浅主题通过；生产组件集成，宿主页面投影另以桌面/手机壳 UT 覆盖，未晋升 CI        |
+| PLM-UI-BACKGROUND-CRAFT     | 最小化窗口且无卡片时，真实工具结果触发 WASM 首次初始化；后台图层操作、编辑状态保留与恢复展示截图；切主页面后隐藏 UI、后台编辑并返回 | `mcp-apps-host-e2e.mjs --photocraft-background-only`，设置 `ZCODE_PHOTOCRAFT_SERVER` | macOS Electron 通过；未修改的 PhotoCraft 0.2.2，恢复截图包含后台新增图层，不替代商店安装路径验证 |
+
+Web/remote 不支持回退、runtime 失效、内联滚动与页面保留沿用 `--managed-only`。
+Windows/Linux、真实手机和其它第三方插件需独立验证。
+
+`PLM-UI-CONNECTION-READY`：`--managed-only` 控制真实 MCP initialize 完成顺序，验证生产
+React 面板等待连接后自动运行、无错误闪现和重复实例。2026-10-16 macOS Electron 专项通过；未晋升 CI。
+独立 worktree 使用标准命令整组回归，`managed` 27 项、`managed-empty` 1 项、`interaction` 1 项全部通过，
+证据批次 `zcode-mcp-host-e2e-f1vN0y`。此前整组运行出现过 guest 崩溃重建超时和锚点切换后
+点击断言失败，独立复跑均通过；保留原失败证据，不据此认定稳定性问题已解决。
+
+## PLM-CONCURRENT-INSTALL：并发安装忙碌态
+
+- 浏览器候选：`packages/ui/test/browser/manual-review/pending/plugin-concurrent-install.test.mjs`。真实 store 和安装按钮，390/1200px × 中英文 × 深浅主题共 8 组通过；旧实现 8 组均在第二次安装清掉第一次忙碌态处失败。日志和截图写入系统临时目录的 `zcode-plugin-concurrent-install/`。
+- 桌面候选：`plugins/manual-review/pending/plugin-concurrent-install.test.ts`。macOS Electron + 真实 CLI，个人来源本地 HTTP 下载响应门验证两项同时安装中、第一项失败不清理第二项、两项失败后均可重试；运行 `desktop-e2e-20261015143344848-p62610-27dafbf8f737df99` 通过。截图位于 `.e2e-artifacts/plugin-management/plm-concurrent-install/both-pending.png`。
+- 离线执行：`ZCODE_E2E_MANUAL_REVIEW=1 E2E_PROVIDER_HTTP_MODE=replay E2E_PROVIDER_REPLAY_FIXTURE_PATH=packages/desktop/test/e2e/fixtures/upstream/common.json pnpm --filter @zcode/desktop test:e2e -- --spec './test/e2e/plugins/manual-review/pending/plugin-concurrent-install.test.ts'`。
+- store 回归覆盖成功乱序、失败、同名操作及上下文切换隔离、来源校验与安装交叠。浏览器成功路径使用受控服务，不等于真实下载成功验证。手机真机/远控、Windows/Linux 未执行；用例 pending，未人工晋升及 CI 准入。

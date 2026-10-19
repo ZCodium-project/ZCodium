@@ -316,7 +316,7 @@ React 错误边界拦截子树渲染异常并阻止其冒泡到 `window.onerror`
 输入阶段字段（`queuePromptTelemetry` 注入到 `message_completion`）：`input_start_time` / `input_first_char_time` / `input_send_time`。
 `agent_step_cnt`、`tool_call_total`、`tool_call_failed` 与逐条 `agent_step` 使用同一个
 active prompt 生命周期；同 session 的历史 assistant 消息不参与本轮 completion 计数。
-Skill tool step 另外可携带 `skill_qualified_name`、`skill_plugin_id`、`skill_source`；仅在
+Skill tool step 始终携带 `skill_name`（仅取通过遥测校验的已解析名称，否则为 `unknown`，不读取请求参数），另外可携带 `skill_qualified_name`、`skill_plugin_id`、`skill_source`；仅在
 `tool_name=Skill` 且 runtime 成功解析 metadata 时写入，不包含 Skill 正文或 description。
 前台 handler 与后台 runtime monitor 都必须先把收到的 step/terminal 事件送入该生命周期，
 再上报 `message_completion`；切换 task 不能让同一轮的后台计数归零或漏报逐条 `agent_step`。

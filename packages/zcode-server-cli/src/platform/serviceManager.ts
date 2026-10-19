@@ -1,3 +1,4 @@
+import { access } from "node:fs/promises";
 import { join } from "node:path";
 import { stablePathId, type ServerLayout } from "../runtime/paths.js";
 
@@ -11,7 +12,11 @@ export interface ServiceDescriptor {
 
 export interface ServiceCommandExecutor {
   run(command: string, args: readonly string[]): Promise<void>;
-  runResult?: (command: string, args: readonly string[]) => Promise<ServiceCommandResult>;
+  runResult?: (
+    command: string,
+    args: readonly string[],
+    options?: { timeoutMs?: number },
+  ) => Promise<ServiceCommandResult>;
 }
 
 export interface ServiceCommandResult {
@@ -80,10 +85,16 @@ export function createServiceDescriptor(options: {
 async function defaultExecutorResult(
   command: string,
   args: readonly string[],
+  options?: { timeoutMs?: number },
 ): Promise<ServiceCommandResult> {
   const { spawn } = await import("node:child_process");
+  const env = await resolveServiceManagerEnvironment(command);
   return await new Promise<ServiceCommandResult>((resolve, reject) => {
-    const child = spawn(command, [...args], { stdio: ["ignore", "ignore", "pipe"] });
+    const child = spawn(command, [...args], {
+      stdio: ["ignore", "ignore", "pipe"],
+      ...(env ? { env } : {}),
+      ...(options?.timeoutMs ? { timeout: options.timeoutMs, killSignal: "SIGKILL" as const } : {}),
+    });
     let stderr = "";
     child.stderr?.on("data", (chunk) => {
       stderr += String(chunk);
@@ -108,6 +119,66 @@ const defaultServiceCommandExecutor: ServiceCommandExecutor = {
   run: defaultExecutor,
   runResult: defaultExecutorResult,
 };
+
+async function resolveServiceManagerEnvironment(
+  command: string,
+): Promise<NodeJS.ProcessEnv | undefined> {
+  if (command !== "systemctl" || typeof process.getuid !== "function") return undefined;
+  const runtimeDir = process.env.XDG_RUNTIME_DIR?.trim() || `/run/user/${process.getuid()}`;
+  const busPath = join(runtimeDir, "bus");
+  if (
+    !(await access(busPath).then(
+      () => true,
+      () => false,
+    ))
+  )
+    return undefined;
+  const dbusAddress = process.env.DBUS_SESSION_BUS_ADDRESS?.trim() || `unix:path=${busPath}`;
+  if (
+    process.env.XDG_RUNTIME_DIR === runtimeDir &&
+    process.env.DBUS_SESSION_BUS_ADDRESS === dbusAddress
+  ) {
+    return undefined;
+  }
+  return {
+    ...process.env,
+    XDG_RUNTIME_DIR: runtimeDir,
+    DBUS_SESSION_BUS_ADDRESS: dbusAddress,
+  };
+}
+
+export async function isServiceManagerAvailable(
+  platform: ServicePlatform,
+  executor: ServiceCommandExecutor = defaultServiceCommandExecutor,
+): Promise<boolean> {
+  if (!executor.runResult) return true;
+  try {
+    // Bug 原因：非交互 SSH 可能继承一个已失效的 D-Bus 地址，systemctl/launchctl 探测会
+    // 占满连接预算。能力探测必须有界；真实 register/start 仍保留完整错误，不套该短超时。
+    if (platform === "linux") {
+      return (
+        (
+          await executor.runResult("systemctl", ["--user", "show-environment"], {
+            timeoutMs: 2_000,
+          })
+        ).exitCode === 0
+      );
+    }
+    if (platform === "darwin") {
+      if (typeof process.getuid !== "function") return false;
+      return (
+        (
+          await executor.runResult("launchctl", ["print", `user/${process.getuid()}`], {
+            timeoutMs: 2_000,
+          })
+        ).exitCode === 0
+      );
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function registerService(
   descriptor: ServiceDescriptor,

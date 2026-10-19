@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { VSBuffer, type ConnectionFlowControl } from "@zcode/rpc";
+import { VSBuffer } from "@zcode/rpc";
 import {
   WEB_REMOTE_CONTROL_RPC_TRANSPORT_LIMITS,
   encodeWebRemoteControlRpcTransportMessage,
@@ -323,21 +323,6 @@ describe("createWebRemoteControlRelayProtocol", () => {
 describe("createAcknowledgedWebRemoteControlRelayProtocol", () => {
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  it("keeps the deprecated legacy factory separate from the production acknowledged adapter", () => {
-    const adapter = createAcknowledgedWebRemoteControlRelayProtocol({
-      ...acknowledgedIdentity,
-      sendFrame: () => true,
-    });
-    const flow: ConnectionFlowControl = adapter;
-
-    expect(adapter.protocol).toBeDefined();
-    expect(flow.unacknowledgedBytes).toBe(0);
-    expect(flow.onSaturated).toBeTypeOf("function");
-    expect(flow.onDrained).toBeTypeOf("function");
-    expect(createWebRemoteControlRelayProtocol).toBeTypeOf("function");
-    adapter.dispose();
   });
 
   it("splits oversized raw messages and only delivers/ACKs after the final fragment", () => {

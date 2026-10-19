@@ -5,8 +5,9 @@ import {
   TID_SIDE_PANE_TOGGLE,
   TID_WORKSPACE_HEADER,
   TID_WORKSPACE_TITLE,
-} from "@zcode/shared";
-import { clearAppData, waitForDefaultWorkspaceReady } from "../helpers/desktop-app.js";
+} from "@zcode/shared/test-ids";
+import { clearAppData } from "../helpers/desktop-app.js";
+import { prepareV4ConversationE2E } from "../helpers/v4-conversation.js";
 
 const TAB_SELECTOR = "[data-side-pane-tab-id]";
 const VIEWPORT_SELECTOR = "[data-side-pane-tabs-viewport]";
@@ -16,7 +17,7 @@ const TOOLTIP_SELECTOR = '[data-slot="tooltip-content"]';
 const DRAFT_SUGGESTED_PROMPTS_SLOT_SELECTOR = '[data-v4-draft-suggested-prompts-slot="true"]';
 
 function expectedWorkspacePanelRadiusPx(): number {
-  if (process.platform === "win32") return 5;
+  if (process.platform === "win32") return 6;
   // Darwin 25 起对应 Tahoe，Sequoia 及旧系统的工作区使用更小的内层圆角。
   if (process.platform === "darwin") return Number.parseInt(release(), 10) >= 25 ? 12 : 6;
   return 12;
@@ -31,7 +32,7 @@ interface TabStripMetrics {
 
 describe("Side Pane Tab responsive interactions", () => {
   before(async () => {
-    await waitForDefaultWorkspaceReady();
+    await prepareV4ConversationE2E({ skipProvider: true });
   });
 
   after(async () => {
@@ -126,10 +127,38 @@ describe("Side Pane Tab responsive interactions", () => {
     if (process.platform === "win32" || process.platform === "linux") {
       expect(
         await browser.execute(() => {
-          const logo = document.querySelector('img[alt="ZCode"]')!;
-          return logo.closest("button")!.getBoundingClientRect().left;
+          const logo = document.querySelector('[data-testid="desktop-top-logo-sidebar-toggle"]')!;
+          return logo.getBoundingClientRect().left;
         }),
       ).toBe(13);
+      const logoButton = await $('[data-testid="desktop-top-logo-sidebar-toggle"]');
+      expect(await logoButton.getSize("width")).toBe(28);
+      expect(await logoButton.$("[data-desktop-logo-badge]").getSize("width")).toBe(20);
+      expect(await logoButton.$("[data-desktop-logo-badge] svg").getSize("width")).toBe(13);
+      expect(await logoButton.$("animate").isExisting()).toBe(false);
+      await logoButton.moveTo();
+      await browser.waitUntil(
+        async () =>
+          await logoButton
+            .$("[data-desktop-logo-visual]")
+            .getCSSProperty("opacity")
+            .then((value) => Number(value.value) === 0),
+      );
+      await logoButton.click();
+      await logoButton.$("svg.lucide-panel-left-open").waitForExist();
+      await browser.waitUntil(async () =>
+        browser.execute(
+          (inset) =>
+            Math.abs(
+              document
+                .querySelector('[data-workspace-conversation-frame="true"]')!
+                .getBoundingClientRect().left - inset,
+            ) < 1,
+          process.platform === "win32" ? 6 : 4,
+        ),
+      );
+      await logoButton.click();
+      await logoButton.$("svg.lucide-panel-left-close").waitForExist();
     }
     if (process.platform === "win32" || process.platform === "linux") {
       expect(
@@ -168,7 +197,12 @@ describe("Side Pane Tab responsive interactions", () => {
           top: frame.getBoundingClientRect().top - content.getBoundingClientRect().top,
         };
       });
-      expect(inset).toEqual({ right: "4px", bottom: "4px", top: 4 });
+      const outerInset = process.platform === "win32" ? 6 : 4;
+      expect(inset).toEqual({
+        right: `${outerInset}px`,
+        bottom: `${outerInset}px`,
+        top: outerInset,
+      });
       expect(
         await browser.execute(() => {
           const sidebar = document.querySelector<HTMLElement>(
@@ -184,7 +218,7 @@ describe("Side Pane Tab responsive interactions", () => {
 
       await movePointerAwayFromResizeHandles();
       expect(await readResizeHandleStyle('[data-testid="resizable-handle"]')).toEqual({
-        hasExtendedTertiaryLine: true,
+        hasExtendedIndicatorLine: true,
         indicatorOpacity: "0",
         handleHeight: "full",
         handleWidth: 4,
@@ -228,13 +262,23 @@ describe("Side Pane Tab responsive interactions", () => {
     await sidePaneClose.waitForClickable({ timeout: 5000 });
     expect(panels?.headerInsideConversation).toBe(true);
     const expectedPanelRadiusPx = expectedWorkspacePanelRadiusPx();
+    if (expectedPanelRadiusPx === 6) {
+      // Side Pane 展开时会话外框使用动态圆角变量，只有右侧 chrome 外框使用圆角 token。
+      const framesUseRadiusToken = await browser.execute(() => {
+        const frame = document.querySelector('[data-workspace-side-frame="true"]');
+        return Boolean(
+          frame?.classList.contains("rounded-md") || frame?.classList.contains("rounded-l-md"),
+        );
+      });
+      expect(framesUseRadiusToken).toBe(true);
+    }
     expect(panels?.leftRadius).toBe(`${expectedPanelRadiusPx}px`);
     expect(panels?.rightRadius).toBe(`${expectedPanelRadiusPx}px`);
     await movePointerAwayFromResizeHandles();
     expect(
       await readResizeHandleStyle('[data-workspace-side-pane-resize-handle="true"]'),
     ).toMatchObject({
-      hasExtendedTertiaryLine: true,
+      hasExtendedIndicatorLine: true,
       indicatorOpacity: "0",
       handleWidth: 4,
     });
@@ -246,7 +290,7 @@ describe("Side Pane Tab responsive interactions", () => {
           const style = getComputedStyle(document.querySelector("[data-workspace-side-frame]")!);
           return [style.borderTopRightRadius, style.borderBottomRightRadius];
         }),
-      ).toEqual(process.platform === "win32" ? ["5px", "5px"] : ["12px", "12px"]);
+      ).toEqual(process.platform === "win32" ? ["6px", "6px"] : ["12px", "12px"]);
     }
     const drag = await browser.execute(() => {
       const frame = document
@@ -296,7 +340,7 @@ describe("Side Pane Tab responsive interactions", () => {
     expect(
       await readResizeHandleStyle('[data-workspace-terminal-resize-handle="true"]'),
     ).toMatchObject({
-      hasExtendedTertiaryLine: true,
+      hasExtendedIndicatorLine: true,
       indicatorOpacity: "0",
       handleHeight: 4,
     });
@@ -342,7 +386,7 @@ describe("Side Pane Tab responsive interactions", () => {
         '[data-workspace-side-pane-resize-handle="true"]',
         '[data-workspace-terminal-resize-handle="true"]',
       ]) {
-        expect((await readResizeHandleStyle(selector)).hasExtendedTertiaryLine).toBe(true);
+        expect((await readResizeHandleStyle(selector)).hasExtendedIndicatorLine).toBe(true);
       }
       const colors = await browser.execute(() => {
         const left = document.querySelector('[data-workspace-conversation-frame="true"]')!;
@@ -357,6 +401,9 @@ describe("Side Pane Tab responsive interactions", () => {
       expect(colors[0]).toBe(colors[1]);
       expect(colors[0]).toBe(colors[2]);
       expect(colors[0]).not.toBe("rgba(0, 0, 0, 0)");
+      if (process.platform === "win32" || process.platform === "linux") {
+        expect(await $("[data-desktop-logo-badge] svg").getSize("width")).toBe(13);
+      }
       const terminalTabStyle = await browser.execute(() => {
         const tab = document.querySelector('#terminal [role="tab"][data-active]')!;
         const content = tab.querySelector("[data-terminal-tab-content]")!;
@@ -400,6 +447,16 @@ describe("Side Pane Tab responsive interactions", () => {
       },
       { timeout: 5000, timeoutMsg: "关闭 Side Pane 后会话宽度未恢复" },
     );
+    const closedFrame = await browser.execute(() => {
+      const frame = document.querySelector('[data-workspace-conversation-frame="true"]')!;
+      return {
+        usesRadiusToken:
+          frame.classList.contains("rounded-md") || frame.classList.contains("rounded-l-md"),
+        leftRadius: getComputedStyle(frame).borderTopLeftRadius,
+      };
+    });
+    if (expectedPanelRadiusPx === 6) expect(closedFrame.usesRadiusToken).toBe(true);
+    expect(closedFrame.leftRadius).toBe(`${expectedPanelRadiusPx}px`);
   });
 
   it("SPT-E2E-001 keeps one tab at 156px and the add button beside it", async () => {
@@ -738,6 +795,93 @@ describe("Side Pane Tab responsive interactions", () => {
       }),
     ).toBe(true);
   });
+  it("SPT-E2E-009 opens a real new tab and replaces it with a tool", async () => {
+    await ensureSidePaneExpanded();
+    const active = () => $('[data-side-pane-tab-id][data-state="active"]');
+    while ((await readTabCount()) > 1) {
+      const count = await readTabCount();
+      await (await active()).$("button").click();
+      await browser.waitUntil(async () => (await readTabCount()) === count - 1);
+    }
+    if (!/新标签页|New tab/.test(await (await active()).getText())) {
+      await (await active()).$("button").click();
+      await browser.waitUntil(async () => (await readTabCount()) === 0);
+      await $(
+        `[data-testid="${TID_WORKSPACE_HEADER}"] [data-testid="${TID_SIDE_PANE_TOGGLE}"]`,
+      ).waitForDisplayed();
+      await ensureSidePaneExpanded();
+    }
+    expect(await readTabCount()).toBe(1);
+    await $(ADD_TRIGGER_SELECTOR).waitForDisplayed();
+    await $('[data-state="active"] [data-side-pane-open-tab-item="terminal"]').click();
+    await browser.waitUntil(async () => !/新标签页|New tab/.test(await (await active()).getText()));
+    expect(await readTabCount()).toBe(1);
+    const toolId = await (await active()).getAttribute("data-side-pane-tab-id");
+    await $(`[data-testid="${TID_SIDE_PANE_TOGGLE}"]`).click();
+    await ensureSidePaneExpanded();
+    expect(await (await active()).getAttribute("data-side-pane-tab-id")).toBe(toolId);
+    await $(ADD_TRIGGER_SELECTOR).click();
+    await browser.waitUntil(async () => (await readTabCount()) === 2);
+    expect(await (await active()).getText()).toMatch(/新标签页|New tab/);
+    await (await active()).$("button").click();
+    await browser.waitUntil(async () => (await readTabCount()) === 1);
+    await (await active()).$("button").click();
+    await browser.waitUntil(async () => (await readTabCount()) === 0);
+    await $(
+      `[data-testid="${TID_WORKSPACE_HEADER}"] [data-testid="${TID_SIDE_PANE_TOGGLE}"]`,
+    ).waitForDisplayed();
+    await ensureSidePaneExpanded();
+    expect(await (await active()).getText()).toMatch(/新标签页|New tab/);
+    // 走真实菜单命令与 IPC，确认末标签关闭不再被自动补建吞掉。
+    await browser.electron.execute((electron) => {
+      const item = electron.Menu.getApplicationMenu()
+        ?.items.flatMap((menu) => menu.submenu?.items ?? [])
+        .find((entry) => entry.accelerator === "CmdOrCtrl+W");
+      if (!item) throw new Error("未找到关闭当前上下文菜单");
+      const target = electron.BrowserWindow.getAllWindows().find((win) =>
+        win.webContents.getURL().includes("/renderer/index.html"),
+      );
+      if (!target || !item.enabled) throw new Error("关闭菜单或目标窗口不可用");
+      target.focus();
+      item.click(item, target, {} as never);
+    });
+    await browser.waitUntil(async () => (await readTabCount()) === 0);
+    await $(
+      `[data-testid="${TID_WORKSPACE_HEADER}"] [data-testid="${TID_SIDE_PANE_TOGGLE}"]`,
+    ).waitForDisplayed();
+    // 不真正关闭测试窗口；再次发出同一可取消事件，必须允许 Root 执行关窗 fallback。
+    expect(
+      await browser.execute(() =>
+        window.dispatchEvent(new Event("zcode:close-active-context-request", { cancelable: true })),
+      ),
+    ).toBe(true);
+    await ensureSidePaneExpanded();
+    expect(await readTabCount()).toBe(1);
+  });
+
+  it("新标签页支持多开、聚焦、统一宽度和关闭", async () => {
+    await ensureTerminalTabCount(1);
+    const ids: string[] = [];
+    for (let index = 0; index < 2; index += 1) {
+      await $(ADD_TRIGGER_SELECTOR).click();
+      await browser.waitUntil(async () => (await readTabCount()) === index + 2);
+      const active = await $('[data-side-pane-tab-id][data-state="active"]');
+      const id = await active.getAttribute("data-side-pane-tab-id");
+      if (!id) throw new Error("新标签页缺少 id");
+      ids.push(id);
+      expect(await active.getText()).toMatch(/新标签页|New tab/);
+      expect(await active.getSize("width")).toBeLessThanOrEqual(156);
+    }
+    expect(ids[0]).not.toBe(ids[1]);
+    const first = await $(`[data-side-pane-tab-id="${ids[0]}"]`);
+    await first.click();
+    expect(await first.getAttribute("data-state")).toBe("active");
+    await $('[data-state="active"] [data-side-pane-open-tab-item="browser"]').waitForDisplayed();
+    await first.$("button").click();
+    await browser.waitUntil(async () => (await readTabCount()) === 2);
+    await $(`[data-side-pane-tab-id="${ids[1]}"] button`).click();
+    await browser.waitUntil(async () => (await readTabCount()) === 1);
+  });
 });
 
 interface ResizeHandleRect {
@@ -805,10 +949,11 @@ async function readResizeHandleStyle(selector: string) {
     const indicatorStyle = getComputedStyle(handle, "::after");
     const reference = document.createElement("div");
     // 测试节点不参与 Tailwind 扫描，直接按主题 token 计算期望色，避免缺失 utility 造成误报。
-    reference.style.backgroundColor =
-      "color-mix(in oklab, var(--color-foreground-subtlest) 50%, transparent)";
+    reference.style.backgroundColor = document.documentElement.classList.contains("dark")
+      ? "var(--color-sky-400)"
+      : "var(--color-sky-500)";
     document.body.append(reference);
-    const tertiaryColor = getComputedStyle(reference).backgroundColor;
+    const indicatorColor = getComputedStyle(reference).backgroundColor;
     reference.remove();
     const vertical = handleRect.height > handleRect.width;
     const expectedInset = Number.parseFloat(
@@ -819,14 +964,14 @@ async function readResizeHandleStyle(selector: string) {
       ),
     );
     return {
-      hasExtendedTertiaryLine:
+      hasExtendedIndicatorLine:
         indicatorStyle.content !== "none" &&
         indicatorStyle.maskImage === "none" &&
         Math.abs(
           Number.parseFloat(vertical ? indicatorStyle.height : indicatorStyle.width) -
             ((vertical ? handleRect.height : handleRect.width) - 2 * expectedInset),
         ) < 1 &&
-        indicatorStyle.backgroundColor === tertiaryColor,
+        indicatorStyle.backgroundColor === indicatorColor,
       indicatorOpacity: indicatorStyle.opacity,
       handleHeight: vertical ? "full" : handleRect.height,
       handleWidth: handleRect.width,
@@ -842,7 +987,7 @@ async function assertResizeHandleVisible(selector: string): Promise<void> {
     async () => Number((await readResizeHandleStyle(selector)).indicatorOpacity) > 0.99,
     { timeout: 1000 },
   );
-  expect((await readResizeHandleStyle(selector)).hasExtendedTertiaryLine).toBe(true);
+  expect((await readResizeHandleStyle(selector)).hasExtendedIndicatorLine).toBe(true);
 }
 
 async function readHeaderBorderBottomColor(): Promise<string> {
@@ -857,6 +1002,13 @@ async function readHeaderBorderBottomColor(): Promise<string> {
 
 async function ensureTerminalTabCount(targetCount: number): Promise<void> {
   await ensureSidePaneExpanded();
+  const initialLauncher = await $(
+    '[data-state="active"] [data-side-pane-open-tab-item="terminal"]',
+  );
+  if (await initialLauncher.isDisplayed()) {
+    await initialLauncher.click();
+    await browser.waitUntil(async () => !(await initialLauncher.isDisplayed()));
+  }
   let count = await readTabCount();
 
   while (count > targetCount) {
@@ -880,21 +1032,9 @@ async function ensureTerminalTabCount(targetCount: number): Promise<void> {
       const addTrigger = await $(ADD_TRIGGER_SELECTOR);
       await addTrigger.waitForClickable({ timeout: 5_000 });
       await addTrigger.click();
-      await browser.waitUntil(
-        async () =>
-          browser.execute(() =>
-            Boolean(document.querySelector('[data-side-pane-add-item="terminal"]')),
-          ),
-        { timeout: 5_000, timeoutMsg: "新增 Terminal 菜单项未挂载" },
-      );
-      await browser.execute(() => {
-        document.querySelector<HTMLElement>('[data-side-pane-add-item="terminal"]')?.click();
-      });
-      await browser.waitUntil(
-        async () =>
-          browser.execute(() => !document.querySelector('[data-side-pane-add-item="terminal"]')),
-        { timeout: 5_000, timeoutMsg: "新增 Terminal 菜单选择后未卸载" },
-      );
+      const launcher = await $('[data-state="active"] [data-side-pane-open-tab-item="terminal"]');
+      await launcher.waitForClickable({ timeout: 5_000 });
+      await launcher.click();
     }
 
     count += 1;

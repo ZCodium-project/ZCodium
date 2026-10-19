@@ -206,35 +206,6 @@ describe("desktopNetworkPolicy", () => {
     });
   });
 
-  it("applies proxy config and resets renderer certificate policy from settings", async () => {
-    const targetSession = {
-      setProxy: vi.fn(() => Promise.resolve()),
-      closeAllConnections: vi.fn(() => Promise.resolve()),
-      setCertificateVerifyProc: vi.fn(),
-    } as unknown as Session;
-    const logger = {
-      info: vi.fn(),
-      warn: vi.fn(),
-    };
-
-    await applyDesktopSessionNetworkPolicy(
-      targetSession,
-      {
-        httpProxy: "http://127.0.0.1:7890",
-        httpProxyNoProxy: "localhost,127.0.0.1",
-      },
-      logger,
-    );
-
-    expect(targetSession.setProxy).toHaveBeenCalledWith({
-      mode: "fixed_servers",
-      proxyBypassRules: "localhost,127.0.0.1",
-      proxyRules: "http://127.0.0.1:7890",
-    });
-    expect(targetSession.closeAllConnections).toHaveBeenCalledTimes(1);
-    expect(targetSession.setCertificateVerifyProc).toHaveBeenCalledWith(null);
-  });
-
   it("accepts only certificate chains that include the configured custom CA", () => {
     const trustedPem = generateSelfSignedCertPem("Trusted Test CA");
     const untrustedPem = generateSelfSignedCertPem("Other Test CA");

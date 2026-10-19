@@ -5,8 +5,6 @@ import type { ZCodePromptAttachment } from "@zcode/shared";
 import {
   REMOTE_PROMPT_ATTACHMENT_ROOT,
   buildRemotePromptAttachmentPath,
-  createRemotePromptAttachmentSessionService,
-  createRemotePromptAttachmentTaskService,
   materializeRemotePromptAttachments,
 } from "../src/host/remotePromptAttachments.js";
 
@@ -171,97 +169,5 @@ describe("remote prompt attachment materialization", () => {
         traceId: "trace/id:456",
       }),
     ).toBe(`${REMOTE_PROMPT_ATTACHMENT_ROOT}/trace-id-456/nonce-with-slash/03-api-.txt`);
-  });
-
-  it("materializes desktop-continuous session prompts before calling the remote session service", async () => {
-    const remoteAttachment: ZCodePromptAttachment = {
-      kind: "file",
-      filename: "pasted.txt",
-      localPath: "/home/tester/.zcode/tmp/prompt-attachments/input/01-pasted.txt",
-      mimeType: "text/plain",
-      sizeBytes: 5,
-      sourceKind: "clipboard-text",
-    };
-    const sendPrompt = vi.fn(async () => ({ accepted: true }));
-    const service = createRemotePromptAttachmentSessionService(
-      { sendPrompt },
-      {
-        materializePromptAttachments: async (params) => ({
-          content: params.content.replace("/tmp/host-paste.txt", remoteAttachment.localPath!),
-          attachments: [remoteAttachment],
-        }),
-      },
-    );
-
-    await service.sendPrompt({
-      sessionId: "task-1",
-      inputId: "input-1",
-      content: "read /tmp/host-paste.txt",
-      attachments: [
-        {
-          kind: "file",
-          filename: "pasted.txt",
-          localPath: "/tmp/host-paste.txt",
-          mimeType: "text/plain",
-          sizeBytes: 5,
-          sourceKind: "clipboard-text",
-        },
-      ],
-    });
-
-    expect(sendPrompt).toHaveBeenCalledWith({
-      sessionId: "task-1",
-      inputId: "input-1",
-      content: "read /home/tester/.zcode/tmp/prompt-attachments/input/01-pasted.txt",
-      attachments: [remoteAttachment],
-    });
-  });
-
-  it("materializes web-remote queued task commands before calling the remote task service", async () => {
-    const remoteAttachment: ZCodePromptAttachment = {
-      kind: "file",
-      filename: "pasted.txt",
-      localPath: "/home/tester/.zcode/tmp/prompt-attachments/input/01-pasted.txt",
-      mimeType: "text/plain",
-      sizeBytes: 5,
-      sourceKind: "clipboard-text",
-    };
-    const enqueueTaskCommand = vi.fn(async () => ({ accepted: true }));
-    const service = createRemotePromptAttachmentTaskService(
-      { enqueueTaskCommand },
-      {
-        materializePromptAttachments: async (params) => ({
-          content: params.content.replace("/tmp/host-paste.txt", remoteAttachment.localPath!),
-          attachments: [remoteAttachment],
-        }),
-      },
-    );
-
-    await service.enqueueTaskCommand({
-      taskId: "task-1",
-      commandId: "command-1",
-      traceId: "input-1",
-      type: "send_prompt",
-      content: "read /tmp/host-paste.txt",
-      attachments: [
-        {
-          kind: "file",
-          filename: "pasted.txt",
-          localPath: "/tmp/host-paste.txt",
-          mimeType: "text/plain",
-          sizeBytes: 5,
-          sourceKind: "clipboard-text",
-        },
-      ],
-    });
-
-    expect(enqueueTaskCommand).toHaveBeenCalledWith({
-      taskId: "task-1",
-      commandId: "command-1",
-      traceId: "input-1",
-      type: "send_prompt",
-      content: "read /home/tester/.zcode/tmp/prompt-attachments/input/01-pasted.txt",
-      attachments: [remoteAttachment],
-    });
   });
 });

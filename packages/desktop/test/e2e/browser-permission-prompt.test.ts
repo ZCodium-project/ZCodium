@@ -6,7 +6,7 @@ import {
   TID_BROWSER_PERMISSION_PROMPTS,
   TID_BROWSER_REFRESH_BUTTON,
   TID_BROWSER_WEBVIEW,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import { clickTestIdByWebDriver } from "./helpers/desktop-app.js";
 import { openFirstBrowserTab } from "./helpers/browser-side-pane.js";
 import { prepareConversationE2E } from "./helpers/conversation-session.js";
@@ -54,6 +54,14 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
   let blockServer: { server: Server; origin: string };
   let allowServer: { server: Server; origin: string };
 
+  afterEach(async function () {
+    if (this.currentTest?.state !== "failed") return;
+    console.info("[permission-e2e] camera diagnosis", {
+      pageResult: await runInGuest("window.__mediaResult"),
+      state: await runInGuest("window.__permissionState('camera')"),
+    });
+  });
+
   before(async () => {
     blockServer = await startPermissionTestServer();
     allowServer = await startPermissionTestServer();
@@ -81,8 +89,9 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
     expect(await runInGuest("window.__permissionState('camera')")).toBe("denied");
 
     // ── 场景二：确认条 → 不允许（本次拒绝，不记忆：二次请求重新弹）
+    // executeJavaScript 会等待 Promise；请求先以 void 返回，测试才能点击正在等待的权限确认条。
     await runInGuest(
-      "window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
+      "void window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
     );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_DENY);
@@ -92,7 +101,7 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
     );
     // 不记忆：二次请求确认条重新出现
     await runInGuest(
-      "window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
+      "void window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
     );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_DENY);
@@ -101,7 +110,7 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
     await navigateTo(allowServer.origin);
     expect(await runInGuest("window.__permissionState('camera')")).toBe("denied");
     await runInGuest(
-      "window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
+      "void window.__getUserMediaResult().then((value) => { window.__mediaResult = value; })",
     );
     await waitForPermissionPrompt();
     await clickTestIdByWebDriver(TID_BROWSER_PERMISSION_ALLOW_ALWAYS);
@@ -112,7 +121,7 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
     );
     // 二次请求不再弹确认条
     await runInGuest(
-      "window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
+      "void window.__getUserMediaResult().then((value) => { window.__mediaResult2 = value; })",
     );
     await browser.waitUntil(
       async () => {
@@ -122,6 +131,12 @@ describe("内置浏览器权限默认拒绝与确认条四态", () => {
       { timeout: 15_000, timeoutMsg: "允许后二次 getUserMedia 应完成（ok 或无设备）" },
     );
     expect(await countPermissionPrompts()).toBe(0);
+    // Electron 查询参数可能带尾部斜杠；授权后刷新仍应命中同一 origin 的持久记录。
+    await clickTestIdByWebDriver(TID_BROWSER_REFRESH_BUTTON);
+    await browser.waitUntil(
+      async () => (await runInGuest("window.__permissionState('camera')")) === "granted",
+      { timeout: 15_000, timeoutMsg: "刷新后没有保留 camera 允许记录" },
+    );
   });
 });
 

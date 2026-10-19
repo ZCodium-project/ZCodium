@@ -37,6 +37,8 @@ describe("v4 catalog E09：fork 使用编辑后的 active branch", () => {
     // edit：行内 newText + Send → rewind 截断 + 重跑
     await waitForV4Edit();
     await editFirstV4UserQuery("E2E_V4_BRANCH_EDITED 编辑后的问题");
+    // branch cut 可见后，replacement user row 也必须从权威投影恢复，不能只剩截断结果。
+    await waitForV4TimelineContaining("E2E_V4_BRANCH_EDITED", 30000);
     await waitForV4TimelineContaining("V4_BRANCH_EDITED_REPLY", 60000);
     const afterEdit = await getV4PaneSnapshot();
     expect(afterEdit.timelineText).not.toContain("V4_BRANCH_T1_REPLY");

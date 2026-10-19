@@ -156,17 +156,6 @@ describe("Upstream replay fixture resolution", () => {
     expect(paths).toEqual([commonFixturePath, caseFixture, ...legacyFixturePaths]);
   });
 
-  it("uses only common and case-local fixtures in strict case-local mode", () => {
-    const caseFixture = join(caseFixtureDir, "conversation-session-v4-edit.json");
-    const caseManifest = join(caseManifestDir, "conversation-session-v4-edit.json");
-    const paths = resolveUpstreamReplayFixturePaths({
-      ...createOptions([commonFixturePath, caseFixture, caseManifest]),
-      mode: "strict-case-local",
-    });
-
-    expect(paths).toEqual([commonFixturePath, caseFixture]);
-  });
-
   it("ignores plugin fixture paths in strict case-local mode", () => {
     const caseFixture = join(caseFixtureDir, "conversation-session-v4-edit.json");
     const caseManifest = join(caseManifestDir, "conversation-session-v4-edit.json");

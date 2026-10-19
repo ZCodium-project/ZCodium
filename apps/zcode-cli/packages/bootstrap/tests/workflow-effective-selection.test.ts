@@ -13,7 +13,7 @@ describe("Workflow 内显式 Subagent 的有效选择", () => {
     "%s 的真实 Workflow child 调用 Agent 时继承公共解析端口",
     async (mode) => {
       const root = await mkdtemp(join(tmpdir(), "zcode-workflow-selection-"));
-      const store = createSqliteSessionStore({ dbPath: ":memory:" });
+      const store = await createSqliteSessionStore({ dbPath: ":memory:" });
       const parent = {
         providerId: "parent",
         modelId: "model",

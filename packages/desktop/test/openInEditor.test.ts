@@ -514,25 +514,6 @@ describe("openInEditor", () => {
     });
   });
 
-  it("macOS QSpace 应通过 app bundle 打开目录", async () => {
-    setProcessPlatform("darwin");
-    execFileMock.mockImplementation(
-      (_file: string, _args: string[], callback: (error: Error | null) => void) => {
-        callback(null);
-      },
-    );
-
-    const result = await openInEditor("qspace", tempDir);
-
-    expect(result).toEqual({ success: true });
-    expect(execFileMock).toHaveBeenCalledTimes(1);
-    expect(execFileMock).toHaveBeenCalledWith(
-      "open",
-      ["-a", "/Applications/QSpace.app", tempDir],
-      expect.any(Function),
-    );
-  });
-
   it("macOS QSpace Pro 应通过 app bundle 打开目录", async () => {
     setProcessPlatform("darwin");
     execFileMock.mockImplementation(

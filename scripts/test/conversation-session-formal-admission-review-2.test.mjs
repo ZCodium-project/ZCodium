@@ -72,7 +72,8 @@ async function addFormalCase(root, caseName, specSource = "it('runs', async () =
   await writeJson(
     root,
     `packages/desktop/test/e2e/fixtures/upstream/conversation-session/${caseName}.json`,
-    { version: 1, fixtures: [providerEntry(defaultRequest)] },
+    // 准入新增身份校验后，合法夹具也须携带归属，避免无关拒绝掩盖本场景断言。
+    { version: 1, caseName, spec: defaultManifest.spec, fixtures: [providerEntry(defaultRequest)] },
   );
   await writeJson(
     root,
@@ -132,7 +133,12 @@ test("requires providerRequestPolicy none for an empty case-local contract", asy
   await writeJson(
     root,
     "packages/desktop/test/e2e/fixtures/upstream/conversation-session/implicit-empty-contract.json",
-    { version: 1, fixtures: [] },
+    {
+      version: 1,
+      caseName: "implicit-empty-contract",
+      spec: implicit.defaultManifest.spec,
+      fixtures: [],
+    },
   );
   await writeJson(
     root,
@@ -144,7 +150,12 @@ test("requires providerRequestPolicy none for an empty case-local contract", asy
   await writeJson(
     root,
     "packages/desktop/test/e2e/fixtures/upstream/conversation-session/explicit-empty-contract.json",
-    { version: 1, fixtures: [] },
+    {
+      version: 1,
+      caseName: "explicit-empty-contract",
+      spec: explicit.defaultManifest.spec,
+      fixtures: [],
+    },
   );
   await writeJson(
     root,
@@ -159,7 +170,10 @@ test("requires providerRequestPolicy none for an empty case-local contract", asy
   const result = await inspect(root);
 
   assert.ok(codes(result, "implicit-empty-contract").includes("EMPTY_CASE_FIXTURE_WITHOUT_NONE"));
-  assert.ok(result.formal.admitted.some((item) => item.caseName === "explicit-empty-contract"));
+  assert.ok(
+    result.formal.admitted.some((item) => item.caseName === "explicit-empty-contract"),
+    JSON.stringify(result.formal.rejected),
+  );
 });
 
 test("unwraps syntax-transparent AST wrappers around legacy prepare calls", async () => {

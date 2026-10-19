@@ -1,8 +1,10 @@
+import { selectCombinedComposerThoughtLevel } from "./composer-model-picker.js";
 /* eslint-disable max-lines -- v4 conversation e2e helper 集中承载 pane/composer/queue/分屏等全部定位与断言原语，拆分会让 spec 的导入面漂移。 */
 // v4 竖切（protocol-v4）conversation e2e helper。
 // 与旧 conversation-session.ts 的区别：所有定位走 TID_V4_* 常量（testid contract v2，
 // 带 paneId 维度），状态断言读 v4 pane 的 data-* 投影属性，不再依赖旧 ChatView DOM。
 // 旧 helper 的登录/工作区/provider 部分继续复用（desktop-app.ts / upstream-provider.ts）。
+import { encodeCustomModelValue } from "@zcode/shared";
 import {
   TID_CHAT_MODE_SELECT_ITEM,
   TID_CHAT_MODE_SELECT_TRIGGER,
@@ -60,12 +62,13 @@ import {
   TID_V4_TURN_NAVIGATOR,
   TID_V4_TURN_NAVIGATOR_ITEM,
   TID_V4_TURN_NAVIGATOR_TOOLTIP,
-  encodeCustomModelValue,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import {
   clickTestIdByDom,
+  DEFAULT_WORKSPACE,
   dispatchMouseDownByExactTestId,
+  setCurrentElectronRendererContentSize,
   setInputValueByTestIdDom,
   waitForDefaultWorkspaceReady,
 } from "./desktop-app.js";
@@ -78,6 +81,7 @@ import { readV4ChatRootSnapshotInBrowser } from "./conversation-session-chat-roo
 import { getTaskStoreSnapshot as readTaskStoreSnapshotForDiagnostics } from "./conversation-session-store.js";
 import { sel } from "./selectors.js";
 import { skipOccupationOnboardingIfPresent } from "./occupation-onboarding.js";
+import { startDraftFromProject, waitForProjectRow } from "#e2e/helpers/project-sidebar";
 
 export const LOGIN_API_KEY = "e2e-login-api-key";
 export const E2E_REPLY_TOKEN = "upstream-e2e-ok";
@@ -85,6 +89,10 @@ export const E2E_REPLY_TOKEN = "upstream-e2e-ok";
 interface PrepareV4ConversationE2EOptions {
   resetDraftBeforeProvider?: boolean;
   skipProvider?: boolean;
+  /** 跳过 ensureV4ShellReady 的 ZCodeProject 等待。已登录冷启（真实凭据 seed 后 reloadSession）
+   * 的 app 按 startupWorkspace 语义落在 conversation backing workspace，ZCodeProject 永远不出现；
+   * 调用方需自行等待 v4 shell 就绪（如侧栏新任务按钮）。见 ANALYSIS r3-rerun §46。 */
+  skipShellReady?: boolean;
 }
 
 /** 单 pane 竖切固定 paneId（V4ChatPane 写死 workspace-main）。 */
@@ -130,16 +138,20 @@ export interface V4MessageSnapshot {
 }
 
 export async function prepareV4ConversationE2E(options: PrepareV4ConversationE2EOptions = {}) {
-  await ensureV4ShellReady();
-  if (options.resetDraftBeforeProvider) {
-    // 修复原因：正式用例若停留在旧 active session，provider 初始化可能把默认模型
-    // 写回旧 session；先切到 v4 空草稿，保持旧 helper 的隔离语义但不再依赖 legacy DOM。
-    await startNewV4Draft();
+  if (!options.skipShellReady) {
+    await ensureV4ShellReady();
+  }
+  if (!options.skipShellReady || options.resetDraftBeforeProvider) {
+    // Provider helper 也校验固定 cwd，必须先返回夹具项目，且不能把模型写入上一条会话。
+    await ensureV4PreparationDraft(options);
   }
   if (!options.skipProvider) {
     await ensureUpstreamProviderForE2E({ skipToolbarSelection: true });
   }
-  await startNewV4Draft();
+  await ensureV4PreparationDraft(options);
+  if (!options.skipShellReady) {
+    await waitForDefaultWorkspaceReady(30000);
+  }
   if (!options.skipProvider) {
     // 新 Composer 会保留已经初始化的空选择。仅写 Recent 不能覆盖这个草稿；
     // 测试准备必须像用户一样选择目标模型和档位，不能依赖旧初始化副作用。
@@ -152,7 +164,7 @@ async function ensureV4ShellReady() {
   try {
     // 新隔离 profile 的职业引导会遮住工作区，先复用真实 UI 跳过流程。
     await skipOccupationOnboardingIfPresent();
-    await waitForDefaultWorkspaceReady(30000);
+    await waitForProjectRow(DEFAULT_WORKSPACE, { timeout: 30000 });
     return;
   } catch (error) {
     if (!(await hasApiKeyLoginButton())) {
@@ -160,7 +172,41 @@ async function ensureV4ShellReady() {
     }
     await loginWithApiKey();
     await skipOccupationOnboardingIfPresent();
-    await waitForDefaultWorkspaceReady(30000);
+    await waitForProjectRow(DEFAULT_WORKSPACE, { timeout: 30000 });
+  }
+}
+
+async function ensureV4PreparationDraft(options: PrepareV4ConversationE2EOptions) {
+  // Bug 根因：全局新建会创建独立 cwd；反复点击会让固定目录夹具与 Agent 工作区分离。
+  // 只按实际 cwd 复用空草稿；为补项目标签而新建会打断冷启动预热，导致首发失败。
+  // 其他 cwd 或已有内容才走项目级新建；显式全局新建 helper 保持原语义。
+  const ready = await browser.execute(
+    (inputId, paneId, stopId, workspacePath) => {
+      const pane = document.querySelector<HTMLElement>(`[data-testid="${paneId}"]`);
+      const input = pane?.querySelector<HTMLElement>(`[data-testid="${inputId}"]`);
+      const activePath = (
+        window as Window & {
+          __zcodeTabStoreE2E?: { getState(): { activeWorkspacePath?: string | null } };
+        }
+      ).__zcodeTabStoreE2E?.getState().activeWorkspacePath;
+      return Boolean(
+        pane?.dataset.sessionId === "draft" &&
+        input?.getClientRects().length &&
+        !input.textContent?.trim() &&
+        !pane.querySelector(`[data-testid="${stopId}"]`) &&
+        (!workspacePath || activePath === workspacePath),
+      );
+    },
+    TID_V4_COMPOSER_INPUT,
+    testId(TID_V4_SESSION_PANE, V4_MAIN_PANE_ID),
+    TID_V4_STOP,
+    options.skipShellReady ? null : DEFAULT_WORKSPACE,
+  );
+  if (ready) return;
+  if (options.skipShellReady) {
+    await startNewV4Draft();
+  } else {
+    await startDraftFromProject(DEFAULT_WORKSPACE);
   }
 }
 
@@ -946,34 +992,9 @@ export function getV4ComposerBackgroundWorkCounts(): Promise<{
 
 /** Electron driver 不实现 WebDriver window/rect；通过主进程 BrowserWindow 调整 viewport。 */
 export async function setV4ElectronWindowSize(width: number, height: number) {
-  const resized = await browser.electron.execute(
-    (electron, nextWidth, nextHeight) => {
-      const window = electron.BrowserWindow.getAllWindows().find(
-        (candidate) => !candidate.isDestroyed() && candidate.isVisible(),
-      );
-      if (!window) return false;
-      const bounds = window.getBounds();
-      window.setBounds({ ...bounds, width: nextWidth, height: nextHeight });
-      window.focus();
-      return true;
-    },
-    width,
-    height,
-  );
-  if (!resized) {
-    throw new Error("没有找到可调整尺寸的 Electron 窗口");
-  }
-  await browser.waitUntil(
-    async () =>
-      browser.execute(
-        (expectedWidth, expectedHeight) =>
-          Math.abs(window.innerWidth - expectedWidth) < 80 &&
-          Math.abs(window.innerHeight - expectedHeight) < 120,
-        width,
-        height,
-      ),
-    { timeout: 10000, timeoutMsg: `Electron 窗口尺寸没有收敛到 ${width}x${height}` },
-  );
+  // Bug 根因：外框和 renderer 内容区的差值随平台及 zoom 改变，固定误差会误报超时。
+  // 复用精确绑定当前窗口的内容区 helper，同时保留尺寸应用失败的断言。
+  await setCurrentElectronRendererContentSize(width, height);
 }
 
 /** 从 Composer 单一入口展开 Status panel，并直达所有非空后台类型区块。 */
@@ -1229,6 +1250,15 @@ export async function switchV4Model(provider: string, model: string, thought: st
               document.querySelector<HTMLElement>(`[data-testid="${groupTestId}"]`),
             )
             .find((candidate): candidate is HTMLElement => Boolean(candidate));
+          if (!group) {
+            const providerTrigger = document.querySelector<HTMLElement>(
+              '[data-testid="composer-provider-trigger"]',
+            );
+            providerTrigger?.focus();
+            providerTrigger?.dispatchEvent(
+              new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }),
+            );
+          }
           if (group) {
             group.focus();
             for (const eventName of ["pointerenter", "mouseenter", "mousemove"] as const) {
@@ -1259,6 +1289,12 @@ export async function switchV4Model(provider: string, model: string, thought: st
     timeout: 30000,
     timeoutMsg: `模型切换后 config.model 投影没有更新为 ${model}`,
   });
+
+  if (thought && (await selectCombinedComposerThoughtLevel(thought))) return;
+  if (!thought && (await modelTrigger.getAttribute("data-composer-combined-model")) === "true") {
+    await browser.keys("Escape");
+    return;
+  }
 
   // 无 reasoning metadata 的 custom provider 不渲染 thought selector。协议类 E2E
   // 传空值表示只切模型，不能把不存在的思考深度控件当作模型切换失败。
@@ -2810,7 +2846,10 @@ export function pasteV4ComposerImageAttachment(
 }
 
 /** 等待某个 user 行渲染出附件簇，返回文件 pill 文本及媒体缩略图的可访问文件名。 */
-export async function waitForV4RowAttachments(timeout = 60000): Promise<string> {
+export async function waitForV4RowAttachments(
+  timeout = 60000,
+  expectedNames: readonly string[] = [],
+): Promise<string> {
   let text = "";
   await browser.waitUntil(
     async () => {
@@ -2825,7 +2864,8 @@ export async function waitForV4RowAttachments(timeout = 60000): Promise<string> 
           .filter(Boolean);
         return [visibleText, ...mediaFilenames].filter(Boolean).join("\n");
       }, TID_V4_ROW_ATTACHMENTS);
-      return text.trim().length > 0;
+      // 文本卡和媒体缩略图异步挂载；需要整组附件的 case 不能把第一张卡当作全组就绪。
+      return text.trim().length > 0 && expectedNames.every((name) => text.includes(name));
     },
     { timeout, timeoutMsg: "user 行没有渲染出附件簇（TID_V4_ROW_ATTACHMENTS）" },
   );

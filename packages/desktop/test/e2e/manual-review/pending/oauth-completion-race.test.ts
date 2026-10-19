@@ -1,12 +1,14 @@
 import { createDecipheriv, createHash } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { PlatformChannels } from "@zcode/shared";
 import {
-  PlatformChannels,
   TID_OAUTH_LOGIN_BUTTON,
   TID_OAUTH_ERROR,
   TID_OAUTH_CANCEL,
-} from "@zcode/shared";
+  TID_LOGIN_TRIGGER,
+  TID_LOGIN_MENU_ITEM,
+} from "@zcode/shared/test-ids";
 import {
   clearAppData,
   clickTestIdByDom,
@@ -28,11 +30,14 @@ describe("OAuth 双路径完成竞态", () => {
     await browser.waitUntil(
       async () =>
         browser.execute(
-          (button) =>
+          (button, trigger) =>
             Boolean(
-              document.querySelector(`[data-testid="${button}"], [data-testid="onboarding-page"]`),
+              document.querySelector(
+                `[data-testid="${button}"], [data-testid="${trigger}"], [data-testid="onboarding-page"]`,
+              ),
             ),
           TID_OAUTH_LOGIN_BUTTON,
+          TID_LOGIN_TRIGGER,
         ),
       { timeout: 60_000 },
     );
@@ -43,7 +48,15 @@ describe("OAuth 双路径完成竞态", () => {
       TID_OAUTH_LOGIN_BUTTON,
     );
     if (!hasButton) {
-      await openProviderConnectFromCommandPalette();
+      // Radix 菜单依赖 pointerdown；原生 WebDriver click 会派发完整指针事件。
+      const triggers = await browser.$$(`[data-testid="${TID_LOGIN_TRIGGER}"]`);
+      for (const trigger of triggers) {
+        if (await trigger.isDisplayed()) {
+          await trigger.click();
+          break;
+        }
+      }
+      await clickTestIdByDom(TID_LOGIN_MENU_ITEM);
     }
     await waitForTestIdByDom(TID_OAUTH_LOGIN_BUTTON);
     const originalProvider = (await readCredentials())["oauth:active_provider"];
@@ -165,37 +178,6 @@ describe("OAuth 双路径完成竞态", () => {
     expect(status.tokenRequests).toBe(1);
   });
 });
-
-async function openProviderConnectFromCommandPalette(): Promise<void> {
-  const opened = await browser.execute(() => {
-    const button = Array.from(document.querySelectorAll("button")).find((item) =>
-      /^(Search|搜索|جستجو)/.test(item.textContent?.trim() ?? ""),
-    );
-    button?.click();
-    return Boolean(button);
-  });
-  if (!opened) throw new Error("没有可见的命令面板入口");
-  const input = await browser.$('[data-slot="command-input"]');
-  await input.waitForDisplayed({ timeout: 20_000 });
-  await input.setValue("login");
-  await browser.waitUntil(
-    async () =>
-      browser.execute(() =>
-        Array.from(document.querySelectorAll('[data-slot="command-item"]')).some((item) =>
-          /connect|连接|اتصال/i.test(item.textContent ?? ""),
-        ),
-      ),
-    { timeout: 20_000, timeoutMsg: "命令面板中没有模型提供商连接入口" },
-  );
-  const clicked = await browser.execute(() => {
-    const item = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-slot="command-item"]'),
-    ).find((entry) => /connect|连接|اتصال/i.test(entry.textContent ?? ""));
-    item?.click();
-    return Boolean(item);
-  });
-  if (!clicked) throw new Error("无法选择模型提供商连接命令");
-}
 
 async function readCredentials(): Promise<Record<string, string>> {
   const stored = JSON.parse(await readFile(getE2EAppDataPaths().credentialsFile, "utf8")) as Record<

@@ -18,7 +18,6 @@ import {
 } from "../src/app/workflow-concurrency-governor.js";
 import {
   resolveWorkflowDefaultConcurrency,
-  WORKFLOW_CONCURRENCY_AUTO_GROWTH_FACTOR,
   WORKFLOW_DEFAULT_CONCURRENCY_MAX,
 } from "../src/app/workflow-default-concurrency.js";
 
@@ -76,13 +75,23 @@ const outcome = {
     ticket.publish(statusEvent({ type: "model_request_started" }, model)),
   completed: (ticket: ModelRequestAdmissionTicket, model = MODEL_A) => {
     outcome.started(ticket, model);
-    void ticket.publish(statusEvent({ type: "model_request_completed", durationMs: 1 } as never, model));
+    void ticket.publish(
+      statusEvent({ type: "model_request_completed", durationMs: 1 } as never, model),
+    );
   },
   /** 一次完整的 429：runner 先发 failed(retryable:true) 再发 retry_scheduled（决策 27 去重的对象）。 */
   throttled429: (ticket: ModelRequestAdmissionTicket, retryAfterMs?: number, model = MODEL_A) => {
     outcome.started(ticket, model);
     void ticket.publish(
-      statusEvent({ type: "model_request_failed", reason: "rate_limited", retryable: true, message: "429" } as never, model),
+      statusEvent(
+        {
+          type: "model_request_failed",
+          reason: "rate_limited",
+          retryable: true,
+          message: "429",
+        } as never,
+        model,
+      ),
     );
     void ticket.publish(
       statusEvent(
@@ -98,16 +107,32 @@ const outcome = {
       ),
     );
   },
-  retryScheduled: (ticket: ModelRequestAdmissionTicket, reason: string, extra: Record<string, unknown> = {}) => {
+  retryScheduled: (
+    ticket: ModelRequestAdmissionTicket,
+    reason: string,
+    extra: Record<string, unknown> = {},
+  ) => {
     outcome.started(ticket);
     void ticket.publish(
-      statusEvent({ type: "model_retry_scheduled", reason, delayMs: 1000, nextAttempt: 2, message: reason, ...extra } as never),
+      statusEvent({
+        type: "model_retry_scheduled",
+        reason,
+        delayMs: 1000,
+        nextAttempt: 2,
+        message: reason,
+        ...extra,
+      } as never),
     );
   },
   permanent: (ticket: ModelRequestAdmissionTicket) => {
     outcome.started(ticket);
     void ticket.publish(
-      statusEvent({ type: "model_request_failed", reason: "auth_failed", retryable: false, message: "401" } as never),
+      statusEvent({
+        type: "model_request_failed",
+        reason: "auth_failed",
+        retryable: false,
+        message: "401",
+      } as never),
     );
   },
 };
@@ -214,7 +239,11 @@ describe("workflow concurrency governor — 桶与闸门（决策 34）", () => 
 
   it("observer 的 tryAcquire 总命中且计入 inFlight（v3 决策 44/47）：主代理的工具与 sidecar 请求从不排队、从不发 queued", async () => {
     const clock = fakeClock();
-    const governor = createWorkflowConcurrencyGovernor({ defaultConcurrency: 2, now: clock.now, schedule: clock.schedule });
+    const governor = createWorkflowConcurrencyGovernor({
+      defaultConcurrency: 2,
+      now: clock.now,
+      schedule: clock.schedule,
+    });
     const first = governor.observer().tryAcquire!({ model: MODEL_A });
     const second = governor.observer().tryAcquire!({ model: MODEL_A });
     const third = governor.observer().tryAcquire!({ model: MODEL_A });
@@ -362,7 +391,11 @@ describe("workflow concurrency governor — ticket 上的事件映射（决策 2
     const ticket = admitNow();
     expect(governor.snapshot(KEY_A)?.inFlight).toBe(1);
     outcome.permanent(ticket);
-    expect(governor.snapshot(KEY_A)).toMatchObject({ inFlight: 0, cap: CEILING, successStreak: before });
+    expect(governor.snapshot(KEY_A)).toMatchObject({
+      inFlight: 0,
+      cap: CEILING,
+      successStreak: before,
+    });
   });
 
   it("reasoning_signature_repair / auth_refresh 不是 provider 失败：cap 与 streak 都不动，只终结尝试", () => {
@@ -371,7 +404,11 @@ describe("workflow concurrency governor — ticket 上的事件映射（决策 2
     const before = governor.snapshot(KEY_A)!.successStreak;
     outcome.retryScheduled(admitNow(), "reasoning_signature_repair", { delayMs: 0 });
     outcome.retryScheduled(admitNow(), "auth_refresh", { delayMs: 0 });
-    expect(governor.snapshot(KEY_A)).toMatchObject({ cap: CEILING, successStreak: before, inFlight: 0 });
+    expect(governor.snapshot(KEY_A)).toMatchObject({
+      cap: CEILING,
+      successStreak: before,
+      inFlight: 0,
+    });
   });
 
   it("offpeak_queued 归 throttled：减 cap 并按 Retry-After 冷却", () => {
@@ -395,10 +432,20 @@ describe("workflow concurrency governor — ticket 上的事件映射（决策 2
     outcome.started(ticket);
     ticket.release();
     ticket.release();
-    expect(governor.snapshot(KEY_A)).toMatchObject({ inFlight: 0, successStreak: streak, cap: CEILING });
+    expect(governor.snapshot(KEY_A)).toMatchObject({
+      inFlight: 0,
+      successStreak: streak,
+      cap: CEILING,
+    });
     // 已结算：再喂 429 也不减。
     void ticket.publish(
-      statusEvent({ type: "model_retry_scheduled", reason: "rate_limited", delayMs: 2000, nextAttempt: 2, message: "429" } as never),
+      statusEvent({
+        type: "model_retry_scheduled",
+        reason: "rate_limited",
+        delayMs: 2000,
+        nextAttempt: 2,
+        message: "429",
+      } as never),
     );
     expect(governor.snapshot(KEY_A)).toMatchObject({ inFlight: 0, cap: CEILING });
     // 终结事件之后再 release 也不再减。
@@ -472,7 +519,13 @@ describe("workflow concurrency governor — 扇出与遗忘", () => {
 
     outcome.throttled429(await observe(), 5_000);
     expect(seenA).toHaveLength(1);
-    expect(seenA[0]).toMatchObject({ key: KEY_A, previous: CEILING, next: 6, reason: "rate_limited", cooldownMs: 5_000 });
+    expect(seenA[0]).toMatchObject({
+      key: KEY_A,
+      previous: CEILING,
+      next: 6,
+      reason: "rate_limited",
+      cooldownMs: 5_000,
+    });
     expect(seenB).toEqual([]);
     expect(seenC).toEqual([]);
     outcome.completed(a);
@@ -546,7 +599,6 @@ describe("workflow concurrency governor — 增长上限（docs/dynamic-workflow
 
   it("桶从 D 起步，自动增长停在 2D", async () => {
     const { governor, admitNow } = makeGovernor(4);
-    expect(WORKFLOW_CONCURRENCY_AUTO_GROWTH_FACTOR).toBe(2);
     const tickets = Array.from({ length: 4 }, () => admitNow("A"));
     expect(governor.snapshot(KEY_A)).toMatchObject({ initial: 4, growthLimit: 8, cap: 4 });
     const live = await climb(governor, "A", tickets, 80);
@@ -588,7 +640,12 @@ describe("workflow concurrency governor — 增长上限（docs/dynamic-workflow
     expect(capBefore).toBeGreaterThan(8);
     governor.clearRunBound("big");
     expect(governor.snapshot(KEY_A)).toMatchObject({ growthLimit: 8, cap: 8 });
-    expect(seenOther.at(-1)).toMatchObject({ key: KEY_A, previous: capBefore, next: 8, reason: "limit_lowered" });
+    expect(seenOther.at(-1)).toMatchObject({
+      key: KEY_A,
+      previous: capBefore,
+      next: 8,
+      reason: "limit_lowered",
+    });
     for (const t of live) outcome.completed(t);
     outcome.completed(other);
   });

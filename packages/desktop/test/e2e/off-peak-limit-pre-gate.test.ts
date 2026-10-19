@@ -1,4 +1,9 @@
-import { TID_OFFPEAK_CREATE_BUTTON, TID_AUTOMATIONS_OPEN } from "@zcode/shared";
+import {
+  restartIntoWorkspace,
+  seedBigModelConnectionSelection,
+  seedBigModelOAuthCredential,
+} from "./helpers/model-provider-restart.js";
+import { TID_OFFPEAK_CREATE_BUTTON, TID_AUTOMATIONS_OPEN } from "@zcode/shared/test-ids";
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -58,6 +63,13 @@ describe("闲时任务服务端额度快照置灰 E2E（D39）", () => {
       await waitForDefaultWorkspaceReady(30000);
     }
 
+    // 网关只替代曝光和取票；Registry 模型需要真实的隔离账号与连接前置。
+    await restartIntoWorkspace({
+      afterElectronProcessExit: async () => {
+        await seedBigModelConnectionSelection({ kind: "individual-coding-plan" });
+        await seedBigModelOAuthCredential();
+      },
+    });
     // 1) 打开 Automations 主视图。
     await clickTestIdByDom(TID_AUTOMATIONS_OPEN, {
       timeoutMsg: "侧栏没有出现 Automations 入口",

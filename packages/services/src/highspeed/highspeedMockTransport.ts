@@ -41,7 +41,10 @@ export function createHighspeedMockTransport(options?: {
             card_id: `hsc_mock_${current}`,
             task_id: taskId,
             provider: request.provider,
-            model: request.model,
+            model:
+              scenario === "hit-invalid-model"
+                ? "E2E-HIGHSPEED-MODEL-NOT-IN-REGISTRY"
+                : request.model,
             issued_at: current,
             expires_at: expiresAt,
           },

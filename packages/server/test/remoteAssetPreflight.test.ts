@@ -95,11 +95,16 @@ function createClosedStream(
 describe("detectRemoteAssetTools", () => {
   it("selects one tool from each required capability", async () => {
     const tools = await detectRemoteAssetTools(
-      new PreflightBackend("download=wget\ntar=tar\nsha256=shasum\n"),
+      new PreflightBackend("download=wget\ntar=tar\nsha256=shasum\nprogress=full\n"),
       { log: () => undefined },
     );
 
-    expect(tools).toEqual({ download: "wget", tar: "tar", sha256: "shasum" });
+    expect(tools).toEqual({
+      download: "wget",
+      tar: "tar",
+      sha256: "shasum",
+      supportsProgress: true,
+    });
   });
 
   it("fails clearly when no download tool exists", async () => {
@@ -139,7 +144,12 @@ describe("detectRemoteAssetTools", () => {
       }),
     ]);
 
-    expect(tools).toEqual({ download: "curl", tar: "tar", sha256: "openssl" });
+    expect(tools).toEqual({
+      download: "curl",
+      tar: "tar",
+      sha256: "openssl",
+      supportsProgress: false,
+    });
   });
 
   it("keeps collecting stdout when close fires before data", async () => {
@@ -154,6 +164,7 @@ describe("detectRemoteAssetTools", () => {
       download: "curl",
       tar: "tar",
       sha256: "sha256sum",
+      supportsProgress: false,
     });
   });
 });

@@ -1,11 +1,11 @@
 import {
-  TID_CONVERSATION_NEW_TASK,
+  TID_VIRTUAL_PROJECT_NEW_TASK,
   TID_CONVERSATION_SECTION,
   TID_TASK_ARCHIVE,
   TID_TASK_ITEM,
   TID_V4_SESSION_PANE,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import { clearAppData } from "./helpers/desktop-app.js";
 import {
   E2E_REPLY_TOKEN,
@@ -107,7 +107,7 @@ async function startConversationTaskDraft() {
       browser.execute((testIdValue) => {
         const button = document.querySelector<HTMLButtonElement>(`[data-testid="${testIdValue}"]`);
         return Boolean(button && !button.disabled);
-      }, TID_CONVERSATION_NEW_TASK),
+      }, TID_VIRTUAL_PROJECT_NEW_TASK),
     {
       timeout: 15000,
       timeoutMsg: "项目任务区水合后没有出现可用的“新建任务”按钮",
@@ -118,7 +118,7 @@ async function startConversationTaskDraft() {
     const button = document.querySelector<HTMLElement>(`[data-testid="${testIdValue}"]`);
     button?.click();
     return Boolean(button);
-  }, TID_CONVERSATION_NEW_TASK);
+  }, TID_VIRTUAL_PROJECT_NEW_TASK);
   expect(clicked).toBe(true);
   await waitForV4Pane(
     (snapshot) => snapshot.sessionId === "draft",

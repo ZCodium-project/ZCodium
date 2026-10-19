@@ -2,7 +2,7 @@
 import { spawn } from "node:child_process";
 import process from "node:process";
 
-const DEFAULT_WEB_REMOTE_CONTROL_URL = "http://localhost:5173/remote";
+const DEFAULT_WEB_REMOTE_CONTROL_URL = "http://localhost:5173/remote/v4";
 
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const webRemoteControlUrl =

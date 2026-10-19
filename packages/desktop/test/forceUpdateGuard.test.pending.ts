@@ -444,7 +444,6 @@ describe("forceUpdateGuard", () => {
     expect(promptHtml).toContain("自动升级正在进行");
     expect(promptHtml).toContain("确认关闭");
     expect(promptHtml).toContain("继续更新");
-    expect(promptHtml).toContain("showCloseConfirmation");
     expect(promptHtml).toContain("action === 'quit' || action === 'manual'");
     electronMocks.browserWindowInstance.emitPageTitle("force-update:quit");
     expect(electronMocks.browserWindowInstance.close).toHaveBeenCalledOnce();

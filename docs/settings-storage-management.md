@@ -276,17 +276,17 @@ Renderer <StorageSection>                 Host StorageService                   
 
 E2E（`packages/desktop/test/e2e/settings/settings-storage-management.test.ts`，隔离 HOME 内 seed fixture）：
 
-| Case                     | Setup                                                             | Action                            | Assertion                                                           |
-| ------------------------ | ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
-| SM-01 scan               | HOME 下 seed `cli/debug` 2 文件、`v2/logs` 昨日+今日、`backup/x`  | 打开 设置 › 数据与统计 › 存储管理 | 出现扫描态；完成后总量 = fixture 总和；类别行与图例大小一致         |
-| SM-02 drill-down         | 同上                                                              | 点「模型调用轨迹」                | 明细列出 2 个文件与根目录 `~/.zcode`；面包屑可返回                  |
-| SM-03 clean safe         | 同上                                                              | 点轨迹行「清理」                  | 无确认框；toast 释放大小；文件已删；行大小变 0                      |
-| SM-04 clean confirm      | 同上                                                              | 点「备份」行「清理」→ 取消 / 确认 | 取消不删；确认后删除                                                |
-| SM-08 stop on leave      | seed 大量小文件                                                   | 扫描中切到其他分区再切回          | 切走后 host 收到 cancel（无进度事件）；切回重新开始且先显示上次结果 |
-| SM-09 tool outputs guard | seed 一个 mtime 为 1 小时前、一个 3 天前的 `cli/artifacts/sess_*` | 清理「工具输出与子代理产物」      | 只删 3 天前的目录                                                   |
-| SM-05 logs keep today    | 同上                                                              | 清理日志                          | 昨日文件删除，今日文件保留                                          |
-| SM-06 two roots          | `setting.json.dataBaseDir` 指向另一目录并 seed `v2`               | 打开分区                          | 磁盘卡片列出两个根目录及各自占用；同盘时仍是一张卡片                |
-| SM-07 i18n/theme         | —                                                                 | 切 en + light                     | 文案与配色正确（代表样本）                                          |
+| Case                     | Setup                                                                                                  | Action                            | Assertion                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------- | ------------------------------------------------------------------- |
+| SM-01 scan               | 等启动迁移完成，清空隔离 HOME 的 `backup/`，再 seed 4 KiB `cli/debug`、6 KiB `backup/` 与昨日/今日日志 | 打开资源管理器 › 存储             | 扫描完成后轨迹为 4.0 KB、备份为 6.0 KB；总量包含应用正常运行数据    |
+| SM-02 drill-down         | 同上                                                                                                   | 点「模型调用轨迹」                | 明细列出 2 个文件与根目录 `~/.zcode`；面包屑可返回                  |
+| SM-03 clean safe         | 同上                                                                                                   | 点轨迹行「清理」                  | 无确认框；toast 释放大小；文件已删；行大小变 0                      |
+| SM-04 clean confirm      | 同上                                                                                                   | 点「备份」行「清理」→ 取消 / 确认 | 取消不删；确认后删除                                                |
+| SM-08 stop on leave      | seed 大量小文件                                                                                        | 扫描中切到其他分区再切回          | 切走后 host 收到 cancel（无进度事件）；切回重新开始且先显示上次结果 |
+| SM-09 tool outputs guard | seed 一个 mtime 为 1 小时前、一个 3 天前的 `cli/artifacts/sess_*`                                      | 清理「工具输出与子代理产物」      | 只删 3 天前的目录                                                   |
+| SM-05 logs keep today    | 同上                                                                                                   | 清理日志                          | 昨日文件删除，今日文件保留                                          |
+| SM-06 two roots          | `setting.json.dataBaseDir` 指向另一目录并 seed `v2`                                                    | 打开分区                          | 磁盘卡片列出两个根目录及各自占用；同盘时仍是一张卡片                |
+| SM-07 i18n/theme         | —                                                                                                      | 切 en + light                     | 文案与配色正确（代表样本）                                          |
 
 ## 8. 裁决记录（2026-09-10）
 

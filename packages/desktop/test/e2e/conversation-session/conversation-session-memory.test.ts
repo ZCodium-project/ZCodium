@@ -20,7 +20,7 @@ import {
   TID_SETTINGS_SECTION_NAV,
   TID_TASK_SETTINGS_BUTTON,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import type { E2ENetworkCaptureArtifact } from "../helpers/network-capture-proxy.js";
 import {
   clearAppData,
@@ -36,6 +36,7 @@ import {
   getV4PaneSnapshot,
   prepareV4ConversationE2E,
   sendV4Prompt,
+  sendV4PromptAndWaitAccepted,
   startNewV4Draft,
   waitForV4Pane,
   waitForV4TimelineContaining,
@@ -206,7 +207,12 @@ describe("Desktop Memory continuous 链路 WDIO", () => {
 
     await startNewV4Draft();
     await ensureToolCrossProductFullAccessMode();
-    await sendV4Prompt(CUSTOM_PROMPT);
+    // 回归：新草稿模型检查曾回收在途预热，首发被误判为草稿切换；只点一次并确认 admission。
+    await sendV4PromptAndWaitAccepted(
+      CUSTOM_PROMPT,
+      "E2E_MEMORY_WDIO_CUSTOM",
+      "Memory 新草稿首次发送未被接收",
+    );
     await waitForV4TimelineContaining(CUSTOM_DONE, 90_000);
     await waitForUpstreamRequest(
       {
@@ -219,6 +225,14 @@ describe("Desktop Memory continuous 链路 WDIO", () => {
       "custom agent persistent Memory prompt 未进入 provider capture",
       60_000,
     );
+    // 回归：Host 动态 profile 曾绕过 Memory 工具补齐；直接检查 child 最终 wire，不能只看完成文本。
+    const customRequest = (await readProviderCapture()).records
+      .slice(providerCaptureStartIndex)
+      .find((record) => record.replay?.fixtureId === "memory-window-custom-child-write")
+      ?.requestJson as { tools?: Array<{ name: string }> } | undefined;
+    const customTools = customRequest?.tools?.map((tool) => tool.name);
+    expect(customTools).toEqual(expect.arrayContaining(["Grep", "Write", "Edit"]));
+    expect(customTools).not.toContain("Read");
     const customContent = await waitForFileContaining(CUSTOM_MEMORY_FILE, CUSTOM_FILE_MARKER);
     expect(customContent).toMatch(/^\s*node_type:\s*memory\s*$/mu);
     expect(readOriginSessionId(customContent)).toMatch(/^sess_subagent_/u);

@@ -3,7 +3,6 @@ import {
   applyDynamicWorkflowUserMode,
   createDynamicWorkflowClientConfig,
   DEFAULT_DYNAMIC_WORKFLOW_MODE,
-  isDynamicWorkflowModeEnabled,
   isDynamicWorkflowOffered,
   normalizeDynamicWorkflowMode,
   resolveDynamicWorkflowClientConfig,
@@ -103,12 +102,6 @@ describe("normalizeDynamicWorkflowMode / isDynamicWorkflowModeEnabled", () => {
     expect(normalizeDynamicWorkflowMode("AlwaysOn")).toBeUndefined();
     expect(normalizeDynamicWorkflowMode(undefined)).toBeUndefined();
     expect(normalizeDynamicWorkflowMode(true)).toBeUndefined();
-  });
-
-  it("本版本两个开启态折叠成同一个布尔", () => {
-    expect(isDynamicWorkflowModeEnabled("disabled")).toBe(false);
-    expect(isDynamicWorkflowModeEnabled("onDemand")).toBe(true);
-    expect(isDynamicWorkflowModeEnabled("alwaysOn")).toBe(true);
   });
 });
 

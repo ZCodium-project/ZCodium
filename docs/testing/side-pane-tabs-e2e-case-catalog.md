@@ -61,12 +61,23 @@
 - Action：在 inactive Tab 的标签主体上派发鼠标中键（`button=1`）事件。
 - Assertions：inactive Tab 被关闭；原 active Tab 保持 active；事件默认行为被阻止，且不会触发标签激活。
 
-### SPT-E2E-007 插件面板的双入口
+### SPT-E2E-007 插件面板的空态与新标签页双入口
 
-- Setup：真实 `AnimatedSidePanePanel`、插件发现 hook、菜单与打开动作；bridge 注入两条已启用 surface，覆盖桌面宽度/en-US/亮色及手机宽度/zh-CN/暗色。
-- Action：先从空白页发出插件打开请求，再提供已有 tab 状态并打开「+」菜单；鼠标重复选择同一插件，键盘选择另一个插件。另覆盖草稿、空目录、无打开动作和无 bridge 的宿主。
-- Assertions：两入口候选与本地化标题一致；菜单选择关闭；打开请求保留工作区/会话隔离字段；重复打开只激活同一 tab；草稿/空目录/无宿主均无插件项。菜单位于视口内，页面无横向溢出。
-- 边界：浏览器 UI E2E 注入服务目录，在既有 tab owner 边界检查打开结果，不启动插件沙箱、Agent 或手机远控链路；这些宿主能力沿用既有验证。
+- Setup：真实 `AnimatedSidePanePanel`、插件发现 hook 与打开动作；fixture 通过 `activateNewTabSidePane` 和统一归属函数创建并激活标签。推荐名单收录两个 surface，另一个开发 surface 不推荐；覆盖 1200px/en-US/亮色与 390px/zh-CN/暗色。
+- Action：从空态 launcher 打开插件，再点击「+」创建 new-tab，从 active tabpanel 的 launcher 重复打开同一插件；新建另一个标签，使用 Tab/Enter 打开第二个插件。
+- Assertions：两入口展示相同推荐与本地化标题；请求保留工作区/会话字段，重复打开复用 plugin tab；安装、启用后必须另点打开。草稿会话隐藏整个应用插件区及分隔线、查看所有插件入口；已有会话从默认空态或显式新标签页进入市场均可返回来源，默认空态返回后保持面板展开。无宿主、无 bridge 无插件项；推荐为空或配置失败显示空态；冷加载显示 skeleton。新标签页保持可见，窄屏无横向溢出。
+- 操作进度回归：控制安装/启用响应，确认只有目标插件显示加载，其他未安装、未启用与已启用插件保留原文案；列表在操作期间继续禁用。失败后恢复并切换另一插件重试，成功后清除进度且不自动打开。覆盖空态与新标签页、桌面亮色英文与手机暗色中文。
+- 加载图标回归：等待响应期间，目标入口显示可见的旋转图标与 `aria-busy`；成功或失败后全部清除。同一插件的两个 surface 同步显示进度，其他插件无进度；减少动画偏好下图标保留但不旋转。
+- 边界：服务由浏览器 fixture 注入，在 plugin tab owner 边界检查请求，不启动沙箱、Agent 或真实手机远控。
+- 当前验证：2026-10-15 自动浏览器 E2E 12/12 通过，包含 8 组操作进度与加载图标回归，以及同插件多 surface / 减少动画偏好用例；仍为 manual-review/pending，不代表插件沙箱或真实手机远控验证。
+
+### SPT-E2E-008 对话隔离的关闭与恢复（manual-review/pending）
+
+- Setup：同一工作区的 A/B 两个对话各有 Browser 和站点权限设置 tab。
+- Action：B 关闭其他、关闭全部；切回 A 检查保留，再关闭 A 的设置 tab；切 B 检查最近关闭，再切回 A 重新打开。
+- Assertions：B 的关闭不删除 A 的隐藏 tab；最近关闭仅显示当前 owner 的记录；A 重新打开恢复原设置 tab；Browser main 关闭与 UI 一致。
+- 证据：真实 Electron 菜单/标签/设置页面与 renderer 日志。不请求模型，不改网页权限决策，不需要 provider fixture。自动通过仍保持人工 review pending。
+- 单测补充：同路径不同 workspaceIdentity、公共/对话/草稿 tab、各 intrinsic owner 类型、无可见标签、异步关闭等待中切换工作区/对话或打开新 tab、main 拒绝关闭。
 
 ## 不变量
 
@@ -80,3 +91,19 @@
 ## 通用 / 编程界面模式 M1
 
 范围与 MODE-01～07 用例见 [模式验证矩阵](general-coding-mode-verification.md)。新增桌面用例位于 `packages/desktop/test/e2e/ui-shell/general-coding-mode.test.ts`，覆盖设置偏好、入口隐藏和已有面板保留；已人工验收并转为 ui-shell 正式用例，尚未加入 Docker preset。对话展示由组件单测补充，验证状态以该矩阵为准。
+
+### 新标签页多开与标准标签行为
+
+- Setup：打开一个 Terminal 标签。
+- Action：连续点击两次「+」，选择第一个新标签页，再分别关闭两个新标签页。
+- Assert：两个 id 独立、最新页激活、标题为新标签页、宽度不超过 156px；旧页可重新聚焦并显示启动入口，关闭仅移除目标标签。
+- 入口调整：原加号菜单选择改为新标签页内的启动行，仍使用既有应用打开动作。
+
+### SPT-E2E-009 默认新标签页与工具替换
+
+- Setup：新任务草稿，无当前 scope 标签。
+- Action：展开、选择终端、收起再展开、点击加号、关闭新增标签及最后一个工具标签。
+- Assertions：首次恰有一个新标签页及加号；终端替换该标签；收起恢复保留原 id；加号独立新增；关闭最后一个标签后面板收起；再次展开创建新标签页。
+- 范围：桌面交互及共享 UI 状态，跨 scope 和异步关闭由 hook 回归补充。
+
+SPT-E2E-009 补充：末标签关闭后面板收起且无补建；重新展开创建新标签页。真实关闭菜单命令关闭唯一新标签页后，下一次关闭上下文事件不被 App 拦截，可进入关窗 fallback。

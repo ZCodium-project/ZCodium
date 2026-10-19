@@ -20,7 +20,10 @@ process.send?.({
   type: "ready",
   host: "127.0.0.1",
   port: 43123 + generation,
-  version: "fixture",
+  version: process.env.ZCODE_TEST_CORE_VERSION ?? "fixture",
+  ...(process.env.ZCODE_SERVER_RELEASE_ID
+    ? { releaseId: process.env.ZCODE_SERVER_RELEASE_ID }
+    : {}),
   generation,
 });
 

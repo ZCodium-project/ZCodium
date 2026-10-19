@@ -2,20 +2,17 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   TID_PREVIEW_PANE,
-  TID_WORKSPACE_FILE_TREE_BUTTON,
   TID_WORKSPACE_FILE_TREE_PANEL,
   TID_WORKSPACE_FILE_TREE_ROW,
-  TID_WORKSPACE_ITEM,
   testId,
-} from "@zcode/shared";
+} from "@zcode/shared/test-ids";
 import {
   DEFAULT_WORKSPACE,
   clearAppData,
-  clickTestIdByDom,
-  hoverTestIdByWebDriver,
   waitForDefaultWorkspaceReady,
   waitForTestIdByDom,
 } from "../helpers/desktop-app.js";
+import { openProjectFileTree } from "../helpers/project-sidebar.js";
 
 const CASE_ROOT = join(DEFAULT_WORKSPACE, "E2E_FILE_TREE_SHARED_SEARCH");
 const JAVA_DIRECTORY = join(CASE_ROOT, "src", "main", "java", "com", "example", "user");
@@ -80,8 +77,7 @@ async function openWorkspaceFileTree() {
   // 被面板挤出视口，继续 moveTo 会报 out-of-bounds，且没有必要重复点击入口。
   if (alreadyOpen) return;
   // 修复原因：workspace action 只在整行 hover/focus 后挂载。
-  await hoverTestIdByWebDriver(testId(TID_WORKSPACE_ITEM, DEFAULT_WORKSPACE));
-  await clickTestIdByDom(testId(TID_WORKSPACE_FILE_TREE_BUTTON, DEFAULT_WORKSPACE), {
+  await openProjectFileTree(DEFAULT_WORKSPACE, {
     timeoutMsg: "没有找到工作区文件树入口",
   });
   await waitForTestIdByDom(TID_WORKSPACE_FILE_TREE_PANEL, {

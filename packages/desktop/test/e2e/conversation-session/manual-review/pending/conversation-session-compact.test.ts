@@ -1,4 +1,4 @@
-import { TID_CHAT_COMPACT_MARKER, TID_CHAT_INPUT, TID_CHAT_MESSAGES } from "@zcode/shared";
+import { TID_CHAT_COMPACT_MARKER, TID_CHAT_INPUT, TID_CHAT_MESSAGES } from "@zcode/shared/test-ids";
 import { UPSTREAM_MODEL } from "../../../helpers/upstream-provider.js";
 import {
   assertUpstreamRequestCapture,
@@ -58,7 +58,10 @@ describe("会话区 Compact E2E", () => {
     assertNonStreamingCompactRequest(compactRecord);
     assertCaptureIncludesText(compactRecord.requestJson, INITIAL_REPLY_TOKEN);
 
-    const completedMarker = await waitForCompactMarkerStatus("completed", startedMarker.inputId);
+    const completedMarker = await waitForCompactMarkerStatus(
+      "completed",
+      startedMarker.inputId,
+    );
     expect(completedMarker.trigger).toBe("manual");
     expect(completedMarker.operationId).toBeTruthy();
     await assertVisibleUserMessagesNotContaining(COMPACT_COMMAND);
@@ -70,7 +73,9 @@ async function typeChatPrompt(prompt: string) {
   await AppPage.chatInput.click();
   const result = (await browser.executeAsync(
     (inputTestId, text, done) => {
-      const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
+      const input = document.querySelector<HTMLElement>(
+        `[data-testid="${inputTestId}"]`,
+      );
       if (!input) {
         done({ actual: "", inserted: false, ok: false, reason: "input-missing" });
         return;
@@ -86,7 +91,9 @@ async function typeChatPrompt(prompt: string) {
       const inserted = document.execCommand("insertText", false, text);
 
       requestAnimationFrame(() => {
-        const actual = (input.innerText || input.textContent || "").replace(/\u00a0/g, " ").trim();
+        const actual = (input.innerText || input.textContent || "")
+          .replace(/\u00a0/g, " ")
+          .trim();
         done({
           actual,
           inserted,
@@ -99,7 +106,9 @@ async function typeChatPrompt(prompt: string) {
   )) as { actual: string; inserted: boolean; ok: boolean; reason?: string };
 
   if (!result.ok) {
-    throw new Error(`聊天输入框没有写入完整 prompt: ${JSON.stringify(result)}`);
+    throw new Error(
+      `聊天输入框没有写入完整 prompt: ${JSON.stringify(result)}`,
+    );
   }
 }
 
@@ -117,8 +126,12 @@ async function waitForComposerText(expected: string, timeoutMsg: string) {
 
 async function getComposerText() {
   return browser.execute((inputTestId) => {
-    const input = document.querySelector<HTMLElement>(`[data-testid="${inputTestId}"]`);
-    return (input?.innerText || input?.textContent || "").replace(/\u00a0/g, " ").trim();
+    const input = document.querySelector<HTMLElement>(
+      `[data-testid="${inputTestId}"]`,
+    );
+    return (input?.innerText || input?.textContent || "")
+      .replace(/\u00a0/g, " ")
+      .trim();
   }, TID_CHAT_INPUT);
 }
 
@@ -181,7 +194,9 @@ async function waitForCompactMarkerStatus(
 function getCompactMarkers() {
   return browser.execute((compactMarkerPrefix) => {
     return Array.from(
-      document.querySelectorAll<HTMLElement>(`[data-testid^="${compactMarkerPrefix}-"]`),
+      document.querySelectorAll<HTMLElement>(
+        `[data-testid^="${compactMarkerPrefix}-"]`,
+      ),
     ).map((element) => ({
       inputId: element.getAttribute("data-input-id"),
       operationId: element.getAttribute("data-operation-id"),
@@ -231,7 +246,9 @@ async function assertVisibleUserMessagesNotContaining(text: string) {
 
 function getVisibleUserMessagesText() {
   return browser.execute((messagesTestId) => {
-    const root = document.querySelector<HTMLElement>(`[data-testid="${messagesTestId}"]`);
+    const root = document.querySelector<HTMLElement>(
+      `[data-testid="${messagesTestId}"]`,
+    );
     return Array.from(root?.querySelectorAll<HTMLElement>(".is-user") ?? [])
       .map((element) => element.innerText)
       .join("\n");

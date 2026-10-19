@@ -130,12 +130,21 @@ function seedBundledOfficialPlugins(input: {
       withOfficialPluginSeedLock(
         targetRoot,
         () => {
+          const manifestFile = plugin.files.find(
+            (file) => file.path === ".zcode-plugin/plugin.json",
+          );
+          if (!manifestFile)
+            throw new Error(`Bundled plugin manifest is missing: ${plugin.definition.name}`);
+          const sourceManifestContents = readSeedFileBytes(source, plugin, manifestFile).toString(
+            "utf8",
+          );
           // 桌面会并发预热多个 workspace Agent；复制插件资源时，
           // 多进程会互删 target 并在 Windows rename 时触发 EPERM。拿锁后必须二次检查，
           // 让等待者直接复用首个进程已经提交的完整缓存。
           if (isSeedCurrent(targetRoot, plugin)) {
             cleanupLegacySeedBackup(targetRoot, retryBudget);
             const manifestWritten = tryWriteOfficialPluginRuntimeManifest({
+              sourceManifestContents,
               pluginName: plugin.definition.name,
               retryBudget,
               rootPath: targetRoot,
@@ -167,6 +176,7 @@ function seedBundledOfficialPlugins(input: {
             );
             replaceSeedRoot(temporaryRoot, targetRoot, plugin, retryBudget);
             writeOfficialPluginRuntimeManifest({
+              sourceManifestContents,
               pluginName: plugin.definition.name,
               retryBudget,
               rootPath: targetRoot,
@@ -211,6 +221,7 @@ function seedBundledOfficialPlugins(input: {
 }
 
 function tryWriteOfficialPluginRuntimeManifest(input: {
+  sourceManifestContents: string;
   pluginName: string;
   retryBudget: OfficialPluginCacheRetryBudget;
   rootPath: string;

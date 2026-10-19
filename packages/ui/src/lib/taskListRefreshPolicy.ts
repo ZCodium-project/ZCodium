@@ -26,7 +26,6 @@ const OPTIMISTIC_TASK_LIST_REASONS = new Set<ZCodeWorkspaceTaskListChanged["reas
   "task_meta_changed",
   "task_model_changed",
   "task_title_changed",
-  "auto_archive",
 ]);
 
 const TASK_LIST_MEMBERSHIP_REASONS = new Set<ZCodeWorkspaceTaskListChanged["reason"]>([

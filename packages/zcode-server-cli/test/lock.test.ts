@@ -36,11 +36,7 @@ describe("DataRootLock", () => {
     const root = await mkdtemp(join(tmpdir(), "zcode-r2-lock-live-"));
     const lockFile = join(root, "run", "server.lock");
     await mkdir(join(root, "run"), { recursive: true });
-    await writeFile(
-      lockFile,
-      `${JSON.stringify({ pid: process.pid, acquiredAt: Date.now() })}\n`,
-      "utf8",
-    );
+    await writeFile(lockFile, `${JSON.stringify({ pid: process.pid, acquiredAt: Date.now() })}\n`, "utf8");
 
     const lock = new DataRootLock(lockFile);
     await expect(lock.acquire()).rejects.toThrow(/already running/);
@@ -76,32 +72,25 @@ describe("DataRootLock", () => {
     await lockA.release();
   });
 
-  it.skipIf(process.platform === "win32")(
-    "does not delete a replacement lock owned by another token during release",
-    async () => {
-      const root = await mkdtemp(join(tmpdir(), "zcode-r2-lock-owner-"));
-      const lockFile = join(root, "run", "server.lock");
-      const replacement = join(root, "run", "replacement.lock");
-      const lock = new DataRootLock(lockFile);
-      await lock.acquire();
-      await writeFile(
-        replacement,
-        `${JSON.stringify({
-          pid: process.pid,
-          acquiredAt: Date.now(),
-          ownerToken: "replacement-owner",
-        })}\n`,
-        "utf8",
-      );
-      await rename(replacement, lockFile);
+  it.skipIf(process.platform === "win32")("does not delete a replacement lock owned by another token during release", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcode-r2-lock-owner-"));
+    const lockFile = join(root, "run", "server.lock");
+    const replacement = join(root, "run", "replacement.lock");
+    const lock = new DataRootLock(lockFile);
+    await lock.acquire();
+    await writeFile(replacement, `${JSON.stringify({
+      pid: process.pid,
+      acquiredAt: Date.now(),
+      ownerToken: "replacement-owner",
+    })}\n`, "utf8");
+    await rename(replacement, lockFile);
 
-      await lock.release();
+    await lock.release();
 
-      expect(JSON.parse(await readFile(lockFile, "utf8"))).toMatchObject({
-        ownerToken: "replacement-owner",
-      });
-    },
-  );
+    expect(JSON.parse(await readFile(lockFile, "utf8"))).toMatchObject({
+      ownerToken: "replacement-owner",
+    });
+  });
 
   it("allows only one real process to claim the same stale lock", async () => {
     const root = await mkdtemp(join(tmpdir(), "zcode-lock-race-"));
@@ -114,51 +103,50 @@ describe("DataRootLock", () => {
     // 根目录 Vitest 与 package 脚本的 cwd 不同，不能用 cwd 推导源码路径，否则子进程会导入不存在的 root/src/runtime/lock.ts。
     const moduleUrl = new URL("../src/runtime/lock.ts", import.meta.url).href;
     const childProgram = `
-      import { access, appendFile, writeFile } from "node:fs/promises";
+      import { access, appendFile, readFile, writeFile } from "node:fs/promises";
       import { setTimeout as delay } from "node:timers/promises";
       const { DataRootLock } = await import(process.env.ZCODE_TEST_LOCK_MODULE);
+      const results = process.env.ZCODE_TEST_LOCK_RESULTS;
+      const losers = Number(process.env.ZCODE_TEST_LOCK_LOSERS);
+      const countLocked = async () => {
+        const raw = await readFile(results, "utf8").catch(() => "");
+        return raw.split("\\n").filter((line) => line.startsWith("locked ")).length;
+      };
       await writeFile(process.env.ZCODE_TEST_LOCK_READY, "ready\\n");
       while (true) { try { await access(process.env.ZCODE_TEST_LOCK_BARRIER); break; } catch { await delay(5); } }
       const lock = new DataRootLock(process.env.ZCODE_TEST_LOCK_FILE);
       try {
         await lock.acquire();
-        await appendFile(process.env.ZCODE_TEST_LOCK_RESULTS, "success " + process.env.ZCODE_TEST_LOCK_CHILD + "\\n");
-        await delay(1_000);
+        await appendFile(results, "success " + process.env.ZCODE_TEST_LOCK_CHILD + "\\n");
+        // owner 必须持锁到所有竞争者都放弃为止：固定时长会在机器负载高时先于对方的重试
+        // 窗口结束，让慢的竞争者在释放后再次 acquire 成功，出现多个 success 的假失败。
+        const holdDeadline = Date.now() + 20_000;
+        while (Date.now() < holdDeadline && (await countLocked()) < losers) await delay(10);
         await lock.release();
       } catch {
-        await appendFile(process.env.ZCODE_TEST_LOCK_RESULTS, "locked " + process.env.ZCODE_TEST_LOCK_CHILD + "\\n");
+        await appendFile(results, "locked " + process.env.ZCODE_TEST_LOCK_CHILD + "\\n");
       }
     `;
-    const children = Array.from(
-      { length: 8 },
-      (_, index) =>
-        new Promise<void>((resolve, reject) => {
-          const child = spawn(
-            process.execPath,
-            ["--import", "tsx", "--input-type=module", "--eval", childProgram],
-            {
-              env: {
-                ...process.env,
-                ZCODE_TEST_LOCK_MODULE: moduleUrl,
-                ZCODE_TEST_LOCK_BARRIER: barrierFile,
-                ZCODE_TEST_LOCK_FILE: lockFile,
-                ZCODE_TEST_LOCK_READY: join(readyDir, String(index)),
-                ZCODE_TEST_LOCK_RESULTS: resultsFile,
-                ZCODE_TEST_LOCK_CHILD: String(index),
-              },
-              stdio: ["ignore", "ignore", "pipe"],
-            },
-          );
-          let childError = "";
-          child.stderr.on("data", (chunk) => {
-            childError += String(chunk);
-          });
-          child.once("error", reject);
-          child.once("exit", (code) =>
-            code === 0 ? resolve() : reject(new Error(childError || `lock child exited ${code}`)),
-          );
-        }),
-    );
+    const childCount = 8;
+    const children = Array.from({ length: childCount }, (_, index) => new Promise<void>((resolve, reject) => {
+      const child = spawn(process.execPath, ["--import", "tsx", "--input-type=module", "--eval", childProgram], {
+        env: {
+          ...process.env,
+          ZCODE_TEST_LOCK_MODULE: moduleUrl,
+          ZCODE_TEST_LOCK_BARRIER: barrierFile,
+          ZCODE_TEST_LOCK_FILE: lockFile,
+          ZCODE_TEST_LOCK_READY: join(readyDir, String(index)),
+          ZCODE_TEST_LOCK_RESULTS: resultsFile,
+          ZCODE_TEST_LOCK_LOSERS: String(childCount - 1),
+          ZCODE_TEST_LOCK_CHILD: String(index),
+        },
+        stdio: ["ignore", "ignore", "pipe"],
+      });
+      let childError = "";
+      child.stderr.on("data", (chunk) => { childError += String(chunk); });
+      child.once("error", reject);
+      child.once("exit", (code) => code === 0 ? resolve() : reject(new Error(childError || `lock child exited ${code}`)));
+    }));
     // 先等待所有子进程进入 barrier；只按固定时间放行会让慢启动的子进程在首个 owner
     // 释放后再次成功获取锁，导致“一个 success”断言随机出现多个 success。
     const readyDeadline = Date.now() + 20_000;
@@ -175,6 +163,6 @@ describe("DataRootLock", () => {
     const results = (await readFile(resultsFile, "utf8")).trim().split("\n");
     expect(allChildrenReady).toBe(true);
     expect(results.filter((result) => result.startsWith("success "))).toHaveLength(1);
-    expect(results.filter((result) => result.startsWith("locked "))).toHaveLength(7);
+    expect(results.filter((result) => result.startsWith("locked "))).toHaveLength(childCount - 1);
   }, 30_000);
 });
