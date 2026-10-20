@@ -915,3 +915,8 @@ exceptions:
       - packages/ui/src/settings/DynamicWorkflowModeSetting.tsx
       - packages/ui/src/store/dynamicWorkflowAvailabilityStore.ts
     reason: Admitted upstream files edited only to let the user's dynamic workflow mode choice always win and keep the settings row visible; adopting packages/shared/src and packages/ui/src needs a separate module boundary refactor.
+  - id: source-server-operation-logs-unmanaged-file
+    rule: unmanaged-new-file
+    paths:
+      - packages/desktop/src/host/sourceServerOperationLogs.ts
+    reason: 该文件由已开源的 v3.16.1 上游同步（PR #62）带入，Host 内的日志历史与现有 source-server 装配共址；接管 packages/desktop/src/host 整个目录需要单独的模块边界重构，本次审计增量不改变其归属。
