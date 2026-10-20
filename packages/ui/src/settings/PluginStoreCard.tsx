@@ -21,8 +21,6 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { PluginStoreAvatar } from "@/settings/PluginStoreAvatar.js";
 import {
   canUpdatePluginItem,
-  isItemBusy,
-  isUiPluginItem,
   resolveItemDescription,
   resolveItemDisplayName,
   type StorePluginItem,
@@ -40,6 +38,17 @@ export interface PluginStoreActions {
   onUpdate: (pluginId: string) => void;
   operationId: string | null;
   togglingPluginId: string | null;
+}
+
+export function isItemBusy(item: StorePluginItem, actions: PluginStoreActions): boolean {
+  return (
+    actions.operationId === `plugin:install:${item.name}@${item.marketplace}` ||
+    actions.operationId === `plugin:restore:${item.id}` ||
+    actions.operationId === `plugin:uninstall:${item.id}` ||
+    actions.operationId === `plugin:update:${item.id}` ||
+    actions.operationId === `plugin:reset-config:${item.id}` ||
+    actions.togglingPluginId === item.id
+  );
 }
 
 /**
@@ -283,8 +292,7 @@ export function PluginStoreUpdateButton({
       variant="secondary"
       size={size}
       className="rounded-full"
-      // 与安装按钮一致按插件判定：A 安装中时 B 仍可提交更新，后端按提交顺序串行执行。
-      disabled={isItemBusy(item, actions)}
+      disabled={actions.operationId !== null}
       onClick={(event) => {
         event.stopPropagation();
         actions.onUpdate(item.id);

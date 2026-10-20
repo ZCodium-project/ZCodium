@@ -6,7 +6,6 @@ import {
 import {
   buildOAuthState,
   buildReturnToCallbackUrl,
-  buildWebRemoteOAuthRedirectUri,
   isTrustedDevReturnTo,
   parseOAuthState,
   parseOptionalUrl,
@@ -88,26 +87,13 @@ export class WebAuthService {
     const nonce = this.runtime.createNonce();
     const provider = options.provider ?? ZAI_PROVIDER_ID;
     const appReturnTo = options.appReturnTo ?? this.runtime.getCurrentHref();
-    const returnToOptions = { currentOrigin: this.runtime.getCurrentOrigin() };
-    const redirectUri = buildWebRemoteOAuthRedirectUri(
-      options.redirectUri ?? this.config.redirectUri,
-      appReturnTo,
-      returnToOptions,
-    );
+    const redirectUri = options.redirectUri ?? this.config.redirectUri;
     this.repo.savePendingLogin({ nonce, provider, redirectUri });
 
     const state = buildOAuthState({
       nonce,
       app_return_to: appReturnTo,
-      ...(options.devReturnTo
-        ? {
-            return_to: buildWebRemoteOAuthRedirectUri(
-              options.devReturnTo,
-              appReturnTo,
-              returnToOptions,
-            ),
-          }
-        : {}),
+      ...(options.devReturnTo ? { return_to: options.devReturnTo } : {}),
     });
 
     this.runtime.assign(
