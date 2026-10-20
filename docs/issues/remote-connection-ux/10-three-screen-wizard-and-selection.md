@@ -56,7 +56,6 @@ Status: done
 - [x] **规格更新**：更新 UX 规格和导航规格，并同步 E2E 用例目录。
 - [x] **提交前检查**：`pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed`、受影响的单测、受影响的 SSH E2E 全部通过后，在本地提交。
 
-
 ## Comments
 
 ### 实施与验收（2026-09-29）

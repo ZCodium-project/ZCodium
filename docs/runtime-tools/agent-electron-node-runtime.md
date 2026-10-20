@@ -33,12 +33,14 @@ process.execPath  <Electron Helper>
 esbuild `target` 从 `node26` 降到 **`node22`**，取两端运行时里最低的 Node 版本（远端 v22.16）。保证同一份 `zcode.cjs` 在桌面 Node 24 和远端 Node 22 上都不会用到目标运行时不支持的语法。
 
 **桌面**
+
 - `zcode-agent-runtime.ts`：描述符加 `nodeBundleEntryFile: "zcode.cjs"` + `resolveNodeBundleSegments()`。
 - `providerRuntimeResolver.ts`：`findZCodeAgentRuntimeNodeBundle()` 定位 `resources/glm/zcode.cjs`。
 - `zcodeAgentProcessManager.ts`：`resolveElectronRuntimeZCodeAgentCommand`，插在 monorepo dev 与 native-binary 兜底之间。
 - 打包：`prepare:agent-bundle`（`prepare-agent-node-bundle.mjs`）构建 cli、把 `zcode.cjs` stage 进 `bundled-agents/<平台>/glm/`、删掉旧原生 `zcode-agent`；`prepare:runtime-assets` 本机列表用它替换 `prepare:glm`；electron-builder 整目录拷 `resources/glm`。
 
 **远端**
+
 - `@zcode/server-cli stage:remote-assets` 为四个平台生成完整 archive；`runtime/zcode.cjs` 与 Server CLI/Core 使用同一 descriptor SHA 身份。
 - Desktop 本地下载上传与 SSH 远端直下只改变 archive 获取位置，最终都进入 `zcode update --from-archive`。
 - legacy `prepare-prebuilds.mjs`、component manifest 与散文件部署不再进入开发、CI 或发布链路。

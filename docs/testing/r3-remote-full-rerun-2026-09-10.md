@@ -28,10 +28,10 @@ soak 批次结案:soak-reconnect 50 轮全绿;soak-dual 56 轮(5 分钟定案轮
 
 ### 一、产品缺陷(定论,维持 FAIL 立项)
 
-| case                                  | 缺陷                                                                                              | 证据                                    | 分析节  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------- | ------- |
-| r3-provisioning-gui                   | 同步途中断开未拒绝旧 RPC，Provisioning lane 阻塞重连 attachment；已修复，0911 16:15 完整复跑 PASS | 真实连接探针与 GUI 复跑，见下方修复记录 | §19/§25 |
-| r3-settings-scopes                    | scope 选"用户"新建 agent,文件落到远端 home(归属歧义/错写)                                         | 保留容器实锤文件在远端                  | §42     |
+| case                | 缺陷                                                                                              | 证据                                    | 分析节  |
+| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------- | ------- |
+| r3-provisioning-gui | 同步途中断开未拒绝旧 RPC，Provisioning lane 阻塞重连 attachment；已修复，0911 16:15 完整复跑 PASS | 真实连接探针与 GUI 复跑，见下方修复记录 | §19/§25 |
+| r3-settings-scopes  | scope 选"用户"新建 agent,文件落到远端 home(归属歧义/错写)                                         | 保留容器实锤文件在远端                  | §42     |
 
 > 后续状态：`r3-settings-scopes` 原缺陷成立，2026-09-11 修复后 GUI 回归 PASS，详见本文末尾复核记录。上表与 49 case 汇总保留历史口径。
 
@@ -51,14 +51,14 @@ soak 批次结案:soak-reconnect 50 轮全绿;soak-dual 56 轮(5 分钟定案轮
 
 ### 四、测试缺陷(已修复,全部收口 PASS)
 
-| case                          | 原缺陷                                                                                                                                                                  | 修复                                                                                            | 状态                      |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- |
-| r3-install-faults             | 故障破坏 x64 包但目标为 ARM64；B 在线复用会话未进入校验                                                                                                                 | 按每台目标架构选包、finally 恢复；B 显式断开并切回本地草稿                                      | **PASS(0911 14:43 复跑)** |
-| ssh-remote-project-conversation-scope | 首次 conversation 连接漏处理向导内嵌安装确认；原日志在 project 场景执行前超时，§26/§40 产品归因撤销 | 先调用公共 waitForSSHDirectoryStep，再保持原 conversation/project 隔离断言 | **PASS(0911 16:32 复跑)** |
-| r3-uninstall(业务断言部分)    | 全新容器无首装 → if 分支进不去;身份换代合同未按产品流程走;七段卡目录快选面板(产品静默缺陷)                                                                              | 八段版:首装 → 卸载对账 → 静默取证采样 → 移除全部连接 → 全新首连重装 → installationId 断言       | **PASS(round 36)**        |
-| r3-subagent                   | agent 进程 cwd 过滤口径(cwd 实为 daemon home /home/dev,§59 取证实锤)                                                                                                    | 断言改 args 匹配存在性口径(≥1 ≤2),cwd 留 facts 观察                                             | **PASS(round 37)**        |
-| r3-ui-pairwise                | §32 同款安装确认悬挂(boundary catch 吞错)                                                                                                                               | waitForSSHConversation 前插 waitForSSHDirectoryStep                                             | **PASS(round 38)**        |
-| ssh-remote-provisioning-ready | §32 同款(90s waitUntil 只认 ConfirmDialog 抓不到 inline 按钮)+ §60:model-selection 合同被 provider-refactor-m2(b10e5e5d80)整体移除,本地/远端都改落 provider_config.json | submit 后插 waitForSSHDirectoryStep;远端+本地对账改 provider_config 存在性(内容含凭据,脱敏不读) | **PASS(round 42)**        |
+| case                                  | 原缺陷                                                                                                                                                                  | 修复                                                                                            | 状态                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- |
+| r3-install-faults                     | 故障破坏 x64 包但目标为 ARM64；B 在线复用会话未进入校验                                                                                                                 | 按每台目标架构选包、finally 恢复；B 显式断开并切回本地草稿                                      | **PASS(0911 14:43 复跑)** |
+| ssh-remote-project-conversation-scope | 首次 conversation 连接漏处理向导内嵌安装确认；原日志在 project 场景执行前超时，§26/§40 产品归因撤销                                                                     | 先调用公共 waitForSSHDirectoryStep，再保持原 conversation/project 隔离断言                      | **PASS(0911 16:32 复跑)** |
+| r3-uninstall(业务断言部分)            | 全新容器无首装 → if 分支进不去;身份换代合同未按产品流程走;七段卡目录快选面板(产品静默缺陷)                                                                              | 八段版:首装 → 卸载对账 → 静默取证采样 → 移除全部连接 → 全新首连重装 → installationId 断言       | **PASS(round 36)**        |
+| r3-subagent                           | agent 进程 cwd 过滤口径(cwd 实为 daemon home /home/dev,§59 取证实锤)                                                                                                    | 断言改 args 匹配存在性口径(≥1 ≤2),cwd 留 facts 观察                                             | **PASS(round 37)**        |
+| r3-ui-pairwise                        | §32 同款安装确认悬挂(boundary catch 吞错)                                                                                                                               | waitForSSHConversation 前插 waitForSSHDirectoryStep                                             | **PASS(round 38)**        |
+| ssh-remote-provisioning-ready         | §32 同款(90s waitUntil 只认 ConfirmDialog 抓不到 inline 按钮)+ §60:model-selection 合同被 provider-refactor-m2(b10e5e5d80)整体移除,本地/远端都改落 provider_config.json | submit 后插 waitForSSHDirectoryStep;远端+本地对账改 provider_config 存在性(内容含凭据,脱敏不读) | **PASS(round 42)**        |
 
 ## 测试侧沉淀(方法论)
 

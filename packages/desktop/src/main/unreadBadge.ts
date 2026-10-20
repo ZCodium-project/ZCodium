@@ -233,9 +233,7 @@ export interface AntialiasedDotOptions {
 }
 
 /** 4× 超采样的纯红预乘 BGRA 圆点；任务栏与托盘复用，几何参数各自独立。 */
-export function renderAntialiasedStatusDotPixels(
-  options: AntialiasedDotOptions,
-): Uint8Array {
+export function renderAntialiasedStatusDotPixels(options: AntialiasedDotOptions): Uint8Array {
   const supersample = options.supersample ?? 4;
   const pixels = new Uint8Array(options.size * options.size * 4);
   const samplesPerPixel = supersample * supersample;

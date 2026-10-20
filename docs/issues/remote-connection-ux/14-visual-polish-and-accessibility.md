@@ -50,7 +50,6 @@ Status: done
 - [x] **读屏测试**：选中状态、标签关联、连接状态的可访问名称都有测试覆盖。
 - [x] **提交前检查**：`pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed`、受影响的单测、受影响的 E2E 全部通过后，在本地提交。
 
-
 ## Comments
 
 2026-09-29 实施与验收：

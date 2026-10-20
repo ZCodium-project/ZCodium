@@ -226,7 +226,6 @@ App 与 CLI 共用 Release、下载和刷新算法，网络能力由装配层注
 
 核心集成和门禁已执行；真实 UI／多端与最终 Todo113 目录更新后的发布文件在整批验收收口。以本 Todo 和现行 Design V2 为准，旧 Todo18 的内联字段示例仅作历史资料。
 
-
 ## 2026-10-12：远端刷新失败与业务刷新隔离
 
 缺陷：Settings 的 refreshSources 将远端 Built-in 和 Account 刷新放在同一个

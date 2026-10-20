@@ -103,18 +103,18 @@ CodeGraph 返回本工作区无索引，未执行 CodeGraph 影响面扫描；�
 
 ## Dimensions / Accepted Cases
 
-| ID   | Setup → Action                                         | 断言                                                    | 证据层                   |
-| ---- | ------------------------------------------------------ | ------------------------------------------------------- | ------------------------ |
-| VP01 | 旧库含正文 → 升级 / 备份恢复                           | 仅 touchedTables 变化；message/part 完整；checksum 不变 | SQLite fixture / unit    |
-| VP02 | 升级 → 旧写者删除、改标题、新建 → 再升级               | 意图交接、orphan、空归属只判一次                        | SQLite fixture / service |
-| VP03 | 冷种子遗漏 / 删除事件丢失 → reconcile                  | exists/deleted 区分；缺席不删行                         | protocol / CLI / Host    |
-| VP04 | 0 / 1 / 多 roots → 创建编辑、软删、同集恢复            | cwd 固定、名称唯一、同 host、取消无副作用               | service / UI E2E         |
-| VP05 | NULL 归属、0/1/多匹配 → 首次发现 / 重启                | 仅唯一匹配归位；之后不再归位；任意 cwd 进任务区         | service / UI E2E         |
-| VP06 | A+B 项目 → create / explicit resume / subscribe 冷恢复 | B skills/subagents/可写范围可用；AGENTS/config 仅 A     | CLI / Host / E2E         |
-| VP07 | live B 改 C / 换主要目录 / 同 cwd 双项目 / 并发订阅    | live 范围固定；重建按归属；不串用；single-flight        | unit / E2E               |
-| VP08 | 离线入口删除 + 迟到刷新 / 重启重连 → 手动重新添加      | 不复活、不改远端项目和会话；主动添加原 ID               | repo / service / E2E     |
+| ID   | Setup → Action                                                                                           | 断言                                                                      | 证据层                   |
+| ---- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------ |
+| VP01 | 旧库含正文 → 升级 / 备份恢复                                                                             | 仅 touchedTables 变化；message/part 完整；checksum 不变                   | SQLite fixture / unit    |
+| VP02 | 升级 → 旧写者删除、改标题、新建 → 再升级                                                                 | 意图交接、orphan、空归属只判一次                                          | SQLite fixture / service |
+| VP03 | 冷种子遗漏 / 删除事件丢失 → reconcile                                                                    | exists/deleted 区分；缺席不删行                                           | protocol / CLI / Host    |
+| VP04 | 0 / 1 / 多 roots → 创建编辑、软删、同集恢复                                                              | cwd 固定、名称唯一、同 host、取消无副作用                                 | service / UI E2E         |
+| VP05 | NULL 归属、0/1/多匹配 → 首次发现 / 重启                                                                  | 仅唯一匹配归位；之后不再归位；任意 cwd 进任务区                           | service / UI E2E         |
+| VP06 | A+B 项目 → create / explicit resume / subscribe 冷恢复                                                   | B skills/subagents/可写范围可用；AGENTS/config 仅 A                       | CLI / Host / E2E         |
+| VP07 | live B 改 C / 换主要目录 / 同 cwd 双项目 / 并发订阅                                                      | live 范围固定；重建按归属；不串用；single-flight                          | unit / E2E               |
+| VP08 | 离线入口删除 + 迟到刷新 / 重启重连 → 手动重新添加                                                        | 不复活、不改远端项目和会话；主动添加原 ID                                 | repo / service / E2E     |
 | VP09 | 未置顶超期旧任务（不看结果/未读）→ Host 定时扫描 / 设置变更补扫（2026-09-14 起不随项目树加载或点击触发） | 任意 cwd 自动归档；置顶/运行中除外；组织操作不重排；点击任务不改 archived | unit / E2E               |
-| VP10 | 项目创建定时/闲时/Bot → 修改 roots → 执行恢复          | 继续使用固化 cwd/additionalDirectories                  | unit / E2E               |
+| VP10 | 项目创建定时/闲时/Bot → 修改 roots → 执行恢复                                                            | 继续使用固化 cwd/additionalDirectories                                    | unit / E2E               |
 
 ## Pruning Decisions / Unresolved Questions
 

@@ -16,10 +16,7 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "bodyIncludes": [
-          "Generate a concise title",
-          "E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR"
-        ]
+        "bodyIncludes": ["Generate a concise title", "E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR"]
       },
       "response": {
         "statusCode": 200,
@@ -41,12 +38,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR_A_FIRST_PROMPT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR_A_FIRST_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,
@@ -69,12 +62,8 @@
       "match": {
         "method": "POST",
         "pathIncludes": "/chat/completions",
-        "lastUserMessageIncludes": [
-          "E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR_A_FOLLOW_PROMPT"
-        ],
-        "bodyExcludes": [
-          "Generate a concise title"
-        ]
+        "lastUserMessageIncludes": ["E2E_SSH_P0_SETTINGS_OVERLAY_SIDEBAR_A_FOLLOW_PROMPT"],
+        "bodyExcludes": ["Generate a concise title"]
       },
       "response": {
         "statusCode": 200,

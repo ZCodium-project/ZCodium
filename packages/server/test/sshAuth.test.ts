@@ -103,7 +103,9 @@ describe("sshAuth", () => {
   });
 
   it.each([
-    Object.assign(new Error("authentication wording may change"), { level: "client-authentication" }),
+    Object.assign(new Error("authentication wording may change"), {
+      level: "client-authentication",
+    }),
     Object.assign(new Error("Permission denied"), { level: "client-authentication" }),
     new Error("OpenSSH key integrity check failed -- bad passphrase?"),
     new Error("Encrypted private OpenSSH key detected, but no passphrase given"),
@@ -117,8 +119,9 @@ describe("sshAuth", () => {
 
   it("文件权限错误不被认证分类吞掉", () => {
     const error = Object.assign(new Error("Permission denied"), { code: "EACCES" });
-    expect(normalizeRemoteConnectionError(normalizeSSHConnectError(error), "preflight").code)
-      .toBe("remote-permission-denied");
+    expect(normalizeRemoteConnectionError(normalizeSSHConnectError(error), "preflight").code).toBe(
+      "remote-permission-denied",
+    );
   });
 
   it("client-timeout 错误应说明是 SSH 连接握手超时", () => {

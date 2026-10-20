@@ -31,7 +31,6 @@ Status: done
 - [x] 回归桌面持续恢复和手机可重放两条恢复路径，手机远控的现有测试全部通过。
 - [x] 以下检查全部通过后在本地提交：`pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed`、受影响的单测、受影响的 E2E。
 
-
 ## 实施与验证记录（2026-09-28）
 
 - 导航恢复继续复用 TabStore 的项目/激活位置与 Layout 既有 pane 选择持久化。冷启动保留原远程焦点；后台补齐与 Source 挂回不抢焦点；原会话已不存在时回到该项目新任务页。

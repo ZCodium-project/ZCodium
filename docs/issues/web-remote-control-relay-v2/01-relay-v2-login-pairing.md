@@ -169,7 +169,7 @@ auth_ack(matched) ─▶ bootstrap-request ─▶ 版本守卫 ─▶ workspace-
 | 生产 zcode-server 部署 V2                                                                    | 服务端                            | `zcode.z.ai/api/v1/remote/token` 返回 404                                                                 | 该接口无 JWT 返回 401                                      |
 | 生产网关将 `/api/v1/remote/ws2` 精确转发到 V2 relay，device 与 terminal 按 `mid` 落同一实例  | ESA/阿里云网关维护方              | 当前按 `/api/v1/remote/ws` 前缀落到 V1 处理器（返回 400）                                                 | 无 token 返回 401；同 `mid` 两端配对稳定                   |
 | 生产网关按 `app_version` 取 OSS `<version>/index.html`，`/remote/v4/<dir>/<path>` 取对应目录 | ESA/阿里云网关维护方              | 测试环境已生效；生产对所有版本返回同一份 index，`/remote/v4/3.13.0/release-manifest.json` 返回 index.html | 该 manifest 返回 JSON；不同 `app_version` 返回各自版本资源 |
-| OAuth 白名单登记 `https://zcode.z.ai/remote/v4` 与 `https://zcode.z.ai/remote/v4`    | 与 ZAI、BigModel OAuth 提供方沟通 | 未开始                                                                                                    | 测试环境完成一次真实登录回跳                               |
+| OAuth 白名单登记 `https://zcode.z.ai/remote/v4` 与 `https://zcode.z.ai/remote/v4`            | 与 ZAI、BigModel OAuth 提供方沟通 | 未开始                                                                                                    | 测试环境完成一次真实登录回跳                               |
 
 旧基础设施仓库已不再承载 zcode.z.ai 的后端与前端配置，本任务不对其做任何改动。
 

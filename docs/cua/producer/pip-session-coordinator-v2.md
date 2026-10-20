@@ -23,7 +23,7 @@ CUA 工具的 state/frame 继续绑定实际窗口；只有 PiP presentation 使
 
 ```ts
 type PipCaptureTarget = {
-  windowId: number;              // 本次实际聚焦/操作的 surface
+  windowId: number; // 本次实际聚焦/操作的 surface
   presentationWindowId?: number; // 可证明的同进程逻辑根；缺失时等于 windowId
   pid: number;
   bundleId: string;

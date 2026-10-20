@@ -141,12 +141,12 @@ desktop local 使用隔离 HOME 冷启动；CLI session DB 与 App tasks-index �
 | --------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | AUTH-02-A | 未配置时登录/provider 入口可用                  | `waitForTestIdByDom(TID_LOGIN_USE_API_KEY_BUTTON)`                                                                                                                |
 | AUTH-02-B | 跳过后草稿首页展示缺模型 banner                 | `TID_CHAT_ERROR_BANNER` 回显“当前没有可用模型”                                                                                                                    |
-| AUTH-02-C | 未配置时发送按钮被 UI admission 禁用            | 输入文本后按钮仍禁用，composer 原文保留，pending command ledger 为空                                                                                 |
+| AUTH-02-C | 未配置时发送按钮被 UI admission 禁用            | 输入文本后按钮仍禁用，composer 原文保留，pending command ledger 为空                                                                                              |
 | AUTH-02-D | 未配置时历史可见且可读                          | 预置 interactive CLI session 的侧栏 row、用户正文与助手正文均可见，证明真实 sessions-index/conversation topic 已工作                                              |
 | AUTH-02-E | 未配置时没有 deferred draft/retry               | service/UI focused tests 断言 `provider_not_ready` 保持 idle 且投影 banner                                                                                        |
 | AUTH-02-F | 未配置时目标 workspace 只读 Agent 数为 1        | 资源管理器快照按 `ZCodeProject` workspace tag 断言为 1；系统 conversation sibling 不计入，只允许 sessions-index/history 读取，不产生 session create/model command |
 | AUTH-02-G | 保存 provider 后仍复用目标 workspace 唯一 Agent | 资源管理器对同一 workspace 的 Agent 行数保持 1，稳定窗口后二次断言仍为 1，read→write 不重复启动                                                                   |
-| AUTH-02-H | 配置后模型水合、草稿保留且恢复可发送                | 模型 trigger 指向新 Personal Provider 实例及非空模型；banner 消失，原文保留，发送按钮启用                                                                                                 |
+| AUTH-02-H | 配置后模型水合、草稿保留且恢复可发送            | 模型 trigger 指向新 Personal Provider 实例及非空模型；banner 消失，原文保留，发送按钮启用                                                                         |
 
 ### Fixture 合同
 

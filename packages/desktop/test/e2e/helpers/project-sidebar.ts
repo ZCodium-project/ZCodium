@@ -257,7 +257,9 @@ export async function startDraftFromProject(
     () =>
       browser.execute(
         (inputId, panePrefix, workspaceTriggerId, projectName, identity, key, previousVersion) => {
-          const inputs = document.querySelectorAll(`[data-testid="${panePrefix}-workspace-main"] [data-testid="${inputId}"]`);
+          const inputs = document.querySelectorAll(
+            `[data-testid="${panePrefix}-workspace-main"] [data-testid="${inputId}"]`,
+          );
           const pane = inputs[0]?.closest<HTMLElement>(`[data-testid^="${panePrefix}-"]`);
           const trigger = document.querySelector<HTMLElement>(
             `[data-testid="${workspaceTriggerId}"]`,

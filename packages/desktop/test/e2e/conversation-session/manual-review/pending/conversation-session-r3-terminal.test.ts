@@ -3,7 +3,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { TID_TERMINAL, TID_TERMINAL_TOGGLE } from "@zcode/shared/test-ids";
-import { clearAppData, clickTestIdByDom, waitForTestIdByDom } from "../../../helpers/desktop-app.js";
+import {
+  clearAppData,
+  clickTestIdByDom,
+  waitForTestIdByDom,
+} from "../../../helpers/desktop-app.js";
 import {
   connectSSHWorkspaceAndSendFirstTurn,
   prepareSSHLifecycle,
@@ -25,18 +29,21 @@ const run = promisify(execFile);
 async function severDesktopSshSessions(container: string): Promise<string> {
   const script = [
     "target_uid=$(id -u dev); killed=''",
-    "for d in /proc/[0-9]*; do p=${d#/proc/}; [ \"$p\" = 1 ] && continue",
+    'for d in /proc/[0-9]*; do p=${d#/proc/}; [ "$p" = 1 ] && continue',
     "c=$(tr '\\0' ' ' < \"$d/cmdline\" 2>/dev/null) || continue; case \"$c\" in *sshd*) ;; *) continue;; esac",
-    "uid=$(awk '/^Uid:/ {print $2}' \"$d/status\"); [ \"$uid\" = \"$target_uid\" ] || continue",
-    "parent=$(awk '{print $4}' \"$d/stat\"); kill -9 \"$p\" 2>/dev/null && killed=\"$killed $p\"",
-    "[ \"$parent\" != 1 ] && kill -9 \"$parent\" 2>/dev/null && killed=\"$killed $parent\"; done",
+    'uid=$(awk \'/^Uid:/ {print $2}\' "$d/status"); [ "$uid" = "$target_uid" ] || continue',
+    'parent=$(awk \'{print $4}\' "$d/stat"); kill -9 "$p" 2>/dev/null && killed="$killed $p"',
+    '[ "$parent" != 1 ] && kill -9 "$parent" 2>/dev/null && killed="$killed $parent"; done',
     "echo $killed",
   ].join("; ");
   return (await run("docker", ["exec", container, "sh", "-c", script])).stdout.trim();
 }
 
 /** 远端 PTY shell 数：cwd 等于给定 workspace 的交互 shell（不含测试自身的 exec 会话）。 */
-async function countRemoteShells(config: SSHConnectionConfig, workspacePath: string): Promise<number> {
+async function countRemoteShells(
+  config: SSHConnectionConfig,
+  workspacePath: string,
+): Promise<number> {
   const result = await runSSHCommand(
     config,
     `n=0; for d in /proc/[0-9]*; do c=$(tr "\\0" " " < "$d/cmdline" 2>/dev/null) || continue; case "$c" in *bas[h]*|*zs[h]*|*"/bin/s"[h]*) [ "$(readlink $d/cwd 2>/dev/null)" = "${workspacePath}" ] && n=$((n+1));; esac; done; echo $n`,
@@ -52,15 +59,20 @@ async function selectWorkspaceTab(taskId: string): Promise<void> {
 async function openTerminalAndWaitPrompt(): Promise<void> {
   const open = await browser.execute(
     (terminalTestId) =>
-      Array.from(document.querySelectorAll<HTMLElement>(`[data-testid="${terminalTestId}"] .xterm-rows`)).some(
-        (row) => row.offsetParent !== null,
-      ),
+      Array.from(
+        document.querySelectorAll<HTMLElement>(`[data-testid="${terminalTestId}"] .xterm-rows`),
+      ).some((row) => row.offsetParent !== null),
     TID_TERMINAL,
   );
   if (!open) {
-    await clickTestIdByDom(TID_TERMINAL_TOGGLE, { timeoutMsg: `${CASE_MARKER}: Terminal 入口不可点击` });
+    await clickTestIdByDom(TID_TERMINAL_TOGGLE, {
+      timeoutMsg: `${CASE_MARKER}: Terminal 入口不可点击`,
+    });
   }
-  await waitForTestIdByDom(TID_TERMINAL, { timeout: 30_000, timeoutMsg: `${CASE_MARKER}: Terminal 没有打开` });
+  await waitForTestIdByDom(TID_TERMINAL, {
+    timeout: 30_000,
+    timeoutMsg: `${CASE_MARKER}: Terminal 没有打开`,
+  });
   // 0911 修复：原写法 `() => async () => …` 返回函数对象（恒 truthy），45s 的
   // prompt 等待被短路成立即通过——PTY 未就绪即开始输入，首批按键全丢（swap 慢机
   // 下两次同点 FAIL 实锤）。改为真正的 async 条件。
@@ -81,7 +93,9 @@ async function typeInTerminal(command: string): Promise<void> {
         `[data-testid="${terminalTestId}"] .xterm-helper-textarea`,
       ),
     );
-    const visible = areas.filter((area) => area.closest<HTMLElement>(".xterm")?.offsetParent !== null);
+    const visible = areas.filter(
+      (area) => area.closest<HTMLElement>(".xterm")?.offsetParent !== null,
+    );
     (visible.at(-1) ?? areas.at(-1))?.focus();
   }, TID_TERMINAL);
   // 逐块输入，每块等待回显；未回显则重新聚焦并重发该块（xterm 尚未接管焦点时首批按键会丢）。
@@ -95,13 +109,18 @@ async function typeInTerminal(command: string): Promise<void> {
       await browser.keys(chunk.split(""));
       const expectedTail = (typed + chunk).slice(-12);
       echoed = await browser
-        .waitUntil(async () => (await terminalText()).includes(expectedTail), { timeout: 8000, interval: 200 })
+        .waitUntil(async () => (await terminalText()).includes(expectedTail), {
+          timeout: 8000,
+          interval: 200,
+        })
         .then(() => true)
         .catch(() => false);
       if (!echoed) {
         await browser.execute((terminalTestId) => {
           const areas = Array.from(
-            document.querySelectorAll<HTMLTextAreaElement>(`[data-testid="${terminalTestId}"] .xterm-helper-textarea`),
+            document.querySelectorAll<HTMLTextAreaElement>(
+              `[data-testid="${terminalTestId}"] .xterm-helper-textarea`,
+            ),
           );
           areas.at(-1)?.focus();
         }, TID_TERMINAL);
@@ -121,7 +140,9 @@ async function terminalText(): Promise<string> {
     const rows = Array.from(
       document.querySelectorAll<HTMLElement>(`[data-testid="${terminalTestId}"] .xterm-rows`),
     );
-    const visible = rows.filter((row) => row.getClientRects().length > 0 && row.offsetParent !== null);
+    const visible = rows.filter(
+      (row) => row.getClientRects().length > 0 && row.offsetParent !== null,
+    );
     return (visible.at(-1) ?? rows.at(-1))?.textContent ?? "";
   }, TID_TERMINAL);
 }
@@ -179,7 +200,8 @@ async function captureTerminalPanelDiagnostics(): Promise<Record<string, unknown
         node = node.parentElement;
       }
       const panel =
-        section?.closest<HTMLElement>("[data-panel]") ?? section?.closest<HTMLElement>("[data-panel-id]");
+        section?.closest<HTMLElement>("[data-panel]") ??
+        section?.closest<HTMLElement>("[data-panel-id]");
       const toggle = document.querySelector<HTMLButtonElement>(`[data-testid="${toggleTestId}"]`);
       const sectionRect = section?.getBoundingClientRect();
       const sections = Array.from(
@@ -188,14 +210,18 @@ async function captureTerminalPanelDiagnostics(): Promise<Record<string, unknown
         const ancestors: string[] = [];
         let cursor = item.parentElement;
         while (cursor && ancestors.length < 4) {
-          ancestors.push(`${cursor.tagName.toLowerCase()}${cursor.dataset.panel !== undefined ? "[data-panel]" : ""}${cursor.hasAttribute("aria-hidden") ? `[aria-hidden=${cursor.getAttribute("aria-hidden")}]` : ""}`);
+          ancestors.push(
+            `${cursor.tagName.toLowerCase()}${cursor.dataset.panel !== undefined ? "[data-panel]" : ""}${cursor.hasAttribute("aria-hidden") ? `[aria-hidden=${cursor.getAttribute("aria-hidden")}]` : ""}`,
+          );
           cursor = cursor.parentElement;
         }
         return {
           ancestors,
           hasXtermRows: Boolean(item.querySelector(".xterm-rows")),
           height: Math.round(item.getBoundingClientRect().height),
-          panelHeight: Math.round(item.closest("[data-panel]")?.getBoundingClientRect().height ?? -1),
+          panelHeight: Math.round(
+            item.closest("[data-panel]")?.getBoundingClientRect().height ?? -1,
+          ),
         };
       });
       return {
@@ -226,9 +252,13 @@ async function clickTerminalButtonByLabel(labels: string[]): Promise<void> {
   const clicked = await browser.execute(
     (terminalTestId, candidates) => {
       const buttons = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(`[data-testid="${terminalTestId}"] button[aria-label]`),
+        document.querySelectorAll<HTMLButtonElement>(
+          `[data-testid="${terminalTestId}"] button[aria-label]`,
+        ),
       );
-      const target = buttons.find((button) => candidates.includes(button.getAttribute("aria-label") ?? ""));
+      const target = buttons.find((button) =>
+        candidates.includes(button.getAttribute("aria-label") ?? ""),
+      );
       target?.click();
       return Boolean(target);
     },
@@ -242,7 +272,9 @@ async function clickTerminalButtonByLabel(labels: string[]): Promise<void> {
 async function closeActiveTerminalTab(): Promise<void> {
   const clicked = await browser.execute((terminalTestId) => {
     const contents = Array.from(
-      document.querySelectorAll<HTMLElement>(`[data-testid="${terminalTestId}"] [data-terminal-tab-content]`),
+      document.querySelectorAll<HTMLElement>(
+        `[data-testid="${terminalTestId}"] [data-terminal-tab-content]`,
+      ),
     );
     const activeTrigger = contents
       .map((content) => content.parentElement)
@@ -299,20 +331,36 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
 
     // A：命令持续到用例回收 PTY，不让固定 90 秒窗口在慢机上先于关键断言结束。
     await selectWorkspaceTab(taskA.taskId);
-    await waitForRemoteTab({ caseMarker: CASE_MARKER, expectedIdentity: taskA.identity, expectedPath: workspaceA });
+    await waitForRemoteTab({
+      caseMarker: CASE_MARKER,
+      expectedIdentity: taskA.identity,
+      expectedPath: workspaceA,
+    });
     await openTerminalAndWaitPrompt();
-    await typeInTerminal(`pwd; i=0; while [ ! -f ${releaseFile} ]; do i=$((i+1)); echo TICK-$i; sleep 1; done; rm -f ${releaseFile}`);
+    await typeInTerminal(
+      `pwd; i=0; while [ ! -f ${releaseFile} ]; do i=$((i+1)); echo TICK-$i; sleep 1; done; rm -f ${releaseFile}`,
+    );
     const aText = await waitTerminalIncludes("TICK-3");
     expect(aText).toContain(workspaceA);
-    await browser.waitUntil(async () => (await countRemoteShells(prepared.config, workspaceA)) > shellsBeforeA, {
-      timeout: 30_000,
-      timeoutMsg: `${CASE_MARKER}: 远端没有出现 A 的 PTY shell`,
-    });
-    facts.shellsA = { before: shellsBeforeA, during: await countRemoteShells(prepared.config, workspaceA) };
+    await browser.waitUntil(
+      async () => (await countRemoteShells(prepared.config, workspaceA)) > shellsBeforeA,
+      {
+        timeout: 30_000,
+        timeoutMsg: `${CASE_MARKER}: 远端没有出现 A 的 PTY shell`,
+      },
+    );
+    facts.shellsA = {
+      before: shellsBeforeA,
+      during: await countRemoteShells(prepared.config, workspaceA),
+    };
 
     // B：切 tab 后终端属于 B（cwd 为 B），不串 A 的输出。
     await selectWorkspaceTab(taskB.taskId);
-    await waitForRemoteTab({ caseMarker: CASE_MARKER, expectedIdentity: taskB.identity, expectedPath: workspaceB });
+    await waitForRemoteTab({
+      caseMarker: CASE_MARKER,
+      expectedIdentity: taskB.identity,
+      expectedPath: workspaceB,
+    });
     await openTerminalAndWaitPrompt();
     // 面板 open 状态是全局的，但会话按 workspaceKey 隔离：切到 B 后应看到 B 自己的 shell，而不是 A 的 TICK 输出。
     await browser.waitUntil(async () => !(await terminalText()).includes("TICK-"), {
@@ -327,7 +375,9 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
     for (let attempt = 0; attempt < 3 && !bText.includes("R3_TERM_B_MARK"); attempt += 1) {
       await browser.pause(1500);
       await typeInTerminal('pwd; echo R3_TERM_B_"MARK"');
-      bText = await waitTerminalIncludes("R3_TERM_B_MARK", 20_000).catch(async () => terminalText());
+      bText = await waitTerminalIncludes("R3_TERM_B_MARK", 20_000).catch(async () =>
+        terminalText(),
+      );
       const attempts = (facts.bAttempts as string[] | undefined) ?? [];
       attempts.push(bText.slice(-200));
       facts.bAttempts = attempts;
@@ -341,15 +391,22 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
 
     // 切回 A：输出继续累积（PTY 在远端持续运行）。
     await selectWorkspaceTab(taskA.taskId);
-    await waitForRemoteTab({ caseMarker: CASE_MARKER, expectedIdentity: taskA.identity, expectedPath: workspaceA });
+    await waitForRemoteTab({
+      caseMarker: CASE_MARKER,
+      expectedIdentity: taskA.identity,
+      expectedPath: workspaceA,
+    });
     await openTerminalAndWaitPrompt();
     const beforeSever = maxTick(await waitTerminalIncludes("TICK-", 30_000));
     let afterSwitch = beforeSever;
     // xterm 视口满后可见行数不再增长，最大序号仍能证明命令继续运行。
-    await browser.waitUntil(async () => {
-      afterSwitch = maxTick(await terminalText());
-      return afterSwitch > beforeSever;
-    }, { timeout: 20_000, timeoutMsg: `${CASE_MARKER}: 切回 A 后输出没有继续增长` });
+    await browser.waitUntil(
+      async () => {
+        afterSwitch = maxTick(await terminalText());
+        return afterSwitch > beforeSever;
+      },
+      { timeout: 20_000, timeoutMsg: `${CASE_MARKER}: 切回 A 后输出没有继续增长` },
+    );
     expect(afterSwitch).toBeGreaterThan(beforeSever);
     facts.ticksAcrossTabSwitch = { beforeSever, afterSwitch };
 
@@ -358,7 +415,9 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
     await browser.waitUntil(
       async () => {
         const snapshot = await readRemoteTabSnapshot(taskA.identity).catch(() => null);
-        return Boolean(snapshot?.remoteSessionId && snapshot.remoteSessionId !== taskA.remoteSessionId);
+        return Boolean(
+          snapshot?.remoteSessionId && snapshot.remoteSessionId !== taskA.remoteSessionId,
+        );
       },
       { timeout: 120_000, interval: 1000, timeoutMsg: `${CASE_MARKER}: 断连后没有自动换代` },
     );
@@ -379,7 +438,9 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
     // 再次展开后 A 的输出仍在。
     const shellsBeforeCollapse = await countRemoteShells(prepared.config, workspaceA);
     const maxTickBeforeCollapse = maxTick(await terminalText());
-    await clickTestIdByDom(TID_TERMINAL_TOGGLE, { timeoutMsg: `${CASE_MARKER}: Terminal 关闭入口不可点击` });
+    await clickTestIdByDom(TID_TERMINAL_TOGGLE, {
+      timeoutMsg: `${CASE_MARKER}: Terminal 关闭入口不可点击`,
+    });
     await browser.waitUntil(() => isTerminalPanelHidden(), {
       timeout: 15_000,
       timeoutMsg: `${CASE_MARKER}: 终端面板没有收起`,
@@ -387,7 +448,9 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
     facts.panelCollapsed = await captureTerminalPanelDiagnostics();
     facts.shellsWhileCollapsed = await countRemoteShells(prepared.config, workspaceA);
     expect(facts.shellsWhileCollapsed).toBe(shellsBeforeCollapse);
-    await clickTestIdByDom(TID_TERMINAL_TOGGLE, { timeoutMsg: `${CASE_MARKER}: Terminal 展开入口不可点击` });
+    await clickTestIdByDom(TID_TERMINAL_TOGGLE, {
+      timeoutMsg: `${CASE_MARKER}: Terminal 展开入口不可点击`,
+    });
     await browser.waitUntil(async () => !(await isTerminalPanelHidden()), {
       timeout: 15_000,
       timeoutMsg: `${CASE_MARKER}: 终端面板没有重新展开`,
@@ -395,7 +458,10 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
     // 视口行数会随面板高度变化（收起再展开后 xterm 重新 fit），不能用可见 TICK 行数判断保活；
     // 可见的最大 TICK 序号是输出尾部，单调不减，用它证明同一个 shell 仍在持续输出。
     const reopenedText = await waitTerminalIncludes("TICK-", 30_000);
-    facts.maxTickAroundCollapse = { before: maxTickBeforeCollapse, afterReopen: maxTick(reopenedText) };
+    facts.maxTickAroundCollapse = {
+      before: maxTickBeforeCollapse,
+      afterReopen: maxTick(reopenedText),
+    };
     expect(maxTick(reopenedText)).toBeGreaterThanOrEqual(maxTickBeforeCollapse);
 
     // 按 terminal 合同回收：关闭一个终端 tab 才释放其 PTY。新建第二个 tab（新 PTY）再关闭它，
@@ -415,9 +481,16 @@ describe(`${CASE_MARKER}: 远端终端长命令、跨 workspace 归属、断线�
         shellsAfterTabClose = await countRemoteShells(prepared.config, workspaceA);
         return shellsAfterTabClose <= shellsBeforeNewTab;
       },
-      { timeout: 60_000, interval: 2000, timeoutMsg: `${CASE_MARKER}: 关闭终端 tab 后远端 PTY 未回收` },
+      {
+        timeout: 60_000,
+        interval: 2000,
+        timeoutMsg: `${CASE_MARKER}: 关闭终端 tab 后远端 PTY 未回收`,
+      },
     );
-    facts.shellsAfterTabClose = { beforeNewTab: shellsBeforeNewTab, afterClose: shellsAfterTabClose };
+    facts.shellsAfterTabClose = {
+      beforeNewTab: shellsBeforeNewTab,
+      afterClose: shellsAfterTabClose,
+    };
     expect(await waitTerminalIncludes("TICK-", 30_000)).toContain("TICK-");
     facts.shellsB_afterAClose = await countRemoteShells(prepared.config, workspaceB);
     expect(facts.shellsB_afterAClose).toBe(shellsDuringB);

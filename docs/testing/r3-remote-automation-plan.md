@@ -27,15 +27,15 @@
 
 ## 2. Feature Summary 与范围发现
 
-| 字段             | 内容                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| Operating mode   | implementation-handoff：交付可实施方案与已接受用例，历史规划阶段；当前实现清单由 harness inventory 和覆盖矩阵维护                         |
-| Change layers    | presentation、option-source、draft-default、validation、commit-effect、persistence、recovery      |
-| 主要领域         | 连接/部署/身份；Provider 配置与执行；工作区/对话/设置；跨端恢复                                   |
-| 必须检查         | 首连屏障、重连换代、全转发 RPC、Source 写路由、旧配置与身份迁移、构建实际身份                     |
-| 条件检查         | SSH 平台能力、Docker/WSL、浏览器 relay、模型账号与真实请求、旧版运行与回退                        |
-| 不变量检查       | 本地流程、单 Window Host、CLI 单队列、continuous/replayable、不同 Source 隔离、日志无 secret      |
-| 不扩展的产品范围 | 远端 cron automation、Direct URL 新产品入口、R4 全量 key 清洗、崩溃后自动续跑、任意多窗口角色切换 |
+| 字段             | 内容                                                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Operating mode   | implementation-handoff：交付可实施方案与已接受用例，历史规划阶段；当前实现清单由 harness inventory 和覆盖矩阵维护 |
+| Change layers    | presentation、option-source、draft-default、validation、commit-effect、persistence、recovery                      |
+| 主要领域         | 连接/部署/身份；Provider 配置与执行；工作区/对话/设置；跨端恢复                                                   |
+| 必须检查         | 首连屏障、重连换代、全转发 RPC、Source 写路由、旧配置与身份迁移、构建实际身份                                     |
+| 条件检查         | SSH 平台能力、Docker/WSL、浏览器 relay、模型账号与真实请求、旧版运行与回退                                        |
+| 不变量检查       | 本地流程、单 Window Host、CLI 单队列、continuous/replayable、不同 Source 隔离、日志无 secret                      |
+| 不扩展的产品范围 | 远端 cron automation、Direct URL 新产品入口、R4 全量 key 清洗、崩溃后自动续跑、任意多窗口角色切换                 |
 
 实施第一个 gate 必须生成 `change-map.json`：分别扫描 R3 主线、合并增量和后续修复的改动，记录文件/符号、命名的语义关系、权威规格、相关用例 ID。非远程改动填写排除理由；共享 facade、协议、构建和状态 owner 不得因路径未包含 remote/ssh 而排除。未解释的远程相关改动标 `unmapped`，完整覆盖不能验收。静态可达性只提供线索，不把所有 staging 文件机械纳入远程用例。
 
@@ -45,7 +45,7 @@
 | -------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------- |
 | 添加 SSH / 设备连接向导                                        | SSHDialog、Host 连接管理                            | target、安装确认、版本门、首连 Provisioning                    | Connection Manager → Transport → Source daemon → attachment | 凭据不进 tab；确认前无安装；本地下载必须显式选择并断言                |
 | 设备设置页 / sidebar / device picker                           | Controller projection、Source 行                    | Source online、操作状态、identity                              | RemoteWorkspaceController → management/profile 服务         | 三入口共享意图；离线不回落本地                                        |
-| 项目与历史用途隔离                                               | Root history、open membership、TabStore             | Source/realpath/purpose、已有 attachment                       | Source backing workspace、logical session、持久 open set    | 本地/远端同 path、两 Source、项目/聊天互相隔离                        |
+| 项目与历史用途隔离                                             | Root history、open membership、TabStore             | Source/realpath/purpose、已有 attachment                       | Source backing workspace、logical session、持久 open set    | 本地/远端同 path、两 Source、项目/聊天互相隔离                        |
 | 模型设置页                                                     | SettingsPage → Local ServiceProvider                | 本地 Provider draft、Configured Default；本地 connectivity cwd | Local ProviderSettings → 成功保存 → Provisioning source     | 激活远端 tab 仍编辑本地；不出现远端编辑/手动同步入口                  |
 | 对话模型选择 / 无模型横幅                                      | useModelSelectionView、pane draft                   | 目标 Host Registry / selection validation                      | 目标 ModelSelection、CLI 创建 Model                         | remote-waiting 不用本地候选兜底；旧 generation 回包丢弃               |
 | Skills/MCP/Plugins/Hooks/Subagents/Memory/Output/Settings-sync | Source scope 与 workspace scope 的 hooks/attachment | online、user/project scope、目标投影一致                       | 所选 Source 正式配置 / workspace 文件                       | 模型页本地化不能带偏这些设置；手机不开放 Source 管理                  |
@@ -157,10 +157,10 @@ ZCODE_E2E_MANUAL_REVIEW=1 pnpm --filter @zcode/desktop test:e2e -- --spec './tes
 
 | 工作包                | 复用                                                  | 需要补齐的能力 / 完成证明                                                                                                 |
 | --------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| H1 运行清单与资源管理 | WDIO runId、SSH helper、CLI verifier                  | alias 标准解析、独占 target、能力探测、build receipt、账号类别与请求记录；缺材料时明确 BLOCKED                                |
+| H1 运行清单与资源管理 | WDIO runId、SSH helper、CLI verifier                  | alias 标准解析、独占 target、能力探测、build receipt、账号类别与请求记录；缺材料时明确 BLOCKED                            |
 | H2 产品连接与生命周期 | SSH dialog、cold reconnect pending                    | 显式选择本地下载、R3 Supervisor/Core PID 身份、断线代理、跨窗口/项目控制；不直接注入“已连接”状态                          |
 | H3 同步与模型 oracle  | case-local replay、SSH reverse tunnel                 | 远端 Store 摘要/Registry readiness、实际 provider/model/body、syncId/generation；barrier 控制流和同步，未匹配 fail-closed |
-| H4 Mobile/live 编排   | dev:web-remote-control、现有 attachment 合同          | 移动 browser 配对、真实 relay、独立断线；实际模型请求含辅助/重试均记录，不设人为消耗上限，鉴权值不进记录            |
+| H4 Mobile/live 编排   | dev:web-remote-control、现有 attachment 合同          | 移动 browser 配对、真实 relay、独立断线；实际模型请求含辅助/重试均记录，不设人为消耗上限，鉴权值不进记录                  |
 | H5 记录与审计         | reporter、Electron window recorder、failure artifacts | 成功代表录像/关键截图、远端日志窗口、每步 JSONL、首次失败保留、前后数据对账、cleanup 审计、HTML/Markdown 汇总             |
 
 H3 通过真实 SSH reverse tunnel 将远端模型请求送到受控响应服务；控制 SSH 连接与模型回放 tunnel 分离。断开 UI SSH 不应意外停止模型响应服务，否则无法证明远端任务独立继续。正式配置同步和远端 Agent 执行必须经过产品链路，禁止直接写目标配置后声称同步通过。

@@ -69,7 +69,6 @@ I27-I31 验证当前连接回退、Family 切换与模型选择恢复，已按�
 - 每个 case 至少断言 UI Selection 与真实 session/request 中的一层运行时证据；
 - Desktop 继续使用 continuous 链路，本组不引入 mobile replayable 状态。
 
-
 ## BR117-F01：远端 Built-in 下载失败不阻断账号连接
 
 - Pending spec：`settings/manual-review/pending/provider-builtin-refresh-failure.test.ts`。

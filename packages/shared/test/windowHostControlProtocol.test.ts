@@ -51,9 +51,26 @@ describe("R1 window Host control protocol", () => {
     );
   });
   it("连接结果可携带严格校验的复用目标", () => {
-    const result = { type: HostResponseTypes.RemoteWorkspaceConnected, requestId: "reused", descriptor: { remoteSessionId: "session", target: sshTarget, generation: 1, reusedConnectionTarget: sshTarget } };
+    const result = {
+      type: HostResponseTypes.RemoteWorkspaceConnected,
+      requestId: "reused",
+      descriptor: {
+        remoteSessionId: "session",
+        target: sshTarget,
+        generation: 1,
+        reusedConnectionTarget: sshTarget,
+      },
+    };
     expect(hostResponseMessageSchema.parse(result)).toEqual(result);
-    expect(hostResponseMessageSchema.safeParse({ ...result, descriptor: { ...result.descriptor, reusedConnectionTarget: { kind: "ssh", host: "dev.internal" } } }).success).toBe(false);
+    expect(
+      hostResponseMessageSchema.safeParse({
+        ...result,
+        descriptor: {
+          ...result.descriptor,
+          reusedConnectionTarget: { kind: "ssh", host: "dev.internal" },
+        },
+      }).success,
+    ).toBe(false);
   });
 
   it("validates monotonic-shape CUA PiP focus facts", () => {

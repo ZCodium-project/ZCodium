@@ -4,9 +4,9 @@
 
 MiMo 按量 API 和 Token Plan 是独立接入产品。设置页需要提供两张模板，避免用户把订阅密钥填到按量地址。
 
-| 模板 ID | 中英文名称 | Anthropic Base URL | 凭据 |
-| --- | --- | --- | --- |
-| `xiaomi-mimo` | Xiaomi MiMo API | `https://api.xiaomimimo.com/anthropic` | 按量 API Key，`sk-` |
+| 模板 ID                  | 中英文名称             | Anthropic Base URL                               | 凭据                     |
+| ------------------------ | ---------------------- | ------------------------------------------------ | ------------------------ |
+| `xiaomi-mimo`            | Xiaomi MiMo API        | `https://api.xiaomimimo.com/anthropic`           | 按量 API Key，`sk-`      |
 | `xiaomi-mimo-token-plan` | Xiaomi MiMo Token Plan | `https://token-plan-cn.xiaomimimo.com/anthropic` | 个人 `tp-` 或团队 `ttp-` |
 
 凭据来自[官方控制台](https://platform.xiaomimimo.com/)。两种 Key 不能混用，但客户端不新增前缀校验。Token Plan 的实际地址以用户控制台为准；同协议也有 `token-plan-sgp.xiaomimimo.com`、`token-plan-ams.xiaomimimo.com` 集群，用户继续通过现有 Base URL 编辑入口覆盖。
@@ -33,10 +33,10 @@ Personal 实例 → Effective Provider → Registry → 新建模型请求
 
 ## 验收
 
-| ID | 场景 | 断言与证据 |
-| --- | --- | --- |
-| MIMO-01 | 生产/测试配置读取、两模板解析 | 名称、协议、地址、模型成员和启用规则正确；V2.6 能力与参数映射完整 |
-| MIMO-02 | 原实例及海外地址覆盖 | 名称、禁用状态、密钥、地址、个人模型配置保留；解析不修改 Personal |
+| ID      | 场景                                | 断言与证据                                                                                                   |
+| ------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| MIMO-01 | 生产/测试配置读取、两模板解析       | 名称、协议、地址、模型成员和启用规则正确；V2.6 能力与参数映射完整                                            |
+| MIMO-02 | 原实例及海外地址覆盖                | 名称、禁用状态、密钥、地址、个人模型配置保留；解析不修改 Personal                                            |
 | MIMO-03 | 手机宽度中文浅色 / 桌面宽度英文深色 | 两张模板及 tooltip、图标显示正确；分别点击只交付对应 templateId；详情使用各自 Base URL，无额外写入或横向溢出 |
 
 配置/Resolver 单测覆盖 MIMO-01/02。浏览器 pending 用例覆盖 MIMO-03 的共享组件，详见[用例矩阵](testing/provider-settings-batch-20260910.md)。浏览器夹具隔离服务写入，不等同于完整 Electron、手机 shared-host 或真实官方付费请求验证。

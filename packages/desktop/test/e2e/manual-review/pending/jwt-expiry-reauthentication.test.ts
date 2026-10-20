@@ -1,11 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { ZAI_PROVIDER_ID } from "@zcode/shared";
 import { TID_OAUTH_LOGIN_BUTTON, testId } from "@zcode/shared/test-ids";
-import {
-  clearAppData,
-  getE2EAppDataPaths,
-  waitForTestIdByDom,
-} from "../../helpers/desktop-app.js";
+import { clearAppData, getE2EAppDataPaths, waitForTestIdByDom } from "../../helpers/desktop-app.js";
 
 const EXPIRED_SESSION_CREDENTIAL_KEYS = [
   "oauth:active_provider",
@@ -60,9 +56,7 @@ async function waitForExpiredLoginAlert(): Promise<{ title: string; description:
 
 async function readAlertSnapshot(): Promise<{ title: string; description: string }> {
   return (await browser.execute(() => {
-    const content = document.querySelector<HTMLElement>(
-      '[data-slot="alert-dialog-content"]',
-    );
+    const content = document.querySelector<HTMLElement>('[data-slot="alert-dialog-content"]');
     return {
       title:
         content
@@ -112,8 +106,7 @@ async function waitForExpiredSessionCredentialsCleanup() {
 async function expectBigModelLoginButton() {
   const text = (await browser.execute((buttonId) => {
     return (
-      document.querySelector<HTMLElement>(`[data-testid="${buttonId}"]`)?.textContent?.trim() ??
-      ""
+      document.querySelector<HTMLElement>(`[data-testid="${buttonId}"]`)?.textContent?.trim() ?? ""
     );
   }, TID_OAUTH_LOGIN_BUTTON)) as string;
   expect(text).toContain("BigModel");

@@ -18,17 +18,17 @@
 
 ## 执行分类
 
-| 执行                    | Selection 来源                        | Model 生命周期      | Session Selection |
-| ----------------------- | ------------------------------------- | ------------------- | ----------------- |
-| 普通 start-now          | 当前 Submission                       | 新 Agent Loop       | 接收时更新        |
-| 普通 Queue drain        | Queue item 保存的 Submission          | 新 Agent Loop       | 接纳时已更新，出队不覆盖 |
-| Guide / “立即”          | Guide Submission                      | 当前 Loop 后续 Step | Guide 接收时更新  |
-| Automatic Compact       | 当前 Loop Active Model                | 当前 Loop           | 不更新            |
-| 手动 Compact            | Compact Submission                    | 新 Loop             | 普通规则          |
-| Subagent                | override > Profile > Parent Selection | Child 生命周期      | 不更新父 Session  |
-| Background              | 每轮启动时确定的 Selection            | 当前后台模型轮      | 不反向更新        |
-| Goal continuation       | 续轮发生时的 Session Selection        | 每轮新的主 Loop     | 不额外保存        |
-| Off-Peak automatic turn | idle Submission 的 ModelSelection     | 整项驻留执行内的模型轮 | 临时更新，不持久化 |
+| 执行                    | Selection 来源                        | Model 生命周期         | Session Selection        |
+| ----------------------- | ------------------------------------- | ---------------------- | ------------------------ |
+| 普通 start-now          | 当前 Submission                       | 新 Agent Loop          | 接收时更新               |
+| 普通 Queue drain        | Queue item 保存的 Submission          | 新 Agent Loop          | 接纳时已更新，出队不覆盖 |
+| Guide / “立即”          | Guide Submission                      | 当前 Loop 后续 Step    | Guide 接收时更新         |
+| Automatic Compact       | 当前 Loop Active Model                | 当前 Loop              | 不更新                   |
+| 手动 Compact            | Compact Submission                    | 新 Loop                | 普通规则                 |
+| Subagent                | override > Profile > Parent Selection | Child 生命周期         | 不更新父 Session         |
+| Background              | 每轮启动时确定的 Selection            | 当前后台模型轮         | 不反向更新               |
+| Goal continuation       | 续轮发生时的 Session Selection        | 每轮新的主 Loop        | 不额外保存               |
+| Off-Peak automatic turn | idle Submission 的 ModelSelection     | 整项驻留执行内的模型轮 | 临时更新，不持久化       |
 
 ## 普通 Agent Loop
 

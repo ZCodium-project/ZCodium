@@ -257,16 +257,16 @@ Host / Agent 最大数量各为 1。RSS 首尾采样 1220 / 1211 MB；这只是�
 
 ## 真实 / 模拟边界
 
-| 环节              | 实现                                                                                                                                                                    |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 连接              | 产品 SSH 弹窗真实填 host/port/user/password，仅密码认证                                                                                                                 |
-| 远端主机          | 同机 Docker 容器（`zcode-remote-ssh:test`），每 case 重建                                                                                                               |
-| 远端 server/Agent | 真装真跑，测试读远端 PID/startTicks/日志对账                                                                                                                            |
-| server 产物       | 本机构建的 `mock-cdn/releases/<版本>`，走"本地下载/上传"安装，不用真 CDN                                                                                                |
-| 模型请求          | 默认 replay：`createSSHReplayTunnel` 经 SSH 反向端口转发把本机 replay server 暴露成容器内 `127.0.0.1:<port>`；`tunnel` 用户单独承载，避免被"杀 dev 的 sshd"故障连带     |
-| 真实模型          | 仅 `live-zapi`、`live-bigmodel-team`、`docker-transport` 三个 case                                                                                                      |
-| 故障注入          | `docker exec` 杀容器内 sshd / 只读探针；本机 loopback TCP 代理挂起首连；本机 HTTP 代理验证下载路径；伪造 release 源                                                     |
-| 手机端            | 本机 chromium（`R3_MOBILE_CHROME`）390×844 viewport；默认托管同批源码的 v4 Web 构建，使用标准 test 外部 relay（`wss://zcode.z.ai/ws`）；显式页面 URL 覆盖仍有效 |
+| 环节              | 实现                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 连接              | 产品 SSH 弹窗真实填 host/port/user/password，仅密码认证                                                                                                             |
+| 远端主机          | 同机 Docker 容器（`zcode-remote-ssh:test`），每 case 重建                                                                                                           |
+| 远端 server/Agent | 真装真跑，测试读远端 PID/startTicks/日志对账                                                                                                                        |
+| server 产物       | 本机构建的 `mock-cdn/releases/<版本>`，走"本地下载/上传"安装，不用真 CDN                                                                                            |
+| 模型请求          | 默认 replay：`createSSHReplayTunnel` 经 SSH 反向端口转发把本机 replay server 暴露成容器内 `127.0.0.1:<port>`；`tunnel` 用户单独承载，避免被"杀 dev 的 sshd"故障连带 |
+| 真实模型          | 仅 `live-zapi`、`live-bigmodel-team`、`docker-transport` 三个 case                                                                                                  |
+| 故障注入          | `docker exec` 杀容器内 sshd / 只读探针；本机 loopback TCP 代理挂起首连；本机 HTTP 代理验证下载路径；伪造 release 源                                                 |
+| 手机端            | 本机 chromium（`R3_MOBILE_CHROME`）390×844 viewport；默认托管同批源码的 v4 Web 构建，使用标准 test 外部 relay（`wss://zcode.z.ai/ws`）；显式页面 URL 覆盖仍有效     |
 
 ## Case 与档位映射
 
@@ -484,7 +484,7 @@ provider/model/endpoint 正确。业务 401 退出、登录弹窗、SSH 协议�
 | share 分享入口 `conversation-share-trigger` 始终 missing                      | 入口条件含 `user &&`，而 `user` 是 OAuth 产物（credentials 的 `oauth:<provider>:user_info`），API Key 登录不产生。已排除 `remoteTarget.kind`（实测 `"ssh"`）、header 缺失、草稿态。**仍未跑通**：补 OAuth 凭据要先让应用进到可操作状态，而该 case 沿用的老 conversation helper（`prepareConversationE2E` → `ensureDeepSeekProviderForE2E`）内部走 WebDriver clickable，正是容器里会误判的路径（`chat-model-select-trigger still not clickable`）。要跑通得先把它迁到 `prepareV4ConversationE2E` 体系 |
 | settings-ui-polish FAIL                                                       | 远程用例 MP-UI-05-remote 本身通过，被同 spec 的本机用例 MP-UI-06 拖累；已用 `ZCODE_E2E_MOCHA_GREP` 只跑远程用例                                                                                                                                                                                                                                                                                                                                                                                      |
 | 一整轮 8 个 case 各在 1 秒内 FAIL(1)                                          | 复跑脚本传的 runId 前缀不满足 runner 校验，而队列把 runner 输出丢进 `/dev/null` —— 编排失败与业务失败无法区分。现在写 `run-logs/<runId>.launcher.log`                                                                                                                                                                                                                                                                                                                                                |
-| live-zapi / dockertrn                                                         | `zapi.z.ai` 从宿主与容器均不可达，等飞连（用户手动配）                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| live-zapi / dockertrn                                                         | `zapi.z.ai` 从宿主与容器均不可达，等飞连（用户手动配）                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | live-team                                                                     | 同上，注入 live 凭据后应用停在 `root-startup-loading`（`bodyText:""`、`localStorageKeys:[]`），启动阶段的账号请求打不通                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### 结果（commit `7573244112` 全量）

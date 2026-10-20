@@ -54,13 +54,13 @@ guest 页面发起请求
 
 ## 权限分级表
 
-| 级别 | 权限 | 记忆策略 |
-|---|---|---|
-| 静默放行 | `clipboard-sanitized-write`、`fullscreen`、`pointerLock`、`mediaKeySystem` | 无 |
-| 弹窗 A：确认气泡 | `media`（按 `details.mediaTypes` 标明摄像头/麦克风）、`clipboard-read`、`geolocation`、`notifications`、`midi`、`midiSysex`、`idle-detection`、`speaker-selection`、`window-management`、`storage-access`、`top-level-storage-access`、`keyboardLock`、`fileSystem` | 见弹窗 A 四态 |
-| 弹窗 B：源选择器 | `display-capture`（屏幕共享） | 每次询问，不记住 |
-| 弹窗 C：设备选择器 | `hid` / `usb` / `serial` / 蓝牙 | 每次询问，不记住 |
-| 显式拒绝 | `openExternal`（外部协议开窗已有独立的"默认浏览器打开"路由）、`unknown`、`deprecated-sync-clipboard-read` | — |
+| 级别               | 权限                                                                                                                                                                                                                                                                | 记忆策略         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| 静默放行           | `clipboard-sanitized-write`、`fullscreen`、`pointerLock`、`mediaKeySystem`                                                                                                                                                                                          | 无               |
+| 弹窗 A：确认气泡   | `media`（按 `details.mediaTypes` 标明摄像头/麦克风）、`clipboard-read`、`geolocation`、`notifications`、`midi`、`midiSysex`、`idle-detection`、`speaker-selection`、`window-management`、`storage-access`、`top-level-storage-access`、`keyboardLock`、`fileSystem` | 见弹窗 A 四态    |
+| 弹窗 B：源选择器   | `display-capture`（屏幕共享）                                                                                                                                                                                                                                       | 每次询问，不记住 |
+| 弹窗 C：设备选择器 | `hid` / `usb` / `serial` / 蓝牙                                                                                                                                                                                                                                     | 每次询问，不记住 |
+| 显式拒绝           | `openExternal`（外部协议开窗已有独立的"默认浏览器打开"路由）、`unknown`、`deprecated-sync-clipboard-read`                                                                                                                                                           | —                |
 
 未在上表中的任何 permission 字符串一律显式拒绝并打 warn 日志（fail-closed，防 Electron 后续版本新增枚举）。
 
@@ -89,11 +89,11 @@ guest 页面发起请求
 2026-10-08 实测定稿：不做「永久阻止」按钮——误点后站点异常难以自愈，持久 deny 只保留在
 站点权限设置里管理（弹窗层不提供）。✕ 关闭与「不允许」同为本次拒绝不记忆。
 
-| 操作 | 语义 | 存储 |
-|---|---|---|
-| 访问此网站时允许 | 持久放行，之后不再询问 | 持久层 `origin+permission → allow` |
-| 仅本次允许 | 本次应用运行期间放行，重启失效 | main 内存 `Map<origin, Set<permission>>` |
-| 不允许 / 20s 超时 | 本次拒绝，不记忆，下次再弹 | 无 |
+| 操作              | 语义                           | 存储                                     |
+| ----------------- | ------------------------------ | ---------------------------------------- |
+| 访问此网站时允许  | 持久放行，之后不再询问         | 持久层 `origin+permission → allow`       |
+| 仅本次允许        | 本次应用运行期间放行，重启失效 | main 内存 `Map<origin, Set<permission>>` |
+| 不允许 / 20s 超时 | 本次拒绝，不记忆，下次再弹     | 无                                       |
 
 ### B. 源选择器 Dialog（屏幕共享）
 
@@ -151,12 +151,12 @@ info 级（低频、生产保留）；弹窗类路径日志量与权限请求数
 
 ## 兼容性影响面（已逐项验证）
 
-| 链路 | 影响 |
-|---|---|
-| agent browser-use（CDP 截图、虚拟剪贴板） | 零影响——截图走 `Page.captureScreenshot`，粘贴走合成 `ClipboardEvent` + `execCommand`（`browserVirtualClipboardPageScript.ts`），均不触发 permission |
-| 网页复制按钮 / DRM 视频站 / 网页全屏 | 不受影响（白名单） |
-| `window.open` / 新标签路由 / 「默认浏览器打开」 | 不受影响（已有 `setWindowOpenHandler` 独立机制） |
-| 屏幕共享 | 从静默失败变为弹窗可控可用，由源选择器把关 |
+| 链路                                            | 影响                                                                                                                                                |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| agent browser-use（CDP 截图、虚拟剪贴板）       | 零影响——截图走 `Page.captureScreenshot`，粘贴走合成 `ClipboardEvent` + `execCommand`（`browserVirtualClipboardPageScript.ts`），均不触发 permission |
+| 网页复制按钮 / DRM 视频站 / 网页全屏            | 不受影响（白名单）                                                                                                                                  |
+| `window.open` / 新标签路由 / 「默认浏览器打开」 | 不受影响（已有 `setWindowOpenHandler` 独立机制）                                                                                                    |
+| 屏幕共享                                        | 从静默失败变为弹窗可控可用，由源选择器把关                                                                                                          |
 
 ## 测试要求
 
@@ -164,7 +164,7 @@ info 级（低频、生产保留）；弹窗类路径日志量与权限请求数
   `executeJavaScript` 会等待返回的 Promise；发起 `getUserMedia` 时使用 `void`，避免测试自身等待用户决策而无法点击。
   顺序：发起请求 -> 确认条可见 -> 点击允许/拒绝 -> 断言结果与二次请求行为。
 
-- 单测：决策表全枚举（白名单/记录命中/无记录无弹窗能力时拒绝/未知权限 fail-closed）、check 与 request 一致性、持久层读写与原子写、sessionAllow 生命周期、inflight 去重、20s 超时拒绝、select-* 与 displayMedia 的拒绝回调。
+- 单测：决策表全枚举（白名单/记录命中/无记录无弹窗能力时拒绝/未知权限 fail-closed）、check 与 request 一致性、持久层读写与原子写、sessionAllow 生命周期、inflight 去重、20s 超时拒绝、select-\* 与 displayMedia 的拒绝回调。
 - e2e（desktop e2e）：确认气泡出现 → 三种按钮 + ✕ 各自的页面侧结果与二次请求行为；重启后持久记忆生效；设置页改状态后生效；源选择器选源后 `getDisplayMedia` 成功、取消失败；`requestDevice` 弹设备选择器，负向断言"未选择设备时不再静默授权第一个设备"。
 
 ### 权限查询与请求的 origin 一致性

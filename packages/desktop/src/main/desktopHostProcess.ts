@@ -316,11 +316,6 @@ export function spawnHostProcess(
       return;
     }
 
-
-
-
-
-
     if (result.data.type === HostResponseTypes.LocalMediaPreviewPathAuthorizeRequest) {
       const request = result.data;
       const authorize = dependencies.authorizeLocalMediaPreviewPath;

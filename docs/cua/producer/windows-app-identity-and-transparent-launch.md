@@ -18,13 +18,13 @@
 
 `selectPlatformAxSource`（`src/broker/server/platformAxSource.ts:109`）在 win32 分支用 `createAxWinReadOnlySource`（`src/native/win.ts`，413 行），**不经过 `nativeAxSource.ts`**。因此 macOS 那套透明拉起控制流（`nativeAxSource.ts:1676-1751`）在 Windows 上从不执行。
 
-| 能力 | macOS | Windows |
-| --- | --- | --- |
-| `captureApp` 实现 | `nativeAxSource.ts` | `src/native/win.ts` |
-| 透明后台拉起 | 有（`openApplicationInBackgroundAsync`，`ax_macos.mm:8883`） | **无导出** |
-| 名字 → canonical 身份 | `resolveApplicationBundleId`（LaunchServices，`macosApplicationResolver.ts:106`） | 只有一张 5 条硬编码表（下 1.2） |
-| 拉起后等 AX 树长稳 | `settleFreshlyLaunchedTree` | **无** |
-| `window_id` 参与 capture | 有 | 有（`win.ts:313`，且校验回传 window_id 一致） |
+| 能力                     | macOS                                                                             | Windows                                       |
+| ------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------- |
+| `captureApp` 实现        | `nativeAxSource.ts`                                                               | `src/native/win.ts`                           |
+| 透明后台拉起             | 有（`openApplicationInBackgroundAsync`，`ax_macos.mm:8883`）                      | **无导出**                                    |
+| 名字 → canonical 身份    | `resolveApplicationBundleId`（LaunchServices，`macosApplicationResolver.ts:106`） | 只有一张 5 条硬编码表（下 1.2）               |
+| 拉起后等 AX 树长稳       | `settleFreshlyLaunchedTree`                                                       | **无**                                        |
+| `window_id` 参与 capture | 有                                                                                | 有（`win.ts:313`，且校验回传 window_id 一致） |
 
 ### 1.2 "按名字启动"目前只是一张计算器别名表
 
@@ -32,8 +32,11 @@
 
 ```ts
 const WINDOWS_PACKAGED_APP_ALIASES = new Map<string, string>([
-  ["calculator", CALC], ["windows calculator", CALC],
-  ["calc", CALC], ["calc.exe", CALC], ["计算器", CALC],
+  ["calculator", CALC],
+  ["windows calculator", CALC],
+  ["calc", CALC],
+  ["calc.exe", CALC],
+  ["计算器", CALC],
 ]);
 ```
 
@@ -52,11 +55,11 @@ const WINDOWS_PACKAGED_APP_ALIASES = new Map<string, string>([
 
 `win.ts:118 windowsNameMatches` 是**大小写无关子串**匹配。三条具体行为：
 
-| `app_ref.name` | 结果 | 原因 |
-| --- | --- | --- |
-| `"计算器"` | ✅ 命中 | 计算器窗口标题恰好等于应用名 |
-| `"记事本"` | ❌ `capture_app: could not be resolved` | 标题是 `无标题 - Notepad`，不含"记事本" |
-| `"设置"` | ⚠️ 静默选错 | 同时命中两条（见 1.4），`win.ts:188` 取 `active` 或第一个，**不抛歧义错** |
+| `app_ref.name` | 结果                                    | 原因                                                                      |
+| -------------- | --------------------------------------- | ------------------------------------------------------------------------- |
+| `"计算器"`     | ✅ 命中                                 | 计算器窗口标题恰好等于应用名                                              |
+| `"记事本"`     | ❌ `capture_app: could not be resolved` | 标题是 `无标题 - Notepad`，不含"记事本"                                   |
+| `"设置"`       | ⚠️ 静默选错                             | 同时命中两条（见 1.4），`win.ts:188` 取 `active` 或第一个，**不抛歧义错** |
 
 子串语义本身也危险：`{name:"cli"}` 会命中 `◐ agent-cli` 这个终端窗口。
 
@@ -96,10 +99,10 @@ activateApplicationByAumid(Microsoft.Paint_...!App) => pid 1936
 
 **结论：绑定必须 pid 优先、AUMID 兜底**，两者各自覆盖一半：
 
-| 应用形态 | 激活返回的 pid | 该 pid 有可见窗口 | AUMID 绑定 | 应采用 |
-| --- | --- | --- | --- | --- |
-| packaged desktop（画图/记事本） | 应用自身 | ✅ | ❌ null | **pid** |
-| UWP（设置/计算器） | 真实进程（如 348） | 窗口 cloaked / 非可视帧 | ✅ 宿主 pid | **AUMID** |
+| 应用形态                        | 激活返回的 pid     | 该 pid 有可见窗口       | AUMID 绑定  | 应采用    |
+| ------------------------------- | ------------------ | ----------------------- | ----------- | --------- |
+| packaged desktop（画图/记事本） | 应用自身           | ✅                      | ❌ null     | **pid**   |
+| UWP（设置/计算器）              | 真实进程（如 348） | 窗口 cloaked / 非可视帧 | ✅ 宿主 pid | **AUMID** |
 
 ### 1.6 已安装应用注册表：`shell:AppsFolder`
 
@@ -116,11 +119,11 @@ CC Switch     aumid=com.ccswitch.desktop  target=...\cc-switch.exe
 
 按"合法 AUMID 或 `.exe` 目标"分类：
 
-| 分类 | 条数 | 拉起方式 |
-| --- | --- | --- |
-| 合法 AUMID | 38 | `ActivateApplication(AO_NONE)` |
-| `.exe` 目标 | 75 | `CreateProcess(target)` |
-| 不可拉起（`.url` / `.msc` / `.html` / shell CLSID） | 21 | 拒绝 |
+| 分类                                                | 条数 | 拉起方式                       |
+| --------------------------------------------------- | ---- | ------------------------------ |
+| 合法 AUMID                                          | 38   | `ActivateApplication(AO_NONE)` |
+| `.exe` 目标                                         | 75   | `CreateProcess(target)`        |
+| 不可拉起（`.url` / `.msc` / `.html` / shell CLSID） | 21   | 拒绝                           |
 
 **113/134（84%）可拉起**，被拒的 21 条全是文档链接、管理控制台、shell 命名空间项 —— 本来就不该当应用拉起。
 
@@ -128,13 +131,13 @@ CC Switch     aumid=com.ccswitch.desktop  target=...\cc-switch.exe
 
 ### 1.7 焦点语义：两条路不同，且 Win32 拦不住
 
-| 路径 | 实测 | 备注 |
-| --- | --- | --- |
-| `ActivateApplication(AO_NONE)` | **不抢焦点**（两次独立测量，含冷启动） | 等价 macOS `activates=NO` |
-| `CreateProcess` / `spawn` | **抢焦点**（`FOREGROUND_CHANGED=true`，新窗口 `focused:true`） | |
-| `CreateProcess` + `STARTF_USESHOWWINDOW` + `SW_SHOWNOACTIVATE` | **仍抢焦点** | charmap 自己调 `SetForegroundWindow`，nCmdShow 只是提示 |
-| `ShowWindow(SW_SHOWNOACTIVATE)` 取消最小化 | **抢焦点**（`focused=true`，前台 32324→25792） | 恢复最小化窗口无法避免焦点转移 |
-| `PreventActivation` / `IsFocusStealPrevented` | 诚实 no-op（`ax_win.cc:3345-3357`，"Windows has no equivalent"） | 无可用抑制机制 |
+| 路径                                                           | 实测                                                             | 备注                                                    |
+| -------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------- |
+| `ActivateApplication(AO_NONE)`                                 | **不抢焦点**（两次独立测量，含冷启动）                           | 等价 macOS `activates=NO`                               |
+| `CreateProcess` / `spawn`                                      | **抢焦点**（`FOREGROUND_CHANGED=true`，新窗口 `focused:true`）   |                                                         |
+| `CreateProcess` + `STARTF_USESHOWWINDOW` + `SW_SHOWNOACTIVATE` | **仍抢焦点**                                                     | charmap 自己调 `SetForegroundWindow`，nCmdShow 只是提示 |
+| `ShowWindow(SW_SHOWNOACTIVATE)` 取消最小化                     | **抢焦点**（`focused=true`，前台 32324→25792）                   | 恢复最小化窗口无法避免焦点转移                          |
+| `PreventActivation` / `IsFocusStealPrevented`                  | 诚实 no-op（`ax_win.cc:3345-3357`，"Windows has no equivalent"） | 无可用抑制机制                                          |
 
 **决策：接受 Win32 分支抢焦点。** 不再尝试抑制。工具描述必须如实告知，不得宣称"后台拉起"。
 
@@ -142,12 +145,12 @@ CC Switch     aumid=com.ccswitch.desktop  target=...\cc-switch.exe
 
 "观察需不需要激活"不是一个是非题 —— 四种状态里两种需要，且两种的代价完全不同。
 
-| 目标状态 | UIA 树 | 窗口截图 | 需要什么 | 焦点代价 |
-| --- | --- | --- | --- | --- |
-| 未运行 | — | — | 拉起 | packaged **不抢**；Win32 **抢** |
-| 运行中，窗口正常（可被其他窗口遮挡） | ✅ 229 元素 | ✅ 112,795 B | **无** | — |
-| 运行中，UWP 挂起（`cloaked=2`） | ❌ **仅 1 元素** | 残帧 20,478 B | `ActivateApplication(AUMID)` | **不抢** |
-| 运行中，最小化（`iconic=True`） | ✅ 完整 | ❌ `invalid_target` | 取消最小化 | **必然抢** |
+| 目标状态                             | UIA 树           | 窗口截图            | 需要什么                     | 焦点代价                        |
+| ------------------------------------ | ---------------- | ------------------- | ---------------------------- | ------------------------------- |
+| 未运行                               | —                | —                   | 拉起                         | packaged **不抢**；Win32 **抢** |
+| 运行中，窗口正常（可被其他窗口遮挡） | ✅ 229 元素      | ✅ 112,795 B        | **无**                       | —                               |
+| 运行中，UWP 挂起（`cloaked=2`）      | ❌ **仅 1 元素** | 残帧 20,478 B       | `ActivateApplication(AUMID)` | **不抢**                        |
+| 运行中，最小化（`iconic=True`）      | ✅ 完整          | ❌ `invalid_target` | 取消最小化                   | **必然抢**                      |
 
 关键实测：
 
@@ -254,12 +257,12 @@ resolveTarget(appRef)
 
 `include_screenshot` 是模型可见的、`default(false)` 的既有参数（`schemas/observation.ts:45`），工具描述本来就写着"只在需要视觉时才设 true"。所以"模型显式要像素"这件事已经有表达方式，而一个最小化的窗口**物理上**无法在不恢复的前提下产出像素（`ValidateWindowTarget` 拒 `IsIconic`，`screen_capture_win.cc:268`）。于是触发条件是精确且自洽的：
 
-| 情况 | 是否动窗口 | 焦点代价 |
-| --- | --- | --- |
-| 窗口正常（含被完全遮挡） | 否 | 无 |
-| 窗口 iconic，`include_screenshot=false` | 否，只回树 | 无 |
-| 窗口 iconic，`include_screenshot=true` | 恢复 | **有** |
-| UWP 挂起 cloaked | AUMID 唤醒 | 无 |
+| 情况                                    | 是否动窗口 | 焦点代价 |
+| --------------------------------------- | ---------- | -------- |
+| 窗口正常（含被完全遮挡）                | 否         | 无       |
+| 窗口 iconic，`include_screenshot=false` | 否，只回树 | 无       |
+| 窗口 iconic，`include_screenshot=true`  | 恢复       | **有**   |
+| UWP 挂起 cloaked                        | AUMID 唤醒 | 无       |
 
 也就是说**默认路径永不抢焦点**，抢焦点只发生在模型明确说"我要看画面"、而那画面确实拿不到的时候。
 
@@ -277,16 +280,16 @@ resolveTarget(appRef)
 
 工具本身消失，不是平台收缩。连带删除：
 
-| 删除对象 | 位置 |
-| --- | --- |
-| 工具定义（约 183 行） | `src/tools/observation.ts:1038-1220` |
-| 注册 / tier / 策略 / legacy 映射 | `manifest.ts:138`、`tier-table.ts`、`action-policy.ts`、`legacyToolMap.ts:26` |
-| 入参 schema | `src/tools/schemas/openApplicationAppArg.ts`、`schemas/index.ts`、`schemas/jsonSchemas.ts` |
-| broker 方法与 handler | `broker/types.ts` 的方法名、`broker-client.ts` 的两处特例、`electronNativeBackend.ts` 的 handler（688 行）+ 只服务它的 helper（`resolveAppByPid` / `rollbackFreshApplication` / `discoverFreshApplicationForRollback` / `settleActivatedAppByPid` / `positiveWindowId` / `activateMacFilePanelSurface`，共 378 行）+ `broker_info` 能力标志 |
-| Windows 启动机械 | `windowsSystemSurface.ts` 的 `openApplication`、计算器别名表、`openRunner` / `WindowsAumidActivator` 全套（173 → 44 行）；连带 `nodeSystemSurface` 的 `windowsOpenRunner` / `windowsActivateApplicationByAumid` 选项与 `helperMain` / `windowsDevHelperMain` 的注入点 |
-| 平台收缩机制（删空后成为死代码） | `src/tools/platform-surface.ts` 全文 + `tools/index.ts:61-62`、`manifest.ts:241-242`、`computer-use-runtime.ts:111-167` |
-| 激活契约文档 | `docs/open-application-activation-contract.md`（激活不再是独立契约，语义并入 `get_app_state`） |
-| `prevent_activation` 拒绝分支 | `electronNativeBackend.ts:1386-1389`。它守的是模型显式请求激活这件事，而该请求不再存在；且该门在 Windows 恒不生效（`IsFocusStealPrevented()` 写死 false，`ax_win.cc:3353`），留着就是死代码 |
+| 删除对象                         | 位置                                                                                                                                                                                                                                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 工具定义（约 183 行）            | `src/tools/observation.ts:1038-1220`                                                                                                                                                                                                                                                                                                        |
+| 注册 / tier / 策略 / legacy 映射 | `manifest.ts:138`、`tier-table.ts`、`action-policy.ts`、`legacyToolMap.ts:26`                                                                                                                                                                                                                                                               |
+| 入参 schema                      | `src/tools/schemas/openApplicationAppArg.ts`、`schemas/index.ts`、`schemas/jsonSchemas.ts`                                                                                                                                                                                                                                                  |
+| broker 方法与 handler            | `broker/types.ts` 的方法名、`broker-client.ts` 的两处特例、`electronNativeBackend.ts` 的 handler（688 行）+ 只服务它的 helper（`resolveAppByPid` / `rollbackFreshApplication` / `discoverFreshApplicationForRollback` / `settleActivatedAppByPid` / `positiveWindowId` / `activateMacFilePanelSurface`，共 378 行）+ `broker_info` 能力标志 |
+| Windows 启动机械                 | `windowsSystemSurface.ts` 的 `openApplication`、计算器别名表、`openRunner` / `WindowsAumidActivator` 全套（173 → 44 行）；连带 `nodeSystemSurface` 的 `windowsOpenRunner` / `windowsActivateApplicationByAumid` 选项与 `helperMain` / `windowsDevHelperMain` 的注入点                                                                       |
+| 平台收缩机制（删空后成为死代码） | `src/tools/platform-surface.ts` 全文 + `tools/index.ts:61-62`、`manifest.ts:241-242`、`computer-use-runtime.ts:111-167`                                                                                                                                                                                                                     |
+| 激活契约文档                     | `docs/open-application-activation-contract.md`（激活不再是独立契约，语义并入 `get_app_state`）                                                                                                                                                                                                                                              |
+| `prevent_activation` 拒绝分支    | `electronNativeBackend.ts:1386-1389`。它守的是模型显式请求激活这件事，而该请求不再存在；且该门在 Windows 恒不生效（`IsFocusStealPrevented()` 写死 false，`ax_win.cc:3353`），留着就是死代码                                                                                                                                                 |
 
 **一处 spec 写错了，按事实纠正**：`adapter.openApplication`（适配器层的启动能力）**必须保留**。
 `reopenWindowlessApp`（darwin 专属）在 `capture_app` 内部用它把 macOS 的无窗口应用重新开出来 ——
@@ -298,11 +301,11 @@ resolveTarget(appRef)
 
 **激活不再是一个能力，而是 `get_app_state` 为完成观察所做的最小动作。** 把"激活"拆开看，三件事各归各位：
 
-| 能力 | 归属 | 焦点代价 |
-| --- | --- | --- |
-| 唤醒挂起 UWP | `get_app_state` 内部自动（2.2） | **无** |
-| 抬到前台（供 raw 输入） | raw 输入派发时自己做（1.10 `activateConcreteWindow`） | 有，但本就是 raw 输入的既有语义 |
-| 恢复最小化窗口（供取像素） | `get_app_state` + `include_screenshot=true`（2.2） | 有，由模型显式触发 |
+| 能力                       | 归属                                                  | 焦点代价                        |
+| -------------------------- | ----------------------------------------------------- | ------------------------------- |
+| 唤醒挂起 UWP               | `get_app_state` 内部自动（2.2）                       | **无**                          |
+| 抬到前台（供 raw 输入）    | raw 输入派发时自己做（1.10 `activateConcreteWindow`） | 有，但本就是 raw 输入的既有语义 |
+| 恢复最小化窗口（供取像素） | `get_app_state` + `include_screenshot=true`（2.2）    | 有，由模型显式触发              |
 
 三件事没有一件需要独立工具。曾考虑新增窄工具 `activate_window`，已否决：它只会有一个使用场景（取一个看不见的窗口的像素），而那个场景本就是 `get_app_state` 自己的职责；多一个工具并没有减少模型要理解的东西，只是把 `open_application` 换了个名字。
 
@@ -335,19 +338,19 @@ resolveTarget(appRef)
 
 改写 / 删除（约 3,200 行）：
 
-| 文件 | 行数 | 处置 |
-| --- | --- | --- |
-| `test/windows-open-application-identity.test.ts` | 771 | 删除；身份语义断言迁入新的 transparent-launch 套件 |
-| `test/open-application-new-instance.test.ts` | 584 | 删除（`new_instance` 随工具消失） |
-| `test/open-application-identity-conjunction.test.ts` | 474 | 删除 |
-| `test/open-application-args.test.ts` | 423 | 删除 |
-| `test/open-application-error-taxonomy.test.ts` | 268 | 删除；错误分类断言迁入 `get_app_state` |
-| `test/broker/windowsSystemSurface.test.ts` | 201 | 精简（去掉 openApplication 与别名表） |
-| `test/get-app-state-transparent-launch.test.ts` | 205 | 扩写：加 Windows 分支 |
-| `test/native/windows-app-ref-resolution.test.ts` | 278 | 改写 `resolveTarget` |
-| `test/tool-platform-surface.test.ts` | 47 | 删除（`open_application` 是唯一条目，机制随之成为死代码） |
-| `test/resolve-opened-app-active-settle.test.ts` | 237 | 删除（`settleActivatedAppByPid` 一并删除，原生激活自带前台校验循环） |
-| `test/manifest.test.ts` / `tier-table` / `schemas-*` / `skill-tool-signatures` / `tool-return-shape.parity` | — | 同步工具计数与签名（15 → 14） |
+| 文件                                                                                                        | 行数 | 处置                                                                 |
+| ----------------------------------------------------------------------------------------------------------- | ---- | -------------------------------------------------------------------- |
+| `test/windows-open-application-identity.test.ts`                                                            | 771  | 删除；身份语义断言迁入新的 transparent-launch 套件                   |
+| `test/open-application-new-instance.test.ts`                                                                | 584  | 删除（`new_instance` 随工具消失）                                    |
+| `test/open-application-identity-conjunction.test.ts`                                                        | 474  | 删除                                                                 |
+| `test/open-application-args.test.ts`                                                                        | 423  | 删除                                                                 |
+| `test/open-application-error-taxonomy.test.ts`                                                              | 268  | 删除；错误分类断言迁入 `get_app_state`                               |
+| `test/broker/windowsSystemSurface.test.ts`                                                                  | 201  | 精简（去掉 openApplication 与别名表）                                |
+| `test/get-app-state-transparent-launch.test.ts`                                                             | 205  | 扩写：加 Windows 分支                                                |
+| `test/native/windows-app-ref-resolution.test.ts`                                                            | 278  | 改写 `resolveTarget`                                                 |
+| `test/tool-platform-surface.test.ts`                                                                        | 47   | 删除（`open_application` 是唯一条目，机制随之成为死代码）            |
+| `test/resolve-opened-app-active-settle.test.ts`                                                             | 237  | 删除（`settleActivatedAppByPid` 一并删除，原生激活自带前台校验循环） |
+| `test/manifest.test.ts` / `tier-table` / `schemas-*` / `skill-tool-signatures` / `tool-return-shape.parity` | —    | 同步工具计数与签名（15 → 14）                                        |
 
 E2E：`docs/cua-act-verify-windows-scenarios.md` 需要一条"按中文应用名冷启动并观察"的用例（今天 `{name:"记事本"}` 必然失败）。
 
@@ -355,11 +358,11 @@ E2E：`docs/cua-act-verify-windows-scenarios.md` 需要一条"按中文应用名
 
 ## 四、分阶段
 
-| 阶段 | 内容 | 可独立验证 |
-| --- | --- | --- |
-| A | 原生：`listInstalledApplications` + `launchApplicationAsync` + `window_id` + cloaked 口径 | ✅ 纯新增导出，不改既有行为 |
-| B | `win.ts`：`resolveTarget` + 透明拉起 + iconic 恢复 + settle + 歧义抛错 | ✅ `get_app_state({name})` 端到端 |
-| C | 删除 `open_application` 全部面 + 平台收缩机制 + 契约文档 | ✅ 净删除 |
+| 阶段 | 内容                                                                                      | 可独立验证                        |
+| ---- | ----------------------------------------------------------------------------------------- | --------------------------------- |
+| A    | 原生：`listInstalledApplications` + `launchApplicationAsync` + `window_id` + cloaked 口径 | ✅ 纯新增导出，不改既有行为       |
+| B    | `win.ts`：`resolveTarget` + 透明拉起 + iconic 恢复 + settle + 歧义抛错                    | ✅ `get_app_state({name})` 端到端 |
+| C    | 删除 `open_application` 全部面 + 平台收缩机制 + 契约文档                                  | ✅ 净删除                         |
 
 C 依赖 B（先有替代能力再删旧工具），B 依赖 A。B 里的 iconic 恢复不含新增原生代码 —— `activateWindow` / `activateApplication` 两条都已存在且都含 `IsIconic → SW_RESTORE`（`ax_win.cc:3300` / `3228`）。
 

@@ -154,15 +154,15 @@ Local → Remote；当前 Provisioning 在本地 allowlist 凭据保存或删除
 
 激活远程工作区只改变工作区服务，不改变 Desktop 设置的所有者。设置页必须按使用者分别加载和保存：
 
-| 设置 | 读取与写入所有者 | 原因 |
-| --- | --- | --- |
-| Chromium 硬件加速、Windows 托盘、内置浏览器证书策略 | base Local Host | Desktop Main 启动时只读取本机 bootstrap 配置 |
-| 数据存储目录 | base Local Host | native picker 返回本机路径；复制和 bootstrap 指针必须在同一台机器 |
-| 集成终端 Shell 选择 | base Local Host | 候选由本机 systemService 枚举；本机 shell 路径不能写入 Source |
-| HTTP 代理、No Proxy、自定义 CA 路径 | base Local Host | 桌面渲染层、内置浏览器与本机子进程的启动配置；不隐式配置另一 Environment |
-| 终端 Profile 继承、终端字体 | 当前 workspace Environment | 由目标 terminalService 创建 PTY 时读取 |
-| 任务自动归档开关与天数 | 当前 workspace Environment | 由持有任务的目标 taskService 执行 |
-| Skills/MCP/Plugins/Hooks/Subagents | 既有目标 scope resolver | 保持 User、Source、workspace 的现有归属 |
+| 设置                                                | 读取与写入所有者           | 原因                                                                     |
+| --------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------ |
+| Chromium 硬件加速、Windows 托盘、内置浏览器证书策略 | base Local Host            | Desktop Main 启动时只读取本机 bootstrap 配置                             |
+| 数据存储目录                                        | base Local Host            | native picker 返回本机路径；复制和 bootstrap 指针必须在同一台机器        |
+| 集成终端 Shell 选择                                 | base Local Host            | 候选由本机 systemService 枚举；本机 shell 路径不能写入 Source            |
+| HTTP 代理、No Proxy、自定义 CA 路径                 | base Local Host            | 桌面渲染层、内置浏览器与本机子进程的启动配置；不隐式配置另一 Environment |
+| 终端 Profile 继承、终端字体                         | 当前 workspace Environment | 由目标 terminalService 创建 PTY 时读取                                   |
+| 任务自动归档开关与天数                              | 当前 workspace Environment | 由持有任务的目标 taskService 执行                                        |
+| Skills/MCP/Plugins/Hooks/Subagents                  | 既有目标 scope resolver    | 保持 User、Source、workspace 的现有归属                                  |
 
 ```text
 Desktop 设置页（可在远程 tab 打开）

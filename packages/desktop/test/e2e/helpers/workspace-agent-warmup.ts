@@ -89,7 +89,7 @@ export async function assertStableAgentSelection(
 /** 旧组织模式入口退场后，所有项目型用例统一选择项目视图。 */
 export async function selectTaskOrganizeMode(_labels: string[]): Promise<void> {
   await $('[data-testid="sidebar-view-menu"]').click();
-  await $('[role="menuitemradio"][data-state]') .waitForExist();
+  await $('[role="menuitemradio"][data-state]').waitForExist();
   const item = $('[role="menuitemradio"][data-testid="sidebar-view-projects"]');
   await item.click();
   await $('[data-testid="project-section"]').waitForDisplayed();

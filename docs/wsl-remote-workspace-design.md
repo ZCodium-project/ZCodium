@@ -121,9 +121,13 @@ export class WSLBackend implements IRemoteBackend {
   //    Node 加的双引号会让外层 shell 先展开 `"$var"`，局部变量在到达 bash -lc 前就变成空串
   //    （2026-09-14 WSL 连接误报「远端缺少 tar」的根因）。--exec 按 CommandLineToArgvW 解析后直接 exec。
   async exec(command: string): Promise<StdioStream> {
-    const proc = spawn("wsl.exe", ["--distribution", this.distro, "--exec", "bash", "-c", command], {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    const proc = spawn(
+      "wsl.exe",
+      ["--distribution", this.distro, "--exec", "bash", "-c", command],
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
 
     return {
       stdin: proc.stdin!,

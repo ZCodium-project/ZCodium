@@ -86,16 +86,16 @@ async function readScopeOptions(): Promise<{ current: string; options: string[] 
   await trigger.click();
   let options: string[] = [];
   await browser.waitUntil(
-      async () => {
-        options = await browser.execute(() =>
-          Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).map((item) =>
-            item.innerText.trim(),
-          ),
-        );
-        return options.length > 0;
-      },
-      { timeout: 10_000, timeoutMsg: "scope-menu" },
-    );
+    async () => {
+      options = await browser.execute(() =>
+        Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).map((item) =>
+          item.innerText.trim(),
+        ),
+      );
+      return options.length > 0;
+    },
+    { timeout: 10_000, timeoutMsg: "scope-menu" },
+  );
   await browser.keys(["Escape"]);
   return { current, options };
 }

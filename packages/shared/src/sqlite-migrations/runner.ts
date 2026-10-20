@@ -48,7 +48,8 @@ async function migrateExclusive(
   migrations: readonly SqliteMigration[],
   options: MigrationOptions,
 ): Promise<MigrationResult> {
-  if (db.isTransaction !== Boolean(options.transactionOpen)) throw new Error("Migration transaction ownership mismatch");
+  if (db.isTransaction !== Boolean(options.transactionOpen))
+    throw new Error("Migration transaction ownership mismatch");
   if (!options.backupDirectories.length) throw new Error("Migration requires a backup directory");
   if (!options.transactionOpen) db.exec("begin immediate");
   try {

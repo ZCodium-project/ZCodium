@@ -52,7 +52,7 @@ export async function runServerCore(generation: number): Promise<void> {
       sourceServerId,
       zcodeBuiltinProviderConfigFilePath,
       providerProvisioningTargetEnabled: true,
-    topicResourceRelayChannel: (request) => topicResourcePeers.getChannel(request),
+      topicResourceRelayChannel: (request) => topicResourcePeers.getChannel(request),
     });
   const taskActivityTracker = createTaskActivityTracker(services.getOptional(IZCodeAgentService));
   const ingressToken = await createIngressToken(layout);

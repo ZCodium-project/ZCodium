@@ -192,11 +192,11 @@ M16 raster frame -> state-only observe -> naked coordinate rejected
 M17 background Chrome file panel -> confirmed exact-surface activation -> exact path -> DOM oracle
 ```
 
-| Case | `main@e0d27a36` before fix | multi-surface implementation |
-|---|---|---|
-| M14 | panel AX tree was visible, but no actionable panel raster or actual/presentation surface identity was delivered | coordinate dispatched to the actual panel window; panel closed into the same root; fixture oracle selected the exact file |
-| M15 | Escape returned `Key pressed 1 time(s).` while the first panel remained open, demonstrating accepted-without-effect feedback | first generation closes, second generation differs, old explicit window returns `surface_replaced`, and PID-only text reports the focused sheet dispatch surface |
-| M16 | no actionable panel raster was available, so coordinate authority could not be established | state-only observation rejects the naked coordinate with `action_sent=false`; the explicit retained frame dispatches to the exact captured surface and leaves its generation unchanged |
+| Case | `main@e0d27a36` before fix                                                                                                   | multi-surface implementation                                                                                                                                                           |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M14  | panel AX tree was visible, but no actionable panel raster or actual/presentation surface identity was delivered              | coordinate dispatched to the actual panel window; panel closed into the same root; fixture oracle selected the exact file                                                              |
+| M15  | Escape returned `Key pressed 1 time(s).` while the first panel remained open, demonstrating accepted-without-effect feedback | first generation closes, second generation differs, old explicit window returns `surface_replaced`, and PID-only text reports the focused sheet dispatch surface                       |
+| M16  | no actionable panel raster was available, so coordinate authority could not be established                                   | state-only observation rejects the naked coordinate with `action_sent=false`; the explicit retained frame dispatches to the exact captured surface and leaves its generation unchanged |
 
 Run the current implementation:
 

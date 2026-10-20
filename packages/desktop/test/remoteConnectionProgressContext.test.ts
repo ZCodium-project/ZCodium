@@ -29,8 +29,14 @@ describe("remoteConnectionProgressContext", () => {
   });
   it("带空格的绝对路径也不能残留在用户日志", async () => {
     const messages: string[] = [];
-    const context = createRemoteConnectionProgressContext({ emit: (event) => messages.push(String(event.args[0])) });
-    await context.run("request", async () => context.report("info", [String.raw`upload "/Users/Alice Smith/private file.tar" and "C:\Program Files\ZCode\key"`]));
+    const context = createRemoteConnectionProgressContext({
+      emit: (event) => messages.push(String(event.args[0])),
+    });
+    await context.run("request", async () =>
+      context.report("info", [
+        String.raw`upload "/Users/Alice Smith/private file.tar" and "C:\Program Files\ZCode\key"`,
+      ]),
+    );
     expect(messages.join("")).not.toMatch(/Alice|Smith|Program|Files|private file/);
   });
 

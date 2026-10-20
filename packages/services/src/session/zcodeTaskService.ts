@@ -184,12 +184,29 @@ export interface ZCodeTaskReadyOutcome {
  */
 export interface IZCodeTaskService {
   /** 审计版兼容旧 UI：上游 3.16 已移除 grouped task view，保留可选签名。 */
-  listGroupedTaskViewStructure?(input: import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewQuery): Promise<import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewStructure>;
-  applyGroupedTaskViewOrder?(input: import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewOrderInput): Promise<import("./zcodeTaskListTypes.js").ZCodeGroupedTaskView>;
-  createTaskGroup?(input?: { workspaceScopes?: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[] }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
-  renameTaskGroup?(input: { groupId: string; title: string; workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[] }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
-  updateTaskGroupColor?(input: { groupId: string; color: import("./zcodeTaskListTypes.js").ZCodeTaskGroupColor; workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[] }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
-  deleteTaskGroup?(input: { groupId: string; workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[] }): Promise<void>;
+  listGroupedTaskViewStructure?(
+    input: import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewQuery,
+  ): Promise<import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewStructure>;
+  applyGroupedTaskViewOrder?(
+    input: import("./zcodeTaskListTypes.js").ZCodeGroupedTaskViewOrderInput,
+  ): Promise<import("./zcodeTaskListTypes.js").ZCodeGroupedTaskView>;
+  createTaskGroup?(input?: {
+    workspaceScopes?: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[];
+  }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
+  renameTaskGroup?(input: {
+    groupId: string;
+    title: string;
+    workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[];
+  }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
+  updateTaskGroupColor?(input: {
+    groupId: string;
+    color: import("./zcodeTaskListTypes.js").ZCodeTaskGroupColor;
+    workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[];
+  }): Promise<import("./zcodeTaskListTypes.js").ZCodeTaskGroup>;
+  deleteTaskGroup?(input: {
+    groupId: string;
+    workspaceScopes: import("./zcodeTaskListTypes.js").ZCodeTaskListWorkspaceScope[];
+  }): Promise<void>;
   // ---- 生命周期 ----
 
   /** 检查 agent runtime 是否可用 */

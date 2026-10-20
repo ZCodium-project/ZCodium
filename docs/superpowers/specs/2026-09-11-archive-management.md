@@ -63,7 +63,7 @@ Host readTree -> 单一 ProjectDirectoryProvider -> sidebar / composer / archive
 | ARM04 | 同 projectId/任务 ID/真实路径不同 Host→路由→完整 identity/source/attachment 保留；本地与远端隔离                       | accepted；unit；真实远端/手机 GUI 待验             |
 | ARM05 | 长标题、50+列表、中英文、390px、明暗→搜索/更多/按钮/滚动可用                                                           | accepted；unit + E2E 共享 renderer，不冒充手机配对 |
 | ARM06 | 默认全部收起→鼠标/键盘展开与收起→只挂载展开组；折叠组数量和批量动作仍完整有效                                          | accepted；unit + pending E2E                       |
-| ARM07 | 常规页无自动归档项→归档管理默认关闭/30 天→关闭时切换并保存时长、刷新恢复→开启后使用已存时长；关闭后仍可修改                           | accepted；pending E2E；复用 ARM05 布局覆盖          |
+| ARM07 | 常规页无自动归档项→归档管理默认关闭/30 天→关闭时切换并保存时长、刷新恢复→开启后使用已存时长；关闭后仍可修改            | accepted；pending E2E；复用 ARM05 布局覆盖         |
 
 E2E 放 manual-review/pending，fixture 在隔离 HOME/工作区创建；只用历史数据无需模型，provider policy=none。功能与批量语义按用户请求及既有命令约束确定；未改流协议，formal-proof 消息状态组合剪枝。不晋升 formal/Docker，等待人工 review。
 

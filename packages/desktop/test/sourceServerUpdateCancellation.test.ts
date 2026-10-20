@@ -41,11 +41,10 @@ async function setup(bound = true) {
       },
     } as never,
     credentialService: { load: async () => null, save: async () => {}, delete: async () => {} },
-    createProfileId: () => [
-      profileId,
-      "4f0f4d21-2798-4608-9d44-889f9f3dc777",
-      "78462780-a3bb-4701-a709-a1ecb1dfb39e",
-    ][profileSequence++]!,
+    createProfileId: () =>
+      [profileId, "4f0f4d21-2798-4608-9d44-889f9f3dc777", "78462780-a3bb-4701-a709-a1ecb1dfb39e"][
+        profileSequence++
+      ]!,
   });
   const adapter: SourceServerTransportAdapter = {
     kind: "docker",
@@ -270,9 +269,9 @@ describe("Source update cancellation", () => {
         expect((await updating).error).toBeInstanceOf(Error);
         expect(f.manager.getOnlineConnection(sourceServerId)).toBe(recovered);
         expect(f.manager.getStateByProfile(profileId).state).toBe("online");
-        expect((await f.directory.snapshot()).profiles.map((profile) => profile.profileId)).toEqual([
-          profileId,
-        ]);
+        expect((await f.directory.snapshot()).profiles.map((profile) => profile.profileId)).toEqual(
+          [profileId],
+        );
         expect(f.connectServer).toHaveBeenCalledTimes(2);
       } finally {
         gate.finish();

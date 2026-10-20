@@ -77,8 +77,8 @@ activation-only primitive。
 | restartDiscardUnchanged       | 上一 runtime 未终态 input 仍按 delivery ledger discarded；不得因去掉 legacy snapshot 自动重放              |
 | legacyResumeResponseUnchanged | `session/resume` 仍返回完整、schema 等价的 legacy snapshot                                                 |
 | v4ColdReadySingleOwner        | V4 gateway 拥有历史就绪与 runtime 就绪；同一会话同一次初始化单飞                                           |
-| hydrationBoundaryUnchanged     | `hydratePublisher` 仍只负责 projection hydration，不接管各入口既有的 runtime activation 前置条件          |
-| registryIsNotV4Readiness       | `context.sessions` 只登记 record；V4 cold operation 完成前不能据此放行 query/command                      |
+| hydrationBoundaryUnchanged    | `hydratePublisher` 仍只负责 projection hydration，不接管各入口既有的 runtime activation 前置条件           |
+| registryIsNotV4Readiness      | `context.sessions` 只登记 record；V4 cold operation 完成前不能据此放行 query/command                       |
 
 pending permission/elicitation 和当前 runtime queue 不是旧进程可无条件复活的 durable 事实。本次不增加、
 删除或改写它们；新 runtime 的 V4 memory event tail 仍是在线权威。
@@ -248,10 +248,10 @@ Apple Silicon / Node 24；同一隔离 SQLite fixture（2 messages），每轮�
 从 `runtime/capabilities` 响应后发出 subscribe 开始计时，真实 SessionStart hook 固定占用 2 秒。
 这是验证等待链路的受控样本，不是自然冷启动百分比，也不是用户会话的 UI 首屏测量。
 
-| 边界 | 修改前（ms） | 修改后（ms） | 中位数前 → 后 |
-| --- | --- | --- | --- |
-| subscribe → CLI 历史首帧 | 3349 / 3094 / 2834 | 12 / 37 / 17 | 3094 → 17 |
-| subscribe → runtime ready 帧 | 3349 / 3094 / 2834 | 3541 / 3305 / 3583 | 3094 → 3541 |
+| 边界                         | 修改前（ms）       | 修改后（ms）       | 中位数前 → 后 |
+| ---------------------------- | ------------------ | ------------------ | ------------- |
+| subscribe → CLI 历史首帧     | 3349 / 3094 / 2834 | 12 / 37 / 17       | 3094 → 17     |
+| subscribe → runtime ready 帧 | 3349 / 3094 / 2834 | 3541 / 3305 / 3583 | 3094 → 3541   |
 
 首帧已不再等待 runtime；完整初始化本轮没有改善。日志中插件发现阶段为修改前 607–992 ms、
 修改后 1020–1236 ms，这一 fresh-HOME 样本的主要波动落在原插件流程；本轮没有优化该阶段，

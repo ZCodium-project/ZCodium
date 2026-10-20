@@ -5,6 +5,7 @@
 > 上游方案：[ZCode CUA 重构技术方案：从 30 个 MCP 工具到 node_repl 代码执行](https://internal-docs.example.invalid/redacted)
 >
 > **修订记录**
+>
 > - v2 draft（同日，废弃）：ZCode 风格绑定对象，方法名/签名自行设计。
 > - v3 draft（同日，废弃）：绑定对象 API 固化为最小模型面，但 ZCode 独有能力仅「下沉」到
 >   逃逸口，30 个工具全部保留。
@@ -33,25 +34,25 @@
 签名、方法名、参数名、选项名、返回类型见 §2：
 
 ```js
-const state = await cua.getState();            // 展示 app 清单
-const app   = await cua.getApp("Notes");       // 绑定 + 展示初始 AX 全树
+const state = await cua.getState(); // 展示 app 清单
+const app = await cua.getApp("Notes"); // 绑定 + 展示初始 AX 全树
 await app.click(42);
 await app.typeText("hello");
 await app.pressKey("Return");
-await app.getAXState();                         // 自动展示；返回 string
+await app.getAXState(); // 自动展示；返回 string
 ```
 
 模型可见面收敛到**两个安全方法 + 四个可选选项袋**，没有任何附加成员。
 
 ### 0.2 三处数量
 
-| 维度 | 现状 | v3.1 |
-|---|---|---|
-| 模型可见工具 / 方法 | 30 个 MCP 工具 | 19 个 SDK 成员（17 个交互面成员 + `requestAccess` + `stop`） |
-| 底层工具面（`cua.computer`） | 30 | **14**（删 16，§3.2-3.5） |
-| broker 协议方法 | 63 | **49**（删 15 + 新增 `paste`；再删 6 个测试探针可到 43，§3.6） |
-| 模型面附加成员 | —— | **0** |
-| 模型面附加选项 | —— | 4 个选项袋，共 5 个键（`modifiers` / `strategy` / `holdSeconds`） |
+| 维度                         | 现状           | v3.1                                                              |
+| ---------------------------- | -------------- | ----------------------------------------------------------------- |
+| 模型可见工具 / 方法          | 30 个 MCP 工具 | 19 个 SDK 成员（17 个交互面成员 + `requestAccess` + `stop`）      |
+| 底层工具面（`cua.computer`） | 30             | **14**（删 16，§3.2-3.5）                                         |
+| broker 协议方法              | 63             | **49**（删 15 + 新增 `paste`；再删 6 个测试探针可到 43，§3.6）    |
+| 模型面附加成员               | ——             | **0**                                                             |
+| 模型面附加选项               | ——             | 4 个选项袋，共 5 个键（`modifiers` / `strategy` / `holdSeconds`） |
 
 ### 0.3 两处特殊语义（必须在模型文档里显式告知）
 
@@ -102,12 +103,12 @@ interface ObservationOptions {
 }
 interface StateOptions extends ObservationOptions {
   disableDiffing?: boolean;
-}                                                   // ← detail 已删除（§3.3）
+} // ← detail 已删除（§3.3）
 interface ClickOptions {
   mouseButton?: MouseButton;
   clickCount?: number;
-  modifiers?: string;                               // + ZCode（"cmd+shift"）
-  strategy?: "auto" | "a11y" | "event";             // + ZCode（默认 auto）
+  modifiers?: string; // + ZCode（"cmd+shift"）
+  strategy?: "auto" | "a11y" | "event"; // + ZCode（默认 auto）
 }
 interface SelectTextOptions {
   prefix?: string;
@@ -116,19 +117,22 @@ interface SelectTextOptions {
 }
 interface PasteOptions {
   format?: "text" | "md" | "html";
-}                                                   // ← restoreClipboard 已删除（§3.4）
+} // ← restoreClipboard 已删除（§3.4）
 interface StateAndScreenshot {
   state: string;
   screenshot?: Uint8Array;
 }
-interface PressKeyOptions {                         // + ZCode（整个第二参数是附加的）
-  holdSeconds?: number;                             //   > 0 时走 hold_key
+interface PressKeyOptions {
+  // + ZCode（整个第二参数是附加的）
+  holdSeconds?: number; //   > 0 时走 hold_key
   strategy?: "auto" | "a11y" | "event";
-}                                                   // ← repeat 已删除（§3.4）
-interface ScrollOptions {                           // + ZCode
+} // ← repeat 已删除（§3.4）
+interface ScrollOptions {
+  // + ZCode
   strategy?: "auto" | "a11y" | "event";
-}                                                   // ← amount 已删除（§3.4）
-interface DragOptions {                             // + ZCode
+} // ← amount 已删除（§3.4）
+interface DragOptions {
+  // + ZCode
   modifiers?: string;
   strategy?: "auto" | "a11y" | "event";
 }
@@ -147,10 +151,13 @@ interface Target {
   click(target: number | Vec2, options?: ClickOptions): Promise<void>;
   drag(from: Vec2, to: Vec2, options?: DragOptions): Promise<void>;
   pressKey(key: string, options?: PressKeyOptions): Promise<void>;
-  scroll(target: number | Vec2, direction: Direction,
-         pages?: number, options?: ScrollOptions): Promise<void>;
-  selectText(elementIndex: number, text: string,
-             options?: SelectTextOptions): Promise<void>;
+  scroll(
+    target: number | Vec2,
+    direction: Direction,
+    pages?: number,
+    options?: ScrollOptions,
+  ): Promise<void>;
+  selectText(elementIndex: number, text: string, options?: SelectTextOptions): Promise<void>;
   setValue(elementIndex: number, value: string): Promise<void>;
   typeText(text: string): Promise<void>;
   performSecondaryAction(elementIndex: number, action: string): Promise<void>;
@@ -165,8 +172,8 @@ interface AppInfo {
   // listApps 直通 producer 的 list_applications wire 形状（工具层不做映射）。
   pid: number;
   name: string | null;
-  bundle_id: string | null;                         // macOS bundle id / Windows AUMID
-  active: boolean;                                  // 是否 frontmost
+  bundle_id: string | null; // macOS bundle id / Windows AUMID
+  active: boolean; // 是否 frontmost
 }
 interface State {
   apps: AppInfo[];
@@ -178,7 +185,7 @@ declare const cua: {
   getState(options?: ObservationOptions): Promise<State>;
   getApp(target: string): Promise<App>;
   listApps(options?: ObservationOptions): Promise<AppInfo[]>;
-  computer: Computer;                               // 内容见 §3.5
+  computer: Computer; // 内容见 §3.5
 
   /** + ZCode：安全面。刻意放顶层，不藏进逃逸口。 */
   requestAccess(capabilities?: string[]): Promise<AccessStatus>;
@@ -190,15 +197,15 @@ declare const cua: {
 
 `Target` 12 个成员全部同名同签，差异只在选项袋：
 
-| 成员 | 差异 |
-|---|---|
-| `getAXState` / `getScreenshot` / `getAXStateAndScreenshot` | 无 |
-| `paste` | 无 |
-| `click` | `ClickOptions` 多 `modifiers` / `strategy` |
-| `drag` | 多尾部可选参数 `DragOptions` |
-| `pressKey` | 多尾部可选参数 `PressKeyOptions` |
-| `scroll` | 多尾部可选参数 `ScrollOptions`（仅 `strategy`） |
-| `selectText` / `setValue` / `typeText` / `performSecondaryAction` | 无 |
+| 成员                                                              | 差异                                            |
+| ----------------------------------------------------------------- | ----------------------------------------------- |
+| `getAXState` / `getScreenshot` / `getAXStateAndScreenshot`        | 无                                              |
+| `paste`                                                           | 无                                              |
+| `click`                                                           | `ClickOptions` 多 `modifiers` / `strategy`      |
+| `drag`                                                            | 多尾部可选参数 `DragOptions`                    |
+| `pressKey`                                                        | 多尾部可选参数 `PressKeyOptions`                |
+| `scroll`                                                          | 多尾部可选参数 `ScrollOptions`（仅 `strategy`） |
+| `selectText` / `setValue` / `typeText` / `performSecondaryAction` | 无                                              |
 
 `cua` 根对象：`getState` / `getApp` / `listApps` / `computer` 四项构成基础面，
 `State` 无 `browsers` 键；附加 `requestAccess` / `stop`。
@@ -282,13 +289,13 @@ browser 半边（`browsers` / `getBrowser` / `createBrowserTab` / `getTab` /
 
 ### 3.4 折叠进选项：4 个点击变体 + hold_key（5 个）
 
-| 删除的工具 | 替代 | broker 侧 |
-|---|---|---|
-| `double_click` | `click(t, {clickCount: 2})` | `click` 已带 button + clicks，零改动 |
-| `triple_click` | `click(t, {clickCount: 3})` | 同上 |
-| `right_click` | `click(t, {mouseButton: "right"})` | 同上 |
-| `middle_click` | `click(t, {mouseButton: "middle"})` | 同上 |
-| `hold_key` | `pressKey(key, {holdSeconds})` | `hold_key` / `hold_key_to_app` 留作原语 |
+| 删除的工具     | 替代                                | broker 侧                               |
+| -------------- | ----------------------------------- | --------------------------------------- |
+| `double_click` | `click(t, {clickCount: 2})`         | `click` 已带 button + clicks，零改动    |
+| `triple_click` | `click(t, {clickCount: 3})`         | 同上                                    |
+| `right_click`  | `click(t, {mouseButton: "right"})`  | 同上                                    |
+| `middle_click` | `click(t, {mouseButton: "middle"})` | 同上                                    |
+| `hold_key`     | `pressKey(key, {holdSeconds})`      | `hold_key` / `hold_key_to_app` 留作原语 |
 
 同批删除的**参数**：
 
@@ -301,14 +308,14 @@ browser 半边（`browsers` / `getBrowser` / `createBrowserTab` / `getTab` /
 
 ### 3.5 工具与 broker 方法一起删除（6 个工具）
 
-| 删除的工具 | 为什么 | 对应 broker 方法 |
-|---|---|---|
-| `wait` | 有 settler 之后调 wait 就是在对抗 SDK；内建 settle 明令禁止 sleep | 无（本地 sleep） |
-| `read_clipboard` | AX 读不到的内容属于 fallback of fallback | `read_clipboard` **删** |
-| `write_clipboard` | 被 `paste` 取代 | `write_clipboard` **删** |
-| `mouse_move` | hover 出 tooltip 罕见 | `move_to` **删** |
-| `left_mouse_down` | 未配对的按下有输入持有泄漏面 | `mouse_down` **删** |
-| `left_mouse_up` | 同上 | `mouse_up` **删** |
+| 删除的工具        | 为什么                                                            | 对应 broker 方法         |
+| ----------------- | ----------------------------------------------------------------- | ------------------------ |
+| `wait`            | 有 settler 之后调 wait 就是在对抗 SDK；内建 settle 明令禁止 sleep | 无（本地 sleep）         |
+| `read_clipboard`  | AX 读不到的内容属于 fallback of fallback                          | `read_clipboard` **删**  |
+| `write_clipboard` | 被 `paste` 取代                                                   | `write_clipboard` **删** |
+| `mouse_move`      | hover 出 tooltip 罕见                                             | `move_to` **删**         |
+| `left_mouse_down` | 未配对的按下有输入持有泄漏面                                      | `mouse_down` **删**      |
+| `left_mouse_up`   | 同上                                                              | `mouse_up` **删**        |
 
 `mouse_move` + `left_mouse_down` + `left_mouse_up` 三者唯一的真实组合用途是
 「按住 → 观察 → 释放」（拖到文件夹上悬停展开、滑块微调）。**v3.1 不暴露按住类原语**，
@@ -328,13 +335,13 @@ browser 半边（`browsers` / `getBrowser` / `createBrowserTab` / `getTab` /
 
 **已经是死方法（与本次重构无关，早就没有消费者）：6 个**
 
-| 方法 | 现状 |
-|---|---|
-| `screen_size` | src 内零调用点 |
-| `get_skyshot` | src 内零调用点（per-app 截图实际走 `capture_app`） |
-| `click_element_at_point` | src 内零调用点（坐标穿 AX 实际走 `element_at_point` + `element_press`，见 `target-utils.ts`） |
-| `key_down` / `key_up` | 只有 Helper 侧实现（`electronInputHandlers.ts:4284-4301`），无调用方 |
-| `type_text_into_current_focus` | 同上（`:4208-4223`） |
+| 方法                           | 现状                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| `screen_size`                  | src 内零调用点                                                                                |
+| `get_skyshot`                  | src 内零调用点（per-app 截图实际走 `capture_app`）                                            |
+| `click_element_at_point`       | src 内零调用点（坐标穿 AX 实际走 `element_at_point` + `element_press`，见 `target-utils.ts`） |
+| `key_down` / `key_up`          | 只有 Helper 侧实现（`electronInputHandlers.ts:4284-4301`），无调用方                          |
+| `type_text_into_current_focus` | 同上（`:4208-4223`）                                                                          |
 
 **随工具删除而失去消费者：9 个**
 
@@ -382,11 +389,11 @@ request_access  stop_computer_control
 
 ### 3.8 必须保留的三项，附证据
 
-| 能力 | 证据 |
-|---|---|
+| 能力                | 证据                                                                                                                                                                                                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `strategy: "event"` | `cua-14-tool-e2e-validity.md`：Finder 重命名（M01/M04）、TextEdit 字符样式（M08-M10）、Chromium 键盘导航（C16）**必须** `strategy=event` + 精确 `window_id`，否则 AX 返回成功但文档模型没变（responder chain 的现实）。ZCode 的「不抢用户焦点」是核心卖点，代价就是需要这个逃生门 |
-| 窗口寻址 | 同一份文档：M01 / M04 / M08-M10 / C16 都要绑定精确窗口。`observation.ts:1008-1011` 的 tool description 就是教模型回填 `window_id` |
-| `modifiers` | cmd+click（新标签页打开）、shift+click（范围选择）无法用组合表达 —— 修饰键必须在按下那一瞬生效 |
+| 窗口寻址            | 同一份文档：M01 / M04 / M08-M10 / C16 都要绑定精确窗口。`observation.ts:1008-1011` 的 tool description 就是教模型回填 `window_id`                                                                                                                                                 |
+| `modifiers`         | cmd+click（新标签页打开）、shift+click（范围选择）无法用组合表达 —— 修饰键必须在按下那一瞬生效                                                                                                                                                                                    |
 
 `strategy: "a11y"`（强制 AX，无可用动作即 fail-closed）用量极少，
 但作为选项键零成本，且是防止静默降级到坐标的唯一手段，保留。
@@ -481,7 +488,7 @@ session** 持有。下一个 cell 里 `await cua.getApp("Notes")` 是**重新绑
 
 ```ts
 declare class ComputerUseError extends Error {
-  readonly code: ComputerUseErrorCode;   // 字符串码，映射自 BrokerErrorCode
+  readonly code: ComputerUseErrorCode; // 字符串码，映射自 BrokerErrorCode
   /** 动作是否已下发。false 才可以安全重试同一个非幂等动作。 */
   readonly actionSent: boolean;
   readonly dispatchStatus?: "accepted" | "possibly_sent";
@@ -490,11 +497,11 @@ declare class ComputerUseError extends Error {
 }
 ```
 
-| runtime receipt | v3.1 表现 |
-|---|---|
-| `action_sent:true, dispatch_status:"accepted"` | resolve（void） |
+| runtime receipt                                     | v3.1 表现                                          |
+| --------------------------------------------------- | -------------------------------------------------- |
+| `action_sent:true, dispatch_status:"accepted"`      | resolve（void）                                    |
 | `action_sent:true, dispatch_status:"possibly_sent"` | **reject**，`actionSent:true`，`retry:"reobserve"` |
-| `action_sent:false` | reject，`actionSent:false`，`retry` 按 code |
+| `action_sent:false`                                 | reject，`actionSent:false`，`retry` 按 code        |
 
 错误码：`PERMISSION_DENIED` `NOT_AUTHORIZED` `APP_NOT_FOUND` `AMBIGUOUS_APP`
 `LAUNCH_FAILED` `INVALID_APP` `ELEMENT_UNAVAILABLE` `STALE_STATE` `NOT_SETTABLE`
@@ -630,49 +637,49 @@ Helper 侧原生实现（macOS NSPasteboard、Windows / Linux 各自剪贴板 AP
 模型对 xdotool / keysym 风格的键名有先验。
 在 `findUnsupportedKeyToken` 之前加一层规范化：
 
-| 输入别名 | 规范 token |
-|---|---|
-| `Return` `Enter` `KP_Enter` | `return` |
-| `Control_L` `Control_R` `Control` `Ctrl` | `ctrl` |
-| `Alt_L` `Alt_R` `Meta_L` | `alt` |
-| `Super_L` `Super_R` `Super` | `cmd`(darwin) / `super`(linux) / `win`(win32) |
-| `Shift_L` `Shift_R` | `shift` |
-| `Escape` | `esc` |
-| `Prior` / `Next` | `pageup` / `pagedown` |
-| `period` `comma` `greater` `slash` `minus` `equal` | `.` `,` `>` `/` `-` `=` |
-| `KP_0`…`KP_9` | 需 Helper 映射；缺失时抛明确错误而非静默丢弃 |
+| 输入别名                                           | 规范 token                                    |
+| -------------------------------------------------- | --------------------------------------------- |
+| `Return` `Enter` `KP_Enter`                        | `return`                                      |
+| `Control_L` `Control_R` `Control` `Ctrl`           | `ctrl`                                        |
+| `Alt_L` `Alt_R` `Meta_L`                           | `alt`                                         |
+| `Super_L` `Super_R` `Super`                        | `cmd`(darwin) / `super`(linux) / `win`(win32) |
+| `Shift_L` `Shift_R`                                | `shift`                                       |
+| `Escape`                                           | `esc`                                         |
+| `Prior` / `Next`                                   | `pageup` / `pagedown`                         |
+| `period` `comma` `greater` `slash` `minus` `equal` | `.` `,` `>` `/` `-` `=`                       |
+| `KP_0`…`KP_9`                                      | 需 Helper 映射；缺失时抛明确错误而非静默丢弃  |
 
 只做输入侧兼容，不改内部 token 集合，不改跨平台修饰键规则
 （macOS `cmd`，Linux / Windows `ctrl` —— 文档继续明说）。
 
 ### 6.8 需要新增 / 修改 / 删除的文件
 
-| 文件 | 改动 |
-|---|---|
-| `z-code .../zcode-cua-plugin/scripts/computer-use-client.mjs` | **重写**：`cua` 全局、`Target`/`App`、自动 emit、错误映射、`cua.computer`(14)、未文档化成员 |
-| `z-code .../zcode-cua-plugin/docs/computer-use.md` | 重写为 v3.1 参考（去 browser 半边 + per-cell bootstrap 段） |
-| `z-code .../zcode-cua-plugin/skills/computer-use/SKILL.md` | 重写 |
-| `zcode-cua/plugin/skills/computer-use/SKILL.md` | 重写（producer 事实源） |
-| `zcode-cua/src/tools/zoom.ts` | **删除**（480 行） |
-| `zcode-cua/src/broker/server/electronDisplaySelection.ts` | **删除**（S0c；选屏状态层，topology 留在 `lib/display-topology.ts`） |
-| `zcode-cua/src/tools/manifest.ts` | `TOOL_NAMES` 30 → 14；`APP_ASSOCIATION_MODE_BY_TOOL` 同步 |
-| `zcode-cua/src/tools/tier-table.ts` | `TIER_TABLE` / `READ_ONLY_TOOLS` / `SAFETY_CONTROL_TOOLS` 同步（`left_mouse_up` 退出 SAFETY_CONTROL） |
-| `zcode-cua/src/tools/schemas/{observation,pointer,keyboard,runtime}.ts` | 删除 16 个工具的 schema；删 `detail` / `repeat` / `amount` |
-| `zcode-cua/src/tools/{observation,pointer,keyboard-runtime}.ts` | 删除对应 handler；`type`/`key` 去掉 repeat 分支 |
-| `zcode-cua/src/targeting/format.ts` | compact 无条件带 `actions`、永不带 `bounds`；删 `detail` 分支（§3.3） |
-| `zcode-cua/src/targeting/frame-registry.ts` | 不再为 zoom 保留精确栅格字节；错误文案去掉 `zoom` 提示 |
-| `zcode-cua/src/targeting/session.ts` | 删 `selectedDisplayId` 状态 |
-| `zcode-cua/src/tools/observation.ts` | 放开 delta：三态都映射为完整内部 AppState；去掉两处无条件 `force_full:true`（:644、:1092） |
-| `zcode-cua/src/broker/server/axReadOnly.ts` | delta / no_change 响应补齐 `elements` 全表 + 签发新 `state_id` |
-| `zcode-cua/src/runtime/action-settler.ts` | 新增（§6.4） |
-| `zcode-cua/src/runtime/target-session-store.ts` | 新增（§6.5） |
-| `zcode-cua/src/tools/action-policy.ts` | 新增（§6.2），替换 `withKillSwitchPreflight` 调用点 |
-| `zcode-cua/src/tools/target-binder.ts` | 新增（§5.5） |
-| `zcode-cua/src/broker/types.ts` / `ipcVersion.ts` | **S0c**：`BROKER_METHODS` 63 → 49；IPC 版本 1 → 2（§7.3） |
-| Helper 原生层 | **S0c**：删已失去消费者的原生导出；新增原生 `paste`（三平台各一份，§6.6） |
-| `zcode-cua/src/tools/keyboard-runtime.ts` | 键位别名（§6.7）；`select_text` 内容匹配（§6.3） |
-| `zcode-cua/src/tools/legacyToolMap.ts` | 加两列：`computer`（存活的 14）与 `v3`；被删工具标 `removed` + 替代路径 |
-| `zcode-cua/docs/cua-30-tool-e2e-validity.md` | **改名 + 改内容**：30 → 14，`FULL_SURFACE_ORACLE_CHECKS` 集合缩小，写明解冻理由（§4.3） |
+| 文件                                                                    | 改动                                                                                                  |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `z-code .../zcode-cua-plugin/scripts/computer-use-client.mjs`           | **重写**：`cua` 全局、`Target`/`App`、自动 emit、错误映射、`cua.computer`(14)、未文档化成员           |
+| `z-code .../zcode-cua-plugin/docs/computer-use.md`                      | 重写为 v3.1 参考（去 browser 半边 + per-cell bootstrap 段）                                           |
+| `z-code .../zcode-cua-plugin/skills/computer-use/SKILL.md`              | 重写                                                                                                  |
+| `zcode-cua/plugin/skills/computer-use/SKILL.md`                         | 重写（producer 事实源）                                                                               |
+| `zcode-cua/src/tools/zoom.ts`                                           | **删除**（480 行）                                                                                    |
+| `zcode-cua/src/broker/server/electronDisplaySelection.ts`               | **删除**（S0c；选屏状态层，topology 留在 `lib/display-topology.ts`）                                  |
+| `zcode-cua/src/tools/manifest.ts`                                       | `TOOL_NAMES` 30 → 14；`APP_ASSOCIATION_MODE_BY_TOOL` 同步                                             |
+| `zcode-cua/src/tools/tier-table.ts`                                     | `TIER_TABLE` / `READ_ONLY_TOOLS` / `SAFETY_CONTROL_TOOLS` 同步（`left_mouse_up` 退出 SAFETY_CONTROL） |
+| `zcode-cua/src/tools/schemas/{observation,pointer,keyboard,runtime}.ts` | 删除 16 个工具的 schema；删 `detail` / `repeat` / `amount`                                            |
+| `zcode-cua/src/tools/{observation,pointer,keyboard-runtime}.ts`         | 删除对应 handler；`type`/`key` 去掉 repeat 分支                                                       |
+| `zcode-cua/src/targeting/format.ts`                                     | compact 无条件带 `actions`、永不带 `bounds`；删 `detail` 分支（§3.3）                                 |
+| `zcode-cua/src/targeting/frame-registry.ts`                             | 不再为 zoom 保留精确栅格字节；错误文案去掉 `zoom` 提示                                                |
+| `zcode-cua/src/targeting/session.ts`                                    | 删 `selectedDisplayId` 状态                                                                           |
+| `zcode-cua/src/tools/observation.ts`                                    | 放开 delta：三态都映射为完整内部 AppState；去掉两处无条件 `force_full:true`（:644、:1092）            |
+| `zcode-cua/src/broker/server/axReadOnly.ts`                             | delta / no_change 响应补齐 `elements` 全表 + 签发新 `state_id`                                        |
+| `zcode-cua/src/runtime/action-settler.ts`                               | 新增（§6.4）                                                                                          |
+| `zcode-cua/src/runtime/target-session-store.ts`                         | 新增（§6.5）                                                                                          |
+| `zcode-cua/src/tools/action-policy.ts`                                  | 新增（§6.2），替换 `withKillSwitchPreflight` 调用点                                                   |
+| `zcode-cua/src/tools/target-binder.ts`                                  | 新增（§5.5）                                                                                          |
+| `zcode-cua/src/broker/types.ts` / `ipcVersion.ts`                       | **S0c**：`BROKER_METHODS` 63 → 49；IPC 版本 1 → 2（§7.3）                                             |
+| Helper 原生层                                                           | **S0c**：删已失去消费者的原生导出；新增原生 `paste`（三平台各一份，§6.6）                             |
+| `zcode-cua/src/tools/keyboard-runtime.ts`                               | 键位别名（§6.7）；`select_text` 内容匹配（§6.3）                                                      |
+| `zcode-cua/src/tools/legacyToolMap.ts`                                  | 加两列：`computer`（存活的 14）与 `v3`；被删工具标 `removed` + 替代路径                               |
+| `zcode-cua/docs/cua-30-tool-e2e-validity.md`                            | **改名 + 改内容**：30 → 14，`FULL_SURFACE_ORACLE_CHECKS` 集合缩小，写明解冻理由（§4.3）               |
 
 ---
 
@@ -687,16 +694,16 @@ Helper 侧原生实现（macOS NSPasteboard、Windows / Linux 各自剪贴板 AP
 
 ### 7.2 删除清扫清单（S0 的实际工作量）
 
-| 消费者 | 需要做的 |
-|---|---|
-| `test/manifest.test.ts` 4-way drift gate | 基线 30 → 14，四方仍需一致 |
-| `test/tier-table.test.ts` / `annotations.test.ts` | 同步 |
-| `docs/cua-14-tool-e2e-validity.md`（normative） | `protocol.all_30_tools_have_passing_oracles` → 14；`FULL_SURFACE_ORACLE_CHECKS` 删除对应条目；写明解冻 |
-| `evals/zcode-gui-eval/` | 删除或改写针对被删工具的场景（C18 全表面覆盖用例受影响最大） |
-| `scripts/cua_act_verify*.py` + `docs/cua-act-verify-{,windows-,linux-}scenarios.md` | 三平台场景各扫一遍；`hold_key` / `wait` / `select_text` 出现在场景里，需改写为新形态 |
-| `scripts/windows-*-live-smoke.mjs` / `verify_linux_*.mjs` | 同步 |
-| `test/legacy-tool-map.test.ts` | 加 `removed` 断言 |
-| 其余 `docs/` | 引用被删工具的段落 |
+| 消费者                                                                              | 需要做的                                                                                               |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `test/manifest.test.ts` 4-way drift gate                                            | 基线 30 → 14，四方仍需一致                                                                             |
+| `test/tier-table.test.ts` / `annotations.test.ts`                                   | 同步                                                                                                   |
+| `docs/cua-14-tool-e2e-validity.md`（normative）                                     | `protocol.all_30_tools_have_passing_oracles` → 14；`FULL_SURFACE_ORACLE_CHECKS` 删除对应条目；写明解冻 |
+| `evals/zcode-gui-eval/`                                                             | 删除或改写针对被删工具的场景（C18 全表面覆盖用例受影响最大）                                           |
+| `scripts/cua_act_verify*.py` + `docs/cua-act-verify-{,windows-,linux-}scenarios.md` | 三平台场景各扫一遍；`hold_key` / `wait` / `select_text` 出现在场景里，需改写为新形态                   |
+| `scripts/windows-*-live-smoke.mjs` / `verify_linux_*.mjs`                           | 同步                                                                                                   |
+| `test/legacy-tool-map.test.ts`                                                      | 加 `removed` 断言                                                                                      |
+| 其余 `docs/`                                                                        | 引用被删工具的段落                                                                                     |
 
 ### 7.3 broker 协议瘦身（S0c，在本次范围内）
 
@@ -705,29 +712,29 @@ Helper 侧原生实现（macOS NSPasteboard、Windows / Linux 各自剪贴板 AP
 
 要一起改的：
 
-| 项 | 改动 |
-|---|---|
-| `src/broker/types.ts` | `BROKER_METHODS` 63 → 49；`READ_ONLY_BROKER_METHODS` 同步剔除已删项 |
-| `src/broker/ipcVersion.ts` | `CUA_BROKER_IPC_VERSION` 1 → 2（`ipcVersion.ts` 注释已规定增删方法必须 bump） |
-| `src/broker/server/electronInputHandlers.ts` | 删 `move_to` / `mouse_down` / `mouse_up` / `key_down` / `key_up` / `type_text_into_current_focus` / `read_clipboard` / `write_clipboard` handler；新增 `paste` |
-| `src/broker/server/electronNativeBackend.ts` | 删 `screenshot` / `list_displays` / `set_display` / `cursor_position` / `screen_size` / `get_skyshot` / `click_element_at_point` handler |
-| `src/broker/server/electronDisplaySelection.ts` | 整个删除（topology 留在 `lib/display-topology.ts`） |
-| 原生层 | 删对应的 addon 导出（`moveTo` / `mouseDown` / `mouseUp` / `keyDownGlobal` / `keyUpGlobal` / 全屏 `screenshot` / 显示器枚举中仅供选屏的部分）；新增原生 `paste`（NSPasteboard / Win / Linux 各一份） |
-| `test/broker/*` | `types.readOnlyMethods.test.ts` 等按新清单更新 |
-| 跨版本兼容 | 旧 Helper + 新 host 走 `version_mismatch`（不重试、提示升级），已是 M2 既有路径 |
+| 项                                              | 改动                                                                                                                                                                                                |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/broker/types.ts`                           | `BROKER_METHODS` 63 → 49；`READ_ONLY_BROKER_METHODS` 同步剔除已删项                                                                                                                                 |
+| `src/broker/ipcVersion.ts`                      | `CUA_BROKER_IPC_VERSION` 1 → 2（`ipcVersion.ts` 注释已规定增删方法必须 bump）                                                                                                                       |
+| `src/broker/server/electronInputHandlers.ts`    | 删 `move_to` / `mouse_down` / `mouse_up` / `key_down` / `key_up` / `type_text_into_current_focus` / `read_clipboard` / `write_clipboard` handler；新增 `paste`                                      |
+| `src/broker/server/electronNativeBackend.ts`    | 删 `screenshot` / `list_displays` / `set_display` / `cursor_position` / `screen_size` / `get_skyshot` / `click_element_at_point` handler                                                            |
+| `src/broker/server/electronDisplaySelection.ts` | 整个删除（topology 留在 `lib/display-topology.ts`）                                                                                                                                                 |
+| 原生层                                          | 删对应的 addon 导出（`moveTo` / `mouseDown` / `mouseUp` / `keyDownGlobal` / `keyUpGlobal` / 全屏 `screenshot` / 显示器枚举中仅供选屏的部分）；新增原生 `paste`（NSPasteboard / Win / Linux 各一份） |
+| `test/broker/*`                                 | `types.readOnlyMethods.test.ts` 等按新清单更新                                                                                                                                                      |
+| 跨版本兼容                                      | 旧 Helper + 新 host 走 `version_mismatch`（不重试、提示升级），已是 M2 既有路径                                                                                                                     |
 
 **回滚粒度**：S0c 单独一个 commit / PR。回滚它会同时回滚 `paste`，
 所以 S1 的 `paste` 相关测试要能在 `paste` 缺失时跳过而不是失败。
 
 ### 7.4 契约测试改动清单
 
-| 测试 | 现状断言 | 改动 |
-|---|---|---|
-| `z-code .../zcode-cua-plugin/tests/sdk.node-test.mjs` | `METHOD_NAMES.length === 30` | 改为：`cua.computer` 14 项 + `Target` 12 个成员齐 + `cua` 无任何 browser 成员 |
-| 同上 | 动作结果含 `action_sent` / `dispatch_status` | 成功 resolve 为 `undefined`；`possibly_sent` reject 且 `actionSent === true` |
-| `zcode-cua/test/skill-keyboard-contract.test.ts` | 钉死 `nodeRepl.write(nextState.text)`、`return_state="none"`、22KB 上限 | 改为钉死「观察方法自动展示」「禁止对观察结果再 write」「per-cell bootstrap」 |
-| `zcode-cua/test/observation-tools.test.ts` | delta / no_change → `null` | 反转：三态都返回完整内部 AppState |
-| 新增 | —— | surface 精确断言（§7.5）、`target-binder.test.ts`、`action-settler.test.ts`、`key-alias.test.ts`、`paste.test.ts`、`error-mapping.test.ts`、`compact-carries-actions.test.ts` |
+| 测试                                                  | 现状断言                                                                | 改动                                                                                                                                                                          |
+| ----------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `z-code .../zcode-cua-plugin/tests/sdk.node-test.mjs` | `METHOD_NAMES.length === 30`                                            | 改为：`cua.computer` 14 项 + `Target` 12 个成员齐 + `cua` 无任何 browser 成员                                                                                                 |
+| 同上                                                  | 动作结果含 `action_sent` / `dispatch_status`                            | 成功 resolve 为 `undefined`；`possibly_sent` reject 且 `actionSent === true`                                                                                                  |
+| `zcode-cua/test/skill-keyboard-contract.test.ts`      | 钉死 `nodeRepl.write(nextState.text)`、`return_state="none"`、22KB 上限 | 改为钉死「观察方法自动展示」「禁止对观察结果再 write」「per-cell bootstrap」                                                                                                  |
+| `zcode-cua/test/observation-tools.test.ts`            | delta / no_change → `null`                                              | 反转：三态都返回完整内部 AppState                                                                                                                                             |
+| 新增                                                  | ——                                                                      | surface 精确断言（§7.5）、`target-binder.test.ts`、`action-settler.test.ts`、`key-alias.test.ts`、`paste.test.ts`、`error-mapping.test.ts`、`compact-carries-actions.test.ts` |
 
 ### 7.5 surface 门禁
 
@@ -745,13 +752,16 @@ surface 精确断言：
 ### 7.6 bootstrap 模板
 
 ```js
-const root = process.env.ZCODE_CUA_PLUGIN_ROOT ?? process.env.ZCODE_PLUGIN_ROOT
-  ?? process.env.CLAUDE_PLUGIN_ROOT;
+const root =
+  process.env.ZCODE_CUA_PLUGIN_ROOT ??
+  process.env.ZCODE_PLUGIN_ROOT ??
+  process.env.CLAUDE_PLUGIN_ROOT;
 const { join } = await import("node:path");
 const { pathToFileURL } = await import("node:url");
 const { setupComputerUseRuntime } = await import(
-  pathToFileURL(join(root, "scripts", "computer-use-client.mjs")).href);
-await setupComputerUseRuntime({ globals: globalThis });   // 装配 globalThis.cua
+  pathToFileURL(join(root, "scripts", "computer-use-client.mjs")).href
+);
+await setupComputerUseRuntime({ globals: globalThis }); // 装配 globalThis.cua
 
 const app = await cua.getApp("Notes");
 await app.click(42);
@@ -765,17 +775,17 @@ await app.getAXState();
 
 ## 8. 分阶段实施
 
-| 阶段 | 内容 | 验收 |
-|---|---|---|
-| **S0a** | **独立小 PR**：compact 无条件带 `actions`、永不带 `bounds`，删 `detail`（§3.3） | `compact-carries-actions.test.ts`；`perform_action` 不再需要 `detail:"full"` |
-| **S0b** | **工具面瘦身 30 → 14**（§3.2 / §3.4 / §3.5）+ 全量清扫（§7.2）+ 解冻文档（§4.3） | 4-way drift gate 基线 14 且四方一致；evals / act-verify / smoke 全绿；`zoom.ts` 删除后 `pnpm typecheck` 通过 |
-| **S0c** | **broker 协议瘦身 63 → 49 + 原生 `paste`**（§3.6 / §7.3），含原生层与 `electronDisplaySelection.ts` 删除、IPC 版本 1 → 2 | 旧 Helper + 新 host 走 `version_mismatch`；三平台 Helper 构建通过；`paste`(text) 有真实粘贴 oracle |
-| **S1** | `cua` 全局 + `Target`/`App` + `TargetBinder` + `TargetSessionStore` + 错误映射 + `cua.computer` | `sdk.node-test.mjs` surface 断言绿（`Target` 附加成员 0）；`error-mapping.test.ts` 覆盖全部 code |
-| **S2** | 自动 emit + 首用文档披露 + delta 放开（Helper 补 `elements` 与新 `state_id`） | 同任务观察 token 相比 S1 降 ≥60%；`no_change` 不再触发 force_full；无重复输出 |
-| **S3** | `ActionSettler` + `withActionPolicy` | SKILL 里「模型自己等待」的措辞全部移除；act-verify 通过率不下降 |
-| **S4** | `selectText` 内容匹配、键位别名、`getWindow`（保持未文档化）/ `elements`（已提为文档化）；§4.2 取舍实测 | 4 组新单测 + 三平台 act-verify 各一条新场景；产出 `elements()` 是否提为文档化成员的结论 |
-| **S5** | SKILL / `computer-use.md` / legacyToolMap / provenance 同步；灰度；删 `agent.computerUse` 别名；`activate_window`；`paste` 的 `md`/`html` | 契约测试全绿；`pnpm typecheck` `pnpm lint`；GUI eval 不回归 |
-| **S6**（可选） | 删 6 个 `pip_live_probe_*` 测试探针（63 → 43）、busy 信号、`numpad` keysym | —— |
+| 阶段           | 内容                                                                                                                                      | 验收                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **S0a**        | **独立小 PR**：compact 无条件带 `actions`、永不带 `bounds`，删 `detail`（§3.3）                                                           | `compact-carries-actions.test.ts`；`perform_action` 不再需要 `detail:"full"`                                 |
+| **S0b**        | **工具面瘦身 30 → 14**（§3.2 / §3.4 / §3.5）+ 全量清扫（§7.2）+ 解冻文档（§4.3）                                                          | 4-way drift gate 基线 14 且四方一致；evals / act-verify / smoke 全绿；`zoom.ts` 删除后 `pnpm typecheck` 通过 |
+| **S0c**        | **broker 协议瘦身 63 → 49 + 原生 `paste`**（§3.6 / §7.3），含原生层与 `electronDisplaySelection.ts` 删除、IPC 版本 1 → 2                  | 旧 Helper + 新 host 走 `version_mismatch`；三平台 Helper 构建通过；`paste`(text) 有真实粘贴 oracle           |
+| **S1**         | `cua` 全局 + `Target`/`App` + `TargetBinder` + `TargetSessionStore` + 错误映射 + `cua.computer`                                           | `sdk.node-test.mjs` surface 断言绿（`Target` 附加成员 0）；`error-mapping.test.ts` 覆盖全部 code             |
+| **S2**         | 自动 emit + 首用文档披露 + delta 放开（Helper 补 `elements` 与新 `state_id`）                                                             | 同任务观察 token 相比 S1 降 ≥60%；`no_change` 不再触发 force_full；无重复输出                                |
+| **S3**         | `ActionSettler` + `withActionPolicy`                                                                                                      | SKILL 里「模型自己等待」的措辞全部移除；act-verify 通过率不下降                                              |
+| **S4**         | `selectText` 内容匹配、键位别名、`getWindow`（保持未文档化）/ `elements`（已提为文档化）；§4.2 取舍实测                                   | 4 组新单测 + 三平台 act-verify 各一条新场景；产出 `elements()` 是否提为文档化成员的结论                      |
+| **S5**         | SKILL / `computer-use.md` / legacyToolMap / provenance 同步；灰度；删 `agent.computerUse` 别名；`activate_window`；`paste` 的 `md`/`html` | 契约测试全绿；`pnpm typecheck` `pnpm lint`；GUI eval 不回归                                                  |
+| **S6**（可选） | 删 6 个 `pip_live_probe_*` 测试探针（63 → 43）、busy 信号、`numpad` keysym                                                                | ——                                                                                                           |
 
 S0a 可以立即开工，不依赖任何模型面决定。S0b 先做能让后续改动面小一半。
 S0c 必须在 S1 之前，因为 `paste` 依赖它。
@@ -785,21 +795,21 @@ S0c 必须在 S1 之前，因为 `paste` 依赖它。
 
 ## 9. 风险
 
-| 风险 | 对策 |
-|---|---|
-| 删掉 16 个工具 + 15 个 broker 方法后发现某个真的需要 | **恢复成本已经不小**：要加回 schema + handler + broker 方法 + 三平台原生实现 + 再 bump 一次 IPC 版本。所以每一项的删除理由与替代路径都写在案（§3.2-3.6、附录 B）；S0b 与 S0c 各自单独成 PR，便于整体回滚。评审确认接受这个成本 |
-| 失去「按住 → 观察 → 释放」与剪贴板读取 | 评审已确认接受（§3.5）。不保留 broker 原语「以备将来」 |
-| 失去全屏观察 | `listApps()` + `getApp()` 替代；macOS 系统 UI 都是有 AX 的进程 |
-| 删 zoom 后小字不可读 | 需在 S0b 量化 per-app 截图的实际缩放率。若缩放确实严重，正解是调 per-app 截图预算，而不是恢复 zoom |
-| S0c 回滚会一起回滚 `paste` | S1 起的 `paste` 测试在 `paste` 方法缺失时跳过而非失败（§7.3） |
-| 原生 `paste` 三平台各写一份，工作量与回归面比 host 侧组合大 | 换来的是少两个 broker 原语 + 修掉还原竞态（§6.6）；S0c 只做 `text`，`md`/`html` 推到 S5 |
-| `getAXState()` 返回 string 使「发现元素」多一个 round trip | `app.elements()` 兜底；S4 已结论为提升为文档化成员（§4.2） |
-| `possibly_sent` 从文本提示变 throw，Electron/Chromium 可能高频抛错 | S1 先只**统计**（照旧 resolve + 打点频率），确认基线后再翻；保留 `ZCODE_CUA_POSSIBLY_SENT=throw\|warn` |
-| 放开 delta 后模型复用旧索引 | delta 也签发新 `stateId`；索引由 SDK 用当前 `stateId` 解析；stale 一律 fail-closed（比今天更严） |
-| 自动 emit 与宿主 structured sink 双写导致重复输出 | 沿用现有 `hostProjectionResult` / `imageAuthorityResult` 边界；`format-model-facing-budget.test.ts` 扩一条重复检测 |
-| 绑定不跨 cell 被误解为「状态丢了」 | 文档明写「每 cell 重新 `getApp`，UI 状态与 stateId 由 host 保留」；reattach 只输出一行 |
-| 解冻 30 工具契约削弱防漂移能力 | 门禁保留，只改基线；解冻理由与删除清单写进 normative 文档与 commit message |
-| Windows / Linux 上 `getApp` 语义与 macOS 不一致 | ZCode **不**在非 macOS 抛错（三平台统一是既有优势）；能力缺失走类型化错误：Linux 无 AX 元素 → `ELEMENT_UNAVAILABLE`；Linux/Windows 键盘无 pid 定向 → `FOREGROUND_REQUIRED`。`cua.computer.target` 暴露平台供模型分支 |
+| 风险                                                               | 对策                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 删掉 16 个工具 + 15 个 broker 方法后发现某个真的需要               | **恢复成本已经不小**：要加回 schema + handler + broker 方法 + 三平台原生实现 + 再 bump 一次 IPC 版本。所以每一项的删除理由与替代路径都写在案（§3.2-3.6、附录 B）；S0b 与 S0c 各自单独成 PR，便于整体回滚。评审确认接受这个成本 |
+| 失去「按住 → 观察 → 释放」与剪贴板读取                             | 评审已确认接受（§3.5）。不保留 broker 原语「以备将来」                                                                                                                                                                         |
+| 失去全屏观察                                                       | `listApps()` + `getApp()` 替代；macOS 系统 UI 都是有 AX 的进程                                                                                                                                                                 |
+| 删 zoom 后小字不可读                                               | 需在 S0b 量化 per-app 截图的实际缩放率。若缩放确实严重，正解是调 per-app 截图预算，而不是恢复 zoom                                                                                                                             |
+| S0c 回滚会一起回滚 `paste`                                         | S1 起的 `paste` 测试在 `paste` 方法缺失时跳过而非失败（§7.3）                                                                                                                                                                  |
+| 原生 `paste` 三平台各写一份，工作量与回归面比 host 侧组合大        | 换来的是少两个 broker 原语 + 修掉还原竞态（§6.6）；S0c 只做 `text`，`md`/`html` 推到 S5                                                                                                                                        |
+| `getAXState()` 返回 string 使「发现元素」多一个 round trip         | `app.elements()` 兜底；S4 已结论为提升为文档化成员（§4.2）                                                                                                                                                                     |
+| `possibly_sent` 从文本提示变 throw，Electron/Chromium 可能高频抛错 | S1 先只**统计**（照旧 resolve + 打点频率），确认基线后再翻；保留 `ZCODE_CUA_POSSIBLY_SENT=throw\|warn`                                                                                                                         |
+| 放开 delta 后模型复用旧索引                                        | delta 也签发新 `stateId`；索引由 SDK 用当前 `stateId` 解析；stale 一律 fail-closed（比今天更严）                                                                                                                               |
+| 自动 emit 与宿主 structured sink 双写导致重复输出                  | 沿用现有 `hostProjectionResult` / `imageAuthorityResult` 边界；`format-model-facing-budget.test.ts` 扩一条重复检测                                                                                                             |
+| 绑定不跨 cell 被误解为「状态丢了」                                 | 文档明写「每 cell 重新 `getApp`，UI 状态与 stateId 由 host 保留」；reattach 只输出一行                                                                                                                                         |
+| 解冻 30 工具契约削弱防漂移能力                                     | 门禁保留，只改基线；解冻理由与删除清单写进 normative 文档与 commit message                                                                                                                                                     |
+| Windows / Linux 上 `getApp` 语义与 macOS 不一致                    | ZCode **不**在非 macOS 抛错（三平台统一是既有优势）；能力缺失走类型化错误：Linux 无 AX 元素 → `ELEMENT_UNAVAILABLE`；Linux/Windows 键盘无 pid 定向 → `FOREGROUND_REQUIRED`。`cua.computer.target` 暴露平台供模型分支           |
 
 ---
 
@@ -807,27 +817,27 @@ S0c 必须在 S1 之前，因为 `paste` 依赖它。
 
 ```js
 // ── 配方 1：绑定 → 动作 → 观察
-const app = await cua.getApp("Notes");       // 展示初始全树
+const app = await cua.getApp("Notes"); // 展示初始全树
 await app.click(42);
 await app.typeText("hello");
 await app.pressKey("Return");
-await app.getAXState();                       // 自动展示 diff
+await app.getAXState(); // 自动展示 diff
 
 // ── 配方 2：坐标兜底（canvas / Electron / 无 AX 元素）
 const app2 = await cua.getApp("Figma");
-const png = await app2.getScreenshot();       // per-app 截图，建立内部 frameId 并展示
-await app2.click([640, 240]);                 // 像素取自这张栅格
+const png = await app2.getScreenshot(); // per-app 截图，建立内部 frameId 并展示
+await app2.click([640, 240]); // 像素取自这张栅格
 await app2.getAXStateAndScreenshot();
 
 // ── 配方 3：ZCode 附加项（只在选项袋里）
 await app.click(42, { mouseButton: "right", modifiers: "cmd", strategy: "a11y" });
 await app.pressKey("Return", { holdSeconds: 0.5 });
-for (let i = 0; i < 3; i++) await app.pressKey("Down");   // 取代已删除的 repeat
+for (let i = 0; i < 3; i++) await app.pressKey("Down"); // 取代已删除的 repeat
 await app.paste("多行\n内容");
 
 // ── 配方 4：逃逸口（多窗口）
 const wins = await cua.computer.list_windows({ app_ref: { name: "Preview" } });
-const w = await cua.getWindow("Preview", wins[1].window_id);   // 未文档化成员
+const w = await cua.getWindow("Preview", wins[1].window_id); // 未文档化成员
 await w.click(7);
 await w.getAXState();
 
@@ -836,11 +846,11 @@ try {
   await app.performSecondaryAction(7, "Show Menu");
 } catch (e) {
   if (e.code === "ACTION_UNAVAILABLE") {
-    await app.getAXState({ disableDiffing: true });   // compact 已带 actions，看清合法取值
+    await app.getAXState({ disableDiffing: true }); // compact 已带 actions，看清合法取值
   } else if (e.code === "CONTROLLER_BUSY") {
     nodeRepl.write(`another ZCode Computer Use session owns control: ${e.details.owner}`);
   } else if (e.actionSent) {
-    await app.getAXState();                            // 可能已落地，先看状态再决定
+    await app.getAXState(); // 可能已落地，先看状态再决定
   } else throw e;
 }
 ```
@@ -849,38 +859,38 @@ try {
 
 ## 附录 B：30 个工具的处置
 
-| 工具 | 处置 | 替代路径 |
-|---|---|---|
-| `list_apps` | **留** | `cua.listApps()` |
-| `open_application` | **留**（逃逸口） | `getApp` 已透明启动；`activate` 走逃逸口 |
-| `list_windows` | **留**（逃逸口） | `cua.getWindow()`（未文档化） |
-| `get_app_state` | **留** | `app.getAXState()` / `getAXStateAndScreenshot()` / `getScreenshot()` |
-| `left_click` | **留** | `app.click(t, opts)` |
-| `scroll` | **留** | `app.scroll(t, dir, pages)` |
-| `left_click_drag` | **留** | `app.drag(from, to)` |
-| `type` | **留** | `app.typeText(text)` |
-| `set_value` | **留** | `app.setValue(i, v)` |
-| `select_text` | **留**（逃逸口 = range 形态） | `app.selectText(i, text, opts)` |
-| `key` | **留**（去 `repeat`） | `app.pressKey(key, opts)` |
-| `perform_action` | **留** | `app.performSecondaryAction(i, a)` |
-| `request_access` | **留** | `cua.requestAccess()` |
-| `stop_computer_control` | **留** | `cua.stop()` |
-| `screenshot`（全屏） | **删** | `app.getScreenshot()`（per-app） |
-| `zoom` | **删** | 无（调 per-app 截图预算） |
-| `list_displays` | **删** | 无（per-app 捕获按窗口所在屏工作） |
-| `switch_display` | **删** | 同上 |
-| `cursor_position` | **删** | 无（纯诊断） |
-| `wait` | **删** | SDK 内建 settler |
-| `double_click` | **删** | `click(t, {clickCount: 2})` |
-| `triple_click` | **删** | `click(t, {clickCount: 3})` |
-| `right_click` | **删** | `click(t, {mouseButton: "right"})` |
-| `middle_click` | **删** | `click(t, {mouseButton: "middle"})` |
-| `hold_key` | **删** | `pressKey(key, {holdSeconds})` |
-| `mouse_move` | **删** | 无；broker `move_to` 一并删 |
-| `left_mouse_down` | **删** | `drag(from, to)`；broker `mouse_down` 一并删 |
-| `left_mouse_up` | **删** | 同上；broker `mouse_up` 一并删 |
-| `read_clipboard` | **删** | 无；broker 方法一并删 |
-| `write_clipboard` | **删** | `app.paste(text)`（原生 broker `paste`）；旧 broker 方法一并删 |
+| 工具                    | 处置                          | 替代路径                                                             |
+| ----------------------- | ----------------------------- | -------------------------------------------------------------------- |
+| `list_apps`             | **留**                        | `cua.listApps()`                                                     |
+| `open_application`      | **留**（逃逸口）              | `getApp` 已透明启动；`activate` 走逃逸口                             |
+| `list_windows`          | **留**（逃逸口）              | `cua.getWindow()`（未文档化）                                        |
+| `get_app_state`         | **留**                        | `app.getAXState()` / `getAXStateAndScreenshot()` / `getScreenshot()` |
+| `left_click`            | **留**                        | `app.click(t, opts)`                                                 |
+| `scroll`                | **留**                        | `app.scroll(t, dir, pages)`                                          |
+| `left_click_drag`       | **留**                        | `app.drag(from, to)`                                                 |
+| `type`                  | **留**                        | `app.typeText(text)`                                                 |
+| `set_value`             | **留**                        | `app.setValue(i, v)`                                                 |
+| `select_text`           | **留**（逃逸口 = range 形态） | `app.selectText(i, text, opts)`                                      |
+| `key`                   | **留**（去 `repeat`）         | `app.pressKey(key, opts)`                                            |
+| `perform_action`        | **留**                        | `app.performSecondaryAction(i, a)`                                   |
+| `request_access`        | **留**                        | `cua.requestAccess()`                                                |
+| `stop_computer_control` | **留**                        | `cua.stop()`                                                         |
+| `screenshot`（全屏）    | **删**                        | `app.getScreenshot()`（per-app）                                     |
+| `zoom`                  | **删**                        | 无（调 per-app 截图预算）                                            |
+| `list_displays`         | **删**                        | 无（per-app 捕获按窗口所在屏工作）                                   |
+| `switch_display`        | **删**                        | 同上                                                                 |
+| `cursor_position`       | **删**                        | 无（纯诊断）                                                         |
+| `wait`                  | **删**                        | SDK 内建 settler                                                     |
+| `double_click`          | **删**                        | `click(t, {clickCount: 2})`                                          |
+| `triple_click`          | **删**                        | `click(t, {clickCount: 3})`                                          |
+| `right_click`           | **删**                        | `click(t, {mouseButton: "right"})`                                   |
+| `middle_click`          | **删**                        | `click(t, {mouseButton: "middle"})`                                  |
+| `hold_key`              | **删**                        | `pressKey(key, {holdSeconds})`                                       |
+| `mouse_move`            | **删**                        | 无；broker `move_to` 一并删                                          |
+| `left_mouse_down`       | **删**                        | `drag(from, to)`；broker `mouse_down` 一并删                         |
+| `left_mouse_up`         | **删**                        | 同上；broker `mouse_up` 一并删                                       |
+| `read_clipboard`        | **删**                        | 无；broker 方法一并删                                                |
+| `write_clipboard`       | **删**                        | `app.paste(text)`（原生 broker `paste`）；旧 broker 方法一并删       |
 
 存活 14，删除 16。删除项中 9 项有等价替代，5 项（全屏像素簇）能力由 per-app 路径覆盖，
 2 项（`read_clipboard`、按住类）是评审确认接受的能力收缩。

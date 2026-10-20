@@ -42,7 +42,6 @@ Status: done
 - [ ] Windows 的真实 WSL 发现、手动添加和连接完成。
 - [ ] Web／手机远控入口与 Host 能力门禁的真实端到端回归。
 
-
 ## Completion evidence (2026-10-12)
 
 - 设置新建直接进入默认 SSH 分类表单；SSH config、WSL 发行版和 Docker 发现只填写配置，显式「添加并连接」才拨号。保持现有认证、安装、Source 归并和取消归属。

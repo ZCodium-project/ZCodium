@@ -147,10 +147,10 @@ pnpm provider:config:check-test
 
 ### 当前账号端点映射
 
-| 正式 Base URL                                    | 测试 Base URL                                            |
-| ------------------------------------------------ | -------------------------------------------------------- |
+| 正式 Base URL                                    | 测试 Base URL                                    |
+| ------------------------------------------------ | ------------------------------------------------ |
 | `https://api.z.ai/api/anthropic`                 | `https://api.z.ai/api/anthropic`                 |
-| `https://open.bigmodel.cn/api/anthropic`         | `https://open.bigmodel.cn/api/anthropic`                  |
+| `https://open.bigmodel.cn/api/anthropic`         | `https://open.bigmodel.cn/api/anthropic`         |
 | `https://zcode.z.ai/api/v1/zcode-plan/anthropic` | `https://zcode.z.ai/api/v1/zcode-plan/anthropic` |
 | `https://zcode.z.ai/api/v1/off-peak/anthropic`   | `https://zcode.z.ai/api/v1/off-peak/anthropic`   |
 | `https://zcode.z.ai/api/v1/highspeed/anthropic`  | `https://zcode.z.ai/api/v1/highspeed/anthropic`  |

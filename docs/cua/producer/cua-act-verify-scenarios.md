@@ -8,11 +8,11 @@ side effect is.
 
 ## The act-verify contract (vs. observe-only)
 
-| | observe-only (`e2e_opus.py`) | **act-verify (`cua_act_verify.py`)** |
-|---|---|---|
-| model calls | `get_app_state`, then reports | `get_app_state` → **act** (`left_click`/`type`/`set_value`/...) → `get_app_state` |
-| what counts as success | the model produced a description | **an independent verifier** confirms the post-state |
-| pass signal | exit 0 if any tool fired | PASS only if `model_acted AND verify_passed` |
+|                        | observe-only (`e2e_opus.py`)     | **act-verify (`cua_act_verify.py`)**                                              |
+| ---------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| model calls            | `get_app_state`, then reports    | `get_app_state` → **act** (`left_click`/`type`/`set_value`/...) → `get_app_state` |
+| what counts as success | the model produced a description | **an independent verifier** confirms the post-state                               |
+| pass signal            | exit 0 if any tool fired         | PASS only if `model_acted AND verify_passed`                                      |
 
 Every scenario has three independent phases the harness runs for you:
 
@@ -96,7 +96,7 @@ silently corrupting a run:
   Source Services (`TISCopyCurrentKeyboardInputSource`, `ctypes` — no extra
   dependency), which reports the live input METHOD/MODE, so it catches a CJK input
   method (e.g. Pinyin, `com.apple.inputmethod.SCIM.ITABC`) layered over a Latin (ABC)
-  layout — a case the HIToolbox *layout* default alone (the fallback when TIS is
+  layout — a case the HIToolbox _layout_ default alone (the fallback when TIS is
   unavailable) cannot see. A CJK input method intercepts the harness's blind
   `type`/keystroke for composition, so typed text lands garbage and `type` scenarios
   false-FAIL. Switch to a Latin layout (ABC / U.S.) before an acceptance run. The
@@ -124,63 +124,63 @@ note for how an originally-ABSENT key is restored). PASS requires both
 
 ### AV01-AV17 (original suite)
 
-| ID | Name | Class | App | Act path | Independent verify |
-|----|------|-------|-----|----------|--------------------|
-| AV01 | Calculator 7+5=12 | calculator-compute | `com.apple.calculator` | element-target `left_click` ×4 (Invoke) | Calculator display reads `12` (System Events) |
-| AV02 | Calculator 8×3−4=20 | calculator-multi-step | `com.apple.calculator` | element `left_click` multi-step | display reads `20` |
-| AV03 | TextEdit type "hello world" | textedit-type | `com.apple.TextEdit` | `type` tool (whole phrase) | `text of document 1` contains it |
-| AV04 | TextEdit set_value "fixed" | textedit-set-value | `com.apple.TextEdit` | `set_value` on the text element | `text of document 1` == `fixed` |
-| AV05 | Finder select target.txt | finder-navigate | `com.apple.finder` | element `left_click` on the file row | Finder `selection` == `[target.txt]` |
-| AV06 | Notes create note | notes-create | `com.apple.Notes` | click "New Note" + `type` title | a note named `AV06_MARKER` exists (cleanup deletes it) |
-| AV07 | Terminal `echo done` | terminal-command | `com.apple.Terminal` | `type` `echo done\n` | terminal tab `contents` contain `done` |
-| AV08 | Clipboard copy | clipboard-copy | `com.apple.TextEdit` | `select_text` + Cmd+C (keyboard) | `pbpaste` contains `clipme-AV08` |
-| AV09 | Stickies type marker | stickies-type | `com.apple.Stickies` | `type` into the note | note's static text contains the marker (cleanup clears it) |
-| AV10 | Calculator 15÷3=5 | calculator-compute | `com.apple.calculator` | element `left_click` (÷ operator) | display reads `5` |
-| AV11 | TextEdit append line | textedit-append | `com.apple.TextEdit` | `type` `\nline-two` at end | doc contains both `line-one` and `line-two` |
-| AV12 | Finder open folder | finder-open | `com.apple.finder` | `open_application` / path action | front window `target` ends with `act-verify-fixture/` |
-| AV13 | Finder drag file into folder | finder-drag | `com.apple.finder` | **`left_click_drag`** element→element | file exists at `DestFolder/moveme.txt` AND gone from parent (filesystem) |
-| AV14 | Sound volume slider drag | settings-slider-drag | `com.apple.systempreferences` | **`left_click_drag`** on the volume slider | `get output volume of (get volume settings)` in 30..70 (cleanup restores) |
-| AV15 | TextEdit type + select-all + bold | textedit-bold-multistep | `com.apple.TextEdit` | `type` → keyboard Cmd+A → Cmd+B | saved RTF source contains the marker + an RTF bold (`\b`) control word |
-| AV16 | System Settings toggle Dock magnification | settings-navigate-toggle | `com.apple.systempreferences` | navigate pane + `left_click` a switch | `defaults read com.apple.dock magnification` flipped from captured original (cleanup restores) |
-| AV17 | Copy from TextEdit, paste into Notes | clipboard-cross-app | `com.apple.TextEdit` | copy + `open_application` Notes + new note + paste | a Notes note contains `clipme-cross-av17` (cleanup removes it) |
+| ID   | Name                                      | Class                    | App                           | Act path                                           | Independent verify                                                                             |
+| ---- | ----------------------------------------- | ------------------------ | ----------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| AV01 | Calculator 7+5=12                         | calculator-compute       | `com.apple.calculator`        | element-target `left_click` ×4 (Invoke)            | Calculator display reads `12` (System Events)                                                  |
+| AV02 | Calculator 8×3−4=20                       | calculator-multi-step    | `com.apple.calculator`        | element `left_click` multi-step                    | display reads `20`                                                                             |
+| AV03 | TextEdit type "hello world"               | textedit-type            | `com.apple.TextEdit`          | `type` tool (whole phrase)                         | `text of document 1` contains it                                                               |
+| AV04 | TextEdit set_value "fixed"                | textedit-set-value       | `com.apple.TextEdit`          | `set_value` on the text element                    | `text of document 1` == `fixed`                                                                |
+| AV05 | Finder select target.txt                  | finder-navigate          | `com.apple.finder`            | element `left_click` on the file row               | Finder `selection` == `[target.txt]`                                                           |
+| AV06 | Notes create note                         | notes-create             | `com.apple.Notes`             | click "New Note" + `type` title                    | a note named `AV06_MARKER` exists (cleanup deletes it)                                         |
+| AV07 | Terminal `echo done`                      | terminal-command         | `com.apple.Terminal`          | `type` `echo done\n`                               | terminal tab `contents` contain `done`                                                         |
+| AV08 | Clipboard copy                            | clipboard-copy           | `com.apple.TextEdit`          | `select_text` + Cmd+C (keyboard)                   | `pbpaste` contains `clipme-AV08`                                                               |
+| AV09 | Stickies type marker                      | stickies-type            | `com.apple.Stickies`          | `type` into the note                               | note's static text contains the marker (cleanup clears it)                                     |
+| AV10 | Calculator 15÷3=5                         | calculator-compute       | `com.apple.calculator`        | element `left_click` (÷ operator)                  | display reads `5`                                                                              |
+| AV11 | TextEdit append line                      | textedit-append          | `com.apple.TextEdit`          | `type` `\nline-two` at end                         | doc contains both `line-one` and `line-two`                                                    |
+| AV12 | Finder open folder                        | finder-open              | `com.apple.finder`            | `open_application` / path action                   | front window `target` ends with `act-verify-fixture/`                                          |
+| AV13 | Finder drag file into folder              | finder-drag              | `com.apple.finder`            | **`left_click_drag`** element→element              | file exists at `DestFolder/moveme.txt` AND gone from parent (filesystem)                       |
+| AV14 | Sound volume slider drag                  | settings-slider-drag     | `com.apple.systempreferences` | **`left_click_drag`** on the volume slider         | `get output volume of (get volume settings)` in 30..70 (cleanup restores)                      |
+| AV15 | TextEdit type + select-all + bold         | textedit-bold-multistep  | `com.apple.TextEdit`          | `type` → keyboard Cmd+A → Cmd+B                    | saved RTF source contains the marker + an RTF bold (`\b`) control word                         |
+| AV16 | System Settings toggle Dock magnification | settings-navigate-toggle | `com.apple.systempreferences` | navigate pane + `left_click` a switch              | `defaults read com.apple.dock magnification` flipped from captured original (cleanup restores) |
+| AV17 | Copy from TextEdit, paste into Notes      | clipboard-cross-app      | `com.apple.TextEdit`          | copy + `open_application` Notes + new note + paste | a Notes note contains `clipme-cross-av17` (cleanup removes it)                                 |
 
 ### AV18-AV50 (33 new scenarios — 10-category expansion)
 
-| ID | Name | Class | App | Act path | Independent verify |
-|----|------|-------|-----|----------|--------------------|
-| AV18 | TextEdit type + italic | textedit-italic-multistep | `com.apple.TextEdit` | `type` → Cmd+A → Cmd+I | saved RTF has marker + RTF italic (`\i`) control word |
-| AV19 | TextEdit type + underline | textedit-underline-multistep | `com.apple.TextEdit` | `type` → Cmd+A → Cmd+U | saved RTF has marker + RTF underline (`\ul`) control word |
-| AV20 | TextEdit select-all + clear | textedit-selectall-clear | `com.apple.TextEdit` | keyboard Cmd+A → Backspace | `text of document 1` is empty |
-| AV21 | TextEdit 3 separate lines | textedit-multiline | `com.apple.TextEdit` | `type` `alpha\nbeta\ngamma` | doc has all 3 words + >=2 newlines |
-| AV22 | TextEdit find & replace all | textedit-find-replace | `com.apple.TextEdit` | Edit>Find>Replace, type, Replace All | doc text == `bar alpha bar` (no `foo`) |
-| AV23 | Finder rename file | finder-rename | `com.apple.finder` | Return → `type` new name → Return | FS: `newname-av23.txt` exists, `oldname` gone |
-| AV24 | Finder navigate nested folder | finder-navigate-nested | `com.apple.finder` | double-`left_click` subfolder | front window `target` ends with `outer/inner` |
-| AV25 | Finder move file to Trash | finder-trash | `com.apple.finder` | select + Cmd+Backspace | source file gone (cleanup restores from Trash) |
-| AV26 | Finder duplicate file (Cmd+D) | finder-duplicate | `com.apple.finder` | select + Cmd+D | >=2 files matching `dupme-av26*` |
-| AV27 | Finder create named folder | finder-new-folder | `com.apple.finder` | Cmd+Shift+N → `type` name | dir `/tmp/av27-newfolder/AV27Folder` exists |
-| AV28 | Safari type URL in address bar | browser-type-url | `com.apple.Safari` | `open_application` + Cmd+L + `type` URL | `URL of front document` ends with `av28-fixture.html` |
-| AV29 | Safari new tab (Cmd+T) | browser-new-tab | `com.apple.Safari` | keyboard Cmd+T | `count tabs of front window` >= 2 |
-| AV30 | Safari click link to navigate | browser-click-link | `com.apple.Safari` | `left_click` the link element | `URL of front document` ends with `av30-b.html` |
-| AV31 | System Settings toggle Dock auto-hide | settings-dock-autohide | `com.apple.systempreferences` | navigate + `left_click` switch | `defaults com.apple.dock autohide` flipped (restored) |
-| AV32 | Finder Settings toggle filename extensions | finder-settings-toggle | `com.apple.finder` | Cmd+, → Advanced → checkbox | `defaults com.apple.finder AppleShowAllExtensions` flipped (restored) |
-| AV33 | Clipboard cut | clipboard-cut | `com.apple.TextEdit` | Cmd+A → Cmd+X | `pbpaste` has marker AND doc empty |
-| AV34 | Clipboard partial-select copy | clipboard-partial-copy | `com.apple.TextEdit` | `select_text` "BETA" → Cmd+C | `pbpaste` == `BETA` |
-| AV35 | TextEdit edit opened file + save | textedit-edit-save | `com.apple.TextEdit` | select+`type` → Cmd+S | file on disk contains `av35-new` |
-| AV36 | Terminal redirect to file | terminal-write-file | `com.apple.Terminal` | `type` `echo … > file` | `/tmp/av36-out.txt` contains the marker |
-| AV37 | Notes create + type body | notes-body | `com.apple.Notes` | new note + `type` body via **real key input** | a note body contains `AV37_BODY_MARKER` — persists ONLY via real key input; a default element value-set does NOT commit (see [Notes body-write reconciliation](#notes-body-write-reconciliation)) |
-| AV38 | TextEdit window resize (edge drag) | window-resize-drag | `com.apple.TextEdit` | **`left_click_drag`** corner→coordinate | `bounds of front window` changed (restored) |
-| AV39 | Finder switch to List view | finder-view-list | `com.apple.finder` | Cmd+2 / View menu | `current view of front window` == `list view` |
-| AV40 | Finder switch to Column view | finder-view-column | `com.apple.finder` | Cmd+3 / View menu | `current view of front window` == `column view` |
-| AV41 | Calculator memory m+ then mr | calculator-memory | `com.apple.calculator` | element `left_click`: 5, m+, AC, mr | display reads `5` |
-| AV42 | Calculator decimal 2.5+2.5 | calculator-decimal | `com.apple.calculator` | element `left_click` incl. `.` | display reads `5` |
-| AV43 | Finder Get Info (context menu) | finder-context-menu | `com.apple.finder` | right-click + `left_click` menu item | a Finder "Info" window is present |
-| AV44 | TextEdit close + Don't Save dialog | dialog-discard-unsaved | `com.apple.TextEdit` | Cmd+W → `left_click` Don't Save | 0 TextEdit windows open |
-| AV45 | TextEdit select-word + replace | textedit-select-replace | `com.apple.TextEdit` | select "REPLACEME" → `type` "DONE" | doc == `alpha DONE gamma` |
-| AV46 | Open Activity Monitor | app-launch-activity-monitor | `com.apple.ActivityMonitor` | `open_application` | `pgrep -x "Activity Monitor"` running |
-| AV47 | TextEdit new document (Cmd+N) | textedit-new-document | `com.apple.TextEdit` | keyboard Cmd+N | >=2 TextEdit windows |
-| AV48 | Finder new window (Cmd+N) | finder-new-window | `com.apple.finder` | keyboard Cmd+N | >=2 Finder windows |
-| AV49 | Notes remove a note | notes-remove | `com.apple.Notes` | select + Backspace + confirm | note named `AV49_REMOVEME_MARKER` is gone |
-| AV50 | Calculator chain 6+6+6 | calculator-chain | `com.apple.calculator` | element `left_click` chained `+` | display reads `18` |
+| ID   | Name                                       | Class                        | App                           | Act path                                      | Independent verify                                                                                                                                                                                |
+| ---- | ------------------------------------------ | ---------------------------- | ----------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AV18 | TextEdit type + italic                     | textedit-italic-multistep    | `com.apple.TextEdit`          | `type` → Cmd+A → Cmd+I                        | saved RTF has marker + RTF italic (`\i`) control word                                                                                                                                             |
+| AV19 | TextEdit type + underline                  | textedit-underline-multistep | `com.apple.TextEdit`          | `type` → Cmd+A → Cmd+U                        | saved RTF has marker + RTF underline (`\ul`) control word                                                                                                                                         |
+| AV20 | TextEdit select-all + clear                | textedit-selectall-clear     | `com.apple.TextEdit`          | keyboard Cmd+A → Backspace                    | `text of document 1` is empty                                                                                                                                                                     |
+| AV21 | TextEdit 3 separate lines                  | textedit-multiline           | `com.apple.TextEdit`          | `type` `alpha\nbeta\ngamma`                   | doc has all 3 words + >=2 newlines                                                                                                                                                                |
+| AV22 | TextEdit find & replace all                | textedit-find-replace        | `com.apple.TextEdit`          | Edit>Find>Replace, type, Replace All          | doc text == `bar alpha bar` (no `foo`)                                                                                                                                                            |
+| AV23 | Finder rename file                         | finder-rename                | `com.apple.finder`            | Return → `type` new name → Return             | FS: `newname-av23.txt` exists, `oldname` gone                                                                                                                                                     |
+| AV24 | Finder navigate nested folder              | finder-navigate-nested       | `com.apple.finder`            | double-`left_click` subfolder                 | front window `target` ends with `outer/inner`                                                                                                                                                     |
+| AV25 | Finder move file to Trash                  | finder-trash                 | `com.apple.finder`            | select + Cmd+Backspace                        | source file gone (cleanup restores from Trash)                                                                                                                                                    |
+| AV26 | Finder duplicate file (Cmd+D)              | finder-duplicate             | `com.apple.finder`            | select + Cmd+D                                | >=2 files matching `dupme-av26*`                                                                                                                                                                  |
+| AV27 | Finder create named folder                 | finder-new-folder            | `com.apple.finder`            | Cmd+Shift+N → `type` name                     | dir `/tmp/av27-newfolder/AV27Folder` exists                                                                                                                                                       |
+| AV28 | Safari type URL in address bar             | browser-type-url             | `com.apple.Safari`            | `open_application` + Cmd+L + `type` URL       | `URL of front document` ends with `av28-fixture.html`                                                                                                                                             |
+| AV29 | Safari new tab (Cmd+T)                     | browser-new-tab              | `com.apple.Safari`            | keyboard Cmd+T                                | `count tabs of front window` >= 2                                                                                                                                                                 |
+| AV30 | Safari click link to navigate              | browser-click-link           | `com.apple.Safari`            | `left_click` the link element                 | `URL of front document` ends with `av30-b.html`                                                                                                                                                   |
+| AV31 | System Settings toggle Dock auto-hide      | settings-dock-autohide       | `com.apple.systempreferences` | navigate + `left_click` switch                | `defaults com.apple.dock autohide` flipped (restored)                                                                                                                                             |
+| AV32 | Finder Settings toggle filename extensions | finder-settings-toggle       | `com.apple.finder`            | Cmd+, → Advanced → checkbox                   | `defaults com.apple.finder AppleShowAllExtensions` flipped (restored)                                                                                                                             |
+| AV33 | Clipboard cut                              | clipboard-cut                | `com.apple.TextEdit`          | Cmd+A → Cmd+X                                 | `pbpaste` has marker AND doc empty                                                                                                                                                                |
+| AV34 | Clipboard partial-select copy              | clipboard-partial-copy       | `com.apple.TextEdit`          | `select_text` "BETA" → Cmd+C                  | `pbpaste` == `BETA`                                                                                                                                                                               |
+| AV35 | TextEdit edit opened file + save           | textedit-edit-save           | `com.apple.TextEdit`          | select+`type` → Cmd+S                         | file on disk contains `av35-new`                                                                                                                                                                  |
+| AV36 | Terminal redirect to file                  | terminal-write-file          | `com.apple.Terminal`          | `type` `echo … > file`                        | `/tmp/av36-out.txt` contains the marker                                                                                                                                                           |
+| AV37 | Notes create + type body                   | notes-body                   | `com.apple.Notes`             | new note + `type` body via **real key input** | a note body contains `AV37_BODY_MARKER` — persists ONLY via real key input; a default element value-set does NOT commit (see [Notes body-write reconciliation](#notes-body-write-reconciliation)) |
+| AV38 | TextEdit window resize (edge drag)         | window-resize-drag           | `com.apple.TextEdit`          | **`left_click_drag`** corner→coordinate       | `bounds of front window` changed (restored)                                                                                                                                                       |
+| AV39 | Finder switch to List view                 | finder-view-list             | `com.apple.finder`            | Cmd+2 / View menu                             | `current view of front window` == `list view`                                                                                                                                                     |
+| AV40 | Finder switch to Column view               | finder-view-column           | `com.apple.finder`            | Cmd+3 / View menu                             | `current view of front window` == `column view`                                                                                                                                                   |
+| AV41 | Calculator memory m+ then mr               | calculator-memory            | `com.apple.calculator`        | element `left_click`: 5, m+, AC, mr           | display reads `5`                                                                                                                                                                                 |
+| AV42 | Calculator decimal 2.5+2.5                 | calculator-decimal           | `com.apple.calculator`        | element `left_click` incl. `.`                | display reads `5`                                                                                                                                                                                 |
+| AV43 | Finder Get Info (context menu)             | finder-context-menu          | `com.apple.finder`            | right-click + `left_click` menu item          | a Finder "Info" window is present                                                                                                                                                                 |
+| AV44 | TextEdit close + Don't Save dialog         | dialog-discard-unsaved       | `com.apple.TextEdit`          | Cmd+W → `left_click` Don't Save               | 0 TextEdit windows open                                                                                                                                                                           |
+| AV45 | TextEdit select-word + replace             | textedit-select-replace      | `com.apple.TextEdit`          | select "REPLACEME" → `type` "DONE"            | doc == `alpha DONE gamma`                                                                                                                                                                         |
+| AV46 | Open Activity Monitor                      | app-launch-activity-monitor  | `com.apple.ActivityMonitor`   | `open_application`                            | `pgrep -x "Activity Monitor"` running                                                                                                                                                             |
+| AV47 | TextEdit new document (Cmd+N)              | textedit-new-document        | `com.apple.TextEdit`          | keyboard Cmd+N                                | >=2 TextEdit windows                                                                                                                                                                              |
+| AV48 | Finder new window (Cmd+N)                  | finder-new-window            | `com.apple.finder`            | keyboard Cmd+N                                | >=2 Finder windows                                                                                                                                                                                |
+| AV49 | Notes remove a note                        | notes-remove                 | `com.apple.Notes`             | select + Backspace + confirm                  | note named `AV49_REMOVEME_MARKER` is gone                                                                                                                                                         |
+| AV50 | Calculator chain 6+6+6                     | calculator-chain             | `com.apple.calculator`        | element `left_click` chained `+`              | display reads `18`                                                                                                                                                                                |
 
 ### AV51-AV65 (15 more — reliable single-target element actions)
 
@@ -194,43 +194,43 @@ activation verb ("press/activate") and to read the element's `actions` list for
 the verb that backend announces — it never hardcodes a macOS-private `AX*` name
 (see `test_scenario_tasks_have_no_platform_private_ax_tokens`).
 
-| ID | Name | Class | App | Act path | Independent verify |
-|----|------|-------|-----|----------|--------------------|
-| AV51 | Calculator 9−3=6 (Invoke) | calculator-subtract-invoke | `com.apple.calculator` | element `left_click` buttons 9,−,3,= | display reads `6` |
-| AV52 | Calculator 6×7=42 (Invoke) | calculator-multiply-invoke | `com.apple.calculator` | element `left_click` 6,×,7,= | display reads `42` |
-| AV53 | Calculator 64−28=36 (Invoke) | calculator-subtract-multidigit-invoke | `com.apple.calculator` | element `left_click` multi-digit | display reads `36` |
-| AV54 | TextEdit set_value replace | textedit-set-value-replace | `com.apple.TextEdit` | `set_value` text area | doc has `AV54_DONE`, not `AV54_OLD_MARKER` |
-| AV55 | TextEdit set_value 2 lines | textedit-set-value-multiline | `com.apple.TextEdit` | `set_value` two lines | doc has both lines |
-| AV56 | TextEdit set_value clear | textedit-set-value-clear | `com.apple.TextEdit` | `set_value` to `''` | doc is empty |
-| AV57 | Notes set_value body | notes-set-value-body | `com.apple.Notes` | `set_value` body text area | **known non-persist**: `set_value` on the Notes body is non-committal (accepted+echoed, never committed) — NOT a product regression (see [reconciliation](#notes-body-write-reconciliation)) |
-| AV58 | Notes title known-limitation | notes-title-known-limitation | `com.apple.Notes` | inspect / confirm | **KNOWN LIMITATION (xfail)**: Notes has NO separate title element (title = first body line), so a title `set_value` has no settable target — scored apart (`KNOWN_LIMITATION`), NOT a PASS and NOT a product FAIL (see [reconciliation](#notes-body-write-reconciliation)) |
-| AV59 | Settings toggle "Show recent applications" | settings-dock-show-recents | `com.apple.systempreferences` | `perform_action`/`left_click` checkbox | `defaults com.apple.dock show-recents` flipped (restored) |
-| AV60 | Settings toggle "Minimize into app icon" | settings-dock-minimize-to-app | `com.apple.systempreferences` | `perform_action`/`left_click` checkbox | `defaults com.apple.dock minimize-to-application` flipped (restored) |
-| AV61 | Finder `perform_action` select file | finder-perform-action | `com.apple.finder` | `perform_action`/`left_click` file row | Finder `selection` == `[pickme-av61.txt]` |
-| AV62 | Preview close image window | preview-close-window | `com.apple.Preview` | Cmd+W / close button | Preview has 0 open windows |
-| AV63 | Dictionary search field type | dictionary-search | `com.apple.Dictionary` | focus field + `type` + Return | search field contains `apple` |
-| AV64 | Open Font Book + click sidebar | app-launch-font-book | `com.apple.FontBook` | `open_application` + `left_click` | `pgrep "Font Book"` running + window present |
-| AV65 | Character Viewer open + click category | app-launch-character-viewer | `com.apple.CharacterPaletteIM` | `open_application` + `left_click` | `pgrep CharacterPalette` running |
+| ID   | Name                                       | Class                                 | App                            | Act path                               | Independent verify                                                                                                                                                                                                                                                         |
+| ---- | ------------------------------------------ | ------------------------------------- | ------------------------------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AV51 | Calculator 9−3=6 (Invoke)                  | calculator-subtract-invoke            | `com.apple.calculator`         | element `left_click` buttons 9,−,3,=   | display reads `6`                                                                                                                                                                                                                                                          |
+| AV52 | Calculator 6×7=42 (Invoke)                 | calculator-multiply-invoke            | `com.apple.calculator`         | element `left_click` 6,×,7,=           | display reads `42`                                                                                                                                                                                                                                                         |
+| AV53 | Calculator 64−28=36 (Invoke)               | calculator-subtract-multidigit-invoke | `com.apple.calculator`         | element `left_click` multi-digit       | display reads `36`                                                                                                                                                                                                                                                         |
+| AV54 | TextEdit set_value replace                 | textedit-set-value-replace            | `com.apple.TextEdit`           | `set_value` text area                  | doc has `AV54_DONE`, not `AV54_OLD_MARKER`                                                                                                                                                                                                                                 |
+| AV55 | TextEdit set_value 2 lines                 | textedit-set-value-multiline          | `com.apple.TextEdit`           | `set_value` two lines                  | doc has both lines                                                                                                                                                                                                                                                         |
+| AV56 | TextEdit set_value clear                   | textedit-set-value-clear              | `com.apple.TextEdit`           | `set_value` to `''`                    | doc is empty                                                                                                                                                                                                                                                               |
+| AV57 | Notes set_value body                       | notes-set-value-body                  | `com.apple.Notes`              | `set_value` body text area             | **known non-persist**: `set_value` on the Notes body is non-committal (accepted+echoed, never committed) — NOT a product regression (see [reconciliation](#notes-body-write-reconciliation))                                                                               |
+| AV58 | Notes title known-limitation               | notes-title-known-limitation          | `com.apple.Notes`              | inspect / confirm                      | **KNOWN LIMITATION (xfail)**: Notes has NO separate title element (title = first body line), so a title `set_value` has no settable target — scored apart (`KNOWN_LIMITATION`), NOT a PASS and NOT a product FAIL (see [reconciliation](#notes-body-write-reconciliation)) |
+| AV59 | Settings toggle "Show recent applications" | settings-dock-show-recents            | `com.apple.systempreferences`  | `perform_action`/`left_click` checkbox | `defaults com.apple.dock show-recents` flipped (restored)                                                                                                                                                                                                                  |
+| AV60 | Settings toggle "Minimize into app icon"   | settings-dock-minimize-to-app         | `com.apple.systempreferences`  | `perform_action`/`left_click` checkbox | `defaults com.apple.dock minimize-to-application` flipped (restored)                                                                                                                                                                                                       |
+| AV61 | Finder `perform_action` select file        | finder-perform-action                 | `com.apple.finder`             | `perform_action`/`left_click` file row | Finder `selection` == `[pickme-av61.txt]`                                                                                                                                                                                                                                  |
+| AV62 | Preview close image window                 | preview-close-window                  | `com.apple.Preview`            | Cmd+W / close button                   | Preview has 0 open windows                                                                                                                                                                                                                                                 |
+| AV63 | Dictionary search field type               | dictionary-search                     | `com.apple.Dictionary`         | focus field + `type` + Return          | search field contains `apple`                                                                                                                                                                                                                                              |
+| AV64 | Open Font Book + click sidebar             | app-launch-font-book                  | `com.apple.FontBook`           | `open_application` + `left_click`      | `pgrep "Font Book"` running + window present                                                                                                                                                                                                                               |
+| AV65 | Character Viewer open + click category     | app-launch-character-viewer           | `com.apple.CharacterPaletteIM` | `open_application` + `left_click`      | `pgrep CharacterPalette` running                                                                                                                                                                                                                                           |
 
 ### AV66-AV80 (15 more — reliable element-target / set_value / defaults-toggle)
 
-| ID | Name | Class | App | Act path | Independent verify |
-|----|------|-------|-----|----------|--------------------|
-| AV66 | Calculator 14+9=23 (Invoke) | calculator-add-multidigit-invoke | `com.apple.calculator` | element `left_click` 1,4,+,9,= | display reads `23` |
-| AV67 | Calculator 7×8=56 (Invoke) | calculator-multiply-invoke | `com.apple.calculator` | element `left_click` 7,×,8,= | display reads `56` |
-| AV68 | Calculator 63÷9=7 (Invoke) | calculator-divide-invoke | `com.apple.calculator` | element `left_click` 6,3,÷,9,= | display reads `7` |
-| AV69 | TextEdit set_value replace marker | textedit-set-value-replace | `com.apple.TextEdit` | `set_value` text area | doc has `AV69_DONE`, not `AV69_OLD_MARKER` |
-| AV70 | TextEdit set_value 3 lines | textedit-set-value-multiline | `com.apple.TextEdit` | `set_value` three lines | doc has all three lines |
-| AV71 | TextEdit set_value clear | textedit-set-value-clear | `com.apple.TextEdit` | `set_value` to `''` | doc is empty |
-| AV72 | Notes set_value body | notes-set-value-body | `com.apple.Notes` | `set_value` body | **known non-persist**: `set_value` on the Notes body is non-committal — NOT a product regression (see [reconciliation](#notes-body-write-reconciliation)) |
-| AV73 | Notes title known-limitation | notes-title-known-limitation | `com.apple.Notes` | inspect / confirm | **KNOWN LIMITATION (xfail)**: Notes has NO separate title element (title = first body line) — scored apart (`KNOWN_LIMITATION`), NOT a PASS and NOT a product FAIL (see [reconciliation](#notes-body-write-reconciliation)) |
-| AV74 | Finder `perform_action` select (alpha) | finder-perform-action | `com.apple.finder` | `perform_action`/`left_click` file row | Finder `selection` == `[alpha-av74.txt]` |
-| AV75 | Finder `perform_action` select (gamma, decoys) | finder-perform-action | `com.apple.finder` | `perform_action`/`left_click` the right row | Finder `selection` == `[gamma-av75.txt]` |
-| AV76 | Safari navigate via address bar | safari-address-bar-navigate | `com.apple.Safari` | Cmd+L + `type` `file://` URL + Return | `URL of front document` ends with `av76-fixture.html` |
-| AV77 | Dictionary search field type | dictionary-search | `com.apple.Dictionary` | focus field + `type` + Return | search field contains `ocean` |
-| AV78 | Finder toggle Show Path Bar | finder-view-pathbar-toggle | `com.apple.finder` | Opt+Cmd+P / View menu | `defaults com.apple.finder ShowPathbar` flipped (restored; see below) |
-| AV79 | Finder toggle Show Status Bar | finder-view-statusbar-toggle | `com.apple.finder` | Cmd+/ / View menu | `defaults com.apple.finder ShowStatusBar` flipped (restored; see below) |
-| AV80 | TextEdit set_value target phrase | textedit-set-value-marker | `com.apple.TextEdit` | `set_value` text area | doc contains `AV80_TARGET_PHRASE` |
+| ID   | Name                                           | Class                            | App                    | Act path                                    | Independent verify                                                                                                                                                                                                          |
+| ---- | ---------------------------------------------- | -------------------------------- | ---------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AV66 | Calculator 14+9=23 (Invoke)                    | calculator-add-multidigit-invoke | `com.apple.calculator` | element `left_click` 1,4,+,9,=              | display reads `23`                                                                                                                                                                                                          |
+| AV67 | Calculator 7×8=56 (Invoke)                     | calculator-multiply-invoke       | `com.apple.calculator` | element `left_click` 7,×,8,=                | display reads `56`                                                                                                                                                                                                          |
+| AV68 | Calculator 63÷9=7 (Invoke)                     | calculator-divide-invoke         | `com.apple.calculator` | element `left_click` 6,3,÷,9,=              | display reads `7`                                                                                                                                                                                                           |
+| AV69 | TextEdit set_value replace marker              | textedit-set-value-replace       | `com.apple.TextEdit`   | `set_value` text area                       | doc has `AV69_DONE`, not `AV69_OLD_MARKER`                                                                                                                                                                                  |
+| AV70 | TextEdit set_value 3 lines                     | textedit-set-value-multiline     | `com.apple.TextEdit`   | `set_value` three lines                     | doc has all three lines                                                                                                                                                                                                     |
+| AV71 | TextEdit set_value clear                       | textedit-set-value-clear         | `com.apple.TextEdit`   | `set_value` to `''`                         | doc is empty                                                                                                                                                                                                                |
+| AV72 | Notes set_value body                           | notes-set-value-body             | `com.apple.Notes`      | `set_value` body                            | **known non-persist**: `set_value` on the Notes body is non-committal — NOT a product regression (see [reconciliation](#notes-body-write-reconciliation))                                                                   |
+| AV73 | Notes title known-limitation                   | notes-title-known-limitation     | `com.apple.Notes`      | inspect / confirm                           | **KNOWN LIMITATION (xfail)**: Notes has NO separate title element (title = first body line) — scored apart (`KNOWN_LIMITATION`), NOT a PASS and NOT a product FAIL (see [reconciliation](#notes-body-write-reconciliation)) |
+| AV74 | Finder `perform_action` select (alpha)         | finder-perform-action            | `com.apple.finder`     | `perform_action`/`left_click` file row      | Finder `selection` == `[alpha-av74.txt]`                                                                                                                                                                                    |
+| AV75 | Finder `perform_action` select (gamma, decoys) | finder-perform-action            | `com.apple.finder`     | `perform_action`/`left_click` the right row | Finder `selection` == `[gamma-av75.txt]`                                                                                                                                                                                    |
+| AV76 | Safari navigate via address bar                | safari-address-bar-navigate      | `com.apple.Safari`     | Cmd+L + `type` `file://` URL + Return       | `URL of front document` ends with `av76-fixture.html`                                                                                                                                                                       |
+| AV77 | Dictionary search field type                   | dictionary-search                | `com.apple.Dictionary` | focus field + `type` + Return               | search field contains `ocean`                                                                                                                                                                                               |
+| AV78 | Finder toggle Show Path Bar                    | finder-view-pathbar-toggle       | `com.apple.finder`     | Opt+Cmd+P / View menu                       | `defaults com.apple.finder ShowPathbar` flipped (restored; see below)                                                                                                                                                       |
+| AV79 | Finder toggle Show Status Bar                  | finder-view-statusbar-toggle     | `com.apple.finder`     | Cmd+/ / View menu                           | `defaults com.apple.finder ShowStatusBar` flipped (restored; see below)                                                                                                                                                     |
+| AV80 | TextEdit set_value target phrase               | textedit-set-value-marker        | `com.apple.TextEdit`   | `set_value` text area                       | doc contains `AV80_TARGET_PHRASE`                                                                                                                                                                                           |
 
 ### AV78/AV79 Finder defaults tri-state recovery
 
@@ -357,8 +357,8 @@ separate title element), and the cross-app **AV17** paste.
 
 **Confirmed reality.** The Notes note body is a rich-text / web-backed text view. A
 direct accessibility value write — `set_value`, or the default `type` on an element
-target (both take the a11y-first value-set path) — is *accepted and echoed back by
-accessibility* but is **NOT committed to the note document model**. The independent
+target (both take the a11y-first value-set path) — is _accepted and echoed back by
+accessibility_ but is **NOT committed to the note document model**. The independent
 verify reads the note through the Notes AppleScript dictionary (the model layer), so it
 correctly sees no marker. This is Notes-specific: the same `set_value` on TextEdit's
 `NSTextView` (AV54-AV56, AV69-AV71, AV80) **does** commit and persist. Confirmed on the
@@ -394,7 +394,7 @@ on this path steering the model to real key input.
   (whose warning check is meaningless for a title). A documented app-AX limitation, neither
   a PASS nor a product `backend_fail`, and it can never become a false PASS.
 - **AV17** (cross-app paste into a new note) shares the same committal requirement:
-  paste (a real key event) into the *focused* body persists; a value-set would not.
+  paste (a real key event) into the _focused_ body persists; a value-set would not.
 
 **Harness scoring (reconciled — `scripts/cua_act_verify.py`).** The harness now agrees
 with this spec:
@@ -419,14 +419,14 @@ with this spec:
   KNOWN_LIMITATION is excluded from the valid PASS-rate denominator (like
   `env_offspace` / `BLOCKED_INFRA`): it is neither a PASS nor a product `backend_fail`,
   and it can never become a false PASS.
-- **AV37** task steers to the committal **real key input** path (`type` with app_ref
+- **AV37** task steers to the committal **real key input** path (`type` with app*ref
   keystrokes into the focused new note, or `type` `strategy=event` on the body element);
   its verify still requires persistence (`AV37_MARKER` in the note body) because real key
   input DOES commit. Unit coverage: `tests/test_cua_act_verify.py`
-  (`test_score_notes_noncommittal_*`, `test_run_one_scores_av57_pass_from_transcript`,
-  `test_run_one_scores_av58_av73_known_limitation_without_any_model_call`,
-  `test_known_limitation_sids_not_in_noncommittal_set`,
-  `test_verify_scenario_does_not_read_persistence_for_notes_setvalue`).
+  (`test_score_notes_noncommittal*\*`, `test_run_one_scores_av57_pass_from_transcript`,
+`test_run_one_scores_av58_av73_known_limitation_without_any_model_call`,
+`test_known_limitation_sids_not_in_noncommittal_set`,
+`test_verify_scenario_does_not_read_persistence_for_notes_setvalue`).
 
 ### AV13-AV17 design notes (drag + multi-step)
 

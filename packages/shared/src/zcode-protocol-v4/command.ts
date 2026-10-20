@@ -170,17 +170,17 @@ export const commandPayloadSchemas = {
   applyFileRewind: z.object({ target: conversationRowTargetSchema }),
   editUserQuery: z
     .object({
-    target: conversationRowTargetSchema,
-    newText: z.string(),
+      target: conversationRowTargetSchema,
+      newText: z.string(),
       conversationQuotes: conversationQuotesSchema.optional(),
-    attachments: z.array(attachmentRefSchema).optional(),
+      attachments: z.array(attachmentRefSchema).optional(),
       // 编辑重发按新的主动发送处理：只接受本次重新 prepare 得到的卡与执行材料，
       // 不从被 rewind 的历史消息复用旧凭据。
       modelSelection: modelSelectionSchema.optional(),
       modelExecution: modelExecutionSchema.optional(),
       highspeedMeta: highspeedMessageMetaSchema.optional(),
-    // 缺省 preserve：仅切 conversation branch；rewind 会先安全恢复该轮文件。
-    workspaceMode: z.enum(["preserve", "rewind"]).optional(),
+      // 缺省 preserve：仅切 conversation branch；rewind 会先安全恢复该轮文件。
+      workspaceMode: z.enum(["preserve", "rewind"]).optional(),
     })
     .superRefine(requireModelSelectionForExecution),
   retryTurn: z.object({ target: conversationRowTargetSchema }),

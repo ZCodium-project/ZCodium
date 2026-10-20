@@ -29,10 +29,11 @@ cd <z-code 仓> && node scripts/ensure-cua-helper-dev-identity.mjs
    它会生成并把密钥**持久化**到 `~/.zcode/cua-helper-dev-identity/`，然后 import
    失败并给出精确指引（`import_needs_gui_session`）。
 2. 用户在**本地 GUI 终端**跑 `node scripts/ensure-cua-helper-dev-identity.mjs
-   --reimport`——复用第 1 步持久化的同一密钥（不重新生成），完成 import + trust。
+--reimport`——复用第 1 步持久化的同一密钥（不重新生成），完成 import + trust。
 3. 之后 `pnpm build:cua-helper` 自动用稳定身份签名；构建输出不再出现 adhoc 警告。
 
 **防护**（同步固化）：
+
 - build 脚本在退回 adhoc 签名时会打印醒目黄色警告（说明 TCC 后果 + 一次性修复
   命令）；测试可用 `ZCODE_CUA_HELPER_QUIET_ADHOC=1` 静音。
 - `ZCODE_CUA_ADDON_PATH=<producer>/build/Release/ax_native.node` 允许 producer
@@ -51,5 +52,5 @@ dev Helper 现在会把 `sharp` 的原生 prebuild 暂存进
 - 验证口径:wave-10 真机测试,functional RGBA→resize→JPEG pipeline 通过。
 
 > 历史背景:产品侧 D-018(commit `f811c910fd`,`fix(desktop): package sharp into
-> ZCode.app for product CUA server`)已把 sharp 打进 product Helper;wave-10 把
+ZCode.app for product CUA server`)已把 sharp 打进 product Helper;wave-10 把
 > 同一套暂存逻辑补进 dev Helper 构建脚本,消除 dev / product 在 sharp 上的差异。

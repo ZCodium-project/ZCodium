@@ -333,13 +333,13 @@ Configured Default 与 Fallback Policy 的解析结果；Renderer 不重复这�
 
 ## 写入事件
 
-| 状态              | 写入事件                                   | 持久化范围                |
-| ----------------- | ------------------------------------------ | ------------------------- |
-| Draft Selection   | Composer 编辑                              | Entry Draft               |
-| App Recent        | App 接受用户 Submission                    | App × workspaceKey        |
-| Session Selection | 普通 Submission 被接纳；闲时执行临时设值 | Session（仅持久化普通选择） |
-| CLI Default Selection | CLI/TUI 的 /model、/effort；会话初始化 | 复用已有普通用户选择存储 |
-| Active Model      | Loop 启动，或 Guide 在 Step 边界切换       | 当前 Agent Loop，不持久化 |
+| 状态                  | 写入事件                                 | 持久化范围                  |
+| --------------------- | ---------------------------------------- | --------------------------- |
+| Draft Selection       | Composer 编辑                            | Entry Draft                 |
+| App Recent            | App 接受用户 Submission                  | App × workspaceKey          |
+| Session Selection     | 普通 Submission 被接纳；闲时执行临时设值 | Session（仅持久化普通选择） |
+| CLI Default Selection | CLI/TUI 的 /model、/effort；会话初始化   | 复用已有普通用户选择存储    |
+| Active Model          | Loop 启动，或 Guide 在 Step 边界切换     | 当前 Agent Loop，不持久化   |
 
 这些状态共享 ModelSelection 语义，但不共享写入时机。一个状态变化后，可以按明确事件更新另一个状态；任何状态都不通过观察其他状态的当前值来猜测自己应该保存什么。
 

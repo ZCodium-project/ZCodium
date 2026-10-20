@@ -6,7 +6,7 @@ The model-facing coordinate contract previously required the model to copy an
 opaque `frame_id` from a text block adjacent to the raster:
 
 ```json
-{"type":"coordinate","frame_id":"frame-ab12cd34","x":38,"y":105}
+{ "type": "coordinate", "frame_id": "frame-ab12cd34", "x": 38, "y": 105 }
 ```
 
 `frame_id` is transport authority, not visual task input. Requiring the model to
@@ -18,7 +18,7 @@ actions depend on copying an opaque implementation token.
 The public coordinate target is:
 
 ```json
-{"type":"coordinate","x":38,"y":105}
+{ "type": "coordinate", "x": 38, "y": 105 }
 ```
 
 The model copies the integer pixel indices from the exact raster it just

@@ -6,10 +6,7 @@
     "product_turn_id": "share-product-turn-1",
     "fallback_row_id": 3,
     "captured_at": 1000,
-    "resource_ids": [
-      "share-artifact-1",
-      "share-artifact-2"
-    ],
+    "resource_ids": ["share-artifact-1", "share-artifact-2"],
     "payload": {
       "name": "军棋游戏：人机对战 + 双人联网",
       "completion": true,
@@ -122,73 +119,55 @@
             "id": "part-0-0",
             "phase": "p0",
             "lane": "agent-0-0",
-            "steps": [
-              "ask-0-0"
-            ]
+            "steps": ["ask-0-0"]
           },
           {
             "id": "part-0-1",
             "phase": "p0",
             "lane": "agent-0-1",
-            "steps": [
-              "ask-0-1"
-            ]
+            "steps": ["ask-0-1"]
           },
           {
             "id": "part-1-0",
             "phase": "p1",
             "lane": "agent-1-0",
-            "steps": [
-              "ask-1-0"
-            ]
+            "steps": ["ask-1-0"]
           },
           {
             "id": "part-2-0",
             "phase": "p2",
             "lane": "agent-2-0",
-            "steps": [
-              "ask-2-0"
-            ]
+            "steps": ["ask-2-0"]
           },
           {
             "id": "part-2-1",
             "phase": "p2",
             "lane": "agent-2-1",
-            "steps": [
-              "ask-2-1"
-            ]
+            "steps": ["ask-2-1"]
           },
           {
             "id": "part-2-2",
             "phase": "p2",
             "lane": "agent-2-2",
-            "steps": [
-              "ask-2-2"
-            ]
+            "steps": ["ask-2-2"]
           },
           {
             "id": "part-3-0",
             "phase": "p3",
             "lane": "agent-3-0",
-            "steps": [
-              "ask-3-0"
-            ]
+            "steps": ["ask-3-0"]
           },
           {
             "id": "part-4-0",
             "phase": "p4",
             "lane": "agent-4-0",
-            "steps": [
-              "ask-4-0"
-            ]
+            "steps": ["ask-4-0"]
           },
           {
             "id": "part-4-1",
             "phase": "p4",
             "lane": "agent-4-1",
-            "steps": [
-              "ask-4-1"
-            ]
+            "steps": ["ask-4-1"]
           }
         ],
         "handoffs": [],
@@ -232,9 +211,7 @@
             "to": "p4"
           }
         ],
-        "exits": [
-          "p4"
-        ],
+        "exits": ["p4"],
         "sink": [
           "ask-0-0",
           "ask-0-1",
@@ -434,9 +411,7 @@
           "spec": {
             "key": "id",
             "status": "status",
-            "columns": [
-              "done"
-            ],
+            "columns": ["done"],
             "cardTitle": "title"
           },
           "items": [

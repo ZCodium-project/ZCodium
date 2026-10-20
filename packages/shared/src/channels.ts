@@ -1282,5 +1282,4 @@ export interface PlatformChannelMap {
     request: WebRemoteControlAuthStateChange;
     response: void;
   };
-
 }

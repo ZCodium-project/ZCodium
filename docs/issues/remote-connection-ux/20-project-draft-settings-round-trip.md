@@ -49,7 +49,6 @@ flowchart TD
 - 本票负责前台的项目草稿往返，不依赖 [#19](19-add-existing-remote-project.md) 的已有项目列表或 [#21](21-chat-settings-round-trip.md) 的聊天往返；满足前置条件即可推进。
 - 后台成功只提示且需用户显式继续的分支由 [#22](22-background-connection-and-explicit-resume.md) 完成。本票不将连接完成意图迁入任务协议，不修改 Host 的连接状态机。
 
-
 ## Implementation notes
 
 - `ProjectEditor` 保持原实例和唯一草稿；`ProjectCreation` 只保存本次返回引用与收起状态。设置导航不复制名称、目录或凭据。

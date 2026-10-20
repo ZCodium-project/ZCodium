@@ -156,9 +156,7 @@ describe("WebAuthService", () => {
     expect(authorizeUrl.origin + authorizeUrl.pathname).toBe(
       "https://chat.z.ai/api/oauth/authorize",
     );
-    expect(authorizeUrl.searchParams.get("redirect_uri")).toBe(
-      "https://zcode.z.ai/remote/v4",
-    );
+    expect(authorizeUrl.searchParams.get("redirect_uri")).toBe("https://zcode.z.ai/remote/v4");
     expect(authorizeUrl.searchParams.get("client_id")).toBe("client_P8X5CMWmlaRO9gyO-KSqtg");
   });
 

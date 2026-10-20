@@ -71,7 +71,6 @@ Status: done
 - [x] 更新 UX 规格，并同步 E2E 用例目录。
 - [x] `pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed`、受影响的单测和受影响的 SSH E2E 全部通过后，在本地提交。
 
-
 ## Comments
 
 ### 实施与验证（2026-09-29）

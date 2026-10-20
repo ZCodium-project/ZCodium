@@ -331,7 +331,10 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
       }
       const event = sourceServerInstallProgressSchema.safeParse(value);
       if (event.success) {
-        context.onLog?.({ phase: event.data.phase, message: INSTALL_PROGRESS_MESSAGES[event.data.phase] });
+        context.onLog?.({
+          phase: event.data.phase,
+          message: INSTALL_PROGRESS_MESSAGES[event.data.phase],
+        });
       }
     });
     if (result.exitCode !== 0) {

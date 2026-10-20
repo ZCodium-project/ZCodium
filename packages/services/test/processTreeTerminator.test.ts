@@ -1,8 +1,4 @@
-import {
-  spawn,
-  spawnSync,
-  type ChildProcessWithoutNullStreams,
-} from "node:child_process";
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -43,10 +39,7 @@ function isPidRunning(pid: number): boolean {
   return status.length > 0 && !status.startsWith("Z");
 }
 
-async function waitForPidExit(
-  pid: number,
-  timeoutMs = 4_000,
-): Promise<boolean> {
+async function waitForPidExit(pid: number, timeoutMs = 4_000): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (!isPidAlive(pid)) {
@@ -63,9 +56,9 @@ async function waitForProcessTreeSnapshotIdentity(
   timeoutMs = 4_000,
 ): Promise<
   | {
-    snapshot: ProcessTreeSnapshot;
-    identity: ProcessIdentity;
-  }
+      snapshot: ProcessTreeSnapshot;
+      identity: ProcessIdentity;
+    }
   | undefined
 > {
   const deadline = Date.now() + timeoutMs;
@@ -253,17 +246,15 @@ setInterval(() => {}, 1000);
     },
   );
 
-  it.runIf(process.platform !== "win32")(
-    "POSIX 下会兜底清理脱离原进程组的后代进程",
-    async () => {
-      const dir = await mkdtemp(join(tmpdir(), "zcode-runtime-terminator-"));
-      tempDirs.add(dir);
-      const grandchildPidPath = join(dir, "detached-grandchild.pid");
-      const child = spawn(
-        process.execPath,
-        [
-          "-e",
-          `
+  it.runIf(process.platform !== "win32")("POSIX 下会兜底清理脱离原进程组的后代进程", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "zcode-runtime-terminator-"));
+    tempDirs.add(dir);
+    const grandchildPidPath = join(dir, "detached-grandchild.pid");
+    const child = spawn(
+      process.execPath,
+      [
+        "-e",
+        `
 const { writeFileSync } = require("node:fs");
 const { spawn } = require("node:child_process");
 const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
@@ -275,27 +266,26 @@ writeFileSync(${JSON.stringify(grandchildPidPath)}, String(child.pid));
 process.stdout.write(String(child.pid) + "\\n");
 setInterval(() => {}, 1000);
 `,
-        ],
-        {
-          detached: shouldSpawnInDetachedProcessGroup(),
-          stdio: ["ignore", "pipe", "pipe"],
-          windowsHide: true,
-        },
-      );
-      activeChildren.add(child);
+      ],
+      {
+        detached: shouldSpawnInDetachedProcessGroup(),
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+      },
+    );
+    activeChildren.add(child);
 
-      const grandchildPid = await readReportedPid(child, grandchildPidPath);
-      expect(isPidAlive(grandchildPid)).toBe(true);
+    const grandchildPid = await readReportedPid(child, grandchildPidPath);
+    expect(isPidAlive(grandchildPid)).toBe(true);
 
-      // Bugfix: 有些 runtime 或插件会把后代进程 detached 到自己的进程组；
-      // 只 kill runtime wrapper 的进程组会留下这类后代进程，必须按已发现的进程树兜底清理。
-      terminateProcessTree(child);
+    // Bugfix: 有些 runtime 或插件会把后代进程 detached 到自己的进程组；
+    // 只 kill runtime wrapper 的进程组会留下这类后代进程，必须按已发现的进程树兜底清理。
+    terminateProcessTree(child);
 
-      expect(await waitForPidExit(child.pid!)).toBe(true);
-      expect(await waitForPidExit(grandchildPid)).toBe(true);
-      activeChildren.delete(child);
-    },
-  );
+    expect(await waitForPidExit(child.pid!)).toBe(true);
+    expect(await waitForPidExit(grandchildPid)).toBe(true);
+    activeChildren.delete(child);
+  });
 
   it.runIf(process.platform !== "win32")(
     "非等待式回收会强制结束忽略 SIGTERM 的 runtime 进程树",
@@ -350,15 +340,11 @@ setInterval(() => {}, 1000);
   it.runIf(process.platform !== "win32")(
     "查询 root 身份失败时记录 warn 且延迟 force 不沿裸 PID 重新发现",
     async () => {
-      const child = spawn(
-        process.execPath,
-        ["-e", "setInterval(() => {}, 1000)"],
-        {
-          detached: shouldSpawnInDetachedProcessGroup(),
-          stdio: ["ignore", "pipe", "pipe"],
-          windowsHide: true,
-        },
-      );
+      const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
+        detached: shouldSpawnInDetachedProcessGroup(),
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+      });
       activeChildren.add(child);
       await delay(50);
 
@@ -382,11 +368,9 @@ setInterval(() => {}, 1000);
         }
       }
 
-      expect(
-        warnMessages.some((message) =>
-          message.includes("查询 runtime 后代进程失败"),
-        ),
-      ).toBe(true);
+      expect(warnMessages.some((message) => message.includes("查询 runtime 后代进程失败"))).toBe(
+        true,
+      );
       // 修复原因：首次查询失败后即使 PATH 已恢复，force timer 也不能沿裸 PID
       // 重新认领进程树；ChildProcess.kill 同样只是 PID 信号，不是稳定 OS 句柄。
       await delay(100);
@@ -394,40 +378,37 @@ setInterval(() => {}, 1000);
     },
   );
 
-  it.runIf(process.platform !== "win32")(
-    "等待式回收会撑到 SIGKILL 兜底完成",
-    async () => {
-      const child = spawn(
-        process.execPath,
-        [
-          "-e",
-          `
+  it.runIf(process.platform !== "win32")("等待式回收会撑到 SIGKILL 兜底完成", async () => {
+    const child = spawn(
+      process.execPath,
+      [
+        "-e",
+        `
 process.on("SIGTERM", () => {});
 console.log("ready");
 setInterval(() => {}, 1000);
 `,
-        ],
-        {
-          detached: shouldSpawnInDetachedProcessGroup(),
-          stdio: ["ignore", "pipe", "pipe"],
-          windowsHide: true,
-        },
-      );
-      activeChildren.add(child);
-      await readFirstStdoutLine(child);
+      ],
+      {
+        detached: shouldSpawnInDetachedProcessGroup(),
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+      },
+    );
+    activeChildren.add(child);
+    await readFirstStdoutLine(child);
 
-      // Bugfix: app 关闭时 host 不能只安排一个 unref 的 SIGKILL 兜底就退出；
-      // 遇到忽略 SIGTERM 的 zcode-cli/app-server 时，必须等兜底执行完再让 host 结束。
-      const result = await terminateProcessTreeAndWait(child, {
-        forceAfterMs: 20,
-        waitAfterForceMs: 20,
-      });
+    // Bugfix: app 关闭时 host 不能只安排一个 unref 的 SIGKILL 兜底就退出；
+    // 遇到忽略 SIGTERM 的 zcode-cli/app-server 时，必须等兜底执行完再让 host 结束。
+    const result = await terminateProcessTreeAndWait(child, {
+      forceAfterMs: 20,
+      waitAfterForceMs: 20,
+    });
 
-      expect(result).toEqual({ remainingPids: [] });
-      expect(await waitForPidExit(child.pid!, 1_000)).toBe(true);
-      activeChildren.delete(child);
-    },
-  );
+    expect(result).toEqual({ remainingPids: [] });
+    expect(await waitForPidExit(child.pid!, 1_000)).toBe(true);
+    activeChildren.delete(child);
+  });
 
   it.runIf(process.platform !== "win32")(
     "根进程先退出时仍等待 detached 后代完成强制回收",
@@ -597,15 +578,11 @@ process.on("message", (message) => {
   it.runIf(process.platform !== "win32")(
     "健康 runtime 提前退出时不会固定等待兜底窗口",
     async () => {
-      const child = spawn(
-        process.execPath,
-        ["-e", "setInterval(() => {}, 1000)"],
-        {
-          detached: shouldSpawnInDetachedProcessGroup(),
-          stdio: ["ignore", "pipe", "pipe"],
-          windowsHide: true,
-        },
-      );
+      const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
+        detached: shouldSpawnInDetachedProcessGroup(),
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+      });
       activeChildren.add(child);
       await delay(50);
 

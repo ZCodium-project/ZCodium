@@ -95,7 +95,12 @@ describe("windows taskbar overlay badge", () => {
     });
 
     it("红点模式只画纯色圆，不渲染数字（托盘 16px 下数字不可读）", () => {
-      const pixels = renderTaskbarBadgePixels("9+", { size: 14, glyphScale: 1, padding: 0, dot: true });
+      const pixels = renderTaskbarBadgePixels("9+", {
+        size: 14,
+        glyphScale: 1,
+        padding: 0,
+        dot: true,
+      });
       const at = (x: number, y: number): number[] => {
         const offset = (y * 14 + x) * 4;
         return [pixels[offset]!, pixels[offset + 1]!, pixels[offset + 2]!, pixels[offset + 3]!];

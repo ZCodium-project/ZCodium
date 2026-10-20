@@ -853,8 +853,9 @@ export function useGroupedTaskView(params: { workspaceTabs: WorkspaceTabState[] 
     // group 内 New task 过去只在 optimistic view 继承草稿位置，SQLite 仍按 root
     // 新任务置顶，刷新后任务会掉出 group。task 已进入 optimistic index 后，将同一份展示
     // view 作为完整排序事务落库，使 membership 和组内第一位顺序一起收敛。
-    void services.zcodeTaskService
-      .applyGroupedTaskViewOrder!(viewToOrderInput({ view: displayedView }))
+    void services.zcodeTaskService.applyGroupedTaskViewOrder!(
+      viewToOrderInput({ view: displayedView }),
+    )
       .then(() => {
         invalidateRemoteData();
         return refreshRef.current().then(() => {

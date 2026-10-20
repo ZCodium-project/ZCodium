@@ -76,4 +76,3 @@ CLI、Desktop agent 与 SEA 复用 `apps/zcode-cli/packages/cli/scripts/build.mj
 `@zcode/shared` alias 会把子路径拼到 `src/index.ts` 后面，导致 bootstrap 打包失败。
 构建回归测试使用真实 session migration 入口与 esbuild，验证共享实现被内联且没有
 遗留该子路径的外部依赖。本修复只调整构建解析，不改变迁移 SQL、checksum、账本或执行顺序。
-
