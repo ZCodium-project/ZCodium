@@ -57,6 +57,7 @@ function entry(row: Record<string, unknown>): RemoteProjectEntry {
     legacyWorkspace:
       row.legacy_workspace_json == null ? null : JSON.parse(String(row.legacy_workspace_json)),
     lastSyncedAt: row.last_synced_at == null ? null : Number(row.last_synced_at),
+    ...(row.initial_position == null ? {} : { initialPosition: Number(row.initial_position) }),
   };
 }
 /** 不含连接运行态的本机目录；调用方负责 SQLite 读事务。 */
@@ -289,7 +290,11 @@ export function createRemoteProjectService(options: {
         )
           throw new Error("remote-project.host-not-found");
         // 连接期间删除并重新添加同一设备后，旧向导不得给新 membership 登记入口。
-        if (input.expectedMembershipId && db.prepare("SELECT membership_id FROM hosts WHERE host_id=?").get(input.hostId)?.membership_id !== input.expectedMembershipId)
+        if (
+          input.expectedMembershipId &&
+          db.prepare("SELECT membership_id FROM hosts WHERE host_id=?").get(input.hostId)
+            ?.membership_id !== input.expectedMembershipId
+        )
           throw new Error("remote-project.host-removed");
         const old = db
           .prepare("SELECT * FROM remote_project_entries WHERE host_id=? AND remote_project_id=?")

@@ -103,7 +103,7 @@ CREATE TABLE projects (
 CREATE TABLE remote_project_entries (
  entry_id TEXT PRIMARY KEY, host_id TEXT NOT NULL REFERENCES hosts(host_id) ON DELETE CASCADE,
  remote_project_id TEXT, cached_name TEXT NOT NULL, cached_roots_json TEXT NOT NULL DEFAULT '[]',
- legacy_workspace_json TEXT, last_synced_at INTEGER, UNIQUE(host_id,remote_project_id));
+ legacy_workspace_json TEXT, last_synced_at INTEGER, initial_position INTEGER, UNIQUE(host_id,remote_project_id));
 
 CREATE TABLE "schema_migration" (id text primary key, checksum text not null, app_version text, "applied_at" integer not null);
 

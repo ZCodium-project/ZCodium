@@ -32,6 +32,22 @@ Provider 行左侧依次为当前供应商图标、名称、接入方式标识�
 
 切换 Provider 立即选择该分组按目录顺序的第一个未锁定模型，沿用已有 onSelectModel 更新 Composer，Think 由既有模型切换逻辑同步为有效档位，弹层保持打开。重复选择当前 Provider 保留其当前可用模型。没有可用模型的 Provider 仍可浏览和配置，但不覆盖当前模型，Think 禁用。滑杆按 Option Spec 的原始顺序逐格选择，不排序、不转换成 Token Budget。仅 Off 单档隐藏整个 Effort 区域及分割线；其他单档禁用滑杆但显示档位；无模型／无有效档位不制造默认选择。选择档位保持弹层打开，点击外部或 Escape 收起。桌面关闭后恢复输入焦点；手机不主动弹出软键盘。
 
+### 模型菜单关闭
+
+- 点击或键盘确认可用模型后保持菜单打开，包括重复选择当前模型，便于继续调整思考档位；锁定模型不提交、不关闭。切换 Provider 和调档仍保持菜单打开。
+- 普通输入框、全屏插件中的浮动输入框共用同一个菜单打开状态。点击菜单外侧一次即关闭，包括插件 webview 所占区域；该次点击只关闭菜单，不触发底下插件操作。Escape 保持关闭行为。
+- 菜单关闭后沿用现有焦点规则：桌面恢复输入框，手机不主动弹出软键盘。不改变模型选择 owner、提交和协议。
+
+```text
+确认可用模型 → 既有模型选择回调 → 菜单保持打开
+菜单外侧指针 → 宿主菜单外部交互 → 菜单 open=false
+Provider / Effort 操作 → 原有选择链路 → 菜单保持打开
+```
+
+外侧点击回归原因：Radix 打开 modal 菜单后将 body 的 pointer-events 设为 none，但插件 webview 显式设置 auto，继续接收点击；guest 内事件不冒泡到宿主 document，因此菜单没有收到外部 pointerdown。Electron 事件采样确认该次点击执行了插件按钮，菜单仍为打开态。合并菜单打开期间提供透明指针层，放在插件页面之上、Composer 和浮窗之下，复用 Radix 的外部关闭逻辑，保留工具栏菜单互切。该层与菜单共用 open，不保存额外状态。
+
+回归验证：菜单组件单测 47 条、Electron webview / 手机宽度 iframe 深浅主题交互 4 条、完整桌面工具栏 11 条通过，覆盖选模型后保持打开及随后一次外侧点击关闭。浏览器候选通过 `node --test packages/ui/test/browser/manual-review/pending/composer-menu-dismiss.test.mjs` 运行，产物在 `packages/desktop/.e2e-artifacts/composer-menu-dismiss/`。未覆盖 Windows/Linux 原生窗口、手机真机和远控连接；插件资源采用测试页，不验证插件安装或 Agent 握手。
+
 ## 整体压缩优先级
 
 统一由 useComposerToolbarFit 测量全部左右控件及间距，每一级仍溢出才进入下一级：
@@ -59,7 +75,7 @@ ModelSelectionView（支持的模型与档位）
 
 ## 验证
 
-- 组件交互：Provider 自动选择可用模型、跳过锁定模型、重复选择当前 Provider、无可用模型、模型选中后菜单不关闭、视觉标签、离散滑杆、单档／无效档、继承的连接方式和管理入口。
+- 组件交互：Provider 自动选择可用模型、跳过锁定模型、重复选择当前 Provider、无可用模型、模型选中后菜单保持打开、视觉标签、离散滑杆、单档／无效档、继承的连接方式和管理入口。
 - 布局：各级收缩与逆向恢复、缺失 Computer/Plan、最终图标＋绿条；真实浏览器桌面与手机宽度、深浅主题。
 - Desktop E2E：模型与档位修改仍更新 Composer；普通模式不再渲染独立 Think 入口；合并菜单与 Mode 互斥。
 

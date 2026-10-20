@@ -385,6 +385,7 @@ The following explicit exceptions may retain `rounded-2xl`; do not extend them t
 
 - **Main chat input shell**: the actual `ChatPromptEditor` input shell may use `rounded-2xl`. Its drag overlay matches the shell because it covers the same surface, rather than introducing a nested container.
 - **Conversation status floating panel**: the shared shell may retain `rounded-2xl` across collapsed and expanded presentations.
+- **Side Pane full-view floating composer**: in Side Pane full view the main chat input shell floats on its own (no outer frame); the drawer that slides out from behind it and the answer bubble shown above it use `rounded-2xl` to match the shell; the minimized state and the answer bubble's close button are deliberate circles (`rounded-full`).
 - **Toast**: the independent notification shell may retain `rounded-2xl`.
 - **Brand icon backplates**: welcome-screen brand art and plugin-detail icons may retain `rounded-2xl` as part of their icon shape. This is not a general exception for icon buttons or content cards.
 

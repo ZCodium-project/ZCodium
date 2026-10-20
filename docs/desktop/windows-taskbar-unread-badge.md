@@ -38,8 +38,8 @@ syncApplicationUnreadBadge(map)                     desktopWindowLifecycle.ts
 Electron 在 Windows 通过 `BrowserWindow.setOverlayIcon(image, description)` 支持任务栏角标（Shell `ITaskbarList3::SetOverlayIcon`）。与 `setBadgeCount` 不同，**overlay 不负责渲染数字**，必须自绘徽章图。
 
 - **位置**：overlay 由系统固定绘制在任务栏按钮右下角（与 Windows 更新盾牌、Outlook 同步状态同一机制），API 无位置参数，无法绘制右上角效果；右上角只在托盘角标上可行（自绘可控）。
-- **观感**：32×32 画布（100% DPI 下系统缩放为 16×16），圆内加透明边距（半径 12，占画布约 75%）控制视觉尺寸；红底圆 + 白色数字，`>= 10` 显示 `9+`。运行时用内置 5×7 点阵字体直接构造预乘 BGRA 像素并 `nativeImage.createFromBitmap`，不引入图片资源与运行时 canvas 依赖，主进程可单测像素逻辑。
-- **托盘角标**：Windows/Linux 托盘（`Tray`）在应用图标**右上圆角缺口**合成**纯红点**（无数字）——Logo 是圆角方块，32×32 画布右上直角处天然有约 4×4 透明缺口，9×9 红点（画布 10、radius 4）嵌进缺口、边缘与圆弧相切，Logo 满幅不缩不放。托盘实际显示仅 16×16，塞数字必然不可读；精确数量由任务栏气泡与任务列表承担。计数变化时 `tray.setImage` 换图，归零恢复原图；合成用预乘 alpha 混合（`blendBadgeIntoBitmap`，纯逻辑可单测），底图取托盘图标源文件。macOS 无托盘（平台返回 null），由 Dock 角标承担。
+- **观感**：任务栏 overlay 按 Windows 固定显示尺寸提供原生 1x（16×16）与 2x（32×32）`NativeImage` representation，不再把普通 32px 硬边圆交给 Shell 盲缩。红点为纯红、无描边、4× 超采样抗锯齿，逻辑直径约 7px。同一个安装包运行时按系统 build 自动选画布圆心：Win10（build < 22000）在画布内右下锚定，补偿旧任务栏的 overlay 落点；Win11（build ≥ 22000）在画布内居中，避免 Shell 已放到图标角上后再次右下锚定造成二次偏移。无障碍 description 仍携带具体数量（如 "3 unread tasks"）。
+- **托盘角标**：Windows/Linux 托盘（`Tray`）在应用图标右上圆角缺口合成纯红点（无数字）。尺寸与任务栏独立，保持约 8px；同样提供原生 1x（16px）与 2x（32px）表示并用 4× 超采样抗锯齿，解决硬边 32px 合成图被 Shell 缩放后的模糊。计数变化时 `tray.setImage` 换图，归零恢复原始多分辨率图标；macOS 无托盘（平台返回 null），由 Dock 角标承担。
 - **多窗口**：所有窗口统一显示全局未读总数（与 macOS Dock 显示应用级总数一致，符合"完成了几个会话就显示几"的直觉）。无任务栏按钮的窗口（CUA 指示器、更新状态窗等 skipTaskbar 窗口）设置 overlay 无副作用，不单独排除。
 - **清零**：`count = 0` 时任务栏传 `null` image 移除角标，托盘恢复原图。
 - **性能**：角标只在"任务完成 / 用户查看任务"时变化，更新频率为事件级；徽章图按 label 缓存在内存，单次更新是一次查表 + 一次 Shell 调用 / 一次托盘换图。

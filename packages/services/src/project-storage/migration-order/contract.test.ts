@@ -1,7 +1,74 @@
 import { describe, expect, it } from "vitest";
 import { fixture, port } from "#src/project-storage/test-fixture.js";
+import { migrateProjects } from "#src/project-storage/migrate-projects.js";
 
 describe("project-storage migration order", () => {
+  const mixedSettings = {
+    recentProjects: [],
+    lastWorkspaceSession: [
+      { kind: "local" as const, workspacePath: "/a" },
+      {
+        kind: "remote" as const,
+        workspacePath: "/a",
+        target: { kind: "ssh" as const, host: "example.test", username: "dev", port: 22 },
+        lastOpenedAt: 1,
+        lastConnectionStatus: "failed" as const,
+      },
+      { kind: "local" as const, workspacePath: "/b" },
+    ],
+  };
+  it("首次升级保留本地/remote 混排位置，重启不覆盖已调整的顺序", async () => {
+    const { db, context } = await fixture();
+    await port.migrate(db, { ...context, settings: mixedSettings });
+    expect(
+      port
+        .repository(db)
+        .readTree()
+        .projects.map((p) => [p.name, p.position]),
+    ).toEqual([
+      ["a", 0],
+      ["b", 2],
+    ]);
+    expect(db.prepare("SELECT initial_position FROM remote_project_entries").get()).toMatchObject({
+      initial_position: 1,
+    });
+    db.exec("UPDATE projects SET position=10-position");
+    const before = db.prepare("SELECT * FROM projects ORDER BY project_id").all();
+    await port.migrate(db, {
+      ...context,
+      settings: {
+        ...mixedSettings,
+        lastWorkspaceSession: [...mixedSettings.lastWorkspaceSession].reverse(),
+      },
+    });
+    expect(db.prepare("SELECT * FROM projects ORDER BY project_id").all()).toEqual(before);
+    expect(db.prepare("SELECT initial_position FROM remote_project_entries").get()).toMatchObject({
+      initial_position: 1,
+    });
+  });
+  it.each(["0005_projects", "0001_projects"])(
+    "已升级 ledger %s 不补混排位置或覆盖项目",
+    async (id) => {
+      const { db, context } = await fixture();
+      migrateProjects(db, { ...context, settings: mixedSettings });
+      db.exec(
+        "CREATE TABLE schema_migration(id TEXT PRIMARY KEY,checksum TEXT,app_version TEXT,applied_at INTEGER)",
+      );
+      db.prepare("INSERT INTO schema_migration VALUES(?,?,?,?)").run(
+        id,
+        "ac00a61c7c45a5ceb3814b1487901372c5580eb6eb8d31bde5bcdfbd1ed0f0da",
+        "3.16.1",
+        10,
+      );
+      db.exec("UPDATE projects SET position=10-position,name='edited-'||name");
+      const before = db.prepare("SELECT * FROM projects ORDER BY project_id").all();
+      await port.migrate(db, { ...context, settings: mixedSettings });
+      expect(db.prepare("SELECT * FROM projects ORDER BY project_id").all()).toEqual(before);
+      expect(db.prepare("SELECT initial_position FROM remote_project_entries").get()).toEqual({
+        initial_position: null,
+      });
+    },
+  );
   it.each([undefined, "remote:server:owner"])(
     "creates saved projects in order (remote owner also infers history roots) for owner %s",
     async (hostId) => {

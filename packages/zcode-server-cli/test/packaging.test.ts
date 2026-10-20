@@ -151,6 +151,7 @@ describe("stageRelease", () => {
     distDir: string;
     workspaceNodeModulesDir: string;
     agentBundlePath: string;
+    bundledSkillsDir: string;
     nodeBinaryPath: string;
     outputDir: string;
     notices: { thirdParty: string; node: string; nodeSource: string };
@@ -185,6 +186,13 @@ describe("stageRelease", () => {
       files: { "prebuilds/linux-x64/pty.node": "linux-binary" },
     });
 
+    const bundledSkillsDir = join(root, "bundled-skills");
+    await mkdir(join(bundledSkillsDir, "skills/dynamic-workflows"), { recursive: true });
+    await writeFile(join(bundledSkillsDir, "README.md"), "bundled skills");
+    await writeFile(join(bundledSkillsDir, "scratch.txt"), "local only");
+    for (const name of ["SKILL.md", "patterns.md", "examples.md"]) {
+      await writeFile(join(bundledSkillsDir, "skills/dynamic-workflows", name), `fixture ${name}`);
+    }
     const agentBundlePath = join(root, "zcode.cjs");
     await writeFile(agentBundlePath, "// fake agent bundle\n", "utf8");
     const nodeBinaryPath = join(root, "node-binary");
@@ -200,6 +208,7 @@ describe("stageRelease", () => {
       distDir,
       workspaceNodeModulesDir,
       agentBundlePath,
+      bundledSkillsDir,
       nodeBinaryPath,
       outputDir,
       notices,
@@ -433,6 +442,68 @@ describe("stageRelease", () => {
     expect(tarText).not.toContain("SCHILY.xattr");
   });
 
+  it("bundled workflow skills ship in the agent component and affect its hash", async () => {
+    const fixture = await makeStageFixture();
+    const officialPluginsDir = join(await makeTempDir(), "packages");
+    await writeOfficialPluginFixture(officialPluginsDir, "zcode-guide-plugin");
+    const options = {
+      ...fixture,
+      officialPluginsDir,
+      target: "linux-x64" as const,
+      appVersion: "test",
+      archive: false,
+    };
+    const staged = await stageRelease(options);
+    const manifest = JSON.parse(await readFile(join(staged.releaseDir, "manifest.json"), "utf8"));
+    const component = manifest.components.find(
+      (entry: { id: string }) => entry.id === "agent-runtime",
+    );
+    expect(component.paths).toContain("runtime/packages/bundled-skills");
+    expect(manifest.plugins).not.toContain("bundled-skills");
+    const archive = gunzipSync(
+      await readFile(join(fixture.outputDir, component.archivePath)),
+    ).toString("utf8");
+    for (const name of ["SKILL.md", "patterns.md", "examples.md"]) {
+      expect(
+        await readFile(
+          join(staged.releaseDir, "runtime/packages/bundled-skills/skills/dynamic-workflows", name),
+          "utf8",
+        ),
+      ).toBe(`fixture ${name}`);
+      expect(archive).toContain(`fixture ${name}`);
+    }
+    await writeFile(
+      join(fixture.bundledSkillsDir, "skills/dynamic-workflows/examples.md"),
+      "updated example",
+    );
+    const updated = await stageRelease(options);
+    const next = JSON.parse(await readFile(join(updated.releaseDir, "manifest.json"), "utf8"));
+    expect(
+      next.components.find((entry: { id: string }) => entry.id === "agent-runtime").sha256,
+    ).not.toBe(component.sha256);
+    expect(
+      next.components.find((entry: { id: string }) => entry.id === "official-plugins").sha256,
+    ).toBe(
+      manifest.components.find((entry: { id: string }) => entry.id === "official-plugins").sha256,
+    );
+  });
+
+  it.each(["SKILL.md", "patterns.md", "examples.md", "entire-pack"])(
+    "rejects missing bundled skill asset %s",
+    async (missing) => {
+      const fixture = await makeStageFixture();
+      await rm(
+        missing === "entire-pack"
+          ? fixture.bundledSkillsDir
+          : join(fixture.bundledSkillsDir, "skills/dynamic-workflows", missing),
+        { recursive: true },
+      );
+      await expect(
+        stageRelease({ ...fixture, target: "linux-x64", appVersion: "test", archive: false }),
+      ).rejects.toThrow(/bundled skill/i);
+    },
+  );
+
   async function writeOfficialPluginFixture(
     officialPluginsDir: string,
     name: string,
@@ -469,6 +540,89 @@ describe("stageRelease", () => {
       );
     }
   }
+
+  it.each(["absent", "incomplete", "stale"])(
+    "stages bundled skills from the agent source when the plugin cache is %s",
+    async (cacheState) => {
+      const fixture = await makeStageFixture();
+      const officialPluginsDir = join(await makeTempDir(), "packages");
+      await writeOfficialPluginFixture(officialPluginsDir, "zcode-guide-plugin");
+      if (cacheState !== "absent") {
+        const cachedPackDir = join(officialPluginsDir, "bundled-skills");
+        await mkdir(join(cachedPackDir, "skills/dynamic-workflows"), { recursive: true });
+        await writeFile(join(cachedPackDir, "README.md"), "old cached pack");
+        const files =
+          cacheState === "stale" ? ["SKILL.md", "patterns.md", "examples.md"] : ["SKILL.md"];
+        for (const name of files) {
+          await writeFile(
+            join(cachedPackDir, "skills/dynamic-workflows", name),
+            "old cached skill",
+          );
+        }
+      }
+
+      // 冲突整合时两条复制路径曾并存：插件缓存缺文件会拒绝有效技能包，旧缓存会覆盖 Agent 源。
+      // 技能包只从 bundledSkillsDir 读取，并只由 agent-runtime 交付。
+      const staged = await stageRelease({
+        ...fixture,
+        target: "linux-x64",
+        appVersion: "test",
+        archive: false,
+        officialPluginsDir,
+      });
+      const stagedPackDir = join(staged.releaseDir, "runtime/packages/bundled-skills");
+      expect(await readFile(join(stagedPackDir, "README.md"), "utf8")).toBe("bundled skills");
+      for (const name of ["SKILL.md", "patterns.md", "examples.md"]) {
+        expect(await readFile(join(stagedPackDir, "skills/dynamic-workflows", name), "utf8")).toBe(
+          `fixture ${name}`,
+        );
+      }
+      // 保留发布白名单：本地临时文件不能进入发行包或组件归档。
+      await expect(stat(join(stagedPackDir, "scratch.txt"))).rejects.toThrow();
+      const manifest = JSON.parse(
+        await readFile(join(staged.releaseDir, "manifest.json"), "utf8"),
+      ) as {
+        plugins: string[];
+        components: Array<{ id: string; paths: string[]; archivePath: string }>;
+      };
+      expect(manifest.plugins).toEqual(["zcode-guide"]);
+      const agentComponent = manifest.components.find((entry) => entry.id === "agent-runtime")!;
+      expect(agentComponent.paths).toContain("runtime/packages/bundled-skills");
+      const agentExtractDir = await makeTempDir();
+      await runTar([
+        "-xf",
+        join(fixture.outputDir, agentComponent.archivePath),
+        "-C",
+        agentExtractDir,
+      ]);
+      expect(
+        await readFile(
+          join(
+            agentExtractDir,
+            "runtime/packages/bundled-skills/skills/dynamic-workflows/SKILL.md",
+          ),
+          "utf8",
+        ),
+      ).toBe("fixture SKILL.md");
+      await expect(
+        stat(join(agentExtractDir, "runtime/packages/bundled-skills/scratch.txt")),
+      ).rejects.toThrow();
+      const pluginComponent = manifest.components.find((entry) => entry.id === "official-plugins")!;
+      const pluginExtractDir = await makeTempDir();
+      await runTar([
+        "-xf",
+        join(fixture.outputDir, pluginComponent.archivePath),
+        "-C",
+        pluginExtractDir,
+      ]);
+      await expect(
+        stat(join(pluginExtractDir, "runtime/packages/zcode-guide-plugin")),
+      ).resolves.toBeTruthy();
+      await expect(
+        stat(join(pluginExtractDir, "runtime/packages/bundled-skills")),
+      ).rejects.toThrow();
+    },
+  );
 
   it("stages the official plugin set and excludes the on-demand superpowers package", async () => {
     const fixture = await makeStageFixture();

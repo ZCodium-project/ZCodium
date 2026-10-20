@@ -362,6 +362,28 @@ describe("v4 M5 门禁：composer 工具条与 slash 候选面板", () => {
     const cfg = await getV4ModelConfig();
     expect(cfg.provider).toBe(UPSTREAM_PROVIDER_ID);
 
+    // 选模型后保留合并菜单，便于继续调档；重复选当前模型也不收起。
+    for (const selected of [false, true]) {
+      await openComposerPicker("model");
+      const option = $(
+        `[data-testid^="chat-model-select-item-"]${selected ? '[data-checked="true"]' : ':not([data-checked="true"])'}:not([data-model-option-locked])`,
+      );
+      await option.waitForClickable({ timeout: 15000 });
+      const value = (await option.getAttribute("data-testid"))!.slice(
+        "chat-model-select-item-".length,
+      );
+      await option.click();
+      await waitForOnlyComposerPickerOpen("model", selected ? "重复选择当前模型" : "选择其他模型");
+      await browser.waitUntil(
+        async () =>
+          (await $(`[data-testid="${TID_CHAT_MODEL_SELECT_TRIGGER}"]`).getAttribute(
+            "data-model-current-value",
+          )) === value,
+        { timeout: 15000 },
+      );
+      await closeComposerPicker();
+    }
+
     // 只点击 Provider，不补点 Model：必须直接更新同一 Composer 草稿并同步有效档位。
     await openComposerPicker("model");
     await $('[data-testid="composer-provider-trigger"]').click();

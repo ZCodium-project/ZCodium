@@ -1526,7 +1526,8 @@ section heading 「已保存的工作流」 with the total count, and, on the ri
 「工作流设置」 (Workflow settings) followed by the current mode's label in the tertiary text
 colour, then a refresh button 「刷新」 that makes every group reload past its cache. The
 settings button opens Settings › 常规, where the mode row lives (see "The user's choice"),
-and is present exactly when that row is: when the feature is offered.
+and is present exactly when that row is, which is whenever the hub is shown, except for a
+snapshot from an older Host.
 
 ### Groups
 
@@ -2479,12 +2480,11 @@ follows: on a team plan it is a UUID.
 
 ## Gray release: the `dynamicWorkflow` feature key
 
-Status: implemented. The server decides, per client, whether dynamic workflows are offered
-at all, and which mode a user gets by default. The key is `data.configs.dynamicWorkflow.mode`
+Status: implemented. The server decides, per client, which mode a user gets by default. The key is `data.configs.dynamicWorkflow.mode`
 in the `/api/v1/client/configs` response, with the values `"disabled" | "onDemand" |
-"alwaysOn"`. Where the server offers the feature, the user can pick another of the three
-modes in Settings (see "The user's choice"). The server offers; the user picks among what is
-offered.
+"alwaysOn"`. The user can pick any of the three modes in Settings (see "The user's choice"),
+and an explicit choice always wins. The server only sets the default: the mode of a user who
+has not chosen.
 
 ### What each mode means
 
@@ -2497,9 +2497,10 @@ offered mode.
 | `onDemand` | Every door of `alwaysOn`, with the model-facing tool surface deferred. The `/workflow` command stays in the slash catalog (so the composer's plus-menu entry and `/` panel entry stay), the `dynamic-workflows` skill stays discoverable, the automations page keeps its 「工作流」 tab and every Resume affordance is offered; but the ten workflow tools are **not registered for the model, and the `Agent`/`Task` descriptions carry no CreateWorkflow line, until the session is activated** by its first `/workflow`, by a Resume or Configure of one of its runs, or by resuming a session whose records already hold a workflow. Once activated a session stays activated. See "On demand: activation". `enabled = mode !== "disabled"` (`isDynamicWorkflowModeEnabled` in `packages/shared/src/dynamic-workflow-feature.ts`) still answers every "is the feature offered at all" question; only the registration gate reads the mode itself. |
 | `alwaysOn` | Everything this document describes; the ten tools are registered from the session's first request. |
 
-The key absent, malformed, or the request failed: `disabled`. A server that stops sending
-the key has turned the feature off; a stale "on" snapshot is never carried forward past a
-successful response that lacks it. The terminal UI and headless `-p` runs never consult the
+The key absent, malformed, or the request failed: the offer is `disabled`. A server that
+stops sending the key has turned the default off; a stale "on" snapshot is never carried
+forward past a successful response that lacks it. A user's explicit choice still applies on
+top (see "The user's choice"). The terminal UI and headless `-p` runs never consult the
 key: the standalone CLI does not read `/client/configs`. Its mode comes from the
 `--workflow-mode` flag and is `disabled` when the flag is absent (see "The standalone CLI:
 `--workflow-mode`").
@@ -2542,11 +2543,14 @@ policy sync, session create and resume in that process reuses it. The user's cho
 latched: it is applied to the latched offer at every use. A server flip therefore
 takes effect at the next app start, the same rule as the desktop context prompt gray. The
 latch is what keeps a session create from waiting on a network timeout when the machine is
-offline; the cost is that a Host that started offline stays disabled until restart. The
+offline; the cost is that a Host that started offline offers `disabled` until restart, so
+a user who never chose a mode has the feature off until then (an explicit choice still
+applies, see "The user's choice"). The
 provider's own 1 h envelope cache and `forceRefresh` serve the renderer's refresh, not the
 CLI gate. Remote Hosts over SSH, WSL and Docker evaluate the key themselves through their own
-`/client/configs` request, so a remote machine that cannot reach the server is disabled
-unless the override reaches it (below). The CLI never reads the key or the override;
+`/client/configs` request, so a remote machine that cannot reach the server offers
+`disabled`: the feature is off there unless the user's choice (pushed by the desktop) or the
+override (below) turns it on. The CLI never reads the key or the override;
 it only consumes what the Host sends, the way `offPeakToolEnabled` works. Old CLIs that do
 not know the policy method answer method-not-found, which the Host logs and ignores, and
 their `z.object` schemas drop the unknown session flag, so the pairing degrades to disabled.
@@ -2648,17 +2652,21 @@ Status: implemented. One app-wide setting, `dynamicWorkflowMode` in the shared s
 file, holds the user's choice. Absent means "follow the offer". It holds one of the three
 modes otherwise.
 
-**Precedence.** The server (or the local override) decides the *offer*: whether the feature
-is available (`offeredMode` is a known mode other than `disabled`, `isDynamicWorkflowOffered`)
-and which mode is the default. A snapshot without a readable `offeredMode` counts as not
-offered: it comes from an older Host (a newer UI bundle, such as the phone remote, attached
-to an older desktop), which ignores the choice, so neither the row nor the hub's settings
-button appears. The user's choice
-applies only when the feature is available, and then replaces the offered mode. A choice
-never turns the feature on where the offer is `disabled`: the stored value stays in the file
-and applies again if a later offer makes the feature available. The shared helper
-`applyDynamicWorkflowUserMode(offer, choice)` is the only place this rule is written; the
-Host calls it, and the renderer only reads its result.
+**Precedence.** The user's choice always wins. The server (or the local override) decides
+only the *offer*, `offeredMode`: the default mode, which is the effective mode while the user
+has not chosen. An offer of `disabled` is a default like the others, so a user can turn the
+feature on where the server does not send the key, where the request failed, or on a remote
+machine that cannot reach the server. A Host without a resolver for the offer at all (one
+that does not wire the feature) stays `disabled` whatever the choice. The server therefore
+has no remote off switch for a user who chose a mode; the feature is generally available, and
+the key only moves the default. The shared helper `applyDynamicWorkflowUserMode(offer, choice)`
+is the only place this rule is written; the Host calls it, and the renderer only reads its
+result.
+
+A snapshot without a readable `offeredMode` (`readDynamicWorkflowOfferedMode` returns
+nothing) comes from an older Host (a newer UI bundle, such as the phone remote, attached to an
+older desktop), which ignores the choice, so neither the row nor the hub's settings button
+appears for it.
 
 **Clear on default.** Picking the option that equals the offered mode deletes the stored
 value (the patch carries the empty string, which the settings patch normalizer turns into a
@@ -2680,10 +2688,10 @@ description that wraps inside the list:
 | `alwaysOn` | 始终开启 / Always on | 除了 /workflow 命令，模型也会根据你的意图主动运行工作流。 |
 
 The option equal to the offered mode carries a 「默认」 (Default) tag; the trigger shows the
-effective mode's title only. The row is not rendered while the availability snapshot is
-loading, when it failed, or when the offer is `disabled`: the gray release stays invisible,
-and a user whose server never offered the feature sees nothing that mentions it. The row
-has no note about timing; open sessions keeping their tools is the rule below, not something
+effective mode's title only. The row is always rendered once the availability snapshot is
+ready, whatever the offer: under an offer of `disabled` the trigger shows 关闭 and the tag
+sits on 关闭. It is not rendered while the snapshot is loading, when reading it failed, or for
+a snapshot from an older Host (above). The row has no note about timing; open sessions keeping their tools is the rule below, not something
 the row explains.
 
 **When it takes effect.** The same rule as a server flip: sessions created or resumed after
@@ -2717,8 +2725,8 @@ once that resolves, reloads its availability snapshot.
 mode's label (see "The hub page"). It is shown only while the hub itself is shown, that is,
 while the effective mode is not `disabled`. Under `disabled` the page reverts to the plain
 「自动化」 title and nothing points at the setting; the way back is Settings › 常规, where the
-user turned it off. A user who chose Off and a user who was never offered the feature see
-the same automations page.
+row is always present. A user who chose Off and a user whose default is Off see the same
+automations page.
 
 ### The local override
 
@@ -2821,12 +2829,12 @@ enabling the hub fixture must not change unrelated specs or the fail-closed prod
 | DWG-15 | Flag scope: `--workflow-mode` with `app-server`, `agent-server`, `login`, `skills` → exit 1 with the scope error; with `-p`, `--target`, `tui` or no command → accepted |
 | DWG-16 | TUI under `disabled`: the `/` suggestions and `/help` have no `workflow`; `/workflow x` answers the disabled notice without calling `submitPrompt`; `/dwf list` and `/dwf cancel` work; `/dwf resume <id>` answers the notice without calling `resumeWorkflowRun`. Under `onDemand` and `alwaysOn`: `/workflow` is suggested and submitted as before |
 | DWG-17 | Headless under `disabled`: `-p "/workflow x"` → the notice on stderr, exit 1, no app created; `-p "/help"` lists no `/workflow`. With `--workflow-mode alwaysOn` the command rides the plain-prompt path and the settle-wait as before |
-| DWG-18 | `applyDynamicWorkflowUserMode`: offer `onDemand` + choice `alwaysOn` → mode `alwaysOn`, `offeredMode` `onDemand`, `userMode` `alwaysOn`; offer `disabled` + any choice → `disabled`, no `userMode`; no choice → the offer unchanged; an invalid stored value is ignored |
+| DWG-18 | `applyDynamicWorkflowUserMode`: offer `onDemand` + choice `alwaysOn` → mode `alwaysOn`, `offeredMode` `onDemand`, `userMode` `alwaysOn`; offer `disabled` + choice `alwaysOn` → mode `alwaysOn`, enabled, `offeredMode` `disabled`; no choice → the offer unchanged; an invalid stored value is ignored. `readDynamicWorkflowOfferedMode` returns the offered mode, `disabled` included, and nothing for a snapshot without a readable `offeredMode` |
 | DWG-19 | Settings patch: `dynamicWorkflowMode: ""` deletes the stored value; a mode is stored as is; an unknown stored value does not break reading the file |
-| DWG-20 | Host: with a latched offer `alwaysOn`, a stored choice `onDemand` makes the next session create carry `dynamicWorkflowMode: "onDemand"` without a new server read; a choice `disabled` makes it carry no workflow fields; `syncDynamicWorkflowUserMode` re-sends the policy to every live workspace (`enabled: false` for `disabled`) only when the effective mode changed, in call order |
+| DWG-20 | Host: with a latched offer `alwaysOn`, a stored choice `onDemand` makes the next session create carry `dynamicWorkflowMode: "onDemand"` without a new server read; a choice `disabled` makes it carry no workflow fields; with a latched offer `disabled`, or an offer read that threw, a stored choice `alwaysOn` sends the policy `enabled: true` and makes session create carry the mode; without an offer resolver the choice is ignored; `syncDynamicWorkflowUserMode` re-sends the policy to every live workspace (`enabled: false` for `disabled`) only when the effective mode changed, in call order |
 | DWG-21 | Desktop-attached remote Host: without a local settings resolver it applies the last pushed value; the desktop pushes the settings value when it builds the remote workspace services and forwards later changes to live remote connections |
-| DWG-22 | UI Settings row: absent while loading, on failure, when the offer is `disabled`, and for a snapshot with no readable `offeredMode` (an older Host), where the hub's settings button is absent too; shows the effective mode; the 「默认」 tag sits on the offered mode; picking the offered mode writes `""`, picking another writes that mode; the store reloads after a change |
-| DWG-23 | Desktop E2E against a mock `/client/configs` sending `alwaysOn`: the row shows 始终开启 with the tag; choosing 关闭 removes the 「工作流」 title word and, in a new draft, the plus-menu entry; choosing 始终开启 again clears the stored value. Offer `disabled`: no row |
+| DWG-22 | UI Settings row: absent while loading, on failure, and for a snapshot with no readable `offeredMode` (an older Host), where the hub's settings button is absent too; present under an offer `disabled`, showing 关闭 with the tag; with an offer `disabled` and a choice `alwaysOn` the hub shows its settings button; shows the effective mode; the 「默认」 tag sits on the offered mode; picking the offered mode writes `""`, picking another writes that mode; the store reloads after a change |
+| DWG-23 | Desktop E2E against a mock `/client/configs` sending `alwaysOn`: the row shows 始终开启 with the tag; choosing 关闭 removes the 「工作流」 title word and, in a new draft, the plus-menu entry; choosing 始终开启 again clears the stored value. Offer `disabled`: the row shows 关闭 with the tag; choosing 始终开启 stores it and brings back the 「工作流」 tab and, in a new draft, the plus-menu entry |
 
 ## Alternatives not taken
 

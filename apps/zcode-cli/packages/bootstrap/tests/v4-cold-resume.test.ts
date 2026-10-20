@@ -1138,7 +1138,13 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
   async function seedPersistedSession(
     dbPath: string,
     workspaceIdentity?: WorkspaceId,
-    taskType: "interactive" | "fork" | "subagent_child" = "interactive",
+    taskType:
+      | "interactive"
+      | "fork"
+      | "subagent_child"
+      | "workflow_child"
+      | "nested_workflow_child"
+      | "selection_side_chat" = "interactive",
   ): Promise<void> {
     const store = await createSqliteSessionStore({ dbPath });
     try {
@@ -2006,180 +2012,238 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
     }
   });
 
-  for (const clientMode of ["desktop-continuous", "web-remote-replayable"] as const) {
-    for (const lifecycle of ["warm", "grace", "parent-release", "cold"] as const) {
-      it(`SAT27/SAT28: ${clientMode} child ${lifecycle} 重开保持隐藏且拒绝用户输入`, async () => {
-        const dbPath = join(tempRoot, "sessions.db");
-        await seedPersistedSession(dbPath, undefined, "subagent_child");
-        const sentInputs: Array<{ text: string }> = [];
-        const options: ZCodeAppOptions[] = [];
-        const { server, store } = await bootRestartedServer(dbPath, sentInputs, undefined, options);
-        const { v4Gateway: gateway } = (
-          server as unknown as {
-            context: { v4Gateway: ConversationV4Gateway };
+  for (const childKind of ["subagent_child", "workflow_child", "nested_workflow_child"] as const) {
+    for (const clientMode of ["desktop-continuous", "web-remote-replayable"] as const) {
+      for (const lifecycle of ["warm", "grace", "parent-release", "cold"] as const) {
+        it(`SAT27/SAT28: ${clientMode} ${childKind} ${lifecycle} 重开保持隐藏且拒绝用户输入`, async () => {
+          const dbPath = join(tempRoot, "sessions.db");
+          await seedPersistedSession(dbPath, undefined, childKind);
+          const sentInputs: Array<{ text: string }> = [];
+          const options: ZCodeAppOptions[] = [];
+          const { server, store } = await bootRestartedServer(
+            dbPath,
+            sentInputs,
+            undefined,
+            options,
+          );
+          const { v4Gateway: gateway } = (
+            server as unknown as {
+              context: { v4Gateway: ConversationV4Gateway };
+            }
+          ).context;
+          async function subscribe(id: string, topic: string) {
+            await requestResult(server, {
+              id,
+              method: V4_METHODS.conversationSubscribe,
+              params: { topic, connectionId: id, clientMode },
+            });
+            return takeInitialFrameParams(server, id);
           }
-        ).context;
-        async function subscribe(id: string, topic: string) {
-          await requestResult(server, {
-            id,
-            method: V4_METHODS.conversationSubscribe,
-            params: { topic, connectionId: id, clientMode },
-          });
-          return takeInitialFrameParams(server, id);
-        }
-        try {
-          await subscribe("index-before", sessionsIndexTopic(WORKSPACE_PATH));
-          if (lifecycle !== "cold") {
-            gateway.ingestDetachedLiveSession(
-              SESSION_ID,
-              makeEvent(SESSION_ID, 1, SessionEventType.SessionCreated, {
-                mode: "default",
-                contextWindow: 200_000,
-              }),
-              PARENT_SESSION_ID,
-            );
-            gateway.ingestDetachedLiveSession(
-              SESSION_ID,
-              {
-                ...makeEvent(SESSION_ID, 2, SessionEventType.TurnStarted, {
-                  turnNumber: 1,
-                  input: "child task",
+          try {
+            await subscribe("index-before", sessionsIndexTopic(WORKSPACE_PATH));
+            if (lifecycle !== "cold") {
+              gateway.ingestDetachedLiveSession(
+                SESSION_ID,
+                makeEvent(SESSION_ID, 1, SessionEventType.SessionCreated, {
+                  mode: "default",
+                  contextWindow: 200_000,
                 }),
-                turnId: "child-turn",
-              },
-              PARENT_SESSION_ID,
-            );
-            gateway.ingestDetachedLiveSession(
-              SESSION_ID,
-              {
-                ...makeEvent(SESSION_ID, 3, SessionEventType.ModelStreaming, {
-                  kind: "text_delta",
-                  delta: "child done",
-                  done: false,
-                }),
-                turnId: "child-turn",
-              },
-              PARENT_SESSION_ID,
-            );
-            gateway.ingestDetachedLiveSession(
-              SESSION_ID,
-              {
-                ...makeEvent(SESSION_ID, 4, SessionEventType.TurnComplete, {
-                  duration: 1,
-                  response: "done",
-                  resultType: "success",
-                  tokenCount: 1,
-                  toolCallCount: 0,
-                }),
-                turnId: "child-turn",
-              },
-              PARENT_SESSION_ID,
-            );
-          }
-          if (lifecycle === "grace")
-            expect(gateway.pruneDetachedChildPublishers(Date.now() + 180_000)).toBe(1);
-          if (lifecycle === "parent-release") gateway.deactivateSession(PARENT_SESSION_ID);
-          const child = conversationTopicFrameSchema.parse(
-            await subscribe("child", conversationTopic(SESSION_ID)),
-          );
-          if (child.payload.kind !== "snapshot") throw new Error("expected child snapshot");
-          expect(child.payload.snapshot.rows.window.length).toBeGreaterThan(0);
-          const index = sessionsIndexTopicFrameSchema.parse(
-            await subscribe("index-after", sessionsIndexTopic(WORKSPACE_PATH)),
-          );
-          if (index.payload.kind !== "snapshot") throw new Error("expected index snapshot");
-          expect(index.payload.snapshot.sessions.map((session) => session.sessionId)).not.toContain(
-            SESSION_ID,
-          );
-          const legacy = (await requestResult(server, {
-            id: "legacy-list",
-            method: zcodeProtocolMethods.sessionList,
-            params: { workspace },
-          })) as { sessions: Array<{ sessionId: string }> };
-          expect(legacy.sessions.map((session) => session.sessionId)).not.toContain(SESSION_ID);
-          expect((await store.getSession(SESSION_ID))?.taskType).toBe("subagent_child");
-          if (lifecycle !== "warm")
-            expect(
-              options.find((option) => option.sessionId === SESSION_ID)?.runtimeConfig?.taskType,
-            ).toBe("subagent_child");
-          for (const type of [
-            "sendText",
-            "sendGoalCommand",
-            "compact",
-            "retryTurn",
-            "editUserQuery",
-          ] as const) {
-            const targetRow = child.payload.snapshot.rows.window.findLast(
-              (row) => row.kind === (type === "editUserQuery" ? "userInput" : "assistantText"),
-            );
-            const ack = commandAckSchema.parse(
-              await requestResult(server, {
-                id: type,
-                method: V4_METHODS.command,
-                params: {
-                  commandId: `child-${type}`,
-                  clientId: "child-test",
-                  sessionId: SESSION_ID,
-                  type,
-                  baseRevision: child.payload.snapshot.revision,
-                  baseLogEpoch: child.payload.snapshot.logEpoch,
-                  payload:
-                    type === "sendText" || type === "sendGoalCommand"
-                      ? { text: "continue child" }
-                      : type === "retryTurn" || type === "editUserQuery"
-                        ? {
-                            target: {
-                              rowId: targetRow?.rowId ?? 1,
-                              entityId: targetRow?.entityId ?? "missing",
-                            },
-                            ...(type === "editUserQuery" ? { newText: "edit child" } : {}),
-                          }
-                        : {},
-                  issuedAt: Date.now(),
+                PARENT_SESSION_ID,
+              );
+              gateway.ingestDetachedLiveSession(
+                SESSION_ID,
+                {
+                  ...makeEvent(SESSION_ID, 2, SessionEventType.TurnStarted, {
+                    turnNumber: 1,
+                    input: "child task",
+                  }),
+                  turnId: "child-turn",
                 },
-              }),
+                PARENT_SESSION_ID,
+              );
+              gateway.ingestDetachedLiveSession(
+                SESSION_ID,
+                {
+                  ...makeEvent(SESSION_ID, 3, SessionEventType.ModelStreaming, {
+                    kind: "text_delta",
+                    delta: "child done",
+                    done: false,
+                  }),
+                  turnId: "child-turn",
+                },
+                PARENT_SESSION_ID,
+              );
+              gateway.ingestDetachedLiveSession(
+                SESSION_ID,
+                {
+                  ...makeEvent(SESSION_ID, 4, SessionEventType.TurnComplete, {
+                    duration: 1,
+                    response: "done",
+                    resultType: "success",
+                    tokenCount: 1,
+                    toolCallCount: 0,
+                  }),
+                  turnId: "child-turn",
+                },
+                PARENT_SESSION_ID,
+              );
+            }
+            if (lifecycle === "grace")
+              expect(gateway.pruneDetachedChildPublishers(Date.now() + 180_000)).toBe(1);
+            if (lifecycle === "parent-release") gateway.deactivateSession(PARENT_SESSION_ID);
+            const child = conversationTopicFrameSchema.parse(
+              await subscribe("child", conversationTopic(SESSION_ID)),
             );
-            expect(ack).toMatchObject(
-              lifecycle === "warm"
-                ? { status: "rejected", reasonCode: "proto.sessionNotFound" }
-                : { status: "failed", reasonCode: "guard.subagentReadOnly" },
+            if (child.payload.kind !== "snapshot") throw new Error("expected child snapshot");
+            expect(child.payload.snapshot.rows.window.length).toBeGreaterThan(0);
+            const index = sessionsIndexTopicFrameSchema.parse(
+              await subscribe("index-after", sessionsIndexTopic(WORKSPACE_PATH)),
             );
+            if (index.payload.kind !== "snapshot") throw new Error("expected index snapshot");
+            expect(
+              index.payload.snapshot.sessions.map((session) => session.sessionId),
+            ).not.toContain(SESSION_ID);
+            const legacy = (await requestResult(server, {
+              id: "legacy-list",
+              method: zcodeProtocolMethods.sessionList,
+              params: { workspace },
+            })) as { sessions: Array<{ sessionId: string }> };
+            expect(legacy.sessions.map((session) => session.sessionId)).not.toContain(SESSION_ID);
+            expect((await store.getSession(SESSION_ID))?.taskType).toBe(childKind);
+            if (lifecycle !== "warm")
+              expect(
+                options.find((option) => option.sessionId === SESSION_ID)?.runtimeConfig?.taskType,
+              ).toBe(childKind);
+            for (const type of [
+              "sendText",
+              "sendGoalCommand",
+              "compact",
+              "retryTurn",
+              "editUserQuery",
+            ] as const) {
+              const targetRow = child.payload.snapshot.rows.window.findLast(
+                (row) => row.kind === (type === "editUserQuery" ? "userInput" : "assistantText"),
+              );
+              const ack = commandAckSchema.parse(
+                await requestResult(server, {
+                  id: type,
+                  method: V4_METHODS.command,
+                  params: {
+                    commandId: `child-${type}`,
+                    clientId: "child-test",
+                    sessionId: SESSION_ID,
+                    type,
+                    baseRevision: child.payload.snapshot.revision,
+                    baseLogEpoch: child.payload.snapshot.logEpoch,
+                    payload:
+                      type === "sendText" || type === "sendGoalCommand"
+                        ? { text: "continue child" }
+                        : type === "retryTurn" || type === "editUserQuery"
+                          ? {
+                              target: {
+                                rowId: targetRow?.rowId ?? 1,
+                                entityId: targetRow?.entityId ?? "missing",
+                              },
+                              ...(type === "editUserQuery" ? { newText: "edit child" } : {}),
+                            }
+                          : {},
+                    issuedAt: Date.now(),
+                  },
+                }),
+              );
+              expect(ack).toMatchObject(
+                lifecycle === "warm"
+                  ? { status: "rejected", reasonCode: "proto.sessionNotFound" }
+                  : { status: "failed", reasonCode: "guard.subagentReadOnly" },
+              );
+            }
+            expect(await store.listSessionInputs({ sessionID: SESSION_ID })).toEqual([]);
+            expect(sentInputs).toEqual([]);
+          } finally {
+            gateway.dispose();
+            store.close();
           }
-          expect(await store.listSessionInputs({ sessionID: SESSION_ID })).toEqual([]);
-          expect(sentInputs).toEqual([]);
-        } finally {
-          gateway.dispose();
-          store.close();
-        }
-      });
+        });
+      }
     }
   }
 
-  it("SAT28: legacy session/send 同样拒绝 child 续聊", async () => {
-    const dbPath = join(tempRoot, "sessions.db");
-    await seedPersistedSession(dbPath, undefined, "subagent_child");
-    const { server, store } = await bootRestartedServer(dbPath, []);
-    try {
-      await requestResult(server, {
-        id: "open-child",
-        method: V4_METHODS.conversationSubscribe,
-        params: {
-          topic: conversationTopic(SESSION_ID),
-          connectionId: "legacy-child",
-          clientMode: "desktop-continuous",
-        },
-      });
-      const result = await server.handleMessage({
-        id: "legacy-send",
-        method: zcodeProtocolMethods.sessionSend,
-        params: { sessionId: SESSION_ID, content: "continue child", queryId: "legacy-child-send" },
-      });
-      expect(result).toMatchObject({ error: { data: { reasonCode: "guard.subagentReadOnly" } } });
-      expect(await store.listSessionInputs({ sessionID: SESSION_ID })).toEqual([]);
-    } finally {
-      store.close();
-    }
-  });
+  it.each(["subagent_child", "workflow_child", "nested_workflow_child"] as const)(
+    "SAT28: legacy session/send 同样拒绝 %s 续聊",
+    async (childKind) => {
+      const dbPath = join(tempRoot, "sessions.db");
+      await seedPersistedSession(dbPath, undefined, childKind);
+      const { server, store } = await bootRestartedServer(dbPath, []);
+      try {
+        await requestResult(server, {
+          id: "open-child",
+          method: V4_METHODS.conversationSubscribe,
+          params: {
+            topic: conversationTopic(SESSION_ID),
+            connectionId: "legacy-child",
+            clientMode: "desktop-continuous",
+          },
+        });
+        const result = await server.handleMessage({
+          id: "legacy-send",
+          method: zcodeProtocolMethods.sessionSend,
+          params: {
+            sessionId: SESSION_ID,
+            content: "continue child",
+            queryId: "legacy-child-send",
+          },
+        });
+        expect(result).toMatchObject({ error: { data: { reasonCode: "guard.subagentReadOnly" } } });
+        expect(await store.listSessionInputs({ sessionID: SESSION_ID })).toEqual([]);
+      } finally {
+        store.close();
+      }
+    },
+  );
+
+  it.each(["desktop-continuous", "web-remote-replayable"] as const)(
+    "SAT30: selection side chat remains writable after cold resume on %s",
+    async (clientMode) => {
+      const dbPath = join(tempRoot, "sessions.db");
+      await seedPersistedSession(dbPath, undefined, "selection_side_chat");
+      const sentInputs: Array<{ text: string }> = [];
+      const { server, store } = await bootRestartedServer(dbPath, sentInputs);
+      try {
+        await requestResult(server, {
+          id: "open-side",
+          method: V4_METHODS.conversationSubscribe,
+          params: { topic: conversationTopic(SESSION_ID), connectionId: "side-test", clientMode },
+        });
+        const frame = conversationTopicFrameSchema.parse(
+          takeInitialFrameParams(server, "open-side"),
+        );
+        if (frame.payload.kind !== "snapshot") throw new Error("expected snapshot");
+        const ack = await requestResult(server, {
+          id: "send-side",
+          method: V4_METHODS.command,
+          params: {
+            commandId: "side-send",
+            clientId: "side-test",
+            sessionId: SESSION_ID,
+            type: "sendText",
+            baseRevision: frame.payload.snapshot.revision,
+            baseLogEpoch: frame.payload.snapshot.logEpoch,
+            payload: { text: "continue side chat" },
+            issuedAt: Date.now(),
+          },
+        });
+        expect(ack).toMatchObject({ status: "accepted" });
+        await vi.waitFor(() =>
+          expect(sentInputs).toContainEqual(
+            expect.objectContaining({ text: "continue side chat" }),
+          ),
+        );
+        expect((await store.getSession(SESSION_ID))?.taskType).toBe("selection_side_chat");
+      } finally {
+        store.close();
+      }
+    },
+  );
 
   it("SAT29: 显式 session/list 按 workspace 查询隐藏身份，不激活 child；普通列表保留 fork", async () => {
     const dbPath = join(tempRoot, "sessions.db");
@@ -2221,63 +2285,71 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
     }
   });
 
-  it.each(["valid", "foreign-parent", "missing-parent", "foreign-cwd", "foreign-child", "cycle"])(
-    "SAT30: explicit remote child metadata resolves persisted lineage (%s) without activation",
-    async (scenario) => {
-      const dbPath = join(tempRoot, "sessions.db");
-      await seedPersistedSession(
-        dbPath,
-        scenario === "foreign-child"
-          ? ("remote:server:other:/workspace/cold-resume" as WorkspaceId)
-          : undefined,
-        "subagent_child",
-      );
-      const options: ZCodeAppOptions[] = [];
-      const { server, store } = await bootRestartedServer(dbPath, [], undefined, options);
-      try {
-        if (scenario !== "missing-parent") {
-          await store.createSession({
-            id: PARENT_SESSION_ID,
-            ...(scenario === "cycle"
-              ? { parentID: SESSION_ID }
-              : {
-                  workspaceID:
-                    scenario === "foreign-parent"
-                      ? ("remote:server:other:/workspace/cold-resume" as WorkspaceId)
-                      : REMOTE_WORKSPACE_IDENTITY,
-                }),
-            taskType: scenario === "cycle" ? "subagent_child" : "interactive",
-            projectID: "project" as ProjectId,
-            slug: "parent",
-            title: "parent",
-            directory: scenario === "foreign-cwd" ? `${WORKSPACE_PATH}-other` : WORKSPACE_PATH,
-            path: scenario === "foreign-cwd" ? `${WORKSPACE_PATH}-other` : WORKSPACE_PATH,
-            version: "test",
-          });
-        }
-        const explicit = (await requestResult(server, {
-          id: "legacy-child",
-          method: zcodeProtocolMethods.sessionList,
-          params: { workspace: remoteWorkspace, sessionIds: [SESSION_ID] },
-        })) as { sessions: Array<{ sessionId: string; workspace: unknown }> };
-        expect(explicit.sessions.map((session) => session.sessionId)).toEqual(
-          scenario === "valid" ? [SESSION_ID] : [],
+  describe.each([
+    "subagent_child",
+    "workflow_child",
+    "selection_side_chat",
+    "nested_workflow_child",
+  ] as const)("SAT30 %s", (childKind) => {
+    it.each(["valid", "foreign-parent", "missing-parent", "foreign-cwd", "foreign-child", "cycle"])(
+      "SAT30: explicit remote child metadata resolves persisted lineage (%s) without activation",
+      async (scenario) => {
+        const dbPath = join(tempRoot, "sessions.db");
+        await seedPersistedSession(
+          dbPath,
+          scenario === "foreign-child"
+            ? ("remote:server:other:/workspace/cold-resume" as WorkspaceId)
+            : undefined,
+          childKind,
         );
-        if (scenario === "valid") expect(explicit.sessions[0]?.workspace).toEqual(remoteWorkspace);
-        const normal = (await requestResult(server, {
-          id: "normal-list",
-          method: zcodeProtocolMethods.sessionList,
-          params: { workspace: remoteWorkspace },
-        })) as { sessions: Array<{ sessionId: string }> };
-        expect(normal.sessions.some((session) => session.sessionId === SESSION_ID)).toBe(false);
-        expect(options).toEqual([]);
-        if (scenario !== "foreign-child")
-          expect((await store.getSession(SESSION_ID))?.workspaceID).toBeUndefined();
-      } finally {
-        store.close();
-      }
-    },
-  );
+        const options: ZCodeAppOptions[] = [];
+        const { server, store } = await bootRestartedServer(dbPath, [], undefined, options);
+        try {
+          if (scenario !== "missing-parent") {
+            await store.createSession({
+              id: PARENT_SESSION_ID,
+              ...(scenario === "cycle"
+                ? { parentID: SESSION_ID }
+                : {
+                    workspaceID:
+                      scenario === "foreign-parent"
+                        ? ("remote:server:other:/workspace/cold-resume" as WorkspaceId)
+                        : REMOTE_WORKSPACE_IDENTITY,
+                  }),
+              taskType: scenario === "cycle" ? childKind : "interactive",
+              projectID: "project" as ProjectId,
+              slug: "parent",
+              title: "parent",
+              directory: scenario === "foreign-cwd" ? `${WORKSPACE_PATH}-other` : WORKSPACE_PATH,
+              path: scenario === "foreign-cwd" ? `${WORKSPACE_PATH}-other` : WORKSPACE_PATH,
+              version: "test",
+            });
+          }
+          const explicit = (await requestResult(server, {
+            id: "legacy-child",
+            method: zcodeProtocolMethods.sessionList,
+            params: { workspace: remoteWorkspace, sessionIds: [SESSION_ID] },
+          })) as { sessions: Array<{ sessionId: string; workspace: unknown }> };
+          expect(explicit.sessions.map((session) => session.sessionId)).toEqual(
+            scenario === "valid" ? [SESSION_ID] : [],
+          );
+          if (scenario === "valid")
+            expect(explicit.sessions[0]?.workspace).toEqual(remoteWorkspace);
+          const normal = (await requestResult(server, {
+            id: "normal-list",
+            method: zcodeProtocolMethods.sessionList,
+            params: { workspace: remoteWorkspace },
+          })) as { sessions: Array<{ sessionId: string }> };
+          expect(normal.sessions.some((session) => session.sessionId === SESSION_ID)).toBe(false);
+          expect(options).toEqual([]);
+          if (scenario !== "foreign-child")
+            expect((await store.getSession(SESSION_ID))?.workspaceID).toBeUndefined();
+        } finally {
+          store.close();
+        }
+      },
+    );
+  });
 
   it("重启后冷订阅：transcript 合成重建历史 + 可交互 + sendText 再发一轮成功", async () => {
     const dbPath = join(tempRoot, "sessions.db");

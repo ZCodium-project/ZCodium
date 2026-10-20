@@ -6,7 +6,7 @@
 
 - `code` / `authCode` + `state`（或 OAuth `error` + `state`）优先渲染现有 `WebCallbackPage`，由 `WebAuthService` 校验 nonce、交换 token、写入同源 localStorage，再 replace 安全 app_return_to。
 - OAuth 回调地址以构建 endpoint origin 的 `/remote/v4` 为基址，保留登录前同源远控 URL 的 `app_version/sid/mid/name` 参数（含空值与编码后的设备名）。不复制未知参数、旧凭据、历史 code/authCode/state/error 或 fragment；分享登录保持独立回调地址。Z.AI 使用 `redirect_uri`，BigModel 使用 `redirect`，授权 origin 随构建环境变化。
-- `WebAuthService` 在发起授权时通过 `BrowserOAuthCredentialRepo` 将本次完整回调地址与 nonce/provider 一起保存在 sessionStorage；地址记录绑定本次 nonce，防止旧页面发起新登录时误用遗留地址。跨页后校验 nonce，再用匹配的地址交换 token 并清理 pending 地址。不得从含授权参数的回调 URL 拼出 token 请求地址。升级前没有匹配 pending 地址的登录继续使用原固定回调配置。
+- `WebAuthService` 在发起授权时通过 `BrowserOAuthCredentialRepo` 把本次登录记录（nonce、provider、完整回调地址）保存在同源 localStorage，按 nonce 区分。回调只取出 state 中 nonce 对应的那一条，取出即删除，再用该记录的 provider 与地址交换 token；找不到记录时报 CSRF 失败，不请求 token，也不改动其他记录。不得从含授权参数的回调 URL 拼出 token 请求地址。原因与边界见[回调落到同一浏览器的其他标签页](#回调落到同一浏览器的其他标签页)。
 - 无 JWT 时展示与桌面一致的 Z.AI / BigModel 两个 OAuth 入口（Z.AI 在前，使用桌面同款图标、连接文案与全球/中国标签），提示使用与电脑相同的平台和账号。登录卡片页头左侧为桌面端标题栏同款应用 logo 图标（40px，装饰性图片），右侧为“ZCode”品牌文字与标题；不再使用强调色方块里的字母占位。设备列表页与扫码占位页页头使用同一 logo 的 20px 版本加“ZCode”文字，见 [设备列表规格](./relay-v2-pairing.md#列表排布与文本线框)。选择后同时禁用两个按钮，所选 provider 经入口编排传入现有 WebAuthService；回调按 pending provider 交换并保存凭据。不增加 API Key 入口，因为远控需要账号身份；二维码不携带凭据或推断登录平台。
 - 无 JWT 时渲染登录页；appReturnTo 为当前完整 URL。安全回跳只保留同源 `/remote/v4`、`/remote/__test__`（均含尾斜杠）和既有分享路径，query 白名单为 app_version/sid/mid/name。
 - 有 JWT、有 SID 直接申请 terminal token 并连接 V2；无 SID 时按当前账号读取设备，最近 SID 在线则直连；最近 SID 不在线但同一台电脑（最近 MID）恰好只有一个在线连接时直连该连接；否则显示设备列表（规则见[落点](./relay-v2-pairing.md#落点状态归属与刷新)）。离线设备不可点击；选中在线设备回写 sid/mid/name/app_version 后连接，支持手动和回前台刷新。设备页标题下显示当前登录账号与平台，“切换”打开下文的切换账号确认弹窗。
@@ -31,7 +31,7 @@
 
 ## 存储与边界
 
-`BrowserOAuthCredentialRepo` 是认证 storage 唯一边界，继续使用 zcodejwttoken、oauth:zai:access_token、oauth:zai:user_info、oauth:active_provider 以及已有 BigModel 独立键。残缺或已过期会话清理后视为未登录。前置编排通过 WebAuthService 读取 JWT，不复制认证缓存；token 不持久化，不进入 QR、日志或业务 payload。
+`BrowserOAuthCredentialRepo` 是认证 storage 唯一边界，继续使用 zcodejwttoken、oauth:zai:access_token、oauth:zai:user_info、oauth:active_provider 以及已有 BigModel 独立键；进行中的登录记录使用 `oauth_pending_logins`。残缺或已过期会话清理后视为未登录；清理登录凭据或退出不删除进行中的登录记录。前置编排通过 WebAuthService 读取 JWT，不复制认证缓存；token 不持久化，不进入 QR、日志或业务 payload。
 
 ## 开发回调转发
 
@@ -86,3 +86,21 @@
 ```
 
 复用 ML04 浏览器用例：两平台 × 手机/宽屏均从实际授权 URL 取回调地址，断言扫码参数完整保留，追加授权参数后导航，并核对 token 请求的 redirect_uri 与授权时一致。单测补充 Unicode/空值、未知及历史授权参数剔除、跨页恢复、nonce 失败、旧 pending 会话兼容与私网转发。此变更仅涉及 Web OAuth；桌面登录、continuous/replayable 与业务 owner 不变。发布后需真机验证两平台允许并保留带 query 的回调地址；缺少 app_version 的入口仍依赖 latest，不能据此宣称已修复线上旧资源。
+
+## 回调落到同一浏览器的其他标签页
+
+部分手机浏览器在 OAuth 往返后，回调页不在发起登录的标签页里，或标签页被系统回收后重建（例如切到短信 App 查看短信验证码）。登录记录原先只存在发起页的 sessionStorage，回调页读不到，就在换 token 前报 “OAuth CSRF 检测失败”；点“重新登录”在同一环境中仍会失败，换浏览器才能完成。
+
+```text
+修复前：Tab A 写 sessionStorage[A].nonce=N → provider 登录 → 回调落在 Tab B / 重建后的 Tab A
+        → sessionStorage 为空 → null≠N → CSRF 失败（不请求 token）
+修复后：Tab A 写 localStorage.oauth_pending_logins += {N, provider, redirectUri}
+        → provider 登录 → 回调落在同源任意标签页 → 取出并删除 N 对应记录 → 换 token → 安全回跳
+```
+
+- 记录按 nonce 区分，多个标签页同时发起登录互不覆盖；最多保留最近 5 条，放弃的登录不会无限累积。
+- nonce 仍随机、同源可见、只能用一次。state 中的 nonce 找不到记录时拒绝，并保留其他记录。
+- 回调落到另一个浏览器 App 时仍拒绝：该浏览器没有本次登录记录，这是 CSRF 校验应有的结果。
+- 不再读取旧版本写在 sessionStorage 的 `oauth_pending_nonce` / `oauth_pending_provider` / `oauth_pending_redirect_uri`。网关按 `app_version` 为发起页和回调页加载同一版本目录，只有部署切换时正在进行的登录会受影响，用户重新登录即可。
+
+验收：`browserOAuthCredentialRepo.test.ts` 覆盖跨标签页取回、只取匹配 nonce、取出即删、条数上限与损坏记录；`webAuthService.test.ts` 覆盖回调页使用空 sessionStorage 时两平台完成登录、nonce 不匹配时不请求 token 且保留记录、两个标签页并行登录各自完成。浏览器回归 `remote-login-v2.mjs` ML07 在同一浏览器 context 的新标签页完成回调，断言 token 请求参数、回跳与 terminal 配对。受控浏览器证据不替代真实手机浏览器验收。

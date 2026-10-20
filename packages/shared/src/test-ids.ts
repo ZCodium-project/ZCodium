@@ -43,6 +43,23 @@ export const TID_LOGOUT_BUTTON = "logout-button";
 /** 终端显隐切换按钮 */
 export const TID_TERMINAL_TOGGLE = "terminal-toggle";
 export const TID_SIDE_PANE_TOGGLE = "side-pane-toggle";
+/** Side Pane 完整视图：进入/退出按钮、对话 tab、对话宿主与浮窗各部件 */
+export const TID_SIDE_PANE_FULL_VIEW_TOGGLE = "side-pane-full-view-toggle";
+export const TID_SIDE_PANE_FULL_VIEW_CONVERSATION_TAB = "side-pane-full-view-conversation-tab";
+export const TID_SIDE_PANE_FULL_VIEW_HOST = "side-pane-full-view-host";
+export const TID_SIDE_PANE_FULL_VIEW_HEADER = "side-pane-full-view-floating-header";
+export const TID_SIDE_PANE_FULL_VIEW_DRAWER = "side-pane-full-view-floating-drawer";
+export const TID_SIDE_PANE_FULL_VIEW_EXPAND = "side-pane-full-view-floating-expand";
+export const TID_SIDE_PANE_FULL_VIEW_RUNNING = "side-pane-full-view-floating-running";
+export const TID_SIDE_PANE_FULL_VIEW_MINIMIZE = "side-pane-full-view-floating-minimize";
+export const TID_SIDE_PANE_FULL_VIEW_HANDLE = "side-pane-full-view-floating-handle";
+export const TID_SIDE_PANE_FULL_VIEW_BUBBLE = "side-pane-full-view-floating-bubble";
+export const TID_SIDE_PANE_FULL_VIEW_ANSWER_BUBBLE = "side-pane-full-view-answer-bubble";
+export const TID_SIDE_PANE_FULL_VIEW_ANSWER_BUBBLE_CLOSE =
+  "side-pane-full-view-answer-bubble-close";
+export const TID_SIDE_PANE_FULL_VIEW_MENU_OPEN_CONVERSATION =
+  "side-pane-full-view-menu-open-conversation";
+export const TID_SIDE_PANE_FULL_VIEW_MENU_MINIMIZE = "side-pane-full-view-menu-minimize";
 /** 终端面板关闭按钮 */
 export const TID_TERMINAL_CLOSE_BUTTON = "terminal-close-button";
 /** 浏览器显隐切换按钮 */
@@ -692,8 +709,6 @@ export const TID_V4_SPLIT_CLOSE = "v4-split-close";
 export const TID_V4_SPLIT_DIVIDER = "v4-split-divider";
 /** v4 pane header 的 workspace 徽标（跨 workspace pane 显示归属） */
 export const TID_V4_PANE_WORKSPACE_BADGE = "v4-pane-workspace-badge";
-/** 侧栏会话项上下文菜单「在分屏打开」（仅桌面 shell，收尾） */
-export const TID_V4_TASK_OPEN_IN_SPLIT = "v4-task-open-in-split";
 /** v4 时间线「加载更早」按钮（游标分页；窗口首行未到全序首行时出现） */
 export const TID_V4_TIMELINE_LOAD_OLDER = "v4-timeline-load-older";
 /** v4 对话轮次全局导航 rail（宽屏 2+ 可导航 turn 时出现） */

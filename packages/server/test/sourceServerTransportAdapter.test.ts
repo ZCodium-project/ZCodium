@@ -223,6 +223,35 @@ describe("probe failure classification", () => {
       ),
     ).rejects.toMatchObject({ code: "remote-preflight-failed" });
   });
+
+  const linuxProbeOutput = (libc: string) =>
+    "__ZCODE_PROBE_PLATFORM__\nLinux\n__ZCODE_PROBE_ARCH__\nx86_64\n__ZCODE_PROBE_KERNEL__\nLinux\n" +
+    `__ZCODE_PROBE_LIBC__\n${libc}\n__ZCODE_PROBE_INSTALLED__\n0\n__ZCODE_PROBE_END__\n`;
+
+  it.each(["2.17", "2.27"])(
+    "rejects Linux glibc %s before install because the bundled Node runtime needs glibc 2.28",
+    async (version) => {
+      // ZCT-2112008575366098944：CentOS 7 先上传 87MB archive，解压后执行 bin/zcode 才报 7 行 not found。
+      await expect(
+        probeWith(async () => completedStream(linuxProbeOutput(`glibc ${version}`))),
+      ).rejects.toMatchObject({
+        code: "remote-preflight-failed",
+        message: expect.stringMatching(
+          new RegExp(`glibc ${version.replace(".", "\\.")}\\b.*glibc 2\\.28`, "u"),
+        ),
+      });
+    },
+  );
+
+  it.each(["glibc 2.28", "glibc 2.39", ""])(
+    "keeps the install chain when the remote libc reports %j",
+    async (libc) => {
+      // 空段代表 musl、缺 getconf 或无法识别：读不到版本时不凭猜测拒绝。
+      await expect(
+        probeWith(async () => completedStream(linuxProbeOutput(libc))),
+      ).resolves.toMatchObject({ platform: "linux", installed: false });
+    },
+  );
 });
 
 it("probes environment, installation, release identity, version and live status without starting the CLI", async () => {
@@ -239,6 +268,7 @@ it("probes environment, installation, release identity, version and live status 
   expect(probeCommands).toHaveLength(1);
   expect(probeCommands[0]).toContain("current.json");
   expect(probeCommands[0]).toContain("run/status.json");
+  expect(probeCommands[0]).toContain("getconf GNU_LIBC_VERSION 2>/dev/null");
   expect(probeCommands[0]).not.toContain(" status --json");
   expect(probeCommands[0]).not.toContain(" --version");
 });

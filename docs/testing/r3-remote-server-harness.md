@@ -295,7 +295,7 @@ Host / Agent 最大数量各为 1。RSS 首尾采样 1220 / 1211 MB；这只是�
 | 10 Bot 远程 workspace        | 无容器                                     | BOT-E2E-RW-01（synthetic fixture 契约）                                                                                                                      |
 | 11 移动端                    | `a` + chromium + relay                     | mobile / mobile-permission                                                                                                                                   |
 | 12 soak                      | `a`                                        | soak-reconnect(10 轮) / soak-dual(10 分钟)                                                                                                                   |
-| 13 受限环境安装              | `d` / `e` / `f`                            | noexec-tmp / no-tar / no-forwarding                                                                                                                          |
+| 13 受限环境安装              | `d` / `e` / `f` / `g`                      | noexec-tmp / no-tar / no-forwarding / old-glibc（注入返回 `glibc 2.17` 的 getconf）                                                                          |
 | 14 live                      | `a`，docker transport 用 `dt`              | live-zapi / live-bigmodel-team / docker-transport                                                                                                            |
 
 覆盖门禁：`packages/desktop/scripts/r3-remote-spec-inventory.mjs` 是远程 spec 清单单点，

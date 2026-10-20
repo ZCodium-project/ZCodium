@@ -221,4 +221,11 @@ React 面板等待连接后自动运行、无错误闪现和重复实例。2026-
 - 浏览器候选：`packages/ui/test/browser/manual-review/pending/plugin-concurrent-install.test.mjs`。真实 store 和安装按钮，390/1200px × 中英文 × 深浅主题共 8 组通过；旧实现 8 组均在第二次安装清掉第一次忙碌态处失败。日志和截图写入系统临时目录的 `zcode-plugin-concurrent-install/`。
 - 桌面候选：`plugins/manual-review/pending/plugin-concurrent-install.test.ts`。macOS Electron + 真实 CLI，个人来源本地 HTTP 下载响应门验证两项同时安装中、第一项失败不清理第二项、两项失败后均可重试；运行 `desktop-e2e-20261015143344848-p62610-27dafbf8f737df99` 通过。截图位于 `.e2e-artifacts/plugin-management/plm-concurrent-install/both-pending.png`。
 - 离线执行：`ZCODE_E2E_MANUAL_REVIEW=1 E2E_PROVIDER_HTTP_MODE=replay E2E_PROVIDER_REPLAY_FIXTURE_PATH=packages/desktop/test/e2e/fixtures/upstream/common.json pnpm --filter @zcode/desktop test:e2e -- --spec './test/e2e/plugins/manual-review/pending/plugin-concurrent-install.test.ts'`。
+- PLM-DETAIL-DURING-INSTALL：同一桌面用例中，A 下载被响应门挂起、B 排在 A 后面时打开本地插件详情，组件区 30 秒内渲染技能，返回后两项仍为安装中。修复后运行 `desktop-e2e-20261019044431890-p93406-b0458048236a975f` 通过，截图 `.e2e-artifacts/plugin-management/plm-detail-during-install/detail-loaded.png`；还原 CLI 修复后运行 `desktop-e2e-20261019044633752-p3203-b44c097feed8ea0d` 在组件区等待处失败。
+- 新建右侧标签页骨架屏（list/overview 排队）：同一桌面用例在 A 下载挂起、B 排队时经桌面服务链路请求 `listPlugins` 与 `getPluginsOverview`，要求 10 秒内返回。修复后运行 `desktop-e2e-20261019062945458-p57938-d3a0c643c27817e2` 通过；只还原 transport 的 list/overview 立即派发后，运行 `desktop-e2e-20261019063058281-p64564-98a2c55f0e022488` 在该步失败（`plugins/list and plugins/overview waited for the install`）。现场证据：dev 日志 `listPlugins`/`getPluginsOverview` 耗时 14569 ms，在第二次安装结束 1.4 秒后才返回。
 - store 回归覆盖成功乱序、失败、同名操作及上下文切换隔离、来源校验与安装交叠。浏览器成功路径使用受控服务，不等于真实下载成功验证。手机真机/远控、Windows/Linux 未执行；用例 pending，未人工晋升及 CI 准入。
+
+## PLM-BUILTIN-UI-UNINSTALL：内置 UI 插件卸载后的分组
+
+- 桌面候选：`plugins/manual-review/pending/plugin-builtin-ui-uninstall.test.ts`。macOS Electron + 真实 CLI，卸载 `documents@zcode-plugins-official` 后卡片仍在 UI 插件专区。修复后运行 `desktop-e2e-20261019071852360-p65132-d5426628aee5a21e` 通过，截图 `.e2e-artifacts/plugin-management/plm-builtin-ui-uninstall/restorable-in-ui-section.png`；还原 CLI 修复后运行 `desktop-e2e-20261019072006864-p72979-1022c7e87a447a4e` 在 restorable 阶段失败（卡片不在 UI 插件专区）。
+- bootstrap 单测：内置定义 `ui` 组件类型与插件包 `ui.surfaces` 一致；卸载后官方目录与可恢复列表都带 `ui`。两条旧实现失败、新实现通过。Windows/Linux、手机远控未执行；用例 pending。

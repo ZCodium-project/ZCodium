@@ -31,15 +31,17 @@ const artifactDir = resolve(
 
 describe(`${CASE_MARKER}: 无 user service manager 目标的 daemon 生命周期`, () => {
   let provider: SSHLifecycleProvider | null = null;
+  let restoreRemoteEnvironment: (() => Promise<void>) | undefined;
 
   after(async () => {
+    await restoreRemoteEnvironment?.();
     await provider?.tunnel.close().catch(() => undefined);
     provider = null;
     await browser.electron.restoreAllMocks();
     await clearAppData();
   });
 
-  it("R3A-BLD-07 detached daemon：断开不杀 daemon，daemon 消失后重连由 ensureDaemon 拉起", async function () {
+  it("R3A-BLD-07 detached daemon：断开不杀 daemon，离线探测被跳过时重连仍能拉起", async function () {
     this.timeout(30 * 60_000);
     const prepared = await prepareSSHLifecycle(CASE_MARKER);
     provider = prepared.provider;
@@ -105,6 +107,32 @@ describe(`${CASE_MARKER}: 无 user service manager 目标的 daemon 生命周期
     );
     expect(daemonGone.stdout.trim()).toBe("gone");
     facts.daemonAfterKill = daemonGone.stdout.trim();
+
+    // Bug 原因：systemd offline 会跳过探测并返回 0；旧代码误判可用，在 enable --now 报 user bus 错误。
+    // 在独立 SSH 目标的非交互 shell 注入真实 offline 环境，不替换 systemctl 或伪造探测结果。
+    const fixtureRoot = `'${`${workspaceA}/.zcode-e2e/${CASE_MARKER}`.replaceAll("'", "'\\''")}'`;
+    const backup = `${fixtureRoot}/bashrc.original`;
+    const setup = await runSSHCommand(
+      prepared.config,
+      `mkdir -p ${fixtureRoot} && test ! -e ${backup} && cp -p "$HOME/.bashrc" ${backup}`,
+    );
+    expect(setup.code).toBe(0);
+    restoreRemoteEnvironment = async () => {
+      const restored = await runSSHCommand(prepared.config, `mv ${backup} "$HOME/.bashrc"`);
+      expect(restored.code).toBe(0);
+    };
+    const configured = await runSSHCommand(
+      prepared.config,
+      `{ printf '%s\\n' 'export SYSTEMD_OFFLINE=1'; cat ${backup}; } > ${fixtureRoot}/bashrc.offline && mv ${fixtureRoot}/bashrc.offline "$HOME/.bashrc"`,
+    );
+    expect(configured.code).toBe(0);
+    const skippedProbe = await runSSHCommand(
+      prepared.config,
+      'test "$SYSTEMD_OFFLINE" = 1 && test "${ZCODE_SERVER_SKIP_SERVICE_REGISTRATION-}" != 1 && systemctl --user show --property=Version',
+    );
+    expect(skippedProbe.code).toBe(0);
+    expect(skippedProbe.stdout.trim()).toBe("");
+    facts.skippedProbe = skippedProbe;
 
     // 3. 用户点击重连：ensureDaemon 必须拉起全新 Supervisor/Core 并恢复 workspace。
     // 用户显式断开的是设备，恢复入口是设备行的"重连"按钮（与冷恢复 case 的合同一致）。

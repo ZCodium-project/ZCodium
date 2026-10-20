@@ -718,6 +718,20 @@ modules:
     layers:
       app: .
     owner: desktop
+  # side-pane-full-view：由 architecture:adopt 登记
+  - id: side-pane-full-view
+    roots:
+      - packages/ui/src/side-pane-full-view
+    managed: true
+    requires:
+      - shared
+      - ui
+    publicEntrypoints:
+      - packages/ui/src/side-pane-full-view/index.ts
+      - packages/ui/src/side-pane-full-view/contract.ts
+    layers:
+      ui: .
+    owner: conversation
 
 global:
   # 临时时间戳（2026-09-10）：unmanaged-new-file 只约束此日期之后首次入库的文件。
@@ -733,6 +747,10 @@ global:
   acceptedUpstreamSnapshot: scripts/architecture/upstream-snapshot.json
 
 exceptions:
+  - id: side-pane-full-view-shortcut-command-edit
+    rule: unmanaged-new-file
+    paths: [packages/shared/src/shortcutCommands.ts]
+    reason: 已准入的快捷键命令表只追加一条 toggleSidePaneFullView 命令（Side Pane 完整视图，docs/ui/side-pane-full-view.md）；命令表仍是唯一数据源，签名与模块边界不变，接管整个 shared 包不在本次范围内。
   - id: opensource-cua-test-project-config
     rule: unmanaged-new-file
     paths: [packages/zcode-cua/vitest.config.ts]
@@ -861,3 +879,10 @@ exceptions:
       - apps/zcode-cli/packages/adapters/src/model/endpoint-routing-edition/index.ts
       - apps/zcode-cli/packages/adapters/src/model/provider-endpoint-routing-options.ts
     reason: Existing upstream routing assembly files gain the endpoint origin and injected JWT reader; adopting the full CLI model adapter directory needs a separate module boundary refactor.
+  - id: workflow-mode-user-choice-unmanaged-edit
+    rule: unmanaged-new-file
+    paths:
+      - packages/shared/src/dynamic-workflow-feature.ts
+      - packages/ui/src/settings/DynamicWorkflowModeSetting.tsx
+      - packages/ui/src/store/dynamicWorkflowAvailabilityStore.ts
+    reason: Admitted upstream files edited only to let the user's dynamic workflow mode choice always win and keep the settings row visible; adopting packages/shared/src and packages/ui/src needs a separate module boundary refactor.

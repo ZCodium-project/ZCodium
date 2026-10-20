@@ -383,8 +383,8 @@ describe("V4WorkspaceChatArea split draft session creation", () => {
 
     const primary = sessionPaneProps(V4_PRIMARY_PANE_ID);
     expect(primary.sessionId).toBe("main-session");
-    expect(primary.onSplitRight).toBeUndefined();
-    expect(primary.onSplitDown).toBeUndefined();
+    expect("onSplitRight" in primary).toBe(false);
+    expect("onSplitDown" in primary).toBe(false);
     expect(capturedPaneIds()).toEqual([V4_PRIMARY_PANE_ID]);
   });
 

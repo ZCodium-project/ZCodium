@@ -1,3 +1,4 @@
+import { isAuxiliarySessionKind } from "@zcode/shared";
 import {
   pluginUiToolResultNotificationSchema,
   type PluginUiToolResultNotification,
@@ -155,6 +156,8 @@ import {
   type DynamicWorkflowClientConfig,
   type DynamicWorkflowMode,
   applyDynamicWorkflowUserMode,
+  createDynamicWorkflowClientConfig,
+  DEFAULT_DYNAMIC_WORKFLOW_MODE,
   isDynamicWorkflowModeEnabled,
   normalizeDynamicWorkflowMode,
   type AgentLaneResourceSample,
@@ -3680,10 +3683,16 @@ export function createZCodeAgentService(
    * 生效模式 = 闩住的「提供」+ 此刻的用户选择。策略同步与三条创建路径同源调用，所以不会出现
    * "策略说开、create 说关"的裂口；选择不闩，改设置后下一次建会话立刻拿到新值。
    * `onDemand` 原样送到 CLI：它决定十个工具是首请求就注册还是等首次 `/workflow`。
+   *
+   * 用户选择永远生效（launch.md「The user's choice」）：提供读取失败或拿不到值时按默认 disabled
+   * 处理，再套用户选择——过去这里直接返回 disabled，离线启动的 Host 会连用户明确打开的功能一起关掉。
+   * 没装配 resolver 的 Host 不接这个功能，选择不生效。
    */
   async function resolveDynamicWorkflowGate(): Promise<DynamicWorkflowMode> {
-    const offer = await resolveDynamicWorkflowOffer();
-    if (!offer) return "disabled";
+    if (!options?.resolveDynamicWorkflowClientConfig) return "disabled";
+    const offer =
+      (await resolveDynamicWorkflowOffer()) ??
+      createDynamicWorkflowClientConfig(DEFAULT_DYNAMIC_WORKFLOW_MODE, "default");
     return applyDynamicWorkflowUserMode(offer, await resolveDynamicWorkflowUserMode()).mode;
   }
 
@@ -6029,7 +6038,7 @@ export function createZCodeAgentService(
             session.workspace.workspacePath !== params.workspacePath
           )
             throw new Error("project.session-lineage-invalid");
-          if (session.sessionKind !== "subagent_child") break;
+          if (!isAuxiliarySessionKind(session.sessionKind)) break;
           if (!session.parentSessionId) throw new Error("project.session-lineage-invalid");
           directorySessionId = session.parentSessionId;
         }

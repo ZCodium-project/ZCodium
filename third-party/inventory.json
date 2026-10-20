@@ -433,7 +433,7 @@
     "docs/knip/docs/src/styles/theme-light.css": "e2e85900fd43b5b563f56b9ce7e2a09f07d7420a78e80f0133efffeb8fce2aa0",
     "docs/knip/docs/src/util/post.ts": "6d7c45bd29035a73f1b67d24524760c7e317f367d32216de2c9a240dda7a40d1",
     "docs/knip/docs/tsconfig.json": "662b1f10a5e572b49a45669e4be9ee46c22f987dcf277c204948777b367df1cd",
-    "package.json": "5478869d5c059fd7bff95c6388b908df899473a7d337dbe9a4c86a9758d366d5",
+    "package.json": "8da0f7bb3892584629dffe32c1b9514cb4841091cda227c8c0cfeb6cfc9ecae5",
     "packages/client/package.json": "e76f441549130dc3e5e68072a36b6cb9044e19a6625f1e813f19a4def2b1b689",
     "packages/desktop/package.json": "1e63b8bd7bcb43da9e29bab8c073de1b6eb7dadeca7eb8aed3529565ea2ca422",
     "packages/desktop/src/renderer/public/material-icons/3d.svg": "9527b849f0fba57ca7640e2717b3a19cb5f5e046712cbbd8b75d73af338c68fb",

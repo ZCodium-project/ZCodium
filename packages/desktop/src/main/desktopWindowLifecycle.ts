@@ -1,5 +1,6 @@
 import { getDatabaseStartupPortPayload } from "./databaseStartupRelay.js";
 import { randomUUID } from "node:crypto";
+import { release as readPlatformRelease } from "node:os";
 import { app, BrowserWindow, Menu, MessageChannelMain, nativeImage } from "electron";
 import type { UtilityProcess as ElectronUtilityProcess } from "electron";
 import { HostMessageTypes, InternalChannels, PlatformChannels, type Locale } from "@zcode/shared";
@@ -8,14 +9,14 @@ import type { HostInitMessage, WindowBootstrapOptions } from "./desktopHostProce
 import type { StartupWorkspaceWarmupTarget } from "./startupWorkspace.js";
 import type { RemoteAssetDirs } from "./desktopRuntimeEnv.js";
 import { handleDarwinWindowCloseRequest } from "./desktopDarwinCloseBehavior.js";
+import { supportsNativeWindowsRoundedCorners } from "./desktopWindowChromeState.js";
 import { applyDesktopTrayUnreadBadge } from "./desktopTray.js";
 import {
   createWindowsTaskbarOverlayApplier,
-  parseWindowUnreadCount,
-  renderTaskbarBadgePixels,
   maxWindowUnreadCounts,
+  parseWindowUnreadCount,
+  renderTaskbarStatusDotPixels,
   syncUnreadBadgeForPlatform,
-  TASKBAR_BADGE_IMAGE_SIZE,
 } from "./unreadBadge.js";
 import { attachDesktopWindowSizePersistence, type DesktopWindowSize } from "./desktopWindowSize.js";
 import {
@@ -326,13 +327,34 @@ export function focusWorkspaceInExistingWindow(
 
 // Windows 任务栏 overlay 的 electron 侧装配：像素渲染在 unreadBadge.ts（纯逻辑，可单测），
 // 这里只负责 BrowserWindow 枚举与 nativeImage 构造。spec 见 docs/desktop/windows-taskbar-unread-badge.md
+const windowsTaskbarOverlayLayout = supportsNativeWindowsRoundedCorners(
+  process.platform,
+  readPlatformRelease(),
+)
+  ? "windows-11"
+  : "windows-10";
+
 const applyWindowsTaskbarOverlay = createWindowsTaskbarOverlayApplier({
   getAllWindows: () => BrowserWindow.getAllWindows(),
-  createBadgeImage: (label) =>
-    nativeImage.createFromBitmap(Buffer.from(renderTaskbarBadgePixels(label)), {
-      width: TASKBAR_BADGE_IMAGE_SIZE,
-      height: TASKBAR_BADGE_IMAGE_SIZE,
-    }),
+  // Windows 固定把 overlay 显示为 16×16。直接传硬边 32px 圆再让 Shell 缩放会发糊、
+  // 边缘像缺口；这里提供原生 1x(16px) + 2x(32px) 纯红抗锯齿表示。
+  // label 只用于无障碍 description，屏幕阅读器仍播报具体数量。
+  createBadgeImage: () => {
+    const image = nativeImage.createEmpty();
+    image.addRepresentation({
+      scaleFactor: 1,
+      width: 16,
+      height: 16,
+      buffer: Buffer.from(renderTaskbarStatusDotPixels(1, windowsTaskbarOverlayLayout)),
+    });
+    image.addRepresentation({
+      scaleFactor: 2,
+      width: 32,
+      height: 32,
+      buffer: Buffer.from(renderTaskbarStatusDotPixels(2, windowsTaskbarOverlayLayout)),
+    });
+    return image;
+  },
 });
 
 export function syncApplicationUnreadBadge(windowUnreadCountMap: Map<number, number>) {

@@ -369,7 +369,7 @@ describe("workflow concurrency governor — ticket 上的事件映射（决策 2
   });
 
   it("retryable:false 的 rate_limited failed（主对话 / 工具侧撞 3008）→ 一次 throttled（apps/zcode-cli/packages/dynamic-workflow/docs/execution-engine.md）", () => {
-    const { governor, admitNow } = makeGovernor();
+    const { governor, admitNow, clock } = makeGovernor();
     const ticket = admitNow();
     outcome.started(ticket);
     void ticket.publish(
@@ -378,11 +378,46 @@ describe("workflow concurrency governor — ticket 上的事件映射（决策 2
         reason: "rate_limited",
         retryable: false,
         message: "[3008] user concurrency limit exceeded",
+        errorCode: "model_rate_limited",
+        providerErrorCode: "3008",
         retryAfterMs: 5_000,
       } as never),
     );
-    expect(governor.snapshot(KEY_A)).toMatchObject({ inFlight: 0, cap: 6 });
+    expect(governor.snapshot(KEY_A)).toMatchObject({
+      inFlight: 0,
+      cap: 6,
+      cooldownUntil: clock.now() + 5_000,
+    });
   });
+
+  // 配额 429（1308 + Retry-After）是 Stop 集：run 停下、由用户决定何时再试。它若按限流记，
+  // Retry-After（常指到额度窗口结束）会冻住整个桶，用户用重置卡恢复额度后 resume 仍卡在闸门上。
+  it.each([
+    ["run 的 ticket", "run"],
+    ["主代理 observer 的 ticket", "observer"],
+  ] as const)(
+    "Stop 集失败（配额 1308 带 Retry-After，来自%s）不动 cap 也不冷却：resume 立即准入（docs/dynamic-workflow/concurrency.md「Reading a ticket」）",
+    async (_label, source) => {
+      const { governor, admitNow, observe } = makeGovernor();
+      const ticket = source === "run" ? admitNow() : await observe();
+      outcome.started(ticket);
+      void ticket.publish(
+        statusEvent({
+          type: "model_request_failed",
+          reason: "rate_limited",
+          retryable: false,
+          message: "[1308] 已达到 5 小时的使用上限",
+          errorCode: "model_rate_limited",
+          providerErrorCode: "1308",
+          retryAfterMs: 3 * 60 * 60 * 1000,
+        } as never),
+      );
+      const snapshot = governor.snapshot(KEY_A)!;
+      expect(snapshot).toMatchObject({ inFlight: 0, cap: CEILING });
+      expect(snapshot.cooldownUntil).toBeUndefined();
+      expect(governor.tryAdmit("resumed-run", KEY_A)).toBeDefined();
+    },
+  );
 
   it("retryable:false 的 failed 只减 inFlight，不动 cap 与 streak", () => {
     const { governor, admitNow } = makeGovernor();

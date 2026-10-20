@@ -257,13 +257,32 @@ sequenceDiagram
 
 回调模式先于普通入口；生产回调地址由 endpoint origin 推导，本地调试仍经允许的私网 `return_to=/remote/v4` 转发，只有显式启用开发转发的构建接受它。`app_return_to` 只允许同源 `/remote/v4`、保留的 `/remote/__test__`（均可有尾斜杠）和已有分享路径；远控 query 仅放行 `app_version`、`sid`、`mid`、`name`，其他参数与 fragment 不进入 OAuth 安全回跳。测试入口复用 `/remote/v4` 回调后返回原测试链接，不新增 OAuth 或私网 callback 路径；验收见 [测试入口登录回跳](./web-remote-login.md#独立测试入口的登录回跳)。
 
-发起授权时，回调地址与私网 return_to 同样保留上述白名单参数，保证网关在加载 JS 前能按 app_version 选取资源。凭据仓储保存本次完整回调地址，nonce 校验后按该地址交换 token；旧 pending 会话无保存地址时沿用固定配置。具体边界与回归见 [回调保留扫码参数](./web-remote-login.md#回调保留扫码参数)。
+发起授权时，回调地址与私网 return_to 同样保留上述白名单参数，保证网关在加载 JS 前能按 app_version 选取资源。凭据仓储在同源 localStorage 按 nonce 保存本次登录记录（含完整回调地址），回调取出匹配记录后按该地址交换 token。具体边界与回归见 [回调保留扫码参数](./web-remote-login.md#回调保留扫码参数) 与 [回调落到同一浏览器的其他标签页](./web-remote-login.md#回调落到同一浏览器的其他标签页)。
 
 有 SID 直接认证，不先查询设备列表。V1 hash/t 链接显示 invalid-mobile-connection，不计算 HMAC。每次重连重新读 JWT、申请并消费一次性 terminal token；transport 使用共享 V2 心跳（5秒±1秒/15秒 watchdog）、pair_status 映射和 KICKED 窗口。手机网络/5xx 保留 500ms×2ⁿ、最大10秒退避；桌面保留既有1秒起步/最大30秒/jitter。首次 KICKED 随机2~5秒后恢复，60秒内第二次终止为 session-conflict，回前台不能绕过该终态。
 
 HTTP401 或重连前 JWT 缺失：关闭连接、清除本地会话、回登录页，当前完整 URL 作为再次登录返回地址。auth_init 后 AUTH_FAILED：device-not-owned；切换账号同样清除会话并保留返回地址。WRONG_PARAM：invalid-mobile-connection。DEVICE_OFFLINE 保留15秒宽限恢复；INTERNAL 维持现有可恢复等待/重连。waiting 是合法配对态，继续心跳；业务 data 仅在已认证 paired 时可接收。dispose/挂起/重建使迟到 token、旧 socket 消息失效。
 
 前后台恢复继续先探测同一 socket，必要时重新申请 token；重配对后按原顺序校验桌面版本、恢复 bootstrap/mobile-view-state、bridge、ACK 未确认帧与 snapshot/gap。桌面 `desktop-continuous`、手机 `web-remote-replayable` 的业务 owner、workspaceIdentity 和恢复顺序不变。
+
+### 浏览器 HTTP 取消兼容
+
+terminal token 与设备列表 HTTP adapter 不依赖 `AbortSignal.any()`、`AbortSignal.timeout()` 或 `throwIfAborted()`。缺少这些方法时，仍须完成真实请求和配对，不能在构造请求参数时抛错并持续重连。
+
+两个 adapter 共用请求作用域的 `AbortController`，将调用方取消和既有 15 秒期限连接到同一请求信号。期限覆盖 fetch 和完整正文读取；收到响应头时不能提前释放。调用方已取消时不发请求；成功、HTTP/业务错误、网络失败、取消或超时后，均清理定时器和调用方监听。提前拒绝 HTTP 状态时也终止未读正文，避免取消期限后留下无期限请求。HTTP 401、业务错误与可重试网络错误沿用原分类，不吞错或返回部分正文。
+
+```text
+修复前：token / list → 缺少静态 API → fetch 未执行 → 重连 / 列表失败
+修复后：入口 / transport 的取消信号 → 请求内 AbortController → fetch + 完整正文
+                                               ├─ 15 秒期限
+                                               └─ finally 清理计时器 / 监听
+```
+
+helper 只拥有一次 HTTP 请求的取消资源；导航由 Entry 持有，socket/generation/重试由 transport 持有。配对协议、账号隔离、桌面 continuous 和手机 replayable 的状态归属不变。
+
+回归：两种静态 API 分别缺失及同时缺失时，token/list 成功；取消覆盖请求头和正文阶段，已取消输入零请求，正文期限与成功/异常清理均有 adapter 测试；真实 loopback relay 验证配对和 bootstrap 透传。ML08 pending 浏览器用例覆盖扫码直连、无码选设备到配对发送 bootstrap，矩阵为三种 API 缺失 × 两入口 × 手机/宽屏 × 深浅主题，交错使用中英文。此证据不替代真机浏览器、生产 relay 或用户现场事故验证。
+
+2026-10-19 本地验证：修复前兼容回归 27 项失败，浏览器缺少 `any` 时 token/WS/bootstrap 均为零；候选的未读错误正文清理另以 2 项失败测试确认。最终受影响 UT 为 21 文件、223 项通过；ML08 的 24 组浏览器回归均只取一次 token、建立一次 WS 并配对发送 bootstrap，证据在 `.tmp/remote-abort-api-compat-e2e/`。正常环境、缺少 `any`、缺少 `timeout` 的真实 HTTP/WS 探针均配对成功。typecheck、桌面 E2E typecheck、lint、architecture 和改动文件格式检查通过；lint 告警位于未修改文件。真机与生产环境仍未验证，用例保持 pending。
 
 ### 手机文案与截图验收
 
@@ -288,14 +307,15 @@ HTTP401 或重连前 JWT 缺失：关闭连接、清除本地会话、回登录�
 
 截图矩阵：登录门禁 / 无 SID / device-not-owned × 390px / 1024px × Zai Light / Zai Dark × zh-CN / en-US，共24张；pending 用例 `packages/web/test/e2e/manual-review/pending/remote-login-v2.mjs`，不自动转正。测试接缝沿用本票已定义的前置编排 + 注入 auth/fetch/location/storage/transport，以及真实 loopback 假 relay。
 
-| 用例 | 行为与断言                                                                                                      | 自动化层级                       |
-| ---- | --------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| ML01 | 无 JWT 显示双平台登录门禁，零 token/WS；24张矩阵中的8张                                                         | pending 浏览器                   |
-| ML02 | 已登录无 SID 查询设备并显示列表，选定前零 token/WS；06 更新为混合/空列表16张                                    | pending 浏览器                   |
-| ML03 | AUTH_FAILED 展示归属失败；切换账号清会话且保留 URL；8张                                                         | pending 浏览器                   |
-| ML04 | 两平台 × 手机/宽屏保留回调的扫码参数，保存 nonce/provider/回调地址，按原地址换 token 并回跳、配对发送 bootstrap | pending 浏览器，受控 OAuth/relay |
-| ML05 | 已登录直接 terminal token/auth_init/配对发送 bootstrap                                                          | pending 浏览器                   |
-| ML06 | token401 清凭据回登录并保留 URL，无 WS                                                                          | pending 浏览器                   |
+| 用例 | 行为与断言                                                                                                      | 自动化层级                                    |
+| ---- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| ML01 | 无 JWT 显示双平台登录门禁，零 token/WS；24张矩阵中的8张                                                         | pending 浏览器                                |
+| ML02 | 已登录无 SID 查询设备并显示列表，选定前零 token/WS；06 更新为混合/空列表16张                                    | pending 浏览器                                |
+| ML03 | AUTH_FAILED 展示归属失败；切换账号清会话且保留 URL；8张                                                         | pending 浏览器                                |
+| ML04 | 两平台 × 手机/宽屏保留回调的扫码参数，保存 nonce/provider/回调地址，按原地址换 token 并回跳、配对发送 bootstrap | pending 浏览器，受控 OAuth/relay              |
+| ML05 | 已登录直接 terminal token/auth_init/配对发送 bootstrap                                                          | pending 浏览器                                |
+| ML06 | token401 清凭据回登录并保留 URL，无 WS                                                                          | pending 浏览器                                |
+| ML08 | 缺少 AbortSignal 静态 API 时，扫码直连和设备列表选择均完成 token/WS/auth/配对并发送 bootstrap                   | pending 浏览器，`remote-abort-api-compat.mjs` |
 
 ### 环境验收记录
 

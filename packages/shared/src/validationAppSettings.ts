@@ -531,7 +531,7 @@ const appSettingsObjectSchema = z.object({
   computerUseComposerEntryHidden: z.boolean().default(true),
   taskAutoArchiveEnabled: z.boolean().default(false),
   taskAutoArchiveResetVersion: z.literal(1).default(1),
-  taskAutoArchiveOlderThanDays: z.number().int().positive().max(365).default(7),
+  taskAutoArchiveOlderThanDays: z.number().int().positive().max(365).default(30),
   closeToTrayOnWindows: z.boolean().default(true),
   closeToTrayOnWindowsMigrationInitialized: z.boolean().default(true),
   // default(false)：新装与存量用户首次启动都视为未归位，由 main 进程按平台决定是否迁移。

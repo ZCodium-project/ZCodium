@@ -484,177 +484,228 @@ describe("zcodeAgentService v4 conversation channel", () => {
     workspaceIdentity: `${childHostId}:${workspacePath}`,
     workspaceKey: `${childHostId}:${workspacePath}`,
   });
-  const storedSession = (
-    workspacePath: string,
-    sessionId: string,
-    parentSessionId?: string,
-  ): ZCodeSessionInfo => ({
-    sessionId,
-    workspace: childWorkspace(workspacePath),
-    ...(parentSessionId ? { parentSessionId } : {}),
-    sessionKind: parentSessionId ? "subagent_child" : "interactive",
-    title: sessionId,
-    mode: "build",
-    status: "completed",
-    createdAt: 1,
-    updatedAt: 2,
-  });
+  describe.each([
+    "subagent_child",
+    "workflow_child",
+    "selection_side_chat",
+    "nested_workflow_child",
+  ] as const)("SAT30 %s", (childKind) => {
+    const storedSession = (
+      workspacePath: string,
+      sessionId: string,
+      parentSessionId?: string,
+    ): ZCodeSessionInfo => ({
+      sessionId,
+      workspace: childWorkspace(workspacePath),
+      ...(parentSessionId ? { parentSessionId } : {}),
+      sessionKind: parentSessionId ? childKind : "interactive",
+      title: sessionId,
+      mode: "build",
+      status: "completed",
+      createdAt: 1,
+      updatedAt: 2,
+    });
 
-  for (const clientMode of ["desktop-continuous", "web-remote-replayable"] as const) {
-    it.each(["running", "completed"] as const)(
-      `SAT30: remote %s child resolves its persisted parent project on ${clientMode}`,
-      async (status) => {
-        const state = await fixture();
-        await port.migrate(state.db, { ...state.context, hostId: childHostId });
-        const repo = port.repository(state.db, childHostId);
-        const resolveDirectories = vi.fn(
-          async (target: {
-            workspacePath: string;
-            workspaceIdentity?: string;
-            sessionId: string;
-          }) =>
-            repo.resolveSessionDirectories({ ...target, taskId: target.sessionId })
-              .additionalDirectories,
-        );
-        const env = setupService({
-          resolveSessionDirectories: resolveDirectories,
-          storedSessions: (path) => [
-            storedSession(path, "parent"),
-            { ...storedSession(path, "child", "parent"), status },
-          ],
-        });
-        const project = repo.saveProject({ roots: [env.workspacePath] });
-        repo.reserveCreatedTask({
-          task: { ...childWorkspace(env.workspacePath), taskId: "parent" },
-          projectId: project.id,
-        });
-        if (status === "running") {
-          const legacyIndex = new TaskIndexRepo();
+    for (const clientMode of ["desktop-continuous", "web-remote-replayable"] as const) {
+      it.each(["running", "completed"] as const)(
+        `SAT30: remote %s child resolves its persisted parent project on ${clientMode}`,
+        async (status) => {
+          const state = await fixture();
+          await port.migrate(state.db, { ...state.context, hostId: childHostId });
+          const repo = port.repository(state.db, childHostId);
+          const resolveDirectories = vi.fn(
+            async (target: {
+              workspacePath: string;
+              workspaceIdentity?: string;
+              sessionId: string;
+            }) =>
+              repo.resolveSessionDirectories({ ...target, taskId: target.sessionId })
+                .additionalDirectories,
+          );
+          const env = setupService({
+            resolveSessionDirectories: resolveDirectories,
+            storedSessions: (path) => [
+              storedSession(path, "parent"),
+              { ...storedSession(path, "child", "parent"), status },
+            ],
+          });
+          const project = repo.saveProject({ roots: [env.workspacePath] });
+          repo.reserveCreatedTask({
+            task: { ...childWorkspace(env.workspacePath), taskId: "parent" },
+            projectId: project.id,
+          });
+          if (status === "running") {
+            const legacyIndex = new TaskIndexRepo();
+            try {
+              await seedTaskIndex(legacyIndex, {
+                meta: {
+                  ...childWorkspace(env.workspacePath),
+                  taskId: "child",
+                  traceId: "trace-child",
+                  title: "Legacy child index",
+                  createdAt: 1,
+                  updatedAt: 2,
+                  mode: "build",
+                  provider: "glm",
+                },
+              });
+            } finally {
+              legacyIndex.close();
+            }
+          }
+          const scope = createZCodeAgentConnectionScope(env.service, {
+            connectionId: "child-view",
+            clientMode,
+          });
           try {
-            await seedTaskIndex(legacyIndex, {
-              meta: {
+            await scope.service.helloConversationV4();
+            await scope.service.initializeConversationV4({
+              kind: "clientHello",
+              protocolVersion: 3,
+              clientId: "child-view",
+              appVersion: "test",
+            });
+            for (let attempt = 0; attempt < 2; attempt += 1) {
+              const result = await scope.service.subscribeConversationV4({
                 ...childWorkspace(env.workspacePath),
-                taskId: "child",
-                traceId: "trace-child",
-                title: "Legacy child index",
-                createdAt: 1,
-                updatedAt: 2,
-                mode: "build",
-                provider: "glm",
-              },
+                sessionId: "child",
+              });
+              await scope.service.unsubscribeConversationV4({
+                ...childWorkspace(env.workspacePath),
+                subscriptionId: result.ack.subscriptionId,
+              });
+              if (attempt === 0)
+                await env.service.disposeWorkspace(childWorkspace(env.workspacePath));
+            }
+            expect(resolveDirectories).toHaveBeenCalledTimes(2);
+            expect(resolveDirectories).toHaveBeenCalledWith(
+              expect.objectContaining({ sessionId: "parent" }),
+            );
+            expect(
+              state.db.prepare("SELECT count(*) AS count FROM tasks WHERE task_id='child'").get()
+                ?.count,
+            ).toBe(0);
+            const subscriptions = readRequests(env.logPath).filter(
+              (entry) => entry.method === "v4/conversation/subscribe",
+            );
+            expect(subscriptions).toHaveLength(2);
+            expect(subscriptions[0]?.params).toMatchObject({
+              topic: "conversation/child",
+              clientMode,
+              additionalDirectories: [],
             });
           } finally {
-            legacyIndex.close();
+            await env.service.disposeAllAndWait();
           }
-        }
-        const scope = createZCodeAgentConnectionScope(env.service, {
-          connectionId: "child-view",
-          clientMode,
+        },
+      );
+    }
+
+    it.each([
+      "missing-parent",
+      "missing-parent-id",
+      "foreign-child",
+      "foreign-parent",
+      "foreign-host",
+      "foreign-cwd",
+      "cycle",
+      "unclassified-parent",
+      "ordinary",
+    ])(
+      "SAT30: rejects remote subscription with %s without bypassing project admission",
+      async (failure) => {
+        const resolveDirectories = vi.fn(async () => {
+          throw new Error("project.remote-project-required");
+        });
+        const env = setupService({
+          resolveSessionDirectories: resolveDirectories,
+          storedSessions: (path) => {
+            const parent = storedSession(path, "parent");
+            const child = storedSession(path, "child", "parent");
+            if (failure === "missing-parent") return [child];
+            if (failure === "missing-parent-id") delete child.parentSessionId;
+            if (failure === "foreign-child") child.workspace = childWorkspace(`${path}-other`);
+            if (failure === "foreign-parent") parent.workspace = childWorkspace(`${path}-other`);
+            if (failure === "foreign-host") {
+              parent.workspace.workspaceIdentity = `remote:server:other:${path}`;
+              parent.workspace.workspaceKey = parent.workspace.workspaceIdentity;
+            }
+            if (failure === "foreign-cwd") parent.workspace.workspacePath = `${path}-other`;
+            if (failure === "cycle") {
+              parent.sessionKind = childKind;
+              parent.parentSessionId = "child";
+            }
+            if (failure === "ordinary") {
+              child.sessionKind = "interactive";
+              delete child.parentSessionId;
+            }
+            return [parent, child];
+          },
         });
         try {
-          await scope.service.helloConversationV4();
-          await scope.service.initializeConversationV4({
-            kind: "clientHello",
-            protocolVersion: 3,
-            clientId: "child-view",
-            appVersion: "test",
-          });
-          for (let attempt = 0; attempt < 2; attempt += 1) {
-            const result = await scope.service.subscribeConversationV4({
+          await expect(
+            env.service.subscribeConversationV4({
               ...childWorkspace(env.workspacePath),
               sessionId: "child",
-            });
-            await scope.service.unsubscribeConversationV4({
-              ...childWorkspace(env.workspacePath),
-              subscriptionId: result.ack.subscriptionId,
-            });
-            if (attempt === 0)
-              await env.service.disposeWorkspace(childWorkspace(env.workspacePath));
-          }
-          expect(resolveDirectories).toHaveBeenCalledTimes(2);
-          expect(resolveDirectories).toHaveBeenCalledWith(
-            expect.objectContaining({ sessionId: "parent" }),
-          );
+            }),
+          ).rejects.toThrow();
           expect(
-            state.db.prepare("SELECT count(*) AS count FROM tasks WHERE task_id='child'").get()
-              ?.count,
-          ).toBe(0);
-          const subscriptions = readRequests(env.logPath).filter(
-            (entry) => entry.method === "v4/conversation/subscribe",
-          );
-          expect(subscriptions).toHaveLength(2);
-          expect(subscriptions[0]?.params).toMatchObject({
-            topic: "conversation/child",
-            clientMode,
-            additionalDirectories: [],
-          });
+            readRequests(env.logPath).some((entry) => entry.method === "v4/conversation/subscribe"),
+          ).toBe(false);
+          if (failure === "ordinary")
+            expect(resolveDirectories).toHaveBeenCalledWith(
+              expect.objectContaining({ sessionId: "child" }),
+            );
+          else if (failure === "unclassified-parent")
+            expect(resolveDirectories).toHaveBeenCalledWith(
+              expect.objectContaining({ sessionId: "parent" }),
+            );
+          else expect(resolveDirectories).not.toHaveBeenCalled();
         } finally {
           await env.service.disposeAllAndWait();
         }
       },
     );
-  }
+  });
 
-  it.each([
-    "missing-parent",
-    "missing-parent-id",
-    "foreign-child",
-    "foreign-parent",
-    "foreign-host",
-    "foreign-cwd",
-    "cycle",
-    "unclassified-parent",
-    "ordinary",
-  ])(
-    "SAT30: rejects remote subscription with %s without bypassing project admission",
-    async (failure) => {
-      const resolveDirectories = vi.fn(async () => {
-        throw new Error("project.remote-project-required");
-      });
+  it.each(["interactive", "fork", "workflow_parent"] as const)(
+    "SAT30: mixed auxiliary lineage stops at independent %s project",
+    async (rootKind) => {
+      const resolveDirectories = vi.fn(async () => []);
       const env = setupService({
         resolveSessionDirectories: resolveDirectories,
-        storedSessions: (path) => {
-          const parent = storedSession(path, "parent");
-          const child = storedSession(path, "child", "parent");
-          if (failure === "missing-parent") return [child];
-          if (failure === "missing-parent-id") delete child.parentSessionId;
-          if (failure === "foreign-child") child.workspace = childWorkspace(`${path}-other`);
-          if (failure === "foreign-parent") parent.workspace = childWorkspace(`${path}-other`);
-          if (failure === "foreign-host") {
-            parent.workspace.workspaceIdentity = `remote:server:other:${path}`;
-            parent.workspace.workspaceKey = parent.workspace.workspaceIdentity;
-          }
-          if (failure === "foreign-cwd") parent.workspace.workspacePath = `${path}-other`;
-          if (failure === "cycle") {
-            parent.sessionKind = "subagent_child";
-            parent.parentSessionId = "child";
-          }
-          if (failure === "ordinary") {
-            child.sessionKind = "interactive";
-            delete child.parentSessionId;
-          }
-          return [parent, child];
-        },
+        storedSessions: (path) =>
+          [
+            { sessionId: "owner", parentSessionId: "different-project", sessionKind: rootKind },
+            {
+              sessionId: "side",
+              parentSessionId: "owner",
+              sessionKind: "selection_side_chat" as const,
+            },
+            { sessionId: "actor", parentSessionId: "side", sessionKind: "workflow_child" as const },
+          ].map((session) => ({
+            ...session,
+            workspace: childWorkspace(path),
+            title: session.sessionId,
+            mode: "build" as const,
+            status: "completed" as const,
+            createdAt: 1,
+            updatedAt: 2,
+          })),
       });
       try {
-        await expect(
-          env.service.subscribeConversationV4({
-            ...childWorkspace(env.workspacePath),
-            sessionId: "child",
-          }),
-        ).rejects.toThrow();
+        await env.service.subscribeConversationV4({
+          ...childWorkspace(env.workspacePath),
+          sessionId: "actor",
+        });
+        expect(resolveDirectories).toHaveBeenCalledWith(
+          expect.objectContaining({ sessionId: "owner" }),
+        );
         expect(
-          readRequests(env.logPath).some((entry) => entry.method === "v4/conversation/subscribe"),
-        ).toBe(false);
-        if (failure === "ordinary")
-          expect(resolveDirectories).toHaveBeenCalledWith(
-            expect.objectContaining({ sessionId: "child" }),
-          );
-        else if (failure === "unclassified-parent")
-          expect(resolveDirectories).toHaveBeenCalledWith(
-            expect.objectContaining({ sessionId: "parent" }),
-          );
-        else expect(resolveDirectories).not.toHaveBeenCalled();
+          readRequests(env.logPath)
+            .filter((entry) => entry.method === "session/list")
+            .flatMap((entry) => entry.params?.sessionIds ?? []),
+        ).not.toContain("different-project");
       } finally {
         await env.service.disposeAllAndWait();
       }

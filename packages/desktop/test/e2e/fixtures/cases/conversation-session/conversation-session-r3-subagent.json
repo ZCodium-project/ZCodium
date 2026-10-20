@@ -17,6 +17,62 @@
       "syntheticReason": "标题不属于断言"
     },
     {
+      "id": "r3-workflow-skill",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-tool-use",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-workflow-create",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-tool-use",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-workflow-started",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-text",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-workflow-child",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-text",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-workflow-notification",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-text",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-side-chat",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-text",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
+      "id": "r3-side-followup",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "kind": "main",
+      "timingPolicy": "fast-text",
+      "source": "synthetic",
+      "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+    },
+    {
       "id": "r3-sub-parent-agent",
       "description": "BG25: main launches a long-running background Agent.",
       "kind": "main",

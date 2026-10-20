@@ -43,7 +43,11 @@ import {
   APP_RUNTIME_PREFERENCES_CHANGED_BROADCAST_CHANNEL,
   appRuntimePreferencesChangedBroadcastPayloadSchema,
 } from "../src/app-runtime-preferences.js";
-import { zcodeUserMessageInfoSchema } from "../src/zcode-protocol-legacy-types.js";
+import {
+  isAuxiliarySessionKind,
+  isReadonlyAgentSessionKind,
+  zcodeUserMessageInfoSchema,
+} from "../src/zcode-protocol-legacy-types.js";
 import { conversationRowSchema, workflowLaunchMetaSchema } from "../src/zcode-protocol-v4/rows.js";
 import { errorAttributionSchema } from "../src/zcode-protocol-v4/snapshot.js";
 
@@ -2918,5 +2922,23 @@ describe("v4 workflowLaunch rows (direct-launch)", () => {
         amend: { ...retune.amend, predecessorRunId: null },
       }).success,
     ).toBe(false);
+  });
+});
+
+// 类型策略相互独立：辅助对话继承项目且隐藏，但仍能接受用户输入。
+describe("session kind policies", () => {
+  it.each([
+    ["interactive", false, false],
+    ["fork", false, false],
+    ["workflow_parent", false, false],
+    ["subagent_child", true, true],
+    ["workflow_child", true, true],
+    ["nested_workflow_child", true, true],
+    ["selection_side_chat", true, false],
+    [undefined, false, false],
+    ["unknown", false, false],
+  ] as const)("%s preserves its project/list and input policy", (kind, auxiliary, readonly) => {
+    expect(isAuxiliarySessionKind(kind)).toBe(auxiliary);
+    expect(isReadonlyAgentSessionKind(kind)).toBe(readonly);
   });
 });

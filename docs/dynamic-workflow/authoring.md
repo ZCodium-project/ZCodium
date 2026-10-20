@@ -606,8 +606,17 @@ How the pack reaches each runtime:
 - Development and the Electron desktop resolve `packages/bundled-skills` on disk next to the
   CLI entry, through the same candidate-directory walk official plugins use, and read it in
   place; nothing is copied. `packages/desktop/scripts/prepare-agent-node-bundle.mjs` stages
-  it beside `resources/glm/zcode.cjs`; `scripts/prepare-prebuilds.mjs` stages it for remote
-  hosts.
+  it beside `resources/glm/zcode.cjs`.
+- ZCode Server releases (headless Server and SSH / WSL / Docker Source Server) use
+  `stageRelease` to stage the pack's `README.md` and `skills/` from `bundledSkillsDir` at
+  `runtime/packages/bundled-skills`, beside `runtime/zcode.cjs`. Other top-level files are
+  excluded. The pack belongs only to the `agent-runtime` component, including its content
+  hash and archive, and is not listed in the manifest's `plugins`. Official plugin staging
+  neither supplies nor overwrites the pack. Development remote
+  deployment stages the same directory beside its agent bundle, includes every pack file
+  in the deployment hash and checks the required files before reusing a remote installation.
+  Both paths reject a missing or incomplete pack before publishing or uploading. They do
+  not depend on an old plugin cache or on the server's working directory.
 - SEA binaries embed `skills/**` under the `zcode-bundled-skills/` asset prefix
   (`cli/scripts/sea-bundled-skill-assets.mjs`) with a manifest whose hash covers every file.
   On start the CLI extracts the pack once into `~/.zcode/cli/bundled-skills/<hash>/`; the

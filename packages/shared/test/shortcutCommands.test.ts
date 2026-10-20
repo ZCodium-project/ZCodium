@@ -95,3 +95,11 @@ describe("shortcutCommands 命令表", () => {
     expect(getDefaultShortcutBindings("doesNotExist")).toEqual([]);
   });
 });
+
+describe("Side Pane 完整视图快捷键", () => {
+  it("默认绑定 ⇧⌘F / Ctrl+Shift+F，走 renderer window 通道", () => {
+    const entry = SHORTCUT_COMMANDS.find((candidate) => candidate.id === "toggleSidePaneFullView");
+    expect(entry?.channel).toBe("window");
+    expect(getDefaultShortcutBindings("toggleSidePaneFullView")).toEqual(["CmdOrCtrl+Shift+f"]);
+  });
+});

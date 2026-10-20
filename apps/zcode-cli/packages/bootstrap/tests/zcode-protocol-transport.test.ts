@@ -690,6 +690,58 @@ describe("ZCodeProtocolNdjsonConnection", () => {
     input.end();
     await connection.waitForClose();
   });
+
+  it("answers plugin read requests while an install runs and another install waits behind it", async () => {
+    const input = new PassThrough();
+    const output = new PassThrough();
+    const installEntered = Promise.withResolvers<void>();
+    const finishInstall = Promise.withResolvers<void>();
+    const readsAnswered = Promise.withResolvers<void>();
+    const readMethods: string[] = [
+      zcodeProtocolMethods.pluginsDescribe,
+      zcodeProtocolMethods.pluginsList,
+      zcodeProtocolMethods.pluginsOverview,
+    ];
+    const order: string[] = [];
+    const connection = new ZCodeProtocolNdjsonConnection({
+      handleMessage: async (message) => {
+        if (!("method" in message) || !("id" in message)) return undefined;
+        order.push(`${message.method}#${message.id}`);
+        if (message.id === 1) {
+          installEntered.resolve();
+          await finishInstall.promise;
+        }
+        if (order.length === 1 + readMethods.length) readsAnswered.resolve();
+        return { id: message.id, result: {} };
+      },
+      input,
+      output,
+    });
+    connection.start();
+    try {
+      input.write(frame({ id: 1, method: zcodeProtocolMethods.pluginsInstall, params: {} }));
+      await installEntered.promise;
+      // B 排在 A 后面时，详情和新标签页的列表加载也不能等「最后排队请求开始」这个屏障。
+      input.write(
+        frame({ id: 2, method: zcodeProtocolMethods.pluginsInstall, params: {} }) +
+          readMethods
+            .map((method, index) => frame({ id: index + 3, method, params: {} }))
+            .join(""),
+      );
+      await readsAnswered.promise;
+      expect(order).toEqual([
+        "plugins/install#1",
+        "plugins/describe#3",
+        "plugins/list#4",
+        "plugins/overview#5",
+      ]);
+    } finally {
+      finishInstall.resolve();
+      input.end();
+      await connection.waitForClose();
+    }
+    expect(order.at(-1)).toBe("plugins/install#2");
+  });
 });
 
 function frame(message: ZCodeProtocolMessage): string {

@@ -1,4 +1,8 @@
-import { OFF_PEAK_EXECUTION_TOOL_DENYLIST } from "@zcode/shared";
+import {
+  isAuxiliarySessionKind,
+  isReadonlyAgentSessionKind,
+  OFF_PEAK_EXECUTION_TOOL_DENYLIST,
+} from "@zcode/shared";
 /* eslint-disable max-lines -- ZCode Protocol 的 session/workspace 方法共享同一个 server context 与 snapshot helpers，迁移期先集中维护。 */
 import { observeSessionDebug } from "./session-debug.js";
 import {
@@ -1716,7 +1720,7 @@ export async function listSessions(context: ZCodeProtocolAgentServerContext, raw
         // 可凭持久化父链证明归属。目录或显式身份不同就拒绝，不回写身份、不激活 runtime。
         if (
           !params.sessionIds ||
-          current.taskType !== "subagent_child" ||
+          !isAuxiliarySessionKind(current.taskType) ||
           !current.parentID ||
           path !== params.workspace.workspacePath ||
           (current.workspaceID?.trim() && key !== path)
@@ -2009,7 +2013,7 @@ export async function sendPrompt(context: ZCodeProtocolAgentServerContext, rawPa
   const params = parseParams(zcodeSessionSendParamsSchema, rawParams);
   const record = requireSession(context, params.sessionId);
   // legacy 输入入口同样必须保持子代理只读，不能绕过 V4 用户输入准入。
-  if (record.taskType === "subagent_child") {
+  if (isReadonlyAgentSessionKind(record.taskType)) {
     throw new ProtocolRequestError(-32010, "Subagent sessions are read-only", {
       reasonCode: "guard.subagentReadOnly",
     });

@@ -166,3 +166,15 @@ PLM-LC-018（管理列表本地化）、PLM-LC-019（双入口创建插件草稿
 连续点击两个不同插件的安装按钮，两者都保持安装中且不能重复提交。任一完成或失败后，另一项继续安装中；两者结束后恢复各自最终状态。补充同名并发及切换上下文后同名操作的隔离回归。
 
 浏览器候选用例：`packages/ui/test/browser/manual-review/pending/plugin-concurrent-install.test.mjs`，真实 store 与共享安装按钮，受控服务完成，390/1200px × 中英文 × 深浅主题。桌面候选用例：`packages/desktop/test/e2e/plugins/manual-review/pending/plugin-concurrent-install.test.ts`，真实个人来源与 CLI 安装，通过本地 HTTP 响应门控制失败顺序。均保持 pending，不自动晋升。
+
+## PLM-DETAIL-DURING-INSTALL
+
+插件 A 的安装下载未完成时，打开其他未安装插件的详情，组件区按 `plugins/describe` 正常加载；插件列表与总览（新建右侧标签页首次加载使用）也立即返回，不等待 A 的安装结束；A 仍保持安装中。卡片“更新”和详情“恢复用户默认”只在自身插件操作中禁用。
+
+桌面候选用例：作为 PLM-CONCURRENT-INSTALL 桌面用例中的一步，真实个人来源与 CLI，HTTP 响应门挂起 A 的下载、B 排在 A 后面时打开本地插件详情，返回后两项仍为安装中；同一时刻经桌面服务链路请求 list/overview，10 秒内返回。单测覆盖 transport 立即派发 describe/list/overview、manifest 已缓存时不等存储锁、manifest 缺失时仍进锁，以及两处按钮的按插件禁用。保持 pending，不自动晋升。
+
+## PLM-BUILTIN-UI-UNINSTALL
+
+卸载内置 UI 插件（如 Word 文档）后，可恢复卡片仍在「UI 插件」专区，不掉进「生产力」等分类分组。已安装时同样在专区。
+
+桌面候选用例：`packages/desktop/test/e2e/plugins/manual-review/pending/plugin-builtin-ui-uninstall.test.ts`，真实 CLI，经卡片菜单卸载 `documents@zcode-plugins-official`，等待总览进入 `restorableBuiltins` 后断言卡片在 `plugin-store-ui-section` 内。bootstrap 单测校验内置定义的 `ui` 组件类型与插件包 `ui.surfaces` 一致，且卸载后官方目录与可恢复列表都带 `ui`。保持 pending，不自动晋升。

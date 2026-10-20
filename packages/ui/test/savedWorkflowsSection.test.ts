@@ -352,6 +352,21 @@ describe("SavedWorkflowsSection（全局 + 多项目页）", () => {
     expect(tabStoreState.openSettingsTab).toHaveBeenCalledTimes(1);
   });
 
+  it("服务端默认 disabled、用户选了始终开启：中枢在，「工作流设置」也在", async () => {
+    useDynamicWorkflowAvailabilityStore.setState({
+      status: "ready",
+      enabled: true,
+      config: applyDynamicWorkflowUserMode(
+        createDynamicWorkflowClientConfig("disabled", "default"),
+        "alwaysOn",
+      ),
+    });
+    groupReadiness.global = { loaded: true, empty: true, count: 0 };
+    mount();
+    const button = await screen.findByTestId(TID_WORKFLOWS_OPEN_SETTINGS);
+    expect(button.textContent).toContain("始终开启");
+  });
+
   it("旧 Host 的快照没有 offeredMode：不出「工作流设置」链接（它要打开的设置行不存在）", async () => {
     useDynamicWorkflowAvailabilityStore.setState({
       status: "ready",

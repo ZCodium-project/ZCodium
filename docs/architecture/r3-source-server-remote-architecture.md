@@ -346,10 +346,14 @@ serve --daemon
 - “服务管理器不可访问”是能力事实，不等于安装失败：常见于 SSH 进入容器、最小系统、未启动 user manager，或 macOS SSH 会话没有可访问的 launchd user domain。
 - 自动 fallback 不改变 Source/Task/Session 权威；Desktop 断开只释放 attachment。fallback 进程在远端环境存活期间继续运行，宿主/容器重启后由既有启动重连或手动连接重新拉起。
 - Linux SSH 若 `/run/user/<uid>/bus` 存在，即使 sshd 未注入 `XDG_RUNTIME_DIR`/`DBUS_SESSION_BUS_ADDRESS`，也应使用该用户 bus 完成 service 探测和注册；不得把“环境变量缺失”误判为“systemd 不存在”。
+- Linux 能力探测读取 `systemctl --user show --property=Version`，只有退出码为 0 且返回非空 `Version` 属性才确认 user manager 可访问。chroot / offline 环境可能跳过命令并返回 0；这种没有属性响应的结果必须进入既有 detached fallback，不能依赖本地化 stderr 文案判断，也不能覆盖用户的离线环境设置。
+- 能力探测沿用 2 秒进程超时。命令被信号终止后，执行器必须关闭本端 stdout/stderr 管道并返回失败，不能继续等待持有管道的 D-Bus 辅助进程退出；正常退出仍等到 `close` 后读取完整响应。该收口不改变服务注册错误传播，也不新增启动路径。
+- 探测成功后的真实注册错误仍直接返回；不得把权限、服务文件或启动错误统一吞掉。daemon 启动 owner 仍由 Server CLI 在 OS service 与 detached Supervisor 之间选择，不新增重试、状态缓存或并行启动路径。
 - `serve --daemon --json` 非零退出时，Adapter 必须优先解析 stdout 的结构化 `{ error, code?, retryable? }`，再把 stderr 作为补充诊断。Node warning、登录 banner 或 shell 噪音不得覆盖真实 CLI 错误。
 - Server CLI `--json` 的结果（成功或失败）是 stdout 中最后一个单行 JSON 对象；Adapter 读取结果时跳过其前后的纯文本行。部分 SSH 堡垒机会把远端 stderr 合并进 stdout，并在 stdout 结束后才投递，Node warning 因此可能排在结果行之后，不能把最后一个非空行当作结果。
 - Source Server bootstrap 可执行文件放在最终可执行根（`~/.zcode/server`）的临时 staging 内，不从常见 `noexec` 的 `/tmp` 执行；archive 临时文件仍须在成功、失败和取消后清理。
 - 远端直下只把 curl/wget、tar 和 SHA-256 工具作为必需能力；awk/wc/date 等仅用于增强进度，缺失时降级为无速度进度而不是阻断下载。Desktop 下载后上传同样必须在上传前探测 tar，避免传完大 archive 才失败。
+- archive 内置官方 Node 22 Linux 构建，动态链接要求 glibc 2.28 及以上。probe 在同一次只读 round-trip 中读取 `getconf GNU_LIBC_VERSION`；Linux 远端（含 WSL、Docker）低于 2.28 时（如 CentOS 7、RHEL 7、Ubuntu 18.04），probe 以预检失败拒绝，不进入安装确认、上传或远端直下，消息写明实测版本和所需版本。读不到 glibc 版本（musl、缺 getconf、输出无法识别）时不拦截，沿用原安装链。
 - macOS 构建 POSIX archive 时必须显式禁用 bsdtar xattr/PAX metadata；仅设置 `COPYFILE_DISABLE=1` 不足以移除 `LIBARCHIVE.xattr.*`，否则 Linux 解压会按条目刷出数千行 unknown extended header 并掩盖真实错误。
 
 ### 5.3 发现、安装与升级链

@@ -11,7 +11,7 @@ import {
 } from "@zcode/shared";
 import {
   blendBadgeIntoBitmap,
-  renderTaskbarBadgePixels,
+  renderAntialiasedStatusDotPixels,
   resolveBadgeOverlayLabel,
 } from "./unreadBadge.js";
 
@@ -19,14 +19,10 @@ let desktopTray: Tray | null = null;
 let rebuildDesktopTrayContextMenu: (() => void) | null = null;
 let trayLogger: { warn: (...args: unknown[]) => void } | null = null;
 
-// 托盘红点合成参数：画布 32×32，Logo 满幅；Logo 是圆角方块，右上直角处天然有约
-// 4×4 的透明缺口，9×9 红点（画布 10、radius 4）圆心 (28.5, 3.5) 嵌进缺口，
-// 与图片上边缘、右边缘正切，最外缘再往外就会被画布裁掉。
+// 托盘图在 Windows 通知区域实际显示约 16px。为避免把普通 32px 合成图交给 Shell
+// 盲缩导致红点发糊，分别合成原生 1x(16px) 与 2x(32px) 表示；红点尺寸独立于任务栏。
 // spec 见 docs/desktop/windows-taskbar-unread-badge.md
-const TRAY_IMAGE_SIZE = 32;
-const TRAY_BADGE_SIZE = 10;
-const TRAY_BADGE_ORIGIN_X = 24;
-const TRAY_BADGE_ORIGIN_Y = -1;
+const TRAY_LOGICAL_SIZE = 16;
 
 let trayBaseImage: NativeImage | null = null;
 const trayBadgeImageCache = new Map<string, NativeImage>();
@@ -156,16 +152,15 @@ function loadTrayBaseImage(): NativeImage | null {
   return trayBaseImage.isEmpty() ? null : trayBaseImage;
 }
 
-function composeTrayBadgeImage(label: string, baseImage: NativeImage): NativeImage | null {
-  const cached = trayBadgeImageCache.get(label);
-  if (cached) {
-    return cached;
-  }
-
-  const resized = baseImage.resize({ width: TRAY_IMAGE_SIZE, height: TRAY_IMAGE_SIZE });
+function composeTrayBadgeRepresentation(
+  label: string,
+  baseImage: NativeImage,
+  scale: 1 | 2,
+): Buffer | null {
+  const size = TRAY_LOGICAL_SIZE * scale;
+  const resized = baseImage.resize({ width: size, height: size });
   const bitmap = resized.toBitmap();
-  // 位深防御：toBitmap 尺寸与预期不符时放弃合成，保持无红点底图，避免托盘出花屏。
-  if (bitmap.length !== TRAY_IMAGE_SIZE * TRAY_IMAGE_SIZE * 4) {
+  if (bitmap.length !== size * size * 4) {
     trayLogger?.warn(
       `[desktop-tray] unexpected tray bitmap size ${bitmap.length}, skip badge compose`,
     );
@@ -173,25 +168,45 @@ function composeTrayBadgeImage(label: string, baseImage: NativeImage): NativeIma
   }
 
   const canvas = new Uint8Array(bitmap);
-  // 托盘实际显示仅 16×16，数字不可读：只画红点提示"有未读"，数量看任务栏气泡/任务列表。
-  // 红点嵌进 Logo 圆角留下的右上透明缺口，边缘与圆弧相切（见顶部常量注释）。
-  const badge = renderTaskbarBadgePixels(label, {
-    size: TRAY_BADGE_SIZE,
-    glyphScale: 1,
-    padding: 0,
-    dot: true,
+  // 托盘保持约 8px 逻辑直径，右上角完整圆；4× 超采样后按原生尺寸合成。
+  const dotSize = 5 * scale;
+  const badge = renderAntialiasedStatusDotPixels({
+    size: dotSize,
+    centerX: 2.75 * scale,
+    centerY: 2.25 * scale,
+    radius: 1.875 * scale,
   });
   blendBadgeIntoBitmap({
     base: canvas,
-    size: TRAY_IMAGE_SIZE,
+    size,
     badge,
-    badgeSize: TRAY_BADGE_SIZE,
-    originX: TRAY_BADGE_ORIGIN_X,
-    originY: TRAY_BADGE_ORIGIN_Y,
+    badgeSize: dotSize,
+    originX: size - dotSize,
+    originY: 0,
   });
-  const image = nativeImage.createFromBitmap(Buffer.from(canvas), {
-    width: TRAY_IMAGE_SIZE,
-    height: TRAY_IMAGE_SIZE,
+  return Buffer.from(canvas);
+}
+
+function composeTrayBadgeImage(label: string, baseImage: NativeImage): NativeImage | null {
+  const cached = trayBadgeImageCache.get(label);
+  if (cached) return cached;
+
+  const oneX = composeTrayBadgeRepresentation(label, baseImage, 1);
+  const twoX = composeTrayBadgeRepresentation(label, baseImage, 2);
+  if (!oneX || !twoX) return null;
+
+  const image = nativeImage.createEmpty();
+  image.addRepresentation({
+    scaleFactor: 1,
+    width: 16,
+    height: 16,
+    buffer: oneX,
+  });
+  image.addRepresentation({
+    scaleFactor: 2,
+    width: 32,
+    height: 32,
+    buffer: twoX,
   });
   trayBadgeImageCache.set(label, image);
   return image;

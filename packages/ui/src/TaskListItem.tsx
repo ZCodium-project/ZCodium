@@ -799,21 +799,6 @@ export function TaskListItemContextMenuContent({
   const workspaceActionsDisabledReason = workspaceActionsDisabled
     ? (disabledReason ?? intl.formatMessage({ id: "workspaceSidebar.unavailableLocalDirectory" }))
     : undefined;
-  // 收尾：「在分屏打开」仅桌面 shell（context 由 WorkspaceShellLayout 提供；
-  // 手机远控/无 Provider 环境默认 false → 菜单项整体不渲染）。
-  const splitPaneEntry = useV4SplitPaneEntry();
-  const splitPaneEntryEnabled = splitPaneEntry.enabled;
-  const splitPaneTarget = useMemo(
-    () => ({
-      workspacePath,
-      ...(task.workspaceIdentity?.trim() ? { workspaceIdentity: task.workspaceIdentity } : {}),
-      ...(remoteSessionId ? { remoteSessionId } : {}),
-      sessionId: task.taskId,
-    }),
-    [remoteSessionId, task.taskId, task.workspaceIdentity, workspacePath],
-  );
-  // 当前 focused session、已有 group 与 pane 上限统一由 shell owner 裁决；row 不再直接写 layout store。
-  const canOpenInSplitPane = splitPaneEntry.canOpenSession(splitPaneTarget);
   const openFeedbackSubmit = useFeedbackStore((state) => state.openSubmit);
   const {
     taskSessionFile,
@@ -899,16 +884,6 @@ export function TaskListItemContextMenuContent({
       onMarkTaskAsUnread={() => {
         onMarkTaskAsUnread(task.taskId);
       }}
-      onOpenInSplitPane={
-        splitPaneEntryEnabled
-          ? () => {
-              // 旧入口直接写 paneLayout，绕过 active group 与 shell navigation，
-              // draft split 后下一次普通点击会把 session 灌进 primary。统一交给 shell controller。
-              splitPaneEntry.openSession(splitPaneTarget);
-            }
-          : undefined
-      }
-      openInSplitPaneDisabled={workspaceActionsDisabled || !canOpenInSplitPane}
       onOpenTaskFeedback={() => {
         void handleOpenTaskFeedback();
       }}

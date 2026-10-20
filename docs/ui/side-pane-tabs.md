@@ -79,6 +79,7 @@ flowchart LR
 - side pane 的 tabs、折叠态、Git source 选择和 Browser 当前 URL 按 `workspaceIdentity?.trim() || workspacePath` 缓存在内存中，跨 workspace 切换后恢复；刷新或重启应用后不保留
 - 多 Browser tab 的 URL 按 `browser tab id -> URL` 记录，避免多个 webview 共用同一份恢复地址
 - 桌面端 `Cmd/Ctrl+W` 走“关闭当前上下文”语义：右侧 side pane 展开且存在 active tab 时优先关闭该 tab；否则回退到关闭当前窗口。该快捷键由 main 进程转发给 renderer 判断，避免 Electron 原生 `close` role 绕过 side pane 状态直接关闭窗口。
+- 桌面端面板右上角提供「进入完整视图」（`⇧⌘F` / `Ctrl+Shift+F`），面板占满窗口、对话变为第一个 tab 并提供浮动输入窗口，完整合同见 `docs/ui/side-pane-full-view.md`。
 
 ### 新标签页展示
 

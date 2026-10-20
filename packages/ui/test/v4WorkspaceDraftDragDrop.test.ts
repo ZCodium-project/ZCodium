@@ -46,35 +46,28 @@ function resetWorkbenchState(): void {
   leafPaneCapture.props = [];
 }
 
-describe("V4WorkspaceChatArea draft drag/drop", () => {
+describe("V4WorkspaceChatArea split entries", () => {
   beforeEach(resetWorkbenchState);
   afterEach(resetWorkbenchState);
 
-  it("allows dropping a sidebar session beside a draft primary pane without creating a group", () => {
+  // 拆分入口已整体下线（docs/v4-split-pane-workbench.md）：pane 不再接收拖放分屏与拆分回调，
+  // 既有布局仍只负责渲染、聚焦与关闭。
+  it("does not hand split or drop callbacks to leaf panes", () => {
     renderToStaticMarkup(
       createElement(V4WorkspaceChatArea, {
         sessionId: null,
         workspacePath: "/workspace",
+        isDesktop: true,
       }),
     );
 
     const primaryPane = leafPaneCapture.props[0];
-    const payload = {
-      kind: "zcode/session" as const,
-      sessionId: "sess-b",
-      workspacePath: "/workspace",
-    };
-
-    expect(primaryPane.canDropSession?.(payload)).toBe(true);
-    primaryPane.onDropSession?.(V4_PRIMARY_PANE_ID, "right", payload);
-
-    const paneState = usePaneLayoutStore.getState();
-    expect(leafPaneIds(paneState.root)).toEqual([V4_PRIMARY_PANE_ID, "pane-1"]);
-    expect(paneState.panes["pane-1"]).toEqual({
-      workspaceScope: { workspacePath: "/workspace" },
-      sessionId: "sess-b",
-    });
-    expect(useWorkbenchGroupStore.getState().activeGroupId).toBeNull();
+    expect(primaryPane?.paneId).toBe(V4_PRIMARY_PANE_ID);
+    expect("canDropSession" in primaryPane!).toBe(false);
+    expect("onDropSession" in primaryPane!).toBe(false);
+    expect("onSplit" in primaryPane!).toBe(false);
+    expect("canSplit" in primaryPane!).toBe(false);
+    expect(leafPaneIds(usePaneLayoutStore.getState().root)).toEqual([V4_PRIMARY_PANE_ID]);
   });
 
   it("keeps the drop preview layer above composer and input layers", () => {

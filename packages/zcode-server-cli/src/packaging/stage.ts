@@ -21,6 +21,8 @@ export interface StageOptions {
   distDir: string;
   /** 既有 CLI/Agent bundle（zcode.cjs，自包含 CJS） */
   agentBundlePath: string;
+  /** CLI 内置技能包；不依赖官方插件缓存。 */
+  bundledSkillsDir: string;
   /** 已准备好的目标平台 Node 二进制 */
   nodeBinaryPath: string;
   /** 构建入口从统一合规 owner（scripts/third-party-notices.mjs）读取后传入；组件组装不能自行拼凑许可。 */
@@ -142,6 +144,8 @@ async function assertOfficialPluginRuntime(stagedDir: string, name: string): Pro
   }
 }
 
+const BUNDLED_SKILL_PACK_TOP_LEVEL_PATHS: readonly string[] = ["README.md", "skills"];
+
 async function copyNativeTools(
   sourceDir: string | undefined,
   targetDir: string,
@@ -232,6 +236,22 @@ export async function stageRelease(options: StageOptions): Promise<StagedRelease
   await cp(options.agentBundlePath, join(runtimeDir, "zcode.cjs"), {
     dereference: true,
   });
+  // 修复原因：dynamic-workflows 已迁出插件，按 -plugin 复制会漏带工作流的必需技能。
+  // 随 Agent 组件独立交付并参与内容哈希，不能依赖服务器旧版本的插件缓存。
+  for (const file of ["SKILL.md", "patterns.md", "examples.md"]) {
+    const skillPath = join(options.bundledSkillsDir, "skills/dynamic-workflows", file);
+    try {
+      await access(skillPath);
+    } catch (cause) {
+      throw new Error(`Missing bundled skill required asset: ${skillPath}`, { cause });
+    }
+  }
+  // 插件缓存可能缺包或过期；只复制 Agent 源中的发布资产，避免二次复制覆盖。
+  await copyPackageDir(
+    options.bundledSkillsDir,
+    join(runtimeDir, "packages/bundled-skills"),
+    (relativePath) => BUNDLED_SKILL_PACK_TOP_LEVEL_PATHS.includes(relativePath.split(sep)[0] ?? ""),
+  );
   // Agent bundle 是第三个实际运行入口；只扫描 Server bundle 会漏掉外置的 TUI/Playwright。
   bundleSources.push(await readFile(options.agentBundlePath, "utf8"));
 
@@ -322,12 +342,18 @@ export async function stageRelease(options: StageOptions): Promise<StagedRelease
         "runtime/THIRD-PARTY-NOTICES.md",
       ],
     },
-    { id: "agent-runtime", paths: ["runtime/zcode.cjs", "runtime/licenses/agent"] },
+    {
+      id: "agent-runtime",
+      paths: ["runtime/zcode.cjs", "runtime/packages/bundled-skills", "runtime/licenses/agent"],
+    },
     ...(plugins.length > 0
       ? [
           {
             id: "official-plugins",
-            paths: ["runtime/packages", "runtime/licenses/official-plugins"],
+            paths: [
+              ...plugins.map((name) => `runtime/packages/${name}-plugin`),
+              "runtime/licenses/official-plugins",
+            ],
           },
         ]
       : []),

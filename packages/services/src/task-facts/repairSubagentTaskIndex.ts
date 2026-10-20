@@ -1,3 +1,4 @@
+import { isAuxiliarySessionKind } from "@zcode/shared";
 import { resolveWorkspaceKey } from "@zcode/shared";
 import type { SubagentIndexRepair } from "#src/task-facts/contract.js";
 
@@ -23,7 +24,7 @@ export async function repairSubagentTaskIndex(params: SubagentIndexRepair): Prom
     for (const session of sessions) {
       if (!isCurrent()) return;
       if (
-        session.sessionKind !== "subagent_child" ||
+        !isAuxiliarySessionKind(session.sessionKind) ||
         !batch.includes(session.sessionId) ||
         resolveWorkspaceKey(session.workspace) !== resolveWorkspaceKey(target)
       )

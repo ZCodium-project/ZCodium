@@ -1,3 +1,4 @@
+import { isAuxiliarySessionKind } from "@zcode/shared";
 /* eslint-disable max-lines -- task index 的 v4 帧摄入、snapshot upsert 和 workspace 广播必须共享同一份闭包状态。 */
 import { repairSubagentTaskIndex } from "#src/task-facts/repairSubagentTaskIndex.js";
 import {
@@ -1682,7 +1683,7 @@ export function createZCodeTaskIndexSyncer(
       broadcastReason: ZCodeWorkspaceTaskListChanged["reason"] | null;
     },
   ): Promise<ZCodeTaskMeta> {
-    if (snapshot.session.sessionKind === "subagent_child")
+    if (isAuxiliarySessionKind(snapshot.session.sessionKind))
       return {
         ...snapshot.session.workspace,
         taskId: snapshot.session.sessionId,

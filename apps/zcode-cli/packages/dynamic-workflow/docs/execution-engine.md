@@ -856,7 +856,7 @@ Shapes are small scripts that differ only in parallelism, subagent count, and as
 | zero requests after stop | any request that reaches the server after `run-settled` plus a 10 ms wire grace is matched by a `cancelled` echo from the runner |
 | in-flight bound | the server's peak in-flight count never exceeds the cell's ceiling (8) |
 
-Two lifecycle cells exercise "Engine ownership" on the same bed: B18 closes the service under a live run, B19 writes a foreign terminal row under a live engine. The quick matrix runs in the default bootstrap suite; the full matrix runs when `ZCODE_FAULT_MATRIX=full` is set, with a 30 s ceiling per cell. Two production seams exist for this bed: the driver clock (`now`, `schedule`, `stallAfterMs`, `quiesceMs`) is injectable, and the adapter keeps `retryAfterMs` on its normalized error.
+The quota cell (B11) also checks what a resume will meet: right after the stop, a new request on the same provider and model is admitted at once, because a `stop`-class failure moves neither the governor's cap nor its cooldown (`docs/dynamic-workflow/concurrency.md`, "Reading a ticket"). Two lifecycle cells exercise "Engine ownership" on the same bed: B18 closes the service under a live run, B19 writes a foreign terminal row under a live engine. The quick matrix runs in the default bootstrap suite; the full matrix runs when `ZCODE_FAULT_MATRIX=full` is set, with a 30 s ceiling per cell. Two production seams exist for this bed: the driver clock (`now`, `schedule`, `stallAfterMs`, `quiesceMs`) is injectable, and the adapter keeps `retryAfterMs` on its normalized error.
 
 ## Alternatives not taken
 

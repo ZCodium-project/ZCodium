@@ -4958,6 +4958,10 @@ export const config: WebdriverIO.Config = {
         // 动态工作流灰度同样只能在 worker 的 beforeSession 注入动态端口，Main -> Host 的
         // 环境链才会继承到 case-local 的 /client/configs 网关。
         await startDynamicWorkflowConfigE2EMock(specs);
+        // 此 SSH 用例验证会话归属；在 Electron 启动前设置开启前置，避免把本机 mock 的 loopback 交给远端。
+        if (specs.some((spec) => spec.endsWith("conversation-session-r3-subagent.test.ts"))) {
+          process.env.ZCODE_DYNAMIC_WORKFLOW_MODE = "alwaysOn";
+        }
         await runE2EBeforeSessionSetup({
           cid,
           specs,

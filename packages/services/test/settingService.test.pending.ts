@@ -486,7 +486,7 @@ describe("settingService", () => {
       locale: "zh-CN",
       localePreference: "system",
       taskAutoArchiveEnabled: false,
-      taskAutoArchiveOlderThanDays: 7,
+      taskAutoArchiveOlderThanDays: 30,
       messageStreamShowReasoning: true,
       messageStreamShowReasoningMigrationInitialized: true,
       messageStreamShowTodos: false,

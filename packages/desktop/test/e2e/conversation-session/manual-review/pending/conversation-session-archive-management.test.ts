@@ -143,7 +143,7 @@ describe("归档管理", () => {
     expect(await confirmation.getText()).toContain("只删除当前确认范围内的会话。");
     await browser.keys("Escape");
   });
-  it("ARM07：自动归档设置仅在归档管理展示，修改落盘且刷新保留", async () => {
+  it("ARM07：默认 30 天，关闭时可先保存时长，开启与刷新保留选择", async () => {
     await $('[data-testid="settings-section-nav-general"]').click();
     expect(await $('//*[normalize-space(text())="自动归档旧会话"]').isExisting()).toBe(false);
     expect(await $('//*[normalize-space(text())="归档保留时长"]').isExisting()).toBe(false);
@@ -151,8 +151,8 @@ describe("归档管理", () => {
     const toggle = $('[data-testid="archive-auto-archive-switch"]');
     const days = $('[data-testid="archive-auto-archive-days"]');
     await expect(toggle).toHaveAttribute("aria-checked", "false");
-    await expect(days).toBeDisabled();
-    await expect(days).toHaveText("7 天后归档");
+    await expect(days).toBeEnabled();
+    await expect(days).toHaveText("30 天后归档");
     const placement = await browser.execute(() => ({
       settingsBottom: document
         .querySelector('[data-testid="archive-auto-archive-days"]')!
@@ -161,8 +161,29 @@ describe("归档管理", () => {
         .top,
     }));
     expect(placement.settingsBottom).toBeLessThan(placement.listTop);
-    await toggle.click();
+    // 先保存时长再开启，避免开关一开就按旧阈值归档。
+    await days.click();
+    await $('[role="option"]*=7 天后归档').click();
+    await expect(days).toHaveText("7 天后归档");
+    await browser.waitUntil(async () => {
+      const settings = JSON.parse(await readFile(join(home, ".zcode/v2/setting.json"), "utf8"));
+      return (
+        settings.taskAutoArchiveEnabled === false && settings.taskAutoArchiveOlderThanDays === 7
+      );
+    });
+    await browser.refresh();
+    await waitForWorkspaceApp(DEFAULT_WORKSPACE, 45000);
+    await $('[data-testid="task-settings-button"]').click();
+    await $('[data-testid="settings-section-nav-archives"]').click();
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
     await expect(days).toBeEnabled();
+    await expect(days).toHaveText("7 天后归档");
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-checked", "true");
+    expect(JSON.parse(await readFile(join(home, ".zcode/v2/setting.json"), "utf8"))).toMatchObject({
+      taskAutoArchiveEnabled: true,
+      taskAutoArchiveOlderThanDays: 7,
+    });
     await days.click();
     await $('[role="option"]*=14 天后归档').click();
     await expect(days).toHaveText("14 天后归档");
@@ -179,14 +200,22 @@ describe("归档管理", () => {
     await expect(toggle).toHaveAttribute("aria-checked", "true");
     await expect(days).toHaveText("14 天后归档");
     await toggle.click();
-    await expect(days).toBeDisabled();
+    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expect(days).toBeEnabled();
     await expect(days).toHaveText("14 天后归档");
+    await days.click();
+    await $('[role="option"]*=30 天后归档').click();
+    await expect(days).toHaveText("30 天后归档");
     await browser.waitUntil(async () => {
       const settings = JSON.parse(await readFile(join(home, ".zcode/v2/setting.json"), "utf8"));
       return (
-        settings.taskAutoArchiveEnabled === false && settings.taskAutoArchiveOlderThanDays === 14
+        settings.taskAutoArchiveEnabled === false && settings.taskAutoArchiveOlderThanDays === 30
       );
     });
+    expect(ids.map((id) => readRow(id).archived)).toEqual(ids.map(() => 1));
+    await browser.saveScreenshot(
+      join(process.env.ZCODE_E2E_ARTIFACT_DIR!, "ARM07-disabled-30-days.png"),
+    );
   });
   it("ARM01/05/06：分组折叠、搜索、时间排序和项目选择", async () => {
     expect(await $$('[data-testid="archive-group"]').length).toBe(4);

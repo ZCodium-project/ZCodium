@@ -1,6 +1,9 @@
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createServer } from "node:net";
+import { buildRemoteHostWorkspaceIdentity, ServiceChannels } from "@zcode/shared";
+import type { RemoteProjectDirectory } from "@zcode/services";
+import { callHandoffHost, installHandoffRpcProbe } from "#e2e/helpers/remote-project-handoff-probe";
 import {
   TID_CONFIRM_DIALOG_CONFIRM,
   TID_REMOTE_KIND_SSH,
@@ -23,6 +26,7 @@ import {
   selectSSHRemoteDirectory,
   waitForSSHDirectoryStep,
   waitForSSHError,
+  waitForRemoteTab,
 } from "../../../helpers/ssh-remote-p0.js";
 
 const CASE_MARKER = "E2E_REMOTE_DEVICE_CARDS";
@@ -68,6 +72,83 @@ describe(`${CASE_MARKER}: 设置设备卡与未完成连接`, () => {
     await waitForSSHDirectoryStep(CASE_MARKER);
     await selectSSHRemoteDirectory(config.workspacePaths[0], CASE_MARKER);
     await waitForWorkspaceApp(config.workspacePaths[0], 120_000);
+    await installHandoffRpcProbe();
+    const originalDirectory = await callHandoffHost<RemoteProjectDirectory>(
+      ServiceChannels.RemoteProjects,
+      "readDirectory",
+    );
+    const original = originalDirectory.entries.find((entry) =>
+      entry.roots.some((root) => root.rootPath === config.workspacePaths[0]),
+    );
+    if (!original?.projectId) throw new Error(`${CASE_MARKER}: 缺少原项目身份`);
+    const identity = buildRemoteHostWorkspaceIdentity(original.hostId, config.workspacePaths[0]);
+    const openRecentProject = async (cachedProjectId: string | null) => {
+      // 模拟旧版本缺少草稿范围或同目录残留其他项目；最近项目必须由 Host 入口决定归属。
+      await browser.execute(
+        (identity, hostId, projectId) => {
+          const key = `zcode-composer-workspace-scope:v1:${JSON.stringify(["desktop", identity])}`;
+          if (projectId === null) localStorage.removeItem(key);
+          else
+            localStorage.setItem(
+              key,
+              JSON.stringify({ clientNamespace: "desktop", hostId, projectId }),
+            );
+        },
+        identity,
+        original.hostId,
+        cachedProjectId,
+      );
+      await $("[data-device-project]").click();
+      await browser.waitUntil(
+        async () => {
+          // 旧断言反而等待创建器，掩盖了已保存项目被当作新目录的回归。
+          expect(await $('[data-testid="virtual-project-name"]').isDisplayed()).toBe(false);
+          return (
+            !(await $('[role="dialog"]').isDisplayed()) &&
+            !(await $('[data-testid="settings-page"]').isDisplayed())
+          );
+        },
+        { timeout: 30_000, timeoutMsg: `${CASE_MARKER}: 最近项目未完成原项目导航` },
+      );
+      await waitForRemoteTab({
+        caseMarker: CASE_MARKER,
+        expectedIdentity: identity,
+        expectedPath: config.workspacePaths[0],
+      });
+      await waitForWorkspaceApp(config.workspacePaths[0], 30_000);
+      expect(await $('[data-testid="virtual-project-name"]').isDisplayed()).toBe(false);
+      const projectId = await browser.execute(
+        (path, identity) => {
+          const bridge = window as Window & {
+            __zcodeSessionStoreE2E?: {
+              getState(): {
+                getWorkspaceState(
+                  path: string,
+                  identity: string,
+                ): { draftProjectId?: string | null };
+              };
+            };
+          };
+          return bridge.__zcodeSessionStoreE2E?.getState().getWorkspaceState(path, identity)
+            .draftProjectId;
+        },
+        config.workspacePaths[0],
+        identity,
+      );
+      expect(projectId).toBe(original.projectId);
+      const rememberedProjectId = await browser.execute((identity) => {
+        const key = `zcode-composer-workspace-scope:v1:${JSON.stringify(["desktop", identity])}`;
+        return JSON.parse(localStorage.getItem(key) ?? "null")?.projectId;
+      }, identity);
+      expect(rememberedProjectId).toBe(original.projectId);
+      const current = await callHandoffHost<RemoteProjectDirectory>(
+        ServiceChannels.RemoteProjects,
+        "readDirectory",
+      );
+      expect(current.entries.map((entry) => [entry.id, entry.projectId]).sort()).toEqual(
+        originalDirectory.entries.map((entry) => [entry.id, entry.projectId]).sort(),
+      );
+    };
     await browser.execute(() => {
       (
         window as Window & { __testActions?: { setLocale(locale: string): void } }
@@ -86,6 +167,8 @@ describe(`${CASE_MARKER}: 设置设备卡与未完成连接`, () => {
     expect(await $("[data-device-projects]").getText()).toContain("最近项目");
     expect(await $("[data-device-project]").getText()).toContain(config.workspacePaths[0]);
     expect(await $("[data-settings-content-frame]").getText()).not.toContain("远端任务会继续运行");
+    await openRecentProject(null);
+    await settings();
     await $('[data-source-server-card] button[aria-label="更多"]').click();
     await browser.waitUntil(
       async () => (await $("[data-device-info]").getText()).includes("设备 ID"),
@@ -110,11 +193,7 @@ describe(`${CASE_MARKER}: 设置设备卡与未完成连接`, () => {
     await $(
       '[data-source-server-card] [data-remote-connection-status="offline"]',
     ).waitForDisplayed();
-    await $("[data-device-project]").click();
-    // 已知目录入口进入项目编辑器，必须保存并打开项目草稿后再继续操作设置。
-    await $('[data-testid="virtual-project-name"]').waitForDisplayed({ timeout: 30_000 });
-    await selectSSHRemoteDirectory(config.workspacePaths[0], CASE_MARKER);
-    await waitForWorkspaceApp(config.workspacePaths[0], 30_000);
+    await openRecentProject("stale-project");
     await settings();
     const listener = createServer();
     await new Promise<void>((done) => listener.listen(0, "127.0.0.1", done));
@@ -128,7 +207,8 @@ describe(`${CASE_MARKER}: 设置设备卡与未完成连接`, () => {
     await fillSSHPasswordSettings({ ...config, host: "localhost", port: address.port });
     await clickLastEnabledSSHDialogButton(CASE_MARKER);
     expect(await waitForSSHError(CASE_MARKER)).toMatch(/无法连接到主机|Unable to connect to host/u);
-    await button("收起 — 连接将继续进行", '[data-testid="ssh-dialog"]');
+    // 默认折叠针对历史记录；收起会保留后台 owner 并主动展开，须先关闭失败的当前流程。
+    await button("关闭", '[data-testid="ssh-dialog"]');
     await $('[data-testid="ssh-dialog"]').waitForDisplayed({ reverse: true });
     const unfinished = $("[data-unfinished-connections]");
     await unfinished.waitForExist();

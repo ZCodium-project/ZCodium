@@ -29,6 +29,213 @@
       }
     },
     {
+      "id": "r3-workflow-skill",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-tool-use",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["E2E_R3_WORKFLOW_START"]
+      },
+      "response": {
+        "statusCode": 200,
+        "toolUse": {
+          "id": "toolu_r3_workflow_skill",
+          "name": "Skill",
+          "input": {
+            "skill": "dynamic-workflows"
+          }
+        }
+      }
+    },
+    {
+      "id": "r3-workflow-create",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-tool-use",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["Writing dynamic workflows"],
+        "bodyIncludes": ["E2E_R3_WORKFLOW_START"]
+      },
+      "response": {
+        "statusCode": 200,
+        "toolUse": {
+          "id": "toolu_r3_workflow_create",
+          "name": "CreateWorkflow",
+          "input": {
+            "name": "Remote workflow regression",
+            "script": "return await agent(\"remote-reviewer\").ask(\"E2E_R3_WORKFLOW_CHILD: Reply exactly R3_WORKFLOW_CHILD_DONE\");",
+            "subagent_model": "e2e-workflow-actors/GLM-5.3"
+          }
+        }
+      }
+    },
+    {
+      "id": "r3-workflow-started",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["run started in the background with ID:"],
+        "bodyIncludes": ["E2E_R3_WORKFLOW_START"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "r3-workflow-started",
+          "text": "R3_WORKFLOW_STARTED"
+        }
+      }
+    },
+    {
+      "id": "r3-workflow-child",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["E2E_R3_WORKFLOW_CHILD"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "r3-workflow-child",
+          "text": "R3_WORKFLOW_CHILD_DONE"
+        }
+      }
+    },
+    {
+      "id": "r3-workflow-notification",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["workflow"],
+        "bodyIncludes": ["E2E_R3_WORKFLOW_START", "R3_WORKFLOW_STARTED"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "r3-workflow-notification",
+          "text": "R3_WORKFLOW_COMPLETED"
+        }
+      }
+    },
+    {
+      "id": "r3-side-chat",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["E2E_R3_SIDE_CHAT"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "r3-side-chat",
+          "text": "R3_SIDE_CHAT_DONE"
+        }
+      }
+    },
+    {
+      "id": "r3-side-followup",
+      "description": "远端工作流及辅助对话会话归属回归",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "固定模型输出，真实执行 Skill、CreateWorkflow 与远端子会话订阅。"
+      },
+      "maxMatches": 3,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "You are now acting as the memory extraction subagent"
+        ],
+        "lastUserMessageIncludes": ["E2E_R3_SIDE_FOLLOWUP"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "r3-side-followup",
+          "text": "R3_SIDE_FOLLOWUP_DONE"
+        }
+      }
+    },
+    {
       "id": "r3-sub-parent-agent",
       "description": "BG25: main launches a long-running background Agent.",
       "metadata": {

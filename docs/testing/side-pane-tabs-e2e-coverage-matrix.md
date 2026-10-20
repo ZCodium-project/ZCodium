@@ -15,6 +15,8 @@
 
 - 2026-10-12 rebase 回归：保留侧栏 scope 修复，网页权限沿用当前基线；E2E 改用当前 `activeTaskId` 对话选择接口、通用会话准备和无账号启动，页面 fixture 只提供两个本地站点。macOS Electron SPT-E2E-008 1/1 通过（`desktop-e2e-20261012032035626-p33390-08ac35a2e03ad569`）；受影响单测、根/E2E typecheck、lint、architecture check 通过。补齐插件侧栏的 parentSessionId 归属断言，仍保持 manual-review/pending；未新增 Windows/Linux 或手机实机验证。
 
+- 2026-10-19 SPT-E2E-007 并发安装回归：推荐区删除独立全局锁，与市场共用管理 store 的按插件忙碌判定。浏览器 16/16 通过，覆盖两个不同插件同时待处理、后一次失败不清理前一次、安装中打开其他已启用插件，以及原有重复点击、同插件双 surface、启用、失败恢复和减少动画偏好；1200px/英文/Zai Light 与 390px/中文/Zai Dark，默认新标签页和主动新增标签页均覆盖。Hook 定向 8/8 通过，含服务切换后旧操作完成隔离；最终 affected 90 个文件、1379 条通过。根 typecheck、architecture 和变更文件格式检查通过；lint 无错误，188 条警告与原基线一致。夹具按当前面板 owner 初始化默认 new-tab，避免旧空面板状态不再挂载入口。服务仍由 fixture 注入，未启动真实 Agent/沙箱或手机远控，保留 pending。
+
 - SPT-E2E-007：`packages/ui/test/browser/manual-review/pending/side-pane-plugin-menu.test.mjs`，空态 launcher + active new-tab launcher 使用真实 reducer 创建标签，覆盖鼠标、Tab/Enter、作用域与重复打开、安装/启用、草稿/无宿主门禁及冷加载；1200px/en-US/亮色与 390px/zh-CN/暗色。2026-10-14 自动浏览器 E2E 11/11 通过，其中 8 组以可控响应验证安装/启用进度仅归属目标插件、其他插件保留原文案、全局禁用、失败后换插件重试及成功后不自动打开。仍为 pending，未提升 CI admission，未声明插件沙箱或真实手机远控覆盖。
 - Logo 样式迁移：SPT-E2E-000 在 Windows/Linux 验证旧 28px 点击区域及位置、18px 底座、11px 静态 SVG、真实 hover 和点击收起/恢复 Sidebar。Windows 实测通过：`desktop-e2e-20261009065750634-p17396-21ed3ac7f4753068`，1/1；Linux 真机待补，平台条件由组件测试覆盖。
 
@@ -61,3 +63,25 @@
 - macOS Electron 本轮 9 通过、1 平台条件跳过（Windows 菜单），含 SPT-E2E-009 与 SPT-E2E-000 深浅主题截图；run `desktop-e2e-20261016082511861-p45212-c004286dcc3d9c01`。手机实机、Windows/Linux 真机和卡顿归因未验证。
 
 2026-10-16 评审修复：SPT-E2E-009 定向通过（1/1），run `desktop-e2e-20261016-091135-357`。覆盖末标签关闭收起、再次展开补建、真实关闭菜单命令，以及后续关闭上下文事件不被 App 拦截；测试未实际关闭宿主窗口。受影响单测 79 文件、1320 条通过。此前整文件运行其余 8 条通过、1 条平台跳过；009 的菜单回调和动画等待问题在上述定向重跑中修正。手机实机、Windows/Linux 真机未新增验证。
+
+## 完整视图（SPFV，2026-10-16）
+
+| Case ID      | 入口/退出     | surface      | 浮窗形态               | 拖动吸附 | owner 记忆 | 阻塞交互 | Spec                                                                    |
+| ------------ | ------------- | ------------ | ---------------------- | -------- | ---------- | -------- | ----------------------------------------------------------------------- |
+| SPFV-E2E-001 | 按钮 + 快捷键 | n/a          | n/a                    | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-002 | n/a           | 对话 / 面板  | 收起（单行）           | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-003 | n/a           | 对话 / 面板  | 收起 + 操作栏 / 最小化 | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-004 | n/a           | 菜单切到对话 | 收起                   | 左上     | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-005 | n/a           | 面板         | 展开 / 收起            | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-006 | ◫ 退出        | n/a          | n/a                    | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-009 | n/a           | 面板         | 收起                   | n/a      | n/a        | n/a      | `ui-shell/side-pane-full-view.test.ts`                                  |
+| SPFV-E2E-007 | 按钮          | 面板         | 收起（发送）           | n/a      | covered    | n/a      | `conversation-session/conversation-session-side-pane-full-view.test.ts` |
+| SPFV-E2E-008 | n/a           | 面板         | 最小化 → 自动恢复      | n/a      | n/a        | covered  | `conversation-session/conversation-session-side-pane-full-view.test.ts` |
+
+- 2026-10-16 macOS Electron：ui-shell 6/6（`desktop-e2e-20261016132641383-p65282-482172e91cde062d`）；provider 2/2（`desktop-e2e-20261016132902337-p68218-55a5106a8275c319`，replay `common.json` + case fixture）；SPT 回归 8/8。ui-shell 用例存了深浅主题截图（展开、收起 + 操作栏、最小化）。仍为 manual-review/pending，未加入 Docker preset；Windows/Linux 未执行。
+- 运行时定位记录：选菜单项曾因 portal 事件沿 React 树冒泡切换展开态（004 回归断言）；用 CSS 压缩对话列 flex 会让 react-resizable-panels 的 group 尺寸为 0、展开 resize 得到 NaN（007 切回会话覆盖）；controller 引用不稳定会让 memo 的 WorkspaceShellLayout 在切换会话时出现 React #185（单测 + 007 覆盖）。
+- 2026-10-16 第二轮（保留侧栏、抽屉、单行输入框、loading、恢复动画、滚动条、插件层）macOS Electron：ui-shell 7/7（`desktop-e2e-20261016152650322-p89798-2c5c15bc8942f302`，含深浅主题截图）；provider 2/2（`desktop-e2e-20261016152827854-p91091-9383fec55304cbe0`）；SPT 回归 8/8。仍为 manual-review/pending；Windows/Linux 未执行。
+- 第二轮运行时定位记录：恢复动画逐帧采样显示浮窗宽 48px 时单行输入框折行到 258px，随宽度变大回落到 46px（003 断言每帧高度不超过最终值）；插件 UI 空白由外框 `z-10` 盖住 body 级停靠层造成，009 在旧构建上命中 `browser`、改为 `z-0` 后命中插件页面；004 的偶发失败是测试在宿主几何过渡中读坐标，改为等待宿主 `getAnimations()` 结束。
+- 2026-10-17 转正（用户确认 review）：ui-shell 移到 `ui-shell/side-pane-full-view.test.ts`；provider 用例经 `e2e:promote --reviewed --apply` 移到 `conversation-session/conversation-session-side-pane-full-view.test.ts`，`audit:conversation-session-coverage` 通过，正式路径 `e2e:fixture:check` 通过。新增断言：运行中占位「工作中 N 秒」与流式消息同值（008）、回答气泡弹出 / 切回仍在 / 点击展开 / × 关闭（007、008）。macOS Electron 正式路径：provider 显式回放 2/2（`desktop-e2e-20261016172121606-p45655-10a0c044cbc26349`）、默认回放 2/2、ui-shell 7/7、SPT 8/8。Docker 隔离运行与 preset 准入未执行（本机 Docker daemon 未启动）；Windows/Linux 未执行。
+- 转正时的运行时定位：正式回放下回答很快，整轮在一次渲染批次里结束，`data-running` 从未为 true；气泡改为「基线之后出现的已结束回合才弹出」，不再要求观察到运行中。
+- provider 用例需要 case-local 的标题与 compact 响应：manual-review 小上下文窗口每轮都会自动 compact，compact 失败会退避重试并把后续输入留在队列。

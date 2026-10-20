@@ -185,6 +185,7 @@ vi.mock("@/lib/rootStartupGate.js", () => ({
 
 vi.mock("@/store/StoreProvider.js", () => ({
   StoreProvider: ({ children }: { children: unknown }) => children,
+  useZCodeStoreWithDefault: () => true,
   useZCodeStore: (selector: (state: unknown) => unknown) =>
     selector({
       user: null,

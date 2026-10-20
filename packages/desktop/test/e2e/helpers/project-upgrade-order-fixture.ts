@@ -4,6 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 
 export const PROJECT_UPGRADE_ORDER_SPEC = "conversation-session-project-upgrade-order.test.ts";
 export const SAVED_PROJECT_NAMES = ["z-saved", "b-saved", "empty-saved"];
+export const MIGRATED_REMOTE_NAME = "upgrade-remote";
 export const LEGACY_PINNED_TASK_IDS = ["e2e-legacy-pinned", "e2e-legacy-imported-pinned"];
 export const CURRENT_IMPORTED_TASK_ID = "e2e-current-imported";
 
@@ -56,11 +57,27 @@ export async function seedProjectUpgradeOrderFixture(home: string, settingsFile:
     settingsFile,
     JSON.stringify({
       ...settings,
-      lastWorkspaceSession: [workspace, defaultPath, ...paths.slice(0, 3)].map((workspacePath) => ({
-        kind: "local",
-        workspacePurpose: "project",
-        workspacePath,
-      })),
+      lastWorkspaceSession: [workspace, defaultPath, ...paths.slice(0, 3)].flatMap(
+        (workspacePath, index) => [
+          {
+            kind: "local",
+            workspacePurpose: "project",
+            workspacePath,
+          },
+          ...(index === 0
+            ? [
+                {
+                  kind: "remote",
+                  workspacePurpose: "project",
+                  workspacePath: `/${MIGRATED_REMOTE_NAME}`,
+                  target: { kind: "ssh", host: "127.0.0.1", port: 1, username: "dev" },
+                  lastOpenedAt: 1,
+                  lastConnectionStatus: "failed",
+                },
+              ]
+            : []),
+        ],
+      ),
       recentProjects: [...paths].reverse(),
       lastActiveTabIndex: 0,
     }),

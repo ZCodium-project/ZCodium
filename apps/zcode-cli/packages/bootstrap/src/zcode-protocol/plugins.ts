@@ -506,14 +506,14 @@ export async function describePlugin(
 ): Promise<ZCodePluginsDescribeResult> {
   const params = parseParams(zcodePluginsDescribeParamsSchema, rawParams);
   const pluginStorageRoot = resolvePluginStorageRoot(params.workspace.workspacePath);
-  const result = await withPluginStorageLock(pluginStorageRoot, async () =>
-    describeZCodePlugin({
-      logger: context.logger,
-      marketplace: params.marketplace,
-      pluginName: params.pluginName,
-      workingDirectory: params.workspace.workspacePath,
-    }),
-  );
+  // 已安装目录、已缓存 manifest 与临时 source 解析都不持锁；只有懒加载 manifest 写入进锁。
+  const result = await describeZCodePlugin({
+    logger: context.logger,
+    marketplace: params.marketplace,
+    pluginName: params.pluginName,
+    withWriteLock: (write) => withPluginStorageLock(pluginStorageRoot, write),
+    workingDirectory: params.workspace.workspacePath,
+  });
   const components: ZCodePluginComponentGroup[] = result.components.map((group) => ({
     kind: group.kind,
     items: group.items.map((item) => ({

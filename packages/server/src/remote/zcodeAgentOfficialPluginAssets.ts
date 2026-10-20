@@ -39,6 +39,10 @@ export const REMOTE_AGENT_OFFICIAL_PLUGIN_INCLUDED_TOP_LEVEL_PATHS = [
 ] as const;
 
 export const REMOTE_AGENT_OFFICIAL_PLUGIN_REQUIRED_RELATIVE_PATHS = [
+  // 工作流技能已迁出插件；远端复用仍必须检查这份 Agent 必需资产。
+  "bundled-skills/skills/dynamic-workflows/SKILL.md",
+  "bundled-skills/skills/dynamic-workflows/patterns.md",
+  "bundled-skills/skills/dynamic-workflows/examples.md",
   ...REMOTE_AGENT_OFFICIAL_PLUGIN_PACKAGE_NAMES.map(
     (packageName) => `${packageName}/.zcode-plugin/plugin.json`,
   ),

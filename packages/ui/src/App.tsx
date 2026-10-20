@@ -9,6 +9,7 @@ import { useAppPanels } from "@/hooks/useAppPanels.js";
 import { useGitAutoRefresh } from "@/hooks/useGitAutoRefresh.js";
 import { useGitRepository } from "@/hooks/useGitRepository.js";
 import { useAppKeyboard } from "@/hooks/useAppKeyboard.js";
+import { useSidePaneFullView } from "@/side-pane-full-view/index.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useWorkspaceActiveTaskState } from "@/hooks/useWorkspaceActiveTaskState.js";
 import { useWorkspaceProviderConfigFile } from "@/hooks/useWorkspaceProviderConfigFile.js";
@@ -132,6 +133,7 @@ export function App({
   const goForwardShortcutLabel = useShortcutCommandLabel("navigateForward");
   const toggleTerminalShortcutLabel = useShortcutCommandLabel("toggleTerminal");
   const toggleSidePaneShortcutLabel = useShortcutCommandLabel("toggleSidePane");
+  const toggleSidePaneFullViewShortcutLabel = useShortcutCommandLabel("toggleSidePaneFullView");
   const openWorkspaceShortcutLabel = useShortcutCommandLabel("openWorkspace");
   const isLinuxDesktop = Boolean(isDesktop && !isMacDesktop && !isWindowsDesktop);
   const supportsEmbeddedBrowser = explicitSupportsEmbeddedBrowser ?? Boolean(isDesktop);
@@ -539,6 +541,24 @@ export function App({
     // 却得到一个新 Browser 或 Review。现在空内容统一交给 Open tab 空态承接。
     handleToggleSidePaneCollapse();
   }, [handleToggleSidePaneCollapse]);
+  // Side Pane 完整视图只在桌面端提供（docs/ui/side-pane-full-view.md）。
+  const supportsSidePaneFullView = Boolean(isDesktop);
+  const sidePaneFullView = useSidePaneFullView({
+    workspacePath: workspaceAbsPath,
+    workspaceIdentity,
+    ownerId: sidePaneOwnerId,
+    isSidePaneOpen,
+    enabled: supportsSidePaneFullView,
+  });
+  const handleToggleSidePaneFullView = useCallback(() => {
+    // 面板关闭时快捷键先打开面板再进入完整视图；记录先写入，面板展开后即生效。
+    if (!sidePaneFullView.fullView && !isSidePaneOpen) {
+      handleToggleSidePaneCollapse();
+      sidePaneFullView.enter();
+      return;
+    }
+    sidePaneFullView.toggle();
+  }, [handleToggleSidePaneCollapse, isSidePaneOpen, sidePaneFullView]);
   const runVisibleWorkspaceCommand = useCallback(
     (run: () => void) => {
       runWorkspaceVisibleCommand({
@@ -990,6 +1010,9 @@ export function App({
     // ⌥⌘B 与 header 最右侧按钮共用同一条 toggle 入口，
     // 避免快捷键和按钮行为漂移；空面板的展示统一由 Open tab 空态承接。
     toggleSidePane: () => runVisibleWorkspaceCommand(handleToggleSidePane),
+    toggleSidePaneFullView: supportsSidePaneFullView
+      ? () => runVisibleWorkspaceCommand(handleToggleSidePaneFullView)
+      : null,
     previousConversation: handleSelectPreviousConversation,
     nextConversation: handleSelectNextConversation,
     navigateBack: canPrimaryNavigationBack
@@ -1211,6 +1234,7 @@ export function App({
         goBackShortcutLabel={goBackShortcutLabel}
         goForwardShortcutLabel={goForwardShortcutLabel}
         toggleSidePaneShortcutLabel={toggleSidePaneShortcutLabel}
+        toggleSidePaneFullViewShortcutLabel={toggleSidePaneFullViewShortcutLabel}
         canGoBack={canGoBack}
         canGoForward={canGoForward}
         canTaskNavBack={canTaskNavBack}
@@ -1221,6 +1245,7 @@ export function App({
         supportsEmbeddedBrowser={supportsEmbeddedBrowser}
         isGitOpen={isGitOpen}
         isSidePaneOpen={isSidePaneOpen}
+        sidePaneFullView={supportsSidePaneFullView ? sidePaneFullView : undefined}
         summaryPanelVariantOverride={summaryPanelVariantOverride}
         onSummaryPanelVariantOverrideChange={setSummaryPanelVariantOverride}
         sidePaneState={sidePaneState}

@@ -16,6 +16,15 @@
 > 而远端未归类会话不进入侧栏，升级后选择原目录只能新建空项目。现按 F8 例外处理：
 > 持库 owner 不是 local 时，首次迁移也按历史任务目录建单 root 项目并归入。
 > 已执行过 `0005_projects` 的库不补跑、不修复；migration ID 与 SQL checksum 不变。
+>
+> 2026-10-19 止血补充（同机多持库 owner）：同一台机器上本机桌面（owner=local）与 Source Server
+> （owner=server）共用 `~/.zcode/v2/tasks-index.sqlite`。`0005_projects` 按库只执行一次，只写入
+> 首个打开者的 host 行；后打开的 owner 缺少自己的 hosts 行，新建项目因 `projects.host_id` 外键失败。
+> 每个 owner 每次启动在 `reconcileLegacy` 中幂等补齐自己的 host 行（`INSERT OR IGNORE`），
+> 不改 schema、migration ID 与 checksum，不改任何任务的 `host_id` 与项目归属。
+> 遗留问题（未修复）：旧行 `host_id IS NULL` 由首个处理者认领；local 按 workspace_key 形态判定，
+> server 不看 key 全部归自己，A 本机旧会话可能被 Source Server 认领、SSH 旧会话可能被本机归入
+> ssh 地址 host。认领规则与已错归数据的修正另行裁决。
 
 状态：**实施中**（2026-09-10）。第 3 节是裁决记录（2026-09-09 至 09-10 与 维护者 逐条对齐），第 4 节起是按裁决展开的方案。实现前若发现与裁决冲突，以裁决记录为准并回来更新本文。实施边界、测试与进度见 [实施记录](../plans/2026-09-10-virtual-project-implementation.md)。
 
@@ -746,6 +755,24 @@ runner（备份只为迁移失败恢复；未触及的表迁移前后是同一�
 本次 migration 声明：CLI `0020_session_soft_delete_outcome` → `touchedTables: ["session"]`；app `0001_projects` → `touchedTables: ["tasks","task_groups","task_group_members","task_group_view_node_orders","task_group_workspace_bootstraps","automations","off_peak_tasks"]`（group 表只读但纳入备份以便整体恢复）。
 
 ### 7.2 步骤
+
+2026-10-19 首次升级排序补充：从 3.15 尚未执行项目迁移的控制端升级时，保留旧
+`lastWorkspaceSession` 的本地/远程混排顺序。本地复用 `projects.position`，远程入口保存
+可空的 `initial_position`，仅供侧栏首次排序初始化；不把控制端位置写到远端项目。
+新增独立加法 migration，只有同一迁移事务实际执行了 `0005_projects` 时才写初始位置，
+已有 `0005_projects` 或旧 ID `0001_projects` 的数据库不补排，不改旧 checksum。
+仅带此次迁移标记的远程入口在 `legacy:<entryId>` 解析成真实项目 ID 时原位替换排序键；
+沿用现有排序算法和偏好 owner，不全局切换排序身份。首屏离线、连接完成、Host 身份绑定、
+刷新以及升级后手动拖动均保持位置；失败回滚后可重试，重复启动不覆盖新排序。
+
+```text
+3.15 的 A → Remote R → B → 首次事务保存 0/1/2 → 现有侧栏偏好
+                                      legacy:R → project:R（同一排序槽位）
+```
+
+VP28 补充验证：真实冷启动迁移本地/remote 混排与离线刷新；SQLite 和 React 回归覆盖
+连接后身份替换、同路径不同 Host、手动排序、旧 ledger 不回填与迁移幂等。沿用 shared-host
+手机目录及同一排序逻辑，不改 CLI、会话归属、continuous/replayable 或连接调度。
 
 ```text
 M0 探测：tasks-index 无 schema_migration 或缺 '0001_projects' → 进入迁移；否则跳过

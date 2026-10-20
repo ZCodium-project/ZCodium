@@ -428,6 +428,10 @@ function writeOfficialMarketplace(storageRoot: string, source: OfficialPluginSee
         const description = readSeedPluginDescription(source, plugin);
         return {
           cachePath: officialPluginCacheRoot(storageRoot, plugin.definition),
+          // 未安装/已卸载时商店读目录条目的 componentTypes 判断「UI 插件」；缺失会掉进分类分组。
+          ...(plugin.definition.componentTypes
+            ? { componentTypes: [...plugin.definition.componentTypes] }
+            : {}),
           ...(description ? { description } : {}),
           name: plugin.definition.name,
           source: source.kind,

@@ -105,6 +105,7 @@ describe("project-storage migration contract", () => {
       { id: "0001_projects" },
       { id: "0005_projects" },
       { id: "0006_default_workspace_tasks" },
+      { id: "0007_initial_workspace_order" },
     ]);
   });
 
@@ -123,7 +124,11 @@ describe("project-storage migration contract", () => {
     expect(
       changes.filter((table) => !(PROJECT_MIGRATION_TABLES as readonly string[]).includes(table)),
     ).toEqual([]);
-    expect(result.applied).toEqual(["0005_projects", "0006_default_workspace_tasks"]);
+    expect(result.applied).toEqual([
+      "0005_projects",
+      "0006_default_workspace_tasks",
+      "0007_initial_workspace_order",
+    ]);
     expect(
       db.prepare("SELECT id,checksum FROM schema_migration WHERE id='0005_projects'").all(),
     ).toEqual([

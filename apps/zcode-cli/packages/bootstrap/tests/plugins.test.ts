@@ -195,6 +195,22 @@ describe("ZCode plugins", () => {
     }
   });
 
+  it("declares the ui component type exactly for bundled plugins with UI surfaces", async () => {
+    const packagesRoot = fileURLToPath(new URL("../../", import.meta.url));
+
+    for (const plugin of OFFICIAL_PLUGIN_DEFINITIONS) {
+      const packageRoot = join(packagesRoot, basename(plugin.rootCandidates[0] ?? ""));
+      const pluginManifest = JSON.parse(
+        await readFile(join(packageRoot, ".zcode-plugin", "plugin.json"), "utf8"),
+      ) as { ui?: { surfaces?: unknown[] } };
+      // 卸载后的可恢复条目没有运行时信息，商店只能靠定义里的 componentTypes 归入「UI 插件」。
+      expect(
+        plugin.componentTypes?.includes("ui") ?? false,
+        plugin.name,
+      ).toBe((pluginManifest.ui?.surfaces?.length ?? 0) > 0);
+    }
+  });
+
   it("rejects an incomplete Browser Use filesystem or SEA seed", () => {
     const browserUse = OFFICIAL_PLUGIN_DEFINITIONS.find((plugin) => plugin.name === "browser-use");
     if (!browserUse) throw new Error("missing Browser Use official plugin definition");
@@ -547,6 +563,34 @@ describe("ZCode plugins", () => {
         workingDirectory: root,
       });
       expect(overview.restorableBuiltins.map((p) => p.id)).toContain(SKILL_CREATOR_PLUGIN_ID);
+    } finally {
+      await rm(root, { force: true, recursive: true });
+    }
+  });
+
+  it("keeps the ui component type on a suppressed bundled document plugin", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcode-bootstrap-restorable-ui-"));
+    const pluginStorageRoot = join(root, "plugins");
+    const userConfigPath = join(root, "config.json");
+    const documentsId = "documents@zcode-plugins-official";
+
+    try {
+      await writeFile(
+        userConfigPath,
+        JSON.stringify({ plugins: { enabled: true, suppressedBuiltins: [documentsId] } }),
+      );
+      const overview = getZCodePluginsOverview({
+        pluginStorageRoot,
+        userConfigPath,
+        workingDirectory: root,
+      });
+      // UI 合并时优先保留目录条目的 summary，所以目录条目与可恢复条目都必须带 "ui"。
+      expect(
+        overview.availablePlugins.find((plugin) => plugin.id === documentsId)?.componentTypes,
+      ).toContain("ui");
+      expect(
+        overview.restorableBuiltins.find((plugin) => plugin.id === documentsId)?.componentTypes,
+      ).toEqual(["ui"]);
     } finally {
       await rm(root, { force: true, recursive: true });
     }

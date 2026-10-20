@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import * as childProcess from "node:child_process";
+import { PassThrough } from "node:stream";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createServiceDescriptor,
   isServiceManagerAvailable,
@@ -6,7 +8,89 @@ import {
   unregisterService,
 } from "../src/platform/serviceManager.js";
 
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof childProcess>();
+  return { ...actual, spawn: vi.fn(actual.spawn) };
+});
+
 describe("service manager adapters", () => {
+  afterEach(() => {
+    vi.mocked(childProcess.spawn).mockReset();
+  });
+
+  it("finishes a timed-out probe while a descendant still holds its pipes", async () => {
+    const { spawn } = await vi.importActual<typeof childProcess>("node:child_process");
+    let descendantPid = 0;
+    let settled = false;
+    const exited = new Promise<void>((resolve, reject) => {
+      vi.mocked(childProcess.spawn).mockImplementationOnce((_command, _args, options) => {
+        // 模拟 D-Bus 辅助进程继承管道：探测父进程被超时杀死后，后代仍存活。
+        const child = spawn(
+          process.execPath,
+          [
+            "--eval",
+            `const { spawn } = require("node:child_process");
+             spawn(process.execPath, ["--eval", 'process.stdout.write(String(process.pid)); setInterval(() => {}, 1000);'], { stdio: ["ignore", "inherit", "inherit"] });
+             setInterval(() => {}, 1000);`,
+          ],
+          options,
+        );
+        child.stdout?.on("data", (chunk) => {
+          descendantPid = Number(String(chunk).trim());
+        });
+        child.once("error", reject);
+        child.once("exit", () => resolve());
+        return child;
+      });
+    });
+    const probe = isServiceManagerAvailable("linux").then((available) => {
+      settled = true;
+      return available;
+    });
+    try {
+      await exited;
+      expect(descendantPid).toBeGreaterThan(0);
+      expect(process.kill(descendantPid, 0)).toBe(true);
+      // 只等待执行器完成收口；后代退出由 finally 控制，不以延长 timeout 掩盖阻塞。
+      await vi.waitFor(() => expect(settled).toBe(true), { timeout: 500 });
+      expect(await probe).toBe(false);
+    } finally {
+      if (descendantPid > 0) process.kill(descendantPid, "SIGKILL");
+      await probe;
+    }
+  });
+
+  it("keeps reading a successful probe until its inherited stdout closes", async () => {
+    const child = new childProcess.ChildProcess();
+    const output = new PassThrough();
+    child.stdout = output;
+    let settled = false;
+    const spawned = new Promise<void>((resolve) => {
+      vi.mocked(childProcess.spawn).mockImplementationOnce(() => {
+        resolve();
+        return child;
+      });
+    });
+    const probe = isServiceManagerAvailable("linux").then((available) => {
+      settled = true;
+      return available;
+    });
+    try {
+      await spawned;
+      // 固定 exit 先于剩余输出的事件顺序，不依赖真实后代进程的启动速度。
+      child.emit("exit", 0, null);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(settled).toBe(false);
+      output.end("Version=252\n");
+      child.emit("close", 0, null);
+      expect(await probe).toBe(true);
+    } finally {
+      output.destroy();
+      child.emit("close", 1, null);
+      await probe;
+    }
+  });
+
   it("probes the Linux user service manager without registering a unit", async () => {
     const calls: Array<{
       command: string;
@@ -18,14 +102,14 @@ describe("service manager adapters", () => {
         run: async () => undefined,
         runResult: async (command, args, options) => {
           calls.push({ command, args, timeoutMs: options?.timeoutMs });
-          return { exitCode: 0, stderr: "" };
+          return { exitCode: 0, stdout: "Version=249.11-0ubuntu3.22\n", stderr: "" };
         },
       }),
     ).resolves.toBe(true);
     expect(calls).toEqual([
       {
         command: "systemctl",
-        args: ["--user", "show-environment"],
+        args: ["--user", "show", "--property=Version"],
         timeoutMs: 2_000,
       },
     ]);
@@ -37,10 +121,49 @@ describe("service manager adapters", () => {
         run: async () => undefined,
         runResult: async () => ({
           exitCode: 1,
+          stdout: "",
           stderr: "Failed to connect to bus",
         }),
       }),
     ).resolves.toBe(false);
+  });
+
+  it("does not register against a skipped Linux probe that exits successfully", async () => {
+    await expect(
+      isServiceManagerAvailable("linux", {
+        run: async () => undefined,
+        runResult: async () => ({
+          exitCode: 0,
+          stdout: "",
+          stderr: "Running in chroot, ignoring command 'show'\n",
+        }),
+      }),
+    ).resolves.toBe(false);
+  });
+
+  it.each(["", "Version=\n", "Welcome to the server\n"])(
+    "requires a manager response even when stderr is empty (stdout: %j)",
+    async (stdout) => {
+      await expect(
+        isServiceManagerAvailable("linux", {
+          run: async () => undefined,
+          runResult: async () => ({ exitCode: 0, stdout, stderr: "" }),
+        }),
+      ).resolves.toBe(false);
+    },
+  );
+
+  it("keeps a responding Linux manager available despite an unrelated warning", async () => {
+    await expect(
+      isServiceManagerAvailable("linux", {
+        run: async () => undefined,
+        runResult: async () => ({
+          exitCode: 0,
+          stdout: "Version=252\n",
+          stderr: "A diagnostic warning\n",
+        }),
+      }),
+    ).resolves.toBe(true);
   });
 
   it("maps all supported platforms to their native registration commands", async () => {
@@ -141,7 +264,7 @@ describe("service manager adapters", () => {
         },
         runResult: async (_command, args) => {
           calls.push([...args]);
-          return { exitCode: 0x80070002, stderr: "" };
+          return { exitCode: 0x80070002, stdout: "", stderr: "" };
         },
       }),
     ).resolves.toBeUndefined();
@@ -158,6 +281,7 @@ describe("service manager adapters", () => {
         run: async () => undefined,
         runResult: async () => ({
           exitCode: 0x80070005,
+          stdout: "",
           stderr: "Access is denied.",
         }),
       }),

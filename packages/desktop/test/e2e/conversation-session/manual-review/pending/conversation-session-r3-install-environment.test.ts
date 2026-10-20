@@ -21,7 +21,7 @@ const CASE_MARKER = "E2E_R3_INSTALL_ENVIRONMENT";
 const artifactDir = resolve(
   process.env.ZCODE_E2E_ARTIFACT_DIR ?? ".e2e-artifacts/r3-install-environment",
 );
-type InstallEnvironmentCase = "noexec-tmp" | "no-tar" | "no-forwarding";
+type InstallEnvironmentCase = "noexec-tmp" | "no-tar" | "no-forwarding" | "old-glibc";
 const SUBCASE = (process.env.R3_INSTALL_ENV_CASE ?? "") as InstallEnvironmentCase;
 
 async function readRemoteFacts(config: SSHConnectionConfig) {
@@ -31,6 +31,8 @@ async function readRemoteFacts(config: SSHConnectionConfig) {
       'echo "forwarding=$(grep -iE "^AllowTcpForwarding" /etc/ssh/sshd_config | tail -n1)"; ' +
       'echo "current=$(test -f "$HOME/.zcode/server/current.json" && grep -o \'"archiveSha256": *"[0-9a-f]*"\' "$HOME/.zcode/server/current.json" || echo none)"; ' +
       'echo "staging=$(ls -d "$HOME"/.zcode/server/staging* "$HOME"/.zcode/server/bootstrap* 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "serverRoot=$(ls -A "$HOME/.zcode/server" 2>/dev/null | tr "\\n" ",")"; ' +
+      'echo "libc=$(getconf GNU_LIBC_VERSION 2>/dev/null || echo none)"; ' +
       'echo "tmpEntries=$(ls /tmp 2>/dev/null | tr "\\n" ",")"; echo "status=$(cat "$HOME/.zcode/server/run/status.json" 2>/dev/null | tr -d "\\n ")"',
   );
   return Object.fromEntries(
@@ -88,8 +90,10 @@ describe(`${CASE_MARKER}: 受限远端环境下的安装与连接（${SUBCASE}�
 
   it(`R3A-BLD-09/CON-06 ${SUBCASE}`, async function () {
     this.timeout(20 * 60_000);
-    if (!["noexec-tmp", "no-tar", "no-forwarding"].includes(SUBCASE)) {
-      throw new Error(`${CASE_MARKER}: R3_INSTALL_ENV_CASE 必须为 noexec-tmp|no-tar|no-forwarding`);
+    if (!["noexec-tmp", "no-tar", "no-forwarding", "old-glibc"].includes(SUBCASE)) {
+      throw new Error(
+        `${CASE_MARKER}: R3_INSTALL_ENV_CASE 必须为 noexec-tmp|no-tar|no-forwarding|old-glibc`,
+      );
     }
     const config = readSSHRuntimeConfig(CASE_MARKER);
     const before = await readRemoteFacts(config);
@@ -128,6 +132,18 @@ describe(`${CASE_MARKER}: 受限远端环境下的安装与连接（${SUBCASE}�
       expect(outcome.connectionLog.toLowerCase()).toContain("tar");
       expect(outcome.connectionLog).not.toMatch(/Uploading|上传/u);
       expect(after.current).toBe("none");
+      return;
+    }
+    if (SUBCASE === "old-glibc") {
+      // ZCT-2112008575366098944：glibc 低于 archive 内置 Node 的 2.28 下限时，probe 按环境检查失败；
+      // 不弹安装确认、不上传 archive、不在 Server root 建 staging。
+      expect(before.libc).toBe("glibc 2.17");
+      expect(outcome.ready).toBe(false);
+      expect(outcome.errorText).toMatch(/环境|environment/iu);
+      expect(outcome.connectionLog).toContain("glibc 2.17");
+      expect(outcome.connectionLog).not.toMatch(/Uploading|上传/u);
+      expect(after.current).toBe("none");
+      expect(after.serverRoot).toBe("");
       return;
     }
     // 主规格与 Transport Adapter 明确支持 direct-tcpip 被禁后回退 proxy-stdio。

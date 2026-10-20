@@ -1,3 +1,4 @@
+import * as executionAdapters from "@zcode/adapters/exec";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -142,7 +143,15 @@ describe("script workflow child runtime — actor transcript 直播通道", () =
   }
 
   it("actor runtime 与父 runtime 共享 event store", async () => {
+    const execution = vi.spyOn(executionAdapters, "createNodeExecutionAdapter");
     const actorRuntime = await makeActorRuntime();
+    expect(execution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bashOutputTempDir: tmpdir(),
+        outputRootDir: join(tempRoot, "cli", "exec"),
+      }),
+    );
+    execution.mockRestore();
     expect(actorRuntime.getSessionEventStore()).toBe(parentStore);
 
     await actorRuntime.ensureSessionPersistedForExternalActivity("workflow actor a#1@1");

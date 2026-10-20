@@ -3,6 +3,19 @@ import { z } from "zod";
 import { appSettingsPatchSchema, appSettingsSchema } from "#src/validationAppSettings.js";
 
 describe("app settings", () => {
+  it("自动归档默认关闭并保留 30 天，已有天数不覆盖", () => {
+    expect(appSettingsSchema.parse({})).toMatchObject({
+      taskAutoArchiveEnabled: false,
+      taskAutoArchiveOlderThanDays: 30,
+    });
+    for (const days of [3, 7, 14, 30]) {
+      expect(
+        appSettingsSchema.parse({ taskAutoArchiveOlderThanDays: days })
+          .taskAutoArchiveOlderThanDays,
+      ).toBe(days);
+    }
+  });
+
   it.each([undefined, false, true])("旧自动归档选择 %s 一次性关闭，保留天数", (enabled) => {
     const migrated = appSettingsSchema.parse({
       taskAutoArchiveEnabled: enabled,

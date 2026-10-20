@@ -1077,16 +1077,38 @@ describe("createZCodeTaskIndexSyncer", () => {
     }
   });
 
-  it("SAT29: 只清理明确属于当前 workspace 的 subagent 索引，保留 fork 与未确认记录", async () => {
-    const env = setupEnv();
-    for (const taskId of ["child", "fork", "unknown"]) {
+  it.each([
+    "subagent_child",
+    "workflow_child",
+    "selection_side_chat",
+    "nested_workflow_child",
+  ] as const)(
+    "SAT29: 只清理当前 workspace 的 %s 索引，保留 fork 与未确认记录",
+    async (childKind) => {
+      const env = setupEnv();
+      for (const taskId of ["child", "fork", "unknown"]) {
+        await seedTaskIndex(env.repo, {
+          meta: {
+            ...snapshotWith(taskId, "/repo").session,
+            taskId,
+            traceId: "trace",
+            title: taskId,
+            workspacePath: "/repo",
+            createdAt: 1,
+            updatedAt: 2,
+            mode: "build",
+            provider: "glm",
+            status: "completed",
+          },
+        });
+      }
       await seedTaskIndex(env.repo, {
         meta: {
-          ...snapshotWith(taskId, "/repo").session,
-          taskId,
+          taskId: "child",
           traceId: "trace",
-          title: taskId,
+          title: "foreign",
           workspacePath: "/repo",
+          workspaceIdentity: "remote:ssh:foreign:22:user:/repo",
           createdAt: 1,
           updatedAt: 2,
           mode: "build",
@@ -1094,54 +1116,47 @@ describe("createZCodeTaskIndexSyncer", () => {
           status: "completed",
         },
       });
-    }
-    await seedTaskIndex(env.repo, {
-      meta: {
-        taskId: "child",
-        traceId: "trace",
-        title: "foreign",
-        workspacePath: "/repo",
-        workspaceIdentity: "remote:ssh:foreign:22:user:/repo",
-        createdAt: 1,
-        updatedAt: 2,
-        mode: "build",
-        provider: "glm",
-        status: "completed",
-      },
-    });
-    vi.mocked(env.agent.listSessions).mockResolvedValue([
-      { ...snapshotWith("child", "/repo").session, sessionKind: "subagent_child" },
-      { ...snapshotWith("fork", "/repo").session, sessionKind: "fork", parentSessionId: "parent" },
-    ]);
-    const syncer = createZCodeTaskIndexSyncer({ agentService: env.agent, taskIndexRepo: env.repo });
-    const changed = vi.fn();
-    const listener = syncer.onDynamicWorkspaceEvent("/repo")(changed);
-    syncer.ensureWorkspaceSubscription({ workspacePath: "/repo" });
-    await vi.waitFor(async () =>
-      expect(await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "child" })).toBeNull(),
-    );
-    expect(await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "fork" })).not.toBeNull();
-    expect(
-      await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "unknown" }),
-    ).not.toBeNull();
-    expect(
-      await env.repo.getTaskMeta({
-        workspacePath: "/repo",
-        workspaceIdentity: "remote:ssh:foreign:22:user:/repo",
-        taskId: "child",
-      }),
-    ).not.toBeNull();
-    expect(env.agent.listSessions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workspacePath: "/repo",
-        sessionIds: expect.arrayContaining(["child", "fork", "unknown"]),
-      }),
-    );
-    expect(env.agent.resumeSession).not.toHaveBeenCalled();
-    expect(changed).toHaveBeenCalled();
-    listener.dispose();
-    syncer.disposeAll();
-  });
+      vi.mocked(env.agent.listSessions).mockResolvedValue([
+        { ...snapshotWith("child", "/repo").session, sessionKind: childKind },
+        {
+          ...snapshotWith("fork", "/repo").session,
+          sessionKind: "fork",
+          parentSessionId: "parent",
+        },
+      ]);
+      const syncer = createZCodeTaskIndexSyncer({
+        agentService: env.agent,
+        taskIndexRepo: env.repo,
+      });
+      const changed = vi.fn();
+      const listener = syncer.onDynamicWorkspaceEvent("/repo")(changed);
+      syncer.ensureWorkspaceSubscription({ workspacePath: "/repo" });
+      await vi.waitFor(async () =>
+        expect(await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "child" })).toBeNull(),
+      );
+      expect(await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "fork" })).not.toBeNull();
+      expect(
+        await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "unknown" }),
+      ).not.toBeNull();
+      expect(
+        await env.repo.getTaskMeta({
+          workspacePath: "/repo",
+          workspaceIdentity: "remote:ssh:foreign:22:user:/repo",
+          taskId: "child",
+        }),
+      ).not.toBeNull();
+      expect(env.agent.listSessions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspacePath: "/repo",
+          sessionIds: expect.arrayContaining(["child", "fork", "unknown"]),
+        }),
+      );
+      expect(env.agent.resumeSession).not.toHaveBeenCalled();
+      expect(changed).toHaveBeenCalled();
+      listener.dispose();
+      syncer.disposeAll();
+    },
+  );
 
   it.each(["failure", "disposed"] as const)(
     "SAT29: 身份查询 %s 时保留既有索引",
@@ -1177,11 +1192,29 @@ describe("createZCodeTaskIndexSyncer", () => {
     },
   );
 
-  it("SAT28: child 完整快照不重新写入主列表", async () => {
+  it.each([
+    "subagent_child",
+    "workflow_child",
+    "selection_side_chat",
+    "nested_workflow_child",
+  ] as const)("SAT28: %s 完整快照不重新写入主列表", async (childKind) => {
     const env = setupEnv();
     const syncer = createZCodeTaskIndexSyncer({ agentService: env.agent, taskIndexRepo: env.repo });
     const snapshot = snapshotWith("child", "/repo", { userMessageText: "child prompt" });
-    snapshot.session.sessionKind = "subagent_child";
+    snapshot.session.sessionKind = childKind;
+    vi.mocked(env.agent.reconcileSessionsIndexV4).mockResolvedValue({
+      sessions: [
+        {
+          sessionId: "child",
+          exists: true,
+          deleted: false,
+          title: "child",
+          titleSource: "generated",
+          createdAt: 1,
+          updatedAt: 2,
+        },
+      ],
+    });
     await syncer.syncSnapshotAndBroadcast(snapshot, { broadcastReason: "task_status_changed" });
     expect(await env.repo.getTaskMeta({ workspacePath: "/repo", taskId: "child" })).toBeNull();
     syncer.disposeAll();

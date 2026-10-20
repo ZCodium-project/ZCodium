@@ -34,6 +34,9 @@ function buildSourceServerProbeCommand(includeReleaseIdentity: boolean): string 
     `printf '%s\\n' ${SERVER_ROOT_SHELL}`,
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}KERNEL__\\n'`,
     "if [ -r /proc/sys/kernel/ostype ]; then cat /proc/sys/kernel/ostype; else printf '\\n'; fi",
+    `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}LIBC__\\n'`,
+    // musl、macOS 或缺 getconf 时只留空段；set +e 下不影响 probe 退出码。
+    "getconf GNU_LIBC_VERSION 2>/dev/null",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}INSTALLED__\\n'`,
     `if [ -f ${SERVER_BIN_SHELL} ]; then printf '1\\n'; else printf '0\\n'; fi`,
     ...(includeReleaseIdentity
@@ -64,6 +67,28 @@ function readSourceServerProbeSections(output: string): Map<string, string> {
 /** 远端环境检查本身的失败；只有它归入预检失败，建立连接或执行命令的传输失败不借探测阶段兜底。 */
 export class SourceServerProbeEnvironmentError extends Error {
   public override readonly name = "SourceServerProbeEnvironmentError";
+}
+
+// archive 内置官方 Node（SERVER_RUNTIME_NODE_VERSION）Linux 构建的动态链接下限，随 Node 大版本同步。
+const SOURCE_SERVER_MIN_GLIBC_VERSION = [2, 28] as const;
+
+function assertSupportedGlibc(platform: string, libcText: string): void {
+  if (platform !== "linux") return;
+  // Bug 原因（ZCT-2112008575366098944）：probe 过去只看平台/架构，CentOS 7 等 glibc 2.17
+  // 的远端要先上传约 87MB archive，解压后执行 bin/zcode 才由 ld.so 报一串 `not found`，
+  // 并被归为安装失败。glibc 下限是 release 的平台事实，归入远端环境检查，在确认安装前拒绝。
+  // 读不到版本（musl、缺 getconf、输出无法识别）时无法判定，保持原安装链，不凭猜测拒绝。
+  const match = /^glibc\s+(\d+)\.(\d+)/iu.exec(libcText);
+  if (!match) return;
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const [minMajor, minMinor] = SOURCE_SERVER_MIN_GLIBC_VERSION;
+  if (major > minMajor || (major === minMajor && minor >= minMinor)) return;
+  const required = SOURCE_SERVER_MIN_GLIBC_VERSION.join(".");
+  throw new SourceServerProbeEnvironmentError(
+    `Remote glibc ${major}.${minor} is older than glibc ${required} required by ZCode Source Server. ` +
+      `Use a Linux system with glibc ${required} or later, such as RHEL 8+, Ubuntu 20.04+ or Debian 10+.`,
+  );
 }
 
 export async function probeSourceServer(
@@ -98,6 +123,7 @@ export async function probeSourceServer(
       error instanceof Error ? error.message : String(error),
     );
   }
+  assertSupportedGlibc(environment.platform, sections.get("LIBC") ?? "");
   const installed = sections.get("INSTALLED") === "1";
   if (!installed) return { ...environment, installed: false };
 

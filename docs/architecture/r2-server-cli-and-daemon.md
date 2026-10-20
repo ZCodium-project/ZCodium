@@ -334,6 +334,13 @@ staging 由 `packages/zcode-server-cli/src/packaging/stage.ts` 实现，
   `ZCODE_SERVER_RUNTIME_ROOT` 解析；`runtime/packages` 包含当前官方插件定义中需要 seed 的七个
   plugin（browser-use、document-skills、skill-creator、zcode-guide、android-emulator、
   ios-simulator、restore-legacy-sessions）。
+- 内置技能包不变量：`stageRelease` 从独立的 `bundledSkillsDir` 参数发布
+  `runtime/packages/bundled-skills`（生产入口传入 `apps/zcode-cli/packages/bundled-skills`），
+  只复制 `README.md` 与 `skills/`，排除其他顶层文件。Agent 在
+  `zcode.cjs` 旁按官方插件同款候选目录原地读取它，`/workflow` 依赖的 `dynamic-workflows` 技能
+  只在这里。它只属于 `agent-runtime` 组件并参与其内容哈希与归档，不写入 manifest 的 `plugins`。
+  官方插件目录不提供也不覆盖技能包，发布不依赖插件缓存中是否存在同名目录。
+  `stageRelease` 按 Agent 的必需文件清单 fail-closed 校验，缺任一文件时 staging 失败。
 - 官方插件 MCP runtime 不变量：凡 `plugin.json` 的 `mcpServers` 通过 `${ZCODE_PLUGIN_ROOT}/...`
   引用的文件（当前为 android-emulator、ios-simulator、browser-use 的 `dist/mcp/server.js`）必须随
   archive 一起发布。这些 dist 不入库，由 `scripts/build-desktop-agent-cli.mjs` 的 MCP runtime 清单在
@@ -456,6 +463,13 @@ unit name、Windows task name 和 descriptor 文件名。兼容清理旧固定 s
 endpoint、status、release、service descriptor 和 uninstall 均从该参数解析同一个 layout；Core/Agent
 同时获得对应的 `ZCODE_DATA_BASE_DIR`。因此自定义 data root 的 daemon 不得在默认 root 创建第二份
 status、lock、Core 或 SQLite。
+
+POSIX 稳定入口 `bin/zcode` 读取 `current.json.releaseDir`，只执行 `<root>/releases/` 下的 release；
+越界时输出 `Invalid current ZCode Server release` 并以 1 退出。该边界必须和写入方比较同一种路径：
+生命周期命令写 `current.json` 前已把 server root 收敛为 canonical（`realpath`）路径，launcher 也必须
+用物理路径（`cd -P` + `pwd -P`）计算 root。远端以 `"$HOME/.zcode/server/bin/zcode"` 调用入口，
+`$HOME` 可能经过符号链接（例如 NAS 的 `/var/services/homes -> /volume1/homes`、`/home -> /var/home`），
+这种别名不得让合法 release 被判为越界。
 
 组件增量组装先从旧 release 复制，再删除所有已变化或已移除组件声明的旧路径，之后解压新组件并
 校验新 manifest；这样新 manifest 移除插件/工具等组件时不会把旧文件带入新 release。

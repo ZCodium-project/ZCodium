@@ -58,7 +58,10 @@ describe("系统 default 项目纠偏", () => {
           .all()
           .map(({ project_id: _project, ...task }) => task);
       const taskFacts = facts();
-      expect((await port.migrate(db, context)).applied).toEqual(["0006_default_workspace_tasks"]);
+      expect((await port.migrate(db, context)).applied).toEqual([
+        "0006_default_workspace_tasks",
+        "0007_initial_workspace_order",
+      ]);
       expect(
         db.prepare("SELECT project_id FROM tasks WHERE task_id IN ('normal','archived')").all(),
       ).toEqual([{ project_id: null }, { project_id: null }]);

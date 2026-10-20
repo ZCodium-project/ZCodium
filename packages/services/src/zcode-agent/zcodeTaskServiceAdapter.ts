@@ -1,3 +1,4 @@
+import { isAuxiliarySessionKind } from "@zcode/shared";
 import { createBotTopicAdmission } from "#src/zcode-agent/botTopicAdmission.js";
 import {
   readBotGroupRuntimeSnapshot,
@@ -1429,7 +1430,7 @@ export function createZCodeTaskServiceAdapter(
     snapshot: ZCodeSessionStateSnapshot,
     broadcastReason: ZCodeWorkspaceTaskListChanged["reason"] | null = "task_status_changed",
   ): Promise<ZCodeTaskMeta> {
-    if (snapshot.session.sessionKind === "subagent_child") return snapshotToMeta(snapshot);
+    if (isAuxiliarySessionKind(snapshot.session.sessionKind)) return snapshotToMeta(snapshot);
     return rememberIndexedTaskMeta(
       await taskIndexSyncer.syncSnapshotAndBroadcast(snapshot, {
         broadcastReason,

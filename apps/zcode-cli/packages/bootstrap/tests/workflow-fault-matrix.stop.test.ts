@@ -164,6 +164,14 @@ for (const row of STOP_ROWS) {
             false,
           );
           expect(obs.governor.snapshot(obs.key)?.inFlight ?? 0).toBe(0);
+          // Stop 集不是并发信号：桶既不降 cap 也不冷却，resume（额度恢复后）同一模型立即准入，
+          // 而不是在闸门上静默等到 Retry-After 指的额度窗口结束。
+          const snapshot = obs.governor.snapshot(obs.key);
+          expect(snapshot?.cooldownUntil).toBeUndefined();
+          expect(snapshot?.cap).toBe(snapshot?.initial);
+          const resumed = obs.governor.tryAdmit("resumed-run", obs.key);
+          expect(resumed).toBeDefined();
+          resumed?.release();
         } finally {
           await server.close();
         }

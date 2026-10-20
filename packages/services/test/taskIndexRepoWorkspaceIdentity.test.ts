@@ -223,7 +223,11 @@ describe("TaskIndexRepo migration startup barrier", () => {
     const db = getRepoDatabase(repo) as unknown as { prepare(sql: string): { all(): unknown[] } };
     // 修复原因：新增 0006 后旧断言仍只允许 0005，导致正确完成迁移也阻塞 pre-push。
     // 明确验证当前两项迁移及重开幂等性，不依赖 SQLite 的隐式返回顺序。
-    const expectedMigrations = [{ id: "0005_projects" }, { id: "0006_default_workspace_tasks" }];
+    const expectedMigrations = [
+      { id: "0005_projects" },
+      { id: "0006_default_workspace_tasks" },
+      { id: "0007_initial_workspace_order" },
+    ];
     expect(db.prepare("select id from schema_migration order by id").all()).toEqual(
       expectedMigrations,
     );

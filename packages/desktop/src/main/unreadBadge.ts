@@ -92,6 +92,12 @@ export type BadgePixelOptions = {
   padding?: number;
   /** 纯色圆点模式（托盘用）：16px 显示尺寸下数字不可读，只画圆不画数字。 */
   dot?: boolean;
+  /**
+   * 圆点锚点。center 为画布中心（托盘合成用）；bottom-right 把圆心锚到画布
+   * 右下角（任务栏 overlay 用）——overlay 整图铺在图标右下区域，点画在画布
+   * 中心会悬在图标中部，只有锚住右下角才呈现"图标角标"的观感。
+   */
+  anchor?: "center" | "bottom-right";
 };
 
 // 输出预乘 alpha 的 BGRA（与 Electron toBitmap / createFromBitmap 契约一致）：
@@ -119,9 +125,15 @@ export function renderTaskbarBadgePixels(
   const totalWidth = glyphs.length * glyphWidth + (glyphs.length - 1) * glyphSpacing;
   const originX = Math.round((size - totalWidth) / 2);
   const originY = Math.round((size - glyphHeight) / 2);
-  const center = (size - 1) / 2;
   const radius = Math.max(1, (size - padding * 2) / 2 - 1);
   const radiusSquared = radius * radius;
+  // 右下锚定留 2px 安全边：贴到只剩 1px 时 Windows 缩放采样会吃掉最外圈像素，
+  // 实拍观感像圆被咬掉一块。
+  const anchorMargin = 2;
+  const center =
+    options.anchor === "bottom-right"
+      ? { x: size - radius - anchorMargin, y: size - radius - anchorMargin }
+      : { x: (size - 1) / 2, y: (size - 1) / 2 };
 
   const isGlyphPixel = (x: number, y: number): boolean => {
     for (let index = 0; index < glyphs.length; index += 1) {
@@ -148,8 +160,8 @@ export function renderTaskbarBadgePixels(
 
   for (let y = 0; y < size; y += 1) {
     for (let x = 0; x < size; x += 1) {
-      const offsetX = x - center;
-      const offsetY = y - center;
+      const offsetX = x - center.x;
+      const offsetY = y - center.y;
       if (offsetX * offsetX + offsetY * offsetY > radiusSquared) {
         continue;
       }
@@ -210,6 +222,72 @@ export function blendBadgeIntoBitmap(options: {
       }
     }
   }
+}
+
+export interface AntialiasedDotOptions {
+  size: number;
+  centerX: number;
+  centerY: number;
+  radius: number;
+  supersample?: number;
+}
+
+/** 4× 超采样的纯红预乘 BGRA 圆点；任务栏与托盘复用，几何参数各自独立。 */
+export function renderAntialiasedStatusDotPixels(
+  options: AntialiasedDotOptions,
+): Uint8Array {
+  const supersample = options.supersample ?? 4;
+  const pixels = new Uint8Array(options.size * options.size * 4);
+  const samplesPerPixel = supersample * supersample;
+
+  for (let y = 0; y < options.size; y += 1) {
+    for (let x = 0; x < options.size; x += 1) {
+      let coveredSamples = 0;
+      for (let sy = 0; sy < supersample; sy += 1) {
+        for (let sx = 0; sx < supersample; sx += 1) {
+          const sampleX = x + (sx + 0.5) / supersample;
+          const sampleY = y + (sy + 0.5) / supersample;
+          const dx = sampleX - options.centerX;
+          const dy = sampleY - options.centerY;
+          if (dx * dx + dy * dy <= options.radius * options.radius) coveredSamples += 1;
+        }
+      }
+
+      if (coveredSamples === 0) continue;
+      const coverage = coveredSamples / samplesPerPixel;
+      const offset = (y * options.size + x) * 4;
+      // 预乘 alpha：抗锯齿边缘保持同一红色，不与底图混成白边或脏边。
+      pixels[offset] = Math.round(BADGE_CIRCLE_COLOR.blue * coverage);
+      pixels[offset + 1] = Math.round(BADGE_CIRCLE_COLOR.green * coverage);
+      pixels[offset + 2] = Math.round(BADGE_CIRCLE_COLOR.red * coverage);
+      pixels[offset + 3] = Math.round(coverage * 255);
+    }
+  }
+
+  return pixels;
+}
+
+/**
+ * Windows taskbar overlay 固定显示 16×16。直接把硬边 32px 圆交给 Shell 缩放会产生
+ * 模糊/缺口；这里在目标尺寸上超采样，生成纯红色、抗锯齿的预乘 BGRA 圆点。
+ * scale=1 产出原生 16px 表示，scale=2 产出 32px 高 DPI 表示。
+ */
+export type TaskbarOverlayLayout = "windows-10" | "windows-11";
+
+export function renderTaskbarStatusDotPixels(
+  scale: 1 | 2 = 1,
+  layout: TaskbarOverlayLayout = "windows-11",
+): Uint8Array {
+  // 两代 Windows Shell 对 16×16 overlay 的任务栏落点不同：
+  // Win10 需要画布内右下锚定；Win11 已把整张 overlay 放到图标角上，需画布内居中，
+  // 否则形成二次偏移。一个固定圆心无法同时匹配两代任务栏。
+  const center = layout === "windows-10" ? 11.25 : 8;
+  return renderAntialiasedStatusDotPixels({
+    size: 16 * scale,
+    centerX: center * scale,
+    centerY: center * scale,
+    radius: 3.5 * scale,
+  });
 }
 
 // 只要求"有任务栏按钮的窗口"能力，方便单测注入假窗口；

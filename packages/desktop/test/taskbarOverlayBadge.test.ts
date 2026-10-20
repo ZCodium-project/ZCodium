@@ -4,6 +4,7 @@ import {
   blendBadgeIntoBitmap,
   createWindowsTaskbarOverlayApplier,
   renderTaskbarBadgePixels,
+  renderTaskbarStatusDotPixels,
   TASKBAR_BADGE_IMAGE_SIZE,
 } from "../src/main/unreadBadge.js";
 import type { TaskbarOverlayWindow } from "../src/main/unreadBadge.js";
@@ -76,6 +77,23 @@ describe("windows taskbar overlay badge", () => {
       expect(pixelAt(pixels, 2, 16)).toEqual([0, 0, 0, 0]);
     });
 
+    it("任务栏红点锚定画布右下角（overlay 整图铺图标右下区域，居中会悬在图标中部）", () => {
+      const pixels = renderTaskbarBadgePixels("9+", {
+        size: 32,
+        padding: 8,
+        dot: true,
+        anchor: "bottom-right",
+      });
+      const at = (x: number, y: number): number[] => {
+        const offset = (y * 32 + x) * 4;
+        return [pixels[offset]!, pixels[offset + 1]!, pixels[offset + 2]!, pixels[offset + 3]!];
+      };
+      // radius=(32-16)/2-1=7，圆心 (24,24)：右下区域是红点，左上与画布最外角为空
+      expect(at(24, 24)).toEqual([53, 57, 229, 255]);
+      expect(at(31, 31)).toEqual([0, 0, 0, 0]);
+      expect(at(8, 8)).toEqual([0, 0, 0, 0]);
+    });
+
     it("红点模式只画纯色圆，不渲染数字（托盘 16px 下数字不可读）", () => {
       const pixels = renderTaskbarBadgePixels("9+", { size: 14, glyphScale: 1, padding: 0, dot: true });
       const at = (x: number, y: number): number[] => {
@@ -103,6 +121,62 @@ describe("windows taskbar overlay badge", () => {
       // 9+ 总宽 22，原点在 x=5：(8,16) 命中 "9" 的竖笔，(22,16) 命中 "+" 的横笔。
       expect(isWhitePixel(pixelAt(pixels, 8, 16))).toBe(true);
       expect(isWhitePixel(pixelAt(pixels, 22, 16))).toBe(true);
+    });
+  });
+
+  describe("renderTaskbarStatusDotPixels", () => {
+    it("输出 Windows 原生 16px overlay 表示，并用半透明像素抗锯齿", () => {
+      const pixels = renderTaskbarStatusDotPixels(1);
+      expect(pixels.length).toBe(16 * 16 * 4);
+      let antialiasedPixels = 0;
+      for (let offset = 3; offset < pixels.length; offset += 4) {
+        const alpha = pixels[offset]!;
+        if (alpha > 0 && alpha < 255) antialiasedPixels += 1;
+      }
+      expect(antialiasedPixels).toBeGreaterThan(0);
+    });
+
+    it("Win11：红点在 overlay 画布内居中，避免 Shell 二次偏移", () => {
+      const pixels = renderTaskbarStatusDotPixels(1, "windows-11");
+      const at = (x: number, y: number): number[] => {
+        const offset = (y * 16 + x) * 4;
+        return [pixels[offset]!, pixels[offset + 1]!, pixels[offset + 2]!, pixels[offset + 3]!];
+      };
+      expect(at(8, 8)).toEqual(CIRCLE_RED_BGRA);
+      expect(at(5, 8)).toEqual(CIRCLE_RED_BGRA);
+      // 左右/上下边缘对称抗锯齿，证明画布内居中
+      expect(at(4, 8)).toEqual([27, 29, 115, 128]);
+      expect(at(11, 8)).toEqual([27, 29, 115, 128]);
+      expect(at(8, 11)).toEqual([27, 29, 115, 128]);
+      expect(at(0, 0)).toEqual([0, 0, 0, 0]);
+      expect(at(15, 15)).toEqual([0, 0, 0, 0]);
+    });
+
+    it("Win10：红点在 overlay 画布内右下锚定，补偿旧任务栏的落点", () => {
+      const pixels = renderTaskbarStatusDotPixels(1, "windows-10");
+      const at = (x: number, y: number): number[] => {
+        const offset = (y * 16 + x) * 4;
+        return [pixels[offset]!, pixels[offset + 1]!, pixels[offset + 2]!, pixels[offset + 3]!];
+      };
+      expect(at(11, 11)).toEqual(CIRCLE_RED_BGRA);
+      expect(at(8, 11)).toEqual(CIRCLE_RED_BGRA);
+      expect(at(7, 11)).toEqual([13, 14, 57, 64]);
+      expect(at(15, 15)).toEqual([0, 0, 0, 0]);
+      // Win10 与 Win11 必须是两套不同圆心，不能退化成同一折中坐标
+      expect(at(8, 8)).not.toEqual(CIRCLE_RED_BGRA);
+    });
+
+    it("2x 高 DPI 表示尺寸为 32px，两种布局均按比例扩展", () => {
+      for (const [layout, center] of [
+        ["windows-11", 16],
+        ["windows-10", 22],
+      ] as const) {
+        const pixels = renderTaskbarStatusDotPixels(2, layout);
+        expect(pixels.length).toBe(32 * 32 * 4);
+        const centerOffset = (center * 32 + center) * 4;
+        expect(Array.from(pixels.slice(centerOffset, centerOffset + 4))).toEqual(CIRCLE_RED_BGRA);
+        expect(Array.from(pixels.slice(0, 4))).toEqual([0, 0, 0, 0]);
+      }
     });
   });
 

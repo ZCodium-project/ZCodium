@@ -1,9 +1,10 @@
-import { mkdir, mkdtemp, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, realpath, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { resolveServerLayout } from "../src/runtime/paths.js";
+import { resolveCanonicalServerLayout, resolveServerLayout } from "../src/runtime/paths.js";
 import { ReleaseInstaller } from "../src/runtime/releaseInstaller.js";
+import { ReleaseManager } from "../src/runtime/releaseManager.js";
 import { writeStableLauncher } from "../src/runtime/stableLauncher.js";
 
 describe("release installer", () => {
@@ -90,6 +91,42 @@ describe("release installer", () => {
         else resolve();
       });
     })).rejects.toThrow(/Invalid current ZCode Server release/);
+  });
+
+  // Bugfix: 远端以 "$HOME/.zcode/server/bin/zcode" 调用 launcher，NAS 等环境的 $HOME 经过符号链接
+  // （/var/services/homes -> /volume1/homes）。update 写 current.json 前把 root 收敛为 realpath，launcher
+  // 却用逻辑 pwd 计算 root，两者前缀不同，合法 release 被判越界，SSH 连接固定报
+  // "Invalid current ZCode Server release"。这里按真实调用方式，从别名路径执行 launcher。
+  it.skipIf(process.platform === "win32")("runs the canonical current release when the POSIX launcher is invoked through a symlinked root", async () => {
+    const root = await realpath(await mkdtemp(join(tmpdir(), "zcode-release-launcher-alias-")));
+    await mkdir(join(root, "volume1", "homes", "dev"), { recursive: true });
+    await mkdir(join(root, "var", "services"), { recursive: true });
+    await symlink(join(root, "volume1", "homes"), join(root, "var", "services", "homes"));
+    const aliasServerRoot = join(root, "var", "services", "homes", "dev", ".zcode", "server");
+    const archiveRoot = join(root, "zcode-server-linux-x64");
+    await mkdir(join(archiveRoot, "runtime"), { recursive: true });
+    await writeFile(join(archiveRoot, "runtime", "node"), "node", "utf8");
+    await writeFile(join(archiveRoot, "runtime", "server-cli.js"), "", "utf8");
+    await writeFile(join(archiveRoot, "runtime", "server-core.js"), "", "utf8");
+    await writeFile(join(archiveRoot, "runtime", "zcode.cjs"), "", "utf8");
+    await writeFile(join(archiveRoot, "manifest.json"), JSON.stringify({ product: "zcode-server", target: "linux-x64", appVersion: "1.2.5", nodeVersion: "22.16.0", entrypoints: { cli: "runtime/server-cli.js", core: "runtime/server-core.js", agent: "runtime/zcode.cjs" }, native: ["node-pty"] }), "utf8");
+    const archivePath = join(root, "release.tar.gz");
+    const { execFile } = await import("node:child_process");
+    await new Promise<void>((resolve, reject) => execFile("tar", ["-czf", archivePath, "zcode-server-linux-x64"], { cwd: root }, (error) => error ? reject(error) : resolve()));
+    // 与 cli.ts 的 update 一致：生命周期命令先把 --server-root 收敛为 canonical layout，再安装并切换 current。
+    const layout = await resolveCanonicalServerLayout(aliasServerRoot);
+    const installed = await new ReleaseInstaller(layout).installArchive({ archivePath, target: "linux-x64", version: "1.2.5" });
+    await new ReleaseManager(layout).applyPending();
+    // runtime/node 换成指向系统 echo 的链接：能观察 launcher 实际 exec 的 release，又不触发 XProtect 首次扫描。
+    await rm(join(installed.releaseDir, "runtime", "node"));
+    await symlink("/bin/echo", join(installed.releaseDir, "runtime", "node"));
+    const output = await new Promise<string>((resolve, reject) => {
+      execFile("/bin/sh", [join(aliasServerRoot, "bin", "zcode"), "serve", "--daemon"], (error, stdout, stderr) => {
+        if (error) reject(new Error(`${error.message}: ${stderr}`));
+        else resolve(stdout);
+      });
+    });
+    expect(output.trim()).toBe(`${join(installed.releaseDir, "runtime", "server-cli.js")} serve --daemon`);
   });
 
   it("reuses an identical immutable release without deleting or replacing its live directory", async () => {
