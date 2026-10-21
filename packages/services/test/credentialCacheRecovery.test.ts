@@ -21,7 +21,7 @@ const deferred = () => {
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "zcode-cache-recovery-"));
   setDataBaseDir(root);
-  file = join(root, ".zcode", "v2", "credentials.json");
+  file = join(root, ".zcodium", "v2", "credentials.json");
 });
 afterEach(async () => {
   setDataBaseDir(null);

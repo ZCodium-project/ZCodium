@@ -12,7 +12,7 @@ const host = await createServerHostServices({
   zcodeBuiltinProviderConfigFilePath: resolve("config/provider/zcode-builtin.json"),
 });
 try {
-  const db = new DatabaseSync(join(home, ".zcode/v2/tasks-index.sqlite"), { readOnly: true });
+  const db = new DatabaseSync(join(home, ".zcodium/v2/tasks-index.sqlite"), { readOnly: true });
   try {
     assert.ok(db.prepare("SELECT id FROM schema_migration WHERE id='0005_projects'").get());
   } finally {

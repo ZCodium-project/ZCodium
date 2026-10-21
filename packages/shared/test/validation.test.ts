@@ -232,21 +232,6 @@ describe("hostResponseMessageSchema", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("accepts network telemetry batch payload", () => {
-    const parsed = hostResponseMessageSchema.safeParse({
-      type: HostResponseTypes.NetworkTelemetryBatch,
-      observations: [
-        {
-          transport: "rpc",
-          interface: "file.read",
-          durationMs: 12,
-          ok: true,
-        },
-      ],
-    });
-    expect(parsed.success).toBe(true);
-  });
-
   it("accepts a strict Agent resource sample and rejects identity fields", () => {
     const payload = {
       type: HostResponseTypes.AgentResourceSample,

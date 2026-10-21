@@ -309,7 +309,9 @@ function resolvePermissionBlockKind(
     return "workflow";
   }
 
-  if (identity.family === "search") {
+  // 上游把 WebFetch 从 search family 拆出后，审计版权限弹窗仍复用 search renderer，
+  // 避免 WebFetch 审批退回摊开整包 toolCall JSON 的 fallback。
+  if (identity.family === "search" || identity.family === "web-fetch") {
     // WebFetch/WebSearch 权限请求以前落到 fallback，会把整包 toolCall JSON 打出来。
     // 这里和聊天区一样走 search renderer，只展示用户关心的 URL/query 摘要。
     return "search";

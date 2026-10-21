@@ -21,7 +21,7 @@ describe("new task draft header action layout", () => {
     expect(headerSource).toContain("data-workspace-header-variant={variant}");
     expect(headerSource).toContain('data-testid="new-task-draft-drop-mask"');
     // 草稿分隔线已改为始终透明，旧源码断言误报且导致 Windows 被跳过；样式由 workspaceHeader.test.ts 的渲染测试覆盖。
-    expect(headerSource).toContain('variant === "task" ? (');
+    expect(headerSource).toContain('variant === "task" || remoteTarget');
   });
 
   it("reuses the same side pane toggle in full and draft headers", () => {

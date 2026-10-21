@@ -60,6 +60,7 @@
     "knip": "knip",
     "count-lines": "bash scripts/count-lines.sh",
     "prepare:remote-assets": "pnpm --filter @zcode/desktop prepare:remote-assets",
+    "prepare:remote-assets:linux": "pnpm --filter @zcode/server-cli stage:remote-assets --linux",
     "ci:assert-node": "node scripts/assert-node-version.mjs",
     "doctor:macos-release": "bash scripts/doctor-macos-release-app.sh",
     "lint": "oxlint",

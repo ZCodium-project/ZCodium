@@ -216,13 +216,10 @@ export const WEB_REMOTE_CONTROL_RELAY_AUTH_PROOF_VECTORS: WebRemoteControlRelayA
 ];
 
 export interface WebRemoteControlExternalQrParams {
-  deviceSid: string;
-  passHash: string;
-  timestamp: number;
+  deviceSid?: string;
   deviceMid?: string;
   deviceName?: string;
   appVersion?: string;
-  theme?: WebRemoteControlThemeSeed;
 }
 
 export interface BuildWebRemoteControlExternalQrUrlOptions extends WebRemoteControlExternalQrParams {
@@ -271,17 +268,15 @@ export function matchesWebRemoteControlRoutePath(pathname: string, routePath: st
 export function buildWebRemoteControlExternalQrUrl({
   baseUrl,
   deviceSid,
-  passHash,
-  timestamp,
   deviceMid,
   deviceName,
   appVersion,
-  theme,
 }: BuildWebRemoteControlExternalQrUrlOptions): string {
   const url = new URL(baseUrl);
-  url.searchParams.set("sid", deviceSid);
-  url.searchParams.set("hash", passHash);
-  url.searchParams.set("t", String(timestamp));
+  if (deviceSid !== undefined) url.searchParams.set("sid", deviceSid);
+  // 旧凭据只允许清除，不能从 base URL 重新带入新二维码。
+  url.searchParams.delete("hash");
+  url.searchParams.delete("t");
 
   if (deviceMid?.trim()) {
     url.searchParams.set("mid", deviceMid);
@@ -292,42 +287,24 @@ export function buildWebRemoteControlExternalQrUrl({
   if (appVersion?.trim()) {
     url.searchParams.set("app_version", appVersion);
   }
-  void theme;
-  // Bugfix: 手机端主题现在固定走本地默认 dark，不再通过二维码 URL 透传 theme。
-  // 之前 theme 参数会把桌面端主题耦合到手机首次进入行为，后续维护和排障都更复杂。
-  // 这里保留入参仅做向后兼容，避免旧调用点一次性改动过大。
-
   return url.toString();
 }
 
 export function parseWebRemoteControlExternalQrParams(
   params: URLSearchParams,
 ): WebRemoteControlExternalQrParams | null {
-  const deviceSid = readNonEmptySearchParam(params, "sid");
-  const passHash = readNonEmptySearchParam(params, "hash");
-  const rawTimestamp = readNonEmptySearchParam(params, "t");
-  const timestamp = rawTimestamp ? Number(rawTimestamp) : Number.NaN;
-  const theme = readNonEmptySearchParam(params, "theme");
-
-  if (!deviceSid || !passHash || !Number.isFinite(timestamp)) {
-    return null;
+  if (params.has("hash") || params.has("t")) return null;
+  const result: WebRemoteControlExternalQrParams = {};
+  for (const [key, param] of [
+    ["deviceSid", "sid"],
+    ["deviceMid", "mid"],
+    ["deviceName", "name"],
+    ["appVersion", "app_version"],
+  ] as const) {
+    const value = readNonEmptySearchParam(params, param);
+    if (value) result[key] = value;
   }
-
-  return {
-    deviceSid,
-    passHash,
-    timestamp,
-    ...(readNonEmptySearchParam(params, "mid")
-      ? { deviceMid: readNonEmptySearchParam(params, "mid") }
-      : {}),
-    ...(readNonEmptySearchParam(params, "name")
-      ? { deviceName: readNonEmptySearchParam(params, "name") }
-      : {}),
-    ...(readNonEmptySearchParam(params, "app_version")
-      ? { appVersion: readNonEmptySearchParam(params, "app_version") }
-      : {}),
-    ...(isWebRemoteControlThemeSeed(theme) ? { theme } : {}),
-  };
+  return result;
 }
 
 export type WebRemoteControlTokenKind = "window-pairing";

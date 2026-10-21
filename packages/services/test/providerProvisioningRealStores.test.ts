@@ -90,7 +90,7 @@ async function createFixture(root: string) {
   setDataBaseDir(root);
   // 设置服务独立读取HOME；仅在Vitest worker中模拟系统用户目录，避免触及真实用户设置。
   vi.stubEnv("HOME", root);
-  const dir = join(root, ".zcode/v2");
+  const dir = join(root, ".zcodium/v2");
   await mkdir(dir, { recursive: true });
   const builtin = join(root, "builtin.json");
   await writeFile(
