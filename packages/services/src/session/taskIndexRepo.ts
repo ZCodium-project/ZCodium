@@ -5,7 +5,7 @@ import {
 } from "#src/session/tasksDatabase/prepared.js";
 /* eslint-disable max-lines -- task 索引仓库集中维护 sqlite schema、查询和状态写入，迁移稳定后再按读写职责拆分。 */
 import { mkdir } from "node:fs/promises";
-import { createRequire } from "node:module";
+import { createNodeRequire } from "#src/nodeRequire.js";
 import { dirname, join } from "node:path";
 import {
   isRemoteWorkspaceIdentity,
@@ -26,7 +26,7 @@ import { getTasksIndexDatabasePath, getZCodeDataRootDir } from "#src/paths.js";
 import { projectStorage, type ProjectMigrationContext } from "#src/project-storage/index.js";
 import { runTasksDatabaseMigrations } from "#src/session/tasksDatabase/migrations.js";
 
-const require = createRequire(import.meta.url);
+const require = createNodeRequire();
 const { DatabaseSync } = require("node:sqlite") as typeof import("node:sqlite");
 
 function appendZCodeAgentIndexedProviderFilter(

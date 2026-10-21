@@ -124,6 +124,10 @@ export function createWindow(options: {
     });
   }
 
+  // #51：上游 v3.16.x 丢失了 browserWindowId 定义，只在 closed 回调里引用这个变量，
+  // 导致每次关闭窗口（含退出）都抛 ReferenceError 并弹出 main process 错误框。
+  // BrowserWindow.id 与 webContents.id 不是同一个值，disposeWindow 需要前者。
+  const browserWindowId = win.id;
   const wcId = win.webContents.id;
   // 本地资源管理器据此区分主窗口与辅助窗口。
   registerMainApplicationWindow(wcId);

@@ -1,10 +1,10 @@
 import { runTasksDatabaseMigrations } from "#src/session/tasksDatabase/migrations.js";
 import { cancelConflictingOffPeakBindings } from "#src/session/offPeakWorkspaceIdentityMigration.js";
 import { randomUUID } from "node:crypto";
-import { createRequire } from "node:module";
+import { createNodeRequire } from "#src/nodeRequire.js";
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-const require = createRequire(import.meta.url);
+const require = createNodeRequire();
 const { DatabaseSync } = require("node:sqlite") as typeof import("node:sqlite");
 
 const INVENTORIED_TABLES = [

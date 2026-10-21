@@ -104,6 +104,51 @@ describe("desktopWindowLifecycle createWindow", () => {
     );
   });
 
+  it("closed 时按 BrowserWindow id 释放远控窗口（#51 回归）", () => {
+    let handleClosed: (() => void) | undefined;
+    const webContents = {
+      id: 44,
+      on: vi.fn(),
+    };
+    const win = {
+      id: 9,
+      webContents,
+      on: vi.fn((event: string, listener: () => void) => {
+        if (event === "closed") handleClosed = listener;
+      }),
+      isDestroyed: vi.fn(() => false),
+      show: vi.fn(),
+      focus: vi.fn(),
+    };
+    vi.mocked(createBrowserWindow).mockReturnValue(win as never);
+    const disposeWindow = vi.fn(async () => undefined);
+
+    createWindow({
+      iconPath: "/tmp/icon.png",
+      preloadPath: "/tmp/preload.js",
+      logger: { info: vi.fn(), warn: vi.fn() },
+      forceQuitRef: { current: false },
+      windowHostProcessMap: new Map(),
+      spawnHostProcess: vi.fn(() => ({ pid: 1239 }) as never),
+      disposeHostProcess: vi.fn(),
+      syncAutoUpdaterStateToWindow: vi.fn(),
+      syncReadyUpdateToWindow: vi.fn(),
+      syncPostUpdateReleaseNotesToWindow: vi.fn(),
+      webRemoteControlManager: { disposeWindow },
+      disposeRemoteWorkspaceSessionsForWindow: vi.fn(),
+      reattachRemoteWorkspaceSessionsForWindow: vi.fn(),
+      agentSpawnFallbackCwd: "/Users/dev/.zcode/workspace/default",
+      deviceMid: "device-mid",
+      runtimeProcessEnvFallbackPatch: {},
+    });
+
+    expect(handleClosed).toBeTypeOf("function");
+    handleClosed?.();
+    // BrowserWindow.id 与 webContents.id 不同；#51 的 ReferenceError 就发生在 closed 回调内。
+    expect(disposeWindow).toHaveBeenCalledWith(9);
+    expect(disposeWindow).not.toHaveBeenCalledWith(44);
+  });
+
   it("InitLocal 携带 spawn 时刻 Main 的实时界面语言", () => {
     let handleDomReady: (() => void) | undefined;
     const webContents = {

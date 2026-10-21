@@ -18,6 +18,7 @@ import {
   type UpdateStatePayload,
 } from "@zcode/shared";
 import { logger } from "./logger.js";
+import { isVersionGreaterThan } from "./autoUpdateVersion.js";
 
 export const CHECK_FOR_UPDATE_MENU_ID = "check-for-update";
 const AUTO_UPDATE_POLL_INTERVAL_MS = 15 * 60 * 1000;
@@ -198,20 +199,6 @@ function applyDevAutoUpdateRuntimeOverrides(): void {
   logger.info(
     `[auto-update] dev update enabled version=${devAutoUpdateVersionOverride ?? app.getVersion()}`,
   );
-}
-
-function normalizeVersionForCompare(version: string): string | null {
-  return semver.valid(semver.coerce(version.trim()));
-}
-
-function isVersionGreaterThan(candidateVersion: string, baselineVersion: string): boolean {
-  const candidate = normalizeVersionForCompare(candidateVersion);
-  const baseline = normalizeVersionForCompare(baselineVersion);
-  if (candidate && baseline) {
-    return semver.gt(candidate, baseline);
-  }
-
-  return candidateVersion.trim() !== baselineVersion.trim();
 }
 
 function shouldDownloadAvailableUpdate(version: string): boolean {
@@ -1523,6 +1510,12 @@ export async function initAutoUpdater(options: InitAutoUpdaterOptions = {}): Pro
   // 由 before-quit 主动安装，避免目标已经升高后退出装上旧包。
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.logger = logger;
+  // #50：legacy 3.x 安装必须允许一次“降级”到 fork 1.x 版本线，否则 electron-updater
+  // 会在发出 update-available 之前按 semver 过滤掉 1.x 迁移包。新 1.x 安装仍禁止降级。
+  const currentUpdateVersion = semver.coerce(getCurrentAppVersionForUpdate());
+  autoUpdater.allowDowngrade = Boolean(
+    currentUpdateVersion && semver.major(currentUpdateVersion) >= 3,
+  );
 
   const triggerCheckForUpdates = (reason: string) => {
     if (checkForUpdatesInFlight) {
