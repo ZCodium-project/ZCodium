@@ -18,10 +18,6 @@ import {
   type WebRemoteControlRelayV2IncomingMessage,
   type WebRemoteControlRelayV2OutgoingMessage,
 } from "@zcode/shared/web-remote-relay";
-import {
-  noteWebRemoteRelayConnectAttempt,
-  noteWebRemoteRelayReconnect,
-} from "#src/main/desktopNetworkTelemetry.js";
 
 import type {
   WebRemoteControlDeviceTransportState,
@@ -159,11 +155,6 @@ export class WebRemoteControlDeviceTransport {
       });
       socket.on("close", () => {
         if (socket !== this.socket) return;
-        if (this.state !== "paired") {
-          noteWebRemoteRelayConnectAttempt(Date.now() - this.connectStartedAt, false, {
-            attempt: this.connectAttempt,
-          });
-        }
         this.scheduleReconnect();
       });
     } catch (error) {
@@ -246,7 +237,6 @@ export class WebRemoteControlDeviceTransport {
     this.closeSocket();
     clearTimeout(this.reconnectTimer);
     this.setState("connecting");
-    noteWebRemoteRelayReconnect();
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = undefined;
       void this.connect();
@@ -272,11 +262,6 @@ export class WebRemoteControlDeviceTransport {
   private setState(state: WebRemoteControlDeviceTransportState): void {
     if (this.state === state) return;
     this.state = state;
-    if (state === "paired") {
-      noteWebRemoteRelayConnectAttempt(Date.now() - this.connectStartedAt, true, {
-        attempt: this.connectAttempt,
-      });
-    }
     this.options.logger.info("[web-remote-control] V2 device state", { state });
     this.options.onStateChange(state);
   }
