@@ -920,3 +920,14 @@ exceptions:
     paths:
       - packages/desktop/src/host/sourceServerOperationLogs.ts
     reason: 该文件由已开源的 v3.16.1 上游同步（PR #62）带入，Host 内的日志历史与现有 source-server 装配共址；接管 packages/desktop/src/host 整个目录需要单独的模块边界重构，本次审计增量不改变其归属。
+  - id: upstream-2026-10-20-unmanaged-files
+    rule: unmanaged-new-file
+    paths:
+      - packages/server/src/source-server/sourceServerTransportRuntime.ts
+      - packages/server/src/source-server/transportAdapter.ts
+      - packages/services/src/source-server-workspace/sourceServerWorkspace.ts
+      - packages/shared/src/source-server/errorCodes.ts
+      - packages/zcode-server-cli/src/packaging/stageArchives.ts
+      - packages/desktop/src/main/webRemoteControlRelayAuthProvider.ts
+      - packages/desktop/src/main/webRemoteControlRelayAuthStorageProvider.ts
+    reason: 上游 v3.16.2 同步（PR #64）带入的 source-server 与 remote asset staging 文件，以及审计版保留的 desktop relay auth provider；接管这些目录需要单独的模块边界重构，本次审计增量不改变其归属。
