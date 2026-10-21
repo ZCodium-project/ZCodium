@@ -931,3 +931,8 @@ exceptions:
       - packages/desktop/src/main/webRemoteControlRelayAuthProvider.ts
       - packages/desktop/src/main/webRemoteControlRelayAuthStorageProvider.ts
     reason: 上游 v3.16.2 同步（PR #64）带入的 source-server 与 remote asset staging 文件，以及审计版保留的 desktop relay auth provider；接管这些目录需要单独的模块边界重构，本次审计增量不改变其归属。
+  - id: auto-update-version-module-unmanaged-file
+    rule: unmanaged-new-file
+    paths:
+      - packages/desktop/src/main/autoUpdateVersion.ts
+    reason: 为 #50 版本线迁移抽出的纯版本比较模块，避免测试依赖 electron/electron-updater；接管 packages/desktop/src/main 整个目录需要单独的模块边界重构。
