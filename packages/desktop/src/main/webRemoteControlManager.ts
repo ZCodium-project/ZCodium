@@ -10,9 +10,6 @@ import {
 } from "@zcode/client";
 import {
   buildWebRemoteControlExternalQrUrl,
-  buildWebRemoteControlBridgeResultTelemetry,
-  buildWebRemoteControlPairResultTelemetry,
-  classifyRemoteUsageError,
   parseRemoteWorkspaceIdentity,
   WEB_REMOTE_CONTROL_OUTBOUND_PAYLOAD_BUFFER_TIMEOUT_MS,
   type ZCodeEndpointUrls,
@@ -41,7 +38,6 @@ import {
   type WebRemoteControlWorkspaceListResult,
   type WebRemoteControlWorkspaceTarget,
   type RemoteUsageRemoteKind,
-  type TelemetryEventPayload,
   measureWebRemoteControlRpcRelayEnvelopeBytes,
 } from "@zcode/shared";
 import { WebRemoteControlV2ConnectionError } from "@zcode/shared/web-remote-relay";
@@ -189,7 +185,6 @@ interface WebRemoteControlManagerDependencies {
     requestId: string,
   ) => Promise<HostPreparedProjectWorkspace>;
   cancelProjectPreparation?: (windowId: number, requestId: string) => void;
-  reportRemoteUsageEvent?: (windowId: number, event: TelemetryEventPayload) => void;
   reportRendererTelemetryEvent?: (event: RendererTelemetryEventPayload) => void;
   onStatusChanged?: (windowId: number, status: WebRemoteControlStatus) => void;
   attachWorkspaceHost: (
@@ -311,18 +306,6 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
   let registrationQueue: Promise<unknown> = Promise.resolve();
   const startAuthorizations = new Map<string, WebRemoteControlStartAuthorization>();
   const availableWorkspacesByWindowId = new Map<number, WebRemoteControlWorkspaceTarget[]>();
-
-  function reportRemoteUsageEvent(windowId: number, event: TelemetryEventPayload): void {
-    try {
-      dependencies.reportRemoteUsageEvent?.(windowId, event);
-    } catch (error) {
-      // 埋点是旁路能力，任何异常都不能改变远控配对和 bridge 的业务结果。
-      dependencies.logger.warn("[web-remote-control] remote usage telemetry failed", {
-        elementName: event.elementName,
-        error,
-      });
-    }
-  }
 
   function resolveRemoteKind(
     target: WebRemoteControlWorkspaceTarget,
@@ -1113,28 +1096,9 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
       dependencies.logger.info(
         `[web-remote-control] workspace bridge active window=${runtime.windowId} session=${runtime.deviceSid} bridgeSession=${request.bridgeSessionId}`,
       );
-      reportRemoteUsageEvent(
-        runtime.windowId,
-        buildWebRemoteControlBridgeResultTelemetry({
-          result: "success",
-          workspaceKind: target.kind,
-          remoteKind: resolveRemoteKind(target, acquired),
-          entryKind: request.taskId ? "task" : "home",
-        }),
-      );
 
       return toExternalBridge(bridgeRuntime);
     } catch (error) {
-      reportRemoteUsageEvent(
-        runtime.windowId,
-        buildWebRemoteControlBridgeResultTelemetry({
-          result: "failure",
-          workspaceKind: target.kind,
-          remoteKind: resolveRemoteKind(target, acquired),
-          entryKind: request.taskId ? "task" : "home",
-          errorCategory: classifyRemoteUsageError(error),
-        }),
-      );
       if (acquired) {
         dependencies.releaseWorkspaceHostAttachment(acquired.attachmentId);
       }
@@ -1403,14 +1367,6 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     if (state === "paired") {
       if (previousTransportState !== "paired") {
         const workspaceDimensions = resolveRuntimeWorkspaceDimensions(runtime);
-        reportRemoteUsageEvent(
-          runtime.windowId,
-          buildWebRemoteControlPairResultTelemetry({
-            result: "success",
-            pairKind: runtime.hasEverPaired ? "reconnect" : "initial",
-            ...workspaceDimensions,
-          }),
-        );
       }
       runtime.hasEverPaired = true;
       clearMobileDisconnectGraceTimer(runtime);
@@ -1427,15 +1383,6 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     if (state === "kicked") {
       if (previousTransportState !== "kicked") {
         const workspaceDimensions = resolveRuntimeWorkspaceDimensions(runtime);
-        reportRemoteUsageEvent(
-          runtime.windowId,
-          buildWebRemoteControlPairResultTelemetry({
-            result: "failure",
-            pairKind: runtime.hasEverPaired ? "reconnect" : "initial",
-            ...workspaceDimensions,
-            errorCategory: "relay",
-          }),
-        );
       }
       preserveWindowRuntimeFailure(
         runtime.windowId,
@@ -1448,15 +1395,6 @@ export function createWebRemoteControlManager(dependencies: WebRemoteControlMana
     if (state === "error") {
       if (previousTransportState !== "error") {
         const workspaceDimensions = resolveRuntimeWorkspaceDimensions(runtime);
-        reportRemoteUsageEvent(
-          runtime.windowId,
-          buildWebRemoteControlPairResultTelemetry({
-            result: "failure",
-            pairKind: runtime.hasEverPaired ? "reconnect" : "initial",
-            ...workspaceDimensions,
-            errorCategory: "relay",
-          }),
-        );
       }
       runtime.status = "error";
       emitRuntimeStatus(runtime);
