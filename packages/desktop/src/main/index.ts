@@ -755,6 +755,10 @@ const webRemoteControlManager = createWebRemoteControlManager({
   deviceMid,
   deviceName: hostname(),
   appVersion: webRemoteControlAppVersion,
+  // 审计版不接入官方账号，没有 JWT 来源。这里必须显式返回 undefined，让远控进入
+  // auth-required 降级；缺少该注入会让 startWebRemoteControl 直接抛
+  // “getLogin is not a function”（v3.16.2 同步后运行时暴露）。
+  getLogin: async () => undefined,
   authProvider: webRemoteControlAuthProvider,
   authStorageProvider: createWebRemoteControlRelayAuthStorageProvider({
     credentialService: webRemoteControlCredentialService,
