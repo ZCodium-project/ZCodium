@@ -7,7 +7,10 @@ import { describe, expect, it } from "vitest";
 // “getLogin is not a function”。这里锁住注入，避免下次同步再次丢掉。
 describe("web remote control auth injection", () => {
   it("injects a getLogin that degrades to auth-required when no account exists", () => {
-    const source = readFileSync(resolve(process.cwd(), "packages/desktop/src/main/index.ts"), "utf8");
+    const source = readFileSync(
+      resolve(process.cwd(), "packages/desktop/src/main/index.ts"),
+      "utf8",
+    );
 
     expect(source).toContain("getLogin: async () => undefined");
     expect(source).toContain("createWebRemoteControlManager({");

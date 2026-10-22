@@ -813,6 +813,11 @@ export class BrowserGuestManager {
   async reportResidency(
     payload: BrowserViewResidencyReportPayload & { windowId: number },
   ): Promise<void> {
+    // 面板关闭 / 切 tab 后 renderer 可能还有一次在途的 residency 上报，此时 tab 已被
+    // 移除或标记 closed。迟到上报没有状态可写，静默丢弃，避免 Electron 把 IPC handler
+    // 的 throw 记成 main process 错误；作用域不匹配仍交给严格校验抛错。
+    const lateTab = this.tabs.get(payload.tabId);
+    if (!lateTab || lateTab.lifecycle === "closed") return;
     const tab = this.requireRendererOwnedTab(payload);
     tab.cachedUrl = payload.restoreUrl?.trim() || tab.cachedUrl;
     if (payload.title !== undefined) tab.cachedTitle = payload.title ?? "";

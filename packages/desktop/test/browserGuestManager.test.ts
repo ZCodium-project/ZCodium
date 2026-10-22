@@ -5970,3 +5970,34 @@ describe("BrowserGuestManager", () => {
     expect(mgr.hasGuest("browser:remote-drift")).toBe(false);
   });
 });
+
+describe("BrowserGuestManager late residency reports", () => {
+  it("关闭 tab 后迟到的 residency 上报静默丢弃，不再抛 renderer scope 错误", async () => {
+    registerGuest(400);
+    const mgr = new BrowserGuestManager();
+    mgr.attachGuest("browser:late-residency", 400, {
+      windowId: 1,
+      workspaceKey: "/repo",
+      sessionId: "session-a",
+    });
+    await mgr.closeTabFromRenderer({
+      tabId: "browser:late-residency",
+      windowId: 1,
+      workspaceKey: "/repo",
+      sessionId: "session-a",
+    });
+
+    await expect(
+      mgr.reportResidency({
+        tabId: "browser:late-residency",
+        windowId: 1,
+        workspaceKey: "/repo",
+        sessionId: "session-a",
+        selected: false,
+        visible: false,
+        currentTask: false,
+        loading: false,
+      }),
+    ).resolves.toBeUndefined();
+  });
+});
