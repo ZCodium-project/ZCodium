@@ -163,6 +163,56 @@ export function buildGithubAssetLayout(options = {}) {
   return { sourceDir, outDir, version: expectedVersion, platforms, files, totalBytes };
 }
 
+// v3.16.x 起 Source Server 远程资产改用 {releases/<version>/source-server-release.json
+// + zcode-server-<target>.tar.gz} 的 descriptor 布局（客户端 host 也按该布局解析）。
+// 旧 mock-cdn manifest 布局仍保留分支，便于历史上已生成的目录继续发布。
+const SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME = "source-server-release.json";
+
+function buildSourceServerReleaseAssetLayout({
+  sourceDir = defaultSourceDir,
+  outDir = defaultOutDir,
+  expectedVersion,
+} = {}) {
+  const versionDir = join(sourceDir, "releases", expectedVersion);
+  const descriptorPath = join(versionDir, SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME);
+  if (!existsSync(descriptorPath)) return null;
+
+  const descriptor = readJsonFile(descriptorPath);
+  if (descriptor.version !== expectedVersion) {
+    throw new Error(
+      `[publish-remote-assets] descriptor version ${descriptor.version} does not match ${expectedVersion}`,
+    );
+  }
+  assertSafeOutDir(outDir, sourceDir);
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+
+  const files = [SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME];
+  copyFileSync(descriptorPath, join(outDir, SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME));
+
+  let totalBytes = 0;
+  const platforms = [];
+  for (const archive of descriptor.archives ?? []) {
+    const fileName = String(archive.fileName ?? "");
+    if (!fileName || fileName.includes("/") || fileName.includes("\\")) {
+      throw new Error(`[publish-remote-assets] unsafe archive file name: ${fileName}`);
+    }
+    const sourcePath = join(versionDir, fileName);
+    if (!existsSync(sourcePath)) {
+      throw new Error(`[publish-remote-assets] missing archive: ${sourcePath}`);
+    }
+    totalBytes += statSync(sourcePath).size;
+    copyFileSync(sourcePath, join(outDir, fileName));
+    files.push(fileName);
+    platforms.push(String(archive.target ?? fileName));
+  }
+  if (platforms.length === 0) {
+    throw new Error(`[publish-remote-assets] descriptor has no archives: ${descriptorPath}`);
+  }
+
+  return { sourceDir, outDir, version: expectedVersion, platforms, files, totalBytes };
+}
+
 function parseArgs(argv) {
   const args = {};
   for (let index = 0; index < argv.length; index += 1) {
@@ -187,14 +237,14 @@ function parseArgs(argv) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = parseArgs(process.argv.slice(2));
-  const result = buildGithubAssetLayout({
-    ...args,
-    // 与构建链同一优先级：显式 --version > ZCODE_APP_VERSION（CI 审计版本）> package.json。
-    expectedVersion:
-      args.expectedVersion?.trim() ||
-      process.env.ZCODE_APP_VERSION?.trim() ||
-      readJsonFile(join(repoRoot, "package.json")).version,
-  });
+  // 与构建链同一优先级：显式 --version > ZCODE_APP_VERSION（CI 审计版本）> package.json。
+  const expectedVersion =
+    args.expectedVersion?.trim() ||
+    process.env.ZCODE_APP_VERSION?.trim() ||
+    readJsonFile(join(repoRoot, "package.json")).version;
+  const result =
+    buildSourceServerReleaseAssetLayout({ ...args, expectedVersion }) ??
+    buildGithubAssetLayout({ ...args, expectedVersion });
   const megabytes = (result.totalBytes / (1024 * 1024)).toFixed(1);
   console.log(
     `[publish-remote-assets] ${result.version}: ${result.platforms.length} platform(s), ` +
