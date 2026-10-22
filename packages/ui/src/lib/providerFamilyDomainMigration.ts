@@ -84,17 +84,26 @@ export async function ensureRetiredProviderFamilySettingsPurge(
   const purgedDomain = settings.providerFamilyDomain ?? null;
   const purgedSelections = Object.keys(settings.providerFamilyConnectionSelections ?? {});
 
-  await services.settingService.update({
-    // 空串是既有清空约定：normalizeSettingsPatch 把它归一成 undefined，落盘时删掉该键。
-    // 领域类型不含空串，这里沿用设置页既有的清空写法。
-    providerFamilyDomain: "" as never,
-    providerFamilyDomainUpdatedAt: undefined,
-    // 两个 family 的 key 全是已下线套餐的连接选择，没有需要保留的子集。
-    providerFamilyConnectionSelections: {},
-    // 同时置位既有迁移守卫：否则同一次启动里下面的推断会把刚清掉的 family 写回来。
-    providerFamilyDomainMigrated: true,
-    retiredProviderFamilySettingsPurged: true,
-  });
+  await services.settingService.update(
+    {
+      // 空串是既有清空约定：normalizeSettingsPatch 把它归一成 undefined，落盘时删掉该键。
+      // 领域类型不含空串，这里沿用设置页既有的清空写法。
+      providerFamilyDomain: "" as never,
+      providerFamilyDomainUpdatedAt: undefined,
+      // 两个 family 的 key 全是已下线套餐的连接选择，没有需要保留的子集。
+      providerFamilyConnectionSelections: {},
+      // 同时置位既有迁移守卫：否则同一次启动里下面的推断会把刚清掉的 family 写回来。
+      providerFamilyDomainMigrated: true,
+      retiredProviderFamilySettingsPurged: true,
+    },
+    {
+      // 原因：清理也写完整连接映射，必须与其它写入者共用 CAS 准入；缺少预期会被
+      // setting.update 以 “Account connection CAS required” 拒绝，导致每次启动都清不掉。
+      providerFamilyDomain: settings.providerFamilyDomain,
+      providerFamilyConnectionSelections: settings.providerFamilyConnectionSelections,
+      providerFamilyDomainUpdatedAt: settings.providerFamilyDomainUpdatedAt ?? 0,
+    },
+  );
 
   logger.info("[providerFamilyDomainMigration] provider family 存量设置已清理", {
     purgedDomain,
