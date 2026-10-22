@@ -71,7 +71,7 @@ it.skipIf(!process.env.ZCODIUM_TEST_SSH_ROOT)(
       kind: "ssh" as const,
       host: "127.0.0.1",
       port,
-      username: userInfo().username,
+      username: process.env.ZCODIUM_TEST_SSH_USER ?? userInfo().username,
       privateKeyPath: join(root, "client_key"),
       assetInstallMode: "remote-download" as const,
     };
@@ -124,9 +124,7 @@ it.skipIf(!process.env.ZCODIUM_TEST_SSH_ROOT)(
       expect(await readFile(release.localArchivePath!)).toBeTruthy();
     } finally {
       connection?.dispose();
-      await adapter
-        .exec(target, ["sh", "-c", '"$HOME/.zcode/server/bin/zcode" stop --json'], {})
-        .catch(() => undefined);
+      await adapter.exec(target, ["stop", "--json"], {}).catch(() => undefined);
       adapter.dispose?.();
     }
   },

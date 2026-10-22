@@ -42,6 +42,13 @@ jobs:
           sudo apt-get install -y openssh-server
           root="$RUNNER_TEMP/offline-ssh"
           mkdir -p "$root/home" "$root/release"
+          # CI runner 账号可能被 shadow 锁定，UsePAM=no 会连公钥也拒绝；使用独立、可登录的测试用户。
+          # 仅绑定 loopback 且彻底禁用密码认证，不修改 runner 的账号或真实 SSH 配置。
+          ssh_user=zcodium_offline
+          sudo useradd -U -d "$root/home" -s /bin/bash "$ssh_user"
+          sudo passwd -d "$ssh_user" >/dev/null
+          chmod 755 "$root"
+          sudo chown "$ssh_user:$ssh_user" "$root/home"
           ssh-keygen -q -t ed25519 -N '' -f "$root/host_key"
           ssh-keygen -q -t ed25519 -N '' -f "$root/client_key"
           cp "$root/client_key.pub" "$root/authorized_keys"
@@ -58,14 +65,19 @@ jobs:
           KbdInteractiveAuthentication no
           UsePAM no
           StrictModes no
-          AllowUsers $(id -un)
+          AllowUsers $ssh_user
           Subsystem sftp internal-sftp
           SetEnv HOME=$root/home ZCODIUM_DATA_BASE_DIR=$root/home ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1
           EOF
           sudo mkdir -p /run/sshd
           sudo /usr/sbin/sshd -t -f "$root/sshd_config"
-          sudo /usr/sbin/sshd -f "$root/sshd_config"
+          sudo /usr/sbin/sshd -E "$root/sshd.log" -f "$root/sshd_config"
+          # 先用系统 OpenSSH 检查测试基础设施，避免把 sshd 账号/权限错误误判成应用问题。
+          ssh -F /dev/null -i "$root/client_key" -p 24268 \
+            -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+            -o UserKnownHostsFile="$root/known_hosts" "$ssh_user@127.0.0.1" 'printf "isolated-sshd-ready\n"'
           echo "ZCODIUM_TEST_SSH_ROOT=$root" >> "$GITHUB_ENV"
+          echo "ZCODIUM_TEST_SSH_USER=$ssh_user" >> "$GITHUB_ENV"
           echo "ZCODIUM_TEST_RELEASE_VERSION=$version" >> "$GITHUB_ENV"
       - name: Verify real SSH upload, installation, handshake and reconnect with resource fetch forbidden
         env:
@@ -75,6 +87,13 @@ jobs:
         if: always()
         shell: bash
         run: |
+          if [ -f "$RUNNER_TEMP/offline-ssh/sshd.log" ]; then
+            sudo tail -n 50 "$RUNNER_TEMP/offline-ssh/sshd.log"
+          fi
           if [ -f "$RUNNER_TEMP/offline-ssh/sshd.pid" ]; then
             sudo kill "$(cat "$RUNNER_TEMP/offline-ssh/sshd.pid")" || true
+          fi
+          if id zcodium_offline >/dev/null 2>&1; then
+            sudo pkill -u zcodium_offline || true
+            sudo userdel zcodium_offline || true
           fi
