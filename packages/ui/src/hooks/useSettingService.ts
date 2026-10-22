@@ -138,8 +138,21 @@ export function useSettings() {
   }, [platform, refresh]);
 
   const update = useCallback(
-    async (patch: Partial<AppSettings>) => {
-      await settingService.update(patch);
+    async (
+      patch: Partial<AppSettings>,
+      expectedAccountSettings?: Parameters<ISettingService["update"]>[1],
+    ) => {
+      try {
+        if (expectedAccountSettings) {
+          await settingService.update(patch, expectedAccountSettings);
+        } else {
+          await settingService.update(patch);
+        }
+      } catch (error) {
+        // 原因：CAS 失败后页面仍持有旧快照；重读事实后报告失败，下一次用户重试才有新预期。
+        if (expectedAccountSettings) await refresh();
+        throw error;
+      }
       platform.syncAppSettings?.(patch);
       await refresh();
       if (
