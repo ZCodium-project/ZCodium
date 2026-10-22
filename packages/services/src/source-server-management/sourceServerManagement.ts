@@ -8,6 +8,7 @@ import type {
   SourceServerManagementDirectoryDelta,
   SourceServerManagementStateDelta,
   SourceServerOperationLog,
+  OfflineRuntimeImportResult,
 } from "@zcode/shared";
 import { ServiceChannels } from "@zcode/shared";
 import { createServiceDescriptor } from "../descriptors.js";
@@ -21,6 +22,8 @@ export interface UpdateConnectionProfileInput {
 }
 
 export interface ISourceServerManagementService {
+  /** 本机 Host 校验并导入当前版本离线包；不连接远端，不访问公网。 */
+  importOfflineRuntime(directory: string): Promise<OfflineRuntimeImportResult>;
   readonly onDidChangeState: Event<SourceServerManagementStateDelta>;
   readonly onDidChangeDirectory: Event<SourceServerManagementDirectoryDelta>;
   /** Desktop Host 的连接/更新日志变更通知；历史由 Host 内存 owner 保留。 */

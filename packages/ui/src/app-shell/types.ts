@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import type { RemoteConnectionContext } from "@zcode/shared";
 import type {
   ZCodeProvider,
   SessionCreateSource,
@@ -80,7 +81,11 @@ export type CreateTaskRequest = ZCodeProvider | CreateTaskOptions;
 export interface AppProps {
   services: IServiceAccessor;
   baseFeedbackService: IFeedbackService;
-  onConnectRemote: (options: RemoteTarget, requestId?: string) => Promise<string>;
+  onConnectRemote: (
+    options: RemoteTarget,
+    requestId?: string,
+    context?: RemoteConnectionContext,
+  ) => Promise<string>;
   onSelectRemoteProject: (
     sessionId: string,
     path: string,

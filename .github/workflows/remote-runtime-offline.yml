@@ -1,0 +1,80 @@
+name: Remote runtime offline SSH
+
+on:
+  pull_request:
+    paths:
+      - "packages/desktop/src/host/sourceServerReleaseResolver.ts"
+      - "packages/desktop/test/sourceServerOfflineSsh.integration.test.ts"
+      - ".github/workflows/remote-runtime-offline.yml"
+  workflow_dispatch:
+    inputs:
+      public_release:
+        description: "额外从当前版本 GitHub Release 下载并验证（版本发布后使用）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  linux-offline-ssh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.14.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Stage current-version Linux runtime
+        env:
+          ZCODE_ENV: production
+        run: pnpm prepare:remote-assets:linux
+      - name: Start an isolated loopback SSH server
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y openssh-server
+          root="$RUNNER_TEMP/offline-ssh"
+          mkdir -p "$root/home" "$root/release"
+          ssh-keygen -q -t ed25519 -N '' -f "$root/host_key"
+          ssh-keygen -q -t ed25519 -N '' -f "$root/client_key"
+          cp "$root/client_key.pub" "$root/authorized_keys"
+          version=$(node -p 'require("./package.json").version')
+          cp "packages/desktop/mock-cdn/releases/$version/source-server-release.json" "$root/release/"
+          cp "packages/desktop/mock-cdn/releases/$version/zcode-server-linux-x64.tar.gz" "$root/release/"
+          cat > "$root/sshd_config" <<EOF
+          Port 24268
+          ListenAddress 127.0.0.1
+          HostKey $root/host_key
+          PidFile $root/sshd.pid
+          AuthorizedKeysFile $root/authorized_keys
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+          UsePAM no
+          StrictModes no
+          AllowUsers $(id -un)
+          Subsystem sftp internal-sftp
+          SetEnv HOME=$root/home ZCODIUM_DATA_BASE_DIR=$root/home ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1
+          EOF
+          sudo mkdir -p /run/sshd
+          sudo /usr/sbin/sshd -t -f "$root/sshd_config"
+          sudo /usr/sbin/sshd -f "$root/sshd_config"
+          echo "ZCODIUM_TEST_SSH_ROOT=$root" >> "$GITHUB_ENV"
+          echo "ZCODIUM_TEST_RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Verify real SSH upload, installation, handshake and reconnect with resource fetch forbidden
+        env:
+          ZCODIUM_TEST_PUBLIC_RELEASE: ${{ inputs.public_release && '1' || '' }}
+        run: pnpm exec vitest run packages/desktop/test/sourceServerOfflineSsh.integration.test.ts
+      - name: Stop isolated SSH server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/offline-ssh/sshd.pid" ]; then
+            sudo kill "$(cat "$RUNNER_TEMP/offline-ssh/sshd.pid")" || true
+          fi

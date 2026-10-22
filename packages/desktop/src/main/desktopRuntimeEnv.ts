@@ -22,6 +22,7 @@ import {
   resolveZaiOAuthOrigin,
   normalizeDynamicWorkflowMode,
   sanitizeZCodeRuntimeEnv,
+  readExternalEnvVar,
   type SourceServerArtifactPolicy,
   type ZCodeRuntimeEnv,
 } from "@zcode/shared";
@@ -232,7 +233,9 @@ function resolveRemoteCdnBaseUrls(
   options: ResolveRemoteCdnOptions = {},
   localEnv: LocalRuntimeEnv = {},
 ): string[] {
-  const raw = resolveEnvValue("ZCODE_REMOTE_ASSET_CDN_BASE_URL", localEnv);
+  const raw =
+    readExternalEnvVar(process.env, "ZCODE_REMOTE_ASSET_CDN_BASE_URL") ??
+    readExternalEnvVar(localEnv, "ZCODE_REMOTE_ASSET_CDN_BASE_URL");
   return resolveOrderedRemoteCdnBaseUrls({
     ...options,
     env: ZCODE_ENV,

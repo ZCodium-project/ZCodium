@@ -1,54 +1,36 @@
-# 远程资源：GitHub Release 发布与自建源加载
+# 远程资源：自有 GitHub Release、镜像与离线加载
 
-审计版不把 remote runtime 打进安装包，也不默认连官方 CDN。发布方可以把 mock-cdn 的产物以扁平布局发布到 GitHub Release，客户端用显式自建源（`ZCODE_REMOTE_ASSET_CDN_BASE_URL`）加载。源解析与官方开关的解耦见 [official-service-switches.md](../../services/specs/official-service-switches.md)。
+本规范描述当前 Source Server descriptor 布局；#68 的所有权、提交点和验收见 [remote-runtime-offline.md](remote-runtime-offline.md)。桌面安装包不携带全平台远端运行时，不默认访问官方 CDN。
 
-## 所有权
+## 发布与消费
 
-- **构建**：`scripts/prepare-prebuilds.mjs`（`pnpm prepare:remote-assets`）产出 `packages/desktop/mock-cdn` 的目录式布局：`releases/<version>/manifest-<arch>.json` + `components/<platform>/<component>/<version+sha>.tar.gz`。
-- **发布布局转换**：`scripts/publish-remote-assets.mjs` 是唯一 owner，把目录式布局转换成 GitHub Release 扁平资产，不改动 mock-cdn。产物是 `manifest-<arch>.json` + `<platformArch>__<componentId>__<safeVersion>.tar.gz`。
-- **消费方**：`@zcode/server` 的 remote asset 加载（`remoteAssetCache.ts`）按 manifest 的 `artifactPath` 拼 `<base>/<artifactPath>` 下载，不感知托管介质；sha256 校验针对文件内容，与文件名无关。
+- `pnpm prepare:remote-assets` 调用 `@zcode/server-cli stage:remote-assets`，生成 `packages/desktop/mock-cdn/releases/<version>/source-server-release.json` 及四个平台归档。
+- 描述文件包含 `schemaVersion`、`version`、`archives`；每个归档包含 target/version/fileName/sha256/sizeBytes/urls，由 `packages/shared/src/source-server/release.ts` 严格校验。
+- 当前文件名是 `zcode-server-linux-x64.tar.gz`、`zcode-server-linux-arm64.tar.gz`、`zcode-server-darwin-x64.tar.gz`、`zcode-server-darwin-arm64.tar.gz`。新布局不使用旧 `zz-manifest-*` 组件清单。
+- `scripts/publish-remote-assets.mjs` 将 descriptor 与归档复制成 Release 扁平布局；旧 manifest 分支仅用于读取历史目录，不是当前发布入口。
+- `sourceServerReleaseResolver` 校验版本、大小和 SHA-256，通过既有 transport 安装器部署。Host 是唯一解析/导入 owner；不另建 Agent、队列或远程身份。
 
-## 版本对齐
+## 完整版本源
 
-- manifest 的 `appVersion` 必须等于桌面 app 的 `ZCODE_VERSION`（客户端在 `parseRemoteAssetManifestFromResponse` 强校验）；远端 server bundle 的内部版本也必须一致（部署后按 `zcode-server.cjs --version` 比较），否则每次连接都会判定版本不匹配并重新部署。
-- 构建链统一由 `ZCODE_APP_VERSION` 注入：桌面 app（`build-metadata.mjs`）、server bundle（`packages/server/tsup.config.ts` 与 `build-remote.ts`）、remote assets（`prepare-prebuilds.mjs`）与发布脚本默认值；本地开发未设置时回退 `package.json` 版本。
-- CI 的 `remote-assets` job 必须携带与 `desktop` job 相同的 `ZCODE_APP_VERSION`。
+- 默认完整地址是 `https://github.com/<repository>/releases/download/v<version>`，不能写成 `/download/v/<version>`。
+- `release.yml` 已传 `ZCODIUM_REMOTE_ASSET_CDN_BASE_URL`，tsup 必须消费为 `__ZCODIUM_REMOTE_ASSET_RELEASE_BASE__`；只在 YAML 中声明环境变量而不编译入 main 不会生效。
+- 运行时显式源覆盖构建内置源；兼容旧 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 名称。设置中的自定义镜像针对完整版本目录，不因失败回退其他公网源。
+- 完整 tag 目录直接寻址，不探测重复版本子目录；不读取 latest，也不把审计版 1.x 改成上游 3.x。
+- descriptor 内其它 origin 的绝对 URL 不得绕过用户指定的镜像边界。SHA-256 证明内容完整性，不替代用户对镜像/离线包来源的信任。
 
-## 扁平命名契约
+## 离线使用（1.16.3 起）
 
-- GitHub Release 的 asset 名不允许 `/`，组件必须压成单段文件名。
-- 版本里的 `+` 统一替换为 `-`：客户端会把 `+` 编码成 `%2B`，不同托管端的解码行为不一致；替换后下载 URL 与 asset 名完全一致。
-- **所有发布资产统一加 `zz-` 前缀**：GitHub Release 的资产列表按名称（忽略大小写）排序，与上传顺序无关；前缀把 remote assets 沉到发布页最后，安装包与更新元数据保持在前。`zz-` 在 `zcodium-*` 之后（第二个字符 `z` > `c`），是确保沉底的排序键。
-- 命名：`zz-<platformArch>__<componentId>__<version(+ → -)>.tar.gz`，例如 `zz-linux-x64__server-bundle__v3.14.4-ef831e13132e.tar.gz`；manifest 输出为 `zz-manifest-<arch>.json`。
-- 客户端 manifest 名候选：`zz-manifest-<arch>.json` 优先，`manifest-<arch>.json` 作为旧布局回退；组件 URL 由 manifest 的 `artifactPath` 决定，客户端不硬编码组件名。
-- manifest 其余字段（`id` / `version` / `sha256` / `mount`）保持原值，只重写 `artifactPath`。
-- 复制前对源文件复验 `sha256`：发布的是内容寻址制品，不能把损坏或被替换的文件以“同名可信制品”发出去。
-- 脚本在开始前重建输出目录，并拒绝输出目录包含源目录或仓库根。
+1. 在可联网机器上，从**与应用完全相同版本**的 Release 下载 `source-server-release.json` 与目标平台的 `zcode-server-<target>.tar.gz`，放在同一个目录。不必下载其它平台包。
+2. 将目录带入内网；在添加 SSH 的连接设置中点「导入离线运行时」，选择该目录。
+3. 本机 Host 严格校验，再复制到独立内容代并复验副本，最后原子发布缓存指针。失败不会覆盖旧的可用导入。
+4. 成功后自动选择「仅离线」，本机经 SSH 上传并安装；不要求远端可访问 GitHub/CDN。
+5. 即使已有线路偏好 remote-download，仅离线返回的也是本地归档；部署器复用现有本地路径优先级。缺包立即提示，不先超时探测公网。
 
-## tag 与寻址假设
+缓存由应用 userData 下 `remote-assets-cache/source-server/<version>` 管理，可用 `ZCODE_REMOTE_ASSET_CACHE_DIR` 覆盖缓存根。用户不需要手工更改缓存布局。在线模式完整缓存命中同样不请求网络。
 
-- 发布到 app release 的 tag（`v<version>`，如 `v3.14.4`）。
-- 客户端 base = `https://github.com/<owner>/<repo>/releases/download/<tag>`：
-  - manifest 候选：优先 `<base>/zz-manifest-<arch>.json`，404 后回退 `<base>/manifest-<arch>.json`；加载器对 404 直接跳过版本目录探测。
-  - 组件候选：`<base>/<artifactPath>`（`zz-` 扁平名，直接命中；tag 带 `v` 前缀时不会产生父级探测）。
-  - manifest 的 `appVersion` 与当前 app 版本不一致时，加载器按原有校验拒绝，避免把旧版本资源装入新客户端。
+## CI 与验收
 
-## 开箱即用（构建内置源）
-
-- release workflow 构建桌面端时注入 `ZCODIUM_REMOTE_ASSET_CDN_BASE_URL`（本仓库该 tag 的 `releases/download/<tag>`），编译期写入 main 进程；安装版开箱即可连接 WSL/SSH，不需要用户配置环境变量。
-- `resolveRemoteCdnBaseUrls` 解析优先级：用户显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` > 构建内置源 > 官方 CDN（仅此路径受 marketplace 开关控制）。内置源与用户源都属自有分发，不经过官方服务开关与官方出口策略。
-- fork 构建时地址由 `github.repository` 决定，天然指向 fork 自己的 Release 资产。
-- dev/本地构建不注入内置源，仍走 mock-cdn 或显式配置。
-
-## CI
-
-- release workflow 的 `remote-assets` job：`pnpm prepare:remote-assets` → `node scripts/publish-remote-assets.mjs --out dist/remote-assets-github` → `gh release upload <tag> --clobber`（带重试）。
-- 失败语义与 CLI / 桌面包一致：任一产物上传失败则 release 保持 draft；`build_artifacts=false` 时跳过。
-
-## 验收
-
-1. 发布脚本单测：`zz-` 扁平命名（无 `/`、无 `+`）、manifest 输出名与 `artifactPath` 重写、sha256 不变、多平台发现与 `--platforms` 过滤、缺失组件与 sha256 不匹配报错。
-2. 加载链路测试：本地 HTTP 服务扁平布局，`ensureRemoteReleaseDirFromCdn` 能按 manifest 下载、校验并物化到 `releases/<version>/<platform>/<mount>`。
-3. `pnpm typecheck`、`pnpm lint`、架构检查通过；release workflow YAML 语法合法。
-4. 版本对齐：`ZCODE_APP_VERSION=<audit 版本>` 构建出的 remote assets，其 `manifest.appVersion` 与 server bundle 的 `--version` 输出都等于该版本；未设置时回退 `package.json` 版本。
-5. 开箱即用：`ZCODIUM_REMOTE_ASSET_CDN_BASE_URL` 注入后，发布版无需任何用户配置即可解析出远程资源源；用户显式 `ZCODE_REMOTE_ASSET_CDN_BASE_URL` 仍优先于内置源。
+- 顺序：创建 draft → CLI/桌面/远端资产构建 → 上传 → 校验清单 → 全部成功才公开。不得对已公开版本重打 tag 或替换运行时身份。
+- 桌面、descriptor、server bundle 使用同一 `ZCODE_APP_VERSION`/根 package.json 版本。
+- 必测：完整 GitHub URL、构建常量接线、镜像独占、有效缓存零请求、离线新装/握手/重连、错版本/平台/损坏/符号链接拒绝，以及安装升级 busy guard/取消。
+- 只有打包应用真实交互与 SSH 部署证据可支持「功能可用」结论；类型检查、单测和下载成功不能替代真实连接验收。

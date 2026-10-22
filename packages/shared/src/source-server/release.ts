@@ -82,3 +82,34 @@ export const sourceServerReleaseDescriptorSchema = z
   });
 
 export type SourceServerReleaseDescriptor = z.infer<typeof sourceServerReleaseDescriptorSchema>;
+
+/** #68：资源联网策略属于控制端设置，不参与 workspace 或远端线路身份。 */
+export const remoteRuntimeAssetSettingsSchema = z
+  .object({
+    mode: z.enum(["online", "offline"]),
+    baseUrl: z
+      .string()
+      .trim()
+      .url()
+      .refine((value) => {
+        const url = new URL(value);
+        return (
+          ["http:", "https:"].includes(url.protocol) &&
+          !url.username &&
+          !url.password &&
+          !url.search &&
+          !url.hash
+        );
+      }, "Runtime mirror must be an HTTP(S) URL without credentials, query or fragment")
+      .optional(),
+  })
+  .strict();
+export type RemoteRuntimeAssetSettings = z.infer<typeof remoteRuntimeAssetSettingsSchema>;
+
+export const offlineRuntimeImportResultSchema = z
+  .object({
+    version: z.string().min(1),
+    targets: z.array(sourceServerReleaseTargetSchema).min(1),
+  })
+  .strict();
+export type OfflineRuntimeImportResult = z.infer<typeof offlineRuntimeImportResultSchema>;

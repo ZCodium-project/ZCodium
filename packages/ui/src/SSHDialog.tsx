@@ -1,6 +1,12 @@
 /* eslint-disable max-lines -- 远程连接向导的状态编排暂集中在同一组件，后续有独立拆分计划。 */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { createUuid, type RemoteTarget, type RemoteWorkspaceSessionEntry } from "@zcode/shared";
+import {
+  createUuid,
+  SOURCE_SERVER_INSTALL_REQUIRED_ERROR_CODE,
+  type RemoteConnectionContext,
+  type RemoteTarget,
+  type RemoteWorkspaceSessionEntry,
+} from "@zcode/shared";
 import {
   TID_SSH_CONNECT_TRIGGER,
   TID_SSH_DIALOG,
@@ -44,7 +50,11 @@ import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import type { VariantProps } from "class-variance-authority";
 
 interface RemoteConnectionDialogProps {
-  onConnect: (options: RemoteTarget, requestId?: string) => Promise<string>;
+  onConnect: (
+    options: RemoteTarget,
+    requestId?: string,
+    context?: RemoteConnectionContext,
+  ) => Promise<string>;
   onSelectProject: (sessionId: string, path: string, localWorkspacePath?: string) => Promise<void>;
   onCancelSession: (sessionId: string) => Promise<void>;
   localWorkspacePath?: string;
@@ -288,7 +298,32 @@ export function RemoteConnectionDialog({
     resetConnectionLogs();
     setCurrentStep("connecting");
     try {
-      const sessionId = await onConnect(nextTarget, requestId);
+      let sessionId: string;
+      try {
+        sessionId = await onConnect(nextTarget, requestId);
+      } catch (failure) {
+        // #68：R3 拒绝未经确认的新装是正确保护；旧向导丢弃该准入结果，导致导入后仍无法连接。
+        // 只对明确的 install-required 请求用户授权，不对普通错误或 upgrade/busy 重试。
+        if (
+          (failure as { code?: unknown } | null)?.code !== SOURCE_SERVER_INSTALL_REQUIRED_ERROR_CODE
+        )
+          throw failure;
+        const accepted = await confirmDialog({
+          title: intl.formatMessage({ id: "remote.runtime.confirmTitle" }),
+          description: intl.formatMessage({ id: "remote.runtime.confirmDescription" }),
+          confirmLabel: intl.formatMessage({ id: "remote.runtime.confirmInstall" }),
+          cancelLabel: intl.formatMessage({ id: "common.cancel" }),
+        });
+        if (!accepted) {
+          setCurrentStep("settings");
+          return;
+        }
+        const installRequestId = createUuid();
+        updateConnectingRequestId(installRequestId);
+        sessionId = await onConnect(nextTarget, installRequestId, {
+          confirmSourceServerInstall: true,
+        });
+      }
       const completionState = getRemoteConnectionCompletionDialogState("success");
       setConnectedSessionId(sessionId);
       setCurrentStep(completionState.step);

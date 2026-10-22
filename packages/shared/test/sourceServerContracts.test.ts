@@ -19,10 +19,41 @@ import {
   sourceServerOperationLogSchema,
   sourceServerInstallProgressSchema,
   sourceServerReleaseDescriptorSchema,
+  remoteRuntimeAssetSettingsSchema,
+  appSettingsSchema,
+  appSettingsPatchSchema,
+  remoteAssetDirsSchema,
 } from "../src/index.js";
 
 const profileId = "17ef20b3-622d-4a53-98c1-0cdff29f3e6d";
 const sourceServerId = "3cd4f9da-cd79-426c-9d70-75f36e9f6a87";
+
+describe("#68 运行时资源策略合同", () => {
+  it("存储、补丁与 Host 边界保留仅离线策略，旧配置保持兼容", () => {
+    const value = { mode: "offline" as const };
+    expect(appSettingsSchema.parse({ remoteRuntimeAssets: value }).remoteRuntimeAssets).toEqual(
+      value,
+    );
+    expect(
+      appSettingsPatchSchema.parse({ remoteRuntimeAssets: value }).remoteRuntimeAssets,
+    ).toEqual(value);
+    expect(
+      remoteAssetDirsSchema.parse({ runtimeAssetSettings: value }).runtimeAssetSettings,
+    ).toEqual(value);
+    expect(appSettingsSchema.parse({}).remoteRuntimeAssets).toBeUndefined();
+  });
+  it.each([
+    "file:///runtime",
+    "ftp://example.test/runtime",
+    "https://user:secret@example.test/runtime",
+    "https://example.test/runtime?token=secret",
+    "https://example.test/runtime#fragment",
+  ])("镜像拒绝非 HTTP(S) 与携带秘密的 URL：%s", (baseUrl) => {
+    expect(remoteRuntimeAssetSettingsSchema.safeParse({ mode: "online", baseUrl }).success).toBe(
+      false,
+    );
+  });
+});
 
 describe("R3 Source Server contracts", () => {
   it("negotiates optional virtualProjects without changing the legacy wire version", () => {

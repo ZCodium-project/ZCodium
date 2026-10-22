@@ -9,6 +9,8 @@ import {
   sourceServerManagementDirectoryDeltaSchema,
   sourceServerManagementStateDeltaSchema,
   sourceServerOperationLogSchema,
+  offlineRuntimeImportResultSchema,
+  type OfflineRuntimeImportResult,
   SOURCE_SERVER_REMOVE_CALLBACK_FAILED_ERROR_CODE,
   SOURCE_SERVER_REMOVE_CALLBACK_MISSING_ERROR_CODE,
   SOURCE_SERVER_REMOVE_PERSIST_FAILED_ERROR_CODE,
@@ -83,6 +85,7 @@ export function createSourceServerManagementService(options: {
   onBeforeSourceServerRemoved?: (sourceServerId: string) => Promise<void>;
   onConnectionLog?: NonNullable<ConnectSourceServerOptions["context"]>["onLog"];
   now?: () => number;
+  importOfflineRuntime?: (directory: string) => Promise<OfflineRuntimeImportResult>;
 }): SourceServerManagementService {
   let generation = 0;
   let disposed = false;
@@ -151,6 +154,11 @@ export function createSourceServerManagementService(options: {
   }
 
   return {
+    async importOfflineRuntime(directory) {
+      if (!options.importOfflineRuntime)
+        throw new Error("Offline runtime import is unavailable in this Host");
+      return offlineRuntimeImportResultSchema.parse(await options.importOfflineRuntime(directory));
+    },
     onDidChangeState: stateEmitter.event,
     onDidChangeDirectory: directoryEmitter.event,
     onDidAppendOperationLog: operationLogEmitter.event,

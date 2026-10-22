@@ -1,5 +1,6 @@
 /* oxlint-disable eslint(max-lines) -- AppSettings schema 聚合历史迁移、默认值和 patch 校验，拆分会削弱设置迁移的单一入口。 */
 import { z } from "zod";
+import { remoteRuntimeAssetSettingsSchema } from "./source-server/release.js";
 import { appToolSearchModeSchema } from "./app-runtime-preferences.js";
 import type { AppSettings } from "./protocol.js";
 import { REMOTE_ASSET_INSTALL_MODES } from "./remoteAssetInstallMode.js";
@@ -577,6 +578,7 @@ const appSettingsObjectSchema = z.object({
   // Bug 原因：该开关过去只声明在 patch schema，SettingService 合并后再走完整 schema 时会把
   // 显式 false 剥离，导致重启后恢复为默认开启。完整 schema 必须拥有这项持久化事实。
   remoteStartupAutoReconnectEnabled: z.boolean().optional(),
+  remoteRuntimeAssets: remoteRuntimeAssetSettingsSchema.optional(),
   sourceServerDirectoryMigrationVersion: z.literal(1).optional(),
   remoteBoundaryOnboardingVersion: z.literal(2).optional(),
   remoteBoundaryIntroAcknowledgedVersion: z.literal(1).optional(),
@@ -692,6 +694,7 @@ export const appSettingsPatchSchema = z.object({
   connectionProfiles: z.array(connectionProfileSchema).optional(),
   sourceServerWorkspaceHistory: z.array(sourceServerWorkspaceHistoryEntrySchema).optional(),
   remoteStartupAutoReconnectEnabled: z.boolean().optional(),
+  remoteRuntimeAssets: remoteRuntimeAssetSettingsSchema.optional(),
   sourceServerDirectoryMigrationVersion: z.literal(1).optional(),
   remoteBoundaryOnboardingVersion: z.literal(2).optional(),
   remoteBoundaryIntroAcknowledgedVersion: z.literal(1).optional(),

@@ -404,6 +404,8 @@ export interface AppSettings {
   sourceServerWorkspaceHistory?: import("./source-server/contracts.js").SourceServerWorkspaceHistoryEntry[];
   /** 桌面端启动时是否执行 Source Server 静默重连；缺失按 true 兼容旧设置。 */
   remoteStartupAutoReconnectEnabled?: boolean;
+  /** 控制端远端运行时来源；缺省为自有 Release，offline 禁止任何资源网络请求。 */
+  remoteRuntimeAssets?: import("./source-server/release.js").RemoteRuntimeAssetSettings;
   sourceServerDirectoryMigrationVersion?: 1;
   /** 旧客户端只接受 2；保留回滚兼容，新介绍不使用该字段判断已读。 */
   remoteBoundaryOnboardingVersion?: 2;

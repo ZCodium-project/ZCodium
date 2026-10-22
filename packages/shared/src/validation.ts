@@ -17,7 +17,10 @@ import { REMOTE_ASSET_INSTALL_MODES } from "./remoteAssetInstallMode.js";
 import { isKnownRemoteResourcePackageId } from "./remoteResourcePackages.js";
 import type { WebRemoteControlAppPayload } from "./web-remote-control.js";
 import { PROTOCOL_V4_LIMITS } from "./zcode-protocol-v4/core.js";
-import { sourceServerArtifactPolicySchema } from "./source-server/release.js";
+import {
+  sourceServerArtifactPolicySchema,
+  remoteRuntimeAssetSettingsSchema,
+} from "./source-server/release.js";
 import { sessionWorkflowActivitySchema } from "./zcode-protocol-v4/sessions-index-workflow-activity.js";
 import {
   webRemoteControlRpcTransportAckSchema,
@@ -507,6 +510,7 @@ export const remoteAssetDirsSchema = z.object({
   remoteCdnBaseUrls: z.array(z.string()).optional(),
   remoteCacheDir: z.string().optional(),
   sourceServerArtifactPolicy: sourceServerArtifactPolicySchema.optional(),
+  runtimeAssetSettings: remoteRuntimeAssetSettingsSchema.optional(),
 });
 
 const hostAgentWarmupTargetSchema = z.object({
@@ -969,6 +973,7 @@ export const hostRemoteWorkspaceContextBoundResponseSchema = z
   .object({
     type: z.literal("remote-workspace-context-bound"),
     requestId: nonEmptyStringSchema,
+    descriptor: windowHostRemoteWorkspaceDescriptorSchema.optional(),
     // Desktop tab rekey only；手机 replayable attachment 不消费该提示。
     previousWorkspaceIdentity: nonEmptyStringSchema.optional(),
   })

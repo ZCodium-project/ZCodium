@@ -123,6 +123,16 @@ export function applyDesktopTsupEsbuildSecurityOptions(options: DesktopTsupEsbui
 
 const desktopTsupBundleSecurityOptions = resolveDesktopTsupBundleSecurityOptions();
 
+export function resolveBuildRemoteRuntimeReleaseBase(
+  runtimeEnv: Record<string, string | undefined>,
+) {
+  return (
+    runtimeEnv.ZCODIUM_REMOTE_ASSET_CDN_BASE_URL?.trim() ||
+    runtimeEnv.ZCODE_REMOTE_ASSET_CDN_BASE_URL?.trim() ||
+    ""
+  );
+}
+
 function createSharedDefines() {
   return {
     __ZCODE_VERSION__: JSON.stringify(buildMetadata.appVersion),
@@ -141,6 +151,9 @@ function createSharedDefines() {
     // Bugfix: remote runtime CDN 根之前硬编码在 main bundle 里，OSS/CDN 切换必须改代码。
     // 这里改成构建期从 CI 的 CDN_DOMAIN/OSS_PATH_PREFIX 注入；没有配置时保留旧默认。
     __ZCODE_REMOTE_CDN_RELEASE_ROOTS__: JSON.stringify(resolveBuildRemoteCdnReleaseRoots(env)),
+    __ZCODIUM_REMOTE_ASSET_RELEASE_BASE__: JSON.stringify(
+      resolveBuildRemoteRuntimeReleaseBase({ ...env, ...process.env }),
+    ),
   };
 }
 

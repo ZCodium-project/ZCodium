@@ -82,6 +82,10 @@ describe("desktopWindowLifecycle createWindow", () => {
       ],
       agentSpawnFallbackCwd: fallbackCwd,
       deviceMid: "device-mid",
+      remoteAssets: {
+        remoteCacheDir: "/runtime-cache",
+        remoteCdnBaseUrl: "https://release.example.test/v1.16.3",
+      },
       runtimeProcessEnvFallbackPatch: {},
     });
 
@@ -100,6 +104,10 @@ describe("desktopWindowLifecycle createWindow", () => {
         ],
         agentSpawnFallbackCwd: fallbackCwd,
         runtimeProcessEnvPatch: {},
+        remoteAssets: {
+          remoteCacheDir: "/runtime-cache",
+          remoteCdnBaseUrl: "https://release.example.test/v1.16.3",
+        },
       }),
     );
   });

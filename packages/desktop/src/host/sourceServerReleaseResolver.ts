@@ -1,15 +1,27 @@
 import { normalizeRemoteConnectionError } from "@zcode/shared";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
-import { access, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import {
+  access,
+  copyFile,
+  lstat,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import {
   SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME,
   ZCODE_VERSION,
   normalizeRemoteAssetInstallMode,
   sourceServerReleaseDescriptorSchema,
+  remoteRuntimeAssetSettingsSchema,
+  type OfflineRuntimeImportResult,
   type RemoteTarget,
   type SourceServerReleaseArchive,
   type SourceServerReleaseDescriptor,
@@ -17,6 +29,7 @@ import {
 import {
   buildReleaseAssetUrlCandidates,
   buildReleaseBaseCandidates,
+  assertRemoteCdnBaseVersionMatches,
 } from "@zcode/server/remote/remoteAssetCdn.js";
 import {
   resolveRemoteAssetFetch,
@@ -69,10 +82,17 @@ function findArchive(
 }
 
 function resolveArchiveUrls(releaseBases: string[], archive: SourceServerReleaseArchive): string[] {
-  const absolute = archive.urls.filter((url) => /^https?:\/\//u.test(url));
+  const allowedOrigins = new Set(releaseBases.map((base) => new URL(base).origin));
+  // 显式镜像不能被 descriptor 内的绝对 URL 绕回另一个公网源。
+  const absolute = archive.urls.filter(
+    (url) => /^https?:\/\//u.test(url) && allowedOrigins.has(new URL(url).origin),
+  );
   const relative = archive.urls.filter((url) => !/^https?:\/\//u.test(url));
   return Array.from(
-    new Set([...absolute, ...buildReleaseAssetUrlCandidates(releaseBases, relative)]),
+    new Set([
+      ...absolute,
+      ...buildReleaseAssetUrlCandidates(releaseBases, [...relative, archive.fileName]),
+    ]),
   );
 }
 
@@ -100,6 +120,81 @@ async function resolveLocalDescriptor(
     throw new Error(`Source Server local archive failed descriptor verification: ${archivePath}`);
   }
   return { archive, archivePath };
+}
+
+/** #68：导入与部署共同使用同一严格校验器；提交指针之前绝不改写原有可用代。 */
+export async function importOfflineRuntime(
+  directory: string,
+  remoteCacheDir: string,
+): Promise<OfflineRuntimeImportResult> {
+  if (typeof directory !== "string" || !isAbsolute(directory) || !remoteCacheDir) {
+    throw new Error("Offline runtime requires an absolute directory and a local cache");
+  }
+  const descriptorPath = join(directory, SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME);
+  const info = await lstat(descriptorPath);
+  if (!info.isFile() || info.isSymbolicLink() || info.size > 1024 * 1024) {
+    throw new Error("Invalid offline runtime descriptor file");
+  }
+  const sourceDescriptor = readDescriptor(await readFile(descriptorPath, "utf8"));
+  const cacheRoot = join(remoteCacheDir, "source-server", ZCODE_VERSION);
+  const staging = join(cacheRoot, "offline", `.staging-${randomUUID()}`);
+  const archives: SourceServerReleaseArchive[] = [];
+  await mkdir(staging, { recursive: true });
+  try {
+    for (const archive of sourceDescriptor.archives) {
+      const source = join(directory, archive.fileName);
+      const fileInfo = await lstat(source).catch((error: NodeJS.ErrnoException) => {
+        if (error.code === "ENOENT") return null;
+        throw error;
+      });
+      // 发布描述文件列出所有平台，但用户可以只下载自己需要的平台。
+      if (!fileInfo) continue;
+      if (
+        !fileInfo.isFile() ||
+        fileInfo.isSymbolicLink() ||
+        !(await verifyArchive(source, archive))
+      ) {
+        throw new Error(`Offline runtime verification failed: ${archive.target}`);
+      }
+      const destination = join(staging, archive.fileName);
+      await copyFile(source, destination);
+      // 用户选中的目录仍可能被外部修改；复验副本，避免校验与复制之间的文件替换。
+      if (!(await verifyArchive(destination, archive))) {
+        throw new Error(`Offline runtime copy verification failed: ${archive.target}`);
+      }
+      archives.push(archive);
+    }
+    if (!archives.length) throw new Error("Offline runtime directory contains no platform archive");
+    const descriptorText = JSON.stringify({ ...sourceDescriptor, archives });
+    const descriptorHash = createHash("sha256").update(descriptorText).digest("hex");
+    const generation = `${descriptorHash}-${randomUUID()}`;
+    await writeTextAtomic(
+      join(staging, SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME),
+      descriptorText,
+    );
+    await rename(staging, join(cacheRoot, "offline", generation));
+    // 并发窗口各写独立代，最后原子发布；读取者永远不会看到半导入状态。
+    await writeTextAtomic(join(cacheRoot, "offline-active.json"), JSON.stringify({ generation }));
+    return { version: ZCODE_VERSION, targets: archives.map((archive) => archive.target) };
+  } catch (error) {
+    await rm(staging, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+async function resolveImportedArchive(cacheRoot: string, target: string) {
+  const pointer = join(cacheRoot, "offline-active.json");
+  if (!(await pathExists(pointer))) return null;
+  const { generation } = JSON.parse(await readFile(pointer, "utf8")) as { generation: unknown };
+  if (typeof generation !== "string" || !/^[a-f0-9]{64}-[a-f0-9-]{36}$/u.test(generation)) {
+    throw new Error("Invalid offline runtime generation");
+  }
+  const releaseDir = join(cacheRoot, "offline", generation);
+  const descriptor = readDescriptor(
+    await readFile(join(releaseDir, SOURCE_SERVER_RELEASE_DESCRIPTOR_FILE_NAME), "utf8"),
+  );
+  if (!descriptor.archives.some((archive) => archive.target === target)) return null;
+  return resolveLocalDescriptor(releaseDir, target);
 }
 
 async function resolveRemoteDescriptor(
@@ -202,6 +297,12 @@ async function resolveReleaseAsset(
     throw new Error(`Unsupported Source Server release target: ${probe.platform}-${probe.arch}`);
   }
   const target = `${probe.platform}-${probe.arch}`;
+  const settings = remoteRuntimeAssetSettingsSchema.parse(
+    remoteAssets.runtimeAssetSettings ?? { mode: "online" },
+  );
+  if (settings.mode !== "offline" && settings.baseUrl) {
+    assertRemoteCdnBaseVersionMatches([settings.baseUrl], ZCODE_VERSION);
+  }
   const installMode =
     remoteTarget.kind === "ssh"
       ? normalizeRemoteAssetInstallMode(remoteTarget.assetInstallMode)
@@ -209,6 +310,29 @@ async function resolveReleaseAsset(
   const cacheRoot = remoteAssets.remoteCacheDir
     ? join(remoteAssets.remoteCacheDir, "source-server", ZCODE_VERSION)
     : null;
+
+  const asLocalRelease = (
+    local: NonNullable<Awaited<ReturnType<typeof resolveLocalDescriptor>>>,
+  ) => ({
+    localArchivePath: local.archivePath,
+    target,
+    version: ZCODE_VERSION,
+    sha256: local.archive.sha256,
+    sizeBytes: local.archive.sizeBytes,
+    urls: [],
+  });
+  // 离线是硬网络边界，必须早于 fetch、metadata preview、开发态分支和 remote-download。
+  if (settings.mode === "offline") {
+    const local =
+      cacheRoot &&
+      ((await resolveImportedArchive(cacheRoot, target)) ??
+        (await resolveLocalDescriptor(cacheRoot, target)));
+    if (!local)
+      throw new Error(
+        `Source Server offline runtime missing for ${ZCODE_VERSION}/${target}; import the matching runtime first`,
+      );
+    return asLocalRelease(local);
+  }
 
   if (
     remoteTarget.kind === "ssh" &&
@@ -239,6 +363,13 @@ async function resolveReleaseAsset(
   }
 
   if (installMode === "local-download-upload") {
+    // 已验证的完整本地缓存无需先请求公网描述文件；这也是内网复用缓存的关键。
+    if (cacheRoot) {
+      const imported = await resolveImportedArchive(cacheRoot, target);
+      if (imported) return asLocalRelease(imported);
+      const cached = await resolveLocalDescriptor(cacheRoot, target).catch(() => null);
+      if (cached) return asLocalRelease(cached);
+    }
     // Bug 原因：开发态曾直接信任 gitignore 的 dist-release；同版本源码变化后仍会部署旧包。
     // 现在只接受本轮 staging 写入 mock-cdn 且通过 descriptor SHA/size 校验的本地产物。
     const localReleaseDirs = remoteAssets.mockCdnDir
@@ -259,7 +390,13 @@ async function resolveReleaseAsset(
   }
 
   const resolvedDescriptor = await resolveRemoteDescriptor(
-    remoteAssets,
+    settings.baseUrl
+      ? {
+          ...remoteAssets,
+          remoteCdnBaseUrls: [settings.baseUrl],
+          remoteCdnBaseUrl: settings.baseUrl,
+        }
+      : remoteAssets,
     cacheRoot,
     remoteAssetNetwork,
   );

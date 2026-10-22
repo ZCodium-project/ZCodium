@@ -178,7 +178,8 @@ async function writeSettingsAt(
   commitAccountSelection = false,
 ): Promise<void> {
   const settingsDir = dirname(settingsFile);
-  log("writing settings to:", settingsFile, JSON.stringify(settings));
+  // #68：镜像可能是企业内网地址；设置值也可能包含用户数据，生产日志只能记字段名。
+  log("writing settings fields:", Object.keys(settings));
   maybeThrowInjectedFsFault({ operation: "mkdir", path: settingsDir });
   await mkdir(settingsDir, { recursive: true });
   if (!shouldCommit()) return;

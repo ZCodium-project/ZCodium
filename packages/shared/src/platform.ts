@@ -681,6 +681,13 @@ export type CuaOsSupport =
  * 比如 native dialog、窗口生命周期控制等。
  * 业务服务（文件、终端、凭据等）走 IServiceAccessor 的 RPC 通道。
  */
+export type RemoteConnectionContext = {
+  workspacePath?: string;
+  workspaceIdentity?: string;
+  connectTrigger?: import("./remoteWorkspaceConnection.js").RemoteWorkspaceConnectTrigger;
+  confirmSourceServerInstall?: boolean;
+};
+
 export interface IPlatformService {
   /** 是否支持当前客户端本机文件的默认应用与目录操作；Web 不具备此能力。 */
   canOpenLocalFiles?: boolean;
@@ -756,12 +763,7 @@ export interface IPlatformService {
   connectRemote(
     options: RemoteTarget,
     requestId?: string,
-    context?: {
-      workspacePath?: string;
-      workspaceIdentity?: string;
-      connectTrigger?: import("./remoteWorkspaceConnection.js").RemoteWorkspaceConnectTrigger;
-      confirmSourceServerInstall?: boolean;
-    },
+    context?: RemoteConnectionContext,
   ): Promise<{
     success: boolean;
     error?: string;

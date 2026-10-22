@@ -181,7 +181,10 @@ import {
   createSourceServerManagementService,
   type SourceServerManagementService,
 } from "./sourceServerManagementService.js";
-import { resolveSourceServerReleaseAsset } from "./sourceServerReleaseResolver.js";
+import {
+  importOfflineRuntime,
+  resolveSourceServerReleaseAsset,
+} from "./sourceServerReleaseResolver.js";
 import { resolveAutomationSubmissionModelSelection } from "./automationModelSelection.js";
 import { createRemoteConnectionProgressContext } from "@zcode/server/remote/remoteConnectionProgressContext.js";
 import {
@@ -1922,7 +1925,11 @@ async function createWindowRemoteConnectionHandle(params: {
             resolveRelease: async (probe, target, options) =>
               await resolveSourceServerReleaseAsset(
                 probe,
-                params.remoteAssets,
+                {
+                  ...params.remoteAssets,
+                  runtimeAssetSettings: (await activeServices?.get(ISettingService).get())
+                    ?.remoteRuntimeAssets,
+                },
                 target,
                 {
                   fetch: requireActiveHostApiNetworkTransport().fetch,
@@ -3469,6 +3476,15 @@ parentPort.on("message", async (e: Electron.MessageEvent) => {
         parentPort.postMessage({
           type: HostResponseTypes.RemoteWorkspaceContextBound,
           requestId: msg.requestId,
+          descriptor: {
+            remoteSessionId: currentSession.remoteSessionId,
+            target: currentSession.target,
+            sourceServerId: currentSession.sourceServerId,
+            workspacePath: currentSession.workspacePath,
+            workspaceIdentity: currentSession.workspaceIdentity,
+            workspacePurpose: currentSession.workspacePurpose,
+            generation: currentSession.generation,
+          },
           // Bug 原因：首次从旧 route tab 打开 Source workspace 时，Renderer 只拿到 stable
           // identity 会误认为没有旧 tab，随后 addTab 产生第二个 workspace。把本次 bind
           // 使用的旧 route 作为一次性 tab rekey 提示返回；它不是任务路由身份，手机端忽略。
@@ -3912,16 +3928,18 @@ parentPort.on("message", async (e: Electron.MessageEvent) => {
           probe: Parameters<typeof resolveSourceServerReleaseAsset>[0],
           target: Parameters<typeof resolveSourceServerReleaseAsset>[2],
           options?: { metadataOnly?: boolean },
-        ) =>
-          await resolveSourceServerReleaseAsset(
+        ) => {
+          const settings = await services.get(ISettingService).get();
+          return await resolveSourceServerReleaseAsset(
             probe,
-            msg.remoteAssets ?? {},
+            { ...msg.remoteAssets, runtimeAssetSettings: settings.remoteRuntimeAssets },
             target,
             {
               fetch: hostApiNetworkTransport.fetch,
             },
             options,
           );
+        };
         sourceServerConnectionManager = new SourceServerConnectionManager({
           directory: sourceServerDirectory,
           admitConnection: createRemoteProjectConnectionAdmission(
@@ -3933,6 +3951,11 @@ parentPort.on("message", async (e: Electron.MessageEvent) => {
           resolveRelease: resolveSourceServerRelease,
         });
         sourceServerManagementService = createSourceServerManagementService({
+          importOfflineRuntime: async (directory) => {
+            const cache = msg.remoteAssets?.remoteCacheDir;
+            if (!cache) throw new Error("Source Server runtime cache is unavailable");
+            return await importOfflineRuntime(directory, cache);
+          },
           directory: sourceServerDirectory,
           manager: sourceServerConnectionManager,
           resolveRelease: resolveSourceServerRelease,

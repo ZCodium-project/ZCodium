@@ -537,7 +537,7 @@ export async function selectRemoteWorkspaceProjectFromDialog({
   }
 
   const canonicalPath = await resolveRemoteWorkspaceCanonicalPath(sessionId, path);
-  const workspaceIdentity = buildRemoteWorkspaceIdentity(canonicalPath, remoteTarget);
+  let workspaceIdentity = buildRemoteWorkspaceIdentity(canonicalPath, remoteTarget);
   const existingWorkspaceTab = getWorkspaceTabs().find(
     (tab): tab is import("@/store/tabStore.js").WorkspaceTabState =>
       isWorkspaceTab(tab) &&
@@ -572,6 +572,29 @@ export async function selectRemoteWorkspaceProjectFromDialog({
       workspacePath: canonicalPath,
       workspaceIdentity,
     });
+    const boundSession = getRemoteWorkspaceSession(sessionId);
+    if (boundSession?.sourceServerId) {
+      // #68：Source 的 canonical identity 由 Host bind 决定。若继续提交绑定前的 SSH
+      // route identity，tab、历史与手机 attachment 会落入不同身份桶；旧非 Source 链路仍兼容。
+      if (!boundSession.workspaceIdentity || boundSession.workspacePath !== canonicalPath)
+        throw new Error("Host canonical workspace scope is unavailable after bind");
+      workspaceIdentity = boundSession.workspaceIdentity;
+      const existingCanonical = getWorkspaceTabs().find(
+        (tab): tab is import("@/store/tabStore.js").WorkspaceTabState =>
+          isWorkspaceTab(tab) &&
+          tab.workspacePath === canonicalPath &&
+          tab.workspaceIdentity === workspaceIdentity,
+      );
+      if (
+        existingCanonical?.remoteSessionId &&
+        existingCanonical.remoteSessionId !== sessionId &&
+        activateTabByPath(canonicalPath, { workspaceIdentity })
+      ) {
+        onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
+        await handleCancelRemoteProject(sessionId);
+        return;
+      }
+    }
   } catch (error) {
     await handleCancelRemoteProject(sessionId);
     throw error;
@@ -755,7 +778,11 @@ export function useRemoteWorkspaceHistory({
     ) => {
       const result = await platform.connectRemote(target, requestId, context);
       if (!result.success) {
-        throw new Error(getErrorMessage(result.error || "Connection failed"));
+        // #68：首次安装确认依赖 Host 的结构化准入原因，不能只保留显示字符串。
+        throw Object.assign(new Error(getErrorMessage(result.error || "Connection failed")), {
+          code: result.reasonCode,
+          retryable: result.retryable,
+        });
       }
 
       if (!result.sessionId) {
@@ -767,7 +794,7 @@ export function useRemoteWorkspaceHistory({
       // 如果此时立刻 addTab，会短暂走到本地 services，导致首屏读目录/预热 ZCode Agent 命中错误服务。
       // 这里等 session 真正挂进 store 再继续。
       await waitForRemoteWorkspaceSessionReady(result.sessionId);
-      if (!context) {
+      if (!context?.workspacePath && !context?.workspaceIdentity) {
         // 共享 Host 只向 renderer store 回传脱敏 target；完整凭据只在选目录流程完成前临时保留。
         pendingConnectionTargetsBySessionIdRef.current.set(result.sessionId, target);
       }

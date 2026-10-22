@@ -1,5 +1,9 @@
 /* eslint-disable max-lines -- 远程连接、OAuth 回调和通知 IPC 共用窗口级上下文，集中注册避免跨文件状态漂移。 */
 import { app, BrowserWindow, ipcMain, shell } from "electron";
+import type {
+  RemoteConnectionContext,
+  BindRemoteWorkspaceSessionContextResult,
+} from "@zcode/shared";
 import {
   formatZodError,
   normalizeUnknownError,
@@ -138,7 +142,7 @@ export function registerRemoteIpcHandlers(options: {
     win: BrowserWindow,
     target: RemoteTarget,
     requestId?: string,
-    context?: { workspacePath: string; workspaceIdentity?: string },
+    context?: RemoteConnectionContext,
   ) => Promise<string>;
   disposeRemoteWorkspaceSession: (
     sessionId: string,
@@ -154,7 +158,7 @@ export function registerRemoteIpcHandlers(options: {
     sessionId: string,
     context: { workspacePath: string; workspaceIdentity?: string },
     expectedWebContentsId?: number,
-  ) => Promise<void>;
+  ) => Promise<BindRemoteWorkspaceSessionContextResult>;
   confirmRendererAttachmentReady: (
     webContentsId: number,
     payload: { sessionId: string; attachmentId: string },
@@ -258,6 +262,7 @@ export function registerRemoteIpcHandlers(options: {
       workspacePath?: unknown;
       workspaceIdentity?: unknown;
       connectTrigger?: unknown;
+      confirmSourceServerInstall?: unknown;
     } =
       rawPayload && typeof rawPayload === "object" && "target" in rawPayload
         ? (rawPayload as {
@@ -266,6 +271,7 @@ export function registerRemoteIpcHandlers(options: {
             workspacePath?: unknown;
             workspaceIdentity?: unknown;
             connectTrigger?: unknown;
+            confirmSourceServerInstall?: unknown;
           })
         : { target: rawPayload, requestId: undefined };
     const result = remoteTargetSchema.safeParse(wrappedPayload.target);
@@ -298,7 +304,14 @@ export function registerRemoteIpcHandlers(options: {
         win,
         result.data,
         requestId,
-        workspacePath ? { workspacePath, workspaceIdentity } : undefined,
+        workspacePath || wrappedPayload.confirmSourceServerInstall === true
+          ? {
+              ...(workspacePath ? { workspacePath, workspaceIdentity } : {}),
+              ...(wrappedPayload.confirmSourceServerInstall === true
+                ? { confirmSourceServerInstall: true }
+                : {}),
+            }
+          : undefined,
       );
       return { success: true, sessionId };
     } catch (error) {
@@ -310,7 +323,14 @@ export function registerRemoteIpcHandlers(options: {
         code: normalizedError.code,
         stack: error instanceof Error ? error.stack : undefined,
       });
-      return { success: false, error: normalizedError.message };
+      return {
+        success: false,
+        error: normalizedError.message,
+        reasonCode: normalizedError.code,
+        ...(typeof (error as { retryable?: unknown } | null)?.retryable === "boolean"
+          ? { retryable: (error as { retryable: boolean }).retryable }
+          : {}),
+      };
     }
   });
 
@@ -353,14 +373,17 @@ export function registerRemoteIpcHandlers(options: {
       if (!remoteSessionId || !workspacePath.trim()) {
         throw new Error("远程 workspace context 缺少 sessionId 或 workspacePath");
       }
-      await options.bindRemoteWorkspaceSessionContext(
-        remoteSessionId,
-        {
-          workspacePath,
-          ...(workspaceIdentity ? { workspaceIdentity } : {}),
-        },
-        event.sender.id,
-      );
+      try {
+        const result = await options.bindRemoteWorkspaceSessionContext(
+          remoteSessionId,
+          { workspacePath, ...(workspaceIdentity ? { workspaceIdentity } : {}) },
+          event.sender.id,
+        );
+        return { success: true, result };
+      } catch (error) {
+        const normalized = normalizeUnknownError(error);
+        return { success: false, error: normalized.message, reasonCode: normalized.code };
+      }
     },
   );
 

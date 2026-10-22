@@ -1,6 +1,18 @@
 import { requestSecurityMessagesZhCN } from "@/request-security-edition/messages.js";
 /** 中文翻译 */
 const zhCN: Record<string, string> = {
+  "remote.runtime.title": "运行时资源（本机全局设置）",
+  "remote.runtime.confirmTitle": "安装远端运行时？",
+  "remote.runtime.confirmDescription":
+    "远端尚未安装当前版本运行时。是否通过 SSH 部署并连接？仅离线模式下只上传已校验的本地包，不访问公网。",
+  "remote.runtime.confirmInstall": "安装并连接",
+  "remote.runtime.online": "自动下载／自定义镜像",
+  "remote.runtime.offline": "仅离线（不访问公网）",
+  "remote.runtime.mirror": "完整版本镜像地址；留空使用本仓 GitHub Release",
+  "remote.runtime.import": "导入离线运行时",
+  "remote.runtime.description":
+    "选择包含当前版本 source-server-release.json 和平台 tar.gz 的目录。导入成功后自动启用仅离线，始终由本机通过 SSH 上传；镜像失败不回退其他源。",
+  "remote.runtime.imported": "已校验并导入 {version}：{targets}",
   "startPlan.recommendation.subagentDescription":
     "你的体验套餐中，{model} 仍有可用额度，是否将此子智能体的模型切换到体验套餐？",
   "startPlan.recommendation.preferenceSaveFailed": "未能保存“不再提示”，本次仍按你的选择继续。",

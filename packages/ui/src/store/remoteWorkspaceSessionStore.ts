@@ -1,11 +1,16 @@
 import { create } from "zustand";
-import type { RemoteTarget } from "@zcode/shared";
+import type { RemoteTarget, WorkspacePurpose } from "@zcode/shared";
 import type { IServiceAccessor } from "@zcode/services";
 import { remoteAgentServiceGeneration } from "@/lib/remoteAgentServiceGeneration.js";
 import { createRemoteWorkspaceDisconnectedError } from "@/lib/remoteWorkspaceServiceError.js";
 
 export interface RemoteWorkspaceSession {
   sessionId: string;
+  /** Host scoped port 的只读投影；UI 不推导或持久化另一份 Source scope。 */
+  readonly sourceServerId?: string;
+  readonly workspacePath?: string;
+  readonly workspaceIdentity?: string;
+  readonly workspacePurpose?: WorkspacePurpose;
   target?: RemoteTarget;
   services: IServiceAccessor;
   dispose?: (reason?: Error) => void;

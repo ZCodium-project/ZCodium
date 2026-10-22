@@ -6,7 +6,7 @@ import {
 } from "../src/main/remoteCdn.js";
 
 describe("remoteCdn", () => {
-  it("中文且东八区时应优先国内 CDN", () => {
+  it("中文与东八区也只使用本仓完整版本 Release，不回退官方 CDN", () => {
     expect(
       shouldPreferDomesticRemoteCdn({
         locale: "zh-CN",
@@ -20,13 +20,10 @@ describe("remoteCdn", () => {
         timeZone: "Asia/Shanghai",
         version: "0.0.0-test",
       }),
-    ).toEqual([
-      "https://cdn.codegeex.cn/zcode/electron/releases/0.0.0-test",
-      "https://cdn-zcode.z.ai/zcode/electron/releases/0.0.0-test",
-    ]);
+    ).toEqual(["https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test"]);
   });
 
-  it("非中文或非东八区时应优先海外 CDN", () => {
+  it("其他语言与时区使用同一自有发行源", () => {
     expect(
       shouldPreferDomesticRemoteCdn({
         locale: "en-US",
@@ -46,10 +43,7 @@ describe("remoteCdn", () => {
         timeZone: "America/Los_Angeles",
         version: "0.0.0-test",
       }),
-    ).toEqual([
-      "https://cdn-zcode.z.ai/zcode/electron/releases/0.0.0-test",
-      "https://cdn.codegeex.cn/zcode/electron/releases/0.0.0-test",
-    ]);
+    ).toEqual(["https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test"]);
   });
 
   it("东八区判断应按 UTC 偏移而不是固定城市名单", () => {
@@ -58,7 +52,7 @@ describe("remoteCdn", () => {
     expect(isUtcPlusEightTimeZone("Asia/Tokyo")).toBe(false);
   });
 
-  it("测试产品环境应固定使用内网 SSH remote assets 根目录", () => {
+  it("测试环境也不隐式选择不可达内网地址，测试源须显式注入", () => {
     expect(
       resolveRemoteCdnBaseUrls({
         env: "test",
@@ -66,7 +60,7 @@ describe("remoteCdn", () => {
         timeZone: "Asia/Shanghai",
         version: "0.0.0-test",
       }),
-    ).toEqual(["http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test"]);
+    ).toEqual(["https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test"]);
   });
 
   it("显式覆盖 CDN 基址时不再按产品环境选择默认值", () => {

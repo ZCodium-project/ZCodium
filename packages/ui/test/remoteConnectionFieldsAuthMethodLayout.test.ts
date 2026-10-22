@@ -7,6 +7,10 @@ import { ZCodeIntlProvider } from "@/i18n/IntlProvider.js";
 import { RemoteConnectionFields } from "@/RemoteConnectionFields.js";
 import type { IPlatformService } from "@zcode/shared";
 
+vi.mock("@/hooks/useSettingService.js", () => ({
+  useRemoteRuntimeAssetSettings: () => ({ available: false }),
+}));
+
 const platform: IPlatformService = {
   activateOrSetWorkspace: vi.fn(),
   cancelRemoteConnection: vi.fn(),

@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ZCODE_VERSION } from "@zcode/shared";
-import { resolveSourceServerReleaseAsset } from "../src/host/sourceServerReleaseResolver.js";
+import {
+  importOfflineRuntime,
+  resolveSourceServerReleaseAsset,
+} from "../src/host/sourceServerReleaseResolver.js";
 
 const target = { kind: "ssh", host: "example.com", username: "alice" } as const;
 const probe = { platform: "linux", arch: "x64", installed: false } as const;
@@ -73,6 +76,168 @@ describe("Source Server release resolver", () => {
       sha256: sha256(contents),
       sizeBytes: Buffer.byteLength(contents),
     });
+  });
+
+  it("离线导入后禁用所有 fetch，remote-download 与预览仍只返回已验证本地包", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-offline-"));
+    const source = join(root, "source");
+    const cache = join(root, "cache");
+    await mkdir(source);
+    await writeFile(join(source, fileName), "offline-server");
+    await writeFile(
+      join(source, "source-server-release.json"),
+      JSON.stringify(descriptor("offline-server")),
+    );
+    const result = await importOfflineRuntime(source, cache);
+    expect(result).toEqual({ version: ZCODE_VERSION, targets: ["linux-x64"] });
+    const fetchMock = vi.fn().mockRejectedValue(new Error("公网禁止"));
+    vi.stubGlobal("fetch", fetchMock);
+    for (const metadataOnly of [false, true]) {
+      const release = await resolveSourceServerReleaseAsset(
+        probe,
+        {
+          remoteCacheDir: cache,
+          runtimeAssetSettings: { mode: "offline" },
+          remoteCdnBaseUrl: "https://must-not-connect.test",
+        },
+        { ...target, assetInstallMode: "remote-download" },
+        { fetch: fetchMock },
+        { metadataOnly },
+      );
+      expect(await readFile(release.localArchivePath!, "utf8")).toBe("offline-server");
+      expect(release.urls).toEqual([]);
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("离线缺包明确失败，绝不回退公网", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-offline-missing-"));
+    const fetchMock = vi.fn().mockRejectedValue(new Error("公网禁止"));
+    await expect(
+      resolveSourceServerReleaseAsset(
+        probe,
+        {
+          remoteCacheDir: root,
+          runtimeAssetSettings: { mode: "offline" },
+          remoteCdnBaseUrl: "https://must-not-connect.test",
+        },
+        target,
+        { fetch: fetchMock },
+      ),
+    ).rejects.toThrow("offline");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("拒绝错版本与符号链接，不把未校验输入写进缓存", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-offline-reject-"));
+    const source = join(root, "source");
+    await mkdir(source);
+    await writeFile(
+      join(source, "source-server-release.json"),
+      JSON.stringify({ ...descriptor("data"), version: "wrong-version" }),
+    );
+    await expect(importOfflineRuntime(source, join(root, "cache"))).rejects.toThrow();
+    await writeFile(join(source, "source-server-release.json"), JSON.stringify(descriptor("data")));
+    await writeFile(join(root, "external"), "data");
+    await symlink(join(root, "external"), join(source, fileName));
+    await expect(importOfflineRuntime(source, join(root, "cache"))).rejects.toThrow("verification");
+  });
+
+  it("允许只导入所需平台，离线访问未导入的平台不联网", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-offline-platform-"));
+    const source = join(root, "source");
+    const cache = join(root, "cache");
+    await mkdir(source);
+    const meta = descriptor("data");
+    await writeFile(
+      join(source, "source-server-release.json"),
+      JSON.stringify({
+        ...meta,
+        archives: [
+          ...meta.archives,
+          {
+            ...meta.archives[0],
+            target: "linux-arm64",
+            fileName: "zcode-server-linux-arm64.tar.gz",
+          },
+        ],
+      }),
+    );
+    await writeFile(join(source, fileName), "data");
+    expect((await importOfflineRuntime(source, cache)).targets).toEqual(["linux-x64"]);
+    const fetchMock = vi.fn().mockRejectedValue(new Error("不能联网"));
+    await expect(
+      resolveSourceServerReleaseAsset(
+        { ...probe, arch: "arm64" },
+        { remoteCacheDir: cache, runtimeAssetSettings: { mode: "offline" } },
+        target,
+        { fetch: fetchMock },
+      ),
+    ).rejects.toThrow("offline");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("镜像独占来源，不接受 descriptor 内其他公网域名", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-mirror-"));
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      expect(url.startsWith("https://mirror.example.test/")).toBe(true);
+      if (url.endsWith(".json")) {
+        const meta = descriptor("data");
+        meta.archives[0].urls = ["https://other-public.example.test/archive.tar.gz"];
+        return new Response(JSON.stringify(meta));
+      }
+      return new Response("data");
+    });
+    await resolveSourceServerReleaseAsset(
+      probe,
+      {
+        remoteCacheDir: root,
+        runtimeAssetSettings: {
+          mode: "online",
+          baseUrl: `https://mirror.example.test/v${ZCODE_VERSION}`,
+        },
+        remoteCdnBaseUrl: "https://default-must-not-use.test",
+      },
+      target,
+      { fetch: fetchMock },
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("损坏导入失败但不改变原有已验证代", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-offline-integrity-"));
+    const source = join(root, "source");
+    const cache = join(root, "cache");
+    await mkdir(source);
+    await writeFile(join(source, fileName), "good");
+    await writeFile(join(source, "source-server-release.json"), JSON.stringify(descriptor("good")));
+    await importOfflineRuntime(source, cache);
+    await writeFile(join(source, fileName), "broken");
+    await expect(importOfflineRuntime(source, cache)).rejects.toThrow("verification");
+    const release = await resolveSourceServerReleaseAsset(
+      probe,
+      {
+        remoteCacheDir: cache,
+        runtimeAssetSettings: { mode: "offline" },
+      },
+      target,
+    );
+    expect(await readFile(release.localArchivePath!, "utf8")).toBe("good");
+  });
+
+  it("在线完整缓存命中无需再次请求描述文件", async () => {
+    const root = await mkdtemp(join(tmpdir(), "zcodium-cache-first-"));
+    const dir = join(root, "source-server", ZCODE_VERSION);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, fileName), "cached");
+    await writeFile(join(dir, "source-server-release.json"), JSON.stringify(descriptor("cached")));
+    const fetchMock = vi.fn().mockRejectedValue(new Error("不应联网"));
+    const result = await resolveSourceServerReleaseAsset(probe, { remoteCacheDir: root }, target, {
+      fetch: fetchMock,
+    });
+    expect(result.localArchivePath).toBe(join(dir, fileName));
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("uses the staged local archive for development even when SSH prefers remote download", async () => {

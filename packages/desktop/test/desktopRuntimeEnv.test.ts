@@ -24,7 +24,8 @@ vi.mock("electron", () => ({
   app: appMock,
 }));
 
-vi.mock("@zcode/shared", () => ({
+vi.mock("@zcode/shared", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@zcode/shared")>()),
   ZCODE_APP_VERSION_ENV: "ZCODE_APP_VERSION",
   ZCODE_BUILD_COMMIT_ID_ENV: "ZCODE_BUILD_COMMIT_ID",
   ZCODE_RUNTIME_ENV_KEY: "ZCODE_RUNTIME_ENV",
@@ -307,10 +308,10 @@ describe("desktopRuntimeEnv resolveRemoteAssetDirs", () => {
       expect(dirs.mockCdnDir).toMatch(/[\\/]mock-cdn$/);
       expect(dirs.sourceServerArtifactPolicy).toBe("development-content-addressed");
       expect(dirs.remoteCdnBaseUrl).toBe(
-        "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+        "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
       );
       expect(dirs.remoteCdnBaseUrls).toEqual([
-        "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+        "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
       ]);
       expect(dirs.remoteCacheDir).toMatch(/[\\/]userData[\\/]remote-assets-cache$/);
     });
@@ -327,10 +328,10 @@ describe("desktopRuntimeEnv resolveRemoteAssetDirs", () => {
       expect(dirs.mockCdnDir).toBeUndefined();
       expect(dirs.sourceServerArtifactPolicy).toBe("development-content-addressed");
       expect(dirs.remoteCdnBaseUrl).toBe(
-        "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+        "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
       );
       expect(dirs.remoteCdnBaseUrls).toEqual([
-        "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+        "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
       ]);
       expect(dirs.remoteCacheDir).toMatch(/[\\/]userData[\\/]remote-assets-cache$/);
     });
@@ -346,10 +347,10 @@ describe("desktopRuntimeEnv resolveRemoteAssetDirs", () => {
     expect(dirs.mockCdnDir).toBeUndefined();
     expect(dirs.sourceServerArtifactPolicy).toBeUndefined();
     expect(dirs.remoteCdnBaseUrl).toBe(
-      "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+      "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
     );
     expect(dirs.remoteCdnBaseUrls).toEqual([
-      "http://intranet.example.invalid:12345/ssh-remote-assets/0.0.0-test",
+      "https://github.com/ZCodium-project/ZCodium/releases/download/v0.0.0-test",
     ]);
     expect(dirs.remoteCacheDir).toMatch(/[\\/]userData[\\/]remote-assets-cache$/);
   });

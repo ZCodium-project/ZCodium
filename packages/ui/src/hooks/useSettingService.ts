@@ -1,11 +1,16 @@
 /**
  * useSettingService —— 设置服务 hooks
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { APP_RUNTIME_PREFERENCES_CHANGED_BROADCAST_CHANNEL, type AppSettings } from "@zcode/shared";
 import type { ISettingService } from "@zcode/services";
 import { useServices } from "./useServices.js";
 import { usePlatform } from "./usePlatform.js";
+import {
+  remoteRuntimeAssetSettingsSchema,
+  type OfflineRuntimeImportResult,
+  type RemoteRuntimeAssetSettings,
+} from "@zcode/shared";
 
 type SettingsSnapshot = {
   settings: AppSettings | null;
@@ -200,6 +205,63 @@ export function useSettings() {
     error: snapshot.error,
     update,
     refresh,
+  };
+}
+
+/** #68：只通过本机 Host RPC 导入，UI 不读文件、不维护第二份部署缓存。 */
+export function useRemoteRuntimeAssetSettings() {
+  const { sourceServerManagementService } = useServices();
+  const platform = usePlatform();
+  const { settings, update } = useSettings();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [imported, setImported] = useState<OfflineRuntimeImportResult | null>(null);
+  const revision = useRef(0);
+  useEffect(
+    () => () => {
+      revision.current += 1;
+    },
+    [],
+  );
+  const configure = useCallback(
+    async (value: RemoteRuntimeAssetSettings) => {
+      revision.current += 1;
+      setError("");
+      try {
+        await update({ remoteRuntimeAssets: remoteRuntimeAssetSettingsSchema.parse(value) });
+      } catch (failure) {
+        setError(failure instanceof Error ? failure.message : String(failure));
+      }
+    },
+    [update],
+  );
+  const importDirectory = useCallback(async () => {
+    if (!sourceServerManagementService || busy) return;
+    const operation = ++revision.current;
+    setBusy(true);
+    setError("");
+    try {
+      const directory = await platform.selectDirectory();
+      if (!directory || operation !== revision.current) return;
+      const result = await sourceServerManagementService.importOfflineRuntime(directory);
+      if (operation !== revision.current) return;
+      setImported(result);
+      await update({ remoteRuntimeAssets: { mode: "offline" } });
+    } catch (failure) {
+      if (operation === revision.current)
+        setError(failure instanceof Error ? failure.message : String(failure));
+    } finally {
+      setBusy(false);
+    }
+  }, [sourceServerManagementService, busy, platform, update]);
+  return {
+    available: Boolean(sourceServerManagementService),
+    value: settings?.remoteRuntimeAssets,
+    configure,
+    importDirectory,
+    busy,
+    error,
+    imported,
   };
 }
 

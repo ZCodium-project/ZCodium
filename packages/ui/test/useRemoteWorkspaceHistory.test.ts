@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { RemoteWorkspaceSessionEntry } from "@zcode/shared";
+import { buildServerRemoteWorkspaceIdentity } from "@zcode/shared";
 import type { WindowTabState } from "@/store/tabStore.js";
 import type { ReconnectRemoteWorkspaceOptions } from "@/root/reconnectRemoteWorkspaceHistoryEntry.js";
 import {
@@ -22,6 +23,52 @@ import {
   buildRemoteWorkspaceIdentity,
   buildWorkspaceSessionKey,
 } from "@/lib/remoteWorkspaceHistory.js";
+
+it("#68：Source bind 后只提交 Host canonical identity，而非 SSH route identity", async () => {
+  const target = { kind: "ssh" as const, host: "example.test", username: "fixture" };
+  const workspacePath = "/repo";
+  const canonical = buildServerRemoteWorkspaceIdentity({
+    serverId: "fixture-source",
+    workspacePath,
+  });
+  let bound = false;
+  const addTab = vi.fn();
+  const commit = vi.fn(async (mutation) => mutation.entry);
+  await selectRemoteWorkspaceProjectFromDialog({
+    canUseRemoteWorkspace: true,
+    sessionId: "source-session",
+    path: workspacePath,
+    loadingMessage: "loading",
+    connectionTarget: target,
+    getRemoteWorkspaceSession: () => ({
+      sessionId: "source-session",
+      sourceServerId: "fixture-source",
+      target,
+      services: {} as never,
+      workspacePath: bound ? workspacePath : "/",
+      workspaceIdentity: bound ? canonical : "initial-scope",
+    }),
+    getWorkspaceTabs: () => [],
+    resolveRemoteWorkspaceCanonicalPath: async () => workspacePath,
+    activateTabByPath: () => false,
+    handleCancelRemoteProject: async () => {},
+    bindRemoteWorkspaceSessionContext: async () => {
+      bound = true;
+    },
+    commitRemoteWorkspaceSessionMutation: commit,
+    getRemoteSessions: () => [],
+    bindRemoteWorkspacePath: vi.fn(),
+    bindRemoteWorkspaceIdentity: vi.fn(),
+    addTab,
+    refreshPinnedTasks: async () => {},
+    refreshTimelineTasks: async () => {},
+  });
+  expect(addTab).toHaveBeenCalledWith(
+    workspacePath,
+    expect.objectContaining({ workspaceIdentity: canonical }),
+  );
+  expect(commit.mock.calls[0][0].entry.workspaceIdentity).toBe(canonical);
+});
 
 function createRemoteWorkspaceSessionEntry(
   overrides: Partial<RemoteWorkspaceSessionEntry> = {},

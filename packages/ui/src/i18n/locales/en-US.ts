@@ -1,6 +1,19 @@
 import { requestSecurityMessagesEnUS } from "@/request-security-edition/messages.js";
 /** English translations */
 const enUS: Record<string, string> = {
+  "remote.runtime.title": "Runtime assets (local application setting)",
+  "remote.runtime.confirmTitle": "Install the remote runtime?",
+  "remote.runtime.confirmDescription":
+    "The remote host does not have the current runtime. Deploy it through SSH and connect? Offline mode only uploads verified local files and never accesses the public network.",
+  "remote.runtime.confirmInstall": "Install and connect",
+  "remote.runtime.online": "Automatic download / custom mirror",
+  "remote.runtime.offline": "Offline only (no public network)",
+  "remote.runtime.mirror":
+    "Version-pinned mirror URL; leave blank for this repository's GitHub Release",
+  "remote.runtime.import": "Import offline runtime",
+  "remote.runtime.description":
+    "Choose a directory containing source-server-release.json and platform tar.gz files for this app version. Import enables offline mode and uploads through SSH; mirror failures never fall back to another source.",
+  "remote.runtime.imported": "Verified and imported {version}: {targets}",
   "startPlan.recommendation.subagentDescription":
     "Your Start Plan has quota available for {model}. Switch this subagent’s model to the Start Plan?",
   "startPlan.recommendation.preferenceSaveFailed":

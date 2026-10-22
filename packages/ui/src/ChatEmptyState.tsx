@@ -7,6 +7,7 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.js";
+import type { RemoteConnectionContext } from "@zcode/shared";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -200,7 +201,11 @@ export function ChatEmptyWorkspacePreviewMenu({
   allowOpenWorkspace?: boolean;
   allowRemoteWorkspace?: boolean;
   remoteWorkspaceSessions?: RemoteWorkspaceSessionEntry[];
-  onConnectRemote: (options: RemoteTarget, requestId?: string) => Promise<string>;
+  onConnectRemote: (
+    options: RemoteTarget,
+    requestId?: string,
+    context?: RemoteConnectionContext,
+  ) => Promise<string>;
   onSelectRemoteProject: (
     sessionId: string,
     path: string,

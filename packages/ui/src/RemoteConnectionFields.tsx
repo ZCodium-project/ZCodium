@@ -30,6 +30,7 @@ import {
 } from "@zcode/shared";
 import type { SSHAuthMethod } from "@/hooks/useRemoteConnectionForm.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
+import { useRemoteRuntimeAssetSettings } from "@/hooks/useSettingService.js";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { Input } from "@/components/ui/input.js";
@@ -61,6 +62,99 @@ function formatSshConfigAliasSummary(aliasOption: SSHConfigAliasOption): string 
   const username = aliasOption.username?.trim();
   const withUser = username ? `${username}@${host}` : host;
   return aliasOption.port != null ? `${withUser}:${aliasOption.port}` : withUser;
+}
+
+function RemoteRuntimeAssetSettings() {
+  const { intl } = useZCodeIntl();
+  const runtime = useRemoteRuntimeAssetSettings();
+  const [mirror, setMirror] = useState("");
+  useEffect(() => setMirror(runtime.value?.baseUrl ?? ""), [runtime.value?.baseUrl]);
+  if (!runtime.available) return null;
+  const mode = runtime.value?.mode ?? "online";
+  return (
+    <section
+      className="space-y-2 rounded-lg border border-border p-3"
+      data-testid="remote-runtime-assets"
+    >
+      <label className="block text-ui-base text-foreground-subtle">
+        {intl.formatMessage({ id: "remote.runtime.title" })}
+      </label>
+      <Select
+        value={mode}
+        onValueChange={(value) => {
+          void runtime.configure(
+            value === "offline"
+              ? { mode: "offline" }
+              : { mode: "online", ...(mirror.trim() ? { baseUrl: mirror.trim() } : {}) },
+          );
+        }}
+      >
+        <SelectTrigger data-testid="remote-runtime-mode">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="online">
+            {intl.formatMessage({ id: "remote.runtime.online" })}
+          </SelectItem>
+          <SelectItem value="offline">
+            {intl.formatMessage({ id: "remote.runtime.offline" })}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      {mode === "online" ? (
+        <div className="flex flex-wrap gap-2">
+          <Input
+            className="min-w-0 flex-1 text-ui-base"
+            data-testid="remote-runtime-mirror"
+            value={mirror}
+            onChange={(event) => setMirror(event.target.value)}
+            placeholder={intl.formatMessage({ id: "remote.runtime.mirror" })}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void runtime.configure({
+                mode: "online",
+                ...(mirror.trim() ? { baseUrl: mirror.trim() } : {}),
+              });
+            }}
+          >
+            {intl.formatMessage({ id: "common.save" })}
+          </Button>
+        </div>
+      ) : null}
+      <Button
+        type="button"
+        variant="outline"
+        data-testid="remote-runtime-import"
+        disabled={runtime.busy}
+        onClick={() => {
+          void runtime.importDirectory();
+        }}
+      >
+        {runtime.busy
+          ? intl.formatMessage({ id: "common.loading" })
+          : intl.formatMessage({ id: "remote.runtime.import" })}
+      </Button>
+      <p className="text-ui-caption text-foreground-subtle">
+        {intl.formatMessage({ id: "remote.runtime.description" })}
+      </p>
+      {runtime.imported ? (
+        <p role="status" className="text-ui-caption text-success">
+          {intl.formatMessage(
+            { id: "remote.runtime.imported" },
+            { version: runtime.imported.version, targets: runtime.imported.targets.join(", ") },
+          )}
+        </p>
+      ) : null}
+      {runtime.error ? (
+        <p role="alert" className="break-words text-ui-caption text-destructive">
+          {runtime.error}
+        </p>
+      ) : null}
+    </section>
+  );
 }
 
 export function RemoteConnectionFields({
@@ -532,6 +626,7 @@ export function RemoteConnectionFields({
               {intl.formatMessage({ id: "ssh.assetInstallModeDescription" })}
             </p>
           </div>
+          <RemoteRuntimeAssetSettings />
         </div>
       );
     case "server":

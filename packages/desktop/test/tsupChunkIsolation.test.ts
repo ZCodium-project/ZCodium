@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import tsupConfig, {
   resolveBuildRemoteCdnReleaseRoots,
+  resolveBuildRemoteRuntimeReleaseBase,
   resolveDesktopTsupBundleSecurityOptions,
 } from "../tsup.config";
 
@@ -8,6 +9,17 @@ type EsbuildLikeOptions = {
   chunkNames?: string;
   legalComments?: string;
 };
+
+it("#68：fork 的完整 tag 地址编译入发布源，新环境变量优先", () => {
+  const base = "https://github.com/example/fork/releases/download/v1.16.3";
+  expect(
+    resolveBuildRemoteRuntimeReleaseBase({
+      ZCODIUM_REMOTE_ASSET_CDN_BASE_URL: ` ${base} `,
+      ZCODE_REMOTE_ASSET_CDN_BASE_URL: "https://legacy.test",
+    }),
+  ).toBe(base);
+  expect(resolveBuildRemoteRuntimeReleaseBase({})).toBe("");
+});
 
 function getChunkNames(configName: string): string | undefined {
   const configs = Array.isArray(tsupConfig) ? tsupConfig : [tsupConfig];

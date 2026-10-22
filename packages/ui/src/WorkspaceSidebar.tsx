@@ -1,4 +1,5 @@
 /* eslint-disable max-lines -- 归档视图开关沿用现有 sidebar 结构，先保持同文件收口。 */
+import type { RemoteConnectionContext } from "@zcode/shared";
 import {
   memo,
   useCallback,
@@ -286,7 +287,11 @@ export const WorkspaceSidebar = memo(function WorkspaceSidebarComponent({
   webRemoteControlWorkspaceSwitcher?: import("@/root/types.js").WebRemoteControlWorkspaceSwitcherApi;
   isWebRemoteControl?: boolean;
   theme: Theme;
-  onConnectRemote: (options: RemoteTarget, requestId?: string) => Promise<string>;
+  onConnectRemote: (
+    options: RemoteTarget,
+    requestId?: string,
+    context?: RemoteConnectionContext,
+  ) => Promise<string>;
   onSelectRemoteProject: (
     sessionId: string,
     path: string,

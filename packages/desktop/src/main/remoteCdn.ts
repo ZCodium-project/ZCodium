@@ -1,13 +1,7 @@
 import { ZCODE_VERSION, type ZCodeEnv } from "@zcode/shared";
 
 declare const __ZCODE_REMOTE_CDN_RELEASE_ROOTS__: readonly string[] | undefined;
-
-const REMOTE_CDN_RELEASE_ROOTS = {
-  domestic: "https://cdn.codegeex.cn/zcode/electron/releases",
-  // 开发构建未注入 CDN_DOMAIN 时也须使用当前发布域名，避免仍请求旧域名。
-  overseas: "https://cdn-zcode.z.ai/zcode/electron/releases",
-} as const;
-const TEST_REMOTE_CDN_RELEASE_ROOT = "http://intranet.example.invalid:12345/ssh-remote-assets";
+declare const __ZCODIUM_REMOTE_ASSET_RELEASE_BASE__: string | undefined;
 
 export interface ResolveRemoteCdnOptions {
   env?: ZCodeEnv;
@@ -49,13 +43,14 @@ export function resolveRemoteCdnBaseUrls(options: ResolveRemoteCdnOptions = {}):
     return [normalizeBaseUrl(overrideBaseUrl)];
   }
 
-  const orderedReleaseRoots = shouldPreferDomesticRemoteCdn(options)
-    ? [REMOTE_CDN_RELEASE_ROOTS.domestic, REMOTE_CDN_RELEASE_ROOTS.overseas]
-    : [REMOTE_CDN_RELEASE_ROOTS.overseas, REMOTE_CDN_RELEASE_ROOTS.domestic];
   const version = options.version ?? ZCODE_VERSION;
-
-  if (options.env === "test") {
-    return [`${TEST_REMOTE_CDN_RELEASE_ROOT}/${version}`];
+  // #68：发布流程已经传入本仓地址，但旧打包器未消费它，最终仍请求不存在的官方 1.x 资产。
+  // 必须使用完整 tag 目录，不能把 /download/v 与 /<version> 机械拼成 /v/<version>。
+  if (
+    typeof __ZCODIUM_REMOTE_ASSET_RELEASE_BASE__ !== "undefined" &&
+    __ZCODIUM_REMOTE_ASSET_RELEASE_BASE__
+  ) {
+    return [normalizeBaseUrl(__ZCODIUM_REMOTE_ASSET_RELEASE_BASE__)];
   }
 
   const configuredReleaseRoots =
@@ -70,7 +65,7 @@ export function resolveRemoteCdnBaseUrls(options: ResolveRemoteCdnOptions = {}):
     );
   }
 
-  return orderedReleaseRoots.map((releaseRoot) => `${releaseRoot}/${version}`);
+  return [`https://github.com/ZCodium-project/ZCodium/releases/download/v${version}`];
 }
 
 export function resolvePrimaryRemoteCdnBaseUrl(
