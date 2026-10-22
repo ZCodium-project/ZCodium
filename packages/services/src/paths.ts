@@ -14,7 +14,10 @@ import {
 let _dataBaseDir: string | null = null;
 export const ZCODE_WINDOWS_APP_INSTALL_DIR_ENV = "ZCODE_WINDOWS_APP_INSTALL_DIR";
 const envDataBaseDir = readExternalEnvVar(process.env, "ZCODE_DATA_BASE_DIR") ?? null;
-const defaultDataBaseDir = process.env.HOME?.trim() || homedir();
+// 独立桌面 Dev 实例通过 ZCODE_DESKTOP_HOME_DIR 指定自己的 home；用户级数据根必须
+// 与该 home 一致，否则设置会写真实 HOME、其它数据写 Dev home。
+const defaultDataBaseDir =
+  process.env.ZCODE_DESKTOP_HOME_DIR?.trim() || process.env.HOME?.trim() || homedir();
 
 /**
  * 显式注入的 ZCODE_DATA_BASE_DIR 是 dev test / e2e 的数据目录隔离硬边界：
