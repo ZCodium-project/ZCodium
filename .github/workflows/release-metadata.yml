@@ -1,0 +1,79 @@
+name: Release metadata
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-metadata.yml"
+      - "scripts/release-update-metadata.mjs"
+      - "scripts/test/release-update-metadata.test.mjs"
+      - "packages/desktop/specs/github-release-update-metadata.md"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "只读演练：已有公开 Release 的版本，不上传、不改 tag"
+        type: string
+        default: "1.16.3"
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.14.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node --test scripts/test/release-update-metadata.test.mjs
+
+  published-rehearsal:
+    needs: regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # 固定已发布回归样本，不跟随未发布的 package.json 版本或 latest 漂移。
+      VERSION: ${{ inputs.release_version || '1.16.3' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.14.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Download public installers and update metadata (read only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/metadata-rehearsal/downloads
+          gh release view "v$VERSION" --json tagName,isDraft,assets > dist/metadata-rehearsal/release.json
+          node -e 'if (JSON.parse(require("node:fs").readFileSync("dist/metadata-rehearsal/release.json")).isDraft !== false) throw new Error("Rehearsal requires a public release")'
+          gh release download "v$VERSION" --dir dist/metadata-rehearsal/downloads \
+            --pattern "ZCodium-$VERSION-*" --pattern 'latest*.yml'
+      - name: Exercise five producers and the single metadata owner
+        run: |
+          set -euo pipefail
+          for target in mac-arm64 mac-x64 win-x64 linux-x64 linux-arm64; do
+            node scripts/release-update-metadata.mjs stage \
+              --directory dist/metadata-rehearsal/downloads \
+              --out "dist/metadata-rehearsal/fragments/$target" \
+              --platform "${target%-*}" --arch "${target##*-}" --version "$VERSION"
+          done
+          node scripts/release-update-metadata.mjs merge \
+            --fragments dist/metadata-rehearsal/fragments --out dist/metadata-rehearsal/candidate \
+            --version "$VERSION" --release-json dist/metadata-rehearsal/release.json
+          node scripts/release-update-metadata.mjs verify \
+            --fragments dist/metadata-rehearsal/fragments --directory dist/metadata-rehearsal/downloads \
+            --version "$VERSION" --release-json dist/metadata-rehearsal/release.json

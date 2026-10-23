@@ -326,26 +326,21 @@ jobs:
           - runner: macos-14
             target: mac
             arch: arm64
-            glob: "*.dmg"
           - runner: macos-15-intel
             target: mac
             arch: x64
-            glob: "*.dmg"
           - runner: windows-latest
             target: win
             arch: x64
-            glob: "*.exe"
           - runner: ubuntu-latest
             target: linux
             arch: x64
-            glob: "*.AppImage"
           # GitHub 公开仓库免费的 ARM64 runner（ubuntu-24.04-arm）；electron-builder 在原生 arm64 上
           # 打包 linux arm64 的 AppImage/deb，无需 QEMU 交叉仿真。
           # 更新元数据生成 latest-linux-arm64.yml，与 x64 的 latest-linux.yml 不冲突，可并行上传。
           - runner: ubuntu-24.04-arm
             target: linux
             arch: arm64
-            glob: "*.AppImage"
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -381,11 +376,22 @@ jobs:
           ZCODE_ENV: production
           # 文件名与应用版本带上完整审计版本（如 1.0.0-audit.20260922.6），不再只写 1.0.0。
           ZCODE_APP_VERSION: ${{ needs.release.outputs.version }}
-          # 内置远程资源默认源：指向本仓库该 tag 的 GitHub Release 资产（zz- 布局）。
+          # 内置远程资源默认源：指向本仓库该 tag 的 descriptor/archive。
           # 安装后的客户端开箱即可连接 WSL/SSH，不再要求用户配置环境变量。
           ZCODIUM_REMOTE_ASSET_CDN_BASE_URL: https://github.com/${{ github.repository }}/releases/download/${{ needs.release.outputs.tag }}
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: pnpm bundle:desktop -- --os ${{ matrix.target }} --arch ${{ matrix.arch }}
+
+      - name: Stage verified desktop metadata fragment
+        # Windows 默认 PowerShell 不展开 $VERSION；与后续上传保持同一 Bash 合同。
+        shell: bash
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+        run: >-
+          node scripts/release-update-metadata.mjs stage
+          --directory packages/desktop/dist
+          --out dist/release-update-metadata/${{ matrix.target }}-${{ matrix.arch }}
+          --platform ${{ matrix.target }} --arch ${{ matrix.arch }} --version "$VERSION"
 
       - name: Upload desktop asset to release
         shell: bash
@@ -394,16 +400,11 @@ jobs:
           TAG: ${{ needs.release.outputs.tag }}
         run: |
           set -euo pipefail
-          ls -la packages/desktop/dist/
-          # latest*.yml 是 electron-updater 的更新元数据，应用靠它做自动更新；
-          # macOS 自动更新需要 zip 包（electron-updater 用 zip 而不是 dmg），blockmap 供差分下载。
-          shopt -s nullglob
-          files=(
-            packages/desktop/dist/${{ matrix.glob }}
-            packages/desktop/dist/latest*.yml
-            packages/desktop/dist/*.zip
-            packages/desktop/dist/*.blockmap
-          )
+          # #76：并行 job 不写最终清单，只上传 stage 已验证的本架构文件和 blockmap。
+          files=()
+          while IFS= read -r file; do
+            files+=("$file")
+          done < dist/release-update-metadata/${{ matrix.target }}-${{ matrix.arch }}/upload-paths.txt
           if [ ${#files[@]} -eq 0 ]; then
             echo "::error::no desktop assets matched in packages/desktop/dist"
             exit 1
@@ -419,30 +420,14 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
-      # 校验片段：只覆盖用户会直接下载运行的安装包（dmg / zip / exe / AppImage）。
-      # latest*.yml 与 *.blockmap 是 electron-updater 的更新元数据（应用内用其中
-      # 的 sha512 校验），且两个 mac 架构会先后覆盖同名 latest-mac.yml，不能在此落哈希。
-      # 用 node 计算（各 runner 都有），避免 sha256sum / shasum / certutil 的平台差异。
+      # 与元数据消费同一份 stage 文件摘要，避免出现两套上传文件选择或哈希事实。
       - name: Generate desktop checksums
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          cd packages/desktop/dist
-          checksummed=( ${{ matrix.glob }} *.zip )
-          if [ ${#checksummed[@]} -eq 0 ]; then
-            echo "::error::no desktop assets to checksum in packages/desktop/dist"
-            exit 1
-          fi
           mkdir -p "$GITHUB_WORKSPACE/dist/release-checksums"
-          node -e '
-          const { createHash } = require("node:crypto");
-          const { readFileSync } = require("node:fs");
-          for (const file of process.argv.slice(1)) {
-            console.log(createHash("sha256").update(readFileSync(file)).digest("hex") + "  " + file);
-          }
-          ' "${checksummed[@]}" \
-            > "$GITHUB_WORKSPACE/dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt"
+          cp dist/release-update-metadata/${{ matrix.target }}-${{ matrix.arch }}/checksums.txt \
+            "$GITHUB_WORKSPACE/dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt"
           cat "$GITHUB_WORKSPACE/dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt"
 
       - uses: actions/upload-artifact@v4
@@ -450,6 +435,69 @@ jobs:
           name: release-checksums-desktop-${{ matrix.target }}-${{ matrix.arch }}
           path: dist/release-checksums/desktop-${{ matrix.target }}-${{ matrix.arch }}.txt
           retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-update-metadata-${{ matrix.target }}-${{ matrix.arch }}
+          path: dist/release-update-metadata/${{ matrix.target }}-${{ matrix.arch }}/fragment.json
+          if-no-files-found: error
+          retention-days: 1
+
+  # #76：最终更新清单只有这个写者，禁止 macOS 两架构用 --clobber 相互覆盖。
+  update-metadata:
+    needs: [release, desktop]
+    if: ${{ inputs.build_artifacts }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.14.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-update-metadata-*
+          path: release-update-metadata
+
+      - name: Merge and verify update metadata against uploaded assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --json tagName,isDraft,assets > release-assets.json
+          node -e 'if (JSON.parse(require("node:fs").readFileSync("release-assets.json")).isDraft !== true) throw new Error("Metadata writes require a draft release")'
+          node scripts/release-update-metadata.mjs merge \
+            --fragments release-update-metadata --out dist/release-updates \
+            --version "$VERSION" --release-json release-assets.json
+
+      - name: Upload final update metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          uploaded=false
+          for attempt in 1 2 3; do
+            if gh release upload "$TAG" dist/release-updates/latest*.yml --clobber; then
+              uploaded=true
+              break
+            fi
+            echo "::warning::metadata upload failed (attempt $attempt/3)"
+            sleep 10
+          done
+          test "$uploaded" = true
+          gh release view "$TAG" --json tagName,isDraft,assets > release-assets.json
+          node -e 'if (JSON.parse(require("node:fs").readFileSync("release-assets.json")).isDraft !== true) throw new Error("Release was published before metadata verification")'
+          node scripts/release-update-metadata.mjs verify \
+            --fragments release-update-metadata --directory dist/release-updates \
+            --version "$VERSION" --release-json release-assets.json
 
   # remote runtime 资产（WSL/SSH/Docker 远端连接用）：本仓库构建后以 GitHub Release
   # 扁平布局上传，客户端用显式自建源（ZCODE_REMOTE_ASSET_CDN_BASE_URL）加载。
@@ -510,7 +558,7 @@ jobs:
   # sha256.txt，并覆盖 release 上 CLI 构建产出的初版（只有一行 tarball 哈希）。
   # 放在 publish 之前：release 公开时校验清单已与全部产物一致；合并失败则保持 draft。
   # 覆盖范围：全部安装包（dmg / zip / exe / AppImage）、CLI 包与 install.sh。
-  # latest*.yml、latest.json、*.blockmap、zz-* 远端资产不在其中（各自有校验机制）。
+  # latest*.yml、latest.json、*.blockmap、远端 descriptor/archive 不在其中（各自有校验机制）。
   checksums:
     needs: [release, build, desktop]
     runs-on: ubuntu-latest
@@ -573,12 +621,12 @@ jobs:
           echo "::error::gh release upload failed after 3 attempts"
           exit 1
 
-  # 只有 CLI、全部桌面平台产物与完整校验清单都成功才公开 release；任一构建失败则保持 draft，
+  # 只有 CLI、桌面/远端产物、校验和与唯一更新清单收口都成功才公开；任一失败保持 draft，
   # 由人工排查后重跑或删除，避免不完整的版本出现在 Releases 与官网下载页。
   # keep_draft=true（上游审计自动构建的测试版）：即使全部成功也保持 draft，不公开、不进入自动更新。
   publish:
-    needs: [release, build, desktop, remote-assets, checksums]
-    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') && (needs['remote-assets'].result == 'success' || needs['remote-assets'].result == 'skipped') && (needs.checksums.result == 'success' || needs.checksums.result == 'skipped') }}
+    needs: [release, build, desktop, remote-assets, checksums, update-metadata]
+    if: ${{ always() && inputs.keep_draft != true && needs.release.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.desktop.result == 'success' || needs.desktop.result == 'skipped') && (needs['remote-assets'].result == 'success' || needs['remote-assets'].result == 'skipped') && (needs.checksums.result == 'success' || needs.checksums.result == 'skipped') && (needs['update-metadata'].result == 'success' || (inputs.build_artifacts != true && needs['update-metadata'].result == 'skipped')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Publish release

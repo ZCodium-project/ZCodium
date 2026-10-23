@@ -31,6 +31,7 @@
 ## CI 与验收
 
 - 顺序：创建 draft → CLI/桌面/远端资产构建 → 上传 → 校验清单 → 全部成功才公开。不得对已公开版本重打 tag 或替换运行时身份。
+- 桌面更新元数据由唯一后置 job 汇总，各 matrix job 不直接上传 latest；双架构、真实资产摘要与失败门禁见 [github-release-update-metadata.md](github-release-update-metadata.md)。
 - 桌面、descriptor、server bundle 使用同一 `ZCODE_APP_VERSION`/根 package.json 版本。
 - 必测：完整 GitHub URL、构建常量接线、镜像独占、有效缓存零请求、离线新装/握手/重连、错版本/平台/损坏/符号链接拒绝，以及安装升级 busy guard/取消。
 - 只有打包应用真实交互与 SSH 部署证据可支持「功能可用」结论；类型检查、单测和下载成功不能替代真实连接验收。
