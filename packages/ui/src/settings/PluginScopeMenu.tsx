@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { getWorkspaceKey } from "@/lib/workspaceKey.js";
-import type { WorkspaceTabState } from "@/store/tabStore.js";
+import type { ConfigWorkspaceTarget } from "@/workspace-config-catalog/index.js";
 
-export function getPluginWorkspaceKey(tab: WorkspaceTabState): string {
+export function getPluginWorkspaceKey(tab: ConfigWorkspaceTarget): string {
   return getWorkspaceKey(tab.workspacePath, tab.workspaceIdentity);
 }
 
-export function isPluginScopeWorkspaceConnected(tab: WorkspaceTabState): boolean {
+export function isPluginScopeWorkspaceConnected(tab: ConfigWorkspaceTarget): boolean {
   // 持久化 tab 会保留已经断开的远端项目和已失效的本地目录；Scope 若继续展示，
   // 用户会选中一个没有可用 service target 的项目。远端必须有当前 session，本地必须仍可用。
   if (tab.availability === "unavailable-local-directory") {
@@ -30,7 +30,8 @@ export function isPluginScopeWorkspaceConnected(tab: WorkspaceTabState): boolean
   if (!isRemote) {
     return true;
   }
-  return Boolean(tab.remoteSessionId);
+  // 配置目录不必打开会话 tab；在线 Source 可以按需复用 settings attachment。
+  return tab.configOnline ?? Boolean(tab.remoteSessionId);
 }
 
 export function PluginScopeMenu({
@@ -55,7 +56,7 @@ export function PluginScopeMenu({
   userOptionTestId?: string;
   workspaceOptionTestIdPrefix?: string;
   workspaceOptions?: Array<{ key: string; label: string; remote?: boolean }>;
-  workspaceTabs?: WorkspaceTabState[];
+  workspaceTabs?: ConfigWorkspaceTarget[];
   onScopeKeyChange: (scopeKey: string) => void;
 }) {
   const { intl } = useZCodeIntl();
@@ -64,7 +65,7 @@ export function PluginScopeMenu({
     workspaceTabs.filter(isPluginScopeWorkspaceConnected).map((tab) => ({
       key: getPluginWorkspaceKey(tab),
       label: tab.label,
-      remote: Boolean(tab.remoteTarget || tab.remoteSessionId),
+      remote: Boolean(tab.workspaceIdentity || tab.remoteTarget || tab.remoteSessionId),
     }));
   const selectedWorkspace = scopeWorkspaces.find((workspace) => workspace.key === selectedScopeKey);
   const SelectedWorkspaceIcon = selectedWorkspace?.remote ? Cloud : Folder;

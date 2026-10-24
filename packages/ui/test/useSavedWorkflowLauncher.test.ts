@@ -34,6 +34,27 @@ afterEach(() => {
 });
 
 describe("useSavedWorkflowLauncher", () => {
+  it("创建准入透传明确项目归属，同 cwd 不反查项目", async () => {
+    sendCommand
+      .mockResolvedValueOnce(
+        ack({ result: { type: "createSession", sessionId: "owned" } as never }),
+      )
+      .mockResolvedValueOnce(
+        ack({ result: { type: "startSavedWorkflow", runId: "run", toolCallId: "tool" } as never }),
+      );
+    const { result } = renderHook(() => useSavedWorkflowLauncher({ agentService }));
+    await act(async () => {
+      await result.current.launch(
+        { workspacePath: "/same", projectId: "project-b", hostId: "local" },
+        { name: "wf", scope: "project", args: {} },
+      );
+    });
+    expect(sendCommand).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: "createSession" }),
+      { projectId: "project-b" },
+    );
+  });
   it("accepted：先 createSession 后 startSavedWorkflow，payload 正确，导航到新会话并返回 ok", async () => {
     sendCommand
       .mockResolvedValueOnce(ack({ result: { type: "createSession", sessionId: "s-1" } as never }))

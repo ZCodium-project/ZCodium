@@ -461,6 +461,8 @@ export async function selectRemoteWorkspaceProjectFromDialog({
   canUseRemoteWorkspace,
   sessionId,
   path,
+  preparedWorkspaceIdentity,
+  isCurrent,
   localWorkspacePath,
   loadingMessage,
   getRemoteWorkspaceSession,
@@ -482,6 +484,8 @@ export async function selectRemoteWorkspaceProjectFromDialog({
   canUseRemoteWorkspace: boolean;
   sessionId: string;
   path: string;
+  preparedWorkspaceIdentity?: string;
+  isCurrent?: () => boolean | Promise<boolean>;
   localWorkspacePath?: string;
   loadingMessage: string;
   getRemoteWorkspaceSession: (sessionId: string) => RemoteWorkspaceSession | null;
@@ -496,6 +500,7 @@ export async function selectRemoteWorkspaceProjectFromDialog({
   bindRemoteWorkspaceSessionContext: BindRemoteWorkspaceSessionContextFn;
   commitRemoteWorkspaceSessionMutation: (
     mutation: ReturnType<typeof buildRemoteWorkspaceSessionMutation>,
+    assertCurrent?: () => Promise<void>,
   ) => Promise<RemoteWorkspaceSessionEntry>;
   getRemoteSessions: () => RemoteWorkspaceSessionEntry[];
   bindRemoteWorkspacePath: (workspacePath: string, sessionId: string) => void;
@@ -536,106 +541,148 @@ export async function selectRemoteWorkspaceProjectFromDialog({
     throw new Error(`远程 workspace session 缺少连接目标: ${sessionId}`);
   }
 
-  const canonicalPath = await resolveRemoteWorkspaceCanonicalPath(sessionId, path);
-  let workspaceIdentity = buildRemoteWorkspaceIdentity(canonicalPath, remoteTarget);
-  const existingWorkspaceTab = getWorkspaceTabs().find(
-    (tab): tab is import("@/store/tabStore.js").WorkspaceTabState =>
-      isWorkspaceTab(tab) &&
-      tab.workspacePath === canonicalPath &&
-      (tab.workspaceIdentity?.trim() || tab.workspacePath) === workspaceIdentity,
-  );
-
-  if (
-    existingWorkspaceTab?.remoteSessionId &&
-    activateTabByPath(canonicalPath, { workspaceIdentity })
-  ) {
-    onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
-    await handleCancelRemoteProject(sessionId);
-    return;
-  }
-
-  // 断连 tab 以前会在 provider/session 绑定完成前先被 activateTabByPath 激活，
-  // V4PaneConversationProvider 此时只能得到 remote-waiting，因 rpcReady=false 返回 null，
-  // 右侧便会先空白，等后续 addTab 写回 remoteSessionId 后才出现新建对话。
-  // 断连 tab 与首次连接统一等到服务绑定完成后再由 addTab 原子激活，避免暴露半连接 workspace。
-
-  // 新建连接不带 context，main/host 的 logical session
-  // descriptor 停留在连接根目录 "/"，identity 也是 Host 用解析后 target 自建的；而 tab、远程历史与
-  // 手机可见 workspace 列表用的都是这里算出的 canonicalPath/workspaceIdentity。
-  // 手机桥接（attachRemoteWorkspaceSessionHost）要求二者三元全等，所以选目录后必须先把 canonical
-  // context 绑定回 main，再提交 connected 状态与 tab。df2db1df7a 把 provider 同步移到 main/host 时
-  // 顺带删掉了这次 bind，导致新建连接后选的目录在手机端必然被 REMOTE_WORKSPACE_IDENTITY_MISMATCH 拒绝。
-  // bind 失败时 fail-closed：回收 session 并把错误抛回连接弹窗，不留下 descriptor 与 tab 不一致的 session。
+  let bound = false;
+  let expectedScope = preparedWorkspaceIdentity
+    ? { path, identity: preparedWorkspaceIdentity }
+    : undefined;
+  const assertCurrent = async () => {
+    if ((await isCurrent?.()) === false)
+      throw Object.assign(new Error("project.navigation-cancelled"), {
+        code: "remote-connection-canceled",
+      });
+    const current = getRemoteWorkspaceSession(sessionId);
+    if (
+      !current ||
+      (remoteSession.sourceServerId && current.sourceServerId !== remoteSession.sourceServerId)
+    )
+      throw new Error("Remote workspace owner changed during project navigation");
+    if (
+      bound &&
+      expectedScope &&
+      (current.workspacePath !== expectedScope.path ||
+        current.workspaceIdentity !== expectedScope.identity)
+    )
+      throw new Error("Host canonical workspace identity/scope changed during project navigation");
+  };
+  const isRetainedSession = () =>
+    getWorkspaceTabs().some((tab) => isWorkspaceTab(tab) && tab.remoteSessionId === sessionId);
+  const retainedAtStart = isRetainedSession();
   try {
+    await assertCurrent();
+    // #79：项目目录已经由 Host 准备；再次 realpath 会把别名与既有 scope 拆开。
+    // 普通目录浏览仍解析用户路径，随后同样等待 #68 的 bind ACK 与 port ready。
+    const canonicalPath = preparedWorkspaceIdentity
+      ? path
+      : await resolveRemoteWorkspaceCanonicalPath(sessionId, path);
+    await assertCurrent();
+    let workspaceIdentity =
+      preparedWorkspaceIdentity ?? buildRemoteWorkspaceIdentity(canonicalPath, remoteTarget);
+
+    // 断连 tab 以前会在 provider/session 绑定完成前先被 activateTabByPath 激活，
+    // V4PaneConversationProvider 此时只能得到 remote-waiting，因 rpcReady=false 返回 null，
+    // 右侧便会先空白，等后续 addTab 写回 remoteSessionId 后才出现新建对话。
+    // 断连 tab 与首次连接统一等到服务绑定完成后再由 addTab 原子激活，避免暴露半连接 workspace。
+
+    // 新建连接不带 context，main/host 的 logical session
+    // descriptor 停留在连接根目录 "/"，identity 也是 Host 用解析后 target 自建的；而 tab、远程历史与
+    // 手机可见 workspace 列表用的都是这里算出的 canonicalPath/workspaceIdentity。
+    // 手机桥接（attachRemoteWorkspaceSessionHost）要求二者三元全等，所以选目录后必须先把 canonical
+    // context 绑定回 main，再提交 connected 状态与 tab。df2db1df7a 把 provider 同步移到 main/host 时
+    // 顺带删掉了这次 bind，导致新建连接后选的目录在手机端必然被 REMOTE_WORKSPACE_IDENTITY_MISMATCH 拒绝。
+    // bind 失败时 fail-closed：回收 session 并把错误抛回连接弹窗，不留下 descriptor 与 tab 不一致的 session。
+    await assertCurrent();
     await bindRemoteWorkspaceSessionContext({
       sessionId,
       workspacePath: canonicalPath,
       workspaceIdentity,
     });
+    bound = true;
+    await assertCurrent();
     const boundSession = getRemoteWorkspaceSession(sessionId);
-    if (boundSession?.sourceServerId) {
+    if (preparedWorkspaceIdentity) {
+      if (
+        boundSession?.workspacePath !== path ||
+        boundSession.workspaceIdentity !== preparedWorkspaceIdentity
+      )
+        throw new Error("Host canonical workspace identity/scope does not match prepared project");
+    } else if (boundSession?.sourceServerId) {
       // #68：Source 的 canonical identity 由 Host bind 决定。若继续提交绑定前的 SSH
       // route identity，tab、历史与手机 attachment 会落入不同身份桶；旧非 Source 链路仍兼容。
       if (!boundSession.workspaceIdentity || boundSession.workspacePath !== canonicalPath)
         throw new Error("Host canonical workspace scope is unavailable after bind");
       workspaceIdentity = boundSession.workspaceIdentity;
-      const existingCanonical = getWorkspaceTabs().find(
-        (tab): tab is import("@/store/tabStore.js").WorkspaceTabState =>
-          isWorkspaceTab(tab) &&
-          tab.workspacePath === canonicalPath &&
-          tab.workspaceIdentity === workspaceIdentity,
-      );
-      if (
-        existingCanonical?.remoteSessionId &&
-        existingCanonical.remoteSessionId !== sessionId &&
-        activateTabByPath(canonicalPath, { workspaceIdentity })
-      ) {
-        onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
-        await handleCancelRemoteProject(sessionId);
-        return;
-      }
+      expectedScope = { path: canonicalPath, identity: workspaceIdentity };
     }
+    const existingCanonical = getWorkspaceTabs().find(
+      (tab): tab is import("@/store/tabStore.js").WorkspaceTabState =>
+        isWorkspaceTab(tab) &&
+        tab.workspacePath === canonicalPath &&
+        (tab.workspaceIdentity?.trim() || tab.workspacePath) === workspaceIdentity,
+    );
+    await assertCurrent();
+    if (
+      existingCanonical?.remoteSessionId &&
+      activateTabByPath(canonicalPath, { workspaceIdentity })
+    ) {
+      onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
+      // 同一个 attachment 已被 tab 持有时不是临时连接，不能取消当前会话。
+      if (existingCanonical.remoteSessionId !== sessionId)
+        await handleCancelRemoteProject(sessionId);
+      return;
+    }
+    await assertCurrent();
+    await commitRemoteWorkspaceSessionMutation(
+      buildRemoteWorkspaceSessionMutation({
+        remoteSessions: getRemoteSessions(),
+        workspacePath: canonicalPath,
+        localWorkspacePath,
+        workspaceIdentity,
+        target: remoteTarget,
+        lastConnectionStatus: "connected",
+        touchOpenedAt: true,
+      }),
+      assertCurrent,
+    );
+
+    await assertCurrent();
+    bindRemoteWorkspacePath(canonicalPath, sessionId);
+    bindRemoteWorkspaceIdentity(workspaceIdentity, sessionId);
+    addTab(canonicalPath, {
+      remoteSessionId: sessionId,
+      remoteTarget: stripRemoteTargetSecrets(remoteTarget),
+      workspaceIdentity,
+      localWorkspacePath,
+    });
+    // startDraft 之前在调用方等待 pinned/timeline 刷新结束后才执行，
+    // tab 已切到远端但草稿 owner 仍是旧状态，形成可见的空白中间帧。
+    // 激活回调必须紧跟 addTab，在任何列表刷新 await 之前提交同一 workspaceKey 的草稿态。
+    onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
+    await Promise.all([
+      refreshPinnedTasks({
+        sessionId,
+        workspacePath: canonicalPath,
+        workspaceIdentity,
+      }),
+      refreshTimelineTasks({
+        sessionId,
+        workspacePath: canonicalPath,
+        workspaceIdentity,
+      }),
+    ]);
   } catch (error) {
-    await handleCancelRemoteProject(sessionId);
+    // 只回收本次未被 tab 接管的临时 attachment；保留已打开会话及后来的 owner。
+    const current = getRemoteWorkspaceSession(sessionId);
+    const sameSource =
+      !remoteSession.sourceServerId || current?.sourceServerId === remoteSession.sourceServerId;
+    const sameBoundScope =
+      !bound ||
+      !expectedScope ||
+      (current?.workspacePath === expectedScope.path &&
+        current?.workspaceIdentity === expectedScope.identity);
+    if (current && sameSource && sameBoundScope && !retainedAtStart && !isRetainedSession())
+      await handleCancelRemoteProject(sessionId);
     throw error;
   }
-
-  await commitRemoteWorkspaceSessionMutation(
-    buildRemoteWorkspaceSessionMutation({
-      remoteSessions: getRemoteSessions(),
-      workspacePath: canonicalPath,
-      localWorkspacePath,
-      workspaceIdentity,
-      target: remoteTarget,
-      lastConnectionStatus: "connected",
-      touchOpenedAt: true,
-    }),
-  );
-
-  bindRemoteWorkspacePath(canonicalPath, sessionId);
-  bindRemoteWorkspaceIdentity(workspaceIdentity, sessionId);
-  addTab(canonicalPath, {
-    remoteSessionId: sessionId,
-    remoteTarget: stripRemoteTargetSecrets(remoteTarget),
-    workspaceIdentity,
-    localWorkspacePath,
-  });
-  // startDraft 之前在调用方等待 pinned/timeline 刷新结束后才执行，
-  // tab 已切到远端但草稿 owner 仍是旧状态，形成可见的空白中间帧。
-  // 激活回调必须紧跟 addTab，在任何列表刷新 await 之前提交同一 workspaceKey 的草稿态。
-  onWorkspaceActivated?.({ workspacePath: canonicalPath, workspaceIdentity });
-  await Promise.all([
-    refreshPinnedTasks({
-      sessionId,
-      workspacePath: canonicalPath,
-      workspaceIdentity,
-    }),
-    refreshTimelineTasks({
-      sessionId,
-      workspacePath: canonicalPath,
-      workspaceIdentity,
-    }),
-  ]);
 }
 
 export function useRemoteWorkspaceHistory({
@@ -710,7 +757,11 @@ export function useRemoteWorkspaceHistory({
   });
 
   const syncPersistedWorkspaceSession = useCallback(
-    async (nextRemoteSessions: readonly RemoteWorkspaceSessionEntry[]) => {
+    async (
+      nextRemoteSessions: readonly RemoteWorkspaceSessionEntry[],
+      assertCurrent?: () => Promise<void>,
+    ) => {
+      await assertCurrent?.();
       setRemoteWorkspaceSessions([...nextRemoteSessions]);
       remoteWorkspaceSessionsRef.current = [...nextRemoteSessions];
 
@@ -718,6 +769,7 @@ export function useRemoteWorkspaceHistory({
         return;
       }
 
+      await assertCurrent?.();
       await services.settingService.update(
         buildRemoteWorkspacePersistPatch(tabStoreApi.getState(), nextRemoteSessions),
       );
@@ -726,8 +778,12 @@ export function useRemoteWorkspaceHistory({
   );
 
   const commitRemoteWorkspaceSessionMutation = useCallback(
-    async (mutation: ReturnType<typeof buildRemoteWorkspaceSessionMutation>) => {
+    async (
+      mutation: ReturnType<typeof buildRemoteWorkspaceSessionMutation>,
+      assertCurrent?: () => Promise<void>,
+    ) => {
       for (const credentialKey of mutation.credentialKeysToDelete) {
+        await assertCurrent?.();
         try {
           await services.credentialService.delete(credentialKey);
         } catch (error) {
@@ -739,10 +795,12 @@ export function useRemoteWorkspaceHistory({
       }
 
       for (const credential of mutation.credentialsToSave) {
+        await assertCurrent?.();
         await services.credentialService.save(credential.key, credential.value);
       }
 
-      await syncPersistedWorkspaceSession(mutation.nextRemoteSessions);
+      await assertCurrent?.();
+      await syncPersistedWorkspaceSession(mutation.nextRemoteSessions, assertCurrent);
       return mutation.entry;
     },
     [services.credentialService, syncPersistedWorkspaceSession],
@@ -1016,13 +1074,26 @@ export function useRemoteWorkspaceHistory({
     ],
   );
 
+  const projectSelectionLeases = useRef(new Map<string, object>());
   const handleSelectRemoteProject = useCallback(
-    async (sessionId: string, path: string, localWorkspacePath?: string) => {
+    async (
+      sessionId: string,
+      path: string,
+      localWorkspacePath?: string,
+      preparedWorkspaceIdentity?: string,
+      isCurrent?: () => boolean | Promise<boolean>,
+      onWorkspaceActivatedOverride?: () => void,
+    ) => {
+      const lease = {};
+      projectSelectionLeases.current.set(sessionId, lease);
+      const ownsSelection = () => projectSelectionLeases.current.get(sessionId) === lease;
       try {
         await selectRemoteWorkspaceProjectFromDialog({
           canUseRemoteWorkspace,
           sessionId,
           path,
+          preparedWorkspaceIdentity,
+          isCurrent: async () => ownsSelection() && (await isCurrent?.()) !== false,
           localWorkspacePath,
           loadingMessage: intl.formatMessage({ id: "common.loading" }),
           getRemoteWorkspaceSession,
@@ -1030,19 +1101,25 @@ export function useRemoteWorkspaceHistory({
           getWorkspaceTabs: () => tabStoreApi.getState().tabs,
           resolveRemoteWorkspaceCanonicalPath,
           activateTabByPath,
-          handleCancelRemoteProject,
+          handleCancelRemoteProject: (id) =>
+            ownsSelection() ? handleCancelRemoteProject(id) : Promise.resolve(),
           bindRemoteWorkspaceSessionContext,
           commitRemoteWorkspaceSessionMutation,
           getRemoteSessions: () => remoteWorkspaceSessionsRef.current,
           bindRemoteWorkspacePath,
           bindRemoteWorkspaceIdentity,
           addTab,
-          onWorkspaceActivated,
+          // #79：新任务在这里提交完整草稿；历史任务在这里记录自身导航后的资格。
+          // 不推迟到 pinned/timeline 返回，也不让默认草稿激活与显式动作重复执行。
+          onWorkspaceActivated: onWorkspaceActivatedOverride ?? onWorkspaceActivated,
           refreshPinnedTasks: refreshRemotePinnedTasksForSession,
           refreshTimelineTasks: refreshRemoteTimelineTasksForSession,
         });
       } finally {
-        pendingConnectionTargetsBySessionIdRef.current.delete(sessionId);
+        if (ownsSelection()) {
+          projectSelectionLeases.current.delete(sessionId);
+          pendingConnectionTargetsBySessionIdRef.current.delete(sessionId);
+        }
       }
     },
     [

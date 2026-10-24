@@ -330,6 +330,8 @@ function createWorkflowChildRuntime(
         deps.configResult.config.features.skill && deps.configResult.config.skills.enabled
           ? (deps.appOptions.skillPort ??
             createNodeSkillAdapter({
+              // 与主实例共用目录范围，保留附加 root 的限定技能来源。
+              additionalDirectories: deps.appOptions.additionalDirectories,
               extraRoots: deps.configResult.config.skills.roots,
               // workflow 子 agent 复用同一套 skill 发现逻辑，也必须继承主配置里的禁用路径。
               disabledPaths: collectDisabledPaths(deps.configResult.config.skillOverrides),

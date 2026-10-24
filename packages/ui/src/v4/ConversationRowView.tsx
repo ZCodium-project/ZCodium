@@ -1,6 +1,14 @@
 /* oxlint-disable eslint(max-lines) -- v4 逐行 row 渲染分发集中收口（每种 row 一个 memo 叶子 + timelineMarker 分隔线），拆分会打散行类型对照。 */
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArchiveIcon,
   ArrowRightLeftIcon,
@@ -61,11 +69,8 @@ import {
   type ChatMediaAttachmentPreviewTarget,
 } from "@/ChatMediaAttachmentPreviewDialog.js";
 import type { PdfViewerRangeSource } from "@/components/ui/pdf-viewer.js";
-import {
-  MessageAction,
-  MessageActions,
-  MessageResponse,
-} from "@/components/ai-elements/message.js";
+import { MessageAction, MessageActions } from "@/components/ai-elements/message.js";
+import { GenUiMessageResponse } from "@/gen-ui/index.js";
 import {
   Reasoning,
   ReasoningContent,
@@ -117,12 +122,10 @@ import { ConversationSelectionReferenceChip } from "@/v4/composer/ConversationSe
 import { PptxElementReferenceChip } from "@/v4/composer/PptxElementReferenceChip.js";
 import { useOpenPptxElementReference } from "@/v4/composer/useOpenPptxElementReference.js";
 import { ConversationFileRewindDialog } from "@/v4/ConversationFileRewindDialog.js";
-import { ConversationUserInputBody } from "@/v4/ConversationUserInputBody.js";
-import { ConversationUserInputContent } from "@/v4/ConversationUserInputContent.js";
-import {
-  ConversationUserInputEpilogue,
-  splitUserInputEpilogue,
-} from "@/v4/ConversationUserInputEpilogue.js";
+import { ConversationUserInputBubble } from "@/v4/ConversationUserInputBubble.js";
+import { splitUserInputEpilogue } from "@/v4/ConversationUserInputEpilogue.js";
+import { BotGroupSourceLabel } from "@/v4/BotGroupSourceLabel.js";
+import { expandTopicInputMessages } from "@/v4/topicInputMessages.js";
 import { ConversationHookDetailsAction } from "@/v4/ConversationHookDetailsAction.js";
 import { ConnectedBotGroupDeliveryAction } from "@/v4/BotGroupDeliveryAction.js";
 import { formatModelChangeLabel } from "@/v4/composer/modelTriggerDisplay.js";
@@ -315,6 +318,49 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
   const [videoPreviewRef, setVideoPreviewRef] = useState<string | null>(null);
   const [videoPreviewLoading, setVideoPreviewLoading] = useState(false);
   const [videoPreviewError, setVideoPreviewError] = useState(false);
+  const [textPreview, setTextPreview] = useState<ChatMediaAttachmentPreviewTarget | null>(null);
+  const [textLoading, setTextLoading] = useState(false);
+  const [textError, setTextError] = useState(false);
+  const textReadAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => textReadAbort.current?.abort(), []);
+  const closeTextPreview = () => {
+    textReadAbort.current?.abort();
+    textReadAbort.current = null;
+    setTextPreview(null);
+  };
+  const openTextPreview = async (attachment: AttachmentRef, index: number) => {
+    if (!sessionId || !readAttachment) return;
+    textReadAbort.current?.abort();
+    const controller = new AbortController();
+    textReadAbort.current = controller;
+    setTextPreview({ filename: attachment.fileName, mediaType: "text/plain" });
+    setTextLoading(true);
+    setTextError(false);
+    try {
+      const result = await readAttachment({
+        sessionId,
+        ref: attachment.ref,
+        mediaType: attachment.mime,
+        ...(entityId ? { target: { rowId, entityId }, attachmentIndex: index } : {}),
+        signal: controller.signal,
+      });
+      // 关闭/切换预览后，迟到结果不能重新打开旧材料。
+      if (controller.signal.aborted) return;
+      if (!("bytes" in result)) throw new Error("Text attachment bytes unavailable");
+      setTextPreview({
+        filename: attachment.fileName,
+        mediaType: "text/plain",
+        textContent: new TextDecoder().decode(result.bytes),
+      });
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setTextError(true);
+        logger.warn("Text attachment preview failed", error);
+      }
+    } finally {
+      if (!controller.signal.aborted) setTextLoading(false);
+    }
+  };
   const [pdfPreview, setPdfPreview] = useState<ChatMediaAttachmentPreviewTarget | null>(null);
   const [pdfPreviewLoading, setPdfPreviewLoading] = useState(false);
   const [pdfPreviewError, setPdfPreviewError] = useState(false);
@@ -683,6 +729,8 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
     setPreviewOpen(true);
   };
   const items = visibleAttachments.map(({ attachment, index }) => {
+    const isTextMaterial =
+      attachment.sourceKind === "topic-history" || attachment.sourceKind === "clipboard-text";
     const ref = attachment.previewRef ?? attachment.ref;
     const isImage = attachment.mime.startsWith("image/");
     const isVideo = attachment.mime.startsWith("video/");
@@ -696,6 +744,7 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
     const previewItemIndex = previewEntries.findIndex((entry) => entry.index === index);
     // 图片与视频共用当前消息的媒体 gallery；video 首次成为 active item 时再读取。
     const canOpen =
+      (isTextMaterial && Boolean(sessionId && readAttachment)) ||
       (isImage && !isUnavailable && previewItemIndex >= 0) ||
       (isVideo && Boolean(sessionId && readAttachment)) ||
       (isPdf && Boolean(sessionId && (readAttachment || readAttachmentRange)));
@@ -730,18 +779,22 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
         onOpen={
           canOpen
             ? () =>
-                isPdf
-                  ? void openPdfPreview(attachment, attachmentIndices?.[index] ?? index)
-                  : selectPreviewItem(previewItemIndex)
+                isTextMaterial
+                  ? void openTextPreview(attachment, attachmentIndices?.[index] ?? index)
+                  : isPdf
+                    ? void openPdfPreview(attachment, attachmentIndices?.[index] ?? index)
+                    : selectPreviewItem(previewItemIndex)
             : undefined
         }
         openLabel={
           canOpen
-            ? isVideo
-              ? previewVideoOpenLabel
-              : isPdf
-                ? previewPdfOpenLabel
-                : previewOpenLabel
+            ? isTextMaterial
+              ? intl.formatMessage({ id: "chat.attachments.preview.openText" })
+              : isVideo
+                ? previewVideoOpenLabel
+                : isPdf
+                  ? previewPdfOpenLabel
+                  : previewOpenLabel
             : undefined
         }
         title={isUnavailable ? previewUnavailableLabel : undefined}
@@ -778,6 +831,13 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
               </span>
             </div>
           </>
+        ) : attachment.sourceKind === "topic-history" ? (
+          <span className="truncate text-ui-base font-medium text-foreground">
+            {intl.formatMessage(
+              { id: "chat.attachments.topicHistory" },
+              { count: attachment.messageCount ?? 0 },
+            )}
+          </span>
         ) : (
           <FileDisplayInline
             path={attachment.fileName}
@@ -817,6 +877,15 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
           {items}
         </Attachments>
       )}
+      <ChatMediaAttachmentPreviewDialog
+        attachment={textPreview}
+        open={textPreview !== null}
+        onOpenChange={(open) => {
+          if (!open) closeTextPreview();
+        }}
+        loading={textLoading}
+        error={textError}
+      />
       <ImagePreviewDialog
         initialIndex={previewIndex}
         items={previewItems}
@@ -844,14 +913,17 @@ const UserInputAttachmentList = memo(function UserInputAttachmentList({
   );
 });
 
-const UserInputRowView = memo(function UserInputRowView({
+const SingleUserInputRowView = memo(function SingleUserInputRowView({
   row,
+  attachmentIndices,
   context,
   onEdit,
   editWorkspaceRewindAvailability,
   status,
 }: {
   row: UserInputRow;
+  /** 合批拆分只改变展示，读取仍按原始输入的持久 FilePart 序号。 */
+  attachmentIndices?: readonly number[];
   context: ConversationRowRenderContext;
   onEdit?: UserInputEditHandler;
   editWorkspaceRewindAvailability?: EditWorkspaceRewindAvailability;
@@ -864,12 +936,14 @@ const UserInputRowView = memo(function UserInputRowView({
   // 用户行时间戳：与 assistant 动作栏共用 messageTimeLabel 的相对日判定。
   const timeLabel = formatMessageTimeLabel(row.createdAt, locale, intl);
   const parsedPrompt = useMemo(
-    () =>
-      parseComposerPromptContexts(bodyText, {
+    () => ({
+      ...parseComposerPromptContexts(bodyText, {
         workspacePath: context.workspacePath,
         workspaceIdentity: context.workspaceIdentity,
       }),
-    [bodyText, context.workspaceIdentity, context.workspacePath],
+      ...(row.conversationQuotes ? { conversationSelections: row.conversationQuotes } : {}),
+    }),
+    [bodyText, context.workspaceIdentity, context.workspacePath, row.conversationQuotes],
   );
   // 只用于把历史消息里的 share URL 尾块从可见正文里剥掉。
   // 该块已不再产出（见 ConversationComposer 的 promptText 注释）；这里保留解析，是为了让
@@ -887,7 +961,7 @@ const UserInputRowView = memo(function UserInputRowView({
   // 编辑态删除附件后，持久 FilePart 列表仍保留全部附件；序号数组把可见列表
   // 映射回原 index，避免 video 预览等按 attachmentIndex 的读取指错分块。
   const [editAttachmentIndices, setEditAttachmentIndices] = useState<number[]>(() =>
-    (row.attachments ?? []).map((_, index) => index),
+    (row.attachments ?? []).map((_, index) => attachmentIndices?.[index] ?? index),
   );
   const [editPromptContexts, setEditPromptContexts] = useState(() => parsedPrompt);
   const [conflictPreview, setConflictPreview] =
@@ -934,7 +1008,12 @@ const UserInputRowView = memo(function UserInputRowView({
     pptxElementReferences.length > 0 ||
     conversationSelections.length > 0;
   const hasAttachmentArea = hasAttachments || hasContextReferences;
-  const hasAttachmentPills = hasFileAttachments || hasContextReferences;
+  const hasAttachmentPills =
+    hasFileAttachments ||
+    codeCommentContexts.length > 0 ||
+    webElementContexts.length > 0 ||
+    pptxElementReferences.length > 0 ||
+    (!row.botGroupSource && conversationSelections.length > 0);
   const openPptxElementReference = useOpenPptxElementReference({
     workspacePath: context.workspacePath,
     workspaceIdentity: context.workspaceIdentity,
@@ -946,7 +1025,9 @@ const UserInputRowView = memo(function UserInputRowView({
     if (!editing) {
       setDraft(parsedShareContext.visibleContent);
       setEditAttachments([...(row.attachments ?? [])]);
-      setEditAttachmentIndices((row.attachments ?? []).map((_, index) => index));
+      setEditAttachmentIndices(
+        (row.attachments ?? []).map((_, index) => attachmentIndices?.[index] ?? index),
+      );
       setEditPromptContexts(parsedPrompt);
       return;
     }
@@ -956,7 +1037,7 @@ const UserInputRowView = memo(function UserInputRowView({
       return;
     }
     focusEditor();
-  }, [editing, parsedPrompt, row.attachments]);
+  }, [attachmentIndices, editing, parsedPrompt, row.attachments]);
 
   useEffect(() => {
     if (!onEdit) {
@@ -970,18 +1051,22 @@ const UserInputRowView = memo(function UserInputRowView({
     // 主 composer 为空时点击只会 warn。这里恢复旧行内编辑态。
     setDraft(parsedShareContext.visibleContent);
     setEditAttachments([...(row.attachments ?? [])]);
-    setEditAttachmentIndices((row.attachments ?? []).map((_, index) => index));
+    setEditAttachmentIndices(
+      (row.attachments ?? []).map((_, index) => attachmentIndices?.[index] ?? index),
+    );
     setEditPromptContexts(parsedPrompt);
     setEditing(true);
-  }, [parsedPrompt, parsedShareContext, row.attachments]);
+  }, [attachmentIndices, parsedPrompt, parsedShareContext, row.attachments]);
 
   const handleCancelEdit = useCallback(() => {
     setDraft(parsedShareContext.visibleContent);
     setEditAttachments([...(row.attachments ?? [])]);
-    setEditAttachmentIndices((row.attachments ?? []).map((_, index) => index));
+    setEditAttachmentIndices(
+      (row.attachments ?? []).map((_, index) => attachmentIndices?.[index] ?? index),
+    );
     setEditPromptContexts(parsedPrompt);
     setEditing(false);
-  }, [parsedPrompt, parsedShareContext, row.attachments]);
+  }, [attachmentIndices, parsedPrompt, parsedShareContext, row.attachments]);
 
   const handleRemoveEditAttachment = useCallback((index: number) => {
     setEditAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index));
@@ -1191,12 +1276,25 @@ const UserInputRowView = memo(function UserInputRowView({
 
   return (
     <RowShell rowId={row.rowId} className="group/user-row flex flex-col items-end">
+      {row.botGroupSource ? (
+        <div data-v4-user-input-source="true" className="mb-2 flex min-w-0 max-w-full">
+          <BotGroupSourceLabel source={row.botGroupSource} />
+        </div>
+      ) : null}
       {hasAttachmentArea ? (
         <div
           data-v4-user-input-attachments="true"
           data-testid={testId(TID_V4_ROW_ATTACHMENTS, String(row.rowId))}
           className="mb-2 flex max-w-xl flex-col items-end gap-2"
         >
+          {row.botGroupSource && conversationSelections.length > 0 ? (
+            <div data-v4-user-input-quotes="true" className="flex max-w-full justify-end">
+              <ConversationSelectionReferenceChip
+                references={conversationSelections}
+                contentAlign="end"
+              />
+            </div>
+          ) : null}
           {hasMediaAttachments ? (
             <div
               data-v4-user-input-media-attachments="true"
@@ -1204,6 +1302,7 @@ const UserInputRowView = memo(function UserInputRowView({
             >
               <UserInputAttachmentList
                 attachments={row.attachments}
+                attachmentIndices={attachmentIndices}
                 entityId={row.entityId}
                 attachmentKind="media"
                 directItems
@@ -1224,6 +1323,7 @@ const UserInputRowView = memo(function UserInputRowView({
               {hasFileAttachments ? (
                 <UserInputAttachmentList
                   attachments={row.attachments}
+                  attachmentIndices={attachmentIndices}
                   entityId={row.entityId}
                   attachmentKind="file"
                   directItems
@@ -1240,10 +1340,12 @@ const UserInputRowView = memo(function UserInputRowView({
                 contentAlign="end"
                 onOpen={context.onOpenCodeViewer ? openPptxElementReference : undefined}
               />
-              <ConversationSelectionReferenceChip
-                references={conversationSelections}
-                contentAlign="end"
-              />
+              {!row.botGroupSource ? (
+                <ConversationSelectionReferenceChip
+                  references={conversationSelections}
+                  contentAlign="end"
+                />
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -1252,20 +1354,21 @@ const UserInputRowView = memo(function UserInputRowView({
         // 附件和上下文引用只属于消息行，不属于气泡；否则仅附件消息会留下空气泡。
         // 同一 row 会渲染在主会话和 Subagent 侧栏，固定宽度会忽略实际宿主宽度。
         // 气泡保留 flex item 的自动宽度；宿主至少 624px 时再以 36rem 封顶并保留 48px 余量。
+        <ConversationUserInputBubble
+          text={visibleText}
+          contentParts={row.botGroupSource?.contentParts}
+          rowId={row.rowId}
+          epilogue={epilogue}
+          attachments={row.attachments}
+          contextAttachmentCount={countComposerPromptContexts(parsedPrompt)}
+        />
+      ) : null}
+      {row.source?.kind === "genUi" ? (
         <div
-          data-v4-user-input-bubble="true"
-          className="flex max-w-full flex-col gap-2 rounded-xl rounded-se-xs border border-border bg-surface px-4 py-3 text-ui-base text-foreground @min-[624px]/conversation:max-w-xl"
+          className="mt-1 text-end text-ui-sm text-foreground-subtlest"
+          data-v4-user-input-source="genUi"
         >
-          {hasVisibleText ? (
-            <ConversationUserInputBody contentText={visibleText} rowId={row.rowId}>
-              <ConversationUserInputContent
-                text={visibleText}
-                attachments={row.attachments}
-                contextAttachmentCount={countComposerPromptContexts(parsedPrompt)}
-              />
-            </ConversationUserInputBody>
-          ) : null}
-          {epilogue === undefined ? null : <ConversationUserInputEpilogue text={epilogue} />}
+          {intl.formatMessage({ id: "genUi.from" }, { name: row.source.title || "Gen UI" })}
         </div>
       ) : null}
       {status ? (
@@ -1300,6 +1403,40 @@ const UserInputRowView = memo(function UserInputRowView({
         ) : null}
       </MessageActions>
     </RowShell>
+  );
+});
+
+const UserInputRowView = memo(function UserInputRowView(
+  props: ComponentProps<typeof SingleUserInputRowView>,
+) {
+  const messages = useMemo(() => {
+    const rows = expandTopicInputMessages(props.row);
+    return rows.map((row) => ({
+      row,
+      attachmentIndices:
+        row === props.row
+          ? undefined
+          : row.attachments?.map((attachment) => props.row.attachments!.indexOf(attachment)),
+    }));
+  }, [props.row]);
+  if (!props.row.botGroupSource?.messages?.length) return <SingleUserInputRowView {...props} />;
+  return (
+    <div className="flex min-w-0 flex-col gap-3" data-v4-topic-messages="true">
+      {messages.map(({ row, attachmentIndices }) => (
+        <div
+          key={row.botGroupSource!.messageId}
+          data-topic-message-id={row.botGroupSource!.messageId}
+        >
+          {/* 合批是同一次接纳，局部原文不能当作 editUserQuery 替换整批；附件读取也必须保留原序号。 */}
+          <SingleUserInputRowView
+            {...props}
+            row={row}
+            attachmentIndices={attachmentIndices}
+            onEdit={undefined}
+          />
+        </div>
+      ))}
+    </div>
   );
 });
 
@@ -1534,7 +1671,9 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           导致 assistant 正文虽然在 JSX 上标了 selectable，框选逻辑却永远找不到该区域。
           selectable 语义必须放在稳定的 DOM 包装层上，完成态和 streaming 共用同一路径。 */}
       <div data-conversation-selectable="true" className="w-full text-ui-base">
-        <MessageResponse
+        <GenUiMessageResponse
+          completed={row.state === "complete"}
+          messageKey={`${row.rowId}:${row.entityId ?? ""}`}
           renderZCodeFileCitations
           streaming={streaming}
           workspacePath={context.workspacePath}
@@ -1550,7 +1689,7 @@ const AssistantTextRowView = memo(function AssistantTextRowView({
           readAttachment={context.readAttachment}
         >
           {visibleText}
-        </MessageResponse>
+        </GenUiMessageResponse>
       </div>
       {codeCommentCardsEnabled && codeCommentCards && codeCommentCards.length > 0 ? (
         <div className="mt-3">

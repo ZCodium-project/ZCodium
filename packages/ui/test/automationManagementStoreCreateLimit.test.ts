@@ -61,4 +61,36 @@ describe("automationManagementStore create limit", () => {
       AUTOMATION_CREATE_LIMIT_ERROR_CODE,
     );
   });
+
+  it("空项目提交保留 projectId/hostId 交给 Host prepare，不用列表 cwd 冒充执行目录", async () => {
+    const created = {
+      ...makeAutomation(0),
+      projectId: "empty-project",
+      hostId: "local",
+      workspacePath: "/prepared",
+    };
+    const createAutomation = vi.fn(async () => created);
+    const agentService = {
+      createAutomation,
+      listAllAutomations: vi.fn(async () => [created]),
+    } as unknown as IZCodeAgentService;
+    useAutomationManagementStore.setState({
+      workspacePath: "/list-scope",
+      workspaceIdentity: null,
+      automations: [],
+    });
+    const input = {
+      title: "empty",
+      cronExpr: "0 9 * * *",
+      prompt: "run",
+      workspacePath: "",
+      projectId: "empty-project",
+      hostId: "local",
+    };
+    await expect(
+      useAutomationManagementStore.getState().createAutomation(input, agentService),
+    ).resolves.toBe(created);
+    expect(createAutomation).toHaveBeenCalledWith(input);
+    expect(useAutomationManagementStore.getState().workspacePath).toBe("/list-scope");
+  });
 });

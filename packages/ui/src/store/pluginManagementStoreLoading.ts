@@ -1,5 +1,9 @@
 import type { IPluginManagementService } from "@zcode/services";
-import type { ZCodePluginScope } from "@zcode/shared";
+import {
+  parseRemoteWorkspaceIdentity,
+  remoteHostIdFromWorkspaceIdentity,
+  type ZCodePluginScope,
+} from "@zcode/shared";
 import { logger } from "@/logger.js";
 import type { PluginManagementState } from "@/store/pluginManagementStore.js";
 
@@ -13,17 +17,80 @@ export function buildWorkspaceKey(workspacePath: string, workspaceIdentity: stri
 
 const inFlightLoads = new Map<string, Promise<void>>();
 
+export interface PluginManagementChange {
+  workspacePath: string;
+  workspaceIdentity: string | null;
+  scope: ZCodePluginScope;
+}
+const changeListeners = new Set<(change: PluginManagementChange) => void>();
+export function subscribePluginManagementChanges(
+  listener: (change: PluginManagementChange) => void,
+): () => void {
+  changeListeners.add(listener);
+  return () => {
+    changeListeners.delete(listener);
+  };
+}
+export function notifyPluginManagementChange(change: PluginManagementChange): void {
+  for (const listener of changeListeners) {
+    try {
+      listener(change);
+    } catch (error) {
+      logger.warn("[plugins] projection refresh failed", { error: toMessage(error) });
+    }
+  }
+}
+export function isPluginManagementChangeRelevant(
+  target: { workspacePath: string; workspaceIdentity: string | null },
+  change: PluginManagementChange,
+): boolean {
+  if (change.scope === "workspace")
+    return (
+      buildWorkspaceKey(target.workspacePath, target.workspaceIdentity) ===
+      buildWorkspaceKey(change.workspacePath, change.workspaceIdentity)
+    );
+  const hostKey = (identity: string | null) => {
+    const source = parseRemoteWorkspaceIdentity(identity ?? "")?.sourceServerId;
+    return source
+      ? `source-settings:${source}`
+      : (remoteHostIdFromWorkspaceIdentity(identity ?? "") ?? "local");
+  };
+  return hostKey(target.workspaceIdentity) === hostKey(change.workspaceIdentity);
+}
+
+/** 仅投影在途命令；每次调用持有独立条目，迟到结束不能清除同名的新操作。 */
+export function beginPluginOperation(
+  set: (partial: Partial<PluginManagementState>) => void,
+  get: () => PluginManagementState,
+  id: string,
+): () => void {
+  const entry = { id };
+  set({
+    activeOperations: [...get().activeOperations, entry],
+    operationId: id,
+    operationVersion: get().operationVersion + 1,
+    error: null,
+    lastFailedPluginId: null,
+  });
+  return () => {
+    if (!get().activeOperations.includes(entry)) return;
+    const activeOperations = get().activeOperations.filter((operation) => operation !== entry);
+    set({ activeOperations, operationId: activeOperations.at(-1)?.id ?? null });
+  };
+}
+
 export async function runWorkspaceOperation(
   set: (partial: Partial<PluginManagementState>) => void,
   get: () => PluginManagementState,
   pluginService: IPluginManagementService,
   operationId: string,
   operation: (workspace: { workspacePath: string; workspaceIdentity?: string }) => Promise<void>,
+  scope: ZCodePluginScope = "user",
 ): Promise<boolean> {
   const { workspacePath, workspaceIdentity, configScope } = get();
   if (!workspacePath) return false;
-  const operationVersion = get().operationVersion + 1;
-  set({ operationId, operationVersion, error: null, lastFailedPluginId: null });
+  const finish = beginPluginOperation(set, get, operationId);
+  const operationVersion = get().operationVersion;
   const isCurrentContext = (): boolean => {
     const current = get();
     return (
@@ -33,38 +100,33 @@ export async function runWorkspaceOperation(
     );
   };
   const ownsVisibleOperation = (): boolean =>
-    isCurrentContext() && get().operationId === operationId;
+    isCurrentContext() && get().operationVersion === operationVersion;
   try {
     await operation({
       workspacePath,
       ...(workspaceIdentity ? { workspaceIdentity } : {}),
     });
-    // operationId 只是共享的 UI 忙碌指示器。自动刷新可能在当前操作完成前覆盖它，
-    // 但不能因此把已经成功落盘的添加/安装操作报告成失败，否则调用方会保留弹窗。
+    // 只广播真实成功的写入，scope 切换不撤销已经落盘的变更；派生面板自行按身份刷新。
+    notifyPluginManagementChange({ workspacePath, workspaceIdentity, scope });
     if (!isCurrentContext()) return false;
     await loadInto(set, get, {
       workspacePath,
       workspaceIdentity,
       configScope,
       pluginService,
+      fresh: true,
     });
     return isCurrentContext();
   } catch (error) {
     // marketplace add/update 等通用操作失败：无插件目标，归属清空。
     logger.error("[plugins] operation failed", { operationId, error: toMessage(error) });
-    // 旧操作不能覆盖同一配置层中新操作的错误态；只有仍持有可见 operationId 的操作才回写。
+    // 旧操作不能覆盖同一配置层中新操作的错误态。
     if (ownsVisibleOperation()) {
       set({ error: toMessage(error), lastFailedPluginId: null });
     }
     return false;
   } finally {
-    // 防止旧操作结束时清掉后来操作的忙碌态。
-    // Scope/workspace 切换后当前上下文可能已经变化，不能再用 isCurrentContext 判断；
-    // 只要 operationId 仍然属于这次已结束的操作，就应该清掉它。否则用户在 User
-    // 配置保存完成、刷新尚未结束时切到 Workspace，新的配置视图会一直被旧操作锁成只读。
-    if (get().operationId === operationId && get().operationVersion === operationVersion) {
-      set({ operationId: null });
-    }
+    finish();
   }
 }
 
@@ -76,6 +138,7 @@ export async function loadInto(
     workspaceIdentity: string | null;
     configScope: ZCodePluginScope | null;
     pluginService: IPluginManagementService;
+    fresh?: boolean;
   },
 ): Promise<void> {
   const workspaceKey = buildWorkspaceKey(params.workspacePath, params.workspaceIdentity);
@@ -87,6 +150,8 @@ export async function loadInto(
       workspaceKey,
     });
     await existing;
+    // 变更前启动的读取不能代替变更后的刷新，等待旧读取完成后重新取权威状态。
+    if (params.fresh) await loadInto(set, get, { ...params, fresh: false });
     return;
   }
   const loadTask = runLoadInto(set, get, { ...params, workspaceKey });

@@ -132,7 +132,11 @@ import {
 } from "@/v4/composer/followupModeSettings.js";
 import { isAppleKeyboardPlatform } from "@/lib/keyboardShortcuts.js";
 import { usePrimaryFollowupModifier } from "@/v4/composer/usePrimaryFollowupModifier.js";
-import { consumeV4ComposerDraftWorkspaceTransferRequest } from "@/v4/composer/composerDraftWorkspaceTransfer.js";
+import {
+  consumeV4ComposerDraftAttachments,
+  registerV4ComposerDraftReader,
+  consumeV4ComposerDraftWorkspaceTransferRequest,
+} from "@/v4/composer/composerDraftWorkspaceTransfer.js";
 import { useComposerAttachments } from "@/v4/composer/useComposerAttachments.js";
 import type { ConversationDropTargetController } from "@/v4/composer/conversationDropTarget.js";
 import { CodeCommentAttachmentChip } from "@/v4/composer/CodeCommentAttachmentChip.js";
@@ -168,6 +172,9 @@ import { resolveAttachableShareContext } from "@/lib/conversationShareContext.js
 const MODEL_SELECTION_LOADING_STATE: ModelSelectionState = { status: "loading" };
 
 export interface ConversationComposerSendOptions {
+  /** 原始正文用于接纳恢复对账；协议正文可能附带提及与页面上下文。 */
+  submittedDraftText?: string;
+  source?: import("@zcode/shared/zcode-protocol-v4").ConversationInputSource;
   /** 点击发送时复制的配置；null 表示未完成选择，Host 不得从 Session 补齐。 */
   submission?: ComposerSubmissionConfig | null;
   heldQueueDisposition?: "clearQueueAndSend" | "keepQueueAndSend";
@@ -345,7 +352,7 @@ function arePromptHistoryEntriesEqual(left: readonly string[], right: readonly s
   return left.length === right.length && left.every((entry, index) => entry === right[index]);
 }
 
-interface ConversationComposerProps {
+export interface ConversationComposerProps {
   snapshot: ConversationSnapshot | null;
   /** 草稿 scope（sessionId；draft 态 null → "__draft__" scope）。 */
   sessionId?: string | null;
@@ -357,6 +364,7 @@ interface ConversationComposerProps {
   draftConfig?: Partial<SessionConfigState>;
   /** SessionPane 注入的完整 Draft owner；生产路径不再由编辑器直接覆盖持久记录。 */
   composerDraft: V4ComposerDraft;
+  rootDraftScopeKey?: string;
   updateComposerContent: (
     content: Pick<V4ComposerDraft, "text" | "editorStateJson" | "mention">,
   ) => void;
@@ -484,6 +492,7 @@ function ConversationComposerImpl({
   draftMode = false,
   draftConfig,
   composerDraft,
+  rootDraftScopeKey,
   updateComposerContent,
   replaceComposerDraft,
   submissionReady = true,
@@ -535,7 +544,9 @@ function ConversationComposerImpl({
 }: ConversationComposerProps) {
   const { intl, locale } = useZCodeIntl();
   const services = useOptionalServices();
-  const draftScopeId = sessionId ?? V4_DRAFT_SCOPE_ROOT;
+  const draftScopeId =
+    sessionId ??
+    (rootDraftScopeKey ? `${V4_DRAFT_SCOPE_ROOT}:${rootDraftScopeKey}` : V4_DRAFT_SCOPE_ROOT);
   const workspaceKey = workspaceIdentity?.trim() || workspacePath;
   const configPickerScopeKey = `${workspaceKey}\0${draftScopeId}`;
   const [text, setText] = useState("");
@@ -748,7 +759,11 @@ function ConversationComposerImpl({
     limitReason: conversationSelectionLimitReason,
     removeReference: removeConversationSelectionReference,
     clearReferences: clearConversationSelectionReferences,
-  } = useConversationSelectionReferences({ sessionId, workspaceKey });
+  } = useConversationSelectionReferences({
+    sessionId,
+    workspaceKey,
+    draftScopeKey: rootDraftScopeKey,
+  });
   const hasConversationSelectionReferences = conversationSelectionReferences.length > 0;
 
   // ── 草稿 per-session 持久化（切会话/刷新不丢；mention pill 经 editorStateJson 保真）──
@@ -784,6 +799,14 @@ function ConversationComposerImpl({
       : { text: "" };
   }, []);
 
+  useEffect(() => {
+    if (!draftScopeId.startsWith(V4_DRAFT_SCOPE_ROOT)) return;
+    return registerV4ComposerDraftReader(workspaceKey, () => ({
+      draft: { ...ownerDraftRef.current.draft, ...snapshotDraftOfEditor() },
+      attachments: attachmentsApi.attachments,
+    }));
+  }, [draftScopeId, workspaceKey, snapshotDraftOfEditor, attachmentsApi.attachments]);
+
   const persistDraftNow = useCallback(
     (scopeId: string) => {
       if (suppressDraftPersistRef.current) return;
@@ -814,6 +837,11 @@ function ConversationComposerImpl({
   const draftFocusVersion = useZCodeSessionStore(
     (state) => state.getWorkspaceState(workspacePath, workspaceIdentity).draftFocusVersion,
   );
+  useEffect(() => {
+    if (!draftScopeId.startsWith(V4_DRAFT_SCOPE_ROOT)) return;
+    const attachments = consumeV4ComposerDraftAttachments(workspaceKey, draftFocusVersion);
+    if (attachments) attachmentsApi.restoreDraftAttachments(attachments);
+  }, [draftFocusVersion, draftScopeId, workspaceKey, attachmentsApi.restoreDraftAttachments]);
   const pendingFocusRef = useRef(false);
   // 修饰键点击先于 form submit；这里只保存这一拍的 delivery 反转意图，submit 消费后清零。
   const reversePointerDeliveryRef = useRef(false);
@@ -942,8 +970,8 @@ function ConversationComposerImpl({
       }
       const previousDraft = snapshotDraftOfEditor();
       const shouldTransferDraft =
-        previousTarget.scopeId === V4_DRAFT_SCOPE_ROOT &&
-        draftScopeId === V4_DRAFT_SCOPE_ROOT &&
+        previousTarget.scopeId.startsWith(V4_DRAFT_SCOPE_ROOT) &&
+        draftScopeId.startsWith(V4_DRAFT_SCOPE_ROOT) &&
         consumeV4ComposerDraftWorkspaceTransferRequest({
           sourceWorkspacePath: previousTarget.workspacePath,
           sourceWorkspaceIdentity: previousTarget.workspaceIdentity,
@@ -1283,6 +1311,7 @@ function ConversationComposerImpl({
           editorClearedOptimistically = true;
         }
         const sendResult = await onSendText(promptText, {
+          submittedDraftText: trimmed,
           submission,
           ...(requestedDelivery ? { requestedDelivery } : {}),
           ...(heldQueueDisposition ? { heldQueueDisposition } : {}),

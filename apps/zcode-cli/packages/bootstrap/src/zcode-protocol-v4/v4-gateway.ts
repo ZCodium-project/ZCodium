@@ -3,7 +3,10 @@ import {
   v4BackgroundBashOutputParamsSchema,
   type BackgroundBashOutputResult,
 } from "@zcode/shared/zcode-protocol-v4";
-import type { PluginUiToolResultNotification } from "@zcode/shared/mcp-apps";
+import {
+  pluginUiToolResultNotificationSchema,
+  type PluginUiToolResultNotification,
+} from "@zcode/shared/mcp-apps";
 // V4 conversation 网关（host 通道层 CLI 侧）。
 // 职责：per-session ConversationTopicPublisher 注册表 + flushWindowMs 定时调度
 // + v4/command → CommandInbox → 宿主 executor 的收口。
@@ -930,6 +933,30 @@ export class ConversationV4Gateway {
       return;
     }
     this.resolveProjectionEventCommit(sessionId, String(event.id));
+    // 后台会话没有工具卡/订阅，仍须在 live 投影提交后通知宿主创建 guest。
+    // 输入与 UI 描述只取同一会话的权威成功行；历史 hydration 不经过此入口。
+    if (event.type === SessionEventType.ToolCallResult && this.host.emitPluginUiToolResult) {
+      const toolCallId = (event.payload as { toolCallId: string }).toolCallId;
+      const row = publisher
+        .getSnapshot()
+        .rows.window.find((row) => row.kind === "toolCall" && row.toolCallId === toolCallId);
+      if (
+        row?.kind === "toolCall" &&
+        row.status === "success" &&
+        row.display?.kind === "mcp_tool"
+      ) {
+        const result = pluginUiToolResultNotificationSchema.safeParse({
+          sessionId,
+          toolCallId,
+          serverName: row.display.serverName,
+          ui: row.display.ui,
+          ...(row.input && typeof row.input === "object" && !Array.isArray(row.input)
+            ? { input: row.input }
+            : {}),
+        });
+        if (result.success) this.host.emitPluginUiToolResult(result.data);
+      }
+    }
     if (
       !this.hydrationBuffers.has(sessionId) &&
       (event.type === SessionEventType.TurnComplete || event.type === SessionEventType.TurnError)
@@ -1396,6 +1423,7 @@ export class ConversationV4Gateway {
             sessionId,
             params.resumeThoughtLevel,
             params.workspace,
+            params.additionalDirectories,
           )
         : await this.hydratePublisher(sessionId);
     const cliSessionRestoreMs = !isLiveConversation
@@ -2880,6 +2908,7 @@ export class ConversationV4Gateway {
     sessionId: string,
     resumeThoughtLevel?: string,
     workspace?: ZCodeWorkspaceRef,
+    additionalDirectories?: string[],
   ): Promise<ConversationTopicPublisher> {
     const existingFlight = this.readyFlights.get(sessionId);
     if (existingFlight) return existingFlight;
@@ -2889,6 +2918,8 @@ export class ConversationV4Gateway {
         sessionId,
         resumeThoughtLevel,
         workspace,
+        // 宿主签名第四参是目录、第五参才是正文快照；遗漏会使冷恢复退化成仅 cwd。
+        additionalDirectories,
       );
       return this.hydratePublisher(sessionId, persistedMessages);
     });

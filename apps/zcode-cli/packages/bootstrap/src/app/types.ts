@@ -320,6 +320,8 @@ export interface SetLocaleResult {
 
 export interface ZCodeApp {
   readonly sessionId: SessionId;
+  /** 本运行实例的目录输入，仅供派生会话继承；冷恢复仍由 Host 重新解析。 */
+  readonly additionalDirectories?: readonly string[];
   readonly traceId: string;
   readonly runtime: AgentRuntime;
   respondWorkspaceHookReview(

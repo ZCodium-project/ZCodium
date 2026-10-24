@@ -15,6 +15,7 @@ import {
   isValidSavedWorkflowNameText,
   savedWorkflowPathPreview,
 } from "@/components/workflow-timeline/workflowRunSave.js";
+import { resolveWorkflowRunProjectOwnership } from "@/workspace-config-catalog/index.js";
 // eslint-disable-next-line import/first
 import { buildWorkflowSaveCandidatesByRunId } from "@/v4/workflowRunCardJoin.js";
 // eslint-disable-next-line import/first
@@ -33,6 +34,34 @@ import zhCN from "../src/i18n/locales/zh-CN.js";
 
 afterEach(() => {
   resetWorkflowRunSavedStoreForTests();
+});
+
+describe("再次运行的项目归属", () => {
+  it("按原会话和 workspace identity 读取 Host 投影，不按同 cwd 猜项目", () => {
+    const tasks = [
+      { taskId: "a", workspacePath: "/same", projectId: "project-a", hostId: "local" },
+      { taskId: "b", workspacePath: "/same", projectId: "project-b", hostId: "local" },
+      {
+        taskId: "b",
+        workspacePath: "/same",
+        workspaceIdentity: "remote:server:two:/same",
+        projectId: "remote-b",
+        hostId: "remote:server:two",
+      },
+    ];
+    expect(
+      resolveWorkflowRunProjectOwnership({ workspacePath: "/same", sessionId: "b" }, tasks),
+    ).toEqual({ projectId: "project-b", hostId: "local" });
+    expect(
+      resolveWorkflowRunProjectOwnership(
+        { workspacePath: "/same", workspaceIdentity: "remote:server:two:/same", sessionId: "b" },
+        tasks,
+      ),
+    ).toEqual({ projectId: "remote-b", hostId: "remote:server:two" });
+    expect(
+      resolveWorkflowRunProjectOwnership({ workspacePath: "/same", sessionId: "missing" }, tasks),
+    ).toEqual({ projectId: null });
+  });
 });
 
 describe("名字规则的前置回声", () => {

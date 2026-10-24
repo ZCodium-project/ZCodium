@@ -95,6 +95,7 @@ export function ConversationWorkflowCompletion({
   // and running it again」）。两道门在 `onSendWorkflowSaveRequest` 的供给点上，与 Resume 同一处；
   // 芯片不受门的影响——它说的是磁盘上有没有那份文件，不是这张卡能不能动它。
   const saveHost: WorkflowRunSaveSlotsHost = {
+    ...(sessionId ? { sessionId } : {}),
     workspacePath: context.workspacePath,
     ...(context.workspaceIdentity === undefined
       ? {}

@@ -4,7 +4,7 @@ import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Emitter } from "@zcode/rpc";
-import type { IServiceAccessor } from "@zcode/services";
+import type { IServiceAccessor, ProjectTree } from "@zcode/services";
 import type { ZCodeTaskMeta } from "@zcode/shared";
 import type {
   SessionsIndexTopicFrame,
@@ -294,7 +294,45 @@ function createEndpointServices(options: EndpointMockOptions) {
       return { items, total: rows.length, hasMore: rows.length > items.length };
     },
   );
+  const readProjectTree = vi.fn(async (): Promise<ProjectTree> => {
+    const entries = Object.entries(
+      options.sessionsByWorkspaceKey ?? { [options.workspaceId]: options.sessions },
+    );
+    return {
+      projects: entries.map(([key], index) => ({
+        id: `project-${index}`,
+        hostId: options.workspaceId,
+        name: key,
+        roots: [],
+        nameOverridden: true,
+        position: index,
+        pinned: false,
+        deleted: false,
+        createdAt: 1,
+        updatedAt: 1,
+      })),
+      tasks: entries.flatMap(([key, sessions], index) => {
+        const workspaceIdentity = key.includes(":/") ? key : undefined;
+        const workspacePath = workspaceIdentity ? key.slice(key.lastIndexOf(":/") + 1) : key;
+        return sessions.map((session) => ({
+          ...createTaskMeta(session.sessionId, {
+            workspacePath,
+            ...(workspaceIdentity ? { workspaceIdentity } : {}),
+            title: session.title,
+            createdAt: session.createdAt,
+            updatedAt: session.lastActivityAt,
+          }),
+          hostId: options.workspaceId,
+          projectId: `project-${index}`,
+          pinned: false,
+          archived: false,
+        }));
+      }),
+    };
+  });
   const services = {
+    projectService: { readTree: readProjectTree },
+    broadcastService: { onMessage: () => ({ dispose() {} }) },
     windowControllerService: {
       listTaskList: controllerListTaskList,
       mutateTask: vi.fn(async () => null),
@@ -341,6 +379,7 @@ function createEndpointServices(options: EndpointMockOptions) {
     subscribeSessionsIndexV4,
     unsubscribeSessionsIndexV4,
     controllerListTaskList,
+    readProjectTree,
   };
 }
 
@@ -980,7 +1019,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     });
   });
 
-  it("远端 workspace 的 # 会话候选只订阅对应 remote endpoint", async () => {
+  it("远端 workspace 的会话候选只读对应 Host 项目目录，不为查询订阅 Agent", async () => {
     const local = createEndpointServices({
       workspaceId: "ws-local",
       sessions: [],
@@ -1031,19 +1070,16 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
     });
 
     expect(local.subscribeSessionsIndexV4).not.toHaveBeenCalled();
-    expect(remote.subscribeSessionsIndexV4).toHaveBeenCalledTimes(1);
-    expect(remote.subscribeSessionsIndexV4).toHaveBeenCalledWith({
-      runtimePolicy: "existing-only",
-      workspacePath: "/remote-ws",
-      workspaceIdentity: REMOTE_IDENTITY,
-    });
+    expect(remote.subscribeSessionsIndexV4).not.toHaveBeenCalled();
+    expect(local.readProjectTree).not.toHaveBeenCalled();
+    expect(remote.readProjectTree).toHaveBeenCalledWith({ includeDeleted: true });
 
     act(() => {
       root.unmount();
     });
   });
 
-  it("@ 保持当前 workspace，# 聚合同一 Host 并按 workspace 各限制 20 条", async () => {
+  it("@ 保持当前 workspace，# 从同 Host 项目目录聚合并按项目各限制20条", async () => {
     const buildWorkspaceSessions = (workspaceId: string, prefix: string) => [
       ...Array.from({ length: 20 }, (_, index) =>
         createSession({
@@ -1135,10 +1171,8 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
       await flushMicrotasks();
     });
 
-    expect(local.subscribeSessionsIndexV4).toHaveBeenCalledTimes(1);
-    expect(local.subscribeSessionsIndexV4).toHaveBeenCalledWith(
-      expect.objectContaining({ workspacePath: "/workspace-a" }),
-    );
+    expect(local.subscribeSessionsIndexV4).not.toHaveBeenCalled();
+    expect(local.readProjectTree).toHaveBeenCalledWith({ includeDeleted: true });
     expect(latest?.items).toHaveLength(21);
     expect((latest?.items ?? []).map((item) => item.value)).toContain("alpha-old-target");
 
@@ -1150,10 +1184,7 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
       await flushMicrotasks();
     });
 
-    expect(local.subscribeSessionsIndexV4).toHaveBeenCalledTimes(2);
-    expect(local.subscribeSessionsIndexV4).toHaveBeenCalledWith(
-      expect.objectContaining({ workspacePath: "/workspace-b" }),
-    );
+    expect(local.subscribeSessionsIndexV4).not.toHaveBeenCalled();
     expect(latest?.items).toHaveLength(40);
     expect((latest?.items ?? []).filter((item) => item.description === "workspace-a")).toHaveLength(
       20,
@@ -1305,7 +1336,10 @@ describe("useGlobalTaskList remote shard tasks-index 行 + sessions-index detail
       await flushMicrotasks();
     });
 
-    expect(remoteA.subscribeSessionsIndexV4).toHaveBeenCalledTimes(2);
+    expect(remoteA.readProjectTree).toHaveBeenCalledTimes(1);
+    expect(remoteB.readProjectTree).not.toHaveBeenCalled();
+    expect(local.readProjectTree).not.toHaveBeenCalled();
+    expect(remoteA.subscribeSessionsIndexV4).not.toHaveBeenCalled();
     expect(remoteB.subscribeSessionsIndexV4).not.toHaveBeenCalled();
     expect(local.subscribeSessionsIndexV4).not.toHaveBeenCalled();
     expect((latest?.items ?? []).map((item) => item.value)).toEqual([

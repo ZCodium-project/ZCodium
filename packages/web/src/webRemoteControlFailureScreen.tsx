@@ -273,7 +273,7 @@ const WEB_REMOTE_CONTROL_SCREEN_COPY = {
   },
 } satisfies Record<
   WebRemoteControlScreenLocale,
-  Record<WebRemoteControlFailureReason, WebRemoteControlScreenCopy>
+  Record<Exclude<WebRemoteControlFailureReason, "auth-required">, WebRemoteControlScreenCopy>
 >;
 
 export function resolveWebRemoteControlScreenLocale(
@@ -286,7 +286,10 @@ export function resolveWebRemoteControlScreenCopy(
   failure: WebRemoteControlFailure,
   locale: WebRemoteControlScreenLocale,
 ): WebRemoteControlScreenCopy {
-  return WEB_REMOTE_CONTROL_SCREEN_COPY[locale][failure.reason];
+  // 审计版没有登录恢复动作；授权缺席沿用“不支持”展示，不重新引入账号入口。
+  return WEB_REMOTE_CONTROL_SCREEN_COPY[locale][
+    failure.reason === "auth-required" ? "unsupported-action" : failure.reason
+  ];
 }
 
 function resolveToneClassName(tone: WebRemoteControlScreenCopy["tone"]): {

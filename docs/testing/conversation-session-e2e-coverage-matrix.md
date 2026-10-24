@@ -1,5 +1,22 @@
 # Conversation Session E2E Coverage Matrix
 
+## ZCodium 多文件夹项目对齐（ZUP，#79）
+
+| Case     | 本轮覆盖                                               | 当前状态                                                                             |
+| -------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| ZUP01/02 | Native 多选创建、编辑 roots/主目录、持久化与旧会话 cwd | Host/Repo 回归通过；macOS 目录包创建/编辑/重启实测通过                               |
+| ZUP03/04 | 附加目录能力/配置隔离、创建/显式恢复/V4 冷恢复         | CLI 真实文件与协议回归通过；旧任务冷恢复后实际发送通过                               |
+| ZUP05    | 同 cwd 不同项目的草稿及任务归属隔离                    | 定向回归与 macOS 双项目草稿切换/重启实测通过                                         |
+| ZUP06    | Zai Light/Dark、中英文、桌面/窄屏                      | 深色中文/浅色英文、390px 编辑表单实测；不等于实体手机                                |
+| ZUP07    | 远程单固定 root、identity、continuous/replayable       | 合同回归通过；真实 SSH/公网手机未完成                                                |
+| ZUP08/13 | Gen UI 内联、文本材料预览、Bot 合批来源/附件对应       | 消息组件回归通过；10-24 实包 Gen UI guest/交互/确认续写/展开保持通过；Bot 真入口未测 |
+| ZUP09/12 | 插件后台 guest 生命周期、逐项操作、独立文档实例        | 生命周期/命令回归通过；真实长时间后台/多文档待验收                                   |
+| ZUP10    | 用户自有设备管理、编辑/升级/force/迁移日志             | 准入回归、设置入口/新建向导/取消通过；真实升级/force 未测                            |
+| ZUP11    | 完整视图、对话/浮窗切换、单一 pane/草稿/附件           | 回归与 macOS 同编辑器 DOM/正文切换实测通过                                           |
+| ZUP14    | 配置所有 roots、自动化/工作流的 project/host 身份      | Catalog/提交/Host 隔离回归通过；配置菜单未打开 root 可选且可加载                     |
+
+规格与剪枝见 [本轮对齐规格](../superpowers/specs/2026-10-23-zcodium-upstream-parity.md)，分批结果、环境及实际证据见 [验收报告](project-parity-validation.md)。上游历史记录只作设计依据，不自动转为本 fork 已覆盖；未执行的真实链路、跨平台 GUI 不写成通过。本轮操作证据不代表旧 manual-review/pending WDIO 场景已转正或加入 CI。
+
 ## 项目与任务草稿生命周期（PD，2026-10-16）
 
 PD01–PD12 定义及分层验证见 [统一生命周期规格](../ui/project-task-draft-lifecycle.md#本轮验证记录2026-10-16)。产品语义 accepted；自动化保持 manual-review/pending，未自动转正或加入 CI。

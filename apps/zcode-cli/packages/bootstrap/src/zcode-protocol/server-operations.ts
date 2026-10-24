@@ -3368,6 +3368,8 @@ async function resolveSessionStartupPreferences(
   if (source.kind === "inherit") {
     const inheritedShellSelection = source.parent.app.runtime.getSessionShellSelection();
     return {
+      // fork 派生父运行实例，不能丢目录或借当前 Host roots 重配父会话的能力范围。
+      additionalDirectories: source.parent.app.additionalDirectories,
       memoryEnabled: source.parent.memoryEnabled,
       subagentRuntimeConfigEnabled: source.parent.subagentRuntimeConfigEnabled,
       modelContextBudgetStrategy: DEFAULT_ZCODE_MODEL_CONTEXT_BUDGET_STRATEGY,

@@ -15,9 +15,12 @@ import { persistLastSelectedAgentProvider } from "@/lib/zcodeProviderPreference.
 import { areConfigOptionsEquivalent } from "@/lib/configOptionsEquality.js";
 import type { ZCodeUiError } from "@/lib/zcodeUiError.js";
 import { pushNavEntry } from "@/lib/taskNavigationHistory.js";
+import { notifyTaskNavigationCommitted } from "@/store/zcodeSessionStoreNavigation.js";
 import { resolveTaskRestorePreloadConfigOptions } from "@/lib/taskModelRecovery.js";
 import type {
   ZCodeSessionStoreState,
+  ComposerInitialConfig,
+  ComposerInitialization,
   ConfigOptionsStatus,
   ComposerMentionPrefill,
   GroupedDraftTaskState,
@@ -234,7 +237,12 @@ function resolveActiveTaskConfigOptionsOnSwitch(
 
 export function createWorkspaceSlice(set: SetFn) {
   return {
-    setActiveTaskId: (workspacePath: string, id: string | null, workspaceIdentity?: string) => {
+    setActiveTaskId: (
+      workspacePath: string,
+      id: string | null,
+      workspaceIdentity?: string,
+      composerConfig?: ComposerInitialConfig,
+    ) => {
       set((state) => {
         const workspaceUpdate = updateWorkspaceState(
           state,
@@ -265,6 +273,12 @@ export function createWorkspaceSlice(set: SetFn) {
               taskUnreadByTaskId: restTaskUnreadByTaskId,
               optimisticTaskListByTaskId: nextOptimisticTaskListByTaskId,
               activeTaskId: id,
+              composerInitialization:
+                id && composerConfig
+                  ? { taskId: id, config: composerConfig }
+                  : current.activeTaskId === id
+                    ? current.composerInitialization
+                    : undefined,
               // grouped 的 New task 草稿行只是当前草稿态锚点。
               // 一旦用户选中真实 task，就代表离开这个临时实体，必须立刻清掉，避免侧栏留下不可操作的假行。
               groupedDraftTask: id ? null : current.groupedDraftTask,
@@ -299,6 +313,7 @@ export function createWorkspaceSlice(set: SetFn) {
 
         return { ...workspaceUpdate, ...navUpdate };
       });
+      if (id) notifyTaskNavigationCommitted({ workspacePath, workspaceIdentity, taskId: id });
     },
 
     promoteGroupedDraftTask: (
@@ -508,12 +523,44 @@ export function createWorkspaceSlice(set: SetFn) {
       );
     },
 
+    consumeComposerInitialization: (
+      workspacePath: string,
+      initialization: ComposerInitialization,
+      workspaceIdentity?: string,
+    ) => {
+      set((state) =>
+        updateWorkspaceState(
+          state,
+          workspacePath,
+          (current) =>
+            current.composerInitialization === initialization
+              ? { ...current, composerInitialization: undefined }
+              : current,
+          workspaceIdentity,
+        ),
+      );
+    },
+    clearDraftTaskGroup: (workspacePath: string, workspaceIdentity?: string) => {
+      set((state) =>
+        updateWorkspaceState(
+          state,
+          workspacePath,
+          (current) =>
+            current.draftTaskGroupId === undefined
+              ? current
+              : { ...current, draftTaskGroupId: undefined },
+          workspaceIdentity,
+        ),
+      );
+    },
     startDraft: (
       workspacePath: string,
       provider?: ZCodeProvider,
       workspaceIdentity?: string,
       options?: {
         groupedDraftPlacement?: GroupedDraftTaskPlacement;
+        projectId?: string | null;
+        taskGroupId?: string | null;
         createSource?: SessionCreateSource;
       },
     ) => {
@@ -594,6 +641,13 @@ export function createWorkspaceSlice(set: SetFn) {
             return {
               ...current,
               activeTaskId: null,
+              composerInitialization: undefined,
+              draftProjectId: options?.projectId,
+              draftTaskGroupId: options?.taskGroupId,
+              // 同 cwd 的项目目录范围不同；更换项目必须使原预热 owner 退休。
+              draftRuntimeInvalidationVersion:
+                current.draftRuntimeInvalidationVersion +
+                Number(current.draftProjectId !== options?.projectId),
               groupedDraftTask: nextGroupedDraftTask,
               draftCreateSource:
                 options?.createSource ?? (options?.groupedDraftPlacement ? "group" : "session"),

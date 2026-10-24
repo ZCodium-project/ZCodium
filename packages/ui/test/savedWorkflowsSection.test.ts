@@ -50,6 +50,27 @@ const tabStoreState: {
   openSettingsTab: () => {},
 };
 const settingsNavigation = vi.hoisted(() => ({ setPendingSettingsSectionIntent: vi.fn() }));
+// 旧 fixture 的目录形状仅供测试构造 Host 项目；生产组件不再读取 tab 候选。
+let catalogOverride: FakeTab[] | undefined;
+vi.mock("@/project-sidebar/index.js", () => ({
+  useOptionalProjectDirectory: () => ({
+    projects: (catalogOverride ?? tabStoreState.tabs)
+      .filter(
+        (tab) =>
+          tab.kind === "workspace" &&
+          tab.workspacePurpose !== "conversation" &&
+          tab.availability !== "unavailable-local-directory",
+      )
+      .map((tab) => ({
+        id: tab.id,
+        hostId: tab.remoteSessionId ? "remote:server:test" : "local",
+        name: tab.label,
+        roots: [{ rootPath: tab.workspacePath, isPrimary: true, position: 0 }],
+        deleted: false,
+      })),
+    availability: new Map(),
+  }),
+}));
 vi.mock("@/lib/settingsNavigation.js", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   setPendingSettingsSectionIntent: settingsNavigation.setPendingSettingsSectionIntent,
@@ -230,6 +251,7 @@ function keyOf(path: string): string {
 
 describe("SavedWorkflowsSection（全局 + 多项目页）", () => {
   beforeEach(() => {
+    catalogOverride = undefined;
     tabStoreState.tabs = [];
     tabStoreState.activeWorkspacePath = null;
     tabStoreState.activeWorkspaceIdentity = null;
@@ -262,6 +284,21 @@ describe("SavedWorkflowsSection（全局 + 多项目页）", () => {
     expect(screen.getByText("已保存的工作流").textContent).toContain("9");
   });
 
+  it("未打开 tab 的 Host 项目仍可浏览，创建工作流传递 projectId/hostId", async () => {
+    tabStoreState.tabs = [];
+    catalogOverride = [workspaceTab("/unopened", "Unopened")];
+    groupReadiness.global = { loaded: true, empty: true, count: 0 };
+    groupReadiness["/unopened"] = { loaded: true, empty: true, count: 0 };
+    const { onCreateViaChat } = mount();
+    await screen.findByTestId(TID_WORKFLOWS_EMPTY);
+    fireEvent.click(screen.getByTestId(TID_WORKFLOWS_CREATE_VIA_CHAT));
+    expect(onCreateViaChat.mock.calls[0]?.[1]).toEqual({
+      workspacePath: "/unopened",
+      projectId: "t-/unopened",
+      hostId: "local",
+    });
+  });
+
   it("全局组接收本机项目候选（过滤远程）与活动项目 key", async () => {
     tabStoreState.tabs = [
       workspaceTab("/a", "Alpha"),
@@ -273,7 +310,7 @@ describe("SavedWorkflowsSection（全局 + 多项目页）", () => {
     mount({ workspacePath: "/a" });
     const globalGroup = await screen.findByTestId(TID_WORKFLOW_GLOBAL_GROUP);
     expect(globalGroup.getAttribute("data-local")).toBe("/a");
-    expect(globalGroup.getAttribute("data-active")).toBe(keyOf("/a"));
+    expect(globalGroup.getAttribute("data-active")).toBe(JSON.stringify(["local", "t-/a"]));
   });
 
   it("全局空态卡只看项目组：项目全空 + 全局有货，空态卡照出（在全局组之下）", async () => {
@@ -299,7 +336,11 @@ describe("SavedWorkflowsSection（全局 + 多项目页）", () => {
     const { onCreateViaChat } = mount({ workspacePath: "/a" });
     await screen.findByTestId(TID_WORKFLOWS_EMPTY);
     fireEvent.click(screen.getByTestId(TID_WORKFLOWS_CREATE_VIA_CHAT));
-    expect(onCreateViaChat.mock.calls[0]?.[1]).toEqual({ workspacePath: "/a" });
+    expect(onCreateViaChat.mock.calls[0]?.[1]).toEqual({
+      workspacePath: "/a",
+      projectId: "t-/a",
+      hostId: "local",
+    });
     expect(onCreateViaChat.mock.calls[0]?.[0]).toEqual(expect.stringContaining("保存到本项目"));
   });
 

@@ -79,6 +79,7 @@ export function WebRemoteControlMobileShell({
   onSelectTask,
   onStartDraftInWorkspace,
   renderChatHeader,
+  renderTaskHome,
   sidePaneContent,
   switcher,
   webRemoteControlTerminalTransportState,
@@ -98,6 +99,11 @@ export function WebRemoteControlMobileShell({
   ) => void;
   onStartDraftInWorkspace?: (targetWorkspacePath: string, targetWorkspaceIdentity?: string) => void;
   renderChatHeader: (options: { onBackHome: () => void }) => ReactNode;
+  /** 完整 Shell 提供与桌面相同的项目目录；旧独立入口仍使用既有任务首页。 */
+  renderTaskHome?: (options: {
+    onNavigateToChat: () => void;
+    onSwitchingChange: (switching: boolean) => void;
+  }) => ReactNode;
   chatContent: ReactNode;
   chatOverlay?: ReactNode;
   sidePaneContent?: ReactNode;
@@ -209,21 +215,28 @@ export function WebRemoteControlMobileShell({
   return (
     <div className="relative flex h-full min-h-0 min-w-0 flex-col bg-background">
       {currentPage === "home" ? (
-        <WebRemoteControlMobileTaskHome
-          activeTaskId={activeTaskId}
-          activeWorkspaceIdentity={activeWorkspaceIdentity}
-          activeWorkspacePath={activeWorkspacePath}
-          initialResult={initialWorkspaceList}
-          onCrossWorkspaceSwitchingChange={setSwitchingWorkspace}
-          onNavigateHome={navigateHome}
-          onNavigateToChat={navigateToChat}
-          preferences={taskHomePreferences}
-          onPreferencesChange={handleTaskHomePreferencesChange}
-          refreshKey={homeRefreshKey}
-          onSelectTask={onSelectTask}
-          onStartDraftInWorkspace={onStartDraftInWorkspace}
-          switcher={switcher}
-        />
+        renderTaskHome ? (
+          renderTaskHome({
+            onNavigateToChat: navigateToChat,
+            onSwitchingChange: setSwitchingWorkspace,
+          })
+        ) : (
+          <WebRemoteControlMobileTaskHome
+            activeTaskId={activeTaskId}
+            activeWorkspaceIdentity={activeWorkspaceIdentity}
+            activeWorkspacePath={activeWorkspacePath}
+            initialResult={initialWorkspaceList}
+            onCrossWorkspaceSwitchingChange={setSwitchingWorkspace}
+            onNavigateHome={navigateHome}
+            onNavigateToChat={navigateToChat}
+            preferences={taskHomePreferences}
+            onPreferencesChange={handleTaskHomePreferencesChange}
+            refreshKey={homeRefreshKey}
+            onSelectTask={onSelectTask}
+            onStartDraftInWorkspace={onStartDraftInWorkspace}
+            switcher={switcher}
+          />
+        )
       ) : (
         <section
           className="flex h-full min-h-0 min-w-0 flex-col bg-background text-foreground"

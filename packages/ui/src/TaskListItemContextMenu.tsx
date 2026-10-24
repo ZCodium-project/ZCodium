@@ -6,6 +6,8 @@ import {
 import { TaskActionMenuContent } from "@/TaskActionMenuContent.js";
 
 export function TaskListItemContextMenu({
+  organizationActions,
+  isArchived = false,
   intl,
   isPinned,
   fileManagerLabel,
@@ -28,6 +30,8 @@ export function TaskListItemContextMenu({
   disableTaskActions = false,
   disabledReason,
 }: {
+  organizationActions?: React.ReactNode;
+  isArchived?: boolean;
   intl: {
     formatMessage: (desc: { id: string }, values?: Record<string, string>) => string;
   };
@@ -58,8 +62,10 @@ export function TaskListItemContextMenu({
 }) {
   return (
     <ContextMenuContent className="w-52">
+      {organizationActions}
       <TaskActionMenuContent
         intl={intl}
+        isArchived={isArchived}
         isPinned={isPinned}
         fileManagerLabel={fileManagerLabel}
         taskSessionFile={taskSessionFile}

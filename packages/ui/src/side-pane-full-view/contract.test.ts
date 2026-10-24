@@ -26,7 +26,8 @@ describe("side-pane-full-view contract", () => {
       controller({ surface: "side-pane", floating: "collapsed" }),
     );
     expect(floating.mode).toBe("floating");
-    expect(floating.sidebarVisible(true)).toBe(false);
+    expect(floating.sidebarVisible(true)).toBe(true);
+    expect(floating.sidebarVisible(false)).toBe(false);
     expect(
       exampleSidePaneFullView(controller({ surface: "conversation", floating: "expanded" })).mode,
     ).toBe("conversation");

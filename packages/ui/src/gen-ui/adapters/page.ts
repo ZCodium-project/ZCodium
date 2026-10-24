@@ -90,6 +90,7 @@ export function createGenUiPage(input: GenUiPageInput): GenUiPage {
   };
   const followUp = async (prompt: string, title?: string, hostGesture = false) => {
     assertCurrent();
+    const sourceBridge = bridge;
     if (sending) throw new Error("A follow-up is already pending");
     const actions = getPluginUiSessionActions(target);
     if (!actions) throw new Error("This session is read-only or disconnected");
@@ -102,6 +103,8 @@ export function createGenUiPage(input: GenUiPageInput): GenUiPage {
       }
       await saves;
       assertCurrent();
+      // 确认和状态保存都可能跨过沙箱重建；ready 只代表新页面，不能授权旧桥的续写请求。
+      if (bridge !== sourceBridge) throw new Error("Gen UI instance was closed");
       if (getPluginUiSessionActions(target) !== actions) throw new Error("Session binding changed");
       await actions.sendFollowUp({
         prompt,

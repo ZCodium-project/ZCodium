@@ -3,6 +3,7 @@ import type { ZCodePluginsOverviewResult, ZCodePluginInfo } from "@zcode/shared"
 import type { IPluginManagementService } from "@zcode/services";
 import { usePluginManagementStore } from "../src/store/pluginManagementStore.js";
 import { buildStoreItems } from "../src/settings/pluginStoreListing.js";
+import { subscribePluginManagementChanges } from "../src/store/pluginManagementStoreLoading.js";
 
 function makePlugin(overrides: Partial<ZCodePluginInfo> = {}): ZCodePluginInfo {
   return {
@@ -95,11 +96,142 @@ beforeEach(() => {
     error: null,
     togglingPluginId: null,
     operationId: null,
+    activeOperations: [],
     describeCache: {},
   });
 });
 
 describe("pluginManagementStore", () => {
+  it("个人插件 A/B 并发操作独立保留 busy，先结束的条目不清除另一个", async () => {
+    const finish = new Map<string, () => void>();
+    const pluginService = createPluginServiceMock({
+      installPlugin: vi.fn(
+        ({ pluginName }) =>
+          new Promise((resolve) => {
+            finish.set(pluginName!, () =>
+              resolve({ installedPlugins: [], dependencyClosure: [], diagnostics: [] }),
+            );
+          }),
+      ),
+    });
+    await usePluginManagementStore.getState().initialize({ workspacePath: "/repo", pluginService });
+    const first = usePluginManagementStore.getState().installPlugin("a", "personal", pluginService);
+    const second = usePluginManagementStore
+      .getState()
+      .installPlugin("b", "personal", pluginService);
+    expect(usePluginManagementStore.getState().activeOperations.map((item) => item.id)).toEqual([
+      "plugin:install:a@personal",
+      "plugin:install:b@personal",
+    ]);
+    finish.get("a")!();
+    await first;
+    expect(usePluginManagementStore.getState().activeOperations.map((item) => item.id)).toEqual([
+      "plugin:install:b@personal",
+    ]);
+    finish.get("b")!();
+    await second;
+    expect(usePluginManagementStore.getState().activeOperations).toEqual([]);
+  });
+
+  it("只有成功写入发布原 scope 的变更，失败与验证不能触发刷新", async () => {
+    const seen = vi.fn();
+    const off = subscribePluginManagementChanges(seen);
+    const pluginService = createPluginServiceMock();
+    await usePluginManagementStore.getState().initialize({ workspacePath: "/repo", pluginService });
+    await usePluginManagementStore
+      .getState()
+      .installPlugin("a", "personal", pluginService, "workspace");
+    expect(seen).toHaveBeenCalledWith({
+      workspacePath: "/repo",
+      workspaceIdentity: null,
+      scope: "workspace",
+    });
+    pluginService.installPlugin = vi.fn(async () => {
+      throw new Error("failed");
+    });
+    await usePluginManagementStore.getState().installPlugin("b", "personal", pluginService);
+    expect(seen).toHaveBeenCalledTimes(1);
+    off();
+  });
+
+  it("配置层切换后的同名新操作不被旧操作完成清除", async () => {
+    const writes: Array<() => void> = [];
+    const pluginService = createPluginServiceMock({
+      installPlugin: vi.fn(
+        () =>
+          new Promise((resolve) => {
+            writes.push(() =>
+              resolve({ installedPlugins: [], dependencyClosure: [], diagnostics: [] }),
+            );
+          }),
+      ),
+    });
+    await usePluginManagementStore
+      .getState()
+      .initialize({ workspacePath: "/repo", configScope: "user", pluginService });
+    const first = usePluginManagementStore.getState().installPlugin("a", "personal", pluginService);
+    await usePluginManagementStore
+      .getState()
+      .initialize({ workspacePath: "/repo", configScope: "workspace", pluginService });
+    const second = usePluginManagementStore
+      .getState()
+      .installPlugin("a", "personal", pluginService, "workspace");
+    writes[0]!();
+    await first;
+    expect(usePluginManagementStore.getState().activeOperations).toEqual([
+      { id: "plugin:install:a@personal" },
+    ]);
+    writes[1]!();
+    await second;
+    expect(usePluginManagementStore.getState().activeOperations).toEqual([]);
+  });
+
+  it("并发启停 A/B 互不覆盖请求身份；失败 A 回滚，成功 B 才发布刷新", async () => {
+    const firstPlugin = makePlugin({ id: "a@personal", name: "a", marketplace: "personal" });
+    const secondPlugin = makePlugin({ id: "b@personal", name: "b", marketplace: "personal" });
+    let failA: (error: Error) => void = () => {};
+    let finishB: (value: { plugin: ZCodePluginInfo; enabled: boolean }) => void = () => {};
+    const pluginService = createPluginServiceMock({
+      listPlugins: vi.fn(async () => ({
+        plugins: [firstPlugin, { ...secondPlugin, enabled: false }],
+        diagnostics: [],
+      })),
+      setPluginEnabled: vi.fn(
+        ({ pluginId }) =>
+          new Promise((resolve, reject) => {
+            if (pluginId === firstPlugin.id) failA = reject;
+            else finishB = resolve;
+          }),
+      ),
+    });
+    await usePluginManagementStore.getState().initialize({ workspacePath: "/repo", pluginService });
+    usePluginManagementStore.setState({ plugins: [firstPlugin, secondPlugin] });
+    const seen = vi.fn();
+    const off = subscribePluginManagementChanges(seen);
+    const first = usePluginManagementStore
+      .getState()
+      .setEnabled(firstPlugin.id, false, pluginService);
+    const second = usePluginManagementStore
+      .getState()
+      .setEnabled(secondPlugin.id, false, pluginService);
+    expect(usePluginManagementStore.getState().activeOperations).toHaveLength(2);
+    failA(new Error("A failed"));
+    await expect(first).resolves.toBe(false);
+    expect(
+      usePluginManagementStore.getState().plugins.find((plugin) => plugin.id === firstPlugin.id)
+        ?.enabled,
+    ).toBe(true);
+    expect(usePluginManagementStore.getState().activeOperations).toEqual([
+      { id: "plugin:set-enabled:b@personal" },
+    ]);
+    expect(seen).not.toHaveBeenCalled();
+    finishB({ plugin: { ...secondPlugin, enabled: false }, enabled: false });
+    await expect(second).resolves.toBe(true);
+    expect(seen).toHaveBeenCalledOnce();
+    expect(usePluginManagementStore.getState().activeOperations).toEqual([]);
+    off();
+  });
+
   it("initialize loads plugins from the agent service", async () => {
     const pluginService = createPluginServiceMock();
 

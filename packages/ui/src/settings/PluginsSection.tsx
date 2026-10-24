@@ -25,10 +25,12 @@ import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { TID_PLUGIN_STORE_BROWSE } from "@zcode/shared";
 import type { ZCodePluginInfo, ZCodePluginScope, ZCodePluginUserConfigOption } from "@zcode/shared";
 import type { CreateTaskRequest } from "@/app-shell/types.js";
+import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import {
-  useBaseWorkspaceServices,
-  useWorkspaceServicesResolution,
-} from "@/hooks/useWorkspaceServices.js";
+  useConfigWorkspaceCatalog,
+  useConfigWorkspaceServicesResolution as useWorkspaceServicesResolution,
+  type ConfigWorkspaceTarget,
+} from "@/workspace-config-catalog/index.js";
 import { getPathLeaf } from "@/lib/path.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { McpSettingsSection } from "@/settings/McpSettingsSection.js";
@@ -52,6 +54,7 @@ import {
 import {
   PluginStoreUpdateBadge,
   PluginStoreUpdateButton,
+  isItemBusy,
   type PluginStoreActions,
 } from "@/settings/PluginStoreCard.js";
 import { SettingsBreadcrumbReporter } from "@/settings/SettingsHeaderBreadcrumb.js";
@@ -74,7 +77,6 @@ import {
 } from "@/settings/pluginStoreListing.js";
 import { usePluginManagementStore } from "@/store/pluginManagementStore.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
-import { isWorkspaceTab, type WorkspaceTabState } from "@/store/tabStore.js";
 import {
   filterPluginsByQuery,
   partitionPluginsForSettings,
@@ -86,11 +88,7 @@ import {
   matchesComputerUseSearch,
   resolveComputerUseAvailability,
 } from "@/settings/computerUseAvailability.js";
-import {
-  PluginScopeMenu,
-  getPluginWorkspaceKey,
-  isPluginScopeWorkspaceConnected,
-} from "@/settings/PluginScopeMenu.js";
+import { PluginScopeMenu, getPluginWorkspaceKey } from "@/settings/PluginScopeMenu.js";
 import {
   RemoteSyncDialogs,
   shouldShowRemoteSyncActions,
@@ -112,7 +110,7 @@ function getPluginTabCountClass(tab: PluginTabTarget, selectedTab: PluginTabTarg
 
 type PluginScope =
   | { kind: "user"; key: "user" }
-  | { kind: "workspace"; key: string; tab: WorkspaceTabState };
+  | { kind: "workspace"; key: string; tab: ConfigWorkspaceTarget };
 
 interface PluginsSectionProps {
   isDesktop?: boolean;
@@ -129,7 +127,7 @@ interface PluginsSectionProps {
   showMarketplaceBreadcrumb?: boolean;
 }
 
-function workspaceKey(tab: WorkspaceTabState): string {
+function workspaceKey(tab: ConfigWorkspaceTarget): string {
   return getPluginWorkspaceKey(tab);
 }
 
@@ -148,7 +146,7 @@ function PluginList({
   showMarketplaceBreadcrumb = false,
   onVisibleCountChange,
 }: {
-  target: WorkspaceTabState | null;
+  target: ConfigWorkspaceTarget | null;
   configScope: ZCodePluginScope;
   searchQuery: string;
   isDesktop: boolean;
@@ -193,6 +191,7 @@ function PluginList({
   const resetPluginConfig = usePluginManagementStore((state) => state.resetPluginConfig);
   const togglingPluginId = usePluginManagementStore((state) => state.togglingPluginId);
   const operationId = usePluginManagementStore((state) => state.operationId);
+  const activeOperations = usePluginManagementStore((state) => state.activeOperations);
   const [selectedPluginId, setSelectedPluginId] = useState<string | null>(null);
   const [pluginOptionsDrafts, setPluginOptionsDrafts] = useState<
     Record<string, Record<string, PluginOptionDraftValue>>
@@ -370,6 +369,7 @@ function PluginList({
     installedPlugins,
     plugins,
     operationId,
+    activeOperations,
     onAfterUninstall: refreshAfterPluginChange,
   });
   const handleUpdatePlugin = useCallback(
@@ -460,6 +460,7 @@ function PluginList({
           : undefined,
       onUpdate: (pluginId) => void handleUpdatePlugin(pluginId),
       operationId,
+      activeOperations,
       togglingPluginId,
     }),
     [
@@ -470,6 +471,7 @@ function PluginList({
       onDetailOpenChange,
       onOpenPluginStore,
       operationId,
+      activeOperations,
       togglingPluginId,
       uninstall.requestUninstall,
     ],
@@ -560,7 +562,10 @@ function PluginList({
                 <DropdownMenuContent align="end">
                   {canUpdatePluginItem(storeItemById.get(plugin.id)) ? (
                     <DropdownMenuItem
-                      disabled={operationId !== null}
+                      disabled={isItemBusy(
+                        { ...plugin, marketplace: plugin.marketplace ?? "" },
+                        actions,
+                      )}
                       onSelect={() => void handleUpdatePlugin(plugin.id)}
                     >
                       <RefreshCw className="size-4" aria-hidden="true" />
@@ -571,7 +576,10 @@ function PluginList({
                   ) : null}
                   {configScope === "workspace" && plugin.enabledSource === "workspace" ? (
                     <DropdownMenuItem
-                      disabled={operationId !== null || togglingPluginId === plugin.id}
+                      disabled={isItemBusy(
+                        { ...plugin, marketplace: plugin.marketplace ?? "" },
+                        actions,
+                      )}
                       onSelect={() => void handleResetPluginConfig(plugin.id)}
                     >
                       <RotateCcw className="size-4" aria-hidden="true" />
@@ -582,7 +590,10 @@ function PluginList({
                   ) : null}
                   <DropdownMenuItem
                     variant="destructive"
-                    disabled={operationId !== null}
+                    disabled={isItemBusy(
+                      { ...plugin, marketplace: plugin.marketplace ?? "" },
+                      actions,
+                    )}
                     onSelect={() => uninstall.requestUninstall(plugin.id)}
                   >
                     <Trash2 className="size-4" aria-hidden="true" />
@@ -594,7 +605,9 @@ function PluginList({
               </DropdownMenu>
             )}
             <div className="flex shrink-0 items-center gap-2">
-              {togglingPluginId === plugin.id ? (
+              {activeOperations.some(
+                (operation) => operation.id === `plugin:set-enabled:${plugin.id}`,
+              ) ? (
                 <Loader2
                   className="size-4 animate-spin text-foreground-subtle"
                   data-testid="plugin-settings-enabled-pending"
@@ -614,8 +627,10 @@ function PluginList({
                 data-testid="plugin-settings-enabled-switch"
                 data-plugin-id={plugin.id}
                 checked={plugin.enabled}
-                disabled={togglingPluginId === plugin.id}
-                aria-busy={togglingPluginId === plugin.id}
+                disabled={isItemBusy({ ...plugin, marketplace: plugin.marketplace ?? "" }, actions)}
+                aria-busy={activeOperations.some(
+                  (operation) => operation.id === `plugin:set-enabled:${plugin.id}`,
+                )}
                 aria-label={intl.formatMessage(
                   {
                     id: plugin.enabled
@@ -965,41 +980,11 @@ export function PluginsSection({
   showMarketplaceBreadcrumb = false,
 }: PluginsSectionProps) {
   const { intl } = useZCodeIntl();
-  const tabs = useTabStore((state) => state.tabs);
   const storeActiveWorkspacePath = useTabStore((state) => state.activeWorkspacePath);
   const storeActiveWorkspaceIdentity = useTabStore((state) => state.activeWorkspaceIdentity);
   const activeWorkspacePath = workspacePath ?? storeActiveWorkspacePath;
   const activeWorkspaceIdentity = workspaceIdentity ?? storeActiveWorkspaceIdentity ?? undefined;
-  const workspaceTabs = useMemo(() => {
-    const seen = new Set<string>();
-    const scopedTabs = tabs
-      .filter(isWorkspaceTab)
-      .filter(isPluginScopeWorkspaceConnected)
-      .filter((tab) => {
-        const key = workspaceKey(tab);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    if (
-      activeWorkspacePath &&
-      !activeWorkspaceIdentity?.trim() &&
-      !scopedTabs.some(
-        (tab) => workspaceKey(tab) === (activeWorkspaceIdentity?.trim() || activeWorkspacePath),
-      )
-    ) {
-      // 启动恢复可能先恢复 activeWorkspacePath，再异步补齐 tabs；此时不能把
-      // Workspace 配置范围误显示成不可用，否则用户无法读取/修改项目配置。
-      scopedTabs.push({
-        id: `__active_workspace__:${activeWorkspaceIdentity?.trim() || activeWorkspacePath}`,
-        kind: "workspace",
-        workspacePath: activeWorkspacePath,
-        workspaceIdentity: activeWorkspaceIdentity ?? undefined,
-        label: getPathLeaf(activeWorkspacePath) || activeWorkspacePath,
-      });
-    }
-    return scopedTabs;
-  }, [activeWorkspaceIdentity, activeWorkspacePath, tabs]);
+  const { targets: workspaceTabs, loading: catalogLoading } = useConfigWorkspaceCatalog();
   const preferredHost = useMemo(
     () =>
       workspaceTabs.find(
@@ -1007,7 +992,13 @@ export function PluginsSection({
           workspaceKey(tab) === (activeWorkspaceIdentity?.trim() || activeWorkspacePath || ""),
       ) ??
       workspaceTabs[0] ??
-      null,
+      (activeWorkspacePath
+        ? {
+            workspacePath: activeWorkspacePath,
+            workspaceIdentity: activeWorkspaceIdentity,
+            label: getPathLeaf(activeWorkspacePath) || activeWorkspacePath,
+          }
+        : null),
     [activeWorkspaceIdentity, activeWorkspacePath, workspaceTabs],
   );
   const [pickedScopeKey, setPickedScopeKey] = useState(() => initialScopeKey?.trim() || "user");
@@ -1095,6 +1086,7 @@ export function PluginsSection({
 
   useEffect(() => {
     if (
+      !catalogLoading &&
       pickedScopeKey !== "user" &&
       !workspaceTabs.some((tab) => workspaceKey(tab) === pickedScopeKey)
     ) {
@@ -1107,7 +1099,7 @@ export function PluginsSection({
         }),
       );
     }
-  }, [intl, pickedScopeKey, workspaceTabs]);
+  }, [catalogLoading, intl, pickedScopeKey, workspaceTabs]);
   const selectedTargetKey = target ? workspaceKey(target) : "";
 
   const updatePluginCount = useCallback(
@@ -1146,6 +1138,11 @@ export function PluginsSection({
     setMcpEditorOpen(open);
     if (!open) setMcpFormScopeKey(null);
   }, []);
+
+  // 首读尚无目录不代表入口被移除；不能先切到 User 并向另一个 Host 发起配置读取。
+  if (catalogLoading && pickedScopeKey !== "user") {
+    return <PluginLoadingState label={intl.formatMessage({ id: "common.loading" })} />;
+  }
 
   return (
     <div className="space-y-6">

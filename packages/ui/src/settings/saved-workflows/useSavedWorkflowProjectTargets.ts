@@ -18,7 +18,10 @@ interface SavedWorkflowProjectTargets {
  * target）。三者只在是否携带 remoteSessionId 上不同；引用在依赖不变时保持稳定，供 memo / effect 依赖。
  */
 export function useSavedWorkflowProjectTargets(
-  project: Pick<AutomationWorkspaceOption, "workspacePath" | "workspaceIdentity">,
+  project: Pick<
+    AutomationWorkspaceOption,
+    "workspacePath" | "workspaceIdentity" | "projectId" | "hostId"
+  >,
   remoteSessionId: string | null,
 ): SavedWorkflowProjectTargets {
   const target = useMemo<ZCodeAgentWorkspaceTarget>(
@@ -33,18 +36,21 @@ export function useSavedWorkflowProjectTargets(
   );
   const projectTarget = useMemo<SavedWorkflowProjectTarget>(
     () => ({
+      ...(project.projectId !== undefined ? { projectId: project.projectId } : {}),
+      ...(project.hostId ? { hostId: project.hostId } : {}),
       workspacePath: project.workspacePath,
       ...(project.workspaceIdentity ? { workspaceIdentity: project.workspaceIdentity } : {}),
     }),
-    [project.workspacePath, project.workspaceIdentity],
+    [project.workspacePath, project.workspaceIdentity, project.projectId, project.hostId],
   );
   const launchTarget = useMemo<SavedWorkflowLaunchTarget>(
     () => ({
+      ...projectTarget,
       workspacePath: project.workspacePath,
       ...(project.workspaceIdentity ? { workspaceIdentity: project.workspaceIdentity } : {}),
       ...(remoteSessionId ? { remoteSessionId } : {}),
     }),
-    [project.workspacePath, project.workspaceIdentity, remoteSessionId],
+    [project.workspacePath, project.workspaceIdentity, remoteSessionId, projectTarget],
   );
   return { target, projectTarget, launchTarget };
 }

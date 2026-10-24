@@ -122,6 +122,52 @@ modules:
     layers:
       app: .
     owner: conversation
+  # #79：固定上游项目展示依赖，逐路径收口，不接管整个 UI hooks/lib/store。
+  - id: project-presentation
+    roots:
+      - packages/ui/src/project-presentation
+      - packages/ui/src/WorkspaceSidebar/RemoteProjectConnectionDetails.tsx
+      - packages/ui/src/WorkspaceSidebar/RemoteProjectDetailsPopover.tsx
+      - packages/ui/src/hooks/RemoteProjectPresentationContext.tsx
+      - packages/ui/src/hooks/useSourceServerDisplayNames.ts
+      - packages/ui/src/hooks/useSourceServerManagementSnapshot.ts
+      - packages/ui/src/hooks/useSourceServerOperationLogs.ts
+      - packages/ui/src/hooks/useSourceServerStatuses.ts
+      - packages/ui/src/lib/remoteConnectionPresentation.ts
+      - packages/ui/src/lib/remoteConnectionPresentationErrors.ts
+      - packages/ui/src/lib/remoteConnectionPresentationTypes.ts
+      - packages/ui/src/remote-connection/RemoteConnectionStateIcon.tsx
+      - packages/ui/src/remote-connection/RemoteConnectionTags.tsx
+      - packages/ui/src/remote/remoteWorkspaceController.ts
+      - packages/ui/src/remote/remoteWorkspaceProjection.ts
+      - packages/ui/src/remote/useRemoteWorkspaceController.tsx
+      - packages/ui/src/store/sourceServerDisplayNameRegistry.ts
+      - packages/ui/src/store/sourceServerStatusRegistry.ts
+    managed: true
+    requires: [services, shared, ui, conversation-workspace-target]
+    publicEntrypoints:
+      - packages/ui/src/project-presentation/contract.ts
+      - packages/ui/src/WorkspaceSidebar/RemoteProjectConnectionDetails.tsx
+      - packages/ui/src/WorkspaceSidebar/RemoteProjectDetailsPopover.tsx
+      - packages/ui/src/hooks/RemoteProjectPresentationContext.tsx
+      - packages/ui/src/hooks/useSourceServerDisplayNames.ts
+      - packages/ui/src/hooks/useSourceServerManagementSnapshot.ts
+      - packages/ui/src/hooks/useSourceServerOperationLogs.ts
+      - packages/ui/src/hooks/useSourceServerStatuses.ts
+      - packages/ui/src/lib/remoteConnectionPresentation.ts
+      - packages/ui/src/lib/remoteConnectionPresentationErrors.ts
+      - packages/ui/src/lib/remoteConnectionPresentationTypes.ts
+      - packages/ui/src/remote-connection/RemoteConnectionStateIcon.tsx
+      - packages/ui/src/remote-connection/RemoteConnectionTags.tsx
+      - packages/ui/src/remote/remoteWorkspaceController.ts
+      - packages/ui/src/remote/remoteWorkspaceProjection.ts
+      - packages/ui/src/remote/useRemoteWorkspaceController.tsx
+      - packages/ui/src/store/sourceServerDisplayNameRegistry.ts
+      - packages/ui/src/store/sourceServerStatusRegistry.ts
+    layers:
+      contract: contract.ts
+      ui: .
+    owner: conversation
   # project-sidebar：由 architecture:adopt 登记
   - id: project-sidebar
     roots:
@@ -134,6 +180,7 @@ modules:
       - conversation-workspace-target
       - web-remote-control-ui
       - remote-connection-flow
+      - project-presentation
     publicEntrypoints:
       - packages/ui/src/project-sidebar/index.tsx
       - packages/ui/src/project-sidebar/contract.ts
@@ -148,6 +195,19 @@ modules:
       contract: contract.ts
       ui: .
     owner: conversation
+  # 自有 Source Server 管理 UI；复用 Host 管理服务，不承载连接业务状态。
+  - id: source-server-settings
+    roots:
+      - packages/ui/src/source-server-settings
+    managed: true
+    requires: [services, shared, ui, remote-connection-flow, project-presentation]
+    publicEntrypoints:
+      - packages/ui/src/source-server-settings/index.ts
+      - packages/ui/src/source-server-settings/contract.ts
+    layers:
+      contract: contract.ts
+      ui: .
+    owner: remote
   # remote-projects：由 architecture:adopt 登记
   - id: remote-projects
     roots:

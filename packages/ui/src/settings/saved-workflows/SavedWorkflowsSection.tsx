@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Plus, Settings2 } from "lucide-react";
+import { projectSelectionId } from "@zcode/services";
 import {
   TID_WORKFLOWS_CREATE_VIA_CHAT,
   TID_WORKFLOWS_EMPTY,
@@ -7,6 +8,7 @@ import {
   TID_WORKFLOWS_REFRESH,
   readDynamicWorkflowOfferedMode,
   resolveWorkspaceKey,
+  buildRemoteHostWorkspaceIdentity,
 } from "@zcode/shared";
 import { Button } from "@/components/ui/button.js";
 import { Spinner } from "@/components/ui/spinner.js";
@@ -17,9 +19,10 @@ import { useTabStore } from "@/store/TabStoreProvider.js";
 import { useDynamicWorkflowAvailability } from "@/hooks/useDynamicWorkflowAvailability.js";
 import { setPendingSettingsSectionIntent } from "@/lib/settingsNavigation.js";
 import {
-  buildAutomationWorkspaceOptions,
+  resolveAutomationWorkspaceSelectionKey,
   type AutomationWorkspaceOption,
 } from "@/settings/automationWorkspaceOptions.js";
+import { useOptionalProjectDirectory } from "@/project-sidebar/index.js";
 import { AutomationRefreshIcon } from "@/settings/AutomationDesignPrimitives.js";
 import { SETTINGS_FRAME_CONTENT_CLASSNAME } from "@/settings/SettingsPageParts.js";
 import { buildSavedWorkflowCreatePrompt } from "@/settings/saved-workflows/savedWorkflowLaunchPrompt.js";
@@ -81,7 +84,7 @@ function resolveOptionKey(option: AutomationWorkspaceOption): string {
 
 /**
  * 已保存工作流中枢：顶部固定「全局」组，
- * 其下按已打开项目分组。页只持有刷新计数器、每组的加载态、详情态；「项目」= `buildAutomationWorkspaceOptions`。
+ * 其下按 Host 虚拟项目分组。页只持有展示投影；关闭 tab 不移除候选，空项目尚无工作流目录。
  */
 export function SavedWorkflowsSection({
   header,
@@ -95,7 +98,7 @@ export function SavedWorkflowsSection({
   onOpenWorkflowConsumed,
 }: SavedWorkflowsSectionProps) {
   const { intl, locale } = useZCodeIntl();
-  const tabs = useTabStore((store) => store.tabs);
+  const directory = useOptionalProjectDirectory();
   const openSettingsTab = useTabStore((store) => store.openSettingsTab);
   // launch.md「The hub page」「The user's choice」：标题行的「工作流设置」直达设置 › 常规的模式行，
   // 旁边写当前生效模式。中枢只在生效模式不是关闭时出现，所以这里不处理关闭态。
@@ -110,10 +113,30 @@ export function SavedWorkflowsSection({
     setPendingSettingsSectionIntent("general");
     openSettingsTab();
   }, [openSettingsTab]);
-  const projects = useMemo(() => buildAutomationWorkspaceOptions(tabs), [tabs]);
+  const projects = useMemo<AutomationWorkspaceOption[]>(
+    () =>
+      (directory?.projects ?? []).flatMap((project) => {
+        const root = project.roots.find((candidate) => candidate.isPrimary)?.rootPath;
+        const key = projectSelectionId(project);
+        if (!root || project.deleted || directory?.availability.get(key)?.online === false)
+          return [];
+        return [
+          {
+            projectId: project.id,
+            hostId: project.hostId,
+            workspacePath: root,
+            label: project.name,
+            ...(project.hostId === "local"
+              ? {}
+              : { workspaceIdentity: buildRemoteHostWorkspaceIdentity(project.hostId, root) }),
+          },
+        ];
+      }),
+    [directory?.projects, directory?.availability],
+  );
   // 全局组的运行 / 移动落点只能是本机项目：过滤掉远程 workspace。
   const localProjects = useMemo(
-    () => projects.filter((project) => !project.remoteSessionId),
+    () => projects.filter((project) => !project.workspaceIdentity),
     [projects],
   );
 
@@ -159,6 +182,7 @@ export function SavedWorkflowsSection({
       consumedRef.current = null;
       return;
     }
+    if (openWorkflow.scope !== "global" && directory?.loading) return;
     if (consumedRef.current === openWorkflow) return;
     consumedRef.current = openWorkflow;
     if (openWorkflow.scope === "global") {
@@ -174,7 +198,7 @@ export function SavedWorkflowsSection({
       });
     }
     onOpenWorkflowConsumed?.();
-  }, [onOpenWorkflowConsumed, openWorkflow, projects]);
+  }, [directory?.loading, onOpenWorkflowConsumed, openWorkflow, projects]);
 
   // 项目详情打开后项目被关闭：回退到列表（用 effect，不在渲染里 setState）。
   useEffect(() => {
@@ -193,6 +217,8 @@ export function SavedWorkflowsSection({
     const target = active ?? projects[0];
     if (!target) return null;
     return {
+      projectId: target.projectId,
+      hostId: target.hostId,
       workspacePath: target.workspacePath,
       ...(target.workspaceIdentity ? { workspaceIdentity: target.workspaceIdentity } : {}),
     };
@@ -211,7 +237,11 @@ export function SavedWorkflowsSection({
     onOpenWorkflowRun,
     onOpenWorkflowArtifact,
     localProjects,
-    activeProjectKey: activeKey,
+    // 文件目录的 workspace key 与选择项目的 Host/projectId key 不能混用。
+    activeProjectKey: (() => {
+      const active = localProjects.find((project) => resolveOptionKey(project) === activeKey);
+      return active ? resolveAutomationWorkspaceSelectionKey(active) : null;
+    })(),
     onMoved: handleMoved,
   };
 

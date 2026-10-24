@@ -11,7 +11,11 @@ import type {
 import { CLAUDE_OFFICIAL_PLUGIN_MARKETPLACE_ID } from "@zcode/shared";
 import type { IPluginManagementService } from "@zcode/services";
 import { logger } from "@/logger.js";
-import { loadInto, runWorkspaceOperation } from "@/store/pluginManagementStoreLoading.js";
+import {
+  beginPluginOperation,
+  loadInto,
+  runWorkspaceOperation,
+} from "@/store/pluginManagementStoreLoading.js";
 import { setPluginEnabledOptimistically } from "@/store/pluginManagementStoreEnabled.js";
 
 // 市场详情按需拉取的组件清单缓存：按 pluginId 记 loading/data/error，避免重复请求与切换闪烁。
@@ -52,6 +56,7 @@ export interface PluginManagementState {
   lastFailedPluginId: string | null;
   togglingPluginId: string | null;
   operationId: string | null;
+  activeOperations: ReadonlyArray<{ id: string }>;
   operationVersion: number;
   describeCache: Record<string, PluginDescribeEntry>;
   initialize: (params: {
@@ -140,6 +145,7 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
   lastFailedPluginId: null,
   togglingPluginId: null,
   operationId: null,
+  activeOperations: [],
   operationVersion: 0,
   describeCache: {},
 
@@ -168,7 +174,9 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
       // 配置保存后的 overview 刷新可能还没结束，用户已切到另一层配置视图；
       // 旧层的 operationId 不能继续把新层的输入控件置灰。旧操作结束时由版本号防止
       // 它误清理新层后来启动的同名操作。
-      ...(contextChanged ? { operationId: null } : {}),
+      ...(contextChanged
+        ? { operationId: null, activeOperations: [], togglingPluginId: null }
+        : {}),
     });
     await loadInto(set, get, {
       workspacePath,
@@ -276,6 +284,7 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
         // 也没有错误和重试入口；这里将 error diagnostic 收敛到既有 operation 错误态。
         throwForErrorDiagnostic(result.diagnostics);
       },
+      scope,
     );
   },
 
@@ -337,6 +346,7 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
           ...(clearOptionKeys.length > 0 ? { clearOptionKeys } : {}),
         });
       },
+      scope,
     );
   },
 
@@ -353,13 +363,14 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
           scope,
         });
       },
+      scope,
     );
   },
 
   async validateSource(source, pluginService) {
     const { workspacePath, workspaceIdentity } = get();
     if (!workspacePath) return;
-    set({ operationId: `marketplace:validate:${source}`, error: null });
+    const finish = beginPluginOperation(set, get, `marketplace:validate:${source}`);
     try {
       const result = await pluginService.validatePlugin({
         workspacePath,
@@ -371,7 +382,7 @@ export const usePluginManagementStore = create<PluginManagementState>((set, get)
       logger.error("[plugins] validate source failed", { source, error: toMessage(error) });
       set({ error: toMessage(error), lastFailedPluginId: null });
     } finally {
-      set({ operationId: null });
+      finish();
     }
   },
 

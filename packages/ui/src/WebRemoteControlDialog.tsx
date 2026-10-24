@@ -221,6 +221,8 @@ function getFailureDescription(
       return formatMessage({
         id: "webRemoteControl.failure.desktopDisconnected",
       });
+    // #79：桥接鉴权失效要求重新配对，不恢复已下线的官方账号登录入口。
+    case "auth-required":
     case "invalid-mobile-connection":
       return formatMessage({
         id: "webRemoteControl.failure.invalidMobileConnection",

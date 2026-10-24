@@ -31,39 +31,40 @@ describe("Composer Draft 持久选择", () => {
     vi.restoreAllMocks();
   });
 
-  it("空文本仍保留 mode、选择；显式清理才删除 scope", () => {
+  it("空正文不持久化仅修改的配置", () => {
     persistV4ComposerDraft(workspace, undefined, "session-a", {
       text: "",
       mode: "edit",
       modelSelection: selection,
     });
-    expect(read()).toMatchObject({ text: "", mode: "edit", modelSelection: selection });
+    expect(read()).toBeNull();
     clearV4ComposerDraft(workspace, undefined, "session-a");
     expect(read()).toBeNull();
   });
 
-  it("初始化过的空选择持久保留，mode 区分它与旧文本草稿", () => {
-    persistV4ComposerDraft(workspace, undefined, "session-a", { text: "", mode: "build" });
-    expect(read()).toMatchObject({ text: "", mode: "build" });
+  it("文字草稿保留已初始化的空选择", () => {
+    persistV4ComposerDraft(workspace, undefined, "session-a", { text: "draft", mode: "build" });
+    expect(read()).toMatchObject({ text: "draft", mode: "build" });
     expect(read()?.modelSelection).toBeUndefined();
   });
 
-  it("清空已发送文本不会删除执行选择", () => {
+  it("清空已发送文本会删除持久配置", () => {
     const draft = { text: "prompt", mode: "plan" as const, modelSelection: selection };
     persistV4ComposerDraft(workspace, undefined, "session-a", draft);
     persistV4ComposerDraft(workspace, undefined, "session-a", { ...draft, text: "" });
-    expect(read()).toMatchObject({
-      text: "",
-      mode: "build",
-      planEnabled: true,
-      modelSelection: selection,
-    });
+    expect(read()).toBeNull();
   });
 
   it("同路径不同远端与 Root/Session scope 互相隔离", () => {
-    persistV4ComposerDraft(workspace, "remote-a", V4_DRAFT_SCOPE_ROOT, { text: "", mode: "edit" });
-    persistV4ComposerDraft(workspace, "remote-b", V4_DRAFT_SCOPE_ROOT, { text: "", mode: "plan" });
-    persistV4ComposerDraft(workspace, "remote-a", "session-a", { text: "", mode: "yolo" });
+    persistV4ComposerDraft(workspace, "remote-a", V4_DRAFT_SCOPE_ROOT, {
+      text: "draft",
+      mode: "edit",
+    });
+    persistV4ComposerDraft(workspace, "remote-b", V4_DRAFT_SCOPE_ROOT, {
+      text: "draft",
+      mode: "plan",
+    });
+    persistV4ComposerDraft(workspace, "remote-a", "session-a", { text: "draft", mode: "yolo" });
     expect(readV4ComposerDraft("/other-path", "remote-a", V4_DRAFT_SCOPE_ROOT)?.mode).toBe("edit");
     expect(readV4ComposerDraft(workspace, "remote-b", V4_DRAFT_SCOPE_ROOT)).toMatchObject({
       mode: "build",
@@ -75,7 +76,7 @@ describe("Composer Draft 持久选择", () => {
 
   it("冷启动初始化 Root scope 时保留已有 Session scope", () => {
     persistV4ComposerDraft(workspace, undefined, "session-a", {
-      text: "",
+      text: "draft",
       mode: "edit",
       modelSelection: {
         providerId: "e2e-deepseek",
@@ -84,7 +85,7 @@ describe("Composer Draft 持久选择", () => {
       },
     });
     persistV4ComposerDraft(workspace, undefined, V4_DRAFT_SCOPE_ROOT, {
-      text: "",
+      text: "draft",
       mode: "build",
       modelSelection: {
         providerId: "e2e-deepseek",
@@ -126,7 +127,10 @@ describe("Composer Draft 持久选择", () => {
     let now = 0;
     vi.spyOn(Date, "now").mockImplementation(() => ++now);
     for (let index = 0; index < 501; index++) {
-      persistV4ComposerDraft(workspace, undefined, `scope-${index}`, { text: "", mode: "build" });
+      persistV4ComposerDraft(workspace, undefined, `scope-${index}`, {
+        text: "draft",
+        mode: "build",
+      });
       if (index === 50 || index === 499) expect(read("scope-0")).not.toBeNull();
     }
     expect(read("scope-0")).not.toBeNull();

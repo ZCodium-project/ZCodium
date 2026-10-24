@@ -332,14 +332,16 @@ describe("Plugin settings section", () => {
     expect(scopeMenuSource).toContain("export function PluginScopeMenu");
     expect(scopeMenuSource).toContain("export function isPluginScopeWorkspaceConnected");
     expect(scopeMenuSource).toContain('tab.availability === "unavailable-local-directory"');
-    expect(scopeMenuSource).toContain("return Boolean(tab.remoteSessionId)");
+    expect(scopeMenuSource).toContain("return tab.configOnline ?? Boolean(tab.remoteSessionId)");
     expect(scopeMenuSource).toContain('align = "start"');
     expect(scopeMenuSource).toContain("workspaceTabs");
     expect(scopeMenuSource).toContain(".map((tab) => ({");
     expect(scopeMenuSource).toContain("Cloud");
-    expect(scopeMenuSource).toContain("remote: Boolean(tab.remoteTarget || tab.remoteSessionId)");
+    expect(scopeMenuSource).toContain(
+      "remote: Boolean(tab.workspaceIdentity || tab.remoteTarget || tab.remoteSessionId)",
+    );
     expect(scopeMenuSource).toContain("workspace.remote ? Cloud : Folder");
-    expect(sectionSource).toContain(".filter(isPluginScopeWorkspaceConnected)");
+    expect(sectionSource).toContain("useConfigWorkspaceCatalog()");
     expect(sectionSource).toContain("mcpEditorWorkspaceMissing");
     expect(sectionSource).toContain("commandEditorWorkspaceMissing");
     expect(sectionSource).toContain("setMcpEditorOpen(false)");

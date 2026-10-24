@@ -2,6 +2,7 @@ import { PuzzleIcon } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import type { OpenPluginUiSideTabRequest } from "@/plugin-ui/contract.js";
+import { documentViewerInstance } from "@/plugin-ui/contract.js";
 import {
   resolvePluginUiSurfaceTitle,
   usePluginUiSurfaces,
@@ -48,6 +49,7 @@ export function PluginUiLauncherItems(props: PluginUiLauncherItemsProps) {
             serverName: surface.server,
             pluginId: surface.pluginId,
             resourceUri: surface.resourceUri,
+            ...documentViewerInstance(surface.resourceUri),
             title,
             workspacePath: props.workspacePath,
             ...(props.workspaceIdentity ? { workspaceIdentity: props.workspaceIdentity } : {}),

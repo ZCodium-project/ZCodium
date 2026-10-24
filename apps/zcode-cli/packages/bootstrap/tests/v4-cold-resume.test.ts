@@ -190,6 +190,49 @@ function nextMacrotask(): Promise<void> {
 }
 
 describe("v4 冷恢复（gateway 单元）", () => {
+  it.each(["desktop-continuous", "web-remote-replayable"] as const)(
+    "%s 冷订阅将目录列表与正文快照按完整签名交给宿主，运行实例不重配",
+    async (clientMode) => {
+      let live = false;
+      const workspace = { workspaceKey: "/frontend", workspacePath: "/frontend" };
+      const additionalDirectories = ["/backend"];
+      const persistedMessages: MessageWithParts[] = [];
+      const resumePersistedSession = vi.fn(async () => {
+        live = true;
+        return { status: "resumed" as const, persistedMessages };
+      });
+      const loadPersistedEvents = vi.fn(async () => ({ events: [], synthesized: true }));
+      const gateway = new ConversationV4Gateway({
+        sessionExists: () => live,
+        resumePersistedSession,
+        loadPersistedEvents,
+        emitWireFrame: () => {},
+        executeCommand: async () => undefined,
+      });
+      try {
+        const params = {
+          ...subscribeParams("directory-session"),
+          clientMode,
+          workspace,
+          additionalDirectories,
+        };
+        await gateway.subscribe(params);
+        expect(resumePersistedSession).toHaveBeenCalledExactlyOnceWith(
+          "directory-session",
+          undefined,
+          workspace,
+          additionalDirectories,
+          undefined,
+        );
+        expect(loadPersistedEvents).toHaveBeenCalledWith("directory-session", persistedMessages);
+        await gateway.subscribe({ ...params, additionalDirectories: ["/must-not-reconfigure"] });
+        expect(resumePersistedSession).toHaveBeenCalledTimes(1);
+      } finally {
+        gateway.dispose();
+      }
+    },
+  );
+
   it("冷订阅未加载会话：单一 READY 完成 activation 与 hydration", async () => {
     const host = makeColdHost();
     host.persistedEvents.set("sess-cold", [

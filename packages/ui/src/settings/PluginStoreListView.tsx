@@ -9,7 +9,11 @@ import { cn } from "@/components/lib/utils.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { ControlHintTooltip } from "@/ControlHintTooltip.js";
 import { PluginStoreAvatar } from "@/settings/PluginStoreAvatar.js";
-import { PluginStoreCard, type PluginStoreActions } from "@/settings/PluginStoreCard.js";
+import {
+  isItemBusy,
+  PluginStoreCard,
+  type PluginStoreActions,
+} from "@/settings/PluginStoreCard.js";
 import { SettingsSearchInput } from "@/settings/SettingsSearchInput.js";
 import {
   FALLBACK_CATEGORY,
@@ -198,7 +202,10 @@ export function PluginStoreListView({
           <div className="mt-1 flex items-center gap-3 overflow-x-auto px-2 pt-2 pb-1 sm:-mx-2">
             {installedItems.map((item) => {
               const displayName = resolveItemDisplayName(item, locale);
-              const updating = actions.operationId === `plugin:update:${item.id}`;
+              const updating = (
+                actions.activeOperations ??
+                (actions.operationId ? [{ id: actions.operationId }] : [])
+              ).some((operation) => operation.id === `plugin:update:${item.id}`);
               return (
                 <ControlHintTooltip key={item.id} title={displayName} side="top" sideOffset={8}>
                   <div className="relative shrink-0">
@@ -220,7 +227,7 @@ export function PluginStoreListView({
                         data-plugin-id={item.id}
                         aria-label={intl.formatMessage({ id: "settings.plugins.detail.update" })}
                         className="absolute -top-1 -end-1 flex size-4 items-center justify-center rounded-full bg-success text-success-foreground shadow-sm transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-border-focused disabled:opacity-60"
-                        disabled={actions.operationId !== null}
+                        disabled={isItemBusy(item, actions)}
                         onClick={(event) => {
                           event.stopPropagation();
                           actions.onUpdate(item.id);

@@ -14,3 +14,11 @@ Side Pane 完整视图：面板占满窗口，对话成为第一个 tab，并在
 - `SessionPane` / `ConversationTimeline` / `V4WorkspaceChatArea` 通过 `useConversationPanePresentation` 读取展示形态并上报运行状态、阻塞交互与输入区高度；不在完整视图下读到默认 docked，行为不变。
 - 浮窗形态下 `ConversationTimeline` 经 `onLatestTurnSummaryChange` 上报最后一个回合（turnKey、运行状态、运行时长、最终回答，同一个 render unit），`SessionPane` 把时长交给单行输入框占位，把 turnKey / 运行状态 / 回答经 `reportFloatingStatus` 交给宿主；宿主按 owner 记录基线并推进回答气泡（`reduceFloatingAnswerBubbles`）：基线之后出现的已结束回合才弹出，不要求观察到运行中。
 - 快捷键 `toggleSidePaneFullView` 在 `packages/shared/src/shortcutCommands.ts` 命令表登记，处理器只在桌面端注册。
+
+## ZUP11 消费者回归（#79，固定上游 3c5b227）
+
+- `AnimatedSidePanePanel` 消费 `fullViewToggle`、`fullView` 与 `fullViewSlotRef`；仅桌面生效。对话 tab 不进入面板 registry；切到对话后，原面板内容仍挂载，但 browser/terminal/辅助会话均不再自认可见或聚焦。所有面板激活动作先选择 side-pane surface，再激活原 tab。
+- 空 tab 集合也必须保留完整视图的对话 tab、退出按钮与内容 slot；沿用本仓启动页，不恢复与完整视图无关的上游市场/文件管理 UI。
+- 本仓保留分屏入口与布局 owner。仅浮窗展示焦点 pane：其余 pane 隐藏且 inert，不卸载，焦点 pane 临时占满宿主；退出浮窗恢复原 rect、分隔条及分屏入口，不写入布局 store。
+- 确定性回归覆盖桌面按钮/对话切换、浏览器与终端显隐、空 tab、Web/mobile 禁用、分屏原实例/草稿及布局恢复；时间线继续由同一 render unit 上报最后回合、由同一 dock 的 ResizeObserver 上报高度。
+- 桌面 GUI 验收仍需执行：按钮/快捷键进入后满屏，切对话/浮窗保留草稿、附件、光标和滚动；展开/最小化/恢复及阻塞卡自动恢复；切 owner 后状态还原。jsdom 和源码断言不替代真实 Electron、主题及手机验证。

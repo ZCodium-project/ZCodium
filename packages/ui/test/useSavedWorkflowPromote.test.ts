@@ -40,6 +40,21 @@ afterEach(() => {
 });
 
 describe("useSavedWorkflowPromote", () => {
+  it("提升为全局仍在所属项目创建会话，保留 projectId/hostId", async () => {
+    sendCommand.mockResolvedValueOnce(
+      ack({ result: { type: "createSession", sessionId: "owned" } as never }),
+    );
+    const onNavigate = vi.fn();
+    const { result } = renderHook(() => useSavedWorkflowPromote({ agentService, onNavigate }));
+    const target = { workspacePath: "/same", projectId: "project-b", hostId: "local" };
+    await act(async () => {
+      await result.current.promote(target, REQUEST);
+    });
+    expect(sendCommand).toHaveBeenCalledWith(expect.objectContaining({ type: "createSession" }), {
+      projectId: "project-b",
+    });
+    expect(onNavigate).toHaveBeenCalledWith(target, "owned");
+  });
   it("accepted：一条 createSession，payload 带 workspaceId 与 firstInput 概括提示；导航并返回 sessionId", async () => {
     sendCommand.mockResolvedValueOnce(
       ack({ result: { type: "createSession", sessionId: "s-1" } as never }),

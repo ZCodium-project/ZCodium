@@ -26,6 +26,7 @@ import {
   type SessionCreateSource,
 } from "@zcode/shared";
 import type { ZCodeUiError } from "@/lib/zcodeUiError.js";
+import type { SessionConfigState, SubmissionMode } from "@zcode/shared/zcode-protocol-v4";
 import type {
   AutomationsNavigationTab,
   TaskNavigationHistory,
@@ -145,7 +146,20 @@ export interface TimelineBottomRequest {
   taskId: string;
 }
 
+export type ComposerInitialConfig = Pick<
+  Partial<SessionConfigState>,
+  "planEnabled" | "modelSelection"
+> & { mode?: SubmissionMode };
+export interface ComposerInitialization {
+  taskId: string;
+  config: ComposerInitialConfig;
+}
+
 export interface WorkspaceZCodeUIState {
+  /** 首次分享导入的导航参数；消费后清理，不作为会话事实持久化。 */
+  composerInitialization?: ComposerInitialization;
+  draftProjectId?: string | null;
+  draftTaskGroupId?: string | null;
   /** 当前 workspace 激活中的 task */
   activeTaskId: string | null;
   /**
@@ -220,7 +234,18 @@ export interface ZCodeSessionStoreState {
   workspaces: Record<string, WorkspaceZCodeUIState>;
   getWorkspaceState: (workspacePath: string, workspaceIdentity?: string) => WorkspaceZCodeUIState;
 
-  setActiveTaskId: (workspacePath: string, id: string | null, workspaceIdentity?: string) => void;
+  setActiveTaskId: (
+    workspacePath: string,
+    id: string | null,
+    workspaceIdentity?: string,
+    composerConfig?: ComposerInitialConfig,
+  ) => void;
+  consumeComposerInitialization: (
+    workspacePath: string,
+    initialization: ComposerInitialization,
+    workspaceIdentity?: string,
+  ) => void;
+  clearDraftTaskGroup: (workspacePath: string, workspaceIdentity?: string) => void;
   promoteGroupedDraftTask: (
     workspacePath: string,
     taskId: string,
@@ -266,6 +291,8 @@ export interface ZCodeSessionStoreState {
     workspaceIdentity?: string,
     options?: {
       groupedDraftPlacement?: GroupedDraftTaskPlacement;
+      projectId?: string | null;
+      taskGroupId?: string | null;
       createSource?: SessionCreateSource;
     },
   ) => void;

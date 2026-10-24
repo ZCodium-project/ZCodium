@@ -7,10 +7,11 @@ const source = readFileSync(
 );
 
 describe("AutomationEditView 无项目会话展示契约", () => {
-  it("保留 conversation 语义并复用会话侧固定菜单项", () => {
-    expect(source).toContain("workspacePurpose: option.workspacePurpose");
-    expect(source).toContain("allowConversationWorkspaceSelection");
-    expect(source).toContain("allowConversationWorkspaceDetach={false}");
-    expect(source).toContain("onSelectConversationWorkspace={handleSelectConversationWorkspace}");
+  it("已有未归类任务保留固定文案，新建只选 Host 虚拟项目", () => {
+    expect(source).toContain('id: "chat.empty.workOutsideProject"');
+    expect(source).toContain('data-testid="automation-project-select"');
+    expect(source).toContain("projectId: selectedWorkspace.projectId");
+    expect(source).not.toContain("includeConversationWorkspace");
+    expect(source).not.toContain("ChatEmptyWorkspacePreviewMenu");
   });
 });

@@ -35,6 +35,7 @@ export { usePluginUiModelContexts } from "./adapters/pluginUiModelContextEvents.
 export { usePluginUiContextImages } from "./adapters/usePluginUiContextImages.js";
 export { PluginUiModelContextChip } from "./adapters/PluginUiModelContextChip.js";
 export { PluginUiFollowUpDialogHost } from "./components/PluginUiFollowUpDialogHost.js";
+export { PluginUiBackgroundHost } from "./adapters/PluginUiBackgroundHost.js";
 export { PluginUiSidePane } from "./PluginUiSidePane.js";
 export {
   PluginUiLauncherItems,

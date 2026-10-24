@@ -70,7 +70,6 @@ describe("server info HTTP endpoint", () => {
       capabilities: {
         desktopContinuous: true,
         websocketRpc: true,
-        processResourceTelemetry: true,
       },
     });
   });

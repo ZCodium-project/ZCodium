@@ -7,8 +7,6 @@ import {
   type ReactNode,
 } from "react";
 import type {
-  CommandAck,
-  CommandEnvelope,
   V4AttachmentPutParams,
   V4AttachmentPutResult,
   V4ConversationFileChangesParams,
@@ -43,7 +41,7 @@ import type { AttachmentUploadOptions } from "@/v4/attachmentUploadTransaction.j
 
 export interface V4ConversationContextValue {
   layer: SessionDataLayer;
-  sendCommand(envelope: CommandEnvelope): Promise<CommandAck>;
+  sendCommand: ConversationTransport["sendCommand"];
   fileChanges(params: V4ConversationFileChangesParams): Promise<V4ConversationFileChangesResult>;
   fileRewindPreview(
     params: V4ConversationFileRewindPreviewParams,
@@ -131,7 +129,9 @@ function ReadyV4ConversationProvider({
     const layer = new SessionDataLayer({ transport });
     return {
       layer,
-      sendCommand: (envelope: CommandEnvelope) => transport.sendCommand(envelope),
+      // Host 项目归属位于命令外层；Provider 不能只转发 CLI envelope。
+      sendCommand: (...params: Parameters<ConversationTransport["sendCommand"]>) =>
+        transport.sendCommand(...params),
       fileChanges: (params: V4ConversationFileChangesParams) => transport.fileChanges(params),
       fileRewindPreview: (params: V4ConversationFileRewindPreviewParams) =>
         transport.fileRewindPreview(params),
@@ -294,7 +294,8 @@ function ReadyV4PaneConversationProvider({
       lease,
       value: {
         layer: lease.layer,
-        sendCommand: (envelope: CommandEnvelope) => lease.transport.sendCommand(envelope),
+        sendCommand: (...params: Parameters<ConversationTransport["sendCommand"]>) =>
+          lease.transport.sendCommand(...params),
         fileChanges: (params: V4ConversationFileChangesParams) =>
           lease.transport.fileChanges(params),
         fileRewindPreview: (params: V4ConversationFileRewindPreviewParams) =>

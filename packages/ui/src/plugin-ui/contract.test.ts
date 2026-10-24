@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { exampleOpenSideTab, examplePresentation } from "./contract.example.js";
+import { openPluginUiSidePane } from "./sidePane/pluginUiSidePaneTab.js";
+import { closeSidePaneTab } from "@/lib/workspaceSidePane.js";
 import {
   PLUGIN_UI_CARD_DEFAULT_HEIGHT_PX,
   buildPluginUiSidePaneTabId,
   buildPluginUiSurfaceKey,
+  documentViewerInstance,
   readPluginUiScopeRef,
   type PluginUiSessionActions,
   type PluginUiSessionCommandPort,
@@ -75,6 +78,37 @@ describe("plugin-ui contract", () => {
 
   it("默认卡片高度符合宿主约定", () => {
     expect(PLUGIN_UI_CARD_DEFAULT_HEIGHT_PX).toBe(240);
+  });
+
+  it("文档手动打开独立身份，恢复时不重复追加作用域，非文档仍共享", () => {
+    const request = {
+      workspacePath: "/repo",
+      parentSessionId: "s1",
+      pluginId: "documents@personal",
+      serverName: "plugin:documents:documents",
+      surfaceId: "documents",
+      resourceUri: "ui://documents/panel.html",
+      title: "Documents",
+    };
+    const first = { ...request, ...documentViewerInstance(request.resourceUri) };
+    const second = { ...request, ...documentViewerInstance(request.resourceUri) };
+    expect(first.instanceId).toBeTruthy();
+    expect(first.instanceId).not.toBe(second.instanceId);
+    expect(buildPluginUiSidePaneTabId(first)).not.toBe(buildPluginUiSidePaneTabId(second));
+    const opened = openPluginUiSidePane(
+      openPluginUiSidePane(null, { ...first, workspaceKey: "/repo" }),
+      { ...second, workspaceKey: "/repo" },
+    );
+    expect(opened.tabs).toHaveLength(2);
+    const firstTab = opened.tabs.find((tab) => tab.id === buildPluginUiSidePaneTabId(first));
+    expect(firstTab?.type).toBe("plugin-ui");
+    if (firstTab?.type !== "plugin-ui") throw new Error("document tab missing");
+    expect(readPluginUiScopeRef(firstTab)).toEqual(readPluginUiScopeRef(first));
+    expect(closeSidePaneTab(opened, firstTab.id)?.tabs.map((tab) => tab.id)).toEqual([
+      buildPluginUiSidePaneTabId(second),
+    ]);
+    expect(readPluginUiScopeRef(first)).toEqual(readPluginUiScopeRef({ ...first }));
+    expect(documentViewerInstance("ui://editor/panel.html")).toEqual({});
   });
 
   it("4a-0 / S3：会话动作只剩 sendFollowUp，命令端口是 sendText + uploadAttachment（widgetState 不再经会话命令）", () => {

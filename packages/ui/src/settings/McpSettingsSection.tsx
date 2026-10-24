@@ -64,9 +64,10 @@ import { RemoteSyncDialogs, shouldShowRemoteSyncActions } from "@/settings/Remot
 import { useMcpStore } from "@/store/mcpStore.js";
 import { usePluginManagementStore } from "@/store/pluginManagementStore.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
-import { useBaseWorkspaceServices, useWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
+import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
+import { useConfigWorkspaceServices as useWorkspaceServices } from "@/workspace-config-catalog/index.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
-import type { WorkspaceTabState } from "@/store/tabStore.js";
+import type { ConfigWorkspaceTarget } from "@/workspace-config-catalog/index.js";
 import { getPluginWorkspaceKey } from "@/settings/PluginScopeMenu.js";
 import { ExternalLink, Import, Plus, UploadCloud } from "lucide-react";
 import { SettingsSegmentedTabs } from "@/settings/SettingsSegmentedTabs.js";
@@ -544,7 +545,7 @@ interface McpSettingsSectionProps {
   isWebRemoteControl?: boolean;
   scopeFilter: "user" | "workspace";
   parentScopeKey: string;
-  workspaceTabs: WorkspaceTabState[];
+  workspaceTabs: ConfigWorkspaceTarget[];
   searchQuery: string;
   onVisibleCountChange?: (count: number) => void;
   onEditorOpenChange?: (open: boolean) => void;
@@ -1301,7 +1302,12 @@ export function McpSettingsSection({
   }
 
   function handleEdit(server: ZCodeMcpServer) {
-    const ownerWorkspace = workspaceTabs.find((tab) => tab.workspacePath === server.projectPath);
+    // 根因：Catalog 会同时包含多个 Host 的同路径 root，按 path 首项会将远端编辑切回本机。
+    // MCP 仍属于当前目录链，不能借项目其它 roots 推断另一个配置 owner。
+    const ownerWorkspace = workspaceTabs.find(
+      (tab) =>
+        tab.workspacePath === server.projectPath && tab.workspaceIdentity === workspaceIdentity,
+    );
     const ownedScopeKey =
       server.scope === "workspace"
         ? ownerWorkspace

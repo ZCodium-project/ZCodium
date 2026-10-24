@@ -14,7 +14,9 @@ describe("plugin settings scope interaction", () => {
     expect(source).toContain('id: "settings.plugins.scope.restoreUserDefault"');
     expect(source).toContain('data-testid="plugin-settings-workspace-scope-hint"');
     expect(source).toContain('data-testid="plugin-settings-enabled-pending"');
-    expect(source).toContain("aria-busy={togglingPluginId === plugin.id}");
+    // 逐项投影不能退回单个全局 togglingPluginId，否则 A/B 并发会吞掉 A 的 busy。
+    expect(source).toMatch(/aria-busy=\{activeOperations\.some\(/);
+    expect(source).toContain("`plugin:set-enabled:${plugin.id}`");
     expect(source).toContain("handleResetPluginConfig(plugin.id)");
   });
 

@@ -42,6 +42,12 @@ vi.mock("@/settings/AutomationsSection.js", () => ({
 
 const capturedChatPaneProps: V4ChatPaneProps[] = [];
 
+// 布局夹具不读取 Host 项目目录；真实目录 owner 由 projectDirectoryProvider/Tree 的组件回归验证。
+vi.mock("@/project-sidebar/index.js", () => ({
+  ProjectDirectoryProvider: ({ children }: { children: ReactNode }) => children,
+  ProjectComposerMenu: ({ children }: { children: ReactNode }) => children,
+}));
+
 vi.mock("@/v4/V4ChatPane.js", () => ({
   V4ChatPane: (props: V4ChatPaneProps) => {
     capturedChatPaneProps.push(props);

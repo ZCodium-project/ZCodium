@@ -10,7 +10,7 @@ Renderer 模块，层序 `domain → app → adapters → components`；公开�
 - App-provided tools 在 initialized 后发现与登记；认领后用官方 SDK AbortSignal 执行，模型取消沿 live-only delta 到页面。callId 去重，终态结果不可再写入。页面调用 MCP 的目标由宿主固定，复用 Agent 的权限和审批路径，原始结果直接返回。
 - 页面 `availableDisplayModes` 是硬约束；inline/fullscreen 对应内联/侧栏，pip 保持当前模式。高度默认 240px、范围 [80,1200]，hostContext 只回传 width/maxHeight，避免高度回环。布局按帧合并。
 - widgetState 仅接受页面主动提交，唯一内存 store 按逻辑键隔离；重建时在 `hostContext["zcode/widgetState"]` 下发。切位置不复制；手动重试、任务淘汰、来源撤销清除；应用重启为空。
-- 连续离屏 5 分钟回收活页面；侧栏展示或有审批/调用时不回收。Agent 原子确认空闲后才释放。最多 30 个任务和 64 个活页面，容量 admission 串行；无法安全回收时返回错误。任务删除同时取消排队创建。
+- MCP 页面保留时不按离屏期限/容量自动回收：session 空闲不代表 guest 没有未保存编辑。无可见锚点或零尺寸 tab 使用非零、inert 后台表面；隐藏和窗口最小化经既有平台 setExecutionActive 保持原 guest 执行。最多 30 个任务和 64 个活页面，容量 admission 串行；无法安全回收时返回错误。任务删除同时取消排队创建，重载、runtime 失效和来源撤销仍 force 释放原代际。
 - 已获准的主动释放先按原 sandboxId 解除导航/崩溃监听，避免 Main 停止页面的 about:blank 导航误报崩溃；真实运行中的导航/崩溃仍进入 error，重试后重建。
 - 释放顺序：失效凭证、取消调用和登记、有界 resource-teardown、关闭端口/guest、释放 feed/lease。迟到 prepare、注销和锚点清理只作用于捕获的原实例。卡片卸载不切断保活页面的订阅。
 - `sendFollowUpMessage` 仍走既有会话动作和手势/可编辑确认；确认完成后验证实例。只读会话不登记动作。`updateModelContext` 只投递到该 workspace/session 的 composer，不是数据库状态。
@@ -18,6 +18,8 @@ Renderer 模块，层序 `domain → app → adapters → components`；公开�
 - 工具失败、取消或 `display.ui.isError` 只保留普通工具记录，不占用 inline/侧栏区域、不自动开侧栏，手动固定/showInline/最近回合不能越过此门禁；失败不替代已有成功页面。原始错误结果及页面通知语义保持不变。
 
 组件只经 hooks/服务端口访问外部能力；controller 不导入适配器，domain 只做纯计算。侧栏 tab、composer 上下文仍由既有 UI owner 持有，不与页面状态重复写入。
+
+RootShell 的 PluginUiBackgroundHost 订阅本地 live 结果，与卡片共享同一 registry 准入并在准入后启动。后台只更新工具 feed，不覆盖前台交互/尺寸。文档 launcher 每次手动打开生成 instanceId，tab 和 scope 贯穿该身份；普通 surface 仍显式共享。面板入口订阅现有插件管理 owner 的成功变更，不再订阅 retired pluginStore。
 
 `preferredDisplayMode: fullscreen` 每次实际工具调用只消费一次；记录归既有侧栏内存，按 workspace/session/plugin/server/resource/toolCall 隔离，随其窗口缓存保留与淘汰。工具行重挂不能重新触发打开并覆盖收起偏好；已显示在侧栏时也消费该调用。手动打开、页面请求以及新工具调用仍走原入口。
 

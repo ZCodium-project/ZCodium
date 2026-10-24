@@ -289,6 +289,8 @@ export function createWorkflowChildSkillPort(
   return (
     deps.appOptions.skillPort ??
     createNodeSkillAdapter({
+      // child 自建 adapter 时也必须继承父实例目录，不能只继承 prompt 中的目录提示。
+      additionalDirectories: deps.appOptions.additionalDirectories,
       extraRoots: deps.configResult.config.skills.roots,
       extraResolvedRoots: [...deps.pluginSkillRoots],
       // 脚本 workflow child runtime 不能绕过用户禁用的 SKILL.md 路径。

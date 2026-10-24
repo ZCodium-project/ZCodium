@@ -107,7 +107,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag "$TAG"
           git push origin "$TAG"
-          cat > /tmp/release-notes.md <<'NOTES'
+          # #79：人工版本说明是完整正文，避免自动摘要和旧营销模板混入本次功能/限制说明。
+          VERSION="${TAG#v}"
+          VERSION_NOTES="docs/releases/v${VERSION}.md"
+          if [ -f "$VERSION_NOTES" ]; then
+            sed "s/<VERSION>/${VERSION}/g" "$VERSION_NOTES" > /tmp/release-notes.md
+          else
+            cat > /tmp/release-notes.md <<'NOTES'
           # ZCodium <VERSION>
 
           ## English
@@ -115,9 +121,8 @@ jobs:
           ### What changed vs ZCode
 
           - **All monitoring and telemetry removed** (~26k lines): ARMS RUM, OTLP reporting, crash collection, resource and network sampling, UI analytics - with regression checks so they cannot be reintroduced.
-          - **Official platform services are opt-in and off by default**: account login, feedback upload, coding plans, official MCP credentials, plugin marketplace and remote client config stay disconnected until you enable the matching switch under Settings -> Z.AI services. With every switch off (the default), the app never contacts the official platform and reports nothing; feedback points to GitHub Issues. You can turn any switch off again at any time.
-          - **No mandatory account**: no sign-up wall and no forced login. New users configure their own API key or a custom model provider and start working; a browser sign-in entry appears only after you enable "Z.AI API configuration".
-          - **No purchase or upgrade prompts by default**: nothing pushes you to buy a plan; plan cards and purchase entries appear only after you enable the coding-plan switch, and can be turned off again at any time.
+          - **Only optional official integrations remain**: plugin marketplace and remote client config are off by default and can be selected under Settings -> Z.AI services. These switches do not restore removed account, purchase or sharing features; feedback points to GitHub Issues.
+          - **Use your own provider without an official account**: account login, purchases and sharing are removed. Configure your own API key or a custom model provider; there is no official sign-in or coding-plan purchase entry.
           - **No repository upload behavior**: snapshot packaging and upload logic removed, with guards against reintroduction.
           - **Open source and reviewable**: first-party code MIT, upstream Apache-2.0; removal reports for desktop, CLI and UI ship in the repository.
           - **Transparent builds**: installers are built by GitHub Actions from this repository, and in-app updates point to this repository's GitHub Releases.
@@ -149,9 +154,8 @@ jobs:
           ### 相对 ZCode 的改动
 
           - **移除全部监控与遥测**（约 2.6 万行）：ARMS RUM、OTLP 上报、崩溃采集、资源与网络采样、UI 埋点，并加了防回归检查，防止重新引入。
-          - **官方平台服务默认全部关闭，按开关选择开启**：账号登录、反馈上传、编码套餐、官方 MCP 凭证、插件市场与客户端远端配置在对应开关打开前保持断开；默认全关时应用不会连接官方平台，也不会上报任何数据。开关可在“设置 → Z.AI 服务”里随时打开或关闭。
-          - **没有强制账号体系**：不弹注册墙、不强制登录。首次启动可直接配置自己的 API Key 或自定义模型开始使用；只有打开“Z.AI API 配置”开关后，才会出现浏览器授权登录入口。
-          - **默认没有购买与升级引导**：不会主动引导你购买套餐；只有打开“套餐与额度”开关后才会显示套餐卡片与购买入口，并可随时关闭。
+          - **仅保留可选官方集成**：仅插件市场与客户端远端配置仍可在“设置 → Z.AI 服务”中选择开启，默认关闭；这些开关不能恢复已删除的账号、购买或分享功能，反馈指向 GitHub Issues。
+          - **使用个人 Provider，不依赖官方账号**：官方账号、购买和分享入口已移除。首次启动直接配置自己的 API Key 或自定义模型，不提供官方登录或编码套餐购买入口。
           - **移除仓库上传行为**：快照打包与上传逻辑已删除，并加了防回归保护。
           - **开源可复核**：第一方代码 MIT，上游代码 Apache-2.0；桌面端、CLI、UI 的移除报告随仓库发布。
           - **构建透明**：安装包由 GitHub Actions 从本仓库构建；应用内更新指向本仓库的 GitHub Releases。
@@ -189,33 +193,31 @@ jobs:
           - Checksums: `sha256.txt`（覆盖上方安装包与 CLI 包 / covers the installers and CLI package above）
           - Update metadata: `latest*.yml`, `latest.json`
           NOTES
-          sed -i "s/<VERSION>/${TAG#v}/g" /tmp/release-notes.md
-          # 自动生成版本差异 Changelog：对比最近的正式 tag（排除 ci 类提交），插入到标题之后。
-          # 审计/预发布 tag（v1.0.0-audit.20260929.2 这类）会被 draft 构建打在 main 上；
-          # 若让它们参与 describe，正式版的基线会切到 draft tag，Changelog 只剩一行。
-          # 只接受正式版 tag（v<semver>，无连字符）。
-          # 条目按 .github/changelog-zh.json 渲染为中英双语；缺翻译时附隐藏 TODO 注释。
-          BASE_TAG=$(git describe --tags --abbrev=0 --match 'v*' --exclude 'v*-*' "${TAG}^" 2>/dev/null || true)
-          if [ -n "$BASE_TAG" ]; then
-            CHANGES=$(node scripts/render-release-changelog.mjs --from "$BASE_TAG" --to "$TAG")
-            {
-              echo "## Changelog (vs $BASE_TAG) / 更新日志（相对 $BASE_TAG）"
-              echo ""
-              if [ -n "$CHANGES" ]; then
-                printf '%s\n' "$CHANGES"
-              else
-                echo "- 无代码变更 / No code changes"
-              fi
-              echo ""
-              echo "对比完整变更 / Full diff: https://github.com/${GITHUB_REPOSITORY}/compare/${BASE_TAG}...${TAG}"
-              echo ""
-              echo "---"
-              echo ""
-            } > /tmp/changelog-section.md
-            head -n 1 /tmp/release-notes.md > /tmp/release-notes-title.md
-            tail -n +2 /tmp/release-notes.md > /tmp/release-notes-rest.md
-            { cat /tmp/release-notes-title.md; echo; cat /tmp/changelog-section.md; cat /tmp/release-notes-rest.md; } > /tmp/release-notes-merged.md
-            mv /tmp/release-notes-merged.md /tmp/release-notes.md
+            sed -i "s/<VERSION>/${VERSION}/g" /tmp/release-notes.md
+            # 没有人工正文才生成差异。只接受正式 tag，避免 draft audit tag 截断基线。
+            # 条目沿用双语映射；缺翻译时附隐藏 TODO 注释。
+            BASE_TAG=$(git describe --tags --abbrev=0 --match 'v*' --exclude 'v*-*' "${TAG}^" 2>/dev/null || true)
+            if [ -n "$BASE_TAG" ]; then
+              CHANGES=$(node scripts/render-release-changelog.mjs --from "$BASE_TAG" --to "$TAG")
+              {
+                echo "## Changelog (vs $BASE_TAG) / 更新日志（相对 $BASE_TAG）"
+                echo ""
+                if [ -n "$CHANGES" ]; then
+                  printf '%s\n' "$CHANGES"
+                else
+                  echo "- 无代码变更 / No code changes"
+                fi
+                echo ""
+                echo "对比完整变更 / Full diff: https://github.com/${GITHUB_REPOSITORY}/compare/${BASE_TAG}...${TAG}"
+                echo ""
+                echo "---"
+                echo ""
+              } > /tmp/changelog-section.md
+              head -n 1 /tmp/release-notes.md > /tmp/release-notes-title.md
+              tail -n +2 /tmp/release-notes.md > /tmp/release-notes-rest.md
+              { cat /tmp/release-notes-title.md; echo; cat /tmp/changelog-section.md; cat /tmp/release-notes-rest.md; } > /tmp/release-notes-merged.md
+              mv /tmp/release-notes-merged.md /tmp/release-notes.md
+            fi
           fi
           # 测试版警示（如上游审计自动构建的 draft）插入到说明顶部
           if [ -n "${NOTICE:-}" ]; then

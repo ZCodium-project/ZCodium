@@ -105,6 +105,7 @@ export async function openWebRemoteControlTask({
   try {
     await switcher.switchWorkspace(taskWorkspaceKey, {
       taskId: task.taskId,
+      ...(task.hostId ? { taskHostId: task.hostId } : {}),
       ...(mobileNavigationIntent ? { mobileNavigationIntent } : {}),
       ...(markTaskReadOnOpen && typeof task.unreadAt === "number"
         ? { markTaskReadExpectedUnreadAt: task.unreadAt }

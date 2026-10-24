@@ -227,6 +227,23 @@ afterEach(async () => {
 });
 
 describe("useComposerAttachments eager upload", () => {
+  it("同 cwd 项目附件独立，显式交接重新建立目标上传 owner", async () => {
+    mocks.service = createTransferService().service;
+    const p = { attachmentSessionId: "session-p", scopeId: "__draft__:p", localDesktop: true };
+    const q = { attachmentSessionId: "session-q", scopeId: "__draft__:q", localDesktop: true };
+    const { root, rerender } = renderProbe(p);
+    await addPaths(["/workspace/p.txt"]);
+    const original = latestApi!.attachments[0]!;
+    rerender(q);
+    expect(latestApi!.attachments).toEqual([]);
+    act(() => latestApi!.restoreDraftAttachments([original]));
+    expect(latestApi!.attachments[0]!.filename).toBe("p.txt");
+    expect(latestApi!.attachments[0]!.id).not.toBe(original.id);
+    expect(latestApi!.attachments[0]!.operationId).not.toBe(original.operationId);
+    rerender(p);
+    expect(latestApi!.attachments[0]!.id).toBe(original.id);
+    act(() => root.unmount());
+  });
   it("满 8 个后每次粘贴都提示，且点击添加不再打开文件选择器", async () => {
     mocks.service = createTransferService().service;
     const { root } = renderProbe({

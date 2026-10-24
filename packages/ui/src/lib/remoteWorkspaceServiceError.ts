@@ -1,3 +1,4 @@
+import { isPublicZCodeErrorCode } from "@zcode/shared";
 export const REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE = "ZCODE_REMOTE_WORKSPACE_DISCONNECTED";
 
 export function createRemoteWorkspaceDisconnectedError(): Error & {
@@ -26,4 +27,12 @@ export function isRemoteWorkspaceDisconnectedError(error: unknown): boolean {
     candidate.code === REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE ||
     candidate.message === REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE
   );
+}
+
+/** 只投影协议结构化错误码，不用业务文案猜断线状态。 */
+export function getRemoteConnectionFailureCode(error: unknown): string | undefined {
+  if (isRemoteWorkspaceDisconnectedError(error)) return REMOTE_WORKSPACE_DISCONNECTED_ERROR_CODE;
+  if (!error || typeof error !== "object" || !("code" in error) || typeof error.code !== "string")
+    return undefined;
+  return isPublicZCodeErrorCode(error.code) ? error.code : undefined;
 }

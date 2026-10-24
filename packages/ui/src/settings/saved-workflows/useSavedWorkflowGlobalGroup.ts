@@ -5,7 +5,7 @@ import type { ZCodeSavedWorkflowEntry, ZCodeSavedWorkflowRun } from "@zcode/shar
 import { toast } from "@/components/ui/toast.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
-import { useServices } from "@/hooks/useServices.js";
+import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import { logger } from "@/logger.js";
 import type { AutomationWorkspaceOption } from "@/settings/automationWorkspaceOptions.js";
 import { useSavedWorkflowsDirectoryWatch } from "@/settings/saved-workflows/useSavedWorkflowsDirectoryWatch.js";
@@ -66,7 +66,7 @@ export function useSavedWorkflowGlobalGroup({
 }: UseSavedWorkflowGlobalGroupParams) {
   const { intl, locale } = useZCodeIntl();
   const requestConfirmation = useConfirmDialog();
-  const { zcodeAgentService: agentService, fileWatcherService } = useServices();
+  const { zcodeAgentService: agentService, fileWatcherService } = useBaseWorkspaceServices();
 
   const state = useSavedWorkflowStore((store) =>
     selectSavedWorkflowState(store, GLOBAL_SAVED_WORKFLOW_TARGET),
@@ -143,6 +143,8 @@ export function useSavedWorkflowGlobalGroup({
       if (!target) return;
       const result = await launcher.launch(
         {
+          projectId: target.projectId,
+          hostId: target.hostId,
           workspacePath: target.workspacePath,
           ...(target.workspaceIdentity ? { workspaceIdentity: target.workspaceIdentity } : {}),
         },

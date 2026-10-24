@@ -20,6 +20,7 @@ export function exampleOpenSideTab(request: OpenPluginUiSideTabRequest): PluginU
   return {
     id: buildPluginUiSidePaneTabId(request),
     type: "plugin-ui",
+    ...(request.instanceId ? { instanceId: request.instanceId } : {}),
     parentSessionId: request.parentSessionId,
     ...(request.toolCallId ? { toolCallId: request.toolCallId } : {}),
     ...(request.surfaceId ? { surfaceId: request.surfaceId } : {}),

@@ -1,6 +1,7 @@
 // 跨项目发起已保存工作流：新任务必须落在工作流归属项目而非活动项目
 // （docs/dynamic-workflow/launch.md「The detail page」）。这里单测纯解析 helper 与源码接线契约。
 import { readFileSync } from "node:fs";
+import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 import { resolveNewTaskTargetFromRequest } from "@/root/useRootWorkspaceActions.js";
 import type { WorkbenchNewTaskTarget } from "@/v4/workbenchNewTaskTarget.js";
@@ -91,10 +92,51 @@ describe("startNewTaskFromActiveWorkspace 接线契约", () => {
   it("中枢发起 handler 带 target 时跳过活动 workspace 只读检查并透传 targetWorkspace", () => {
     const shell = source("../src/app-shell/WorkspaceShellLayout.tsx");
     expect(shell).toContain("if (!targetWorkspace && workspaceReadOnlyReason) return;");
-    // 单一 object literal，仅在 target 存在时 spread，不给 request 塞 undefined 键。
-    expect(shell).toMatch(
-      /handleCreateTaskInChat\(\{\s*initialPrompt: prompt,\s*\.\.\.\(targetWorkspace \? \{ targetWorkspace \} : \{\}\),\s*\}\)/,
+    // 用实际 callback 验证提交数据；项目化增加 projectId/hostId 后不再锁死旧 object literal 文本。
+    const file = ts.createSourceFile(
+      "shell.tsx",
+      shell,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
     );
+    let callback = "";
+    const visit = (node: ts.Node) => {
+      if (
+        ts.isVariableDeclaration(node) &&
+        node.name.getText(file) === "handleCreateAutomationInChat" &&
+        node.initializer &&
+        ts.isCallExpression(node.initializer)
+      )
+        callback = node.initializer.arguments[0]!.getText(file);
+      ts.forEachChild(node, visit);
+    };
+    visit(file);
+    expect(callback).not.toBe("");
+    const compiled = ts.transpileModule(`exports.handler = ${callback};`, {
+      compilerOptions: { target: ts.ScriptTarget.ES2022 },
+    }).outputText;
+    const calls = vi.fn();
+    const exported: { handler?: (prompt: string, target?: object) => void } = {};
+    new Function("exports", "workspaceReadOnlyReason", "handleCreateTaskInChat", compiled)(
+      exported,
+      "readonly",
+      calls,
+    );
+    const target = { workspacePath: "/owner" };
+    exported.handler!("prompt", target);
+    expect(calls).toHaveBeenLastCalledWith({ initialPrompt: "prompt", targetWorkspace: target });
+    const project = { ...target, projectId: "project", hostId: "local" };
+    exported.handler!("prompt", project);
+    expect(calls).toHaveBeenLastCalledWith({
+      initialPrompt: "prompt",
+      targetWorkspace: project,
+      projectId: "project",
+      hostId: "local",
+    });
+    calls.mockClear();
+    exported.handler!("prompt");
+    expect(calls).not.toHaveBeenCalled();
     // 工作流「运行」不再走 autoSubmit 对话文案：直接启动（docs/dynamic-workflow/launch.md），
     // 该分支应已删除，autoSubmit 通道全线移除。
     expect(shell).not.toContain("autoSubmit: true");
@@ -107,7 +149,7 @@ describe("startNewTaskFromActiveWorkspace 接线契约", () => {
     // workspaceReadOnlyReason` 才 return，随后 showChatMainView() + onCreateTask(request)。
     const shell = source("../src/app-shell/WorkspaceShellLayout.tsx");
     expect(shell).toMatch(
-      /const hasTargetWorkspace\s*=\s*typeof request === "object" && request !== null && Boolean\(request\.targetWorkspace\);/,
+      /const hasTargetWorkspace\s*=\s*typeof request === "object" &&\s*request !== null &&\s*\(Boolean\(request\.targetWorkspace\) \|\| "projectId" in request\);/,
     );
     expect(shell).toMatch(
       /if \(!hasTargetWorkspace && workspaceReadOnlyReason\) \{\s*return;\s*\}\s*showChatMainView\(\);\s*onCreateTask\(request\);/,

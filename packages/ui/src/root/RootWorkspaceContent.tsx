@@ -11,6 +11,7 @@ import type { IFeedbackService, IServiceAccessor } from "@zcode/services";
 const StableWorkspaceApp = memo(App);
 
 interface RootWorkspaceContentProps {
+  sourceServerSettings?: import("@/source-server-settings/contract.js").SourceServerSettingsNavigation;
   workspaceScopedServices: IServiceAccessor;
   baseFeedbackService: IFeedbackService;
   workspaceShellPath: string;
@@ -53,6 +54,7 @@ interface RootWorkspaceContentProps {
 }
 
 export function RootWorkspaceContent({
+  sourceServerSettings,
   workspaceScopedServices,
   baseFeedbackService,
   workspaceShellPath,
@@ -192,6 +194,7 @@ export function RootWorkspaceContent({
           className="absolute inset-0 z-10"
         >
           <WorkspaceSettingsLayer
+            sourceServerSettings={sourceServerSettings}
             workspaceScopedServices={workspaceScopedServices}
             isDesktop={isDesktop}
             isMacDesktop={isMacDesktop}

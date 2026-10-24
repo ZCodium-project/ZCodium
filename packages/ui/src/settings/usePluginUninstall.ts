@@ -8,6 +8,7 @@ interface UsePluginUninstallInput {
   installedPlugins: ZCodeInstalledPluginSummary[];
   plugins: ZCodePluginInfo[];
   operationId: string | null;
+  activeOperations?: ReadonlyArray<{ id: string }>;
   // 卸载会让插件提供的技能/命令失效，调用方传入统一的「能力变更后刷新」收尾逻辑。
   onAfterUninstall: () => Promise<void>;
 }
@@ -29,6 +30,7 @@ export function usePluginUninstall({
   installedPlugins,
   plugins,
   operationId,
+  activeOperations,
   onAfterUninstall,
 }: UsePluginUninstallInput): PluginUninstallController {
   const uninstallPlugin = usePluginManagementStore((state) => state.uninstallPlugin);
@@ -43,7 +45,11 @@ export function usePluginUninstall({
     );
   }, [installedPlugins, pendingId, plugins]);
 
-  const uninstalling = pendingId !== null && operationId === `plugin:uninstall:${pendingId}`;
+  const uninstalling =
+    pendingId !== null &&
+    (activeOperations ?? (operationId ? [{ id: operationId }] : [])).some(
+      (operation) => operation.id === `plugin:uninstall:${pendingId}`,
+    );
 
   const requestUninstall = useCallback((pluginId: string) => {
     setPendingId(pluginId);

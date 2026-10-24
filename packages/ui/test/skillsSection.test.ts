@@ -313,6 +313,11 @@ vi.mock("@/hooks/useServices.js", () => ({
   }),
 }));
 
+vi.mock("@/workspace-config-catalog/index.js", async () => {
+  const { useWorkspaceServicesResolution } = await import("@/hooks/useWorkspaceServices.js");
+  return { useConfigWorkspaceServicesResolution: useWorkspaceServicesResolution };
+});
+
 vi.mock("@/hooks/useWorkspaceServices.js", () => ({
   useWorkspaceServicesResolution: () => ({
     services: {

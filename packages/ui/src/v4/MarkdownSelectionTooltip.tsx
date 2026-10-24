@@ -97,6 +97,7 @@ export function MarkdownSelectionTooltip({
         dispatchConversationSelectionAdd({
           targetSessionId: target.sessionId,
           workspaceKey: target.workspaceKey,
+          draftScopeKey: target.draftScopeKey,
           reference: createReference(),
         });
         close();

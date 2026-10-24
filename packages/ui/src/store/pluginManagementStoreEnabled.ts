@@ -1,7 +1,11 @@
 import type { IPluginManagementService } from "@zcode/services";
 import type { ZCodePluginScope } from "@zcode/shared";
 import { logger } from "@/logger.js";
-import { loadInto } from "@/store/pluginManagementStoreLoading.js";
+import {
+  beginPluginOperation,
+  loadInto,
+  notifyPluginManagementChange,
+} from "@/store/pluginManagementStoreLoading.js";
 import type { PluginManagementState } from "@/store/pluginManagementStore.js";
 
 function toMessage(error: unknown): string {
@@ -46,12 +50,12 @@ export async function setPluginEnabledOptimistically(
       activeToggleRequests.get(requestKey) === requestId &&
       current.workspacePath === workspacePath &&
       current.workspaceIdentity === workspaceIdentity &&
-      current.configScope === configScope &&
-      current.togglingPluginId === pluginId
+      current.configScope === configScope
     );
   };
 
   const previousPlugin = get().plugins.find((plugin) => plugin.id === pluginId);
+  const finish = beginPluginOperation(set, get, `plugin:set-enabled:${pluginId}`);
   // 启停 RPC 和后续列表刷新存在可感知延迟。先投影最终状态，让开关立刻响应；失败时
   // 在 catch 中恢复快照，避免用户把正常的异步写入误判成“点了没反应”。
   set({
@@ -75,6 +79,7 @@ export async function setPluginEnabledOptimistically(
       enabled,
       scope,
     });
+    notifyPluginManagementChange({ workspacePath, workspaceIdentity, scope });
     if (!isCurrentRequest()) return false;
     set({
       plugins: get().plugins.map((plugin) =>
@@ -86,6 +91,7 @@ export async function setPluginEnabledOptimistically(
       workspaceIdentity,
       configScope,
       pluginService,
+      fresh: true,
     });
     return isCurrentRequest();
   } catch (error) {
@@ -107,7 +113,8 @@ export async function setPluginEnabledOptimistically(
     }
     return false;
   } finally {
-    if (isCurrentRequest()) {
+    finish();
+    if (isCurrentRequest() && get().togglingPluginId === pluginId) {
       set({ togglingPluginId: null });
     }
     if (activeToggleRequests.get(requestKey) === requestId) {

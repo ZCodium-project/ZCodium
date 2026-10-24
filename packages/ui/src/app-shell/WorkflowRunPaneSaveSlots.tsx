@@ -70,6 +70,7 @@ function useWorkflowRunPaneSaveHost(params: WorkflowRunPaneSaveParams): Workflow
     [sendCommand, tab.parentSessionId, tab.runId],
   );
   return {
+    sessionId: tab.parentSessionId,
     workspacePath: tab.workspacePath,
     ...(tab.workspaceIdentity === undefined ? {} : { workspaceIdentity: tab.workspaceIdentity }),
     ...(tab.remoteSessionId === undefined ? {} : { remoteSessionId: tab.remoteSessionId }),

@@ -1,5 +1,11 @@
 # Conversation Session Case Catalog
 
+## ZCodium 非官方能力对齐（ZUP，#79，2026-10-23）
+
+用户明确要求同步官方 3.16.2 非官方服务能力及多文件夹项目 UI。沿用现有项目合同，不恢复官方服务/遥测。ZUP01–ZUP07 的 setup/action/assertion、owner 和剪枝见 [本轮规格](superpowers/specs/2026-10-23-zcodium-upstream-parity.md#验收用例与剪枝)：本地多选创建、编辑与旧 cwd 保持、附加目录能力和配置隔离、V4 冷恢复、同 cwd 项目草稿隔离、主题/窄屏、远程单 root/手机边界。产品语义 accepted，确定性回归及 macOS 多目录/重启/冷恢复证据见 [验收报告](testing/project-parity-validation.md)，不复用上游历史 PASS 充当本 fork 的验收。
+
+同次静态盘点确认的独立非官方缺口 ZUP08–ZUP14 也已纳入用户授权范围：Gen UI 正式消息、插件后台执行、用户自有 Source 管理、完整 Side Pane、个人插件逐项操作/独立文档、文本与 Bot 合批材料呈现、多 roots 配置/自动化候选。具体动作/断言及隔离边界见本轮规格相应表，产品语义 accepted；回归和真实设备验证分层记录，不因组件测试通过就称全部 GUI 验收。官方账号/购买/分享/遥测不恢复，本仓有效分屏不因上游撤入口而删除。
+
 ## 项目与任务草稿生命周期（2026-10-16）
 
 PD01–PD12 的前置、动作、断言与证据要求见 [统一生命周期规格](ui/project-task-draft-lifecycle.md)。产品语义 accepted；自动化保持 manual-review/pending，运行证据见 coverage matrix 与规格的验证记录，不代表已转正或发布。覆盖项目/任务新建、同目录项目隔离、接纳后默认配置、目录复用、迟到回执、手机独立恢复及旧数据认领。

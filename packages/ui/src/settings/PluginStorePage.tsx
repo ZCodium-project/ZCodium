@@ -29,7 +29,7 @@ import {
   PluginStoreDetailView,
 } from "@/settings/PluginStoreDetailView.js";
 import { PluginStoreSourcesDialog } from "@/settings/PluginStoreSourcesDialog.js";
-import type { PluginStoreActions } from "@/settings/PluginStoreCard.js";
+import { isItemBusy, type PluginStoreActions } from "@/settings/PluginStoreCard.js";
 import {
   buildStoreItems,
   canUpdatePluginItem,
@@ -91,6 +91,7 @@ export function PluginStorePage({
   const loadedWorkspaceIdentity = usePluginManagementStore((state) => state.workspaceIdentity);
   const error = usePluginManagementStore((state) => state.error);
   const operationId = usePluginManagementStore((state) => state.operationId);
+  const activeOperations = usePluginManagementStore((state) => state.activeOperations);
   const describeCache = usePluginManagementStore((state) => state.describeCache);
   const initialize = usePluginManagementStore((state) => state.initialize);
   const updateMarketplace = usePluginManagementStore((state) => state.updateMarketplace);
@@ -326,6 +327,7 @@ export function PluginStorePage({
     installedPlugins,
     plugins,
     operationId,
+    activeOperations,
     onAfterUninstall: async () => {
       await refreshAfterPluginChange();
     },
@@ -423,9 +425,17 @@ export function PluginStorePage({
       onUninstall: uninstall.requestUninstall,
       onUpdate: (pluginId) => void handleUpdatePlugin(pluginId),
       operationId,
+      activeOperations,
       togglingPluginId: null,
     }),
-    [handleInstall, handleUpdatePlugin, openDetail, operationId, uninstall.requestUninstall],
+    [
+      handleInstall,
+      handleUpdatePlugin,
+      openDetail,
+      operationId,
+      activeOperations,
+      uninstall.requestUninstall,
+    ],
   );
 
   if (!workspacePath) {
@@ -565,7 +575,7 @@ export function PluginStorePage({
                       data-testid="plugin-store-detail-update"
                       variant="outline"
                       size="sm"
-                      disabled={operationId === `plugin:update:${detailItem.id}`}
+                      disabled={isItemBusy(detailItem, actions)}
                       onClick={() => void handleUpdatePlugin(detailItem.id)}
                     >
                       {intl.formatMessage({ id: "settings.plugins.detail.update" })}

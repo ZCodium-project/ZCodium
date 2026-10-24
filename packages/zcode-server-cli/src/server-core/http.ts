@@ -230,7 +230,7 @@ export async function createCoreHttpServer(
       desktopContinuous: true,
       websocketRpc: true,
       virtualProjects: true,
-      processResourceTelemetry: true,
+      // #79：该采集器在审计版不存在，Source Core 也不能向管理界面宣称支持它。
     },
   });
   // 裸 Set 无法落实 expiresAt，未消费的 capability 会一直有效并持续累积。

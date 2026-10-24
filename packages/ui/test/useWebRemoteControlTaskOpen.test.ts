@@ -13,10 +13,31 @@ function createTask(overrides: Partial<WebRemoteControlTaskTarget>): WebRemoteCo
     createdAt: overrides.createdAt ?? 1,
     updatedAt: overrides.updatedAt ?? 2,
     unreadAt: overrides.unreadAt,
+    hostId: overrides.hostId,
   };
 }
 
 describe("openWebRemoteControlTask", () => {
+  it("项目目录的跨 workspace 历史任务携带权威 Host 地址进入 bridge admission", async () => {
+    const switchWorkspace = vi.fn(async () => {});
+    await openWebRemoteControlTask({
+      activeWorkspacePath: "/current",
+      activeTaskId: null,
+      onSelectTask: vi.fn(),
+      switcher: { listWorkspaces: vi.fn(async () => ({ workspaces: [] })), switchWorkspace },
+      task: createTask({
+        taskId: "historical",
+        workspacePath: "/old-cwd",
+        workspaceIdentity: "remote:server:source:/old-cwd",
+        workspaceKind: "remote",
+        hostId: "remote:server:source",
+      }),
+    });
+    expect(switchWorkspace).toHaveBeenCalledWith("remote:server:source:/old-cwd", {
+      taskId: "historical",
+      taskHostId: "remote:server:source",
+    });
+  });
   it("marks a same-workspace unread task as read before selecting it", async () => {
     const task = createTask({ taskId: "task-unread", unreadAt: 123 });
     const events: string[] = [];

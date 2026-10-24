@@ -137,6 +137,7 @@ function PrewarmHarness(props: {
     typeof useDraftSessionPrewarm
   >[0]["resolveInitialRuntimeModel"];
   onRender: (binding: ReturnType<typeof useDraftSessionPrewarm>["binding"]) => void;
+  onOwner?: (owner: ReturnType<typeof useDraftSessionPrewarm>) => void;
 }) {
   const result = useDraftSessionPrewarm({
     enabled: props.enabled ?? true,
@@ -148,6 +149,7 @@ function PrewarmHarness(props: {
     resolveInitialConfig: props.resolveInitialConfig,
   });
   props.onRender(result.binding);
+  props.onOwner?.(result);
   return null;
 }
 
@@ -162,6 +164,91 @@ afterEach(async () => {
 });
 
 describe("startDraftSessionPrewarm", () => {
+  it("同 cwd 项目换代：新 owner 等旧创建退休，旧发送不能借新订阅继续", async () => {
+    const resolvers: Array<(ack: CommandAck) => void> = [];
+    const { dispatch, calls } = createDispatchRecorder({
+      onCreate: () => new Promise((resolve) => resolvers.push(resolve)),
+    });
+    const root = createRoot(installMinimalDom());
+    mountedRoots.push(root);
+    const transportIdentity = {};
+    let owner!: ReturnType<typeof useDraftSessionPrewarm>;
+    const render = (invalidationVersion: number) =>
+      root.render(
+        createElement(PrewarmHarness, {
+          workspaceKey: "/shared",
+          invalidationVersion,
+          transportIdentity,
+          dispatchCommand: dispatch,
+          onRender: () => {},
+          onOwner: (value) => {
+            owner = value;
+          },
+        }),
+      );
+    await act(async () => {
+      render(0);
+      await flushMicrotasks();
+    });
+    const oldOwner = owner;
+    await act(async () => {
+      render(1);
+      await flushMicrotasks();
+    });
+    const stale = oldOwner.waitForSession().then(
+      () => "sent",
+      () => "stale",
+    );
+    const current = owner.waitForSession();
+    expect(calls.filter((call) => call.type === "createSession")).toHaveLength(1);
+    await act(async () => {
+      resolvers[0]!(acceptedCreateAck("retired-p"));
+      await flushMicrotasks();
+    });
+    expect(calls).toContainEqual({ type: "deleteSession", sessionId: "retired-p" });
+    expect(calls.filter((call) => call.type === "createSession")).toHaveLength(2);
+    await act(async () => {
+      resolvers[1]!(acceptedCreateAck("current-q"));
+      await flushMicrotasks();
+    });
+    expect(await stale).toBe("stale");
+    expect((await current).sessionId).toBe("current-q");
+  });
+  it("首发并发等待同一 owner 在途创建，不额外创建 session", async () => {
+    let resolveCreate!: (ack: CommandAck) => void;
+    const { dispatch, calls } = createDispatchRecorder({
+      onCreate: () =>
+        new Promise((resolve) => {
+          resolveCreate = resolve;
+        }),
+    });
+    const root = createRoot(installMinimalDom());
+    mountedRoots.push(root);
+    let owner!: ReturnType<typeof useDraftSessionPrewarm>;
+    await act(async () => {
+      root.render(
+        createElement(PrewarmHarness, {
+          workspaceKey: "/same",
+          transportIdentity: {},
+          dispatchCommand: dispatch,
+          onRender: () => {},
+          onOwner: (value) => {
+            owner = value;
+          },
+        }),
+      );
+      await flushMicrotasks();
+    });
+    const first = owner.waitForSession();
+    const second = owner.waitForSession();
+    await act(async () => {
+      resolveCreate(acceptedCreateAck("single"));
+      await flushMicrotasks();
+    });
+    expect((await first).sessionId).toBe("single");
+    expect(await second).toBe(await first);
+    expect(calls.filter((call) => call.type === "createSession")).toHaveLength(1);
+  });
   it("createSession 就绪 → onReady 上抛 sessionId", async () => {
     const { dispatch } = createDispatchRecorder();
     const onReady = vi.fn();

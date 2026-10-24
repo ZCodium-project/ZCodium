@@ -212,6 +212,8 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
       resolveZCodeRuntimeEnv(options.env ?? process.env) === "development",
     );
     const zcodeSubagentProfileOutcome = await loadZCodeAgentProfiles({
+      // 附加目录只扩展能力发现；配置、Hook、MCP 等仍由 workingDirectory 链装配。
+      additionalDirectories: options.additionalDirectories,
       logger,
       storageRoot,
       workingDirectory,
@@ -757,6 +759,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
         configResult.config.features.skill && configResult.config.skills.enabled
           ? (options.skillPort ??
             createNodeSkillAdapter({
+              additionalDirectories: options.additionalDirectories,
               extraRoots: configResult.config.skills.roots,
               extraResolvedRoots: [...pluginOutcome.skillRoots, ...bundledSkillRoots],
               disabledPaths: [
@@ -813,6 +816,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
           return builtinPrompt;
         }
         return await resolveZCodeCustomCommandPrompt(text, {
+          additionalDirectories: options.additionalDirectories,
           env: options.env,
           executionPort,
           logger,
@@ -931,6 +935,7 @@ export async function createZCodeApp(options: ZCodeAppOptions): Promise<ZCodeApp
     };
     return {
       sessionId,
+      additionalDirectories: options.additionalDirectories,
       traceId: traceContext.traceId,
       runtime,
       respondWorkspaceHookReview: (input) =>

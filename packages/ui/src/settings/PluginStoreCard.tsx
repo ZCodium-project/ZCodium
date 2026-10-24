@@ -37,17 +37,28 @@ export interface PluginStoreActions {
   onResetConfig?: (pluginId: string) => void;
   onUpdate: (pluginId: string) => void;
   operationId: string | null;
+  /** 真实 owner 的逐项进行中投影；operationId 保留给尚未迁移的配置入口。 */
+  activeOperations?: ReadonlyArray<{ id: string }>;
   togglingPluginId: string | null;
 }
 
-export function isItemBusy(item: StorePluginItem, actions: PluginStoreActions): boolean {
+export function isItemBusy(
+  item: Pick<StorePluginItem, "id" | "name" | "marketplace">,
+  actions: PluginStoreActions,
+): boolean {
+  const ids = [
+    `plugin:install:${item.name}@${item.marketplace}`,
+    `plugin:restore:${item.id}`,
+    `plugin:uninstall:${item.id}`,
+    `plugin:update:${item.id}`,
+    `plugin:configure:${item.id}`,
+    `plugin:reset-config:${item.id}`,
+    `plugin:set-enabled:${item.id}`,
+  ];
   return (
-    actions.operationId === `plugin:install:${item.name}@${item.marketplace}` ||
-    actions.operationId === `plugin:restore:${item.id}` ||
-    actions.operationId === `plugin:uninstall:${item.id}` ||
-    actions.operationId === `plugin:update:${item.id}` ||
-    actions.operationId === `plugin:reset-config:${item.id}` ||
-    actions.togglingPluginId === item.id
+    (actions.activeOperations ?? (actions.operationId ? [{ id: actions.operationId }] : [])).some(
+      (operation) => ids.includes(operation.id),
+    ) || actions.togglingPluginId === item.id
   );
 }
 
@@ -99,7 +110,7 @@ export function PluginStoreEnabledSwitch({
       data-testid="plugin-store-enabled-switch"
       data-plugin-id={item.id}
       checked={enabled}
-      disabled={actions.togglingPluginId === item.id}
+      disabled={isItemBusy(item, actions)}
       aria-label={
         enabled
           ? intl.formatMessage({ id: "settings.plugins.store.menu.disable" })
@@ -224,9 +235,13 @@ export function PluginStoreInstallButton({
   size?: "sm" | "default" | "lg";
 }) {
   const { intl } = useZCodeIntl();
-  const installing =
-    actions.operationId === `plugin:install:${item.name}@${item.marketplace}` ||
-    actions.operationId === `plugin:restore:${item.id}`;
+  const installing = (
+    actions.activeOperations ?? (actions.operationId ? [{ id: actions.operationId }] : [])
+  ).some(
+    (operation) =>
+      operation.id === `plugin:install:${item.name}@${item.marketplace}` ||
+      operation.id === `plugin:restore:${item.id}`,
+  );
   return (
     <Button
       type="button"
@@ -235,7 +250,7 @@ export function PluginStoreInstallButton({
       variant="secondary"
       size={size}
       className="rounded-full"
-      disabled={installing}
+      disabled={isItemBusy(item, actions)}
       onClick={(event) => {
         event.stopPropagation();
         actions.onInstall(item);
@@ -283,7 +298,9 @@ export function PluginStoreUpdateButton({
 }) {
   const { intl } = useZCodeIntl();
   if (!item || !canUpdatePluginItem(item)) return null;
-  const updating = actions.operationId === `plugin:update:${item.id}`;
+  const updating = (
+    actions.activeOperations ?? (actions.operationId ? [{ id: actions.operationId }] : [])
+  ).some((operation) => operation.id === `plugin:update:${item.id}`);
   return (
     <Button
       type="button"
@@ -292,7 +309,8 @@ export function PluginStoreUpdateButton({
       variant="secondary"
       size={size}
       className="rounded-full"
-      disabled={actions.operationId !== null}
+      // 按插件判定，A 安装期间 B 仍可提交；真正的串行写入继续由既有插件 owner 裁决。
+      disabled={isItemBusy(item, actions)}
       onClick={(event) => {
         event.stopPropagation();
         actions.onUpdate(item.id);

@@ -111,6 +111,7 @@ export const webRemoteControlReconnectWorkspaceResultSchema = z.union([
 ]);
 
 export const webRemoteControlFailureReasonSchema = z.enum([
+  "auth-required",
   "session-not-found",
   "session-expired",
   "session-conflict",

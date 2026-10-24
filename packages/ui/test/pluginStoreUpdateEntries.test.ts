@@ -132,6 +132,27 @@ describe("plugin update badge and inline update entries", () => {
     expect(onUpdate).toHaveBeenCalledWith("demo@personal");
   });
 
+  it("A 安装不锁住 B 更新，同一插件的并发操作仍保持 busy", async () => {
+    await renderCard(storeItem(), makeActions({ operationId: "plugin:install:other@personal" }));
+    expect(
+      buttonProps.find((props) => props["data-testid"] === "plugin-store-card-update")?.disabled,
+    ).toBe(false);
+    buttonProps.length = 0;
+    await renderCard(
+      storeItem(),
+      makeActions({
+        operationId: "plugin:install:other@personal",
+        activeOperations: [
+          { id: "plugin:update:demo@personal" },
+          { id: "plugin:install:other@personal" },
+        ],
+      }),
+    );
+    expect(
+      buttonProps.find((props) => props["data-testid"] === "plugin-store-card-update")?.disabled,
+    ).toBe(true);
+  });
+
   it("overlays an update entry on the installed strip avatar only when updatable", async () => {
     const pendingHtml = await renderListView(storeItem(), makeActions());
     expect(pendingHtml).toContain('data-testid="plugin-store-installed-item-update"');

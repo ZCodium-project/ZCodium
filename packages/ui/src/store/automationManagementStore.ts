@@ -25,6 +25,8 @@ export interface AutomationRunsEntry {
 export type AutomationRunNowResult = "queued" | "duplicate" | "failed";
 
 export interface CreateAutomationInput {
+  projectId?: string | null;
+  hostId?: string;
   title: string;
   cronExpr: string;
   prompt: string;

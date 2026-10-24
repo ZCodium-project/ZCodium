@@ -63,8 +63,8 @@ const agentByPath: Record<string, ReturnType<typeof makeAgent>> = {
   "/repo": agentRepo,
 };
 
-vi.mock("@/hooks/useWorkspaceServices.js", () => ({
-  useWorkspaceServicesResolution: (workspacePath: string) => ({
+vi.mock("@/workspace-config-catalog/index.js", () => ({
+  useConfigWorkspaceServicesResolution: (workspacePath: string) => ({
     services: { zcodeAgentService: agentByPath[workspacePath] ?? agentRepo, fileWatcherService },
     remoteSessionId: null,
     isRemoteTarget: false,

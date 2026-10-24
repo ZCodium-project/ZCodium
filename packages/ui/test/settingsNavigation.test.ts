@@ -19,6 +19,28 @@ afterEach(() => {
 });
 
 describe("settingsNavigation", () => {
+  it.each(["remoteDevices", "officialServices"] as const)(
+    "#79：%s 的导航意图和重启偏好不会被合法值校验丢弃",
+    async (section) => {
+      const local = new Map<string, string>();
+      const session = new Map<string, string>();
+      const storage = (values: Map<string, string>) => ({
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => values.set(key, value),
+        removeItem: (key: string) => values.delete(key),
+      });
+      vi.stubGlobal("window", {
+        localStorage: storage(local),
+        sessionStorage: storage(session),
+        dispatchEvent: vi.fn(),
+      });
+      const navigation = await loadSettingsNavigation("production");
+      navigation.writeLastSettingsSectionPreference(section);
+      expect(navigation.readLastSettingsSectionPreference()).toBe(section);
+      navigation.setPendingSettingsSection(section);
+      expect(navigation.consumePendingSettingsSection()).toBe(section);
+    },
+  );
   it("在 test 环境保留 usage 分区", async () => {
     const navigation = await loadSettingsNavigation("test");
 

@@ -3,7 +3,7 @@ import { SessionEventType, type SessionEvent } from "@zcode/contracts";
 import { ConversationV4Gateway } from "../src/zcode-protocol-v4/index.js";
 
 const ui = { pluginId: "editor@example", resourceUri: "ui://editor", surface: "editor" };
-function events(success = true, isError = false): SessionEvent[] {
+function events(success = true, isError = false, sessionId = "session-1"): SessionEvent[] {
   return [
     [SessionEventType.SessionCreated, { mode: "default", contextWindow: 200_000 }],
     [SessionEventType.TurnStarted, { turnNumber: 1, input: "open", inputId: "cmd" }],
@@ -37,7 +37,7 @@ function events(success = true, isError = false): SessionEvent[] {
     ([type, payload], index) =>
       ({
         id: `event-${index}` as never,
-        sessionId: "session-1" as never,
+        sessionId: sessionId as never,
         turnId: "turn-1" as never,
         traceId: "trace" as never,
         type,
@@ -78,6 +78,98 @@ describe("后台 UI 工具结果创建入口", () => {
       gateway.dispose();
     }
   });
+  it("乱序结果等待权威工具行提交，旧 raw 水位的迟到结果不重复投递", () => {
+    const { gateway, emit } = setup();
+    try {
+      const [created, started, scheduled, result] = events();
+      gateway.ingest("session-1", created!);
+      gateway.ingest("session-1", started!);
+      gateway.ingest("session-1", result!);
+      expect(emit).not.toHaveBeenCalled();
+      gateway.ingest("session-1", scheduled!);
+      expect(emit).toHaveBeenCalledExactlyOnceWith({
+        sessionId: "session-1",
+        toolCallId: "tool",
+        serverName: "plugin:editor:editor",
+        ui,
+        input: { file: "drawing.png" },
+      });
+      gateway.ingest("session-1", {
+        ...result!,
+        id: "late-old-result" as never,
+        sequenceNumber: 3,
+      });
+      expect(emit).toHaveBeenCalledTimes(1);
+    } finally {
+      gateway.dispose();
+    }
+  });
+  it("相同 event/tool ID 在不同会话中独立投递，不混用另一会话的权威行", () => {
+    const { gateway, emit } = setup();
+    try {
+      for (const sessionId of ["session-1", "session-2"]) {
+        for (const event of events(true, false, sessionId)) gateway.ingest(sessionId, event);
+      }
+      expect(emit.mock.calls.map(([result]) => result.sessionId)).toEqual([
+        "session-1",
+        "session-2",
+      ]);
+    } finally {
+      gateway.dispose();
+    }
+  });
+  it("没有 UI display 的成功工具不投递", () => {
+    const { gateway, emit } = setup();
+    try {
+      const live = events();
+      const result = live.at(-1)!;
+      result.payload = {
+        toolCallId: "tool",
+        duration: 1,
+        result: { success: true, content: "ordinary tool output" },
+      };
+      for (const event of live) gateway.ingest("session-1", event);
+      expect(emit).not.toHaveBeenCalled();
+    } finally {
+      gateway.dispose();
+    }
+  });
+  it("非对象输入不进入通知 payload", () => {
+    const { gateway, emit } = setup();
+    try {
+      const live = events();
+      const scheduled = live[2]!;
+      scheduled.payload = {
+        ...(scheduled.payload as object),
+        input: ["not-a-record"],
+      } as SessionEvent["payload"];
+      for (const event of live) gateway.ingest("session-1", event);
+      expect(emit).toHaveBeenCalledExactlyOnceWith({
+        sessionId: "session-1",
+        toolCallId: "tool",
+        serverName: "plugin:editor:editor",
+        ui,
+      });
+    } finally {
+      gateway.dispose();
+    }
+  });
+  it.each(["desktop-continuous", "web-remote-replayable"] as const)(
+    "%s 使用同一 live 通知入口，重订阅不重放创建副作用",
+    async (clientMode) => {
+      const { gateway, emit } = setup();
+      try {
+        const params = { connectionId: "live", clientMode, topic: "conversation/session-1" };
+        await gateway.subscribe(params);
+        for (const event of events()) gateway.ingest("session-1", event);
+        expect(emit).toHaveBeenCalledTimes(1);
+        await gateway.subscribe({ ...params, connectionId: "reconnected" });
+        expect(emit).toHaveBeenCalledTimes(1);
+      } finally {
+        gateway.dispose();
+      }
+    },
+  );
   it.each([
     [false, false],
     [true, true],

@@ -48,6 +48,8 @@ import {
 import { useRemoteWorkspaceSessionStore } from "@/store/remoteWorkspaceSessionStore.js";
 import { useBaseWorkspaceServices } from "@/hooks/useWorkspaceServices.js";
 import type { VariantProps } from "class-variance-authority";
+import { buildRemoteConnectionProgress } from "@/remote-connection-flow/index.js";
+import { usePublishRemoteConnectionProgress } from "@/remote-connection-flow/ui/RemoteConnectionProgress.js";
 
 interface RemoteConnectionDialogProps {
   onConnect: (
@@ -280,6 +282,50 @@ export function RemoteConnectionDialog({
     }
     closeDialog();
   }, [closeDialog, confirmRemoteFlowDiscard]);
+
+  const progressActionsRef = useRef({
+    resume: () => applyOpenState(true),
+    cancel: handleCloseRequest,
+  });
+  progressActionsRef.current = { resume: () => applyOpenState(true), cancel: handleCloseRequest };
+  const resumeProgress = useCallback(() => progressActionsRef.current.resume(), []);
+  const cancelProgress = useCallback(() => progressActionsRef.current.cancel(), []);
+  const progressSourceServerId = useRemoteWorkspaceSessionStore((state) =>
+    connectedSessionId ? state.sessionsById[connectedSessionId]?.sourceServerId : undefined,
+  );
+  const connectionProgress = useMemo(
+    () =>
+      buildRemoteConnectionProgress({
+        currentStep,
+        loading,
+        selectingDirectory,
+        open,
+        error,
+        connectedSessionId,
+        connectingRequestId,
+        pendingRemoteTarget,
+        connectionLogs,
+        sourceServerId: progressSourceServerId,
+        onResume: resumeProgress,
+        onCancel: cancelProgress,
+      }),
+    [
+      currentStep,
+      loading,
+      selectingDirectory,
+      open,
+      error,
+      connectedSessionId,
+      connectingRequestId,
+      pendingRemoteTarget,
+      connectionLogs,
+      progressSourceServerId,
+      resumeProgress,
+      cancelProgress,
+    ],
+  );
+  // 只发布脱敏展示；安装确认、离线资源、取消和目录 canonical bind 均继续由原路径处理。
+  usePublishRemoteConnectionProgress(connectionProgress);
 
   const startRemoteConnection = async (target: RemoteTarget) => {
     const nextTarget = withDefaultRemoteResourcePackages(target);

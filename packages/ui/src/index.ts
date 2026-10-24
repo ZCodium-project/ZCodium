@@ -13,6 +13,8 @@ export {
   useAssistantCodeCommentFeatureEnabled,
 } from "./AssistantCodeCommentFeatureProvider.js";
 export { Root } from "./Root.js";
+// 手机项目导航复用客户端草稿 owner；不在 Web 端另建待发送目录状态。
+export { ensurePendingTaskDraft } from "./v4/composer/composerDraftStore.js";
 export { UpdateStatusWindowRoot } from "./UpdateStatusWindowRoot.js";
 export type { WebRemoteControlTerminalTransportState } from "./root/types.js";
 export { setWebRemoteControlTerminalTransportState } from "./webRemoteControlTerminalTransportState.js";

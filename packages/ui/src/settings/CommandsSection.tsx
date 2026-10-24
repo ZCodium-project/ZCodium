@@ -8,7 +8,7 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { toast } from "@/components/ui/toast.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
 import { useCommands } from "@/hooks/useCommands.js";
-import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
+import { useConfigWorkspaceServicesResolution as useWorkspaceServicesResolution } from "@/workspace-config-catalog/index.js";
 import { CommandCard, isEditableUserCommand } from "@/settings/CommandCard.js";
 import { CommandForm } from "@/settings/CommandForm.js";
 import { getPluginWorkspaceKey } from "@/settings/PluginScopeMenu.js";
@@ -31,7 +31,7 @@ import {
   selectCommandsForScope,
   selectPluginsForScope,
 } from "@/settings/pluginCapabilityProjection.js";
-import type { WorkspaceTabState } from "@/store/tabStore.js";
+import type { ConfigWorkspaceTarget } from "@/workspace-config-catalog/index.js";
 import {
   resolveCommandScopeRecovery,
   resolveCommandStorageTarget,
@@ -43,7 +43,7 @@ interface CommandsSectionProps {
   workspaceIdentity?: string;
   scopeFilter: "user" | "workspace";
   parentScopeKey: string;
-  workspaceTabs: WorkspaceTabState[];
+  workspaceTabs: ConfigWorkspaceTarget[];
   searchQuery: string;
   onVisibleCountChange?: (count: number) => void;
   onEditorOpenChange?: (open: boolean) => void;

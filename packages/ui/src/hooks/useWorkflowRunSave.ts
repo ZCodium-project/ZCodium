@@ -29,11 +29,7 @@ import {
   type SavedWorkflowLaunchTarget,
 } from "@/settings/saved-workflows/useSavedWorkflowLauncher.js";
 
-export interface WorkflowRunSaveTarget {
-  workspacePath: string;
-  workspaceIdentity?: string;
-  remoteSessionId?: string;
-}
+export type WorkflowRunSaveTarget = SavedWorkflowLaunchTarget;
 
 export interface WorkflowRunSaveHost extends WorkflowRunSaveTarget {
   runId: string;
@@ -89,11 +85,19 @@ export function useWorkflowRunSave(host: WorkflowRunSaveHost): WorkflowRunSaveCo
 
   const target = useMemo<WorkflowRunSaveTarget>(
     () => ({
+      ...(host.projectId !== undefined ? { projectId: host.projectId } : {}),
+      ...(host.hostId ? { hostId: host.hostId } : {}),
       workspacePath: host.workspacePath,
       ...(host.workspaceIdentity ? { workspaceIdentity: host.workspaceIdentity } : {}),
       ...(resolution.remoteSessionId ? { remoteSessionId: resolution.remoteSessionId } : {}),
     }),
-    [host.workspacePath, host.workspaceIdentity, resolution.remoteSessionId],
+    [
+      host.workspacePath,
+      host.workspaceIdentity,
+      resolution.remoteSessionId,
+      host.projectId,
+      host.hostId,
+    ],
   );
   const workspaceKey = useMemo(
     () =>
@@ -184,6 +188,8 @@ export function useWorkflowRunSave(host: WorkflowRunSaveHost): WorkflowRunSaveCo
       const destination = launchTarget ?? target;
       const result = await launcher.launch(
         {
+          ...(destination.projectId !== undefined ? { projectId: destination.projectId } : {}),
+          ...(destination.hostId ? { hostId: destination.hostId } : {}),
           workspacePath: destination.workspacePath,
           ...(destination.workspaceIdentity
             ? { workspaceIdentity: destination.workspaceIdentity }

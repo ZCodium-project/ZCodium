@@ -53,6 +53,7 @@ export function createPage(
   let controller: PluginUiHostController | null = null;
   let releaseFeed: (() => void) | undefined;
   let releaseLease: (() => void) | undefined;
+  let executionKey = "";
   let disposed = false;
   let starting = false;
   let incarnation = 0;
@@ -87,6 +88,7 @@ export function createPage(
     appIdentity = handle.instance.appIdentity;
     patch({ handle });
     plane.mount(handle);
+    syncExecution();
   };
   const setHeight = (height: number) => patch({ height });
   const setError = (error: string) => patch({ error });
@@ -96,12 +98,30 @@ export function createPage(
     onVisibility(visible) {
       if (page.visible !== visible) pluginUiPages.visibility(page, visible);
       if (visible) ensure();
+      syncExecution();
     },
     onCrash() {
       void page.suspend(true);
       patch({ phase: "error", error: "MCP App page stopped" });
     },
   });
+  function syncExecution() {
+    // 握手完成和 session 空闲不代表 guest 已无工作；保留页面时仍须允许未保存编辑继续执行。
+    const active = controller !== null;
+    plane.setExecutionActive(active);
+    const handle = snapshot.handle;
+    if (!handle || !sandboxPlatform.setExecutionActive) return;
+    const background = active && (!page.visible || document.hidden);
+    const nextKey = `${handle.sandboxId}:${handle.initId}:${background}`;
+    if (nextKey === executionKey) return;
+    executionKey = nextKey;
+    void sandboxPlatform
+      .setExecutionActive(handle.sandboxId, handle.initId, background)
+      .catch((error: unknown) => {
+        if (snapshot.handle !== handle || disposed) return;
+        logger.warn("[plugin-ui] background execution failed", { error: String(error) });
+      });
+  }
   async function ensure() {
     if (disposed || controller || starting || snapshot.phase === "error") return;
     starting = true;
@@ -198,7 +218,7 @@ export function createPage(
         ...(latest.current.toolCancelled ? { toolCancelled: true } : {}),
       }),
       // widgetState 初值直接读宿主内存 store（唯一 owner），不经 props 再缓存一份；
-      // 端口投递时才读，离屏回收后重建也拿到页面最近一次主动保存的值。
+      // 端口投递时才读；切换位置保留同一 guest 和尚未保存的内存状态。
       getWidgetState: () => getPluginUiWidgetState(surfaceKey),
       getHostCapabilities: () =>
         buildPluginUiHostCapabilities({
@@ -290,6 +310,7 @@ export function createPage(
     task,
     visible: false,
     snapshot: () => snapshot,
+    start: () => void ensure(),
     subscribe(listener) {
       listeners.add(listener);
       return () => {
@@ -336,6 +357,17 @@ export function createPage(
           controller?.updateHostContext(context);
         }
       }
+      page.updateToolFeed(next);
+    },
+    updateToolFeed(next) {
+      if (disposed) return;
+      latest.current = {
+        ...latest.current,
+        toolCallId: next.toolCallId,
+        toolInput: next.toolInput,
+        toolResult: next.toolResult,
+        toolCancelled: next.toolCancelled,
+      };
       const feed = JSON.stringify([
         next.toolCallId,
         next.toolInput,
@@ -350,15 +382,14 @@ export function createPage(
       }
     },
     async suspend(force = false) {
-      const candidate = controller;
-      if (!force && (starting || (candidate && !(await candidate.tryRecycle().catch(() => false)))))
-        return false;
-      // 审批接纳与后台回收在 Agent 原子裁决；等待期间替换的 controller 不受旧结果影响。
-      if (!force && candidate !== controller) return false;
+      // 编辑器未保存内容在 guest 内存，不能按离屏 TTL/容量猜测可回收；失效、删除、重载仍显式释放。
+      if (!force) return false;
       incarnation++;
       starting = false;
       const previous = controller;
       controller = null;
+      plane.setExecutionActive(false);
+      executionKey = "";
       const previousHandle = snapshot.handle;
       const offFeed = releaseFeed,
         offLease = releaseLease;
@@ -376,11 +407,10 @@ export function createPage(
         pluginUiPages.released(page);
       });
       await releasing;
-      // 等待 Agent 回收答复时锚点可能重新可见；释放完成后由同一 owner 恢复，避免停在空页面。
-      if (!force && page.visible && !disposed) void ensure();
       return true;
     },
     destroy() {
+      document.removeEventListener("visibilitychange", syncExecution);
       workspaceEvents.dispose();
       clearPluginUiSurfaceFeed(key);
       disposed = true;
@@ -389,6 +419,7 @@ export function createPage(
       listeners.clear();
     },
   };
+  document.addEventListener("visibilitychange", syncExecution);
   return page;
 }
 

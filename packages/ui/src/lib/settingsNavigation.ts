@@ -7,6 +7,7 @@ export type SettingsSectionId =
   | "migration"
   | "browser"
   | "modelProvider"
+  | "remoteDevices"
   | "memory"
   | "plugin"
   | "mcp"
@@ -65,6 +66,10 @@ function isSettingsSectionId(value: string): value is SettingsSectionId {
     value === "migration" ||
     value === "browser" ||
     value === "modelProvider" ||
+    // #79：分区渲染、一次性导航和持久偏好必须接受同一组合法 ID；否则设备管理
+    // 和审计版已有官方服务设置都能点击，却在恢复/跳转时悄悄落回常规页。
+    value === "remoteDevices" ||
+    value === "officialServices" ||
     value === "memory" ||
     value === "plugin" ||
     value === "mcp" ||

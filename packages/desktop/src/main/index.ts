@@ -195,7 +195,13 @@ import {
   snapshotWindowsPackagedResources,
   WINDOWS_UPDATE_LOCK_RELEASE_GRACE_MS,
 } from "./windowsInstallResourceLocks.js";
-registerLocalMediaPreviewScheme(protocol);
+import {
+  PLUGIN_SANDBOX_PRIVILEGED_SCHEME,
+  getPluginSandboxHost,
+  installPluginSandboxHost,
+} from "./pluginSandbox/index.js";
+// privileged schemes 必须在 ready 前同一次注册；单独补 IPC 仍会使沙箱文档加载失败。
+registerLocalMediaPreviewScheme(protocol, [PLUGIN_SANDBOX_PRIVILEGED_SCHEME]);
 const localMediaPreviewPathRegistry = createLocalMediaPreviewPathRegistry();
 
 // e2e 由 Chromedriver 管理远程调试端口；如果这里继续固定到 9229，
@@ -807,6 +813,21 @@ const webRemoteControlManager = createWebRemoteControlManager({
     migrateLegacyCommonMcp: (payload) => migrateLegacyCommonMcp(payload),
   },
   reconnectWorkspace: reconnectWebRemoteControlWorkspaceInRenderer,
+  prepareProjectWorkspace: (windowId, intent, requestId) => {
+    const win = BrowserWindow.fromId(windowId);
+    if (!win || win.isDestroyed()) return Promise.reject(new Error("窗口已关闭，项目导航已取消"));
+    // Main 仅转交原窗口 Host：目录、项目成员与远端 owner 的准入由 Host 决定。
+    return remoteSessionManager.prepareProjectWorkspace(win, intent, requestId);
+  },
+  cancelProjectPreparation: (windowId, requestId) => {
+    const win = BrowserWindow.fromId(windowId);
+    if (win)
+      remoteSessionManager.cancelPendingRemoteWorkspaceSessionsForWindow(
+        win.webContents.id,
+        "mobile-project-cancelled",
+        requestId,
+      );
+  },
   onStatusChanged: (windowId, status) => {
     sendWebRemoteControlStatusChangedToWindow(BrowserWindow.fromId(windowId), status);
   },
@@ -1718,6 +1739,12 @@ function createWindowInstance(startupBootstrap: StartupWindowBootstrap = {}) {
           onCronSchedulerWakeRequested: wakeCronScheduler,
           onOffPeakSchedulerWakeRequested: wakeOffPeakScheduler,
           authorizeLocalMediaPreviewPath: localMediaPreviewPathRegistry.authorize,
+          registerPluginSandbox: (input) => {
+            const host = getPluginSandboxHost();
+            if (!host) throw new Error("Plugin UI sandbox host is not installed.");
+            const { requestId: _requestId, ...registerInput } = input;
+            return host.registerFromHost(registerInput);
+          },
           // Bugfix: bot service 运行在本地窗口 host 内，/reconnect 必须能从本地 host 请求 main 创建远端 session。
           handleBotRemoteWorkspaceReconnectRequest: async ({
             win,
@@ -1928,6 +1955,22 @@ app.whenReady().then(async () => {
   }
   installLocalMediaPreviewProtocol(session.defaultSession.protocol, {
     isPathAuthorized: localMediaPreviewPathRegistry.isAuthorized,
+  });
+  // 正式入口曾漏掉整组沙箱初始化，导致 Gen UI 获取 owner 时无 IPC handler。
+  // 窗口/Host 启动前统一安装原 owner，登记、权限、截图、执行租约和释放复用同一注册表。
+  installPluginSandboxHost({
+    preloadPath: join(import.meta.dirname, "../preload/pluginSandbox.cjs"),
+    rendererDir: join(import.meta.dirname, "../renderer"),
+    aliasDir: join(import.meta.dirname, "../plugin-sandbox"),
+    ...(!app.isPackaged && process.env["ELECTRON_RENDERER_URL"]
+      ? { devServerUrl: process.env["ELECTRON_RENDERER_URL"] }
+      : {}),
+    logger,
+    ...(process.env.ZCODE_E2E_RUN_ID?.trim() &&
+    Number.isInteger(Number(process.env.ZCODE_E2E_PLUGIN_SANDBOX_MAX_ENTRIES)) &&
+    Number(process.env.ZCODE_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) > 0
+      ? { registryMaxEntries: Number(process.env.ZCODE_E2E_PLUGIN_SANDBOX_MAX_ENTRIES) }
+      : {}),
   });
   // Electron 的 net.request 只能在 app ready 后使用；灰度请求仍是旁路预热，不阻塞首个 Host。
   void desktopContextPromptRollout?.refresh();

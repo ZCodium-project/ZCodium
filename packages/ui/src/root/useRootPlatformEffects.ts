@@ -46,7 +46,6 @@ export function useRootPlatformEffects({
   activeWorkspaceIdentity,
   reconnectingRemoteWorkspaceKeys = [],
   remoteWorkspaceErrorByWorkspaceKey = {},
-  totalUnreadTaskCount,
   webRemoteControlFeatureEnabled = false,
   webRemoteControlSessionActive = false,
   hasCompletedFullTabRestore = true,
@@ -81,7 +80,6 @@ export function useRootPlatformEffects({
   activeWorkspaceIdentity?: string | null;
   reconnectingRemoteWorkspaceKeys?: string[];
   remoteWorkspaceErrorByWorkspaceKey?: Record<string, string>;
-  totalUnreadTaskCount: number;
   webRemoteControlFeatureEnabled?: boolean;
   webRemoteControlSessionActive?: boolean;
   hasCompletedFullTabRestore?: boolean;
@@ -610,11 +608,8 @@ export function useRootPlatformEffects({
     };
   }, [isDesktop, locale, platform]);
 
-  useEffect(() => {
-    // Dock badge 一期只统计“后台完成后还没点开”的 task 数。
-    // 失败态红点和 permission tag 仍留在各自 UI 语义里，避免把平台徽标混成泛化告警数。
-    platform.syncWindowUnreadCount(totalUnreadTaskCount);
-  }, [platform, totalUnreadTaskCount]);
+  // #79：角标只由常驻 ProjectDirectoryProvider 提交 Host 项目树计数。
+  // Root 的旧 workspace 缓存不含后台目录，不能作为第二个写者覆盖角标。
 
   const activeTabId = useTabStore((state: TabStoreState) => state.activeTabId);
   const activeTabCandidate = useTabStore((state: TabStoreState) =>

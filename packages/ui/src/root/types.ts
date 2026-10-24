@@ -8,7 +8,7 @@ import type {
 } from "@zcode/shared";
 import type { IServiceAccessor } from "@zcode/services";
 import type { ReactNode } from "react";
-import type { CreateTaskRequest } from "@/app-shell/types.js";
+import type { CreateTaskOptions, CreateTaskRequest } from "@/app-shell/types.js";
 
 export type WebRemoteControlTerminalTransportState =
   | "idle"
@@ -22,13 +22,28 @@ export type WebRemoteControlTerminalTransportState =
   | "error";
 
 export interface WebRemoteControlWorkspaceSwitcherApi {
+  deviceNavigation?: {
+    deviceName?: string;
+    devicePlatform?: string;
+    chooseOtherDevice(): void;
+  };
+  openProjectDraft?(request: CreateTaskOptions): Promise<void>;
+  updateMobileTaskView?(
+    view:
+      | import("zod").infer<typeof import("@zcode/shared").webRemoteControlMobileTaskViewSchema>
+      | null,
+  ): Promise<void>;
   listWorkspaces(): Promise<WebRemoteControlWorkspaceListResult>;
   onWorkspaceListUpdated?(
     listener: (result: WebRemoteControlWorkspaceListResult) => void,
   ): () => void;
   switchWorkspace(
     workspaceKey: string,
-    options?: WebRemoteControlWorkspaceSwitchOptions,
+    options?: WebRemoteControlWorkspaceSwitchOptions & {
+      openFileManager?: boolean;
+      taskHostId?: string;
+      fileTreeTaskId?: string;
+    },
   ): Promise<void>;
   /** 手机任务首页确认用户查看了当前 bridge 内的未读 task；桌面任务选择链路不使用。 */
   markTaskRead?(task: WebRemoteControlTaskTarget): Promise<void>;
@@ -53,6 +68,8 @@ export interface RootProps {
   initialWorkspaceIdentity?: string;
   /** 初始要打开的 task，从全局 task 列表进入时透传 */
   initialTaskId?: string;
+  initialTaskDraft?: CreateTaskOptions;
+  composerClientNamespace?: string;
   /** Electron renderer 传 true，用于启用自绘标题栏 */
   isDesktop?: boolean;
   /** macOS 桌面端需要给红绿灯按钮预留安全区 */
@@ -88,6 +105,7 @@ export interface RootProps {
 }
 
 export interface WorkspaceSettingsLayerProps {
+  sourceServerSettings?: import("@/source-server-settings/contract.js").SourceServerSettingsNavigation;
   workspaceScopedServices?: IServiceAccessor;
   isDesktop?: boolean;
   isMacDesktop?: boolean;

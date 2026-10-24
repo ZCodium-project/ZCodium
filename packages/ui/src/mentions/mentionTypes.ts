@@ -11,6 +11,8 @@ export interface MentionItemData {
   kind?: "file" | "directory" | "whiteboard";
   path?: string;
   relativePath?: string;
+  /** 只用于展示；文件身份和链接目标不依赖 root 的显示名。 */
+  rootName?: string;
   boardId?: string;
   scope?: "built-in" | "workspace" | "user" | "plugin";
   source?: "built-in" | "user" | "plugin";
@@ -44,6 +46,7 @@ export interface MentionItem {
 
 export interface MentionCategoryResult {
   items: MentionItem[];
+  groups?: Array<{ id: string; title: string; items: MentionItem[] }>;
   loading: boolean;
   error: Error | null;
   emptyText: string;

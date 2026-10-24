@@ -116,9 +116,10 @@ export class ReplaceableConversationTransport implements ConversationTransport {
   }
 
   sendCommand(
-    envelope: Parameters<ConversationTransport["sendCommand"]>[0],
+    ...params: Parameters<ConversationTransport["sendCommand"]>
   ): ReturnType<ConversationTransport["sendCommand"]> {
-    return this.current.sendCommand(envelope);
+    // 代理换代不能丢失 Host 首发项目归属。
+    return this.current.sendCommand(...params);
   }
 
   queryCommands(

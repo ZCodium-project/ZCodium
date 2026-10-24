@@ -22,16 +22,21 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useWorkflowRunSave } from "@/hooks/useWorkflowRunSave.js";
 import { useSavedWorkflowHub } from "@/v4/savedWorkflowHubContext.js";
 import { useOptionalServices } from "@/hooks/useServices.js";
-import { useOptionalTabStore } from "@/store/TabStoreProvider.js";
+import { useOptionalProjectDirectory } from "@/project-sidebar/index.js";
+import { resolveAutomationProjectOptions } from "@/hooks/useAutomationProjectOptions.js";
 import {
-  buildAutomationWorkspaceOptions,
+  resolveAutomationWorkspaceSelectionKey,
   type AutomationWorkspaceOption,
 } from "@/settings/automationWorkspaceOptions.js";
 import { SavedWorkflowLaunchDialog } from "@/settings/saved-workflows/SavedWorkflowLaunchDialog.js";
 import { WorkflowSavePopover } from "./WorkflowSavePopover.js";
 import { buildWorkflowSaveRequestPrompt, type WorkflowSaveDraft } from "./workflowRunSave.js";
+import { resolveWorkflowRunProjectOwnership } from "@/workspace-config-catalog/index.js";
 
 export interface WorkflowRunSaveSlotsHost {
+  sessionId?: string;
+  projectId?: string | null;
+  hostId?: string;
   workspacePath: string;
   workspaceIdentity?: string;
   remoteSessionId?: string;
@@ -70,8 +75,11 @@ export function useWorkflowRunSaveSlots(host: WorkflowRunSaveSlotsHost): Workflo
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [launchEntry, setLaunchEntry] = useState<ZCodeSavedWorkflowEntry | null>(null);
   const [announcement, setAnnouncement] = useState<string | null>(null);
+  const directory = useOptionalProjectDirectory();
+  const ownership = resolveWorkflowRunProjectOwnership(host, directory?.tree.tasks ?? []);
 
   const controller = useWorkflowRunSave({
+    ...ownership,
     workspacePath: host.workspacePath,
     ...(host.workspaceIdentity === undefined ? {} : { workspaceIdentity: host.workspaceIdentity }),
     ...(host.remoteSessionId === undefined ? {} : { remoteSessionId: host.remoteSessionId }),
@@ -83,10 +91,12 @@ export function useWorkflowRunSaveSlots(host: WorkflowRunSaveSlotsHost): Workflo
 
   // 全局档的「运行于」候选：与中枢全局组同一张表（本机项目，不含远程）。默认落在这次 run
   // 自己的项目上——从一张卡上按「再次运行」，最自然的落点就是它跑过的那个项目。
-  const tabs = useOptionalTabStore((store) => store.tabs);
   const localProjects = useMemo<AutomationWorkspaceOption[]>(
-    () => buildAutomationWorkspaceOptions(tabs).filter((project) => !project.remoteSessionId),
-    [tabs],
+    () =>
+      resolveAutomationProjectOptions(directory?.projects ?? []).filter(
+        (project) => project.workspacePath,
+      ),
+    [directory?.projects],
   );
   const runProjectKey = useMemo(
     () =>
@@ -95,6 +105,12 @@ export function useWorkflowRunSaveSlots(host: WorkflowRunSaveSlotsHost): Workflo
         ...(host.workspaceIdentity ? { workspaceIdentity: host.workspaceIdentity } : {}),
       }),
     [host.workspacePath, host.workspaceIdentity],
+  );
+  const runProject = localProjects.find((project) =>
+    ownership.projectId
+      ? project.projectId === ownership.projectId &&
+        project.hostId === (ownership.hostId ?? "local")
+      : resolveWorkspaceKey(project) === runProjectKey,
   );
 
   const sendLead = host.sendLead;
@@ -229,21 +245,16 @@ export function useWorkflowRunSaveSlots(host: WorkflowRunSaveSlotsHost): Workflo
       <SavedWorkflowLaunchDialog
         entry={launchEntry}
         scope={launchEntry?.scope ?? "project"}
-        projectLabel={
-          localProjects.find(
-            (project) =>
-              resolveWorkspaceKey({
-                workspacePath: project.workspacePath,
-                ...(project.workspaceIdentity
-                  ? { workspaceIdentity: project.workspaceIdentity }
-                  : {}),
-              }) === runProjectKey,
-          )?.label ?? host.workspacePath
-        }
+        projectLabel={runProject?.label ?? host.workspacePath}
         // 这次 run 跑过的实参就是下一次最可能要跑的那一份（journal 给的）。
         {...(controller.runArgs === undefined ? {} : { initialArgs: controller.runArgs })}
         {...(launchEntry?.scope === "global"
-          ? { targets: localProjects, defaultTargetKey: runProjectKey }
+          ? {
+              targets: localProjects,
+              defaultTargetKey: runProject
+                ? resolveAutomationWorkspaceSelectionKey(runProject)
+                : null,
+            }
           : {})}
         pending={controller.launching}
         error={controller.launchError}
@@ -256,6 +267,8 @@ export function useWorkflowRunSaveSlots(host: WorkflowRunSaveSlotsHost): Workflo
               target === undefined
                 ? undefined
                 : {
+                    projectId: target.projectId,
+                    hostId: target.hostId,
                     workspacePath: target.workspacePath,
                     ...(target.workspaceIdentity
                       ? { workspaceIdentity: target.workspaceIdentity }

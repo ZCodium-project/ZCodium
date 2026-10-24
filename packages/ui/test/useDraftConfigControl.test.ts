@@ -7,9 +7,59 @@ import type { IModelSelectionService, ModelSelectionView } from "@zcode/services
 import { resolveEffectiveModelSelection, type ProviderRegistryView } from "@zcode/provider";
 import { useZCodeSessionStore } from "@/store/zcodeSessionStore.js";
 import { useDraftConfigControl as useActualDraftConfigControl } from "@/v4/composer/useDraftConfigControl.js";
-import { persistV4ComposerDraft, readV4ComposerDraft } from "@/v4/composer/composerDraftStore.js";
-import { captureComposerRecentSubmission } from "@/lib/composerRecent.js";
-import { seedImportedSessionDraft } from "@/v4/composer/newTaskDraft.js";
+import {
+  persistV4ComposerDraft as persistScopedDraft,
+  readV4ComposerDraft as readScopedDraft,
+  resolveComposerScope,
+} from "@/v4/composer/composerDraftStore.js";
+import {
+  captureComposerRecentSubmission as captureScopedRecent,
+  readComposerRecent,
+} from "@/lib/composerRecent.js";
+import { resolveImportedComposerConfig } from "@/v4/composer/newTaskDraft.js";
+function testScope(path: string, identity?: string) {
+  return resolveComposerScope(
+    useZCodeSessionStore.getState().getWorkspaceState(path, identity).draftProjectId,
+    identity,
+  );
+}
+function persistV4ComposerDraft(...args: Parameters<typeof persistScopedDraft>) {
+  return persistScopedDraft(
+    args[0],
+    args[1],
+    args[2],
+    args[3],
+    args[4] ?? testScope(args[0], args[1]),
+  );
+}
+function readV4ComposerDraft(...args: Parameters<typeof readScopedDraft>) {
+  return readScopedDraft(args[0], args[1], args[2], args[3] ?? testScope(args[0], args[1]));
+}
+function captureComposerRecentSubmission(...args: Parameters<typeof captureScopedRecent>) {
+  return captureScopedRecent(
+    args[0],
+    args[1],
+    args[2],
+    args[3],
+    args[4] ?? testScope(args[0], args[2]),
+  );
+}
+function seedImportedSessionDraft(result: Parameters<typeof resolveImportedComposerConfig>[0]) {
+  useZCodeSessionStore
+    .getState()
+    .setActiveTaskId(
+      result.workspacePath,
+      result.sessionId,
+      result.workspaceIdentity,
+      resolveImportedComposerConfig(result),
+    );
+}
+function readImportInitialization(path: string, identity: string | undefined, taskId: string) {
+  const value = useZCodeSessionStore
+    .getState()
+    .getWorkspaceState(path, identity).composerInitialization;
+  return value?.taskId === taskId ? value.config : undefined;
+}
 
 const { prepareWorkspaceMock } = vi.hoisted(() => ({
   prepareWorkspaceMock: vi.fn(),
@@ -199,6 +249,111 @@ function installMinimalDom() {
 }
 
 describe("useDraftConfigControl slash command hydration", () => {
+  it("PD03 同 cwd 切项目恢复各自正文，旧编辑回调不能写入新项目", async () => {
+    const workspacePath = "/shared-project-root";
+    const root = createRoot(installMinimalDom());
+    const view = modelSelectionView(1, ["model"], "model");
+    let control!: ReturnType<typeof useDraftConfigControl>;
+    function Probe() {
+      control = useDraftConfigControl({
+        workspacePath,
+        sessionId: null,
+        modelSelectionView: view,
+        agentStartupAllowed: false,
+      });
+      return null;
+    }
+    act(() =>
+      useZCodeSessionStore
+        .getState()
+        .startDraft(workspacePath, undefined, undefined, { projectId: "p" }),
+    );
+    await act(async () => root.render(createElement(Probe)));
+    act(() => {
+      control.updateComposerContent({ text: "P" });
+      control.handleDraftSwitchMode("yolo");
+    });
+    const stale = control.updateComposerContent;
+    act(() =>
+      useZCodeSessionStore
+        .getState()
+        .startDraft(workspacePath, undefined, undefined, { projectId: "q" }),
+    );
+    expect(control.composerDraft.text).toBe("");
+    act(() => {
+      control.updateComposerContent({ text: "Q" });
+      stale({ text: "late P" });
+    });
+    expect(control.composerDraft.text).toBe("Q");
+    act(() =>
+      useZCodeSessionStore
+        .getState()
+        .startDraft(workspacePath, undefined, undefined, { projectId: "p" }),
+    );
+    expect(control.composerDraft.text).toBe("P");
+    expect(control.draftConfig.mode).toBe("yolo");
+    act(() => root.unmount());
+  });
+
+  it("首发地址迁移保留新输入，迟到 Snapshot 不覆盖当前选择；重开取最新权限", async () => {
+    const workspacePath = "/promotion-snapshot";
+    const root = createRoot(installMinimalDom());
+    let control!: ReturnType<typeof useDraftConfigControl>;
+    function Probe({ sessionId }: { sessionId: string | null }) {
+      control = useDraftConfigControl({
+        workspacePath,
+        sessionId,
+        sessionConfig: { mode: "build", planEnabled: false },
+        modelSelectionView: modelSelectionView(1, ["model"], "model"),
+        agentStartupAllowed: false,
+      });
+      return null;
+    }
+    await act(async () => root.render(createElement(Probe, { sessionId: null })));
+    act(() => {
+      control.handleDraftSwitchMode("yolo");
+      control.updateComposerContent({ text: "next" });
+      control.promoteComposerDraft("created");
+    });
+    await act(async () => root.render(createElement(Probe, { sessionId: "created" })));
+    expect(control.composerDraft).toMatchObject({ text: "next", mode: "yolo" });
+    await act(async () => root.render(createElement(Probe, { sessionId: "other" })));
+    await act(async () => root.render(createElement(Probe, { sessionId: "created" })));
+    expect(control.composerDraft).toMatchObject({
+      text: "next",
+      mode: "build",
+      planEnabled: false,
+    });
+    act(() => root.unmount());
+  });
+
+  it("New Task 在 React 提交前就使旧 promotion 失效", async () => {
+    const workspacePath = "/promotion-generation";
+    const root = createRoot(installMinimalDom());
+    let control!: ReturnType<typeof useDraftConfigControl>;
+    function Probe() {
+      control = useDraftConfigControl({
+        workspacePath,
+        sessionId: null,
+        agentStartupAllowed: false,
+        modelSelectionView: modelSelectionView(1, ["model"], "model"),
+      });
+      return null;
+    }
+    await act(async () => root.render(createElement(Probe)));
+    const oldPromotion = control.promoteComposerDraft;
+    act(() => {
+      useZCodeSessionStore.getState().startDraft(workspacePath);
+      persistV4ComposerDraft(workspacePath, undefined, "__draft__", {
+        text: "new page",
+        mode: "build",
+      });
+      oldPromotion("old");
+    });
+    expect(readV4ComposerDraft(workspacePath, undefined, "old")).toBeNull();
+    expect(readV4ComposerDraft(workspacePath, undefined, "__draft__")?.text).toBe("new page");
+    act(() => root.unmount());
+  });
   it.each(["root", "empty-root", "recent", "default", "unavailable"])(
     "SHARE30 首次导入与普通新任务一致：%s，保留 Root 正文且不更新 Recent",
     async (source) => {
@@ -247,7 +402,17 @@ describe("useDraftConfigControl slash command hydration", () => {
       expect(control!.composerDraft.editorStateJson).toBeUndefined();
       expect(readV4ComposerDraft(workspacePath, undefined, "__draft__")).toEqual(originalRoot);
       await act(async () => root.render(createElement(Probe, { sessionId: null })));
-      expect(control!.draftConfig).toEqual(imported);
+      expect(control!.draftConfig).toEqual(
+        source === "empty-root"
+          ? {
+              ...imported,
+              modelSelection: selection,
+              provider: selection.providerId,
+              model: selection.modelId,
+              thought: selection.options.reasoningLevel,
+            }
+          : imported,
+      );
       expect(window.localStorage.getItem(`zcode-model-selection-recent-v1:${workspacePath}`)).toBe(
         recentBefore,
       );
@@ -310,8 +475,8 @@ describe("useDraftConfigControl slash command hydration", () => {
     });
     persistV4ComposerDraft(workspacePath, undefined, "__draft__", { text: "local", mode: "plan" });
     seedImportedSessionDraft({ workspacePath, sessionId: "new", reused: false });
-    expect(readV4ComposerDraft(workspacePath, undefined, "new")).toMatchObject({
-      text: "",
+    expect(readV4ComposerDraft(workspacePath, undefined, "new")).toBeNull();
+    expect(readImportInitialization(workspacePath, undefined, "new")).toMatchObject({
       mode: "build",
       planEnabled: true,
     });
@@ -741,11 +906,7 @@ describe("useDraftConfigControl slash command hydration", () => {
       mode: "edit",
       modelSelection: { modelId: "new" },
     });
-    expect(readV4ComposerDraft(workspacePath, undefined, "session")).toMatchObject({
-      text: "",
-      mode: "edit",
-      modelSelection: { modelId: "new" },
-    });
+    expect(readV4ComposerDraft(workspacePath, undefined, "session")).toBeNull();
     act(() => root.unmount());
   });
 
@@ -795,10 +956,10 @@ describe("useDraftConfigControl slash command hydration", () => {
     const workspacePath = "/recent-mode";
     const root = createRoot(installMinimalDom());
     const view = modelSelectionView(1, ["model"], "model");
-    window.localStorage.setItem(
-      `zcode-model-selection-recent-v1:${workspacePath}`,
-      JSON.stringify({ modelSelection: view.preferredSelection, mode: "yolo" }),
-    );
+    captureComposerRecentSubmission(workspacePath, {
+      modelSelection: view.preferredSelection!,
+      mode: "yolo",
+    })();
     let control: ReturnType<typeof useDraftConfigControl>;
     function Probe({ sessionId }: { sessionId: string | null }) {
       control = useDraftConfigControl({
@@ -812,16 +973,22 @@ describe("useDraftConfigControl slash command hydration", () => {
     }
     await act(async () => root.render(createElement(Probe, { sessionId: null })));
     expect(control!.draftConfig.mode).toBe("yolo");
-    act(() => control!.handleDraftSwitchMode("plan"));
+    act(() => {
+      control!.handleDraftSwitchMode("plan");
+      control!.updateComposerContent({ text: "root unsent" });
+    });
     await act(async () => root.render(createElement(Probe, { sessionId: "session" })));
     expect(control!.draftConfig.mode).toBe("build");
-    act(() => control!.handleDraftSwitchMode("edit"));
+    act(() => {
+      control!.handleDraftSwitchMode("edit");
+      control!.updateComposerContent({ text: "session unsent" });
+    });
     await act(async () => root.render(createElement(Probe, { sessionId: null })));
     expect(control!.draftConfig).toMatchObject({ mode: "yolo", planEnabled: true });
     await act(async () => root.render(createElement(Probe, { sessionId: "session" })));
-    expect(control!.draftConfig.mode).toBe("edit");
+    expect(control!.draftConfig.mode).toBe("build");
     expect(
-      JSON.parse(window.localStorage.getItem(`zcode-model-selection-recent-v1:${workspacePath}`)!),
+      readComposerRecent(workspacePath, undefined, undefined, testScope(workspacePath)),
     ).toMatchObject({ mode: "yolo" });
     act(() => root.unmount());
   });
@@ -857,6 +1024,8 @@ describe("useDraftConfigControl slash command hydration", () => {
       root.render(createElement(Probe));
     });
     expect(control!.draftConfig.modelSelection).toEqual(effective);
+    expect(readV4ComposerDraft(workspacePath, undefined, "__draft__")).toBeNull();
+    act(() => control!.updateComposerContent({ text: "draft" }));
     expect(readV4ComposerDraft(workspacePath, undefined, "__draft__")?.modelSelection).toEqual(
       original,
     );
@@ -902,7 +1071,7 @@ describe("useDraftConfigControl slash command hydration", () => {
       root.render(createElement(Probe, { view }));
     });
     expect(control!.draftConfig.modelSelection).toEqual({ providerId: "provider", modelId: "old" });
-    expect(control!.draftConfig).toMatchObject({ mode: "build", planEnabled: true });
+    expect(control!.draftConfig).toMatchObject({ mode: "build", planEnabled: false });
     expect(
       readV4ComposerDraft(workspacePath, undefined, "session")?.modelSelection?.options
         ?.reasoningLevel,
@@ -967,7 +1136,7 @@ describe("useDraftConfigControl slash command hydration", () => {
     });
     expect(control!.composerDraft).toMatchObject({
       text: "草稿 A",
-      mode: "yolo",
+      mode: "build",
       modelSelection: {
         providerId: "provider",
         modelId: "new",
@@ -1065,7 +1234,7 @@ describe("useDraftConfigControl slash command hydration", () => {
     expect(control!.composerDraft).toMatchObject({
       text: "draft",
       mode: "yolo",
-      planEnabled: true,
+      planEnabled: false,
     });
     act(() => control!.handleDraftSwitchMode("build"));
     await act(async () => root.render(createElement(Probe, { sessionId: "s" })));
@@ -1077,12 +1246,11 @@ describe("useDraftConfigControl slash command hydration", () => {
       text: "later queue",
       mode: "edit",
       planEnabled: false,
-      lastPermissionGrantId: "p",
     });
     await act(async () => root.render(createElement(Probe, { sessionId: "other" })));
     expect(control!.composerDraft.mode).toBe("build");
     await act(async () => root.render(createElement(Probe, { sessionId: "s" })));
-    expect(control!.composerDraft.mode).toBe("edit");
+    expect(control!.composerDraft.mode).toBe("yolo");
     act(() => root.unmount());
   });
 });

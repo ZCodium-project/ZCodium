@@ -116,6 +116,21 @@ nodes:
     codeSeeds:
       - symbol: "ProjectDirectoryProvider"
         file: "packages/ui/src/project-sidebar/ProjectDirectoryProvider.tsx"
+  - id: "capability.local-project-multiple-roots"
+    kind: "capability"
+    label: "Local project with multiple folders and one primary root"
+    aliases: ["一项目多个文件夹", "多目录项目", "项目主要目录", "multiple project roots"]
+    docs:
+      - "docs/superpowers/specs/2026-10-23-zcodium-upstream-parity.md"
+      - "docs/superpowers/specs/2026-09-09-virtual-project-design.md"
+    codeSeeds:
+      - { file: "packages/ui/src/project-sidebar/ProjectEditor.tsx", symbol: "ProjectEditor" }
+      - { file: "packages/services/src/project/contract.ts", symbol: "IProjectService" }
+    invariants:
+      - "Host ProjectRepository is the only project/roots writer; UI keeps drafts and read-only projections."
+      - "New sessions use the primary root; existing session cwd never changes when roots or project membership change."
+      - "Additional directories cross create/resume/cold materialization, but live subscriptions never reconfigure a running runtime."
+      - "Remote projects remain single fixed root; additional roots do not extend MCP/hooks/settings/AGENTS trust."
   - id: "service.project-task-mutation"
     kind: "service"
     label: "UI adapter to existing Controller and TaskService mutations"
@@ -5527,6 +5542,15 @@ nodes:
         file: "packages/ui/src/v4/ConversationShareReadonlyTimeline.tsx"
 
 edges:
+  - from: "capability.local-project-multiple-roots"
+    to: "surface.project-task-list"
+    type: "renders-in"
+    rank: "must-inspect"
+  - from: "capability.local-project-multiple-roots"
+    to: "state.virtual-project-directory"
+    type: "projects-to"
+    rank: "must-inspect"
+    condition: "Host project/roots facts are projected by one provider; UI edits remain drafts until save."
   - from: "capability.tool-search"
     to: "surface.tool-search-settings"
     type: "renders-in"

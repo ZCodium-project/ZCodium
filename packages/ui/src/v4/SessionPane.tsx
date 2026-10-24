@@ -21,6 +21,7 @@ import {
   TID_V4_SESSION_PANE,
   testId,
   ZCODE_AGENT_PROVIDER,
+  remoteHostIdFromWorkspaceIdentity,
 } from "@zcode/shared";
 import type {
   ConversationShareAccessMode,
@@ -54,6 +55,9 @@ import type {
   ImportedConversationShare,
 } from "@zcode/services";
 import { toast } from "@/components/ui/toast.js";
+import { PluginUiSessionProvider } from "@/plugin-ui/index.js";
+import { useConversationPanePresentation } from "@/side-pane-full-view/index.js";
+import type { ConversationLatestTurnSummary } from "@/v4/conversationTimelineLiveTail.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { DEFAULT_CODE_PREVIEW_SETTINGS } from "@/lib/codePreviewSettings.js";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
@@ -61,7 +65,7 @@ import type { OpenAutomationsMain } from "@/lib/taskNavigationHistory.js";
 import { WORKSPACE_FILE_DRAG_MIME } from "@/lib/workspaceFileDrag.js";
 import { buildChatSessionScrollMemoryKey } from "@/lib/chatSessionScrollMemory.js";
 import type { MessageFileLinkTarget } from "@/components/ai-elements/message.js";
-import { useServices } from "@/hooks/useServices.js";
+import { useServices, useComposerClientNamespace } from "@/hooks/useServices.js";
 import { useDynamicWorkflowAvailability } from "@/hooks/useDynamicWorkflowAvailability.js";
 import { resolveWorkflowResumeHandler } from "@/v4/workflowResumeGate.js";
 import {
@@ -74,7 +78,12 @@ import { useWorkspaceHomePath } from "@/hooks/useWorkspaceHomePath.js";
 import { prepareWorkspaceWithZCodeSessionService } from "@/hooks/useWorkspacePrepare.js";
 import { decodeCustomModelValue, encodeCustomModelValue } from "@/lib/zcodeCustomModelValue.js";
 import { parseModelPickerValue } from "@/lib/zcodeSessionProjection.js";
-import { captureComposerRecentSubmission } from "@/lib/composerRecent.js";
+import { prepareComposerRecentReceipt } from "@/lib/composerRecent.js";
+import {
+  resolveComposerScope,
+  composerScopeKey,
+  readPendingTaskDraft,
+} from "@/v4/composer/composerDraftStore.js";
 import { resolveProviderLabel } from "@/lib/registryProviderView.js";
 import {
   buildDraftCreateConfigPayload,
@@ -535,6 +544,39 @@ export function SessionPane({
   const { intl, locale } = useZCodeIntl();
   const slashCommands = useSlashCommands(workspacePath, workspaceIdentity);
   const baseWorkspaceServices = useBaseWorkspaceServices();
+  const composerClientNamespace = useComposerClientNamespace();
+  const composerProjectId = useZCodeSessionStore(
+    (store) => store.getWorkspaceState(workspacePath, workspaceIdentity).draftProjectId,
+  );
+  const composerDraftGeneration = useZCodeSessionStore(
+    (store) => store.getWorkspaceState(workspacePath, workspaceIdentity).draftFocusVersion,
+  );
+  const newTaskComposerScope = useMemo(
+    () => resolveComposerScope(composerProjectId, workspaceIdentity, composerClientNamespace),
+    [composerProjectId, workspaceIdentity, composerClientNamespace],
+  );
+  const draftNavigationKey = JSON.stringify([
+    workspaceIdentity?.trim() || workspacePath,
+    composerScopeKey(newTaskComposerScope),
+    composerDraftGeneration,
+  ]);
+  const currentPaneTargetRef = useRef({ sessionId, draftNavigationKey, readOnly });
+  currentPaneTargetRef.current = { sessionId, draftNavigationKey, readOnly };
+  const paneMountedRef = useRef(false);
+  useEffect(() => {
+    paneMountedRef.current = true;
+    return () => {
+      paneMountedRef.current = false;
+    };
+  }, []);
+  const pendingAtEntry = useMemo(() => {
+    if (sessionId !== null || newTaskComposerScope.projectId !== null) return null;
+    const pending = readPendingTaskDraft(newTaskComposerScope);
+    return pending?.workspacePath === workspacePath && pending.commandId ? pending : null;
+  }, [sessionId, workspacePath, newTaskComposerScope, composerDraftGeneration]);
+  const [resolvedDraftCommand, setResolvedDraftCommand] = useState<string | null>(null);
+  const recoveringDraft =
+    pendingAtEntry?.commandId !== resolvedDraftCommand ? pendingAtEntry : null;
   const workspaceHomePath = useWorkspaceHomePath({
     workspacePath,
     workspaceIdentity,
@@ -543,6 +585,10 @@ export function SessionPane({
   const [lease, setLease] = useState<SessionLease | null>(null);
   const state = useConversationProjection(lease);
   const snapshot = state.snapshot;
+  const runtimeReady =
+    sessionId === null ||
+    (snapshot?.sessionId === sessionId &&
+      (!snapshot.runtimeInitialization || snapshot.runtimeInitialization.status === "ready"));
   const shareDraft = useConversationShareSelectionStore((storeState) =>
     sessionId ? storeState.drafts[sessionId] : undefined,
   );
@@ -1147,6 +1193,50 @@ export function SessionPane({
     snapshot?.pendingInteractions.find(
       (interaction) => interaction.payload.kind !== "workspaceHookReview",
     )?.interactionId ?? null;
+  const panePresentation = useConversationPanePresentation();
+  const isFloatingPresentation = panePresentation.presentation === "floating";
+  const isRunning = Boolean(snapshot?.control.canStop);
+  const { reportFloatingStatus } = panePresentation;
+  const floatingOwnerKey = sessionId ?? "__draft__";
+  const [floatingLatestTurn, setFloatingLatestTurn] = useState<{
+    ownerKey: string;
+    summary: ConversationLatestTurnSummary;
+  } | null>(null);
+  const handleFloatingLatestTurnSummaryChange = useCallback(
+    (summary: ConversationLatestTurnSummary) =>
+      setFloatingLatestTurn({ ownerKey: floatingOwnerKey, summary }),
+    [floatingOwnerKey],
+  );
+  const floatingLatestTurnSummary =
+    isFloatingPresentation && floatingLatestTurn?.ownerKey === floatingOwnerKey
+      ? floatingLatestTurn.summary
+      : null;
+  const floatingTurnKey = floatingLatestTurnSummary?.turnKey ?? null;
+  const floatingTurnRunning = floatingLatestTurnSummary?.running ?? false;
+  const floatingTurnAnswer = floatingLatestTurnSummary?.answer ?? null;
+  const hasFloatingLatestTurn = floatingLatestTurnSummary !== null;
+  useEffect(() => {
+    // 完整视图只消费焦点 pane 的投影，不建立第二个会话或编辑器 owner。
+    if (!focused) return;
+    reportFloatingStatus({
+      running: isRunning,
+      blockingInteractionId,
+      ownerKey: floatingOwnerKey,
+      latestTurn: hasFloatingLatestTurn
+        ? { turnKey: floatingTurnKey, running: floatingTurnRunning, answer: floatingTurnAnswer }
+        : null,
+    });
+  }, [
+    blockingInteractionId,
+    floatingOwnerKey,
+    floatingTurnAnswer,
+    floatingTurnKey,
+    floatingTurnRunning,
+    focused,
+    hasFloatingLatestTurn,
+    isRunning,
+    reportFloatingStatus,
+  ]);
   const selectionSideChatKey = sessionId
     ? buildSelectionSideChatKey(workspaceKey, sessionId)
     : null;
@@ -1199,7 +1289,7 @@ export function SessionPane({
     workspaceIdentity,
     provider,
     sessionId,
-    sessionConfig: snapshot?.sessionId === sessionId ? snapshot.config : null,
+    sessionConfig: runtimeReady && snapshot?.sessionId === sessionId ? snapshot.config : null,
     agentStartupAllowed: draftAgentStartupAllowed,
     modelSelectionService,
   });
@@ -1241,8 +1331,50 @@ export function SessionPane({
   const openSettingsTab = useOptionalTabStore((state) => state.openSettingsTab);
   const promoteGroupedDraftTask = useZCodeSessionStore((state) => state.promoteGroupedDraftTask);
   const handleDraftSessionCreated = useCallback(
-    (createdSessionId: string, groupedDraftTask: GroupedDraftTaskState | null | undefined) => {
-      promoteComposerDraft(createdSessionId);
+    async (
+      createdSessionId: string,
+      groupedDraftTask: GroupedDraftTaskState | null | undefined,
+      taskGroupId?: string | null,
+      creationId?: string,
+    ) => {
+      if (taskGroupId !== undefined) {
+        const task = {
+          taskId: createdSessionId,
+          workspacePath,
+          ...(workspaceIdentity ? { workspaceIdentity } : {}),
+          hostId: remoteHostIdFromWorkspaceIdentity(workspaceIdentity ?? "") ?? "local",
+        };
+        const attempt = async () => {
+          try {
+            if (!baseWorkspaceServices.taskGroupService)
+              throw new Error("task-group.service-unavailable");
+            await baseWorkspaceServices.taskGroupService.admit({
+              tasks: [task],
+              placement: { task, groupId: taskGroupId, creationId: creationId ?? createdSessionId },
+            });
+          } catch (error) {
+            // 会话已接纳；组织失败只重试冻结 placement，绝不重发用户输入。
+            logger.error("[task-groups] 新任务归属提交失败", error);
+            toast(intl.formatMessage({ id: "taskGroup.failed" }), {
+              durationMs: 0,
+              actionLabel: intl.formatMessage({ id: "taskGroup.retryPlacement" }),
+              onAction: () => void attempt(),
+              dedupeKey: `task-group:${createdSessionId}`,
+            });
+          }
+        };
+        await attempt();
+      }
+      const workspaceNow = useZCodeSessionStore
+        .getState()
+        .getWorkspaceState(workspacePath, workspaceIdentity);
+      const stillCurrentDraft =
+        paneMountedRef.current &&
+        currentPaneTargetRef.current.sessionId === null &&
+        currentPaneTargetRef.current.draftNavigationKey === draftNavigationKey &&
+        workspaceNow.draftFocusVersion === composerDraftGeneration &&
+        workspaceNow.draftProjectId === composerProjectId;
+      if (stillCurrentDraft) promoteComposerDraft(createdSessionId);
       // 只有 draft create/promote 的 accepted 边界能继承 grouped placement。
       // fork 和普通任务导航仍复用 onSessionCreated，但不会污染已有 task 的分组排序。
       if (groupedDraftTask) {
@@ -1257,7 +1389,8 @@ export function SessionPane({
           draftId: groupedDraftTask.draftId,
         });
       }
-      onSessionCreated?.(createdSessionId);
+      // 旧 ACK 仍完成原归属交接，但不能把已经切到另一项目的 pane 拉回旧会话。
+      if (stillCurrentDraft) onSessionCreated?.(createdSessionId);
     },
     [
       onSessionCreated,
@@ -1265,6 +1398,11 @@ export function SessionPane({
       promoteGroupedDraftTask,
       workspaceIdentity,
       workspacePath,
+      draftNavigationKey,
+      composerDraftGeneration,
+      composerProjectId,
+      baseWorkspaceServices.taskGroupService,
+      intl,
     ],
   );
   const { settings: sharedSettings } = useSettings();
@@ -1306,11 +1444,40 @@ export function SessionPane({
       baseLogEpoch?: string,
       onEnvelopeCreated?: (envelope: CommandEnvelope) => void,
       sessionCreateSource?: SessionCreateSource,
+      creationProjectId?: string | null,
+      creationTaskGroupId?: string | null,
+      submittedDraftText?: string,
     ): Promise<CommandAck> => {
       const submission = submissionConfigFromCommand(type, payload);
-      const acceptRecent = submission
-        ? captureComposerRecentSubmission(workspacePath, submission, workspaceIdentity)
+      let recentScope =
+        creationProjectId === undefined
+          ? newTaskComposerScope
+          : { ...newTaskComposerScope, projectId: creationProjectId };
+      // 顺序和完整选择在查询前冻结；目录查询慢不能让早发请求成为最新 Recent。
+      const recentReceipt = submission
+        ? prepareComposerRecentReceipt(recentScope, submission)
         : undefined;
+      if (submission && sessionId && targetSessionId) {
+        const projectService = baseWorkspaceServices.projectService;
+        if (!projectService) throw new Error("project.service-unavailable");
+        const directories = await projectService.resolveSessionDirectories(
+          {
+            workspacePath,
+            workspaceIdentity,
+            taskId:
+              selectionSideChat && targetSessionId === sessionId && rootSessionId
+                ? rootSessionId
+                : targetSessionId,
+          },
+          recentScope.hostId,
+        );
+        recentScope = { ...recentScope, projectId: directories.projectId };
+      }
+      if (recentReceipt) recentReceipt.scope = recentScope;
+      const pendingDraft =
+        sessionId === null && recentScope.projectId === null
+          ? readPendingTaskDraft(recentScope)
+          : null;
       const acceptSelection =
         submission && (sessionId === null || targetSessionId === sessionId)
           ? captureAcceptedModelSelection(submission.modelSelection)
@@ -1329,6 +1496,21 @@ export function SessionPane({
           ? useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
               .groupedDraftTask
           : null;
+      const projectId =
+        type === "createSession"
+          ? creationProjectId !== undefined
+            ? creationProjectId
+            : composerProjectId
+          : undefined;
+      const composerContext = recentReceipt
+        ? {
+            ...recentReceipt,
+            submittedText: submittedDraftText,
+            ...(pendingDraft?.workspacePath === workspacePath
+              ? { draftId: pendingDraft.draftId }
+              : {}),
+          }
+        : undefined;
       pendingCommandRegistry.record(
         envelope,
         type === "createSession"
@@ -1338,12 +1520,32 @@ export function SessionPane({
                 ...(workspaceIdentity ? { workspaceIdentity } : {}),
               },
               ...(groupedDraftTask ? { groupedDraftTask } : {}),
+              ...(projectId !== undefined ? { projectId } : {}),
+              ...(composerContext ? { composer: composerContext } : {}),
+              taskGroupId:
+                creationTaskGroupId !== undefined
+                  ? creationTaskGroupId
+                  : useZCodeSessionStore
+                      .getState()
+                      .getWorkspaceState(workspacePath, workspaceIdentity).draftTaskGroupId,
               sessionCreateSource:
                 sessionCreateSource ??
                 useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
                   .draftCreateSource,
             }
-          : undefined,
+          : composerContext
+            ? {
+                workspace: { workspacePath, ...(workspaceIdentity ? { workspaceIdentity } : {}) },
+                composer: composerContext,
+                ...(sessionId === null
+                  ? {
+                      projectId: recentScope.projectId,
+                      taskGroupId: creationTaskGroupId,
+                      sessionCreateSource,
+                    }
+                  : {}),
+              }
+            : undefined,
       );
       if (lease?.store && type !== "createSession") {
         lease.store.markCommandPending({
@@ -1354,7 +1556,10 @@ export function SessionPane({
       }
       let ack: CommandAck;
       try {
-        ack = await sendCommand(envelope);
+        ack =
+          projectId !== undefined
+            ? await sendCommand(envelope, { projectId })
+            : await sendCommand(envelope);
       } catch (error) {
         if (lease?.store) {
           lease.store.settleCommand(envelope.commandId);
@@ -1363,7 +1568,7 @@ export function SessionPane({
           // provider_not_ready 在 Host getClient 前确定性拒绝，CLI 不可能已经
           // admission。若继续保留 renderer 恢复账本，重连 query 必然得到 unknown；即使
           // unknown 现已静默清账，也不应为确定性拒绝留下无效的恢复记录。
-          pendingCommandRegistry.settle(envelope.sessionId, envelope.commandId);
+          pendingCommandRegistry.rejectCommand(envelope.sessionId, envelope.commandId);
         }
         recordV4CommandAck({
           type,
@@ -1376,7 +1581,6 @@ export function SessionPane({
       pendingCommandRegistry.applyAck(envelope, ack);
       if (ack.status === "accepted") {
         acceptSelection?.();
-        acceptRecent?.();
       }
       if (
         lease?.store &&
@@ -1413,6 +1617,11 @@ export function SessionPane({
     },
     [
       captureAcceptedModelSelection,
+      newTaskComposerScope,
+      composerProjectId,
+      baseWorkspaceServices.projectService,
+      selectionSideChat,
+      rootSessionId,
       lease,
       provider,
       sendCommand,
@@ -2110,8 +2319,8 @@ export function SessionPane({
   // ── 草稿态 v4 draft session 预热（m5）──
   // pane 未绑定会话时后台建 phase=draft 会话作预热载体：配置写 CAS 直达、首发复用。
   // 对外绑定语义不变（shell activeTaskId 仍 null），预热会话只是 pane 内部 effective 订阅目标。
-  const { binding: prewarmBinding } = useDraftSessionPrewarm({
-    enabled: sessionId === null && draftAgentStartupAllowed,
+  const { binding: prewarmBinding, waitForSession: waitForDraftSession } = useDraftSessionPrewarm({
+    enabled: sessionId === null && draftAgentStartupAllowed && !recoveringDraft,
     workspaceKey,
     paneId,
     invalidationVersion: draftRuntimeInvalidationVersion,
@@ -2138,7 +2347,51 @@ export function SessionPane({
   const ensureDraftPrewarmConfigBeforeSendRef = useRef<(targetSessionId: string) => Promise<void>>(
     async () => undefined,
   );
-  const effectiveSessionId = sessionId ?? prewarmSessionId;
+  const effectiveSessionId = sessionId ?? recoveringDraft?.sessionId ?? prewarmSessionId;
+  useEffect(() => {
+    if (!recoveringDraft?.commandId) return;
+    let current = true;
+    const commandId = recoveringDraft.commandId;
+    const off = pendingCommandRegistry.subscribeResolution(commandId, (resolution) => {
+      if (!current) return;
+      if (
+        resolution === "accepted" ||
+        resolution === "duplicate" ||
+        resolution === "authoritative"
+      ) {
+        const entry = pendingCommandRegistry.findCommand(commandId);
+        const recoveredSessionId = entry?.sessionId ?? recoveringDraft.sessionId;
+        if (recoveredSessionId)
+          void handleDraftSessionCreated(
+            recoveredSessionId,
+            entry?.clientContext?.groupedDraftTask,
+            entry?.clientContext?.taskGroupId,
+            commandId,
+          );
+      } else if (resolution === "failed" || resolution === "discarded")
+        setResolvedDraftCommand(commandId);
+    });
+    void pendingCommandRegistry
+      .reconcileSession(
+        pendingCommandRegistry.findCommand(commandId)?.sessionId ??
+          recoveringDraft.sessionId ??
+          null,
+        (params) => layer.queryCommands(params),
+        workspaceIdentity?.trim() || workspacePath,
+      )
+      .catch((error) => logger.warn("[v4-composer] 首发结果恢复查询失败，保留草稿身份", error));
+    return () => {
+      current = false;
+      off();
+    };
+  }, [
+    recoveringDraft,
+    layer,
+    handleDraftSessionCreated,
+    newTaskComposerScope,
+    workspacePath,
+    workspaceIdentity,
+  ]);
   const showModelChangeNotice = useCallback(
     (sourceModel: ModelSelectionSource | null, targetModel: ModelSelectionSource) => {
       // Bug 原因：草稿尚未形成实际会话，模型选择本身已经在 composer 中可见；
@@ -2274,6 +2527,12 @@ export function SessionPane({
       heldQueueDisposition: "clearQueueAndSend" | "keepQueueAndSend" | undefined,
       expectedHeldQueueItemIds?: readonly string[],
       submission?: ComposerSubmissionConfig,
+      creationContext?: {
+        projectId?: string | null;
+        taskGroupId?: string | null;
+        createSource: SessionCreateSource;
+        text: string;
+      },
     ): Promise<boolean | "confirmationRequired"> => {
       let type: CommandType | null = null;
       let payload: Record<string, unknown> = {};
@@ -2323,6 +2582,12 @@ export function SessionPane({
         payload,
         targetSessionId,
         withBaseRevision ? baseRevision : undefined,
+        undefined,
+        undefined,
+        creationContext?.createSource,
+        creationContext?.projectId,
+        creationContext?.taskGroupId,
+        creationContext?.text,
       );
       if (ack.reasonCode === "guard.heldQueueConfirmationStale") {
         return "confirmationRequired";
@@ -2352,9 +2617,16 @@ export function SessionPane({
       text: string,
       options: ConversationComposerSendOptions | undefined,
       createSourceAtSend: SessionCreateSource,
+      projectIdAtSend: string | null | undefined,
+      taskGroupIdAtSend: string | null | undefined,
+      groupedDraftTaskAtSend: GroupedDraftTaskState | null,
     ) => {
       let onAcceptedSelection: (() => void) | undefined;
       const dispatchSubmissionCommand = async (...args: Parameters<typeof dispatchCommand>) => {
+        args[6] = createSourceAtSend;
+        args[7] = projectIdAtSend;
+        args[8] = taskGroupIdAtSend;
+        args[9] = options?.submittedDraftText ?? text;
         const ack = await dispatchCommand(...args);
         // 在原 accepted 边界写回推荐选择，早于新 Session 的草稿转移；失败不改用户意图。
         if (ack.status === "accepted" && submissionConfigFromCommand(args[0], args[1]))
@@ -2399,11 +2671,6 @@ export function SessionPane({
       }
       // create/send ACK 期间用户可能切换任务或创建另一份 draft。
       // placement 必须绑定发送开始时的稳定 identity，不能在完成回调里读取当前 workspace 草稿。
-      const groupedDraftTaskAtSend =
-        sessionId === null
-          ? useZCodeSessionStore.getState().getWorkspaceState(workspacePath, workspaceIdentity)
-              .groupedDraftTask
-          : null;
       const selectionSideSlashCommand =
         sessionId && (appSlashCommands?.length ?? 0) > 0
           ? parseSelectionSideSlashCommand(text, readyAttachments, {
@@ -2500,169 +2767,40 @@ export function SessionPane({
           );
           return;
         }
-        const prewarm = prewarmBindingRef.current;
-        if (prewarm?.beginPromotion()) {
-          try {
-            const consumed = await dispatchSlashCommand(
-              draftSlashCommand,
-              prewarm.sessionId,
-              0,
-              heldQueueDisposition,
-              expectedHeldQueueItemIds,
-              submission,
-            );
-            if (consumed === "confirmationRequired") return consumed;
-            if (consumed) {
-              onAcceptedSelection?.();
-              prewarm.promote();
-              handleDraftSessionCreated(prewarm.sessionId, groupedDraftTaskAtSend);
-              return;
-            }
-          } catch (error) {
-            if (isProviderNotReadyError(error)) throw error;
-            // 与普通首发相同：slash command 写出后的 transport error 也是 admission
-            // 结果未知，不能 discard 后换 session/command 再执行一次。
-            logger.warn(
-              `[v4-draft-prewarm] 预热会话 slash 结果未知，保留原 command 禁止自动重发: ${String(error)}`,
-            );
-            throw error;
-          }
-        }
-        const draftConfigPayload = buildDraftCreateConfigPayload(
-          { ...draftConfigRef.current, modelSelection: submission.modelSelection },
-          appFollowupMode,
-        );
-        const createAck = await dispatchSubmissionCommand(
-          "createSession",
-          { workspaceId: workspaceKey, ...draftConfigPayload },
-          null,
-        );
-        if (createAck.status !== "accepted") {
-          throw new Error(createAck.reasonCode ?? "createSession 被拒绝");
-        }
-        const createResult = createAck.result;
-        if (!createResult || createResult.type !== "createSession") {
-          throw new Error("createSession 缺少 sessionId");
-        }
-        const newSessionId = createResult.sessionId;
-        handleDraftSessionCreated(newSessionId, groupedDraftTaskAtSend);
-        await dispatchSlashCommand(
+      }
+      // 首发只能等待当前 owner 的同一创建任务，不能把 binding=null 当作另建许可。
+      const draftBinding = sessionId === null ? await waitForDraftSession() : null;
+      if (draftBinding) {
+        await ensureDraftPrewarmConfigBeforeSendRef.current(draftBinding.sessionId);
+        if (!draftBinding.beginPromotion()) throw new Error("草稿会话已切换，请重新发送");
+      }
+      const targetSessionId = sessionId ?? draftBinding!.sessionId;
+      if (draftBinding && draftSlashCommand) {
+        const consumed = await dispatchSlashCommand(
           draftSlashCommand,
-          newSessionId,
+          targetSessionId,
           0,
           heldQueueDisposition,
           expectedHeldQueueItemIds,
           submission,
+          {
+            projectId: projectIdAtSend,
+            taskGroupId: taskGroupIdAtSend,
+            createSource: createSourceAtSend,
+            text: options?.submittedDraftText ?? text,
+          },
         );
-        return;
-      }
-      if (!sessionId) {
-        // 草稿附件在 composer 中已绑定预热 session 完成预传。
-        // 这里只提交 ready ref，禁止在 send click 内再启动上传。
-        const prewarm = prewarmBindingRef.current;
-        if (prewarm?.beginPromotion()) {
-          try {
-            const ack = await dispatchSubmissionCommand(
-              "sendText",
-              {
-                text: effectiveText,
-                ...submission,
-                ...(readyAttachments.length > 0 ? { attachments: readyAttachments } : {}),
-                ...(sharedContextRefs?.length ? { context_refs: sharedContextRefs } : {}),
-              },
-              prewarm.sessionId,
-              undefined,
-              undefined,
-            );
-            if (ack.status === "accepted") {
-              prewarm.promote();
-              handleDraftSessionCreated(prewarm.sessionId, groupedDraftTaskAtSend);
-              return;
-            }
-            // failed ACK 也可能发生在 runtime 已启动、但 TurnStarted projection commit
-            // 超时之后；模型工具副作用无法靠 failed ACK 回滚，不能自动换 command 重跑。
-            logger.warn(
-              `[v4-draft-prewarm] 预热会话首发未 accepted（${ack.reasonCode ?? ack.status}），禁止自动重发`,
-            );
-            throw new Error(ack.reasonCode ?? "预热会话首发未 accepted");
-          } catch (error) {
-            if (isProviderNotReadyError(error)) throw error;
-            if (readyAttachments.length > 0) throw error;
-            // Bug 原因：transport error 不能证明 Agent 没有 admission；failed ACK 也可能
-            // 晚于 runtime 启动和工具副作用。旧逻辑统一 discard 预热会话并自动
-            // createSession(firstInput)，会把同一次提交跑两遍。保留 pending 生命周期和
-            // command 对账线索，异常交给 composer 保留草稿，禁止自动换 command 重发。
-            logger.warn(
-              `[v4-draft-prewarm] 预热会话首发未确认成功，保留原 command 禁止自动重发: ${String(error)}`,
-            );
-            throw error;
-          }
-        }
-        // fallback：无预热（创建失败/已丢弃）时现场建会话。草稿已选 config 随
-        // createSession 携带（CLI 归并请求与 runtime 缺省，首发即用草稿选择）。
-        // fallback 有 prewarm 投影时必须以 Agent 当前配置为 base；只有从未拿到投影
-        // 才使用冻结的初始化元组。否则 provider fallback 后会把 localStorage 旧模型重新写回。
-        const draftConfigPayload = buildDraftCreateConfigPayload(
-          { ...draftConfigRef.current, modelSelection: submission.modelSelection },
-          appFollowupMode,
-        );
-        if (readyAttachments.length === 0 && !sharedContextRefs?.length) {
-          const ack = await dispatchSubmissionCommand(
-            "createSession",
-            {
-              workspaceId: workspaceKey,
-              firstInput: { text: effectiveText, ...submission },
-              ...draftConfigPayload,
-            },
-            null,
-            undefined,
-            undefined,
-            undefined,
-            createSourceAtSend,
+        if (consumed === "confirmationRequired") return consumed;
+        if (consumed) {
+          onAcceptedSelection?.();
+          draftBinding.promote();
+          await handleDraftSessionCreated(
+            targetSessionId,
+            groupedDraftTaskAtSend,
+            taskGroupIdAtSend,
           );
-          if (ack.status !== "accepted") {
-            throw new Error(ack.reasonCode ?? "createSession 被拒绝");
-          }
-          const result = ack.result;
-          if (!result || result.type !== "createSession") {
-            throw new Error("createSession 缺少 sessionId");
-          }
-          handleDraftSessionCreated(result.sessionId, groupedDraftTaskAtSend);
           return;
         }
-        // 本地 desktop localPath 是零拷贝 ready，不依赖 attachment transaction；极短窗口内
-        // 预热 session 可能还未返回。此时仍可先创建空 session，再提交现成 ref，发送点击内
-        // 不做任何附件上传，也不会让非 ready 附件绕过 composer 门禁。
-        const createAck = await dispatchSubmissionCommand(
-          "createSession",
-          { workspaceId: workspaceKey, ...draftConfigPayload },
-          null,
-        );
-        if (createAck.status !== "accepted") {
-          throw new Error(createAck.reasonCode ?? "createSession 被拒绝");
-        }
-        const createResult = createAck.result;
-        if (!createResult || createResult.type !== "createSession") {
-          throw new Error("createSession 缺少 sessionId");
-        }
-        const newSessionId = createResult.sessionId;
-        const sendAck = await dispatchSubmissionCommand(
-          "sendText",
-          {
-            text: effectiveText,
-            attachments: readyAttachments,
-            ...submission,
-            ...(sharedContextRefs?.length ? { context_refs: sharedContextRefs } : {}),
-          },
-          newSessionId,
-          undefined,
-          undefined,
-        );
-        if (sendAck.status !== "accepted") {
-          throw new Error(sendAck.reasonCode ?? "sendText 被拒绝");
-        }
-        handleDraftSessionCreated(newSessionId, groupedDraftTaskAtSend);
-        return;
       }
       // 附件 ref 已在 composer 预传状态机中收口。
       const ack = await dispatchSubmissionCommand(
@@ -2670,6 +2808,7 @@ export function SessionPane({
         {
           text: effectiveText,
           ...submission,
+          ...(options?.source ? { source: options.source } : {}),
           ...(readyAttachments.length > 0 ? { attachments: readyAttachments } : {}),
           ...(options?.requestedDelivery
             ? {
@@ -2683,7 +2822,7 @@ export function SessionPane({
           ...(expectedHeldQueueItemIds ? { expectedHeldQueueItemIds } : {}),
           ...(sharedContextRefs?.length ? { context_refs: sharedContextRefs } : {}),
         },
-        sessionId,
+        targetSessionId,
         undefined,
         undefined,
       );
@@ -2693,8 +2832,17 @@ export function SessionPane({
       if (ack.status !== "accepted") {
         throw new Error(ack.reasonCode ?? "sendText 被拒绝");
       }
+      if (draftBinding) {
+        draftBinding.promote();
+        await handleDraftSessionCreated(
+          targetSessionId,
+          groupedDraftTaskAtSend,
+          taskGroupIdAtSend,
+          ack.commandId,
+        );
+      }
       if (heldQueueDisposition === "clearQueueAndSend") {
-        settleCurrentQueueInputs(sessionId);
+        settleCurrentQueueInputs(targetSessionId);
       }
     },
     [
@@ -2703,6 +2851,7 @@ export function SessionPane({
       captureAcceptedModelSelection,
       dispatchSlashCommand,
       ensureDraftModelReadyForSend,
+      waitForDraftSession,
       availableSelectionSideSlashCommandNames,
       appSlashCommands,
       appFollowupMode,
@@ -2723,9 +2872,15 @@ export function SessionPane({
 
   const dispatchSendText = useCallback(
     (text: string, options?: ConversationComposerSendOptions) => {
-      const createSource = useZCodeSessionStore
+      // 插件/GenUI 续写复用本会话 admission；恢复未完成或只读时不建立命令线索。
+      if (options?.source && (readOnly || !runtimeReady || sessionId === null))
+        return Promise.resolve("blocked" as const);
+      const workspaceAtSend = useZCodeSessionStore
         .getState()
-        .getWorkspaceState(workspacePath, workspaceIdentity).draftCreateSource;
+        .getWorkspaceState(workspacePath, workspaceIdentity);
+      const createSource = workspaceAtSend.draftCreateSource;
+      const projectIdAtSend = workspaceAtSend.draftProjectId;
+      const taskGroupIdAtSend = workspaceAtSend.draftTaskGroupId;
       const submissionOptions = {
         ...options,
         submission:
@@ -2735,7 +2890,14 @@ export function SessionPane({
       // 依赖“配置命令先到、sendText 后到”的跨命令时序。
       return configCommandBarrier.enqueue(async () => {
         try {
-          return await dispatchSendTextAfterConfig(text, submissionOptions, createSource);
+          return await dispatchSendTextAfterConfig(
+            text,
+            submissionOptions,
+            createSource,
+            projectIdAtSend,
+            taskGroupIdAtSend,
+            sessionId === null ? workspaceAtSend.groupedDraftTask : null,
+          );
         } catch (error) {
           if (sessionId === null && isProviderNotReadyError(error)) {
             // UI 预检查与 Host getClient 之间 registry 仍可能失效。竞态命中时收敛成
@@ -2753,6 +2915,8 @@ export function SessionPane({
       dispatchSendTextAfterConfig,
       markDraftProviderNotReady,
       sessionId,
+      readOnly,
+      runtimeReady,
       workspacePath,
       workspaceIdentity,
     ],
@@ -4110,7 +4274,18 @@ export function SessionPane({
       commandId: recoverableCommand.commandId,
     });
     if (!replay) return;
-    void dispatchCommand(replay.type, replay.payload, replay.sessionId, replay.baseRevision)
+    void dispatchCommand(
+      replay.type,
+      replay.payload,
+      replay.sessionId,
+      replay.baseRevision,
+      undefined,
+      undefined,
+      replay.clientContext?.sessionCreateSource,
+      replay.clientContext?.projectId,
+      replay.clientContext?.taskGroupId,
+      replay.clientContext?.composer?.submittedText,
+    )
       .then((ack) => {
         if (
           replay.type === "createSession" &&
@@ -4128,7 +4303,12 @@ export function SessionPane({
             });
             return;
           }
-          handleDraftSessionCreated(ack.result.sessionId, replay.clientContext?.groupedDraftTask);
+          void handleDraftSessionCreated(
+            ack.result.sessionId,
+            replay.clientContext?.groupedDraftTask,
+            replay.clientContext?.taskGroupId,
+            ack.commandId,
+          );
         }
       })
       .catch((error) => {
@@ -4151,12 +4331,17 @@ export function SessionPane({
       draftMode={isDraft}
       draftConfig={draftConfig}
       composerDraft={composerDraft}
+      rootDraftScopeKey={composerScopeKey(newTaskComposerScope)}
       replaceComposerDraft={replaceComposerDraft}
-      submissionReady={composerSubmissionReady}
+      submissionReady={composerSubmissionReady && runtimeReady && !recoveringDraft}
       updateComposerContent={updateComposerContent}
       createSubmissionFromComposer={createSubmissionFromComposer}
-      contextHeader={isDraft ? draftComposerHeader : undefined}
+      contextHeader={isDraft && !isFloatingPresentation ? draftComposerHeader : undefined}
       centered={isDraft}
+      layout={isFloatingPresentation ? "inline" : "stacked"}
+      workingDurationMs={
+        floatingTurnRunning ? floatingLatestTurnSummary?.workDurationMs : undefined
+      }
       blockingRequestId={blockingInteractionId}
       listenAddToChatEvents={focused}
       externalTextInsertRequest={focused && sessionId === null ? composerTextInsertRequest : null}
@@ -4331,7 +4516,9 @@ export function SessionPane({
       ) : null}
       {composerNode}
       {/* 办公模式显示主动任务推荐；编程模式保留原有小型场景入口。 */}
-      {isDraft && (!isOfficeMode || sharedSettings?.proactiveSuggestionsEnabled === true) ? (
+      {isDraft &&
+      !isFloatingPresentation &&
+      (!isOfficeMode || sharedSettings?.proactiveSuggestionsEnabled === true) ? (
         <ConversationDraftSuggestedPromptsContainer
           className={isOfficeMode ? "mt-4" : "mt-6"}
           proactive={isOfficeMode}
@@ -4348,6 +4535,38 @@ export function SessionPane({
       ) : null}
     </>
   );
+  const pluginUiUploadAttachment = useCallback(
+    async (input: {
+      fileName: string;
+      mime: string;
+      dataBase64: string;
+    }): Promise<AttachmentRef> => {
+      if (!sessionId || !runtimeReady || readOnly)
+        throw new Error("Plugin UI attachments need a writable ready session");
+      const { ref } = await attachmentPut({ sessionId, ...input });
+      // 上传在途时 Provider 的 port 可能已经切到新会话；拒绝旧结果，不能把旧图片续写给新 owner。
+      const currentTarget = currentPaneTargetRef.current;
+      const currentSnapshot = snapshotRef.current;
+      if (
+        !paneMountedRef.current ||
+        currentTarget.sessionId !== sessionId ||
+        currentTarget.draftNavigationKey !== draftNavigationKey ||
+        currentTarget.readOnly ||
+        currentSnapshot?.sessionId !== sessionId ||
+        (currentSnapshot.runtimeInitialization &&
+          currentSnapshot.runtimeInitialization.status !== "ready")
+      )
+        throw new Error("Plugin UI session changed while uploading attachment");
+      const padding = input.dataBase64.endsWith("==") ? 2 : input.dataBase64.endsWith("=") ? 1 : 0;
+      return {
+        ref,
+        fileName: input.fileName,
+        mime: input.mime,
+        bytes: Math.floor((input.dataBase64.length * 3) / 4) - padding,
+      };
+    },
+    [attachmentPut, sessionId, runtimeReady, readOnly, draftNavigationKey],
+  );
   // 进入/退出分享时 chat dock 与分享 dock 高度不同；共享同一个 grid 单元做上下位移淡入淡出，
   // 避免父高度突变导致的硬跳。prefers-reduced-motion 由 transition 组件内部降级为立即切换。
   const conversationBottomDock = conversationBottomDockContent ? (
@@ -4357,256 +4576,283 @@ export function SessionPane({
   ) : null;
 
   return (
-    <div
-      data-testid={testId(TID_V4_SESSION_PANE, paneId)}
-      data-session-id={sessionId ?? "draft"}
-      data-initial-draft-provider={initialDraftConfigForDiagnostics?.provider ?? ""}
-      data-initial-draft-model={initialDraftConfigForDiagnostics?.model ?? ""}
-      data-projection-seq={snapshot?.seq ?? ""}
-      data-running-subagent-ids={subagents.running.map((item) => item.childSessionId).join(",")}
-      data-running-subagent-work-ids={(snapshot?.backgroundWorks ?? [])
-        .filter((work) => work.kind === "subagent" && work.status === "running")
-        .map((work) => work.childSessionId ?? work.workId)
-        .join(",")}
-      data-v4-conversation-drop-target="true"
-      onDragOver={effectiveDropTargetController?.onDragOver}
-      onDragLeave={effectiveDropTargetController?.onDragLeave}
-      onDrop={effectiveDropTargetController?.onDrop}
-      className="relative flex h-full min-h-0 flex-col"
+    <PluginUiSessionProvider
+      workspacePath={workspacePath}
+      workspaceIdentity={workspaceIdentity}
+      remoteSessionId={remoteSessionId}
+      sessionId={runtimeReady ? sessionId : null}
+      readOnly={readOnly || !runtimeReady}
+      sendText={dispatchSendText}
+      uploadAttachment={pluginUiUploadAttachment}
+      projectionStore={sessionLeaseReady ? lease?.store : null}
     >
-      {effectiveDropTargetController?.active ? (
-        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-accent/55 backdrop-blur-sm">
-          <div className="flex items-center gap-2 rounded-full border border-border bg-accent px-4 py-2 text-ui-base text-foreground shadow-sm">
-            <Hand className="size-4 text-foreground" />
-            <span>
-              {intl.formatMessage({
-                id:
-                  effectiveDropTargetController.kind === "workspace"
-                    ? "chat.composer.workspaceFileDragHint"
-                    : "chat.attachments.dragHint",
-              })}
-            </span>
-          </div>
-        </div>
-      ) : null}
-      <ConversationHeader
-        title={snapshot?.meta.title ?? ""}
-        onSplitRight={onSplitRight}
-        onSplitDown={onSplitDown}
-        onClosePane={onClosePane}
-        workspaceBadge={workspaceBadge}
-      />
-
       <div
-        ref={conversationLayoutContainerRef}
-        className="@container/conversation relative flex min-h-0 flex-1 flex-col"
+        data-testid={testId(TID_V4_SESSION_PANE, paneId)}
+        data-session-id={sessionId ?? "draft"}
+        data-initial-draft-provider={initialDraftConfigForDiagnostics?.provider ?? ""}
+        data-initial-draft-model={initialDraftConfigForDiagnostics?.model ?? ""}
+        data-projection-seq={snapshot?.seq ?? ""}
+        data-running-subagent-ids={subagents.running.map((item) => item.childSessionId).join(",")}
+        data-running-subagent-work-ids={(snapshot?.backgroundWorks ?? [])
+          .filter((work) => work.kind === "subagent" && work.status === "running")
+          .map((work) => work.childSessionId ?? work.workId)
+          .join(",")}
+        data-v4-conversation-drop-target="true"
+        onDragOver={effectiveDropTargetController?.onDragOver}
+        onDragLeave={effectiveDropTargetController?.onDragLeave}
+        onDrop={effectiveDropTargetController?.onDrop}
+        className="relative flex h-full min-h-0 flex-col"
       >
-        <ConversationShareSelectionScrim
-          visible={shareSelectionPanelVisible}
-          interactive
-          onBackdropClick={dismissShareSelectionPanel}
-        />
-        <ConversationShareSelectionPanel
-          visible={shareSelectionPanelVisible}
-          items={shareItems}
-          selectedRowIds={selectedShareRowIds}
-          onToggle={handleShareSelectionToggle}
-          onInspect={handleShareSelectionInspect}
-        />
-        {shareActive && shareInSelectionStage && shareDraft?.view === "timeline" && sessionId ? (
-          <ConversationShareSelectionReopenTab onOpen={() => showShareSelectionPanel(sessionId)} />
-        ) : null}
-        {!isDraft ? (
-          <ConversationStatusPanel
-            workspacePath={workspacePath}
-            workspaceIdentity={workspaceIdentity}
-            gitSummary={gitSummary}
-            gitDirtyFileCount={gitDirtyFileCount}
-            gitWorktreeReviewSourceId={gitWorktreeReviewSourceId}
-            gitWorktreeChangeSummary={gitWorktreeChangeSummary}
-            activeTaskChangeSummary={activeTaskChangeSummary}
-            goal={selectionSideChat ? null : (snapshot?.goal ?? null)}
-            sessionPlans={state.sessionPlans}
-            plan={snapshot?.plan ?? null}
-            backgroundWorks={snapshot?.backgroundWorks ?? []}
-            runningSubagents={subagents.running}
-            workflowRuns={snapshot?.workflowRuns?.runs ?? []}
-            endedSubagentCount={subagents.endedTotal}
-            rootSessionId={rootSessionId ?? sessionId ?? undefined}
-            parentSessionId={sessionId ?? undefined}
-            layoutMode={statusPanelLayout}
-            summaryPanelVariantOverride={effectiveSummaryPanelVariantOverride}
-            onVariantChange={handleSummaryPanelVariantChange}
-            terminalSectionOpen={terminalSectionOpen}
-            onTerminalSectionOpenChange={setTerminalSectionOpen}
-            agentSectionOpen={agentSectionOpen}
-            onAgentSectionOpenChange={setAgentSectionOpen}
-            workflowSectionOpen={workflowSectionOpen}
-            onWorkflowSectionOpenChange={setWorkflowSectionOpen}
-            onRefreshGit={onRefreshGit}
-            onOpenGitReview={onOpenGitReview}
-            onPauseGoal={
-              !readOnly && !selectionSideChat && snapshot?.availability.pauseGoal.allowed
-                ? handlePauseGoal
-                : undefined
-            }
-            onResumeGoal={
-              !readOnly && !selectionSideChat && snapshot?.availability.resumeGoal.allowed
-                ? handleResumeGoal
-                : undefined
-            }
-            onOpenPlanDetail={onOpenPlanDetail ? handleOpenPlanDetail : undefined}
-            onOpenBackgroundBash={
-              onOpenBackgroundBash && sessionId
-                ? (work) =>
-                    onOpenBackgroundBash({
-                      workspacePath,
-                      workspaceIdentity: workspaceIdentity ?? undefined,
-                      remoteSessionId: remoteSessionId ?? undefined,
-                      rootSessionId: rootSessionId ?? sessionId,
-                      sessionId,
-                      workId: work.workId,
-                      title: work.title,
-                    })
-                : undefined
-            }
-            onCancelBackgroundWork={readOnly ? undefined : handleCancelBackgroundWork}
-            onOpenSubagentSession={onOpenSubagentSession ? handleOpenSubagentSession : undefined}
-            onOpenSubagentDirectory={
-              onOpenSubagentDirectory ? handleOpenSubagentDirectory : undefined
-            }
-            onOpenWorkflowRun={
-              onOpenWorkflowRun && sessionId ? handleOpenWorkflowRunFromPanel : undefined
-            }
-            endedWorkflowRunCount={endedWorkflowRunCount}
-            onOpenWorkflowRunDirectory={
-              onOpenWorkflowRunDirectory ? handleOpenWorkflowRunDirectoryFromPanel : undefined
-            }
-          />
-        ) : null}
-
-        {readOnly && controlLastError ? (
-          <div
-            role="alert"
-            data-testid="v4-subagent-readonly-error"
-            className="mx-4 mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-3 py-2 text-ui-base text-[var(--color-danger)]"
-          >
-            {controlLastError.message}
+        {effectiveDropTargetController?.active ? (
+          <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-accent/55 backdrop-blur-sm">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-accent px-4 py-2 text-ui-base text-foreground shadow-sm">
+              <Hand className="size-4 text-foreground" />
+              <span>
+                {intl.formatMessage({
+                  id:
+                    effectiveDropTargetController.kind === "workspace"
+                      ? "chat.composer.workspaceFileDragHint"
+                      : "chat.attachments.dragHint",
+                })}
+              </span>
+            </div>
           </div>
         ) : null}
+        <ConversationHeader
+          title={snapshot?.meta.title ?? ""}
+          onSplitRight={onSplitRight}
+          onSplitDown={onSplitDown}
+          onClosePane={onClosePane}
+          workspaceBadge={workspaceBadge}
+        />
 
-        {errored ? (
-          <SessionSubscriptionErrorPanel
-            error={state.lastError ?? intl.formatMessage({ id: "chat.error.connectionLost" })}
-            sessionId={sessionId}
-            workspacePath={workspacePath}
-            onReconnect={handleRetrySubscribe}
+        <div
+          ref={conversationLayoutContainerRef}
+          className="@container/conversation relative flex min-h-0 flex-1 flex-col"
+        >
+          <ConversationShareSelectionScrim
+            visible={shareSelectionPanelVisible}
+            interactive
+            onBackdropClick={dismissShareSelectionPanel}
           />
-        ) : (
-          <SessionPluginReferenceIconBoundary
-            enabled={pluginReferenceIconsEnabled}
-            remoteSessionId={remoteSessionId}
-            sessionId={sessionId}
-            workspaceIdentity={workspaceIdentity}
-            workspacePath={workspacePath}
-          >
-            <ConversationTimeline
-              scrollToBottomActionRef={timelineScrollToBottomRef}
-              scrollToQueryActionRef={timelineScrollToQueryRef}
-              selectionPanelLayoutContainerRef={conversationLayoutContainerRef}
-              rows={timelineSnapshot?.rows.window ?? []}
-              pendingGuides={timelineSnapshot ? pendingGuideProjection?.pendingGuides : []}
-              apiRetry={timelineSnapshot?.control.apiRetry ?? null}
-              totalCount={timelineSnapshot?.rows.totalCount ?? 0}
-              sessionKey={sessionId ?? "draft"}
-              scrollMemoryKey={timelineScrollMemoryKey}
-              rowContext={rowContext}
-              onFork={forkActionsEnabled ? handleFork : undefined}
-              onRetry={retryActionsEnabled ? handleRetry : undefined}
-              onFeedbackChange={
-                !readOnly && !selectionSideChat && sessionId ? handleAssistantFeedback : undefined
-              }
-              onEdit={editActionsEnabled ? handleEdit : undefined}
-              canLoadOlder={timelineSnapshot ? hasOlderRows(timelineSnapshot) : false}
-              loadingOlder={timelineSnapshot ? state.loadingOlder : false}
-              onLoadOlder={handleLoadOlder}
-              onLoadAllOlder={handleLoadAllOlder}
-              turnNavigatorDirectoryRevision={state.turnNavigatorDirectoryRevision}
-              bottomDock={conversationBottomDock}
-              hideTurnNavigator={shareActive && shareInSelectionStage}
-              backgroundScrollLocked={resolveConversationShareBackgroundScrollLocked({
-                partialShareActive: shareActive,
-                stage: shareDraft?.stage ?? "selection",
-                view: shareDraft?.view,
-              })}
-              headerSlot={
-                // unsupportedRowCount 也要开这个门：整份副本的行都被本 build 跳过时
-                // rows 为空，但只读块必须留下来显示「需要更新 ZCode」，不能整块消失。
-                importedShare &&
-                (importedShare.rows.length > 0 || importedShare.unsupportedRowCount > 0) ? (
-                  <ConversationShareImportNotice
-                    rows={importedShare.rows}
-                    unsupportedRowCount={importedShare.unsupportedRowCount}
-                    artifactNames={importedShareArtifactNames}
-                    artifactWorkspaceRelativePaths={importedShareArtifactWorkspaceRelativePaths}
-                    workspacePath={workspacePath}
-                    {...(workspaceIdentity ? { workspaceIdentity } : {})}
-                    {...(remoteSessionId ? { workspaceRemoteSessionId: remoteSessionId } : {})}
-                    locale={locale}
-                    theme={theme}
-                    codePreviewSettings={codePreviewSettings}
-                    onOpenShareUrl={onOpenBrowserUrl ? handleOpenImportedShareUrl : undefined}
-                    onOpenFileLink={onOpenFileLink}
-                    onOpenCodeViewer={onOpenCodeViewer}
-                  />
-                ) : null
-              }
-              emptyState={
-                isDraft ? (
-                  <div data-testid={TID_CHAT_EMPTY} className="w-full">
-                    <ConversationDraftEmptyState />
-                  </div>
-                ) : null
-              }
-              centerEmptyStateWithDock={isDraft}
-              summaryPanelLayout={statusPanelLayout}
-              conversationFindQuery={!isDraft && focused ? conversationFindQuery : ""}
-              conversationFindActiveIndex={!isDraft && focused ? conversationFindActiveIndex : -1}
-              conversationFindNavigationRequestId={
-                !isDraft && focused ? conversationFindNavigationRequestId : 0
-              }
-              onConversationFindMatchStateChange={
-                !isDraft && focused ? onConversationFindMatchStateChange : undefined
-              }
-              searchResultHighlightRequest={isDraft ? null : searchResultHighlightRequest}
-              onSearchResultHighlightDone={onSearchResultHighlightDone}
-              sessionPhase={isDraft ? undefined : snapshot?.control.phase}
-              shareSelection={
-                shareActive && shareInSelectionStage && shareDraft?.view === "timeline" && sessionId
-                  ? {
-                      eligibleRowIds: eligibleShareRowIds,
-                      selectedRowIds: selectedShareRowIds,
-                      onToggle: handleShareSelectionToggle,
-                    }
+          <ConversationShareSelectionPanel
+            visible={shareSelectionPanelVisible}
+            items={shareItems}
+            selectedRowIds={selectedShareRowIds}
+            onToggle={handleShareSelectionToggle}
+            onInspect={handleShareSelectionInspect}
+          />
+          {shareActive && shareInSelectionStage && shareDraft?.view === "timeline" && sessionId ? (
+            <ConversationShareSelectionReopenTab
+              onOpen={() => showShareSelectionPanel(sessionId)}
+            />
+          ) : null}
+          {!isDraft ? (
+            <ConversationStatusPanel
+              workspacePath={workspacePath}
+              workspaceIdentity={workspaceIdentity}
+              gitSummary={gitSummary}
+              gitDirtyFileCount={gitDirtyFileCount}
+              gitWorktreeReviewSourceId={gitWorktreeReviewSourceId}
+              gitWorktreeChangeSummary={gitWorktreeChangeSummary}
+              activeTaskChangeSummary={activeTaskChangeSummary}
+              goal={selectionSideChat ? null : (snapshot?.goal ?? null)}
+              sessionPlans={state.sessionPlans}
+              plan={snapshot?.plan ?? null}
+              backgroundWorks={snapshot?.backgroundWorks ?? []}
+              runningSubagents={subagents.running}
+              workflowRuns={snapshot?.workflowRuns?.runs ?? []}
+              endedSubagentCount={subagents.endedTotal}
+              rootSessionId={rootSessionId ?? sessionId ?? undefined}
+              parentSessionId={sessionId ?? undefined}
+              layoutMode={statusPanelLayout}
+              summaryPanelVariantOverride={effectiveSummaryPanelVariantOverride}
+              onVariantChange={handleSummaryPanelVariantChange}
+              terminalSectionOpen={terminalSectionOpen}
+              onTerminalSectionOpenChange={setTerminalSectionOpen}
+              agentSectionOpen={agentSectionOpen}
+              onAgentSectionOpenChange={setAgentSectionOpen}
+              workflowSectionOpen={workflowSectionOpen}
+              onWorkflowSectionOpenChange={setWorkflowSectionOpen}
+              onRefreshGit={onRefreshGit}
+              onOpenGitReview={onOpenGitReview}
+              onPauseGoal={
+                !readOnly && !selectionSideChat && snapshot?.availability.pauseGoal.allowed
+                  ? handlePauseGoal
                   : undefined
               }
-              selectionActions={
-                !isDraft && sessionId && !readOnly && !selectionSideChat
-                  ? {
-                      enabled: resolveConversationSelectionTooltipEnabled({
-                        selectionActionsEnabled: focused && !blockingInteractionId,
-                        partialShareActive: shareActive,
-                      }),
-                      sideActionDisabled: selectionSideActionBlocked,
-                      onAddToCurrentTask: handleAddSelectionToCurrentTask,
-                      onAskInSideChat: handleOpenSelectionSideConversation,
-                    }
+              onResumeGoal={
+                !readOnly && !selectionSideChat && snapshot?.availability.resumeGoal.allowed
+                  ? handleResumeGoal
                   : undefined
+              }
+              onOpenPlanDetail={onOpenPlanDetail ? handleOpenPlanDetail : undefined}
+              onOpenBackgroundBash={
+                onOpenBackgroundBash && sessionId
+                  ? (work) =>
+                      onOpenBackgroundBash({
+                        workspacePath,
+                        workspaceIdentity: workspaceIdentity ?? undefined,
+                        remoteSessionId: remoteSessionId ?? undefined,
+                        rootSessionId: rootSessionId ?? sessionId,
+                        sessionId,
+                        workId: work.workId,
+                        title: work.title,
+                      })
+                  : undefined
+              }
+              onCancelBackgroundWork={readOnly ? undefined : handleCancelBackgroundWork}
+              onOpenSubagentSession={onOpenSubagentSession ? handleOpenSubagentSession : undefined}
+              onOpenSubagentDirectory={
+                onOpenSubagentDirectory ? handleOpenSubagentDirectory : undefined
+              }
+              onOpenWorkflowRun={
+                onOpenWorkflowRun && sessionId ? handleOpenWorkflowRunFromPanel : undefined
+              }
+              endedWorkflowRunCount={endedWorkflowRunCount}
+              onOpenWorkflowRunDirectory={
+                onOpenWorkflowRunDirectory ? handleOpenWorkflowRunDirectoryFromPanel : undefined
               }
             />
-          </SessionPluginReferenceIconBoundary>
-        )}
+          ) : null}
+
+          {readOnly && controlLastError ? (
+            <div
+              role="alert"
+              data-testid="v4-subagent-readonly-error"
+              className="mx-4 mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-3 py-2 text-ui-base text-[var(--color-danger)]"
+            >
+              {controlLastError.message}
+            </div>
+          ) : null}
+
+          {errored ? (
+            <SessionSubscriptionErrorPanel
+              error={state.lastError ?? intl.formatMessage({ id: "chat.error.connectionLost" })}
+              sessionId={sessionId}
+              workspacePath={workspacePath}
+              onReconnect={handleRetrySubscribe}
+            />
+          ) : (
+            <SessionPluginReferenceIconBoundary
+              enabled={pluginReferenceIconsEnabled}
+              remoteSessionId={remoteSessionId}
+              sessionId={sessionId}
+              workspaceIdentity={workspaceIdentity}
+              workspacePath={workspacePath}
+            >
+              <ConversationTimeline
+                scrollToBottomActionRef={timelineScrollToBottomRef}
+                scrollToQueryActionRef={timelineScrollToQueryRef}
+                selectionPanelLayoutContainerRef={conversationLayoutContainerRef}
+                rows={timelineSnapshot?.rows.window ?? []}
+                pendingGuides={timelineSnapshot ? pendingGuideProjection?.pendingGuides : []}
+                apiRetry={timelineSnapshot?.control.apiRetry ?? null}
+                totalCount={timelineSnapshot?.rows.totalCount ?? 0}
+                sessionKey={sessionId ?? "draft"}
+                scrollMemoryKey={timelineScrollMemoryKey}
+                rowContext={rowContext}
+                onFork={forkActionsEnabled ? handleFork : undefined}
+                onRetry={retryActionsEnabled ? handleRetry : undefined}
+                onFeedbackChange={
+                  !readOnly && !selectionSideChat && sessionId ? handleAssistantFeedback : undefined
+                }
+                onEdit={editActionsEnabled ? handleEdit : undefined}
+                canLoadOlder={timelineSnapshot ? hasOlderRows(timelineSnapshot) : false}
+                loadingOlder={timelineSnapshot ? state.loadingOlder : false}
+                onLoadOlder={handleLoadOlder}
+                onLoadAllOlder={handleLoadAllOlder}
+                turnNavigatorDirectoryRevision={state.turnNavigatorDirectoryRevision}
+                bottomDock={conversationBottomDock}
+                hideTurnNavigator={shareActive && shareInSelectionStage}
+                backgroundScrollLocked={resolveConversationShareBackgroundScrollLocked({
+                  partialShareActive: shareActive,
+                  stage: shareDraft?.stage ?? "selection",
+                  view: shareDraft?.view,
+                })}
+                headerSlot={
+                  // unsupportedRowCount 也要开这个门：整份副本的行都被本 build 跳过时
+                  // rows 为空，但只读块必须留下来显示「需要更新 ZCode」，不能整块消失。
+                  importedShare &&
+                  (importedShare.rows.length > 0 || importedShare.unsupportedRowCount > 0) ? (
+                    <ConversationShareImportNotice
+                      rows={importedShare.rows}
+                      unsupportedRowCount={importedShare.unsupportedRowCount}
+                      artifactNames={importedShareArtifactNames}
+                      artifactWorkspaceRelativePaths={importedShareArtifactWorkspaceRelativePaths}
+                      workspacePath={workspacePath}
+                      {...(workspaceIdentity ? { workspaceIdentity } : {})}
+                      {...(remoteSessionId ? { workspaceRemoteSessionId: remoteSessionId } : {})}
+                      locale={locale}
+                      theme={theme}
+                      codePreviewSettings={codePreviewSettings}
+                      onOpenShareUrl={onOpenBrowserUrl ? handleOpenImportedShareUrl : undefined}
+                      onOpenFileLink={onOpenFileLink}
+                      onOpenCodeViewer={onOpenCodeViewer}
+                    />
+                  ) : null
+                }
+                emptyState={
+                  isDraft ? (
+                    <div data-testid={TID_CHAT_EMPTY} className="w-full">
+                      <ConversationDraftEmptyState />
+                    </div>
+                  ) : null
+                }
+                centerEmptyStateWithDock={isDraft && !isFloatingPresentation}
+                floatingComposerDock={isFloatingPresentation}
+                onComposerDockHeightChange={
+                  isFloatingPresentation && focused
+                    ? panePresentation.reportComposerDockHeight
+                    : undefined
+                }
+                onLatestTurnSummaryChange={
+                  isFloatingPresentation && focused
+                    ? handleFloatingLatestTurnSummaryChange
+                    : undefined
+                }
+                summaryPanelLayout={statusPanelLayout}
+                conversationFindQuery={!isDraft && focused ? conversationFindQuery : ""}
+                conversationFindActiveIndex={!isDraft && focused ? conversationFindActiveIndex : -1}
+                conversationFindNavigationRequestId={
+                  !isDraft && focused ? conversationFindNavigationRequestId : 0
+                }
+                onConversationFindMatchStateChange={
+                  !isDraft && focused ? onConversationFindMatchStateChange : undefined
+                }
+                searchResultHighlightRequest={isDraft ? null : searchResultHighlightRequest}
+                onSearchResultHighlightDone={onSearchResultHighlightDone}
+                sessionPhase={isDraft ? undefined : snapshot?.control.phase}
+                shareSelection={
+                  shareActive &&
+                  shareInSelectionStage &&
+                  shareDraft?.view === "timeline" &&
+                  sessionId
+                    ? {
+                        eligibleRowIds: eligibleShareRowIds,
+                        selectedRowIds: selectedShareRowIds,
+                        onToggle: handleShareSelectionToggle,
+                      }
+                    : undefined
+                }
+                selectionActions={
+                  !isDraft && sessionId && !readOnly && !selectionSideChat
+                    ? {
+                        enabled: resolveConversationSelectionTooltipEnabled({
+                          selectionActionsEnabled: focused && !blockingInteractionId,
+                          partialShareActive: shareActive,
+                        }),
+                        sideActionDisabled: selectionSideActionBlocked,
+                        onAddToCurrentTask: handleAddSelectionToCurrentTask,
+                        onAskInSideChat: handleOpenSelectionSideConversation,
+                      }
+                    : undefined
+                }
+              />
+            </SessionPluginReferenceIconBoundary>
+          )}
+        </div>
       </div>
-    </div>
+    </PluginUiSessionProvider>
   );
 }

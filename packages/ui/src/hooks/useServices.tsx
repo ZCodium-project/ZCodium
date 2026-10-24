@@ -7,15 +7,28 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { IServiceAccessor } from "@zcode/services";
 
 const ServiceContext = createContext<IServiceAccessor | null>(null);
+const ComposerClientNamespaceContext = createContext("desktop");
+
+/** 草稿按稳定客户端/目标主机隔离，不能使用换代的 bridge ID。 */
+export function useComposerClientNamespace(): string {
+  return useContext(ComposerClientNamespaceContext);
+}
 
 export function ServiceProvider({
   services,
   children,
+  composerClientNamespace,
 }: {
   services: IServiceAccessor;
   children: ReactNode;
+  composerClientNamespace?: string;
 }) {
-  return <ServiceContext.Provider value={services}>{children}</ServiceContext.Provider>;
+  const inheritedNamespace = useComposerClientNamespace();
+  return (
+    <ComposerClientNamespaceContext.Provider value={composerClientNamespace ?? inheritedNamespace}>
+      <ServiceContext.Provider value={services}>{children}</ServiceContext.Provider>
+    </ComposerClientNamespaceContext.Provider>
+  );
 }
 
 export function useServices(): IServiceAccessor {

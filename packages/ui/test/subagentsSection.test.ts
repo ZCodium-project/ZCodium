@@ -33,6 +33,13 @@ const mockSubagentsService = vi.hoisted(() => ({
   setPluginAgentModelOverride: vi.fn(),
 }));
 const mockRefreshLoadedSubagentsStoreForWorkspace = vi.hoisted(() => vi.fn(async () => {}));
+vi.mock("@/workspace-config-catalog/index.js", () => ({
+  useConfigWorkspaceTargets: () => mockTabs.tabs,
+  useConfigWorkspaceServicesResolution: () => ({
+    services: { subagentsService: mockSubagentsService, pluginManagementService: {} },
+    rpcReady: true,
+  }),
+}));
 const mockUseModelProviders = vi.hoisted(() =>
   vi.fn(() => ({
     displayOrder: { providerIds: [] },

@@ -1,120 +1,40 @@
 import { describe, expect, it } from "vitest";
-import type { WindowTabState } from "@/store/tabStore.js";
 import {
-  buildAutomationWorkspaceOptions,
   findAutomationWorkspaceOptionByKey,
   reconcileAutomationWorkspaceSelectionKey,
   resolveAutomationWorkspaceSelectionKey,
 } from "@/settings/automationWorkspaceOptions.js";
 
-describe("automation workspace options", () => {
-  it("只保留当前打开且可用的项目 tab", () => {
-    const tabs: WindowTabState[] = [
-      { id: "settings", kind: "settings", label: "settings" } as never,
-      {
-        id: "project-open",
-        kind: "workspace",
-        workspacePath: "/repo/open",
-        label: "open",
-        workspacePurpose: "project",
-      },
-      {
-        id: "conversation-default",
-        kind: "workspace",
-        workspacePath: "/app/default",
-        label: "default",
-        workspacePurpose: "conversation",
-      },
-      {
-        id: "project-deleted",
-        kind: "workspace",
-        workspacePath: "/repo/deleted",
-        label: "deleted",
-        availability: "unavailable-local-directory",
-        workspacePurpose: "project",
-      },
-    ] as WindowTabState[];
+describe("automation project selection", () => {
+  const options = [
+    { projectId: "one", hostId: "local", workspacePath: "/same", label: "one" },
+    { projectId: "two", hostId: "local", workspacePath: "/same", label: "two" },
+    { projectId: "two", hostId: "remote:server:two", workspacePath: "/same", label: "remote" },
+  ];
 
-    expect(buildAutomationWorkspaceOptions(tabs)).toEqual([
-      {
-        workspacePath: "/repo/open",
-        label: "open",
-      },
-    ]);
+  it("同 cwd、跨 Host 的项目选择分别隔离", () => {
+    const keys = options.map(resolveAutomationWorkspaceSelectionKey);
+    expect(new Set(keys).size).toBe(3);
+    expect(findAutomationWorkspaceOptionByKey(options, keys[1]!)).toBe(options[1]);
+    expect(findAutomationWorkspaceOptionByKey(options, keys[2]!)).toBe(options[2]);
   });
 
-  it("远程同路径项目按 workspaceIdentity 隔离并保留会话信息", () => {
-    const tabs = [
-      {
-        id: "remote-a",
-        kind: "workspace",
-        workspacePath: "/repo",
-        label: "remote-a",
-        workspaceIdentity: "remote:ssh:a:/repo",
-        remoteSessionId: "session-a",
-      },
-      {
-        id: "remote-b",
-        kind: "workspace",
-        workspacePath: "/repo",
-        label: "remote-b",
-        workspaceIdentity: "remote:ssh:b:/repo",
-        remoteSessionId: "session-b",
-      },
-    ] as WindowTabState[];
-
-    expect(buildAutomationWorkspaceOptions(tabs)).toMatchObject([
-      {
-        label: "remote-a",
-        workspaceIdentity: "remote:ssh:a:/repo",
-        remoteSessionId: "session-a",
-      },
-      {
-        label: "remote-b",
-        workspaceIdentity: "remote:ssh:b:/repo",
-        remoteSessionId: "session-b",
-      },
-    ]);
-
-    const options = buildAutomationWorkspaceOptions(tabs);
-    const selectedKey = resolveAutomationWorkspaceSelectionKey(options[1]!);
-    expect(selectedKey).toBe("remote:ssh:b:/repo");
-    expect(findAutomationWorkspaceOptionByKey(options, selectedKey)).toMatchObject({
-      workspacePath: "/repo",
-      workspaceIdentity: "remote:ssh:b:/repo",
-      remoteSessionId: "session-b",
-    });
+  it("有效当前选择保留，失效时依次回落默认项目、首项目或 null", () => {
+    const firstKey = resolveAutomationWorkspaceSelectionKey(options[0]!);
+    const secondKey = resolveAutomationWorkspaceSelectionKey(options[1]!);
+    expect(reconcileAutomationWorkspaceSelectionKey(options, firstKey, options[1])).toBe(firstKey);
+    expect(reconcileAutomationWorkspaceSelectionKey(options, null, options[1])).toBe(secondKey);
+    expect(reconcileAutomationWorkspaceSelectionKey(options, "removed")).toBe(firstKey);
+    expect(reconcileAutomationWorkspaceSelectionKey([], "removed")).toBeNull();
   });
 
-  it("无有效项目时选择收敛为 null，不回退到默认或 conversation workspace", () => {
+  it("已有未归类任务保持真实 cwd identity，不伪造项目或改绑定目录", () => {
     expect(
-      reconcileAutomationWorkspaceSelectionKey([], "/app/default", {
-        workspacePath: "/app/default",
+      resolveAutomationWorkspaceSelectionKey({
+        projectId: null,
+        workspacePath: "/old",
+        workspaceIdentity: "remote:server:one:/old",
       }),
-    ).toBeNull();
-  });
-
-  it("候选恢复后优先选择有效默认项目，并保留仍有效的当前项目", () => {
-    const options = [
-      { workspacePath: "/repo/first", label: "first" },
-      {
-        workspacePath: "/repo",
-        workspaceIdentity: "remote:ssh:b:/repo",
-        label: "remote-b",
-      },
-    ];
-
-    expect(
-      reconcileAutomationWorkspaceSelectionKey(options, null, {
-        workspacePath: "/repo",
-        workspaceIdentity: "remote:ssh:b:/repo",
-      }),
-    ).toBe("remote:ssh:b:/repo");
-    expect(
-      reconcileAutomationWorkspaceSelectionKey(options, "/repo/first", {
-        workspacePath: "/repo",
-        workspaceIdentity: "remote:ssh:b:/repo",
-      }),
-    ).toBe("/repo/first");
+    ).toBe("remote:server:one:/old");
   });
 });

@@ -109,6 +109,10 @@ import {
 import { AppearanceSectionContent } from "./settingsCodePreview.js";
 import type { SettingsSectionId } from "@/lib/settingsNavigation.js";
 import { requestPluginStoreOpen } from "@/lib/pluginStoreNavigation.js";
+import {
+  SourceServerManagementPanel,
+  type SourceServerSettingsNavigation,
+} from "@/source-server-settings/index.js";
 
 function SettingsUsageProviderTabs({
   activeTab,
@@ -256,6 +260,7 @@ export function SettingsPage({
   allowOpenWorkspace = true,
   onLogout,
   user,
+  sourceServerSettings,
 }: {
   isDesktop?: boolean;
   isWindowsDesktop?: boolean;
@@ -269,6 +274,7 @@ export function SettingsPage({
   allowOpenWorkspace?: boolean;
   onLogout?: () => void;
   user?: UserInfo | null;
+  sourceServerSettings?: SourceServerSettingsNavigation;
 }) {
   const { intl, localePreference, setLocalePreference } = useZCodeIntl();
   const { settingsSectionGroups, settingsSections } = useMemo(
@@ -1479,6 +1485,13 @@ export function SettingsPage({
                               workspaceDisplayNames={memoryWorkspaceDisplayNames}
                             />
                           </ServiceProvider>
+                        ) : activeSection === "remoteDevices" ? (
+                          <SourceServerManagementPanel
+                            key={`remote:${settingsSectionNavigationVersion}`}
+                            {...sourceServerSettings}
+                            settings={sharedSettings}
+                            onUpdateSettings={updateSharedSettings}
+                          />
                         ) : activeSection === "officialServices" ? (
                           <OfficialServicesSettingsSection
                             switches={sharedSettings?.officialServices}

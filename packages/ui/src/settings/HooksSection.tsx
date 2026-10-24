@@ -5,7 +5,10 @@ import type { Hook, HookConfig, ZCodeInstalledPluginSummary, ZCodePluginInfo } f
 import { Button } from "@/components/ui/button.js";
 import { toast } from "@/components/ui/toast.js";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog.js";
-import { useWorkspaceServicesResolution } from "@/hooks/useWorkspaceServices.js";
+import {
+  useConfigWorkspaceTargets,
+  useConfigWorkspaceServicesResolution as useWorkspaceServicesResolution,
+} from "@/workspace-config-catalog/index.js";
 import { useZCodeSessionService } from "@/hooks/useZCodeSessionService.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { invalidateDeferredDraftSessionForRuntimeChange } from "@/lib/zcodeDraftSkillInvalidation.js";
@@ -19,18 +22,12 @@ import { getWorkspaceKey } from "@/lib/workspaceKey.js";
 import { HooksList, type HookScope, type PluginHookRow } from "./HooksList.js";
 import { useWorkspaceHookInlineTrust } from "./useWorkspaceHookInlineTrust.js";
 import { useWorkspaceHookReviewStore } from "@/store/workspaceHookReviewStore.js";
-import {
-  PluginScopeMenu,
-  getPluginWorkspaceKey,
-  isPluginScopeWorkspaceConnected,
-} from "@/settings/PluginScopeMenu.js";
+import { PluginScopeMenu, getPluginWorkspaceKey } from "@/settings/PluginScopeMenu.js";
 import { PluginLoadingState, PluginSearchEmptyState } from "@/settings/PluginInstallEmptyState.js";
 import {
   resolvePluginDisplayName,
   resolveUniquePluginListingByName,
 } from "@/settings/pluginStoreListing.js";
-import { useTabStore } from "@/store/TabStoreProvider.js";
-import { isWorkspaceTab } from "@/store/tabStore.js";
 import {
   shouldShowWorkspaceHookTrustNotice,
   WorkspaceHookTrustNotice,
@@ -153,19 +150,7 @@ export function HooksSection({ workspacePath, workspaceIdentity }: HooksSectionP
   const [viewMode, setViewMode] = useState<"list" | "form">("list");
   const [editingHook, setEditingHook] = useState<Hook | null>(null);
   const [query, setQuery] = useState("");
-  const tabs = useTabStore((state) => state.tabs);
-  const workspaceTabs = useMemo(() => {
-    const seen = new Set<string>();
-    return tabs
-      .filter(isWorkspaceTab)
-      .filter(isPluginScopeWorkspaceConnected)
-      .filter((tab) => {
-        const key = getPluginWorkspaceKey(tab);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-  }, [tabs]);
+  const workspaceTabs = useConfigWorkspaceTargets();
   const [selectedScopeKey, setSelectedScopeKey] = useState("user");
   const deferredQuery = useDeferredValue(query);
   const selectedWorkspace = workspaceTabs.find(

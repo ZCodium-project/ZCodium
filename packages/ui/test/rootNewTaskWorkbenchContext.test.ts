@@ -11,6 +11,7 @@ import {
   usePaneLayoutStore,
 } from "@/v4/paneLayoutStore.js";
 import { useWorkbenchGroupStore } from "@/v4/workbenchGroupStore.js";
+import { parseRemoteWorkspaceIdentity } from "@zcode/shared";
 
 const mountedRoots: Root[] = [];
 
@@ -133,11 +134,63 @@ function renderRootActions({
     tabState.activeWorkspaceIdentity = options?.workspaceIdentity ?? null;
   });
 
+  // 项目化新建先读取 Host 组织归属再 prepare；旧空 accessor 已不代表可创建任务的环境。
+  const services = {
+    projectService: {
+      readTree: vi.fn(async () => ({
+        projects: [],
+        tasks: Object.entries(useZCodeSessionStore.getState().workspaces).flatMap(
+          ([key, workspace]) => {
+            const parsed = parseRemoteWorkspaceIdentity(key);
+            const workspacePath = parsed?.workspacePath ?? key;
+            return workspace.activeTaskId
+              ? [
+                  {
+                    workspacePath,
+                    ...(parsed ? { workspaceIdentity: key } : {}),
+                    taskId: workspace.activeTaskId,
+                    projectId: workspacePath === "/workspace-b" ? "project-b" : "project-a",
+                  },
+                ]
+              : [];
+          },
+        ),
+      })),
+      prepareSession: vi.fn(async (input: { projectId?: string; hostId?: string }) => {
+        const workspacePath = input.projectId === "project-b" ? "/workspace-b" : "/workspace-a";
+        return {
+          workspacePath,
+          ...(input.hostId && input.hostId !== "local"
+            ? { workspaceIdentity: `${input.hostId}:${workspacePath}` }
+            : {}),
+          projectId: input.projectId ?? null,
+          additionalDirectories: [],
+        };
+      }),
+    },
+  };
+  for (const [path, identity] of [
+    ["/workspace-a", activeWorkspaceIdentity ?? undefined],
+    ["/workspace-b", undefined],
+    ["/workspace-b", "remote:ssh:dev:22:user:/workspace-b"],
+  ] as const) {
+    const state = workspaceState(path, identity);
+    useZCodeSessionStore.setState((current) => ({
+      workspaces: {
+        ...current.workspaces,
+        [identity || path]: {
+          ...state,
+          draftProjectId: path === "/workspace-b" ? "project-b" : "project-a",
+        },
+      },
+    }));
+  }
+
   function Probe() {
     const actions = useRootWorkspaceActions({
       intl: { formatMessage: ({ id }: { id: string }) => id },
       platform: {} as never,
-      services: {} as never,
+      services: services as never,
       tabStoreApi: { getState: () => tabState } as never,
       addTab,
       activeWorkspacePath: tabState.activeWorkspacePath,
@@ -150,6 +203,12 @@ function renderRootActions({
       setOAuthError: vi.fn(),
       setUser: vi.fn(),
       workbenchGroupClientMode,
+      openRemoteProjectWorkspace: async (target) => {
+        addTab(target.workspacePath, target);
+        // 与真实 history owner 一样，在 workspace 激活点交付草稿，而不是返回后补写。
+        target.onWorkspaceActivated?.();
+      },
+      openMobileProjectDraft: async () => {},
     });
     handleCreateTask = actions.handleCreateTask;
     handleSelectConversationWorkspace = actions.handleSelectConversationWorkspace;
@@ -187,7 +246,7 @@ describe("root new task workbench context", () => {
   beforeEach(resetState);
   afterEach(resetState);
 
-  it("creates the draft in the focused read-only subagent pane workspace and exits split view", () => {
+  it("creates the draft in the focused read-only subagent pane workspace and exits split view", async () => {
     useZCodeSessionStore.getState().setActiveTaskId("/workspace-a", "main-session");
     useWorkbenchGroupStore.getState().splitSessionIntoGroup(
       V4_PRIMARY_PANE_ID,
@@ -195,7 +254,7 @@ describe("root new task workbench context", () => {
       {
         workspaceScope: {
           workspacePath: "/workspace-b",
-          workspaceIdentity: "remote:ssh:dev:/workspace-b",
+          workspaceIdentity: "remote:ssh:dev:22:user:/workspace-b",
         },
         sessionId: "child-session",
         readOnly: true,
@@ -207,20 +266,24 @@ describe("root new task workbench context", () => {
     );
     const { getHandleCreateTask, tabState } = renderRootActions();
 
-    act(() => {
-      getHandleCreateTask()();
+    await act(async () => {
+      await getHandleCreateTask()();
     });
 
     expect(tabState.activeWorkspacePath).toBe("/workspace-b");
-    expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:/workspace-b");
+    expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:22:user:/workspace-b");
     expect(workspaceState("/workspace-a").activeTaskId).toBe("main-session");
-    expect(workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").activeTaskId).toBeNull();
-    expect(workspaceState("/workspace-b", "remote:ssh:dev:/workspace-b").draftFocusVersion).toBe(1);
+    expect(
+      workspaceState("/workspace-b", "remote:ssh:dev:22:user:/workspace-b").activeTaskId,
+    ).toBeNull();
+    expect(
+      workspaceState("/workspace-b", "remote:ssh:dev:22:user:/workspace-b").draftFocusVersion,
+    ).toBe(1);
     expect(useWorkbenchGroupStore.getState().activeGroupId).toBeNull();
     expect(countPanes(usePaneLayoutStore.getState())).toBe(1);
   });
 
-  it("creates the draft in a focused ordinary split pane workspace and resets to one panel", () => {
+  it("creates the draft in a focused ordinary split pane workspace and resets to one panel", async () => {
     useZCodeSessionStore.getState().setActiveTaskId("/workspace-a", "main-session");
     usePaneLayoutStore.getState().splitPaneWithBinding(V4_PRIMARY_PANE_ID, "right", {
       workspaceScope: { workspacePath: "/workspace-b" },
@@ -228,8 +291,8 @@ describe("root new task workbench context", () => {
     });
     const { getHandleCreateTask, tabState } = renderRootActions();
 
-    act(() => {
-      getHandleCreateTask()();
+    await act(async () => {
+      await getHandleCreateTask()();
     });
 
     expect(tabState.activeWorkspacePath).toBe("/workspace-b");
@@ -246,14 +309,14 @@ describe("root new task workbench context", () => {
       {
         workspaceScope: {
           workspacePath: "/workspace-b",
-          workspaceIdentity: "remote:ssh:dev:/workspace-b",
+          workspaceIdentity: "remote:ssh:dev:22:user:/workspace-b",
         },
         sessionId: "secondary-session",
       },
       {
         workspaceScope: {
           workspacePath: "/workspace-a",
-          workspaceIdentity: "remote:ssh:dev:/workspace-a",
+          workspaceIdentity: "remote:ssh:dev:22:user:/workspace-a",
         },
         sessionId: "main-session",
       },
@@ -261,12 +324,12 @@ describe("root new task workbench context", () => {
     usePaneLayoutStore.getState().splitPaneWithBinding(V4_PRIMARY_PANE_ID, "right", {
       workspaceScope: {
         workspacePath: "/workspace-b",
-        workspaceIdentity: "remote:ssh:dev:/workspace-b",
+        workspaceIdentity: "remote:ssh:dev:22:user:/workspace-b",
       },
       sessionId: "hidden-secondary-session",
     });
     const { getHandleCreateTask, tabState } = renderRootActions({
-      activeWorkspaceIdentity: "remote:ssh:dev:/workspace-a",
+      activeWorkspaceIdentity: "remote:ssh:dev:22:user:/workspace-a",
       workbenchGroupClientMode: "web-remote-replayable",
     });
 
@@ -275,14 +338,16 @@ describe("root new task workbench context", () => {
     });
 
     expect(tabState.activeWorkspacePath).toBe("/workspace-a");
-    expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:/workspace-a");
-    expect(workspaceState("/workspace-a", "remote:ssh:dev:/workspace-a").activeTaskId).toBeNull();
+    expect(tabState.activeWorkspaceIdentity).toBe("remote:ssh:dev:22:user:/workspace-a");
+    expect(
+      workspaceState("/workspace-a", "remote:ssh:dev:22:user:/workspace-a").activeTaskId,
+    ).toBeNull();
   });
 
-  it("preserves initial prompt trailing space in the targeted remote identity bucket", () => {
+  it("preserves initial prompt trailing space in the targeted remote identity bucket", async () => {
     const workspacePath = "/workspace-a";
-    const workspaceIdentity = "remote:ssh:dev:/workspace-a";
-    const otherWorkspaceIdentity = "remote:ssh:other:/workspace-a";
+    const workspaceIdentity = "remote:ssh:dev:22:user:/workspace-a";
+    const otherWorkspaceIdentity = "remote:ssh:other:22:user:/workspace-a";
     const mention = {
       id: "skill:skill-creator",
       category: "skills" as const,
@@ -295,8 +360,8 @@ describe("root new task workbench context", () => {
       activeWorkspaceIdentity: workspaceIdentity,
     });
 
-    act(() => {
-      getHandleCreateTask()({
+    await act(async () => {
+      await getHandleCreateTask()({
         initialPrompt: "$skill-creator ",
         initialPromptMention: mention,
       });
