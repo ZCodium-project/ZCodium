@@ -36,7 +36,7 @@
     "test:unit": "vitest run --exclude \"packages/desktop/test/e2e/**/*.test.ts\"",
     "test:unit:affected": "node scripts/run-affected-unit-tests.mjs",
     "test:docker:web-app-gateway": "node scripts/test-web-app-gateway-reset.mjs",
-    "verify:pre-push": "pnpm run lint && pnpm run architecture:check -- --changed && pnpm run db:schema:check && pnpm run test:unit:affected",
+    "verify:pre-push": "pnpm run lint && pnpm run architecture:check -- --changed && pnpm run db:schema:check && pnpm run typecheck && pnpm run test:unit:affected",
     "build": "pnpm -r build",
     "build:desktop-agent:bytecode": "node scripts/build-desktop-agent-bytecode.mjs",
     "build:docs": "pnpm --filter @zcode/dev-docs build",
