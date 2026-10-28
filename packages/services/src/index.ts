@@ -246,7 +246,12 @@ export { IFileWatcherService } from "./fileWatcher/fileWatcher.js";
 
 // OAuth service — IOAuthService is both a type (interface) and value (descriptor)
 export { IOAuthService } from "./oauth/oauth.js";
-export { IOrcaRouterService } from "./orcarouter/service.js";
+// IOrcaRouterService 的实现模块（orcarouter/service.js）顶层静态依赖 connect.js（node:crypto），
+// 以值导出的形式留在根 barrel 会把整条 node 依赖链拉进浏览器模块图（renderer 与 web 侧
+// 对 @zcode/services 的值导入会解析到它）。这里只导出类型（编译期擦除），需要描述符值的
+// 消费方（client 的 RemoteServiceAccess）改用 @zcode/shared 的 ServiceChannels.OrcaRouter
+// 取 channel 名。browserSafeBarrel.test.ts 守卫本约束。
+export type { IOrcaRouterService } from "./orcarouter/service.js";
 
 // UsageStats service — IUsageStatsService is both a type (interface) and value (descriptor)
 export { IUsageStatsService } from "./usage-stats/usageStats.js";
