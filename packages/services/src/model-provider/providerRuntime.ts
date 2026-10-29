@@ -24,6 +24,7 @@ import {
   type ModelSelectionConfiguredDefaultSource,
   type ProviderSettingsConnectivityTester,
 } from "./providerFacadeServices.js";
+import { createRemoteModelCatalogExecutor } from "./remoteModelCatalog.js";
 import { createServiceLogger } from "#src/logger/serviceLogger.js";
 
 const log = createServiceLogger("provider-runtime");
@@ -104,10 +105,13 @@ export class ProviderRuntime {
     );
     const ensureReady = () => this.start();
     const settingsFacade = new ProviderSettingsFacade(this.registryService, mutations);
+    // 设置服务缺少第四个参数时会在发请求前报“未装配”；在共享 Runtime 统一接入
+    // 现有只读执行器，让所有创建入口都能使用草稿连接信息检测模型。
     this.providerSettings = createProviderSettingsService(
       settingsFacade,
       ensureReady,
       dependencies.testConnectivity,
+      createRemoteModelCatalogExecutor({}),
     );
     this.#modelSelectionRuntime = createModelSelectionService(
       createNodeModelSelectionFacade(this.registryService),
