@@ -20,6 +20,8 @@ import openrouterDark from "@/assets/provider-icons/model-provider-openrouter-da
 import opencodeLight from "@/assets/provider-icons/model-provider-opencode-light.svg";
 import opencodeDark from "@/assets/provider-icons/model-provider-opencode-dark.svg";
 import orcaRouterLogo from "@/assets/provider-icons/model-provider-orcarouter.png";
+import cheaperInferenceLight from "@/assets/provider-icons/model-provider-cheaperinference-light.svg";
+import cheaperInferenceDark from "@/assets/provider-icons/model-provider-cheaperinference-dark.svg";
 
 type ProviderLogoRef = NonNullable<ProviderConfigObject["logo"]>;
 
@@ -46,6 +48,7 @@ const BUILTIN_PROVIDER_LOGO_ASSETS: Readonly<Record<string, BuiltinProviderLogoA
   opencode: { light: opencodeLight, dark: opencodeDark },
   // 官方经典图标，同一素材同时用于 API Key 与 PKCE 两个入口。
   orcarouter: { light: orcaRouterLogo },
+  cheaperinference: { light: cheaperInferenceLight, dark: cheaperInferenceDark },
 };
 
 export function resolveBuiltinProviderLogoAsset(

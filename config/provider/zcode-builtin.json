@@ -714,6 +714,27 @@
               "key": "orcarouter"
             }
           }
+        },
+        {
+          "templateId": "cheaperinference",
+          "templateNameMap": {
+            "zh-CN": "Cheaper Inference",
+            "en-US": "Cheaper Inference"
+          },
+          "config": {
+            "access": {
+              "type": "api-key"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.cheaperinference.com/v1"
+            },
+            "builtinModelIds": ["gpt-5.4-mini", "claude-sonnet-5"],
+            "logo": {
+              "type": "builtin",
+              "key": "cheaperinference"
+            }
+          }
         }
       ],
       "providerRules": []
@@ -6014,6 +6035,20 @@
         {
           "templateId": "orcarouter",
           "modelId": "orcarouter/auto",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "cheaperinference",
+          "modelId": "gpt-5.4-mini",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "cheaperinference",
+          "modelId": "claude-sonnet-5",
           "config": {
             "enabled": true
           }
