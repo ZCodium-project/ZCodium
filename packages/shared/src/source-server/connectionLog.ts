@@ -1,9 +1,11 @@
 function redactUnquotedPath(value: string): string {
   // 裸路径可能含空格，不能把空格后的用户名/目录当成正文放行。只保留机器可识别的
   // 诊断尾部和已经脱敏的字段；其他无法消歧的尾部继续保守过滤，生产者应给路径加引号。
+  // Bug 原因：Docker 错误在 URL 后还会输出裸 socket 路径，旧规则连同末尾的 connect
+  // 系统错误一起吞掉；只放行有明确分隔符的这三种诊断，仍不按空格猜测路径边界。
   const suffix =
     value.match(
-      /(?:\s+(?:failed with exit code -?\d+|permission denied|no space left on device|read-only file system|[\w-]+=\[redacted\]))+\.?$/iu,
+      /(?:: connect: (?:no such file or directory|connection refused|permission denied)|(?:\s+(?:failed with exit code -?\d+|permission denied|no space left on device|read-only file system|[\w-]+=\[redacted\]))+)\.?$/iu,
     )?.[0] ?? "";
   return `[redacted-path]${suffix}`;
 }
@@ -45,7 +47,10 @@ export function sanitizeRemoteConnectionLog(
         "$1[redacted]",
       )
       .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, "[redacted]")
-      .replace(/(?:https?|wss?|file):\/\/[^\s"'<>]+/gi, "[redacted-url]")
+      // Bug 原因：docker CLI 报错带 daemon 地址（unix:// / npipe:// / tcp://），旧规则不认这些协议，
+      // `unix:` 里的 `x:/` 又被下面的 Windows 盘符规则当成路径开头，一直遮到行尾，
+      // 用户看不到 “Is the docker daemon running?” 这类原因。把它们按 URL 整体遮蔽，保留后续正文。
+      .replace(/(?:https?|wss?|file|unix|npipe|tcp):\/\/[^\s"'<>]+/gi, "[redacted-url]")
       // 引号提供精确边界，保留后续正文；无引号时不能靠空格猜测路径结束位置。
       .replace(/"(?:~?\/|[A-Za-z]:[\\/]|\\\\)(?:\\[^\r\n]|[^"\\\r\n])*"/g, "[redacted-path]")
       .replace(/'(?:~?\/|[A-Za-z]:[\\/]|\\\\)[^'\r\n]*'/g, "[redacted-path]")

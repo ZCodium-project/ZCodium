@@ -1,0 +1,5 @@
+/* Radix 在紧邻的浮层上给出真实展开方向；只翻转本组件的末尾箭头，不另存定位状态。 */
+.file-application-more-trigger:has(+ [data-radix-popper-content-wrapper] > [data-side="left"])
+  > svg:last-child {
+  transform: rotate(180deg);
+}

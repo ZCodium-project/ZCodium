@@ -1,16 +1,19 @@
 import { spawn, execFile } from "node:child_process";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
-import type { DockerConnectOptions } from "@zcode/shared";
+import type { DockerConnectOptions, PublicZCodeErrorCode } from "@zcode/shared";
 import type {
   IRemoteBackend,
   RemoteEnvironment,
   RemoteUploadOptions,
   StdioStream,
 } from "@zcode/server/remote/backend.js";
-import { createCloseEventController } from "@zcode/server/remote/closeEvent.js";
 import {
-  isDockerAvailable,
+  createCloseEventController,
+  resolveRemoteExitCode,
+} from "@zcode/server/remote/closeEvent.js";
+import {
+  probeDockerDaemon,
   listDockerContainers,
   resolveDockerCommand,
   type DockerContainerInfo,
@@ -209,11 +212,12 @@ export class DockerBackend implements IRemoteBackend {
           onClose.fire(code);
         };
 
-        child.on("exit", (code) => {
-          fireOnce(code ?? 0);
+        // 被信号终止时 code 为 null，不能当作成功，见 resolveRemoteExitCode。
+        child.on("exit", (code, signal) => {
+          fireOnce(resolveRemoteExitCode(code, signal));
         });
-        child.on("close", (code) => {
-          fireOnce(code ?? 0);
+        child.on("close", (code, signal) => {
+          fireOnce(resolveRemoteExitCode(code, signal));
         });
 
         resolve({
@@ -262,20 +266,35 @@ export class DockerBackend implements IRemoteBackend {
     // Docker backend 的命令都是一次性子进程，没有常驻连接需要显式清理。
   }
 
+  async diagnoseExecFailure(): Promise<void> {
+    // exec 为了冷启动预算不预跑 daemon 探测（见 exec 注释），所以只在命令失败后探测一次。
+    // 丢弃之前成功的结果：daemon 可能在那之后停止，旧缓存会把这次失败误判成命令自身失败。
+    this.availabilityPromise = null;
+    await this.ensureAvailable();
+  }
+
   private async ensureAvailable(): Promise<void> {
     if (!this.availabilityPromise) {
       // Bug 原因：Source probe 内的每条 Docker exec 都重复执行 `docker version`；首次解析
       // container/home 又重复 `docker ps`。应用冷启动峰值下，四五个 CLI round-trip 会让
       // 单个本地 Docker Source 在真正 probe 前就耗尽 10 秒预算。Backend 生命周期内只需
       // 探测一次 daemon；失败清空 promise，后续显式重试仍可重新检测。
-      this.availabilityPromise = isDockerAvailable()
-        .then((available) => {
-          if (!available) throw new Error("当前系统未检测到可用的 Docker 环境");
-        })
-        .catch((error) => {
-          this.availabilityPromise = null;
-          throw error;
-        });
+      this.availabilityPromise = probeDockerDaemon().catch((error: unknown) => {
+        this.availabilityPromise = null;
+        // Bug 原因：旧逻辑经 isDockerAvailable 只拿到 false，连接错误只剩“未检测到可用的
+        // Docker 环境”，无法区分 docker 未安装、daemon 未启动与 socket 权限不足。这里保留
+        // docker CLI 原因供详细信息与日志使用；显式标为未分类，避免原因里的 “permission
+        // denied” 等文本被归一化成“没有容器写入权限”这类不相符的分类。
+        const detail = error instanceof Error ? error.message.trim() : String(error);
+        throw Object.assign(
+          new Error(
+            detail
+              ? `当前系统未检测到可用的 Docker 环境：${detail}`
+              : "当前系统未检测到可用的 Docker 环境",
+          ),
+          { code: "remote-connection-unknown" satisfies PublicZCodeErrorCode },
+        );
+      });
     }
     await this.availabilityPromise;
   }
