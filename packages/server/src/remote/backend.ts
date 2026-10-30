@@ -42,6 +42,11 @@ export interface IRemoteBackend extends IDisposable {
   upload(localPath: string, remotePath: string, options?: RemoteUploadOptions): Promise<void>;
   /** Execute a command on the remote machine, returning stdio streams */
   exec(command: string): Promise<StdioStream>;
+  /**
+   * exec 的命令非零退出后调用：失败来自 backend 自身的传输（如 Docker daemon 不可用）时，
+   * 抛出带公开码的传输错误；传输正常时直接返回，由调用方按命令失败处理。
+   */
+  diagnoseExecFailure?(): Promise<void>;
   /** Check if a remote file exists */
   exists(remotePath: string): Promise<boolean>;
   /** Read a small remote file (e.g. version string) */

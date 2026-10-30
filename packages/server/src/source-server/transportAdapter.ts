@@ -22,6 +22,7 @@ import {
   duplexFromStdio,
   quoteShellArg,
   readLastJsonLine,
+  readStructuredCommandCode,
   readStructuredCommandError,
   throwIfAborted,
   type RemoteExecResult,
@@ -36,6 +37,8 @@ export interface SourceServerProbeResult {
   installPath?: string;
   installedVersion?: string;
   installedArchiveSha256?: string;
+  /** 当前 release 由显式降级安装时，被替换的版本。 */
+  downgradedFrom?: string;
   daemonStatus?: Record<string, unknown> & { state: string; port?: number };
 }
 
@@ -46,6 +49,8 @@ export interface SourceServerProbeOptions {
 export interface SourceServerIngressInfo {
   port: number;
   ingressToken: string;
+  /** 端口取自 probe 读到的 status.json 快照，本次没有执行 serve --daemon。 */
+  reusedProbeStatus?: true;
 }
 
 export interface ServerReleaseAsset {
@@ -69,6 +74,8 @@ export interface TransportContext {
 
 export interface SourceServerInstallOrUpdateOptions {
   force?: boolean;
+  /** 用户已确认把远端切换到更旧版本；方向由远端 CLI 按真实 current 判定。 */
+  allowDowngrade?: boolean;
 }
 
 export interface SourceServerEnsureDaemonOptions {
@@ -84,6 +91,41 @@ export class SourceServerTransportOperationError extends Error {
     super(message);
     this.name = "SourceServerTransportOperationError";
   }
+}
+
+/**
+ * 远端 Server CLI `--json` 失败输出 `{ok:false,error,code?,retryable?}`（写在 stdout）。
+ * 公开错误码必须原样保留给 Host/UI 分类，不能只取 error 文本。
+ */
+function createServerCommandError(result: RemoteExecResult, fallbackMessage: string): Error {
+  try {
+    const response = readLastJsonLine(result.stdout);
+    if (isPublicZCodeErrorCode(response.code)) {
+      return new SourceServerTransportOperationError(
+        typeof response.error === "string" && response.error.trim()
+          ? response.error
+          : fallbackMessage,
+        response.code,
+        typeof response.retryable === "boolean" ? response.retryable : undefined,
+      );
+    }
+  } catch {
+    // 输出不是 JSON 时按文本诊断处理。
+  }
+  // Bug 原因：CLI 的 --json 错误写在 stdout，stderr 可能只有 SQLite warning；
+  // 安装路径与 daemon 启动复用同一错误解析，避免 warning 覆盖真正的失败原因。
+  return new Error(
+    (readStructuredCommandError(result.stdout) ?? result.stderr.trim()) || fallbackMessage,
+  );
+}
+
+/** 读取远端 Server CLI `--json` 命令的最终 JSON；非零退出按 {@link createServerCommandError} 失败。 */
+export function readServerCommandResult(
+  result: RemoteExecResult,
+  fallbackMessage: string,
+): Record<string, unknown> {
+  if (result.exitCode !== 0) throw createServerCommandError(result, fallbackMessage);
+  return readLastJsonLine(result.stdout);
 }
 
 export type SourceServerFileTransfer = Pick<IRemoteBackend, "exec" | "upload">;
@@ -319,7 +361,7 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
       `tar -xzf ${remoteArchiveShell} -C ${bootstrapDirShell} --strip-components=1`,
       // Bug 原因：update 现在会重启完整 daemon；若不把既有 transport 能力边界传给目标
       // bootstrap CLI，WSL/Docker 会在 handoff 时误尝试注册不可用的 systemd user service。
-      `${this.kind === "ssh" ? "" : "ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 "}${bootstrapDirShell}/bin/zcode update --from-archive ${remoteArchiveShell}${options.force ? " --force" : ""} --server-root ${SERVER_ROOT_SHELL} --json --progress`,
+      `${this.kind === "ssh" ? "" : "ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 "}${bootstrapDirShell}/bin/zcode update --from-archive ${remoteArchiveShell}${options.force ? " --force" : ""}${options.allowDowngrade ? " --allow-downgrade" : ""} --server-root ${SERVER_ROOT_SHELL} --json --progress`,
     ].join(" && ");
     // 上传完成后命令仍需解压、整树校验和 daemon 换代；必须实时消费阶段，不能等退出才显示。
     const result = await collectCommand(await backend.exec(command), (line) => {
@@ -338,26 +380,7 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
       }
     });
     if (result.exitCode !== 0) {
-      try {
-        const response = readLastJsonLine(result.stdout);
-        if (isPublicZCodeErrorCode(response.code)) {
-          throw new SourceServerTransportOperationError(
-            typeof response.error === "string" && response.error.trim()
-              ? response.error
-              : "Source Server archive installation failed",
-            response.code,
-            typeof response.retryable === "boolean" ? response.retryable : undefined,
-          );
-        }
-      } catch (error) {
-        if (error instanceof SourceServerTransportOperationError) throw error;
-      }
-      // Bug 原因：CLI 的 --json 错误写在 stdout，stderr 可能只有 SQLite warning；
-      // 安装路径与 daemon 启动复用同一错误解析，避免 warning 覆盖真正的失败原因。
-      throw new Error(
-        (readStructuredCommandError(result.stdout) ?? result.stderr.trim()) ||
-          "Source Server archive installation failed",
-      );
+      throw createServerCommandError(result, "Source Server archive installation failed");
     }
     const response = readLastJsonLine(result.stdout);
     if (response.ok === false || response.applied !== true) {
@@ -384,10 +407,12 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
       if (result.exitCode !== 0) {
         // Bug 原因：Server CLI 的 --json 错误写在 stdout，Node 运行时 warning 写在 stderr。
         // 旧逻辑只取 stderr，最终把 SQLite warning 当成连接根因展示给用户。
-        throw new Error(
+        const message =
           (readStructuredCommandError(result.stdout) ?? result.stderr.trim()) ||
-            "Source Server daemon failed to start",
-        );
+          "Source Server daemon failed to start";
+        // CLI 失败信息会追加 Core 的失败原因；CLI 已按原首句带码时用该码，不让详情文本改判类别。
+        const code = readStructuredCommandCode(result.stdout);
+        throw code ? new SourceServerTransportOperationError(message, code) : new Error(message);
       }
       status = readLastJsonLine(result.stdout) as SourceServerProbeResult["daemonStatus"];
     }
@@ -398,10 +423,19 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
     if (!Number.isInteger(port) || (port as number) <= 0) {
       throw new Error("Source Server daemon did not report a valid ingress port");
     }
-    if (status.serviceRegistered === false) {
+    // Bug 原因：复用 probe 已确认就绪的 daemon 时也按 serviceRegistered 打印
+    // “started in detached fallback mode”，日志读起来像每次连接都另起了一个实例。
+    // 启动方式只在本次实际执行 serve --daemon 时报告。
+    if (observedReady) {
+      context.onLog?.({ phase: "daemon", message: "Reusing running Source Server" });
+    } else if (status.serviceRegistered === false) {
+      // Bug 原因：systemd 装载失败后 CLI 改用 fallback，原因只在本次输出的 serviceFallbackReason 里；
+      // 不写进连接日志，用户和排障都看不出这次为什么没有用 OS 用户服务。脱敏由连接日志统一处理。
+      const fallbackReason =
+        typeof status.serviceFallbackReason === "string" ? status.serviceFallbackReason.trim() : "";
       context.onLog?.({
         phase: "daemon",
-        message: "Source Server started in detached fallback mode for this remote environment",
+        message: `Source Server started in detached fallback mode for this remote environment${fallbackReason ? ` (${fallbackReason})` : ""}`,
       });
     } else if (status.serviceRegistered === true) {
       context.onLog?.({
@@ -414,7 +448,11 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
       await backend.readFile(`${SERVER_ROOT_READ_PATH}/run/ingress-token`)
     ).trim();
     if (!ingressToken) throw new Error("Source Server ingress token is missing");
-    return { port: port as number, ingressToken };
+    return {
+      port: port as number,
+      ingressToken,
+      ...(observedReady ? { reusedProbeStatus: true } : {}),
+    };
   }
 
   public async openChannel(
@@ -449,10 +487,11 @@ class BackendSourceServerTransportAdapter implements SourceServerTransportAdapte
     throwIfAborted(context.signal);
     const backend = await this.getBackend(target);
     const hasServerRoot = argv.includes("--server-root");
+    // `restart` 会在远端重新执行 serve --daemon，必须与它一样保持 detached fallback（R2 §8.1）。
+    const startsDaemon =
+      (argv[0] === "serve" && argv.includes("--daemon")) || argv[0] === "restart";
     const daemonEnvironment =
-      this.kind !== "ssh" && argv[0] === "serve" && argv.includes("--daemon")
-        ? "ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 "
-        : "";
+      this.kind !== "ssh" && startsDaemon ? "ZCODE_SERVER_SKIP_SERVICE_REGISTRATION=1 " : "";
     const command = [
       // Bug 原因：WSL/Docker 没有稳定的用户级服务管理器；若沿用 SSH 命令会尝试
       // 注册 systemd user service 并在常见环境中失败。两者必须显式进入 detached fallback。

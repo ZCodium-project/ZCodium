@@ -172,34 +172,74 @@ export async function pruneKoffiRuntime(
   }
 }
 
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** 构建守卫：发行包里的 node-pty JS 与 native 必须来自同一版本。 */
+export function assertNodePtyNativeMatchesJs(input: {
+  target: ServerTarget;
+  jsVersion: unknown;
+  nativeSource: string;
+  nativeVersion: unknown;
+}): void {
+  if (typeof input.jsVersion === "string" && input.jsVersion === input.nativeVersion) return;
+  throw new Error(
+    `node-pty JS ${String(input.jsVersion)} does not match native ${input.nativeSource} ` +
+      `${String(input.nativeVersion)} for ${input.target}; JS and pty.node must come from the same package version`,
+  );
+}
+
 export async function ensureNodePtyPrebuild(
   options: { target: ServerTarget; workspaceNodeModulesDir: string },
   nodeModulesTargetDir: string,
 ): Promise<void> {
-  const prebuildDir = join(nodeModulesTargetDir, "node-pty", "prebuilds", options.target);
-  const ptyNodePath = join(prebuildDir, "pty.node");
-  let hasPtyNode = true;
-  try {
-    await access(ptyNodePath);
-  } catch {
-    hasPtyNode = false;
-  }
-  if (!hasPtyNode) {
-    const lydellDir = await findDependencyDir(
+  const stagedDir = join(nodeModulesTargetDir, "node-pty");
+  const prebuildDir = join(stagedDir, "prebuilds", options.target);
+  let nativeSource = "node-pty";
+  let nativeVersion = (await readPackageJson(stagedDir))?.version;
+  // Bug 原因：桌面 Linux 打包的 beforePack 会把平台包的 pty.node 回填进共享的 workspace node-pty，
+  // 同一 checkout 随后 staging 时复制到这份文件；旧逻辑见到 pty.node 已存在就跳过整包替换，
+  // 而 nativeVersion 取自同一份官方 package.json，下方守卫无法发现混装。linux 因此不看文件是否存在。
+  if (options.target.startsWith("linux-") || !(await pathExists(join(prebuildDir, "pty.node")))) {
+    // Bug 原因：官方 node-pty 1.1.0 没有 linux prebuild，旧逻辑只把 @lydell 平台包
+    // 1.2.0-beta.10 的 pty.node 塞进官方 1.1.0 JS。新 native 的 resize 要 5 个参数，
+    // 旧 JS 只传 3 个，远端终端每次 resize 都抛 Usage 错误，尺寸停在初始值。
+    // 平台包本身是同版本 node-pty 的 linux 子集（lib + prebuild），所以整包改用平台包，
+    // 保证 JS 与 native 同包同版本；不改官方包已自带 prebuild 的 darwin/win32。
+    nativeSource = `@lydell/node-pty-${options.target}`;
+    const platformDir = await findDependencyDir(
       dirname(resolve(options.workspaceNodeModulesDir)),
-      `@lydell/node-pty-${options.target}`,
+      nativeSource,
     );
-    const lydellPtyNode = lydellDir
-      ? join(lydellDir, "prebuilds", options.target, "pty.node")
-      : null;
-    if (!lydellPtyNode) {
+    if (
+      !platformDir ||
+      !(await pathExists(join(platformDir, "prebuilds", options.target, "pty.node")))
+    ) {
+      throw new Error(`Missing node-pty prebuild for ${options.target}: install ${nativeSource}`);
+    }
+    if (!(await pathExists(join(platformDir, "lib", "index.js")))) {
       throw new Error(
-        `Missing node-pty prebuild for ${options.target}: install @lydell/node-pty-${options.target}`,
+        `${nativeSource} does not ship node-pty JS (lib/index.js); cannot pair its pty.node with matching JS`,
       );
     }
-    await mkdir(prebuildDir, { recursive: true });
-    await cp(lydellPtyNode, ptyNodePath, { dereference: true });
+    nativeVersion = (await readPackageJson(platformDir))?.version;
+    await rm(stagedDir, { recursive: true, force: true });
+    await copyPackageDir(platformDir, stagedDir, (relativePath) =>
+      isNodePtyRuntimePath(relativePath, options.target),
+    );
   }
+  assertNodePtyNativeMatchesJs({
+    target: options.target,
+    jsVersion: (await readPackageJson(stagedDir))?.version,
+    nativeSource,
+    nativeVersion,
+  });
   const spawnHelperPath = join(prebuildDir, "spawn-helper");
   try {
     await access(spawnHelperPath);
