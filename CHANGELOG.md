@@ -2,11 +2,17 @@
 
 本索引从 v1.17.0 起维护；不补造此前版本的发布历史。每版完整说明在 `docs/releases/`，GitHub Release 使用对应版本文件作为正文。
 
-## v1.17.3
+## v1.17.4
+
+整合未公开的 v1.17.3 候选修复，并补齐不依赖可用模型配置的历史会话管理路径；迁移已退役的 macOS arm64 构建 runner。重新构建测试包验收后发布。详见[完整发布说明](docs/releases/v1.17.4.md)。
+
+Includes the fixes from the unpublished v1.17.3 candidate, model-independent history management, and the macOS runner migration. See the [release notes](docs/releases/v1.17.4.md).
+
+## v1.17.3（未公开候选）
 
 恢复归档会话管理入口和项目文件树返回操作，修复可用模型检测的运行时装配及错误凭据脱敏，新增 Cheaper Inference 预设，并补齐根类型检查与浏览器安全入口门禁。详见[完整发布说明](docs/releases/v1.17.3.md)。
 
-Restores archive management and file-tree navigation, repairs model discovery with credential-safe errors, adds the Cheaper Inference preset, and strengthens quality gates. See the [release notes](docs/releases/v1.17.3.md).
+该候选在真实包验收发现 #109 后保持 draft，未公开为正式版，由 v1.17.4 候选接续；原 tag 和工件保留用于对照。
 
 ## v1.17.2
 
