@@ -123,3 +123,13 @@ pnpm --filter @zcode/desktop test:e2e:serial
 - #104：隔离 Host projects/project_roots 添加 NAV104 单 root 项目并创建 NAV104-fixture.txt（完整 SQL 见测试）；hover `virtual-project-row`，点击 `virtual-project-files`。检查 `workspace-file-tree-back` 中心与左右四分点的 elementFromPoint 属于按钮、按钮位于 `sidebar-file-tree-titlebar` 之后；真实鼠标点击返回，再次打开用 Tab/Enter 返回，项目 `virtual-project-toggle` 的 aria-expanded 不变。另在 Windows 真实包复核标题栏拖动、窗口控制、新建任务没有被覆盖。
 
 原始外部证据下载在 session 临时目录 `issue-104.png`；红态输出 `nav99-before.log` / `nav104-before.log`，最终根检查 `navigation-final-typecheck.log` / `navigation-final-lint.log`。这些日志不是 Desktop E2E 通过证据；实际 Electron/Windows/手机/SSH 尚未运行，由父会话的合成包验收决定是否发布。
+
+### 真实 DMG 追加验收（2026-11-02）
+
+- 使用候选 `f848246b` 的真实 arm64 DMG，挂载后复制到隔离临时安装目录，版本及内嵌 build commit 均匹配。从仓库外 cwd、独立 HOME 启动，复用 v1.17.2 初始化的数据根进行升级对照；没有操作生产数据。
+- NAV104：按钮位于标题栏以下，中心/左右四分点均命中按钮；真实鼠标和 Enter 返回成功，项目折叠状态不变。
+- NAV99：最初 SQL seed 还遗漏合法 `meta_json`，并且伪造 session 未建立 CLI 的完整运行时合同。它们不能作为删除回归 fixture；即使补齐 meta，`proto.sessionNotFound` 也不能当作生产缺陷。新增 NAV99 pending 用例仍须修正这些前置条件，禁止转正或宣称通过。
+- 改用真实 UI 配置本地受控 Provider、创建两个真实会话并归档。查阅、搜索、取消归档、删除取消及确认删除均通过；确认后核对 Host `cli_deleted=1` 与 CLI `time_deleted>0`，另一会话 `archived=0`；完整退出重启后两库事实不变，取消归档项重新出现在侧栏，已删除项未复活。仅调用本地假模型，不是付费供应商实网验证。
+- 自动化必须等待折叠/弹窗动画稳定后再发鼠标输入。被动 DOM 事件取证显示，早先“按钮无效”的部分点击没有抵达目标；稳定后真实 click 和键盘输入均可执行。不能用驱动返回成功、缺少完成日志或错误选择器超时推定产品缺陷。
+- 另确认冷启动且未配置可用模型时，历史删除会被 `startModelExecutionClient` 的模型就绪门禁拒绝，见 [#109](https://github.com/ZCodium-project/ZCodium/issues/109)。配置受控模型后的真实会话路径通过不代表这个无模型场景已修复；发布决策须单独处理该限制。
+- Windows/Linux GUI、真实手机/SSH 与这两个 pending WDIO 仍未执行。完整工件校验、实际包证据及发布状态由本轮验收报告记录，不把 353 项定向检查等同于全量单测。
