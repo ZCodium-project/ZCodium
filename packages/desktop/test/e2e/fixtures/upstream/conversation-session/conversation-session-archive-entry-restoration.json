@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "caseName": "conversation-session-archive-entry-restoration",
+  "spec": "./test/e2e/conversation-session/conversation-session-archive-entry-restoration.test.ts",
+  "fixtures": []
+}
