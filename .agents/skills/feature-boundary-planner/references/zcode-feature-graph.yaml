@@ -1913,6 +1913,10 @@ nodes:
     kind: "ui-surface"
     label: "Workspace file tree panel"
     codeSeeds:
+      - symbol: "WorkspaceSidebar"
+        file: "packages/ui/src/WorkspaceSidebar.tsx"
+      - symbol: "DesktopTopOverlay"
+        file: "packages/ui/src/DesktopTopOverlay.tsx"
       - symbol: "WorkspaceFileTree"
         file: "packages/ui/src/workspace-file-tree/WorkspaceFileTree.tsx"
       - symbol: "WorkspaceFileTreeRowView"

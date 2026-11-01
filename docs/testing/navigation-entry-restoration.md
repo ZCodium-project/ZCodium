@@ -89,3 +89,25 @@ Host 唯一持有归档；CLI 唯一持有存在性/标题/时间；workspaceKey
 ## 本轮执行记录
 
 #99 红绿证据：新增 `archiveManagementEntry.test.ts` 先运行 4 个平台入口断言均因缺少 archives 失败，既有组件的取消归档/删除 2 项已通过；补接线后与导航、目录合同、批量删除及 Host 删除定向共 5 文件 / 39 项通过。根 `pnpm typecheck`、E2E `tsc --noEmit`、`pnpm lint`（116 warnings / 0 errors）、architecture（0/0）通过；新增 pending E2E fixture check 通过，真实 Electron 尚未运行。环境只有 Node 24.16.0（mise 不可用），不是 mise.toml 固定的 24.14.0；pnpm 10.33.2。根 node_modules 与包依赖仅本 worktree 建软链接，未修改共享依赖。#99 只编辑现有 ui legacy 导航文件，复用 project-sidebar/ui 公开入口；没有新增 source 或架构 owner。
+
+#104 红绿证据：新增 `workspaceSidebarFileTreeReturn.test.ts` 在旧实现的五个平台组合均因缺失标题栏占位失败；修复后覆盖反复打开/关闭和项目展开态保留。最终定向 8 文件 / 98 项通过（归档入口、设置导航、目录合同、文件树、置顶文件入口、归档删除和 Host 删除）；根 typecheck、lint（116 warnings / 0 errors）、architecture（0 违规）、新增 E2E fixture check、所改文件格式与 diff check 通过。#104 编辑两个现有 ui legacy source；新增文件只有测试、fixture 与文档，无 unmanaged 新 source。
+
+图谱 YAML 检查：无重复 node ID，两个 surface 的所有 seeds 文件/符号存在；4 条 dangling edge 与 ced6cb4b 基线完全相同，无新增。当前没有 codegraph 工具，不将此静态完整性检查称为代码调用图验证。
+
+### 合成包交接
+
+可执行候选保持 pending、未转正：
+
+```sh
+ZCODE_E2E_HOME_DIR="/var/folders/zd/qnwn4b553t7bwmjqz93x65dm0000gn/T/opencode/zcode-navigation-e2e-99" \
+ZCODE_E2E_PACKAGED_APP_PATH="<合成测试包可执行文件绝对路径>" \
+ZCODE_E2E_SPEC="./test/e2e/conversation-session/manual-review/pending/conversation-session-archive-entry-restoration.test.ts" \
+pnpm --filter @zcode/desktop test:e2e:serial
+```
+
+另用全新 `zcode-navigation-e2e-104` HOME 将 spec 换为 `conversation-session-file-tree-return.test.ts`。不指定 PACKAGED_APP_PATH 则按当前仓库规则构建开发 E2E 产物，不能称为合成包验证。发布构建若无测试桥，请手动执行下面相同路径，不以更改产品能力迁就测试。
+
+- #99：隔离库的 CLI session 和 Host archived 双侧播种见 NAV99 before 代码；两条 `nav99-restore/delete`，相同 workspace，不依赖模型。点击 `task-settings-button` → `settings-section-nav-archives` → `archive-search` 输入 nav99- → `archive-group-toggle`。点 `archive-unarchive` 后核对 archived=0 与返回侧栏可见；对另一行 `archive-delete` 先 Escape 取消再确认 `confirm-dialog-confirm`，核对 CLI time_deleted 与 Host cli_deleted，重启后不复活。
+- #104：隔离 Host projects/project_roots 添加 NAV104 单 root 项目并创建 NAV104-fixture.txt（完整 SQL 见测试）；hover `virtual-project-row`，点击 `virtual-project-files`。检查 `workspace-file-tree-back` 中心与左右四分点的 elementFromPoint 属于按钮、按钮位于 `sidebar-file-tree-titlebar` 之后；真实鼠标点击返回，再次打开用 Tab/Enter 返回，项目 `virtual-project-toggle` 的 aria-expanded 不变。另在 Windows 真实包复核标题栏拖动、窗口控制、新建任务没有被覆盖。
+
+原始外部证据下载在 session 临时目录 `issue-104.png`；红态输出 `nav99-before.log` / `nav104-before.log`，最终根检查 `navigation-final-typecheck.log` / `navigation-final-lint.log`。这些日志不是 Desktop E2E 通过证据；实际 Electron/Windows/手机/SSH 尚未运行，由父会话的合成包验收决定是否发布。

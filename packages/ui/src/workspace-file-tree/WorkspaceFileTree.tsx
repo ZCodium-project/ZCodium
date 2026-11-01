@@ -614,6 +614,7 @@ export function WorkspaceFileTree({
           variant="ghost"
           size="lg"
           className="w-full justify-start gap-2 rounded-xl px-2.5 text-foreground-subtle hover:bg-surface-hover hover:text-foreground"
+          data-testid="workspace-file-tree-back"
           onClick={onClose}
         >
           <ArrowLeft className="size-4 shrink-0" />
