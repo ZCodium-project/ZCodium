@@ -65,32 +65,46 @@ Host 唯一持有归档；CLI 唯一持有存在性/标题/时间；workspaceKey
 
 ## Dimensions / Candidate Combinations / Pruning Decisions
 
-| Dimension     | Accepted                                                                    | Pruned / reason                                  |
-| ------------- | --------------------------------------------------------------------------- | ------------------------------------------------ |
-| 平台与标题栏  | Windows/Linux 自定义标题栏、macOS、普通 Web；手机远控窄屏保留原隐藏占位规则 | 不改变窗口 caption/拖动实现                      |
-| 归档目标      | 项目/未归类、完整地址、取消归档/删除取消/确认                               | 自动归档策略无改动；真实 SSH/手机不以 jsdom 冒充 |
-| 模型/运行阶段 | 历史会话，不调用模型                                                        | compact/fork/queue/goal 由不变事实边界剪枝       |
+| Dimension     | Accepted                                                                    | Pruned / reason                                              |
+| ------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 平台与标题栏  | Windows/Linux 自定义标题栏、macOS、普通 Web；手机远控窄屏保留原隐藏占位规则 | 不改变窗口 caption/拖动实现                                  |
+| 归档目标      | 项目/未归类、完整地址、取消归档/删除取消/确认                               | 自动归档策略无改动；真实 SSH/手机不以 jsdom 冒充             |
+| 模型/运行阶段 | NAV99 准备阶段通过本地 replay 完成两条真实会话；归档操作不执行模型          | compact/fork/queue/goal 由不变事实边界剪枝；不请求供应商实网 |
 
 ## Accepted Cases / Matrix Backfill
 
-| Case   | Setup → action → assertion                                                                                                                      | Evidence / E2E                                                   |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| NAV99  | 隔离 HOME 中 CLI 历史会话+Host archived；设置 → 数据与统计 → 归档；搜索、展开、取消归档；取消删除、再确认删除；刷新仍保持结果且侧栏可见未归档项 | focused 导航/组件/命令 UT；新增 pending E2E；真实包由父会话执行  |
-| NAV104 | 隔离项目含一个文件；项目行 files → 返回按钮；鼠标命中按钮中心和左右四分点，不是顶部浮层；真实点击关闭；同项目可再次打开，项目折叠不变           | 组件 open/close UT、布局断言；新增 pending E2E；Windows GUI 待验 |
+| Case   | Setup → action → assertion                                                                                                                                           | Evidence / E2E                                                   |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| NAV99  | 隔离 HOME 中真实 UI + 本地 replay 创建两个会话后归档；设置 → 数据与统计 → 归档；搜索、展开、取消归档；取消删除、再确认删除；完整重启后双库保持结果且侧栏可见未归档项 | focused 导航/组件/命令 UT；pending E2E 未执行；真实包另行取证    |
+| NAV104 | 隔离项目含一个文件；项目行 files → 返回按钮；鼠标命中按钮中心和左右四分点，不是顶部浮层；真实点击关闭；同项目可再次打开，项目折叠不变                                | 组件 open/close UT、布局断言；新增 pending E2E；Windows GUI 待验 |
 
 本文件即专项 case catalog / coverage matrix / decision worksheet；不改 conversation runtime 协议 catalog。现有归档上游 pending E2E 含默认天数等 fork 未实现的历史预期，不将整份旧测试当成本轮通过证据。
 
 ## E2E Handoff Notes / Unresolved Questions
 
-- Provider policy=none；不发模型请求。fixture 以独立 HOME 启动后用真实 SQLite 添加历史 CLI session 与 Host tasks；不使用生产库。
-- 两个新增 fixture 从 `@zcode/shared` 公开入口读取 `ZCODE_DATA_ROOT_DIR_NAME`（当前 `.zcodium`），所有直接 SQLite 播种和断言路径统一为 `join(home, ZCODE_DATA_ROOT_DIR_NAME, ...)`：Host `v2/tasks-index.sqlite`，CLI `cli/db/db.sqlite`。不再硬编码旧 `.zcode`，不创建旧根、不依赖迁移把测试数据搬入实际根。
+- NAV99 使用 case-local synthetic replay：真实 UI/已有 V4 helper 创建两条会话，收到固定 assistant 响应并完成后，才读取 CLI 分配的完整 sessionId 与实际 project_id。Host 的合法 meta_json、CLI 项目/会话身份、正文与组织态均由原生产 owner 生成；测试只读两个数据库，不再 INSERT/UPDATE 任何会话或任务。NAV104 仍为 provider policy=none，不受本次修正影响。
+- 两个 fixture 从 `@zcode/shared` 公开入口读取 `ZCODE_DATA_ROOT_DIR_NAME`（当前 `.zcodium`）；NAV99 的只读断言和 NAV104 的项目 fixture 路径统一为 `join(home, ZCODE_DATA_ROOT_DIR_NAME, ...)`：Host `v2/tasks-index.sqlite`，CLI `cli/db/db.sqlite`。不硬编码旧 `.zcode`，不创建旧根、不依赖迁移搬运。
 - 测试入口候选为本包现有 WDIO，pending 显式 spec；下述公共 helper 路径和 release 测试桥前置条件尚未对齐，不能称这两个候选已运行通过。本次实际 release 包建议使用隔离 HOME + CDP 手动验收。无固定 sleep，以 DOM、落库与导航回执等待。
 - 不以 jsdom、390px 或 macOS 包冒充 Windows/真实手机/SSH；没有未决产品问题。
 
 ### 自动候选的已知前置阻塞（2026-11-02 补正）
 
+#### NAV99 数据合同二次修正
+
+原 SQL fixture 同时违反两项前置：Host meta_json 不满足共享 schema；`session.project_id='nav99-cli'` 不是 CLI 根据 cwd 建立的项目身份。补 JSON 而保留假 project_id 不能证明 deleteSession 可识别该会话，`proto.sessionNotFound` 也不能据此归因于 Settings callback。本次完全删除会话/任务 SQL 播种，选择「真实 UI + 既有本地 replay helper」路径；只读校验实际 CLI project_id、完整 sessionId、Host meta_json 与两库 cwd，不复制 CLI 项目 ID 算法或新增工厂。
+
+NAV99 仅允许 loopback replay Base URL 与 replay 模式，拒绝 capture/供应商外网；两个普通 turn 和标题响应在对应 JSON 中声明 synthetic 理由。准备阶段经完成的 assistant 正文与非 draft session 共同建立屏障，不能只凭 canStop=false 判断已完成。每次归档/设置/展开/删除点击前等待相关容器动画结束、按钮启用且中心命中正确目标；被动 capture listener 确认 click 确实抵达该目标，再等待可见状态或权威库回执，不用固定 sleep 或盲重试。取消删除要等 dialog 退场卸载，再打开下一次确认。
+
+该 replay JSON 沿用当前默认 Anthropic `/messages` 预设；不是供应商协议全矩阵。测试只从实际 CLI pane 取 sessionId；只读 Host 行须通过 `zcodeTaskMetaSchema` 并核对 workspaceKey，CLI 行须与同一 id/cwd 对应且至少已有两条消息。两个会话的真实 CLI project_id 必须相同，不能把 Host 虚拟项目 ID 或 prompt 标记用作 CLI project_id/sessionId。重启使用已有保留 profile 的 Electron/Host/Agent 退出屏障，不以 browser.refresh 代替。
+
+本次只修 pending 数据合同，不覆盖或修复 #109 的「冷启动无 Provider」生产门禁；该场景仍由独立代理修复与新包验收。NAV104 无 task meta 问题，不修改其测试或 fixture。公共 runner 旧根、Provider helper 读取旧根和 release bridge 仍是自动执行前置阻塞；即使局部 CLI/SQLite 自检通过，也不等于 NAV99 WDIO 或 v1.17.4 包验收通过。
+
+本次限定自检（Node 24.14.0，基线 f34d4869）：在 session 临时目录建立全新 HOME/工作区/SQLite，通过真实 createZCodeApp/submitPrompt 路径、内存固定模型执行器创建两个完整 `sess_<uuid>`，各有 3 条消息，project_id 与生产 `projectIdFromDirectory(cwd)` 一致；关闭 app/库后用新协议 server 重开，显式 `session/resume` 成功后发 deleteSession，ACK=accepted（revisionAtDecision=1），直接 SQLite 复核 time_deleted>0，另一会话未删除。这里显式激活是协议前置；裸发无 record 的 V4 command 会被 admission 拒绝，不能把该自检准备错误当作产品缺陷。自检使用本 worktree bootstrap 源码和隔离复制的既有已编译 CLI 库，未修改公共依赖或生产源码；禁用外网 fetch，模型执行器仅内存返回，未使用生产数据库。派生 meta 对象可通过共享 schema，不冒充实际 Host 落库验证；后者仍由未运行的 pending UI case 读取断言。
+
+原始证据：session 临时目录 `nav99-cli-proof-jRNXIF/proof.json`、`nav99-cli-selfcheck.log` 和临时自检脚本 `nav99-cli-fixture-selfcheck.mts`。另启动现有 replay server，仅 loopback HTTP 执行两条主响应与两次标题响应，4/4 匹配，工件 `nav99-replay-smoke.json` / `.log`。根 typecheck、E2E tsc、lint（116 warnings / 0 errors）、architecture、NAV99 fixture check 通过；它们均不是 WDIO 运行证据。没有运行两个 pending WDIO 或新的 release 包，没有改 NAV104、#109、CI runner、版本及 release notes。
+
 - `packages/desktop/wdio.conf.ts` 与 `test/e2e/helpers/desktop-app.ts` 的公共 `E2E_STORAGE_ROOT` 仍写死 `.zcode`，WDIO 初始化/配置播种、helper 的设置读取和失败诊断不能代表 release 实际 `.zcodium` 数据。本轮仅修两个新增 fixture，不扩大修改公共 helpers 或迁移旧测试。
-- 两个测试只从旧 helper 导入 `DEFAULT_WORKSPACE` 和 `waitForWorkspaceApp`，没有调用 helper 的数据库读取函数；前者是 `HOME/ZCodeProject`，与数据根名无关。后者依赖 DOM 路径徽标或 `__zcodeTabStoreE2E` 等就绪探针，失败诊断还会读取旧 helper 路径。release 构建不提供测试桥，不能假定该等待路径或 runner 初始化可直接复用。
+- NAV104 仅从旧 helper 导入 `DEFAULT_WORKSPACE` 和 `waitForWorkspaceApp`，没有调用 helper 的数据库读取函数；前者是 `HOME/ZCodeProject`，与数据根名无关。后者依赖 DOM 路径徽标或 `__zcodeTabStoreE2E` 等就绪探针，失败诊断还读取旧 helper 路径。NAV99 新增复用的 Provider/V4/完整重启 helper 也仍受旧路径与测试桥前置约束；release 构建不提供测试桥，不能假定这些准备或等待路径可直接复用。
 - fixture check 仅验证 JSON/spec 契约，tsc 仅验证类型；均不证明 WDIO seed 写入真实根、release 已就绪或 GUI 行为通过。在公共路径与 bridge 合同另行对齐之前，下面自动命令只保留为候选，不作为本次 release 验收入口。
 
 本次补正使用已提供的 Node 24.14.0：两个 fixture check、E2E `tsc --noEmit`、根 `pnpm typecheck`、`pnpm lint`（116 warnings / 0 errors）、architecture 与 diff check 通过；另从 `@zcode/shared` 实际导入常量并核对两个 fixture 无旧根路径拼接，输出 `.zcodium/v2/tasks-index.sqlite`。只改本文与两个新增测试，没有修改生产源码、公共 helpers、旧测试或迁移；未执行 WDIO 或 release GUI，以下原始单测记录不能替代这两项运行证据。
@@ -117,9 +131,9 @@ pnpm --filter @zcode/desktop test:e2e:serial
 
 另用全新 `zcode-navigation-e2e-104` HOME 将 spec 换为 `conversation-session-file-tree-return.test.ts`。不指定 PACKAGED_APP_PATH 则按当前仓库规则构建开发 E2E 产物，不能称为合成包验证；设置该变量也不会自动解决旧 helper 路径或缺失测试桥。
 
-手动路径：给实际 release 可执行文件设置全新隔离 `HOME` 与同一 `ZCODE_DATA_BASE_DIR`，并隔离 Electron user-data；启用独立 CDP 端口后只使用真实 DOM/用户操作与实际文件断言，不注入测试桥。先启动 App 初始化 `.zcodium` 归属文件和数据库，退出后再按下列 fixture SQL 向 `HOME/<ZCODE_DATA_ROOT_DIR_NAME>/...` 播种，避免旧 WDIO helper 初始化和运行时写入互相覆盖；重新启动同一 release 包进行验收。CDP 截图、命中结果和库查询结果分别留档。生产 HOME、旧 `.zcode` 与真实凭据均不参与。
+手动路径：给实际 release 可执行文件设置全新隔离 `HOME` 与同一 `ZCODE_DATA_BASE_DIR`，并隔离 Electron user-data；启用独立 CDP 端口后只使用真实 DOM/用户操作与实际文件断言，不注入测试桥。NAV99 在真实 UI 配置本地受控模型并创建会话，绝不手写 session/task；NAV104 的项目 SQL 仍须在 App 退出后播种。CDP 截图、命中结果和库查询结果分别留档。生产 HOME、旧 `.zcode` 与真实凭据均不参与。
 
-- #99：隔离库的 CLI session 和 Host archived 双侧播种见 NAV99 before 代码；两条 `nav99-restore/delete`，相同 workspace，不依赖模型。点击 `task-settings-button` → `settings-section-nav-archives` → `archive-search` 输入 nav99- → `archive-group-toggle`。点 `archive-unarchive` 后核对 archived=0 与返回侧栏可见；对另一行 `archive-delete` 先 Escape 取消再确认 `confirm-dialog-confirm`，核对 CLI time_deleted 与 Host cli_deleted，重启后不复活。
+- #99：已有 V4/replay helper 在同一 workspace 创建两个真实会话；case-local prompt/reply/title 带 NAV99 标记，sessionId 仅从真实 pane 读取，不用标记充当 ID，不伪造 CLI project_id。Host meta_json 必须通过共享 `zcodeTaskMetaSchema`，taskId/cwd 与 CLI 记录一致，再通过 UI 二次确认归档。设置中搜索 NAV99、展开后取消归档；另一行删除先 Escape 取消再确认，核对 CLI time_deleted 与 Host cli_deleted，使用已有退出进程屏障完整重启后复核双库和侧栏。
 - #104：隔离 Host projects/project_roots 添加 NAV104 单 root 项目并创建 NAV104-fixture.txt（完整 SQL 见测试）；hover `virtual-project-row`，点击 `virtual-project-files`。检查 `workspace-file-tree-back` 中心与左右四分点的 elementFromPoint 属于按钮、按钮位于 `sidebar-file-tree-titlebar` 之后；真实鼠标点击返回，再次打开用 Tab/Enter 返回，项目 `virtual-project-toggle` 的 aria-expanded 不变。另在 Windows 真实包复核标题栏拖动、窗口控制、新建任务没有被覆盖。
 
 原始外部证据下载在 session 临时目录 `issue-104.png`；红态输出 `nav99-before.log` / `nav104-before.log`，最终根检查 `navigation-final-typecheck.log` / `navigation-final-lint.log`。这些日志不是 Desktop E2E 通过证据；实际 Electron/Windows/手机/SSH 尚未运行，由父会话的合成包验收决定是否发布。

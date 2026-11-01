@@ -6,7 +6,27 @@
     "./test/e2e/fixtures/upstream/conversation-session/conversation-session-archive-entry-restoration.json"
   ],
   "fileFixtures": [],
-  "providerRequestPolicy": "none",
-  "noProviderRequests": true,
-  "requests": []
+  "requests": [
+    {
+      "id": "nav99-title",
+      "kind": "common",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "仅为两个真实会话提供可搜索标题；会话、项目身份和合法任务元数据均由生产创建路径生成。"
+    },
+    {
+      "id": "nav99-restore-turn",
+      "kind": "main",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "本地固定回复完成真实会话和正文持久化，再验证取消归档；不手写 session/project_id/meta_json，不验证模型质量。"
+    },
+    {
+      "id": "nav99-delete-turn",
+      "kind": "main",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "本地固定回复完成另一真实会话，再验证删除取消/确认和冷启动双库事实，不依赖供应商实网。"
+    }
+  ]
 }
