@@ -49,9 +49,12 @@
 
 ## 失败语义
 
-- 401/403/404/网络错误/超时都返回 `{ success: false, message }`，UI 展示原文消息；
+- 401/403/404/网络错误/超时都返回 `{ success: false, message }`，UI 展示脱敏后的消息；
   检测失败不影响手输模型 ID 的任何能力。
 - 超时使用 AbortSignal（默认 15s），Host 侧注入的 fetch 可被测试替换。
+- 错误进入 UI 前必须脱敏：底层 fetch 的非法 header 异常会回显 header 值，不能原样传播
+  API Key、自定义 header 值（包括 JSON 转义或 URL 编码形式）。HTTP 状态提示中的 URL
+  不展示 userinfo、query、fragment；保留可诊断的状态码与端点路径，不记录请求头。
 
 ## 不变量
 
@@ -71,3 +74,5 @@
 7. 连续点击检测 → pending 期间按钮禁用；旧响应晚到时由 stale token 守卫丢弃。
 8. 从两种 Runtime 创建入口调用设置服务检测 → 请求使用草稿 URL、Key 和 headers，返回
    模型列表或供应商错误；不启动 Runtime，不创建配置文件，不改变 Registry 快照。
+9. 草稿 Key / headers 含非法换行，或 Provider 错误回显凭据 → UI 错误不包含凭据；检测失败
+   不写配置、不改变 Registry。真实本地 HTTP fixture 验证成功、401/404 和鉴权头优先级。
