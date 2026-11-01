@@ -614,3 +614,16 @@ interface SessionStore {
 7. 接入 revert：`session.revert` + snapshot + patch cleanup。
 
 这就是持久化的主线：少量表，message/part JSON 承载业务结构，运行状态留在内存，compact/revert 都通过已有 message/part/session 字段表达。
+## 模型无关历史管理补充（2026-11-02，#109）
+
+历史 `renameSession` / `deleteSession` 不需要可执行模型；命令分类使用共享 V4 合同
+`isSessionHistoryManagementCommand`，新增命令默认不属于该集合。Host 复用现有控制面
+client；CLI 仍唯一持有存在性、标题与软删除。完整跨端边界见
+[runtime boundaries](../../../../../docs/agents/runtime-boundaries.md)。
+
+冷历史命令在 `CommandInbox.prepareDecision` 内先完成幂等查询，再持有同一 per-session
+admission，复用 cold READY/restore/hydration；不要求预先订阅，不另建管理队列。
+缺失会话仍回 `proto.sessionNotFound`，成功重复删除先命中原 inbox 事实、不复活会话。
+删除在任何软删除/关闭副作用之前读取原 record 的 active turn、Core active/queued、后台、
+V4 queue 与 pending interaction；busy 回 `guard.sessionBusy` 而非 stop 后删除。重命名不关闭
+runtime，允许 busy 修改标题。无配置冷恢复只建立控制面，不执行模型或伪造 Provider/key。

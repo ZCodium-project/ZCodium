@@ -299,6 +299,7 @@ import {
   clientHelloSchema,
   commandAckSchema,
   commandPayloadSchemas,
+  isSessionHistoryManagementCommand,
   commandsQueryParamsSchema,
   commandsQueryResultSchema,
   conversationTopic,
@@ -6110,7 +6111,11 @@ export function createZCodeAgentService(
     },
 
     async sendConversationCommandV4(params: ZCodeAgentConversationCommandParams) {
-      const client = await getClient(params);
+      // #109 根因：历史删除/重命名误用模型执行启动门禁，空/无效/禁用配置时尚未发命令就失败。
+      // 复用同一个控制面 client，CLI 仍经 CommandInbox 裁决；绝不提升模型能力或放行其它命令。
+      const client = isSessionHistoryManagementCommand(params.envelope.type)
+        ? await getReadOnlyClient(params)
+        : await getClient(params);
       const planPayload = params.envelope.payload as {
         planEnabled?: boolean;
         config?: { planEnabled?: boolean };

@@ -293,6 +293,12 @@ export const commandPayloadSchemas = {
 } as const;
 
 export type CommandType = keyof typeof commandPayloadSchemas;
+
+/** 仅这两类历史管理可在无可执行模型时启动控制面；其它命令（含新增命令）默认不放行。 */
+export function isSessionHistoryManagementCommand(type: CommandType): boolean {
+  return type === "renameSession" || type === "deleteSession";
+}
+
 export type CommandPayloadMap = {
   [T in CommandType]: T extends "sendText"
     ? z.infer<(typeof commandPayloadSchemas)[T]> &

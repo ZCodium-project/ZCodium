@@ -74,7 +74,10 @@ import { ZCodeProtocolAgentServer } from "../src/zcode-protocol/server.js";
 import type { SessionUsageSeed } from "../src/zcode-protocol-v4/product-projection.js";
 import type { ZCodeApp, ZCodeAppOptions } from "../src/app/types.js";
 import { createApiKeyProviderConfig } from "./provider-config-fixtures.js";
-import { createRegistryBackedTestApp } from "./helpers/registry-backed-test-app.js";
+import {
+  createRegistryBackedTestApp,
+  type RegistryBackedTestModelExecutor,
+} from "./helpers/registry-backed-test-app.js";
 
 // ── gateway 单元层（stub host，模式对齐 v4-gateway.test.ts）──────────────────
 
@@ -1326,18 +1329,26 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
     }
   }
 
-  async function bootRealRestartedServer(dbPath: string, registry = createColdProviderRegistry()) {
+  async function bootRealRestartedServer(
+    dbPath: string,
+    registry = createColdProviderRegistry(),
+    modelExecutor?: RegistryBackedTestModelExecutor,
+    additionalDirectories?: string[],
+  ) {
     const store = await createSqliteSessionStore({ dbPath });
     const apps: ZCodeApp[] = [];
+    const appOptions: ZCodeAppOptions[] = [];
     const server = new ZCodeProtocolAgentServer({
       cwd: process.cwd(),
       sessionStore: store,
       createZCodeApp: async (options) => {
+        appOptions.push(options ?? {});
         const app = await createRegistryBackedTestApp({
           ...options,
           env: {},
           skipUserConfig: true,
           providerRegistry: registry,
+          ...(modelExecutor ? { modelExecutor } : {}),
         });
         apps.push(app);
         return app;
@@ -1351,6 +1362,7 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
           result: {
             nativeSearchEnhancementsEnabled: false,
             memoryEnabled: false,
+            ...(additionalDirectories ? { additionalDirectories } : {}),
           },
         });
       }
@@ -1358,6 +1370,7 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
     return {
       server,
       apps,
+      appOptions,
       close: async () => {
         for (const app of apps) await app.close();
         store.close();
@@ -1365,54 +1378,203 @@ describe("v4 冷恢复（集成：真 sqlite + server + binder）", () => {
     };
   }
 
-  it("cold rename/delete persist before acknowledgement and duplicate delete does not resume again", async () => {
-    const dbPath = join(tempRoot, "metadata.db");
-    await seedPersistedSession(dbPath);
-    const { server, close } = await bootRealRestartedServer(dbPath);
-    const command = (
-      commandId: string,
-      type: "renameSession" | "deleteSession",
-      payload: object,
-    ) => ({
-      commandId,
-      clientId: "metadata-test",
-      sessionId: SESSION_ID,
-      type,
-      payload,
-      issuedAt: 100,
-    });
-    try {
-      const rename = await requestResult(server, {
-        id: "rename",
-        method: V4_METHODS.command,
-        params: command("rename-1", "renameSession", { title: "Renamed offline" }),
+  it.each([
+    ["desktop-continuous", false],
+    ["web-remote-replayable", false],
+    ["desktop-continuous", true],
+    ["web-remote-replayable", true],
+  ] as const)(
+    "#109 cold rename/delete persist before ACK: %s, empty registry=%s",
+    async (clientMode, emptyRegistry) => {
+      const dbPath = join(tempRoot, "metadata.db");
+      await seedPersistedSession(dbPath);
+      const fetch = vi
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("unexpected network"));
+      const { server, apps, appOptions, close } = await bootRealRestartedServer(
+        dbPath,
+        emptyRegistry ? new ProviderRegistry([]) : createColdProviderRegistry(),
+        undefined,
+        ["/project/extra"],
+      );
+      const command = (
+        commandId: string,
+        type: "renameSession" | "deleteSession",
+        payload: object,
+      ) => ({
+        commandId,
+        clientId: "metadata-test",
+        sessionId: SESSION_ID,
+        type,
+        payload,
+        issuedAt: 100,
       });
-      expect(rename).toMatchObject({ status: "accepted" });
-      const check = await createSqliteSessionStore({ dbPath });
       try {
-        expect(await check.getSession(SESSION_ID)).toMatchObject({
-          title: "Renamed offline",
-          titleSource: "custom",
-        });
-        const deletion = command("delete-1", "deleteSession", {});
-        const deleteAck = await requestResult(server, {
-          id: "delete",
-          method: V4_METHODS.command,
-          params: deletion,
-        });
-        expect(deleteAck, JSON.stringify(deleteAck)).toMatchObject({ status: "accepted" });
-        expect((await check.getSession(SESSION_ID))?.time.deleted).toBeTypeOf("number");
+        // 无会话不能由 Host/CLI 伪造成功；该拒绝不能使后续合法历史命令卡住 admission。
         expect(
           await requestResult(server, {
-            id: "retry",
+            id: "missing",
+            method: V4_METHODS.command,
+            params: { ...command("missing", "deleteSession", {}), sessionId: "missing-history" },
+          }),
+        ).toMatchObject({ status: "rejected", reasonCode: "proto.sessionNotFound" });
+        const rename = await requestResult(server, {
+          id: "rename",
+          method: V4_METHODS.command,
+          params: command("rename-1", "renameSession", { title: "Renamed offline" }),
+        });
+        expect(rename).toMatchObject({ status: "accepted" });
+        expect(apps).toHaveLength(1);
+        expect(appOptions[0]?.additionalDirectories).toEqual(["/project/extra"]);
+        // 管理操作不要求先订阅；随后桌面/手机读同一 runtime，而不是再启动一份。
+        await requestResult(server, {
+          id: "managed-history-subscribe",
+          method: V4_METHODS.conversationSubscribe,
+          params: {
+            topic: conversationTopic(SESSION_ID),
+            connectionId: clientMode,
+            clientMode,
+            additionalDirectories: ["/late-must-not-replace"],
+          },
+        });
+        expect(apps).toHaveLength(1);
+        expect(appOptions[0]?.additionalDirectories).toEqual(["/project/extra"]);
+        const check = await createSqliteSessionStore({ dbPath });
+        try {
+          expect(await check.getSession(SESSION_ID)).toMatchObject({
+            title: "Renamed offline",
+            titleSource: "custom",
+          });
+          const deletion = command("delete-1", "deleteSession", {});
+          const deleteAck = await requestResult(server, {
+            id: "delete",
             method: V4_METHODS.command,
             params: deletion,
+          });
+          expect(deleteAck, JSON.stringify(deleteAck)).toMatchObject({ status: "accepted" });
+          expect((await check.getSession(SESSION_ID))?.time.deleted).toBeTypeOf("number");
+          expect(
+            await requestResult(server, {
+              id: "retry",
+              method: V4_METHODS.command,
+              params: deletion,
+            }),
+          ).toMatchObject({ status: "duplicate" });
+          expect(apps).toHaveLength(1);
+          expect(fetch).not.toHaveBeenCalled();
+        } finally {
+          check.close();
+        }
+      } finally {
+        await close();
+        fetch.mockRestore();
+      }
+    },
+  );
+
+  it("#109 无模型冷删除的并发重试只恢复一次，不要求先 rename 或 subscribe", async () => {
+    const dbPath = join(tempRoot, "delete-first.db");
+    await seedPersistedSession(dbPath);
+    const { server, apps, close } = await bootRealRestartedServer(dbPath, new ProviderRegistry([]));
+    const params = {
+      commandId: "cold-delete-first",
+      clientId: "history-client",
+      sessionId: SESSION_ID,
+      type: "deleteSession",
+      payload: {},
+      issuedAt: 1,
+    };
+    try {
+      const acks = await Promise.all(
+        ["delete-first", "delete-retry"].map((id) =>
+          requestResult(server, {
+            id,
+            method: V4_METHODS.command,
+            params,
           }),
-        ).toMatchObject({ status: "duplicate" });
+        ),
+      );
+      expect(acks.map((ack) => commandAckSchema.parse(ack).status).sort()).toEqual([
+        "accepted",
+        "duplicate",
+      ]);
+      expect(apps).toHaveLength(1);
+      const check = await createSqliteSessionStore({ dbPath });
+      try {
+        expect((await check.getSession(SESSION_ID))?.time.deleted).toBeTypeOf("number");
       } finally {
         check.close();
       }
     } finally {
+      await close();
+    }
+  });
+
+  it("#109 真实 runtime 正在执行时删除拒绝，保留原会话与执行实例", async () => {
+    const dbPath = join(tempRoot, "busy-metadata.db");
+    await seedPersistedSession(dbPath);
+    let releaseModel!: () => void;
+    const modelGate = new Promise<void>((resolve) => {
+      releaseModel = resolve;
+    });
+    const generateText = vi.fn(async () => {
+      await modelGate;
+      return {
+        finishReason: "stop" as const,
+        text: "local fixture done",
+        usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      };
+    });
+    const { server, apps, close } = await bootRealRestartedServer(
+      dbPath,
+      createColdProviderRegistry(),
+      { generateText },
+    );
+    let turn: Promise<unknown> | undefined;
+    try {
+      await requestResult(server, {
+        id: "busy-subscribe",
+        method: V4_METHODS.conversationSubscribe,
+        params: {
+          topic: conversationTopic(SESSION_ID),
+          connectionId: "busy",
+          clientMode: "desktop-continuous",
+        },
+      });
+      await apps[0].setModel({
+        providerId: "glm",
+        modelId: "glm-4-air",
+        options: { reasoningLevel: "medium" },
+      });
+      turn = apps[0].runtime.executeTurn("local fixture, keep executing");
+      // 立刻登记 rejection handler；finally 仍 await 同一个 Promise，避免夹具失败先变成未处理异常。
+      void turn.catch(() => {});
+      await expect.poll(() => generateText.mock.calls.length).toBe(1);
+      expect(apps[0].runtime.hasActiveOrQueuedTurnWork()).toBe(true);
+      const deleteAck = await requestResult(server, {
+        id: "busy-delete",
+        method: V4_METHODS.command,
+        params: {
+          commandId: "busy-delete",
+          clientId: "metadata-test",
+          sessionId: SESSION_ID,
+          type: "deleteSession",
+          payload: {},
+          issuedAt: 1,
+        },
+      });
+      expect(deleteAck).toMatchObject({ status: "failed", reasonCode: "guard.sessionBusy" });
+      expect(apps).toHaveLength(1);
+      expect(apps[0].runtime.hasActiveOrQueuedTurnWork()).toBe(true);
+      const check = await createSqliteSessionStore({ dbPath });
+      try {
+        expect((await check.getSession(SESSION_ID))?.time.deleted).toBeUndefined();
+      } finally {
+        check.close();
+      }
+    } finally {
+      releaseModel();
+      await turn;
       await close();
     }
   });

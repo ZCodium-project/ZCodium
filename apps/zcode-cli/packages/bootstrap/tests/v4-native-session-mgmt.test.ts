@@ -22,6 +22,8 @@ function makeApp(overrides: Record<string, unknown> = {}) {
     close: vi.fn().mockResolvedValue(undefined),
     runtime: {
       setCustomSessionTitle: vi.fn().mockResolvedValue(undefined),
+      hasActiveOrQueuedTurnWork: vi.fn(() => false),
+      hasRunningBackgroundTasks: vi.fn(() => false),
     },
     ...overrides,
   };
@@ -89,6 +91,34 @@ describe("v4 原生 renameSession", () => {
 });
 
 describe("v4 原生 deleteSession", () => {
+  it.each(["foreground", "core-queue", "background", "v4-queue", "interaction"] as const)(
+    "#109 %s 的权威 busy 事实阻止任何删除副作用，重命名仍可执行",
+    async (busyKind) => {
+      const app = makeApp();
+      app.runtime.hasActiveOrQueuedTurnWork.mockReturnValue(busyKind === "core-queue");
+      app.runtime.hasRunningBackgroundTasks.mockReturnValue(busyKind === "background");
+      const record = makeRecord({
+        app,
+        ...(busyKind === "foreground" ? { activeAbortController: new AbortController() } : {}),
+      });
+      const deleteSession = vi.fn();
+      const host = makeHost(record, {
+        deleteSession,
+        getQueueLength: () => (busyKind === "v4-queue" ? 1 : 0),
+        interactions: {
+          hasPendingForSession: () => busyKind === "interaction",
+        } as V4CommandCoreHost["interactions"],
+      });
+      const executor = new V4CommandExecutor(host);
+      await expect(executor.execute(envelope("deleteSession", {}))).rejects.toMatchObject({
+        reasonCode: "guard.sessionBusy",
+      });
+      expect(deleteSession).not.toHaveBeenCalled();
+      expect(app.close).not.toHaveBeenCalled();
+      await executor.execute(envelope("renameSession", { title: "Busy title" }));
+      expect(app.runtime.setCustomSessionTitle).toHaveBeenCalled();
+    },
+  );
   it("正路径：语义 = deleteSession，经 host.deleteSession 钩子执行关闭", async () => {
     const record = makeRecord();
     const deleteSession = vi.fn().mockResolvedValue(undefined);

@@ -31,6 +31,52 @@ warmup / createSession / sendText → workspace startup Promise → ready → �
 此状态只控制 runtime 启动，不接管 CLI CommandInbox；桌面 continuous 与手机 replayable
 继续使用各自可信 clientMode、原有 owner/lease 和同一个 shared-host runtime。
 
+### 历史管理不依赖可执行模型（#109）
+
+- `renameSession` / `deleteSession` 是模型无关的历史管理命令。冷启动时即使没有
+  Provider、配置无效或全部禁用，也使用已有的只读/控制面客户端启动入口；已存在
+  runtime 时直接复用，不另起 runtime、不提升 `modelExecutionEnabled`。
+- 这不是所有“非发送”命令的通行证：仅上述两种命令免除 Host 模型启动门禁，其他
+  V4 命令保持原有门禁（包括创建、发送、compact、retry、队列提升和工作流恢复）。
+  新命令默认不放行；不能把“不刷新 Provider Registry”等同于“不需模型执行能力”。
+- “只读客户端”表达未获模型执行能力，不表示数据库只读。命令仍通过原有
+  `v4/command` → CLI controller → `CommandInbox` 的每会话串行 admission、业务 guard
+  和持久化执行，不从 Host/UI 直接写 CLI 库。CLI 唯一持有存在性、标题和软删除；Host
+  仅在 CLI 确认后镜像。归档/取消归档仍由 Host 独有，不因操作历史而要求模型。
+- owner/lease、权限、地址验证、`workspaceIdentity` / `remoteSessionId`、幂等
+  `commandId` 与 stale guard 不变。busy 时必须由同一个 CLI admission/guard 决定，
+  Host 不先行关闭运行实例、伪造成功或绕过 busy 保护。缺失会话由 CLI 拒绝。
+- 不读取或伪造 Provider/key 来满足管理操作，不触发模型请求；控制面启动不改变
+  被动 observer 的 `existing-only` 语义。其后创建/发送仍须通过模型门禁。
+- 冷历史命令必须在 `CommandInbox.prepareDecision` 内、幂等查询之后持有每会话 admission，
+  复用既有 cold READY/恢复/投影路径；不能要求 UI 预先订阅会话。已不存在的会话返回
+  `proto.sessionNotFound`，重复成功删除先命中 inbox 事实，不重新恢复或复活会话。
+- 冷恢复继续经已有 `session/requestRuntimePreferences(scope=runtime-materialization)`
+  反向请求，让 Host 按同一 workspace identity / session 解析项目附加目录；不从命令载荷猜
+  项目、不忽略目录读取失败，也不等后续订阅再重配运行实例。无需扩展命令 wire 合同。
+- 删除在 CLI 执行面落软删除之前检查原 record 的前台执行、Core active/queued work、
+  后台工作、V4 queue 与 pending interaction；busy 返回 `guard.sessionBusy`，不主动 stop。
+  重命名不关闭运行实例，允许在 busy 中修改标题。检查不复制 phase，也不另建控制队列。
+
+源码回归另确认：基线虽已定义 `prepareDecision`，gateway 尚未接线，现有真实 SQLite +
+server 的冷 rename/delete 用例返回 rejected；delete 执行面也未检查 busy。此次连同控制面
+分类修复这两处既有链路缺口，不新增旁路存储接口。
+
+```text
+桌面 continuous / 手机 replayable → 可信连接与原 owner/地址路由
+  ├─ renameSession / deleteSession → 现有控制面客户端（复用/按需启动）─┐
+  └─ 其余命令 → 原模型 readiness → 同一客户端（能力提升）────────┤
+                                                               ↓
+      同一个 CLI controller → CommandInbox 串行 admission → guard
+                            → CLI 持久化 → ACK/事件 → Host 镜像
+```
+
+验收：无配置、无效/禁用配置冷启动均能管理真实历史；已通过管理启动的 CLI 不得
+放行模型命令；已运行 busy runtime 不重复启动且原样返回 CLI guard；桌面 continuous
+与手机 replayable 均保留可信连接与身份隔离。CLI 集成验证冷恢复、持久化先于 ACK、
+重复删除幂等、缺失会话拒绝与 busy 拒绝，并确认无模型调用。真实包 UI 验收还应覆盖
+历史归档→重启（无可执行模型）→取消归档/重命名/删除，不能以本地协议集成冒充 GUI。
+
 ## 工作区身份
 
 - `workspaceIdentity` 是身份/隔离，`workspacePath` 是真实文件路径。所有身份判断统一使用 `workspaceKey = workspaceIdentity?.trim() || workspacePath`。
