@@ -149,6 +149,8 @@ export { LAUNCH_MARKS_QUERY_KEY, parseLaunchMarks, serializeLaunchMarks } from "
 export type {
   BrowserViewSurfaceScaleMode,
   CancelPendingRemoteConnectionRequest,
+  FileApplicationInfo,
+  FileApplicationTarget,
   BindRemoteWorkspaceSessionContextRequest,
   BindRemoteWorkspaceSessionContextIpcResult,
   BindRemoteWorkspaceSessionContextResult,

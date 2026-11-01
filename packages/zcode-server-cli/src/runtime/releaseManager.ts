@@ -119,6 +119,17 @@ export class ReleaseManager {
     await rm(this.layout.pendingFile, { force: true });
   }
 
+  /**
+   * 标记只在 releaseId 等于 current.json 时有效：之后的升级或失败回滚到其他 release
+   * 会让它自然失效，读取方不需要依赖额外的清理时序。
+   */
+  public async markDowngrade(target: ReleaseManifest, fromVersion: string): Promise<void> {
+    await atomicWriteJson(this.layout.downgradeMarkerFile, {
+      releaseId: target.releaseId,
+      fromVersion,
+    });
+  }
+
   public async writePending(manifest: ReleaseManifest): Promise<void> {
     const parsed = releaseManifestSchema.parse({
       ...manifest,

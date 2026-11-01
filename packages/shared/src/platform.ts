@@ -216,6 +216,21 @@ export interface EditorInfo {
   iconDataUrl: string;
 }
 
+/** 系统对当前文件类型注册的应用；id 仅由宿主解析，不能当作命令执行。 */
+export interface FileApplicationInfo {
+  id: string;
+  name: string;
+  iconDataUrl?: string;
+  isDefault: boolean;
+}
+
+export interface FileApplicationTarget {
+  path: string;
+  pathKind: "file" | "directory";
+  workspaceIdentity?: string;
+  remoteTarget?: OpenInEditorRemoteTarget;
+}
+
 export interface ApplicationIconInfo {
   iconDataUrl: string;
 }
@@ -715,6 +730,15 @@ export interface IPlatformService {
 
   /** 使用宿主原生另存为对话框写入文件；普通 Web 端不实现 */
   saveFile?(payload: SaveFileRequest): Promise<SaveFileResult>;
+
+  /** 查询当前文件类型注册的本机应用；仅桌面实现，Web/手机返回空。 */
+  getFileApplications?(target: FileApplicationTarget): Promise<FileApplicationInfo[]>;
+
+  /** 用指定本机应用打开文件；应用 id 由宿主解析，不接受任意命令。 */
+  openFileWithApplication?(
+    applicationId: string,
+    target: FileApplicationTarget,
+  ): Promise<{ success: boolean; error?: string }>;
 
   /**
    * 用 Chromium 打印引擎把当前 webContents 的 print 媒体版面输出为 PDF（矢量文本）。
