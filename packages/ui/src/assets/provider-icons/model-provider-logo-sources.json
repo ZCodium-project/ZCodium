@@ -127,6 +127,15 @@
       "sourceUrl": "https://www.orcarouter.ai/orca-logo-classic.png",
       "sourceOwner": "OrcaRouter",
       "normalization": "Official classic logo downloaded unchanged from https://www.orcarouter.ai/orca-logo-classic.png. One asset serves both the API-key and the PKCE entries. Retrieved 2026-10-02."
+    },
+    {
+      "brand": "Cheaper Inference",
+      "file": "model-provider-cheaperinference-light.svg",
+      "darkFile": "model-provider-cheaperinference-dark.svg",
+      "providerIds": ["cheaperinference"],
+      "sourceUrl": "user-provided:ci-logo.svg",
+      "sourceOwner": "Cheaper Inference",
+      "normalization": "Official 24x24 mark, paths unchanged. Only the fill changed from currentColor to #000000 for light backgrounds and #ffffff for dark backgrounds."
     }
   ]
 }
