@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { IChannel, IChannelClient } from "@zcode/rpc";
 import { ISourceServerManagementService } from "@zcode/services";
+import { ServiceChannels } from "@zcode/shared";
 import { RemoteServiceAccess } from "../src/remoteServiceAccess.js";
 
 const channel: IChannel = {
@@ -9,6 +10,15 @@ const channel: IChannel = {
 };
 
 describe("RemoteServiceAccess", () => {
+  it("OrcaRouter 客户端使用共享频道常量并保持 RPC 行为", async () => {
+    const call = vi.fn(async () => ({ source: null, connected: false }));
+    const getChannel = vi.fn(() => ({ call, listen: vi.fn() }) as IChannel);
+    const services = new RemoteServiceAccess({ getChannel });
+    expect(getChannel).toHaveBeenCalledWith(ServiceChannels.OrcaRouter);
+    await services.orcaRouterService.getCredentialStatus();
+    expect(call).toHaveBeenCalledWith("getCredentialStatus", []);
+  });
+
   it("公开配置经独立频道 RPC 读取", async () => {
     const call = vi.fn(async () => ({ pluginStoreOrder: null }));
     const requested: string[] = [];
