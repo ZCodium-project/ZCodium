@@ -614,6 +614,7 @@ interface SessionStore {
 7. 接入 revert：`session.revert` + snapshot + patch cleanup。
 
 这就是持久化的主线：少量表，message/part JSON 承载业务结构，运行状态留在内存，compact/revert 都通过已有 message/part/session 字段表达。
+
 ## 模型无关历史管理补充（2026-11-02，#109）
 
 历史 `renameSession` / `deleteSession` 不需要可执行模型；命令分类使用共享 V4 合同

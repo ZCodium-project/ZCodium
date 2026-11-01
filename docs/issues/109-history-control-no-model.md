@@ -34,19 +34,19 @@ owner/lease、地址检查、workspace identity、可信 continuous/replayable �
 先更新 spec、跑失败回归，再实现。Host 六个初始冷启动回归均复现 provider 门禁错误；
 CLI 冷管理四例复现 rejected；使用精确基线源码 loader 验证五种 busy 事实未获保护。
 
-| 验证 | 结果 |
-| --- | --- |
-| 根定向 5 文件：Host V4、Provider Registry、hook trust、共享 command、Window Controller | 191 通过 |
-| 调用方：task-facts contract、task index syncer | 78 通过 |
-| CLI：command inbox、native session management、native commands | 111 通过 |
-| CLI `#109` 专项（真实 SQLite + server/binder/App/Core，以及 native busy guards） | 11 通过 |
-| Host `#109` 专项 | 12 通过（包含在 191 中） |
-| 根 `pnpm typecheck` | 通过 |
-| `pnpm --dir apps/zcode-cli typecheck` | 30 tasks 成功，26 命中缓存；改动 bootstrap 实际检查 |
-| 根 `pnpm lint` | 0 errors、116 warnings |
-| CLI lint | 0 errors、76 warnings、12 项上游存量行数诊断 |
-| `pnpm architecture:check --changed` | 0 violations / baseline / new |
-| 改动 TS 格式检查、`git diff --check` | 通过 |
+| 验证                                                                                   | 结果                                                |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 根定向 5 文件：Host V4、Provider Registry、hook trust、共享 command、Window Controller | 191 通过                                            |
+| 调用方：task-facts contract、task index syncer                                         | 78 通过                                             |
+| CLI：command inbox、native session management、native commands                         | 111 通过                                            |
+| CLI `#109` 专项（真实 SQLite + server/binder/App/Core，以及 native busy guards）       | 11 通过                                             |
+| Host `#109` 专项                                                                       | 12 通过（包含在 191 中）                            |
+| 根 `pnpm typecheck`                                                                    | 通过                                                |
+| `pnpm --dir apps/zcode-cli typecheck`                                                  | 30 tasks 成功，26 命中缓存；改动 bootstrap 实际检查 |
+| 根 `pnpm lint`                                                                         | 0 errors、116 warnings                              |
+| CLI lint                                                                               | 0 errors、76 warnings、12 项上游存量行数诊断        |
+| `pnpm architecture:check --changed`                                                    | 0 violations / baseline / new                       |
+| 改动 TS 格式检查、`git diff --check`                                                   | 通过                                                |
 
 扩大到 CLI 六文件（上述 inbox/session management，加 cold resume、gateway、
 sessions-index、history-first）为 **244 通过、45 失败**，不能写成全通过。
