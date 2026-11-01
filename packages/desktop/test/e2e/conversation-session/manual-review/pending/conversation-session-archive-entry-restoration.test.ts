@@ -1,12 +1,16 @@
 import { DatabaseSync } from "node:sqlite";
 import { basename, join } from "node:path";
+import { ZCODE_DATA_ROOT_DIR_NAME } from "@zcode/shared";
 import { TID_CONFIRM_DIALOG_CONFIRM } from "@zcode/shared/test-ids";
 import { DEFAULT_WORKSPACE, waitForWorkspaceApp } from "../../../helpers/desktop-app.js";
 
 const home = process.env.ZCODE_E2E_HOME_DIR!;
 const ids = ["nav99-restore", "nav99-delete"];
 function readTask(id: string) {
-  const db = new DatabaseSync(join(home, ".zcode/v2/tasks-index.sqlite"), { readOnly: true });
+  // fixture 必须与 release 使用同一数据根；旧 helper 的 .zcode 路径不会被 App 读取。
+  const db = new DatabaseSync(join(home, ZCODE_DATA_ROOT_DIR_NAME, "v2", "tasks-index.sqlite"), {
+    readOnly: true,
+  });
   try {
     return db.prepare("SELECT archived,cli_deleted FROM tasks WHERE task_id=?").get(id) as {
       archived: number;
@@ -28,8 +32,8 @@ describe("NAV99：归档入口恢复", () => {
     if (!home || !basename(home).startsWith("zcode-navigation-e2e-"))
       throw new Error("使用独立 zcode-navigation-e2e-* HOME，禁止写生产数据库");
     await waitForWorkspaceApp(DEFAULT_WORKSPACE, 45_000);
-    const db = new DatabaseSync(join(home, ".zcode/v2/tasks-index.sqlite"));
-    const cli = new DatabaseSync(join(home, ".zcode/cli/db/db.sqlite"));
+    const db = new DatabaseSync(join(home, ZCODE_DATA_ROOT_DIR_NAME, "v2", "tasks-index.sqlite"));
+    const cli = new DatabaseSync(join(home, ZCODE_DATA_ROOT_DIR_NAME, "cli", "db", "db.sqlite"));
     try {
       for (const id of ids) {
         cli
@@ -71,7 +75,10 @@ describe("NAV99：归档入口恢复", () => {
     await openArchives();
     await $('[data-testid="archive-search"]').setValue("nav99-");
     expect(await $$('[data-testid="archive-task"]').length).toBe(0);
-    const cliCheck = new DatabaseSync(join(home, ".zcode/cli/db/db.sqlite"), { readOnly: true });
+    const cliCheck = new DatabaseSync(
+      join(home, ZCODE_DATA_ROOT_DIR_NAME, "cli", "db", "db.sqlite"),
+      { readOnly: true },
+    );
     try {
       expect(
         cliCheck.prepare("SELECT time_deleted FROM session WHERE id=?").get(ids[1]!)?.time_deleted,

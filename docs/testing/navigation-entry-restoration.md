@@ -83,8 +83,17 @@ Host 唯一持有归档；CLI 唯一持有存在性/标题/时间；workspaceKey
 ## E2E Handoff Notes / Unresolved Questions
 
 - Provider policy=none；不发模型请求。fixture 以独立 HOME 启动后用真实 SQLite 添加历史 CLI session 与 Host tasks；不使用生产库。
-- 测试入口为本包现有 WDIO，pending 显式 spec；父会话在合成测试包上运行/手动取证。无固定 sleep，以 DOM、落库与导航回执等待。
+- 两个新增 fixture 从 `@zcode/shared` 公开入口读取 `ZCODE_DATA_ROOT_DIR_NAME`（当前 `.zcodium`），所有直接 SQLite 播种和断言路径统一为 `join(home, ZCODE_DATA_ROOT_DIR_NAME, ...)`：Host `v2/tasks-index.sqlite`，CLI `cli/db/db.sqlite`。不再硬编码旧 `.zcode`，不创建旧根、不依赖迁移把测试数据搬入实际根。
+- 测试入口候选为本包现有 WDIO，pending 显式 spec；下述公共 helper 路径和 release 测试桥前置条件尚未对齐，不能称这两个候选已运行通过。本次实际 release 包建议使用隔离 HOME + CDP 手动验收。无固定 sleep，以 DOM、落库与导航回执等待。
 - 不以 jsdom、390px 或 macOS 包冒充 Windows/真实手机/SSH；没有未决产品问题。
+
+### 自动候选的已知前置阻塞（2026-11-02 补正）
+
+- `packages/desktop/wdio.conf.ts` 与 `test/e2e/helpers/desktop-app.ts` 的公共 `E2E_STORAGE_ROOT` 仍写死 `.zcode`，WDIO 初始化/配置播种、helper 的设置读取和失败诊断不能代表 release 实际 `.zcodium` 数据。本轮仅修两个新增 fixture，不扩大修改公共 helpers 或迁移旧测试。
+- 两个测试只从旧 helper 导入 `DEFAULT_WORKSPACE` 和 `waitForWorkspaceApp`，没有调用 helper 的数据库读取函数；前者是 `HOME/ZCodeProject`，与数据根名无关。后者依赖 DOM 路径徽标或 `__zcodeTabStoreE2E` 等就绪探针，失败诊断还会读取旧 helper 路径。release 构建不提供测试桥，不能假定该等待路径或 runner 初始化可直接复用。
+- fixture check 仅验证 JSON/spec 契约，tsc 仅验证类型；均不证明 WDIO seed 写入真实根、release 已就绪或 GUI 行为通过。在公共路径与 bridge 合同另行对齐之前，下面自动命令只保留为候选，不作为本次 release 验收入口。
+
+本次补正使用已提供的 Node 24.14.0：两个 fixture check、E2E `tsc --noEmit`、根 `pnpm typecheck`、`pnpm lint`（116 warnings / 0 errors）、architecture 与 diff check 通过；另从 `@zcode/shared` 实际导入常量并核对两个 fixture 无旧根路径拼接，输出 `.zcodium/v2/tasks-index.sqlite`。只改本文与两个新增测试，没有修改生产源码、公共 helpers、旧测试或迁移；未执行 WDIO 或 release GUI，以下原始单测记录不能替代这两项运行证据。
 
 ## 本轮执行记录
 
@@ -96,16 +105,19 @@ Host 唯一持有归档；CLI 唯一持有存在性/标题/时间；workspaceKey
 
 ### 合成包交接
 
-可执行候选保持 pending、未转正：
+**建议本次实际 release 包使用隔离 HOME + CDP 手动验收；以下自动候选存在上述前置阻塞，未执行、未通过、未转正：**
 
 ```sh
+# 仅候选：先另行对齐公共 WDIO 数据根与 release 就绪探针，当前不要据此宣称包验收通过。
 ZCODE_E2E_HOME_DIR="/var/folders/zd/qnwn4b553t7bwmjqz93x65dm0000gn/T/opencode/zcode-navigation-e2e-99" \
 ZCODE_E2E_PACKAGED_APP_PATH="<合成测试包可执行文件绝对路径>" \
 ZCODE_E2E_SPEC="./test/e2e/conversation-session/manual-review/pending/conversation-session-archive-entry-restoration.test.ts" \
 pnpm --filter @zcode/desktop test:e2e:serial
 ```
 
-另用全新 `zcode-navigation-e2e-104` HOME 将 spec 换为 `conversation-session-file-tree-return.test.ts`。不指定 PACKAGED_APP_PATH 则按当前仓库规则构建开发 E2E 产物，不能称为合成包验证。发布构建若无测试桥，请手动执行下面相同路径，不以更改产品能力迁就测试。
+另用全新 `zcode-navigation-e2e-104` HOME 将 spec 换为 `conversation-session-file-tree-return.test.ts`。不指定 PACKAGED_APP_PATH 则按当前仓库规则构建开发 E2E 产物，不能称为合成包验证；设置该变量也不会自动解决旧 helper 路径或缺失测试桥。
+
+手动路径：给实际 release 可执行文件设置全新隔离 `HOME` 与同一 `ZCODE_DATA_BASE_DIR`，并隔离 Electron user-data；启用独立 CDP 端口后只使用真实 DOM/用户操作与实际文件断言，不注入测试桥。先启动 App 初始化 `.zcodium` 归属文件和数据库，退出后再按下列 fixture SQL 向 `HOME/<ZCODE_DATA_ROOT_DIR_NAME>/...` 播种，避免旧 WDIO helper 初始化和运行时写入互相覆盖；重新启动同一 release 包进行验收。CDP 截图、命中结果和库查询结果分别留档。生产 HOME、旧 `.zcode` 与真实凭据均不参与。
 
 - #99：隔离库的 CLI session 和 Host archived 双侧播种见 NAV99 before 代码；两条 `nav99-restore/delete`，相同 workspace，不依赖模型。点击 `task-settings-button` → `settings-section-nav-archives` → `archive-search` 输入 nav99- → `archive-group-toggle`。点 `archive-unarchive` 后核对 archived=0 与返回侧栏可见；对另一行 `archive-delete` 先 Escape 取消再确认 `confirm-dialog-confirm`，核对 CLI time_deleted 与 Host cli_deleted，重启后不复活。
 - #104：隔离 Host projects/project_roots 添加 NAV104 单 root 项目并创建 NAV104-fixture.txt（完整 SQL 见测试）；hover `virtual-project-row`，点击 `virtual-project-files`。检查 `workspace-file-tree-back` 中心与左右四分点的 elementFromPoint 属于按钮、按钮位于 `sidebar-file-tree-titlebar` 之后；真实鼠标点击返回，再次打开用 Tab/Enter 返回，项目 `virtual-project-toggle` 的 aria-expanded 不变。另在 Windows 真实包复核标题栏拖动、窗口控制、新建任务没有被覆盖。

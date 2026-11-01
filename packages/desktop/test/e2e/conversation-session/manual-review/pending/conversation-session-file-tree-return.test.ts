@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { basename, join } from "node:path";
 import { writeFile } from "node:fs/promises";
+import { ZCODE_DATA_ROOT_DIR_NAME } from "@zcode/shared";
 import { DEFAULT_WORKSPACE, waitForWorkspaceApp } from "../../../helpers/desktop-app.js";
 
 describe("NAV104：项目文件树返回", () => {
@@ -11,7 +12,8 @@ describe("NAV104：项目文件树返回", () => {
       throw new Error("使用独立 zcode-navigation-e2e-* HOME，禁止写生产数据库");
     await waitForWorkspaceApp(DEFAULT_WORKSPACE, 45_000);
     await writeFile(join(DEFAULT_WORKSPACE, "NAV104-fixture.txt"), "navigation fixture");
-    const db = new DatabaseSync(join(home, ".zcode/v2/tasks-index.sqlite"));
+    // 使用 release 的共享数据根，不在旧 helper 指向的 .zcode 下创建无效 fixture。
+    const db = new DatabaseSync(join(home, ZCODE_DATA_ROOT_DIR_NAME, "v2", "tasks-index.sqlite"));
     try {
       db.prepare(
         "INSERT INTO projects(project_id,host_id,name,position,deleted,created_at,updated_at) VALUES('nav104-project','local','NAV104',0,0,1,1)",
