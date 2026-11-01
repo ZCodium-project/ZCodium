@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -47,6 +47,63 @@ class StaticAccountSource implements ProviderSource<AccountProviderConfigSnapsho
 }
 
 describe("ProviderRuntime", () => {
+  it.each(["options", "config-runtime"] as const)(
+    "草稿模型检测在 %s 入口装配，且不启动或写入配置",
+    async (entry) => {
+      const root = await mkdtemp(join(tmpdir(), "zcode-provider-runtime-model-catalog-"));
+      const options = {
+        zcodeBuiltinFilePath: join(root, "not-saved-builtin.json"),
+        personalFilePath: join(root, "not-saved-personal.json"),
+        watch: false,
+      };
+      const runtime =
+        entry === "options"
+          ? createProviderRuntime(options)
+          : createProviderRuntimeFromConfigRuntime({
+              configRuntime: createProviderConfigRuntime(options),
+            });
+      const start = vi.spyOn(runtime, "start");
+      const snapshot = runtime.registryService.getSnapshot();
+      const fetch = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: "draft-model" }] })))
+        .mockResolvedValueOnce(new Response(null, { status: 401, statusText: "Unauthorized" }));
+      const draft = {
+        apiType: "openai-chat-completions" as const,
+        baseUrl: "https://draft.example/v1",
+        apiKey: "draft-key",
+        headers: { "X-Draft-Header": "draft-value" },
+      };
+
+      try {
+        await expect(runtime.providerSettings.listRemoteModels(draft)).resolves.toEqual({
+          success: true,
+          models: ["draft-model"],
+        });
+        expect(fetch).toHaveBeenNthCalledWith(1, "https://draft.example/v1/models", {
+          headers: { Authorization: "Bearer draft-key", "X-Draft-Header": "draft-value" },
+          signal: expect.any(AbortSignal),
+        });
+        await expect(
+          runtime.providerSettings.listRemoteModels({
+            ...draft,
+            baseUrl: "https://changed.example/v1",
+          }),
+        ).resolves.toEqual({
+          success: false,
+          message: "Provider 返回 401 Unauthorized（请求：GET https://changed.example/v1/models）",
+        });
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(start).not.toHaveBeenCalled();
+        expect(runtime.registryService.getSnapshot()).toBe(snapshot);
+        expect(await readdir(root)).toEqual([]);
+      } finally {
+        fetch.mockRestore();
+        runtime.dispose();
+      }
+    },
+  );
+
   it("Host View 原子返回 Configured Default 解析后的 preferredSelection", async () => {
     const root = await mkdtemp(join(tmpdir(), "zcode-provider-runtime-preferred-"));
     const zcodeBuiltinFilePath = join(root, "zcode-builtin.json");

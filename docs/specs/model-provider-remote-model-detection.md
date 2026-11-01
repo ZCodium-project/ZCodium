@@ -28,6 +28,9 @@
   直接访问 Provider API，避免 CORS 与密钥面扩大。
 - 服务实现位于 `packages/services` 的 `createLocalServices` 装配中，桌面本地 Host、
   远程 server、Web server 共用同一实现；`ProxyChannel` 按方法名转发，无需改动 stdio 协议。
+- 共享 `ProviderRuntime` 负责向设置服务装配 `createRemoteModelCatalogExecutor`；直接创建
+  Runtime 或复用已有 Config Runtime 时都必须具备该能力。检测不等待 Runtime / Registry
+  启动，也不读取已保存的连接信息。
 
 ## URL 与鉴权语义（与正式执行链一致）
 
@@ -66,3 +69,5 @@
 5. 草稿未保存时点击检测 → 使用草稿值；修改 Base URL 后再检测使用新值。
 6. `zhipu-account` Provider → 不渲染检测入口。
 7. 连续点击检测 → pending 期间按钮禁用；旧响应晚到时由 stale token 守卫丢弃。
+8. 从两种 Runtime 创建入口调用设置服务检测 → 请求使用草稿 URL、Key 和 headers，返回
+   模型列表或供应商错误；不启动 Runtime，不创建配置文件，不改变 Registry 快照。
