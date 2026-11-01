@@ -325,7 +325,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-14
+          # #108：macos-14 于 2026-11-02 退役（actions/runner-images#13518）。
+          # macos-15 是 ARM64；Intel 仍使用独立的 macos-15-intel，避免目标架构错配。
+          - runner: macos-15
             target: mac
             arch: arm64
           - runner: macos-15-intel
