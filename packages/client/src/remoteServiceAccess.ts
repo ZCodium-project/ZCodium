@@ -1,5 +1,7 @@
 import { IGenUiService } from "@zcode/services";
 import { ProxyChannel, type IChannelClient } from "@zcode/rpc";
+import { ServiceChannels } from "@zcode/shared";
+import type { IOrcaRouterService } from "@zcode/services";
 import {
   IFileService,
   IMediaPreviewService,
@@ -22,7 +24,6 @@ import {
   IBotsService,
   IFileWatcherService,
   IOAuthService,
-  IOrcaRouterService,
   IModelSelectionService,
   IProviderSettingsService,
   IProviderProvisioningTargetService,
@@ -214,7 +215,9 @@ export class RemoteServiceAccess implements IServiceAccessor {
       channelClient.getChannel(IOAuthService.channelName),
     );
     this.orcaRouterService = ProxyChannel.toService<IOrcaRouterService>(
-      channelClient.getChannel(IOrcaRouterService.channelName),
+      // 描述符值所在的实现模块顶层依赖 node:crypto，根 barrel 只导出类型（编译期擦除）；
+      // channel 名直接取 @zcode/shared 的常量，与描述符同源同值。
+      channelClient.getChannel(ServiceChannels.OrcaRouter),
     );
     this.providerSettingsService = ProxyChannel.toService<IProviderSettingsService>(
       channelClient.getChannel(IProviderSettingsService.channelName),

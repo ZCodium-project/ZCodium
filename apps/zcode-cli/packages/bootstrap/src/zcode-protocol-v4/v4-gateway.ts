@@ -86,6 +86,7 @@ import {
   commandsQueryParamsSchema,
   commandsQueryResultSchema,
   parseCommandEnvelope,
+  isSessionHistoryManagementCommand,
   measureTopicNotificationEnvelopeBytes,
   parseConversationTopic,
   parseSessionsIndexTopic,
@@ -132,6 +133,7 @@ import {
 import { AttachmentUploadRegistry } from "./attachment-upload-registry.js";
 import {
   ColdSessionResumeCoordinator,
+  V4SubscribeSessionUnavailableError,
   type ColdSessionResumeOutcome,
 } from "./cold-session-resume.js";
 import { CommandInbox } from "./command-inbox.js";
@@ -666,6 +668,26 @@ export class ConversationV4Gateway {
     this.createLogEpoch = options.createLogEpoch ?? defaultLogEpoch;
     this.coldResume = new ColdSessionResumeCoordinator(host);
     this.inbox = new CommandInbox({
+      prepareDecision: async (envelope) => {
+        if (!isSessionHistoryManagementCommand(envelope.type) || envelope.sessionId === null)
+          return;
+        const sessionId = envelope.sessionId;
+        const ready = this.readyFlights.get(sessionId);
+        if (ready) await ready;
+        if (this.host.sessionExists(sessionId)) return;
+        // #109：历史管理不一定先订阅。冷恢复必须在 inbox 查重之后、同一 admission 内，
+        // 否则重复删除会重新恢复已删会话，并发管理也可能建立第二个 runtime。
+        try {
+          await this.ensureColdReadyPublisher(sessionId);
+        } catch (error) {
+          // 缺失仍由 inbox 的存在性裁决返回标准 ACK；恢复失败则保持失败，不能伪造存在性。
+          if (
+            !(error instanceof V4SubscribeSessionUnavailableError) ||
+            error.reasonCode !== "fault.subscribe.sessionNotFound"
+          )
+            throw error;
+        }
+      },
       getRevision: (sessionId) => {
         if (!this.host.sessionExists(sessionId)) return null;
         // 已知会话但尚无事件 → 投影未建，revision 视为 0（draft 起点）。

@@ -106,6 +106,12 @@ nodes:
     aliases: ["归档管理", "已归档的聊天"]
     docs: ["docs/superpowers/specs/2026-09-11-archive-management.md"]
     codeSeeds:
+      - symbol: "createSettingsPageConfig"
+        file: "packages/ui/src/settings/settingsPageConfig.ts"
+      - symbol: "resolveSettingsSection"
+        file: "packages/ui/src/lib/settingsNavigation.ts"
+      - symbol: "SettingsPage"
+        file: "packages/ui/src/SettingsPage.tsx"
       - symbol: "ArchiveManagement"
         file: "packages/ui/src/project-sidebar/ArchiveManagement.tsx"
       - symbol: "useArchiveManagement"
@@ -1907,6 +1913,10 @@ nodes:
     kind: "ui-surface"
     label: "Workspace file tree panel"
     codeSeeds:
+      - symbol: "WorkspaceSidebar"
+        file: "packages/ui/src/WorkspaceSidebar.tsx"
+      - symbol: "DesktopTopOverlay"
+        file: "packages/ui/src/DesktopTopOverlay.tsx"
       - symbol: "WorkspaceFileTree"
         file: "packages/ui/src/workspace-file-tree/WorkspaceFileTree.tsx"
       - symbol: "WorkspaceFileTreeRowView"

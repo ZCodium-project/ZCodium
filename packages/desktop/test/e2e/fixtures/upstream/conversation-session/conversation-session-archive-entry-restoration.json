@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "caseName": "conversation-session-archive-entry-restoration",
+  "spec": "./test/e2e/conversation-session/conversation-session-archive-entry-restoration.test.ts",
+  "fixtures": [
+    {
+      "id": "nav99-title",
+      "description": "两个真实 NAV99 会话的可搜索标题响应。",
+      "metadata": {
+        "kind": "common",
+        "source": "synthetic",
+        "timingPolicy": "fast-text",
+        "syntheticReason": "仅为两个真实会话提供可搜索标题；会话、项目身份和合法任务元数据均由生产创建路径生成。"
+      },
+      "maxMatches": 2,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "bodyIncludes": ["Generate a concise title", "E2E_NAV99_"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "nav99-title",
+          "inputTokens": 64,
+          "outputTokens": 8,
+          "text": "{\"title\":\"NAV99 archive fixture\"}"
+        }
+      }
+    },
+    {
+      "id": "nav99-restore-turn",
+      "description": "通过真实创建与发送路径持久化将被取消归档的会话。",
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "fast-text",
+        "syntheticReason": "本地固定回复完成真实会话和正文持久化，再验证取消归档；不手写 session/project_id/meta_json，不验证模型质量。"
+      },
+      "maxMatches": 1,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "lastUserMessageIncludes": ["E2E_NAV99_RESTORE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "nav99-restore-turn",
+          "inputTokens": 96,
+          "outputTokens": 12,
+          "text": "NAV99_RESTORE_OK"
+        }
+      }
+    },
+    {
+      "id": "nav99-delete-turn",
+      "description": "通过真实创建与发送路径持久化将被确认删除的会话。",
+      "metadata": {
+        "kind": "main",
+        "source": "synthetic",
+        "timingPolicy": "fast-text",
+        "syntheticReason": "本地固定回复完成另一真实会话，再验证删除取消/确认和冷启动双库事实，不依赖供应商实网。"
+      },
+      "maxMatches": 1,
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "lastUserMessageIncludes": ["E2E_NAV99_DELETE"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "nav99-delete-turn",
+          "inputTokens": 96,
+          "outputTokens": 12,
+          "text": "NAV99_DELETE_OK"
+        }
+      }
+    }
+  ]
+}

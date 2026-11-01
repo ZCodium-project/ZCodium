@@ -42,11 +42,11 @@ export function createRemoteModelCatalogExecutor(dependencies: {
           // 同样要求 Base URL 自含前缀）；带上实际请求 URL 并给出提示，避免用户盲猜。
           const hint =
             response.status === 404
-              ? `（请求：GET ${request.url}；若为 OpenAI 兼容网关，请检查 Base URL 是否遗漏 /v1 前缀）`
-              : `（请求：GET ${request.url}）`;
+              ? `（请求：GET ${publicRequestUrl(request.url)}；若为 OpenAI 兼容网关，请检查 Base URL 是否遗漏 /v1 前缀）`
+              : `（请求：GET ${publicRequestUrl(request.url)}）`;
           return {
             success: false,
-            message: `${statusText}${hint}`,
+            message: redactCredentials(`${statusText}${hint}`, input),
           };
         }
         const parsed = parseRemoteModelListPage(await response.json());
@@ -65,8 +65,44 @@ export function createRemoteModelCatalogExecutor(dependencies: {
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : String(error),
+        message: redactCredentials(error instanceof Error ? error.message : String(error), input),
       };
     }
   };
+}
+
+/** URL 只用于诊断端点，不能把 userinfo 或查询串中的凭据带回 Renderer。 */
+function publicRequestUrl(value: string): string {
+  const url = new URL(value);
+  return `${url.origin}${url.pathname}`;
+}
+
+function redactCredentials(message: string, input: RemoteModelCatalogRequest): string {
+  // Node fetch 会在非法 header 异常中原样回显其值；只隐藏 API Key 不足以保护自定义鉴权头。
+  // 同时覆盖转义/编码后的回显，保留其余可诊断错误，不向日志写入请求或凭据。
+  const headerValues = Object.values(input.headers ?? {});
+  const secrets = [
+    input.apiKey ?? "",
+    ...headerValues,
+    ...headerValues.map((value) => value.replace(/^(?:Bearer|Basic)\s+/iu, "")),
+  ];
+  try {
+    const url = new URL(input.baseUrl);
+    secrets.push(url.username, url.password, ...url.searchParams.values(), url.hash.slice(1));
+  } catch {
+    // URL 校验本身也可能抛错；仍对已知的 Key 和 headers 脱敏。
+  }
+  const variants = new Set(
+    secrets.flatMap((secret) =>
+      [secret, secret.trim()].flatMap((value) =>
+        value
+          ? [value, JSON.stringify(value).slice(1, -1), encodeURIComponent(value.toWellFormed())]
+          : [],
+      ),
+    ),
+  );
+  for (const secret of [...variants].sort((left, right) => right.length - left.length)) {
+    message = message.replaceAll(secret, "[REDACTED]");
+  }
+  return message;
 }

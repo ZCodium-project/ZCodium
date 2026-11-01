@@ -6,7 +6,7 @@
 - `pre-push` 会执行 `pnpm run verify:pre-push`。
 - 根 `pnpm test` 现在只跑单测，不再误把桌面端 `packages/desktop/test/e2e` 当成 Vitest 用例。
 - Bugfix：单测脚本里的 E2E exclude glob 必须加引号；否则 shell 会先把 `packages/desktop/test/e2e/**/*.test.ts` 展开成真实文件列表，导致 Vitest 把多余文件当成 filters，同时又被 exclude 排除，最终报 `No test files found` 并阻止 push。
-- `verify:pre-push` 依次执行 lint、架构检查、SQLite schema 只增检查和 push 范围的受影响单测；任一门禁、选中测试或脚本自身失败都会阻止 push。
+- `verify:pre-push` 依次执行 lint、架构检查、SQLite schema 只增检查、根 typecheck 和受影响单测；任一门禁、选中测试或脚本自身失败都会阻止 push。
 
 这样可以在代码推到远端前，先用更快的静态检查拦住明显问题，再把单测问题拦在本地，同时保留 `pnpm test:e2e` 作为桌面端 E2E 的独立入口。
 
@@ -20,7 +20,7 @@ pre-push 直接使用当前 `PATH` 中的 pnpm / Node，不强制依赖 mise。�
 开发者准备 Node / pnpm（mise、nvm 或其他方式）
     → Git hook 保留 push ref 信息并清理 Git local env
     → pnpm run verify:pre-push
-    → lint / 架构检查 / SQLite schema / 受影响单测
+    → lint / 架构检查 / SQLite schema / 根 typecheck / 受影响单测
 ```
 
 - 仓库负责声明工具版本和执行检查；个人环境负责让合适的 Node / pnpm 可被 Git 找到。
@@ -29,6 +29,15 @@ pre-push 直接使用当前 `PATH` 中的 pnpm / Node，不强制依赖 mise。�
   版本管理环境，参见 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis)。
 - 缺少命令或检查失败仍然阻止 push；hook 不自动安装工具，不静默跳过检查。
 - 本次只解除 hook 对 mise 的依赖，不新增版本检查，也不修改现有开发、CLI/SEA 或 CI 的版本要求。
+
+## 根 Typecheck 门禁
+
+- 根 `pnpm typecheck` 在 SQLite schema 之后、affected UT 之前执行；类型错误必须使真实 Git pre-push 非零退出，后续 affected UT 不执行。用临时仓库的已提交错误及本地 bare remote 验证接线，不能只靠未提交错误证明 push 门禁。
+- 范围以根 `package.json` 的 `typecheck` 命令为准：当前是 14 个显式入口及其工程引用，包括 desktop host 与 E2E，**不包含** `tsconfig.main.json`、preload、renderer 的完整工程或 CLI 独立 typecheck。它不是“所有桌面源码都检查”的承诺。
+- 类型检查只能发现静态类型错误，不能检查环境变量的版本注入是否存在、版本值是否满足发布规则。#83 的版本注入回归应由版本/发布合同测试验证，不能归因为 tsc 能捕获的类型错误。
+- affected 入口当前未传 `--scope push`，因此 hook 传入的 ref 不会自动启用 push 范围。这是既有范围接线问题，不属于新增 typecheck 的行为；不要将工作区模式输出当成已验证 committed push 范围。
+
+回归入口：`node --test scripts/test/pre-push-typecheck.test.mjs`，其他门禁使用可观测桩，typecheck 使用真实 tsc；另行执行根 typecheck 验证真实工程。
 
 ## SQLite Schema
 

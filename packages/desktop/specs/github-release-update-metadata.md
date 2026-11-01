@@ -16,6 +16,24 @@
 - 所有新增生产流程只写 draft Release。`publish` 必须显式等待 `update-metadata` 成功；任一片段/校验/上传失败保持 draft，不回退到 builder 的原始清单。
 - `build_artifacts=false` 时跳过本链路，保持原有仅建 Release 的显式行为。`keep_draft=true` 时可执行构建和元数据验证，但不公开。
 
+## #108：macOS runner 与目标架构分离
+
+`.github/workflows/release.yml` 的 `desktop.strategy.matrix.include` 是构建 runner 与目标架构映射的唯一来源。两个 macOS job 必须独立、原生构建，不能将 Intel 目标交给 ARM64 runner，也不使用会自动迁移系统版本的 `macos-latest`：
+
+| runner label     | target | arch  | 分发产物  |
+| ---------------- | ------ | ----- | --------- |
+| `macos-15`       | `mac`  | arm64 | dmg + zip |
+| `macos-15-intel` | `mac`  | x64   | dmg + zip |
+
+`runs-on` 继续消费 `matrix.runner`，`bundle:desktop` 继续消费 `matrix.target` / `matrix.arch`；阶段片段、文件名、checksums 和最终更新清单规则不变。不修改 Windows/Linux 矩阵、版本、tag 或发布正文，不恢复已删除的 workflow/模块。
+
+修改依据（2026-11-02 核验）：
+
+- [GitHub runner-images 退役公告 #13518](https://github.com/actions/runner-images/issues/13518)（搜索索引日期 2026-01-10；以当日抓取的正文为准）：macOS 14/14 ARM64 于 2026-11-02 退役，brownout/退役期间旧 label 的 job 会被终止；公告建议将 `macos-14` 迁至 `macos-15` 等支持的 label。
+- [GitHub 官方 runner-images 标签表](https://github.com/actions/runner-images#available-images) 与 [GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)（均于 2026-11-02 查阅）：`macos-15` 为 ARM64，`macos-15-intel` 为 Intel/x64；不能只按系统版本推断架构。
+
+验收边界：现有 Release YAML 合同回归必须精确检查这两个 runner/target/arch 组合，以及 job 调度与打包参数对同一矩阵的消费；旧标签、两架构错配、缺失/重复 macOS job 均失败。静态测试不证明 GitHub 调度、镜像工具链或真实产物已通过，下一轮正式候选仍须执行完整 Actions 构建，核对两种 runner 的实际架构和产物；任何失败保持 draft，不承诺 runner 未来持续可用。
+
 ## 所有权和事件顺序
 
 ```text

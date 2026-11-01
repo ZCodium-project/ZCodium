@@ -165,12 +165,32 @@ async function renameSession(
   return undefined;
 }
 
+/** 删除不能以关闭 runtime 的方式隐式取消执行；由 gateway 保留结构化拒绝原因。 */
+export class V4SessionBusyError extends Error {
+  readonly reasonCode = "guard.sessionBusy";
+
+  constructor() {
+    super("Session still has active or queued work");
+    this.name = "V4SessionBusyError";
+  }
+}
+
 /** CLI 先持久化软删除，再关闭运行实例；正文保留，后续冷种子不会复活该会话。 */
 async function deleteSession(
   host: V4CommandCoreHost,
   envelope: CommandEnvelope,
 ): Promise<CommandResult | undefined> {
   const record = requireRecord(host, envelope.sessionId);
+  // #109：控制面能无模型启动不代表可以关闭 busy runtime。读取 CLI/Core 原始事实，
+  // 在软删除之前拒绝；不复制 UI phase、不先 stop、不另建管理队列。
+  if (
+    record.activeAbortController ||
+    record.app.runtime.hasActiveOrQueuedTurnWork() ||
+    record.app.runtime.hasRunningBackgroundTasks() ||
+    (host.getQueueLength?.(record.app.sessionId) ?? 0) > 0 ||
+    host.interactions?.hasPendingForSession(record.app.sessionId)
+  )
+    throw new V4SessionBusyError();
   if (!host.deleteSession) {
     // 关闭不能静默降级：钩子缺失说明 binder 接线不完整，直接失败（ACK failed）。
     throw new Error("v4 deleteSession requires host.deleteSession capability");

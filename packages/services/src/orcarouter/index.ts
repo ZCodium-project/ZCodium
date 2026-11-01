@@ -31,7 +31,7 @@ export {
   type OrcaCatalogSource,
 } from "./catalog.js";
 export {
-  IOrcaRouterService,
+  type IOrcaRouterService,
   createOrcaRouterService,
   type CreateOrcaRouterServiceInput,
   type OrcaRouterCatalogView,

@@ -1,6 +1,7 @@
 import { seedTaskIndex } from "./helpers/taskIndexFixture.js";
 import { fixture, port } from "#src/project-storage/test-fixture.js";
 import type { ZCodeSessionInfo } from "@zcode/shared";
+import type { ModelSelectionView } from "@zcode/provider";
 import { channelReplyHostRequestSchema, type ChannelReplyHostRequest } from "@zcode/shared";
 // v4 conversation 通道 host 转发面测试（M3 竖切，docs/v4-refactor/01-topology §host 通道层）。
 // 验证 host 只做透传：subscribe/unsubscribe/command 转发给 CLI v4 方法，
@@ -11,6 +12,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   TopicWireFrameAssembler,
+  commandPayloadSchemas,
   conversationTopicFrameSchema,
   type ConversationTopicWireCandidate,
   type ConversationTopicWireFrame,
@@ -34,6 +36,7 @@ const V4_FAKE_AGENT = `
 const fs = require("node:fs");
 const logPath = process.argv[2];
 let buf = "";
+const pendingHistoryCommands = new Map();
 function send(obj) { process.stdout.write(JSON.stringify(obj) + "\\n"); }
 process.stdin.on("data", (chunk) => {
   buf += chunk.toString("utf8");
@@ -45,6 +48,13 @@ process.stdin.on("data", (chunk) => {
     let msg;
     try { msg = JSON.parse(line); } catch { continue; }
     if (logPath && msg.method) fs.appendFileSync(logPath, line + "\\n");
+    if (!msg.method && pendingHistoryCommands.has(msg.id)) {
+      const command = pendingHistoryCommands.get(msg.id);
+      pendingHistoryCommands.delete(msg.id);
+      fs.appendFileSync(logPath, JSON.stringify({ method: "history/preferences-response", params: msg.result ?? { error: msg.error } }) + "\\n");
+      send({ id: command.id, result: { commandId: command.params.commandId, status: msg.error ? "failed" : "accepted", revisionAtDecision: 3 } });
+      continue;
+    }
     if (msg.method === "session/list" && msg.id !== undefined) {
       const sessions = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
       send({ id: msg.id, result: { sessions: sessions.filter((session) => msg.params.sessionIds.includes(session.sessionId)) } });
@@ -296,6 +306,16 @@ process.stdin.on("data", (chunk) => {
       else reply();
     }
     if (msg.method === "v4/command" && msg.id !== undefined) {
+      if (msg.params.sessionId === "project-history") {
+        const id = "history-prefs-" + msg.id;
+        pendingHistoryCommands.set(id, msg);
+        send({ id, method: "session/requestRuntimePreferences", params: { sessionId: msg.params.sessionId, scope: "runtime-materialization" } });
+        continue;
+      }
+      if (msg.params.sessionId === "busy-history" && msg.params.type === "deleteSession") {
+        send({ id: msg.id, result: { commandId: msg.params.commandId, status: "failed", reasonCode: "guard.sessionBusy", revisionAtDecision: 3 } });
+        continue;
+      }
       const status = "accepted";
       const acceptedInput = {
         delivery: "startNow",
@@ -413,6 +433,8 @@ describe("zcodeAgentService v4 conversation channel", () => {
   function setupService(
     options: {
       providerReady?: boolean;
+      withoutReadinessSource?: boolean;
+      readModelSelection?: () => Promise<ModelSelectionView>;
       authorizeLocalMediaPreviewPath?: (path: string) => Promise<string>;
       prepareSessionCreation?: NonNullable<
         Parameters<typeof createZCodeAgentService>[0]
@@ -450,30 +472,33 @@ describe("zcodeAgentService v4 conversation channel", () => {
       topicResourceExecutor: options.topicResourceExecutor,
       channelReplyExecutor: options.channelReplyExecutor,
       authorizeLocalMediaPreviewPath: options.authorizeLocalMediaPreviewPath,
-      modelSelectionReadinessSource: {
-        async getView() {
-          return {
-            revision: 1,
-            providers:
-              options.providerReady === false
-                ? []
-                : [
-                    {
-                      providerId: "glm",
-                      config: {
-                        kind: "api" as const,
-                        api: {
-                          type: "openai-chat-completions" as const,
-                          baseUrl: "https://provider.test/v1",
+      modelSelectionReadinessSource: options.withoutReadinessSource
+        ? undefined
+        : {
+            async getView() {
+              if (options.readModelSelection) return options.readModelSelection();
+              return {
+                revision: 1,
+                providers:
+                  options.providerReady === false
+                    ? []
+                    : [
+                        {
+                          providerId: "glm",
+                          config: {
+                            kind: "api" as const,
+                            api: {
+                              type: "openai-chat-completions" as const,
+                              baseUrl: "https://provider.test/v1",
+                            },
+                            models: ["glm-4.6"],
+                          },
+                          models: [{ modelId: "glm-4.6", config: {} }],
                         },
-                        models: ["glm-4.6"],
-                      },
-                      models: [{ modelId: "glm-4.6", config: {} }],
-                    },
-                  ],
-          };
-        },
-      },
+                      ],
+              };
+            },
+          },
     });
     return { service, workspacePath, logPath, commandResolver };
   }
@@ -906,6 +931,169 @@ describe("zcodeAgentService v4 conversation channel", () => {
       await service.disposeAllAndWait();
     }
   });
+
+  describe.each(["desktop-continuous", "web-remote-replayable"] as const)(
+    "#109 历史控制面 %s",
+    (clientMode) => {
+      it("冷管理继续通过原 materialization 反向请求取得 Host 的项目目录", async () => {
+        const resolveSessionDirectories = vi.fn(async () => ["/project/extra"]);
+        const { service, workspacePath, logPath } = setupService({
+          providerReady: false,
+          resolveSessionDirectories,
+        });
+        const target = {
+          workspacePath,
+          workspaceIdentity: `remote:server:materialize:${workspacePath}`,
+          remoteSessionId: "materialize-attachment",
+        };
+        try {
+          const ack = await service.sendConversationCommandV4({
+            ...target,
+            clientMode,
+            envelope: {
+              commandId: "project-history-delete",
+              clientId: "history-client",
+              sessionId: "project-history",
+              type: "deleteSession",
+              payload: {},
+              issuedAt: 1,
+            },
+          });
+          expect(ack.status).toBe("accepted");
+          expect(resolveSessionDirectories).toHaveBeenCalledExactlyOnceWith(
+            expect.objectContaining({
+              ...target,
+              sessionId: "project-history",
+            }),
+          );
+          expect(
+            readRequests(logPath).find(
+              (request) => request.method === "history/preferences-response",
+            )?.params.additionalDirectories,
+          ).toEqual(["/project/extra"]);
+        } finally {
+          await service.disposeAllAndWait();
+        }
+      });
+
+      it.each(["missing", "empty", "disabled", "invalid"] as const)(
+        "%s 配置冷启动允许管理历史，但不能因此放行其它命令",
+        async (configuration) => {
+          // ModelSelectionView 是过滤后的执行视图；全部禁用时与空配置一样没有可选模型。
+          // 无效配置则令读者报错：管理命令不能为了启动去读取该执行配置。
+          const readModelSelection = vi.fn(async (): Promise<ModelSelectionView> => {
+            if (configuration === "invalid") throw new Error("invalid model configuration");
+            return { revision: configuration === "disabled" ? 2 : 1, providers: [] };
+          });
+          const { service, workspacePath, logPath, commandResolver } = setupService({
+            readModelSelection,
+            withoutReadinessSource: configuration === "missing",
+          });
+          const scope = createZCodeAgentConnectionScope(service, {
+            connectionId: `history-${clientMode}`,
+            clientMode,
+          });
+          const target = {
+            workspacePath,
+            workspaceIdentity: `remote:server:history:${workspacePath}`,
+            remoteSessionId: "history-attachment",
+          };
+          try {
+            await scope.service.helloConversationV4();
+            await scope.service.initializeConversationV4({
+              kind: "clientHello",
+              protocolVersion: 3,
+              clientId: "history-client",
+              appVersion: "test",
+            });
+            for (const type of ["renameSession", "deleteSession"] as const) {
+              const ack = await scope.service.sendConversationCommandV4({
+                ...target,
+                envelope: {
+                  commandId: `history-${type}`,
+                  clientId: "history-client",
+                  issuedAt: 1,
+                  sessionId: "persisted-history",
+                  type,
+                  payload: type === "renameSession" ? { title: "Renamed history" } : {},
+                },
+              });
+              expect(ack.status).toBe("accepted");
+            }
+            expect(readModelSelection).not.toHaveBeenCalled();
+            expect(commandResolver).toHaveBeenCalledTimes(1);
+            expect(commandResolver).toHaveBeenCalledWith(
+              expect.objectContaining({
+                workspacePath,
+                workspaceIdentity: target.workspaceIdentity,
+                workspaceKey: target.workspaceIdentity,
+              }),
+            );
+
+            // 枚举全部命令，避免把“不刷新 Registry”误当成“无需执行能力”，尤其是
+            // resumeGoal/resumeWorkflowRun/startSavedWorkflow/setAutoDrain 等非 send 命令。
+            for (const type of Object.keys(commandPayloadSchemas) as Array<
+              keyof typeof commandPayloadSchemas
+            >) {
+              if (type === "renameSession" || type === "deleteSession") continue;
+              const pending = scope.service.sendConversationCommandV4({
+                ...target,
+                envelope: {
+                  commandId: `blocked-${type}`,
+                  clientId: "history-client",
+                  issuedAt: 2,
+                  sessionId: type === "createSession" ? null : "persisted-history",
+                  type,
+                  payload: {},
+                },
+              });
+              if (configuration === "invalid") {
+                await expect(pending).rejects.toThrow("invalid model configuration");
+              } else {
+                await expect(pending).rejects.toMatchObject({
+                  code: "ZCODE_AGENT_PROVIDER_NOT_READY",
+                });
+              }
+            }
+            const commands = readRequests(logPath).filter((entry) => entry.method === "v4/command");
+            expect(commands.map((entry) => entry.params.type)).toEqual([
+              "renameSession",
+              "deleteSession",
+            ]);
+            expect(commandResolver).toHaveBeenCalledTimes(1);
+          } finally {
+            scope.dispose();
+            await service.disposeAllAndWait();
+          }
+        },
+      );
+
+      it("已运行 runtime 原样转发 busy 拒绝，不重启或先 stop", async () => {
+        const { service, workspacePath, commandResolver, logPath } = setupService();
+        try {
+          // 先通过模型门禁启动，历史管理仍须复用该进程，不能走独立控制面进程。
+          await service.initialize({ workspacePath });
+          const ack = await service.sendConversationCommandV4({
+            workspacePath,
+            clientMode,
+            envelope: {
+              commandId: "busy-delete",
+              clientId: "history-client",
+              sessionId: "busy-history",
+              issuedAt: 1,
+              type: "deleteSession",
+              payload: {},
+            },
+          });
+          expect(ack).toMatchObject({ status: "failed", reasonCode: "guard.sessionBusy" });
+          expect(commandResolver).toHaveBeenCalledTimes(1);
+          expect(readRequests(logPath).map((entry) => entry.method)).toEqual(["v4/command"]);
+        } finally {
+          await service.disposeAllAndWait();
+        }
+      });
+    },
+  );
 
   it("uses the registry view only as a readiness gate for a cold conversation subscription", async () => {
     const { service, workspacePath, logPath } = setupService();

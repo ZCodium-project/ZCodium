@@ -6,6 +6,7 @@ import {
   WORKFLOW_RUN_SETTINGS_REJECTED_FAULT_PREFIX,
   commandAckSchema,
   commandPayloadSchemas,
+  isSessionHistoryManagementCommand,
   commandResultSchema,
   helloMessageSchema,
   parseCommandEnvelope,
@@ -15,6 +16,13 @@ import {
 } from "../src/zcode-protocol-v4/index.js";
 
 describe("zcode-protocol-v4 command", () => {
+  it("#109 仅历史 rename/delete 可在没有可执行模型时启动控制面", () => {
+    const types = Object.keys(commandPayloadSchemas) as Array<keyof typeof commandPayloadSchemas>;
+    expect(types.filter(isSessionHistoryManagementCommand)).toEqual([
+      "renameSession",
+      "deleteSession",
+    ]);
+  });
   it("parses a valid sendText envelope with typed payload", () => {
     const result = parseCommandEnvelope({
       commandId: "018f0000-0000-7000-8000-000000000001",

@@ -8,6 +8,7 @@ import {
   Palette,
   Sun,
   BarChart3,
+  Archive,
   Terminal,
   AlarmClock,
   Anchor,
@@ -162,6 +163,13 @@ const BASE_SETTINGS_SECTIONS: SettingsSectionDefinition[] = [
     id: "usage",
     icon: BarChart3,
     titleId: "settings.usageTitle",
+    groupId: "dataAndStats",
+  },
+  // #99：归档组件与 Host 命令仍存在，缺少分区注册会让已归档会话失去管理入口。
+  {
+    id: "archives",
+    icon: Archive,
+    titleId: "archives.nav",
     groupId: "dataAndStats",
   },
   {

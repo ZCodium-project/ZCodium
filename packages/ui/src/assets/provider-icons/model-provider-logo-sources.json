@@ -127,6 +127,17 @@
       "sourceUrl": "https://www.orcarouter.ai/orca-logo-classic.png",
       "sourceOwner": "OrcaRouter",
       "normalization": "Official classic logo downloaded unchanged from https://www.orcarouter.ai/orca-logo-classic.png. One asset serves both the API-key and the PKCE entries. Retrieved 2026-10-02."
+    },
+    {
+      "brand": "Cheaper Inference",
+      "file": "model-provider-cheaperinference-light.svg",
+      "darkFile": "model-provider-cheaperinference-dark.svg",
+      "providerIds": ["cheaperinference"],
+      "sourceUrl": "https://github.com/lobehub/lobe-icons/blob/63ef3f5900f7387b3024c920f6c1978672d8f9e4/src/CheaperInference/components/Mono.tsx",
+      "sourceOwner": "LobeHub; Cheaper Inference trademark belongs to its owner",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/lobehub/lobe-icons/blob/63ef3f5900f7387b3024c920f6c1978672d8f9e4/LICENSE",
+      "normalization": "Current 24x24 LobeHub Mono paths unchanged. Only currentColor replaced by #000000 / #ffffff for themes. Full MIT notice embedded in both SVGs. Shape cross-checked against https://www.cheaperinference.com/icon.svg. Retrieved 2026-11-02."
     }
   ]
 }

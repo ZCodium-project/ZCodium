@@ -1,5 +1,11 @@
 # Workspace File Tree
 
+## ZCodium 侧栏返回入口（#104，2026-11-02）
+
+当前 fork 项目行与置顶任务的查看文件入口由 WorkspaceSidebar 的本地 overlay 承载，不能把下文右侧 FileManagerPane 的描述当作已完成入口迁移。侧栏 overlay 必须复用项目列表同等的 48px 顶部标题栏占位，返回按钮与搜索等内容从占位之后开始；否则 Windows/Linux 的 DesktopTopOverlay logo、历史导航及新建按钮会覆盖返回按钮。macOS 与普通 Web 同样保留现有侧栏标题栏布局；手机远控窄屏沿用项目列表 `max-md:hidden` 的占位隐藏规则，不增加空白标题栏。
+
+返回按钮保持清晰可访问名称，提供 `workspace-file-tree-back` 稳定选择器，鼠标中心及左右四分点不得命中顶部浮层，键盘与鼠标均调用原 onClose。关闭只令 WorkspaceSidebar.open=false，不创建/切换任务，不改当前 workspace、草稿、项目折叠或 Host/CLI 事实；ProjectSidebar 保持挂载。反复打开/返回可用，桌面 continuous 与手机 shared-host/replayable 原边界不变。最小回归与实际包交接见 [NAV104](../testing/navigation-entry-restoration.md)。
+
 Workspace 文件树入口位于项目和任务行的操作区，也可从右侧内置应用中的“文件”打开。入口在右侧创建独立文件标签页，左侧任务列表保持可用。文件预览在左、目录在右；目录宽度可拖拽调整，分割线与边框重合。收起目录后预览填满区域，展开恢复目录宽度，并保留目录搜索、展开状态和滚动位置。用户通过目录开关选择的显隐状态按 `workspaceIdentity?.trim() || workspacePath` 持久化：同一 workspace 的所有文件标签与 session 共用最后状态，关闭并重启 App 后仍恢复；不同 workspace 互不影响。面包屑、文件操作和目录开关共用一行，不再重复显示项目绝对路径。
 
 窄面板及手机视图中，目录和预览交替显示；选择文件后只临时收起当前紧凑布局中的目录，不改写 workspace 的显式显隐偏好，恢复宽屏后继续使用该偏好。标签页导航只更新对应实例，不改变任务归属或激活其他标签。内置应用按文件、浏览器、终端、审查、辅助对话排列；不支持的入口仍按现有能力条件隐藏。
