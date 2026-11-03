@@ -1,3 +1,5 @@
+import { BROWSER_LOCAL_PREVIEW_SCHEME, browserPreviewSourceUrl } from "@zcode/shared";
+
 export const DEFAULT_BROWSER_URL = "about:blank";
 
 const RECOVERABLE_BROWSER_GUEST_EXIT_REASONS = new Set([
@@ -58,7 +60,14 @@ export function safeWebviewCall<T>(
   }
 }
 
-const ALLOWED_BROWSER_PROTOCOLS = new Set(["about:", "data:", "file:", "http:", "https:"]);
+const ALLOWED_BROWSER_PROTOCOLS = new Set([
+  "about:",
+  "data:",
+  "file:",
+  `${BROWSER_LOCAL_PREVIEW_SCHEME}:`,
+  "http:",
+  "https:",
+]);
 
 const URL_PROTOCOL_RE = /^[a-zA-Z][a-zA-Z\d+.-]*:/;
 const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
@@ -130,7 +139,7 @@ export function isAllowedBrowserUrl(url: string): boolean {
 /** 系统默认浏览器入口接受 Web URL 和 file URL，不能复用内置浏览器更宽的本地/内联协议白名单。 */
 export function isDefaultBrowserOpenableUrl(url: string): boolean {
   try {
-    const protocol = new URL(url).protocol;
+    const protocol = new URL(browserPreviewSourceUrl(url)).protocol;
     return protocol === "http:" || protocol === "https:" || protocol === "file:";
   } catch {
     return false;
@@ -323,5 +332,5 @@ export function normalizeBrowserUrl(input: string): string | null {
 }
 
 export function displayBrowserUrl(url: string): string {
-  return url === DEFAULT_BROWSER_URL ? "" : url;
+  return url === DEFAULT_BROWSER_URL ? "" : browserPreviewSourceUrl(url);
 }

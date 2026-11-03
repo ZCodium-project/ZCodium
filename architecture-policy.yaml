@@ -822,6 +822,19 @@ modules:
       ui: .
     owner: conversation
 
+  # browser-local-preview：内置浏览器本地 HTML 的受控文件读取边界。
+  - id: browser-local-preview
+    roots:
+      - packages/desktop/src/main/browser-local-preview
+    managed: true
+    requires: [shared]
+    publicEntrypoints:
+      - packages/desktop/src/main/browser-local-preview/index.ts
+      - packages/desktop/src/main/browser-local-preview/contract.ts
+    layers:
+      adapters: .
+    owner: desktop
+
 global:
   # 临时时间戳（2026-09-10）：unmanaged-new-file 只约束此日期之后首次入库的文件。
   # 基于领先 staging 很多的分支开工时，merge-base 之前的"新增"文件不应被追溯。
@@ -996,3 +1009,9 @@ exceptions:
     paths:
       - packages/desktop/src/main/autoUpdateVersion.ts
     reason: 为 #50 版本线迁移抽出的纯版本比较模块，避免测试依赖 electron/electron-updater；接管 packages/desktop/src/main 整个目录需要单独的模块边界重构。
+  - id: plugin-agent-permission-mode-restrict-only-existing-edit
+    rule: unmanaged-new-file
+    paths:
+      - packages/shared/src/subagent-profile.ts
+      - packages/shared/src/subagent-profile-parser.ts
+    reason: 已准入的存量文件为插件 agent 的 permissionMode 只能收紧（ZP-20261028-13）增加进程内 profile 标记字段并更新注释；跨进程 schema 与解析行为不变，接管 shared 目录不在本次范围内。
