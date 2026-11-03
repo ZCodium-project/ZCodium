@@ -391,6 +391,8 @@ export const PlatformChannels = {
    * main 用 BrowserGuestManager attach 该 guest（fire-and-forget）。CDP-on-guest pivot。
    */
   BrowserViewAttachGuest: "zcode:browser-view-attach-guest",
+  /** 可信宿主发起导航；main 将本地 HTML 转成有目录边界的预览地址。 */
+  BrowserViewLoadUrl: "zcode:browser-view-load-url",
   /** Renderer → Main：重建 `<webview>` 前主动断开旧 guest 的 CDP。 */
   BrowserViewDetachGuest: "zcode:browser-view-detach-guest",
   /** Renderer → Main：用户显式关闭 Browser tab。 */
