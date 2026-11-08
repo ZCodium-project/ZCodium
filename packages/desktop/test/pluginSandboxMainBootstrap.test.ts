@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PlatformChannels } from "@zcode/shared";
+import { BROWSER_LOCAL_PREVIEW_SCHEME, PlatformChannels } from "@zcode/shared";
 import type {
   PluginSandboxHandle,
   PluginSandboxRegisterRequestPayload,
@@ -98,6 +98,13 @@ function evaluate(code: string, ports: Record<string, unknown>) {
     mainDir: "/app/out/main",
     join,
     process: { env: {} },
+    // 上游 v3.17.2：入口在 ready 前额外注册 browser-local-preview scheme，
+    // 并安装内置浏览器的本地预览协议；测试只需常量值，安装逻辑用替身。
+    BROWSER_LOCAL_PREVIEW_PRIVILEGES: {
+      scheme: BROWSER_LOCAL_PREVIEW_SCHEME,
+      privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true },
+    },
+    installBrowserLocalPreview: vi.fn(),
     ...sandbox,
     ...ports,
   });

@@ -47,6 +47,9 @@ const h = vi.hoisted(() => {
   const reportResidency = vi.fn().mockResolvedValue(undefined);
   const screenshotSurfaceReady = vi.fn();
   const updateViewport = vi.fn().mockResolvedValue(undefined);
+  // human 导航经 platform.browserViewLoadUrl（main 准入）；转发到对应 webview，
+  // 保持既有「webview.loadURL 收到归一化 URL」断言有效。
+  const webviews = new Map<number, unknown>();
   const viewportListeners = new Set<
     (payload: {
       workspaceKey: string;
@@ -76,6 +79,11 @@ const h = vi.hoisted(() => {
     browserViewReportResidency: reportResidency,
     browserViewScreenshotSurfaceReady: screenshotSurfaceReady,
     browserViewUpdateViewport: updateViewport,
+    browserViewLoadUrl: vi.fn(async (payload: { webContentsId: number; url: string }) => {
+      const target = webviews.get(payload.webContentsId);
+      if (!target) throw new Error("unknown webview");
+      return (target as { loadURL: (url: string) => Promise<void> }).loadURL(payload.url);
+    }),
     getDesktopZoomLevel: vi.fn().mockResolvedValue({ zoomLevel: 0 }),
     openExternal,
     onDesktopZoomLevelChanged: (listener: (state: { zoomLevel: number }) => void) => {
@@ -96,6 +104,7 @@ const h = vi.hoisted(() => {
     openExternal,
     platform,
     reportResidency,
+    webviews,
     screenshotSurfaceReady,
     settingsState,
     updateSettings,
@@ -254,6 +263,8 @@ function stubWebview(el: HTMLElement, over: Record<string, unknown> = {}) {
     executeJavaScript: vi.fn(() => Promise.resolve()),
     ...over,
   });
+  const id = (el as { getWebContentsId: () => number }).getWebContentsId();
+  h.webviews.set(id, el);
   return el;
 }
 
