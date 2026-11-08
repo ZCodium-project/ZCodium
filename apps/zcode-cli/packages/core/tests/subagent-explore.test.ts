@@ -1267,7 +1267,9 @@ describe("Explore subagent", () => {
     const runtime = createTestAgentRuntime(
       sessionId,
       {
-        mode: "build",
+        // 本例只验证 HTTP client 透传。Explore 现在继承父会话模式，build 下非预批 URL 会请求审批，
+        // 所以父会话用 yolo 让 WebFetch 直接执行。
+        mode: "yolo",
         workingDirectory: "/workspace/project",
       },
       {
