@@ -38,6 +38,8 @@ export function createStatusPersister<T>(
   statusFile: string,
   getStatus: () => T,
   onError: (error: unknown) => void,
+  /** status.json 只能由持有 data-root lock 的 Supervisor 写；返回 false 时跳过本次写入。 */
+  canWrite: () => Promise<boolean>,
 ): () => Promise<void> {
   let inFlight: Promise<void> = Promise.resolve();
   return async () => {
@@ -45,6 +47,7 @@ export function createStatusPersister<T>(
     // 会全部丢失；status.json 只是观测快照，失败时记录告警并继续服务生命周期。
     inFlight = inFlight
       .then(async () => {
+        if (!(await canWrite())) return;
         const temporary = `${statusFile}.${process.pid}.tmp`;
         await writeFile(temporary, `${JSON.stringify(getStatus(), null, 2)}\n`, {
           encoding: "utf8",

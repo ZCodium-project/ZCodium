@@ -4,7 +4,11 @@ import {
   resolveRemotePlatform,
 } from "@zcode/server/remote/detectEnv.js";
 import type { IRemoteBackend } from "@zcode/server/remote/backend.js";
-import { assertSupportedRemoteEnvironment } from "@zcode/server/remote/remotePlatformSupport.js";
+import {
+  assertSupportedRemoteEnvironment,
+  createUnsupportedRemotePlatformError,
+  WINDOWS_NATIVE_REMOTE_UNSUPPORTED_MESSAGE,
+} from "@zcode/server/remote/remotePlatformSupport.js";
 import {
   collectCommand,
   readLastJsonLine,
@@ -21,22 +25,26 @@ const SERVER_ROOT_SHELL = '"$HOME/.zcode/server"';
 const SERVER_BIN_SHELL = '"$HOME/.zcode/server/bin/zcode"';
 const SERVER_CURRENT_SHELL = `${SERVER_ROOT_SHELL}/current.json`;
 const SERVER_STATUS_SHELL = `${SERVER_ROOT_SHELL}/run/status.json`;
+const SERVER_DOWNGRADE_SHELL = `${SERVER_ROOT_SHELL}/downgrade.json`;
 const SOURCE_SERVER_PROBE_MARKER_PREFIX = "__ZCODE_PROBE_";
 
 function buildSourceServerProbeCommand(includeReleaseIdentity: boolean): string {
   return [
     "set +e",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}PLATFORM__\\n'`,
-    "uname -s",
+    // Bug 原因：set +e 加末尾 printf 会把 uname 失败覆盖为退出 0，空字段随后被误报为系统不支持。
+    // 系统与架构是必需结果；只让这两条命令的失败终止探测，可选元数据仍允许缺失。
+    "uname -s || exit $?",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}ARCH__\\n'`,
-    "uname -m",
+    "uname -m || exit $?",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}ROOT__\\n'`,
     `printf '%s\\n' ${SERVER_ROOT_SHELL}`,
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}KERNEL__\\n'`,
     "if [ -r /proc/sys/kernel/ostype ]; then cat /proc/sys/kernel/ostype; else printf '\\n'; fi",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}LIBC__\\n'`,
-    // musl、macOS 或缺 getconf 时只留空段；set +e 下不影响 probe 退出码。
-    "getconf GNU_LIBC_VERSION 2>/dev/null",
+    // 内置 Node 需要 glibc 2.28。musl 没有 GNU_LIBC_VERSION，只能看它的动态链接器；先查 glibc，
+    // 因为 Debian 等 glibc 系统安装 musl 包后也会有 /lib/ld-musl-*.so.1。macOS 两项都没有输出。
+    "if libc_version=$(getconf GNU_LIBC_VERSION 2>/dev/null); then printf '%s\\n' \"$libc_version\"; else for musl_loader in /lib/ld-musl-*.so.1; do if [ -e \"$musl_loader\" ]; then printf 'musl\\n'; break; fi; done; fi",
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}INSTALLED__\\n'`,
     `if [ -f ${SERVER_BIN_SHELL} ]; then printf '1\\n'; else printf '0\\n'; fi`,
     ...(includeReleaseIdentity
@@ -45,6 +53,10 @@ function buildSourceServerProbeCommand(includeReleaseIdentity: boolean): string 
           `if [ -r ${SERVER_CURRENT_SHELL} ]; then cat ${SERVER_CURRENT_SHELL}; fi`,
         ]
       : []),
+    `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}RELEASEID__\\n'`,
+    `if [ -r ${SERVER_CURRENT_SHELL} ]; then sed -n 's/^[[:space:]]*"releaseId"[[:space:]]*:[[:space:]]*"\\([^"]*\\)".*/\\1/p' ${SERVER_CURRENT_SHELL} | head -n 1; fi`,
+    `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}DOWNGRADE__\\n'`,
+    `if [ -r ${SERVER_DOWNGRADE_SHELL} ]; then tr -d '\\r\\n' < ${SERVER_DOWNGRADE_SHELL}; printf '\\n'; fi`,
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}VERSION__\\n'`,
     `if [ -r ${SERVER_CURRENT_SHELL} ]; then sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\\([^"]*\\)".*/\\1/p' ${SERVER_CURRENT_SHELL} | head -n 1; fi`,
     `printf '${SOURCE_SERVER_PROBE_MARKER_PREFIX}STATUS__\\n'`,
@@ -69,26 +81,62 @@ export class SourceServerProbeEnvironmentError extends Error {
   public override readonly name = "SourceServerProbeEnvironmentError";
 }
 
+// cmd.exe / PowerShell 找不到 `/bin/sh` 时的英文特征。uname 失败也会非零退出，
+// 因此只凭明确的 Windows shell 错误判定目标不支持，不能把所有探测失败都归入此类。
+// Bug 原因：旧逻辑还把 U+FFFD（非 UTF-8 字节）当成 GBK 的 Windows 报错。乱码只说明解码有损失：
+// POSIX 登录 shell 的启动脚本可在 probe 执行前输出本地编码错误并退出，WSL 里 wsl.exe 的中文提示是
+// UTF-16LE，两者都被说成“不支持 Windows 原生远程主机”。只有乱码时保留预检失败与原始 stderr。
+const WINDOWS_NATIVE_SHELL_FAILURE_PATTERN =
+  /CommandNotFoundException|FullyQualifiedErrorId|is not recognized as (?:an internal or external command|the name of a cmdlet)|The system cannot find the path specified/iu;
+
 // archive 内置官方 Node（SERVER_RUNTIME_NODE_VERSION）Linux 构建的动态链接下限，随 Node 大版本同步。
 const SOURCE_SERVER_MIN_GLIBC_VERSION = [2, 28] as const;
 
-function assertSupportedGlibc(platform: string, libcText: string): void {
+function warnUnsupportedLibc(platform: string, libcText: string, context: TransportContext): void {
   if (platform !== "linux") return;
-  // Bug 原因（ZCT-2112008575366098944）：probe 过去只看平台/架构，CentOS 7 等 glibc 2.17
-  // 的远端要先上传约 87MB archive，解压后执行 bin/zcode 才由 ld.so 报一串 `not found`，
-  // 并被归为安装失败。glibc 下限是 release 的平台事实，归入远端环境检查，在确认安装前拒绝。
-  // 读不到版本（musl、缺 getconf、输出无法识别）时无法判定，保持原安装链，不凭猜测拒绝。
+  // 旧实现把系统 glibc 报告当作拒连依据，连已有服务也无法尝试连接。
+  // 保留随包 runtime 的兼容风险提示，实际能否运行由后续安装/启动决定；未知版本不猜测。
+  let detected: string;
   const match = /^glibc\s+(\d+)\.(\d+)/iu.exec(libcText);
-  if (!match) return;
-  const major = Number(match[1]);
-  const minor = Number(match[2]);
-  const [minMajor, minMinor] = SOURCE_SERVER_MIN_GLIBC_VERSION;
-  if (major > minMajor || (major === minMajor && minor >= minMinor)) return;
+  if (match) {
+    const major = Number(match[1]);
+    const minor = Number(match[2]);
+    const [minMajor, minMinor] = SOURCE_SERVER_MIN_GLIBC_VERSION;
+    if (major > minMajor || (major === minMajor && minor >= minMinor)) return;
+    detected = `Remote glibc ${major}.${minor} is older than`;
+  } else if (libcText === "musl") {
+    // musl 下随包 Node 实测无法运行（装 gcompat 后仍报 fcntl64: symbol not found），同样只提示。
+    detected = "Remote uses musl libc instead of";
+  } else {
+    return;
+  }
   const required = SOURCE_SERVER_MIN_GLIBC_VERSION.join(".");
-  throw new SourceServerProbeEnvironmentError(
-    `Remote glibc ${major}.${minor} is older than glibc ${required} required by ZCode Source Server. ` +
-      `Use a Linux system with glibc ${required} or later, such as RHEL 8+, Ubuntu 20.04+ or Debian 10+.`,
-  );
+  context.onLog?.({
+    phase: "probe",
+    level: "warn",
+    message:
+      `${detected} glibc ${required} required by the bundled ZCode Source Server runtime. ZCode Source Server may fail to start. ` +
+      "Continuing installation or connection.",
+  });
+}
+
+function isWindowsNativeShellFailure(stderr: string): boolean {
+  return WINDOWS_NATIVE_SHELL_FAILURE_PATTERN.test(stderr);
+}
+
+/** 降级标记只属于写入时的 release；current 已换成其他 release 时标记作废。 */
+function readDowngradedFrom(markerText: string, currentReleaseId: string): string | undefined {
+  if (!markerText || !currentReleaseId) return undefined;
+  try {
+    const marker = JSON.parse(markerText) as { releaseId?: unknown; fromVersion?: unknown };
+    return marker.releaseId === currentReleaseId &&
+      typeof marker.fromVersion === "string" &&
+      marker.fromVersion.trim()
+      ? marker.fromVersion.trim()
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function probeSourceServer(
@@ -104,11 +152,36 @@ export async function probeSourceServer(
     await backend.exec(buildSourceServerProbeCommand(options.includeReleaseIdentity === true)),
   );
   if (result.exitCode !== 0) {
+    // Bug 原因：Docker 的 `docker exec` 在 daemon 不可用时也只是退出码 1，与远端脚本失败无法区分，
+    // docker CLI 的报错被当成远端环境检查失败；socket 无权限时还被原因文本归成“没有容器写入权限”。
+    // 先让 backend 确认传输本身可用；不可用时抛出它的传输错误，不归入预检失败。
+    await backend.diagnoseExecFailure?.();
+    // Bug 原因：Windows OpenSSH 的默认 shell 是 cmd/PowerShell，固定的 `/bin/sh` 无法启动，
+    // 旧逻辑只报“远端环境检查失败”并把 GBK 乱码当原因展示，用户看不出是不支持 Windows 原生主机。
+    if (isWindowsNativeShellFailure(result.stderr)) {
+      throw Object.assign(
+        createUnsupportedRemotePlatformError(WINDOWS_NATIVE_REMOTE_UNSUPPORTED_MESSAGE),
+        { cause: new Error(result.stderr.trim()) },
+      );
+    }
     throw new SourceServerProbeEnvironmentError(
       result.stderr.trim() || "Source Server environment probe failed",
     );
   }
   const sections = readSourceServerProbeSections(result.stdout);
+  // Bug 原因（ZCT-2114700808714715136）：退出 0 不保证脚本执行完整；缺失字段被默认为空，
+  // 不仅误报系统不支持，还会把缺失的 INSTALLED 当作未安装并覆盖已有 Source 的安装状态。
+  // 在唯一的探测边界拒绝不完整结果，不让上层依据未知值选包或修改安装状态。
+  const invalidFields = ["PLATFORM", "ARCH", "ROOT"].filter((field) => !sections.get(field));
+  if (!["0", "1"].includes(sections.get("INSTALLED") ?? "")) invalidFields.push("INSTALLED");
+  if (!sections.has("END")) invalidFields.push("END");
+  if (invalidFields.length) {
+    const stderr = result.stderr.trim().slice(0, 2_048);
+    throw new SourceServerProbeEnvironmentError(
+      `Source Server environment probe returned incomplete or invalid output: ${invalidFields.join(", ")}` +
+        (stderr ? `; ${stderr}` : ""),
+    );
+  }
   const reportedPlatform = sections.get("PLATFORM") ?? "";
   const kernelOstype = sections.get("KERNEL") ?? "";
   const environment = {
@@ -116,14 +189,9 @@ export async function probeSourceServer(
     arch: normalizeRemoteArch(sections.get("ARCH") ?? ""),
     ...(sections.get("ROOT") ? { installPath: sections.get("ROOT") } : {}),
   };
-  try {
-    assertSupportedRemoteEnvironment(environment);
-  } catch (error) {
-    throw new SourceServerProbeEnvironmentError(
-      error instanceof Error ? error.message : String(error),
-    );
-  }
-  assertSupportedGlibc(environment.platform, sections.get("LIBC") ?? "");
+  // 不支持的平台带公开码 remote-platform-unsupported，直接上抛，不包装成笼统的预检失败。
+  assertSupportedRemoteEnvironment(environment);
+  warnUnsupportedLibc(environment.platform, sections.get("LIBC") ?? "", context);
   const installed = sections.get("INSTALLED") === "1";
   if (!installed) return { ...environment, installed: false };
 
@@ -162,11 +230,16 @@ export async function probeSourceServer(
   } catch {
     daemonStatus = undefined;
   }
+  const downgradedFrom = readDowngradedFrom(
+    sections.get("DOWNGRADE") ?? "",
+    sections.get("RELEASEID") ?? "",
+  );
   return {
     ...environment,
     installed: true,
     ...(installedArchiveSha256 ? { installedArchiveSha256 } : {}),
     ...(installedVersion ? { installedVersion } : {}),
+    ...(downgradedFrom ? { downgradedFrom } : {}),
     ...(daemonStatus ? { daemonStatus } : {}),
   };
 }

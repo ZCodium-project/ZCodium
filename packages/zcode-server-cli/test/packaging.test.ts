@@ -183,7 +183,12 @@ describe("stageRelease", () => {
       },
     });
     await writeFakePackage(workspaceNodeModulesDir, "@lydell/node-pty-linux-x64", {
-      files: { "prebuilds/linux-x64/pty.node": "linux-binary" },
+      files: {
+        "prebuilds/linux-x64/pty.node": "linux-binary",
+        // 上游 v3.17.1 起整包替换平台包，要求平台包自带与 native 配对的 JS 与许可声明。
+        "lib/index.js": "module.exports = {};\n",
+        LICENSE: "node-pty license\n",
+      },
     });
 
     const bundledSkillsDir = join(root, "bundled-skills");
@@ -791,7 +796,11 @@ describe("stageRelease", () => {
     async (target) => {
       const fixture = await makeStageFixture();
       await writeFakePackage(fixture.workspaceNodeModulesDir, "@lydell/node-pty-linux-arm64", {
-        files: { "prebuilds/linux-arm64/pty.node": "linux-arm64-binary" },
+        files: {
+          "prebuilds/linux-arm64/pty.node": "linux-arm64-binary",
+          "lib/index.js": "module.exports = {};\n",
+          LICENSE: "node-pty license\n",
+        },
       });
       const options = { ...fixture, target, appVersion: "9.9.9-test" };
       const original = await stageRelease(options);

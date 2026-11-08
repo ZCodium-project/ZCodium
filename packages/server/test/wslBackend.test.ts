@@ -17,10 +17,16 @@ vi.mock("node:child_process", () => ({
   spawn: mocks.spawn,
 }));
 
-vi.mock("@zcode/server/remote/wsl-detect.js", () => ({
-  isWSLAvailable: mocks.isWSLAvailable,
-  listWSLDistros: mocks.listWSLDistros,
-}));
+vi.mock("@zcode/server/remote/wsl-detect.js", async (importOriginal) => {
+  // 上游 v3.17.1 新增 createWslExecError（纯函数）；用 importOriginal 保留真实实现，
+  // 只覆盖会触网的可用性/发行版探测。
+  const actual = await importOriginal<typeof import("@zcode/server/remote/wsl-detect.js")>();
+  return {
+    ...actual,
+    isWSLAvailable: mocks.isWSLAvailable,
+    listWSLDistros: mocks.listWSLDistros,
+  };
+});
 
 import { WSLBackend, buildWslArgs } from "../src/remote/wsl-backend.js";
 
@@ -67,7 +73,12 @@ beforeEach(() => {
     ) => {
       const child = new EventEmitter();
       queueMicrotask(() => {
-        callback(null, Buffer.from("Ubuntu-24.04\ntester\n/home/tester"), Buffer.alloc(0));
+        callback(
+          null,
+          // 上游 v3.17.1 起身份探测要求哨兵分隔的 distro/user/home。
+          Buffer.from("__ZCODE_WSL_IDENTITY__\nUbuntu-24.04\ntester\n/home/tester"),
+          Buffer.alloc(0),
+        );
         child.emit("close", 0);
       });
       return child as never;
@@ -265,7 +276,16 @@ describe("buildWslArgs", () => {
     });
     expect(mocks.execFile).toHaveBeenCalledWith(
       "wsl.exe",
-      expect.arrayContaining(["-d", "Ubuntu-24.04", "bash", "-lc"]),
+      // 上游 v3.17.1 起身份探测走 `--exec bash --noprofile --norc -c`，不依赖登录 shell。
+      expect.arrayContaining([
+        "-d",
+        "Ubuntu-24.04",
+        "--exec",
+        "bash",
+        "--noprofile",
+        "--norc",
+        "-c",
+      ]),
       expect.any(Object),
       expect.any(Function),
     );
@@ -316,13 +336,15 @@ describe("buildWslArgs", () => {
         callback: (error: Error | null, stdout: Buffer, stderr: Buffer) => void,
       ) => {
         const shellCommand = args.at(-1) ?? "";
-        const stdout = shellCommand.includes("/dev/tcp/172.21.240.1/")
-          ? "reachable"
-          : shellCommand.includes("/dev/tcp/")
-            ? "unreachable"
-            : shellCommand.includes("ip route show default")
-              ? "route=172.21.240.1"
-              : "Ubuntu-24.04\ntester\n/home/tester";
+        const stdout = shellCommand.includes("__ZCODE_WSL_IDENTITY__")
+          ? "__ZCODE_WSL_IDENTITY__\nUbuntu-24.04\ntester\n/home/tester"
+          : shellCommand.includes("/dev/tcp/172.21.240.1/")
+            ? "reachable"
+            : shellCommand.includes("/dev/tcp/")
+              ? "unreachable"
+              : shellCommand.includes("ip route show default")
+                ? "route=172.21.240.1"
+                : "Ubuntu-24.04\ntester\n/home/tester";
         const child = new EventEmitter();
         queueMicrotask(() => {
           callback(null, Buffer.from(stdout), Buffer.alloc(0));
@@ -412,13 +434,15 @@ describe("buildWslArgs", () => {
         callback: (error: Error | null, stdout: Buffer, stderr: Buffer) => void,
       ) => {
         const shellCommand = args.at(-1) ?? "";
-        const stdout = shellCommand.includes("/dev/tcp/172.21.240.1/")
-          ? "reachable"
-          : shellCommand.includes("/dev/tcp/")
-            ? "unreachable"
-            : shellCommand.includes("ip route show default")
-              ? "resolv=127.0.0.53 resolv=172.21.240.1"
-              : "Ubuntu-24.04\ntester\n/home/tester";
+        const stdout = shellCommand.includes("__ZCODE_WSL_IDENTITY__")
+          ? "__ZCODE_WSL_IDENTITY__\nUbuntu-24.04\ntester\n/home/tester"
+          : shellCommand.includes("/dev/tcp/172.21.240.1/")
+            ? "reachable"
+            : shellCommand.includes("/dev/tcp/")
+              ? "unreachable"
+              : shellCommand.includes("ip route show default")
+                ? "resolv=127.0.0.53 resolv=172.21.240.1"
+                : "Ubuntu-24.04\ntester\n/home/tester";
         const child = new EventEmitter();
         queueMicrotask(() => {
           callback(null, Buffer.from(stdout), Buffer.alloc(0));

@@ -58,6 +58,7 @@ class FakeBackend implements IRemoteBackend {
       return completedStream(
         `__ZCODE_PROBE_PLATFORM__\nLinux\n` +
           `__ZCODE_PROBE_ARCH__\nx86_64\n` +
+          `__ZCODE_PROBE_ROOT__\n~/.zcode/server\n` +
           `__ZCODE_PROBE_KERNEL__\nLinux\n` +
           `__ZCODE_PROBE_INSTALLED__\n1\n` +
           releaseSection +
@@ -225,21 +226,17 @@ describe("probe failure classification", () => {
   });
 
   const linuxProbeOutput = (libc: string) =>
-    "__ZCODE_PROBE_PLATFORM__\nLinux\n__ZCODE_PROBE_ARCH__\nx86_64\n__ZCODE_PROBE_KERNEL__\nLinux\n" +
+    "__ZCODE_PROBE_PLATFORM__\nLinux\n__ZCODE_PROBE_ARCH__\nx86_64\n" +
+    "__ZCODE_PROBE_ROOT__\n~/.zcode/server\n__ZCODE_PROBE_KERNEL__\nLinux\n" +
     `__ZCODE_PROBE_LIBC__\n${libc}\n__ZCODE_PROBE_INSTALLED__\n0\n__ZCODE_PROBE_END__\n`;
 
   it.each(["2.17", "2.27"])(
-    "rejects Linux glibc %s before install because the bundled Node runtime needs glibc 2.28",
+    "warns for Linux glibc %s but keeps the install chain",
     async (version) => {
-      // ZCT-2112008575366098944：CentOS 7 先上传 87MB archive，解压后执行 bin/zcode 才报 7 行 not found。
+      // 上游 v3.17.1：glibc 过旧只作为随包 runtime 的兼容性警告，不再拒连/拒绝安装。
       await expect(
         probeWith(async () => completedStream(linuxProbeOutput(`glibc ${version}`))),
-      ).rejects.toMatchObject({
-        code: "remote-preflight-failed",
-        message: expect.stringMatching(
-          new RegExp(`glibc ${version.replace(".", "\\.")}\\b.*glibc 2\\.28`, "u"),
-        ),
-      });
+      ).resolves.toMatchObject({ platform: "linux", installed: false });
     },
   );
 
@@ -283,7 +280,11 @@ it("reuses a just-probed ready daemon status instead of running serve --daemon a
 
   await expect(
     adapter.ensureDaemon(targets[0]!, {}, { observedStatus: probe.daemonStatus }),
-  ).resolves.toEqual({ port: 43123, ingressToken: "ingress-token-value" });
+  ).resolves.toEqual({
+    port: 43123,
+    ingressToken: "ingress-token-value",
+    reusedProbeStatus: true,
+  });
 
   expect(backend.commands.slice(commandCountBeforeEnsure)).not.toEqual(
     expect.arrayContaining([expect.stringContaining("'serve' '--daemon'")]),

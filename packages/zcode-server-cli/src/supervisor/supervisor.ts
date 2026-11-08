@@ -6,9 +6,11 @@ import { mkdir } from "node:fs/promises";
 import { createServiceLogger } from "@zcode/services/node";
 import { SOURCE_SERVER_UPDATE_RUNNING_TASKS_ERROR_CODE } from "@zcode/shared";
 import {
+  CORE_HEARTBEAT_INTERVAL_MS,
   CORE_KILL_TIMEOUT_MS,
   CORE_READY_TIMEOUT_MS,
   CORE_STOP_GRACE_TIMEOUT_MS,
+  CORE_UNRESPONSIVE_HEARTBEAT_PERIODS,
   coreMessageSchema,
   SERVER_CLI_PROTOCOL_VERSION,
   type ControlRequest,
@@ -19,7 +21,7 @@ import {
 } from "../contracts.js";
 import { createControlServer, type ControlHandler } from "../ipc/controlServer.js";
 import { ControlRequestError } from "../ipc/controlError.js";
-import { DataRootLock } from "../runtime/lock.js";
+import { DataRootLock, type DataRootLockLoss } from "../runtime/lock.js";
 import { resolveServerLayout, type ServerLayout } from "../runtime/paths.js";
 import { ReleaseManager } from "../runtime/releaseManager.js";
 import { createStatusPersister } from "../runtime/statusSnapshot.js";
@@ -50,9 +52,15 @@ export interface SupervisorOptions {
   coreKillTimeoutMs?: number;
   now?: () => number;
   onStopped?: () => void;
+  /**
+   * 路径上的 data-root lock 已不属于本实例；Core 已停止，调用方按原因结束进程：
+   * missing 以非 0 退出，让服务管理器拉起新 owner；taken 以 0 退出，新 owner 已在运行。
+   */
+  onServerRootLost?: (loss: DataRootLockLoss) => void;
 }
 
-type LifecycleOperationKind = "stop" | "restart" | "update" | "uninstall";
+// 只重启 Core 的 control `restart` 已删除（R2 §8.1）：整棵进程树重启由发起命令的 CLI 协调。
+type LifecycleOperationKind = "stop" | "update" | "uninstall";
 
 export class Supervisor {
   private readonly layout: ServerLayout;
@@ -76,6 +84,15 @@ export class Supervisor {
   private activeRelease: ReleaseManifest | null = null;
   private coreVersion: string | undefined;
   private coreReleaseId: string | undefined;
+  /**
+   * 当前 Core 的致命原因摘要：Core 发来的 fatal，或 Supervisor 判定的无响应；随 Core 作用域清空，
+   * Core 退出时拼进 lastExitReason。
+   */
+  private coreFatalMessage: string | undefined;
+  /** 当前 ready Core 已连续多少个 heartbeat 周期没有 IPC 消息；随 Core 作用域清空。 */
+  private coreSilentPeriods = 0;
+  private coreLivenessTimer: NodeJS.Timeout | undefined;
+  private serverRootLost = false;
 
   public constructor(private readonly options: SupervisorOptions) {
     this.layout = options.layout ?? resolveServerLayout();
@@ -86,7 +103,35 @@ export class Supervisor {
       this.layout.statusFile,
       () => this.status(),
       (error) => log.warn("failed to persist status snapshot", error),
+      () => this.ownsServerRoot(),
     );
+  }
+
+  private async ownsServerRoot(): Promise<boolean> {
+    // Bug 原因（ZCT-2112854001415753728）：daemon 运行中 server root 被删除或替换后，本实例的锁、control socket
+    // 和 Core 写的 ingress-token 都随旧目录消失，Supervisor 却仍按路径把 ready 与旧端口写进新 root 的 status.json。
+    // probe 与 serve --daemon 都把这份快照当成新 root 的 daemon，随后读 token 失败；OS service 的 unit 仍 active，
+    // start 不会拉起新实例，每次重连都一样。
+    // 修复：写快照前确认路径上的锁仍是自己的；不是就不再写，停掉 Core 后结束进程，由服务管理器或下一次
+    // serve --daemon 拉起真正的 owner。
+    if (this.serverRootLost) return false;
+    const loss = await this.lock.readLoss();
+    if (!loss) return true;
+    this.serverRootLost = true;
+    void this.stepDownAfterServerRootLost(loss);
+    return false;
+  }
+
+  private async stepDownAfterServerRootLost(loss: DataRootLockLoss): Promise<void> {
+    log.error("data-root lock is gone or owned by another instance; stopping this supervisor", {
+      serverRoot: this.layout.serverRoot,
+      loss,
+    });
+    // 不走 stopInternal：control.close() 与锁释放按路径清理，路径上的 socket 和锁可能已属于新 owner。
+    await this.stopCore("server root lost").catch((error: unknown) => {
+      log.error("failed to stop server core after server root was lost", error);
+    });
+    this.options.onServerRootLost?.(loss);
   }
 
   public async start(): Promise<ServerStatus> {
@@ -181,7 +226,7 @@ export class Supervisor {
       await this.control?.close();
       this.control = undefined;
       await this.lock.release();
-      if (reason !== "restart") this.options.onStopped?.();
+      this.options.onStopped?.();
       return this.status();
     }
     await this.stopCore(reason);
@@ -191,15 +236,8 @@ export class Supervisor {
     this.control = undefined;
     await this.lock.release();
     log.info("supervisor stopped", { reason });
-    if (reason !== "restart") this.options.onStopped?.();
+    this.options.onStopped?.();
     return this.status();
-  }
-
-  public async restart(): Promise<ServerStatus> {
-    return await this.runLifecycleOperation("restart", async () => {
-      await this.stopInternal("restart");
-      return await this.start();
-    });
   }
 
   private async stopCore(reason: string): Promise<void> {
@@ -397,19 +435,25 @@ export class Supervisor {
       if (terminalObserved) return;
       terminalObserved = true;
       if (this.core !== child || this.state === "stopping" || this.state === "stopped") return;
+      // Bug 原因：Core 启动失败时先发 fatal 再退出，旧逻辑用退出码覆盖 fatal，status 只剩
+      // "core exited code=1"，CLI 与远端都看不到 Core 为什么起不来（3.16.2 远端超时工单）。
+      // fatal 拼在退出码之后保留，并受 status schema 的 500 字符上限约束。
+      const exitReason = this.coreFatalMessage
+        ? `${reason}: ${this.coreFatalMessage}`.slice(0, 500)
+        : reason;
       if (this.state === "stop-failed") {
         // stop 已失败时继续保留锁；迟到的终态只清除已死亡 child，不得计入 crash budget
         // 或启动替代 Core。用户重试 stop 后再释放 control socket 与 data-root lock。
         this.core = undefined;
         this.clearCoreScopedStatus();
-        this.lastExitReason = reason;
+        this.lastExitReason = exitReason;
         void this.persistStatusSnapshot();
         return;
       }
       this.core = undefined;
       this.clearCoreScopedStatus();
       this.state = "crashed";
-      this.lastExitReason = reason;
+      this.lastExitReason = exitReason;
       const decision = this.crashBudget.recordCrash();
       if (!decision.shouldRestart) {
         this.state = "crash-loop-stopped";
@@ -455,6 +499,8 @@ export class Supervisor {
     // 旧 child 的 message listener 会跨 generation 存活，延迟 heartbeat/ready
     // 可覆盖当前 Core 的状态。消息必须同时绑定当前 child；ready 还需匹配启动 generation。
     if (this.core !== child) return;
+    // 任意一条来自当前 Core 的 IPC 消息都证明它的事件循环在运行。
+    this.coreSilentPeriods = 0;
     const parsed = coreMessageSchema.safeParse(raw);
     if (!parsed.success) {
       return;
@@ -471,6 +517,7 @@ export class Supervisor {
       this.startedAt = Date.now();
       this.coreVersion = message.version;
       this.coreReleaseId = message.releaseId;
+      this.watchCoreLiveness(child);
       log.info("server core ready", {
         host: this.host,
         port: this.port,
@@ -484,6 +531,7 @@ export class Supervisor {
         runningTaskCount: message.runningTaskCount,
       });
     } else if (message.type === "fatal") {
+      this.coreFatalMessage = message.message;
       this.lastExitReason = message.message;
       log.error("server core reported fatal error", { message: message.message });
     } else if (message.type === "exit") {
@@ -499,7 +547,36 @@ export class Supervisor {
     if (this.state === "crashed") this.state = "updating";
   }
 
+  private watchCoreLiveness(child: ChildProcess): void {
+    // Bug 原因（ZCT-2113570821476302848）：Core 的事件循环被同步工作占满后，进程仍在，但不发 heartbeat、
+    // 不响应握手，也执行不了 JS 层的 SIGTERM 处理。Supervisor 只在 Core 退出时才走 crash budget，
+    // status 一直报 ready，Desktop 回退的 serve --daemon 也只复用同一端口，设备只能人工 kill -9。
+    // 修复：ready 后按 heartbeat 周期计数，连续 N 个周期没有任何 IPC 消息就 SIGKILL，由既有的退出
+    // 处理按崩溃重启。只计周期、不比较时钟：Supervisor 自身被挂起时检查不执行，不会把挂起时长算成沉默。
+    if (this.coreLivenessTimer) clearInterval(this.coreLivenessTimer);
+    const timer = setInterval(() => {
+      if (this.core !== child || this.state !== "ready") return;
+      this.coreSilentPeriods += 1;
+      if (this.coreSilentPeriods < CORE_UNRESPONSIVE_HEARTBEAT_PERIODS) return;
+      clearInterval(timer);
+      this.coreLivenessTimer = undefined;
+      const silentMs = this.coreSilentPeriods * CORE_HEARTBEAT_INTERVAL_MS;
+      this.coreFatalMessage = `core unresponsive: no IPC message for ${silentMs}ms`;
+      log.warn("server core unresponsive, sending SIGKILL", {
+        pid: child.pid,
+        generation: this.generation,
+        silentMs,
+      });
+      child.kill("SIGKILL");
+    }, CORE_HEARTBEAT_INTERVAL_MS);
+    timer.unref();
+    this.coreLivenessTimer = timer;
+  }
+
   private clearCoreScopedStatus(): void {
+    if (this.coreLivenessTimer) clearInterval(this.coreLivenessTimer);
+    this.coreLivenessTimer = undefined;
+    this.coreSilentPeriods = 0;
     this.host = null;
     this.port = null;
     this.startedAt = null;
@@ -507,6 +584,7 @@ export class Supervisor {
     this.runningTasks = undefined;
     this.coreVersion = undefined;
     this.coreReleaseId = undefined;
+    this.coreFatalMessage = undefined;
   }
 
   private async handleControl(request: ControlRequest): Promise<unknown> {
@@ -524,12 +602,6 @@ export class Supervisor {
           this.stopInternal("control request"),
         );
         return { stopping: true };
-      case "restart":
-        this.startAcknowledgedLifecycleOperation("restart", async () => {
-          await this.stopInternal("restart");
-          await this.start();
-        });
-        return { restarting: true };
       case "prepare-update":
         return {
           status: this.runningTaskCount ? "blocked" : "ready",
@@ -589,7 +661,7 @@ export class Supervisor {
     operation: () => Promise<unknown>,
   ): void {
     // ack 型请求也必须在回包前检查 gate；后台 Promise 再 reject 会让客户端误以为
-    // restart/uninstall 已受理，实际却只在 Supervisor 日志里留下冲突。
+    // stop/uninstall 已受理，实际却只在 Supervisor 日志里留下冲突。
     this.assertLifecycleOperationCanStart(kind);
     const started = this.runLifecycleOperation(kind, async () => {
       // control response 必须先写回原 socket；直接关闭 control server 会与 dispatch 互等。

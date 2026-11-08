@@ -29,6 +29,31 @@ function normalizeWslOutput(raw: string): string {
     .replace(/\r/g, "");
 }
 
+/**
+ * 生成 wsl.exe 执行失败的错误。
+ *
+ * Bug 原因：旧逻辑只取 stderr，否则退回 execFile 的 "Command failed: …"。wsl.exe 常把
+ * “找不到发行版”等错误写到 UTF-16 stdout，退出码也只在 error.code 上，日志里只剩
+ * "Command failed" 或 `{}`，无法判断失败原因。这里在 stderr 为空时带上 stdout，并附退出码。
+ */
+export function createWslExecError(
+  error: Error & { code?: unknown },
+  stdout: Buffer,
+  stderr: Buffer,
+): Error {
+  const detail =
+    normalizeWslOutput(decodeWslOutput(stderr)).trim() ||
+    normalizeWslOutput(decodeWslOutput(stdout)).trim() ||
+    error.message;
+  const exitCode = typeof error.code === "number" ? error.code : undefined;
+  return Object.assign(
+    new Error(exitCode === undefined ? detail : `${detail}（退出码 ${exitCode}）`, {
+      cause: error,
+    }),
+    exitCode === undefined ? {} : { exitCode },
+  );
+}
+
 export function parseWSLDistroList(rawOutput: string): WSLDistro[] {
   const lines = normalizeWslOutput(rawOutput)
     .split("\n")
@@ -86,8 +111,7 @@ async function execWslForBuffer(args: string[]): Promise<Buffer> {
         const stderrBuffer = Buffer.isBuffer(stderr) ? stderr : Buffer.from(stderr ?? "");
 
         if (error) {
-          const stderrText = normalizeWslOutput(decodeWslOutput(stderrBuffer)).trim();
-          reject(new Error(stderrText || error.message));
+          reject(createWslExecError(error, stdoutBuffer, stderrBuffer));
           return;
         }
 

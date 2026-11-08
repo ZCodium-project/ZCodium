@@ -190,6 +190,8 @@ describe("service manager adapters", () => {
       "systemctl",
       "systemctl",
       "systemctl",
+      // 上游 v3.17.1 把 systemd 的 enable --now 拆成 enable + start，注册阶段多一次调用。
+      "systemctl",
       "schtasks",
       "schtasks",
       "schtasks",

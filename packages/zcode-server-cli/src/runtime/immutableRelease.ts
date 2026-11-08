@@ -1,7 +1,7 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { serverRuntimeManifestSchema, type ServerTarget } from "./manifest.js";
 
 export interface ReleaseIdentity {
@@ -40,34 +40,90 @@ async function hashReleaseTree(root: string, relativeRoot = ""): Promise<string>
   return hash.digest("hex");
 }
 
+function immutableReleaseConflict(releaseDir: string, error: unknown): Error {
+  return new Error(
+    `Existing immutable release conflict at ${releaseDir}: ${error instanceof Error ? error.message : String(error)}`,
+  );
+}
+
+/**
+ * 已存在的同 id release 只有两种合法结论：与本次 archive 一致可复用，或是本次 archive 的损坏副本。
+ * Bug 原因（A2）：旧实现把“完整性记录与本次 archive 一致、但磁盘内容已偏离记录”也判成冲突，
+ * 同一 archive 强制重装永远失败，用户只能手动删除 releases/<id>。记录缺失或指向别的身份时
+ * 无法证明它是本 release 的副本，仍按冲突失败。
+ */
+async function inspectExistingRelease(
+  releaseDir: string,
+  expected: ReleaseIntegrity,
+): Promise<"match" | "damaged"> {
+  let integrity: Partial<ReleaseIntegrity>;
+  try {
+    integrity = JSON.parse(
+      await readFile(join(releaseDir, RELEASE_INTEGRITY_FILE), "utf8"),
+    ) as Partial<ReleaseIntegrity>;
+  } catch (error) {
+    throw immutableReleaseConflict(releaseDir, error);
+  }
+  if (
+    integrity.archiveSha256 !== expected.archiveSha256 ||
+    integrity.contentSha256 !== expected.contentSha256 ||
+    integrity.target !== expected.target ||
+    integrity.version !== expected.version
+  ) {
+    throw immutableReleaseConflict(releaseDir, "identity mismatch");
+  }
+  try {
+    const runtimeManifest = serverRuntimeManifestSchema.parse(
+      JSON.parse(await readFile(join(releaseDir, "manifest.json"), "utf8")),
+    );
+    if (
+      runtimeManifest.target !== expected.target ||
+      runtimeManifest.appVersion !== expected.version
+    ) {
+      return "damaged";
+    }
+    return (await hashReleaseTree(releaseDir)) === expected.contentSha256 ? "match" : "damaged";
+  } catch {
+    return "damaged";
+  }
+}
+
 async function assertExistingReleaseMatches(
   releaseDir: string,
   expected: ReleaseIntegrity,
 ): Promise<void> {
-  try {
-    const integrity = JSON.parse(
-      await readFile(join(releaseDir, RELEASE_INTEGRITY_FILE), "utf8"),
-    ) as Partial<ReleaseIntegrity>;
-    const runtimeManifest = serverRuntimeManifestSchema.parse(
-      JSON.parse(await readFile(join(releaseDir, "manifest.json"), "utf8")),
-    );
-    const actualContentSha256 = await hashReleaseTree(releaseDir);
-    if (
-      integrity.archiveSha256 !== expected.archiveSha256 ||
-      integrity.contentSha256 !== expected.contentSha256 ||
-      integrity.contentSha256 !== actualContentSha256 ||
-      integrity.target !== expected.target ||
-      integrity.version !== expected.version ||
-      runtimeManifest.target !== expected.target ||
-      runtimeManifest.appVersion !== expected.version
-    ) {
-      throw new Error("identity mismatch");
-    }
-  } catch (error) {
-    throw new Error(
-      `Existing immutable release conflict at ${releaseDir}: ${error instanceof Error ? error.message : String(error)}`,
-    );
+  if ((await inspectExistingRelease(releaseDir, expected)) !== "match") {
+    throw immutableReleaseConflict(releaseDir, "content does not match its integrity record");
   }
+}
+
+async function replaceDamagedRelease(incomingDir: string, targetDir: string): Promise<void> {
+  // 调用方持有 update.lock；先把损坏副本移到同目录的隐藏名，再 rename 已校验的 incoming，
+  // 两步都是同一文件系统内的 rename。第二步失败时移回，保持与修复前相同的磁盘状态。
+  const damagedDir = join(
+    dirname(targetDir),
+    `.damaged-${basename(targetDir)}-${process.pid}-${randomUUID()}`,
+  );
+  await rename(targetDir, damagedDir);
+  try {
+    await rename(incomingDir, targetDir);
+  } catch (error) {
+    try {
+      await rename(damagedDir, targetDir);
+    } catch (rollbackError) {
+      // Bug 原因（CR-01）：移回失败曾被吞掉，只报第二步错误；此时 releases/<id> 已缺失而
+      // current.json 仍指向它，用户看不到目录缺失和损坏副本位置。两步之间没有原子交换，
+      // 不能保证旧目录回到原位，只能如实报告；再次重装时目标不存在，走普通 promote 恢复。
+      throw new AggregateError(
+        [error, rollbackError],
+        `Failed to replace damaged release ${targetDir}: ${error instanceof Error ? error.message : String(error)}; ` +
+          `restoring it also failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}. ` +
+          `The damaged copy is kept at ${damagedDir}; reinstall to recover.`,
+      );
+    }
+    throw error;
+  }
+  await rm(damagedDir, { recursive: true, force: true }).catch(() => undefined);
 }
 
 async function existingPathKind(path: string): Promise<"directory" | "other" | null> {
@@ -106,7 +162,9 @@ export async function promoteImmutableReleaseDirectory(options: {
           `Existing immutable release conflict at ${options.targetDir}: target is not a directory`,
         );
       }
-      await assertExistingReleaseMatches(options.targetDir, integrity);
+      if ((await inspectExistingRelease(options.targetDir, integrity)) === "match") return;
+      await replaceDamagedRelease(options.incomingDir, options.targetDir);
+      promoted = true;
       return;
     }
     try {
