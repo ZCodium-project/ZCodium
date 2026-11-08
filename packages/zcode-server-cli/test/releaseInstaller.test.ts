@@ -296,7 +296,7 @@ describe("release installer", () => {
     ).toEqual([]);
   });
 
-  it("rejects an existing release whose immutable archive identity is missing", async () => {
+  it("repairs a damaged copy of the same immutable archive", async () => {
     const root = await mkdtemp(join(tmpdir(), "zcode-release-installer-conflict-"));
     const layout = resolveServerLayout(join(root, "server"));
     const archiveRoot = join(root, "zcode-server-linux-x64");
@@ -336,8 +336,14 @@ describe("release installer", () => {
     });
     await writeFile(join(first.releaseDir, "runtime", "server-core.js"), "tampered", "utf8");
 
+    // 上游 v3.17.1：完整性记录一致但磁盘内容偏离 = 本次 archive 的损坏副本，重装应替换修复。
+    const repaired = await installer.installArchive({
+      archivePath,
+      target: "linux-x64",
+      version: "2.1.0",
+    });
     await expect(
-      installer.installArchive({ archivePath, target: "linux-x64", version: "2.1.0" }),
-    ).rejects.toThrow(/immutable release conflict/);
+      readFile(join(repaired.releaseDir, "runtime", "server-core.js"), "utf8"),
+    ).resolves.toBe("");
   });
 });
