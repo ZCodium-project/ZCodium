@@ -147,6 +147,15 @@
       "sourceUrl": "https://cheapaimodel.ai/favicon.svg",
       "sourceOwner": "cheapaimodel",
       "normalization": "Official three-feather mark from the favicon, paths and 30x30 viewBox unchanged. Background tile removed. Fill set to #000000 for light backgrounds and #ffffff for dark backgrounds. Retrieved 2026-11-05."
+    },
+    {
+      "brand": "Standard Compute",
+      "file": "model-provider-standardcompute-light.svg",
+      "darkFile": "model-provider-standardcompute-dark.svg",
+      "providerIds": ["standardcompute"],
+      "sourceUrl": "https://standardcompute.com/icon.svg",
+      "sourceOwner": "Standard Compute",
+      "normalization": "Official single-bar mark from the site icon, rect geometry and 512x512 viewBox unchanged. Title element removed. Fill set to #000000 for light backgrounds and #ffffff for dark backgrounds. Retrieved 2026-11-09."
     }
   ]
 }

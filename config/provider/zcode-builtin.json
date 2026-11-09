@@ -756,6 +756,31 @@
               "key": "cheapaimodel"
             }
           }
+        },
+        {
+          "templateId": "standardcompute",
+          "templateNameMap": {
+            "zh-CN": "Standard Compute",
+            "en-US": "Standard Compute"
+          },
+          "config": {
+            "access": {
+              "type": "api-key"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.stdcmpt.com/v1"
+            },
+            "builtinModelIds": [
+              "StandardCompute",
+              "deepseek/deepseek-v4.1-flash",
+              "z-ai/glm-5.3"
+            ],
+            "logo": {
+              "type": "builtin",
+              "key": "standardcompute"
+            }
+          }
         }
       ],
       "providerRules": []
@@ -6084,6 +6109,27 @@
         {
           "templateId": "cheapaimodel",
           "modelId": "glm-5.3",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "standardcompute",
+          "modelId": "StandardCompute",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "standardcompute",
+          "modelId": "deepseek/deepseek-v4.1-flash",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "standardcompute",
+          "modelId": "z-ai/glm-5.3",
           "config": {
             "enabled": true
           }
