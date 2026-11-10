@@ -1,3 +1,18 @@
+# 全仓文本入库/检出归一 LF：Windows autocrlf 的行尾伪影不再进入行尾敏感门禁
+# （byte-compare 类门禁逐个打点规则是被动追补；catch-all 一次到位，text=auto 对
+# 真二进制按 NUL 启发式自动豁免）。本块必须在文件最前——后续 -text/binary 规则
+# 依赖 gitattributes 的后者覆盖语义，对本块特化。
+* text=auto eol=lf
+
+# 显式二进制兜底：防 NUL 启发式误判；Windows 批处理必须保留 CRLF。
+*.png   binary
+*.icns  binary
+*.ico   binary
+*.zip   binary
+*.gz    binary
+*.woff2 binary
+*.bat   binary
+
 # 保持脚本文件 LF 换行，避免 Windows CRLF 导致 shebang 解析失败
 *.mjs text eol=lf
 *.sh  text eol=lf
