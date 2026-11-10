@@ -8,6 +8,7 @@ import { createRoot } from "react-dom/client";
 import { useEffect, useState } from "react";
 import { Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
+import { createToastDelivery } from "@/components/ui/toastDelivery.js";
 
 export type ToastPosition = "top-center" | "top-right" | "bottom-left" | "bottom-center";
 type ToastVariant = "default" | "update" | "info" | "warning";
@@ -61,23 +62,27 @@ export function resolveToastStackClassName(position: ToastPosition): string {
 export type ToastUpdate = Partial<Omit<ToastItem, "id">>;
 
 let nextId = 0;
-let addToast: ((item: ToastItem) => void) | null = null;
 let removeToast: ((id: number) => void) | null = null;
 let updateToastItem: ((id: number, patch: ToastUpdate) => void) | null = null;
+// 投递经 toastDelivery 控制器缓冲/排空，不依赖 rAF（26.5.6 修复项 1/2，根因见 toastDelivery.ts）。
+const toastDelivery = createToastDelivery<ToastItem>();
 const pendingToastIds = new Set<number>();
 const pendingToastUpdates = new Map<number, ToastUpdate>();
 const dismissedBeforeMountToastIds = new Set<number>();
 const DEFAULT_TOAST_DURATION_MS = 3000;
 const TOAST_TRANSITION_DURATION_MS = 200;
 
+let toastHostCreated = false;
+
 function ensureHost() {
-  if (addToast) {
+  if (toastHostCreated) {
     return;
   }
 
   const host = document.createElement("div");
   host.id = "zcode-toast-host";
   document.body.appendChild(host);
+  toastHostCreated = true;
   const root = createRoot(host);
   root.render(<ToastContainer />);
 }
@@ -86,7 +91,8 @@ function ToastContainer() {
   const [items, setItems] = useState<ToastItem[]>([]);
 
   useEffect(() => {
-    addToast = (item: ToastItem) => {
+    // 接收方就绪即同步排空缓冲队列（React 挂载走 Scheduler，不随窗口可见性停摆）。
+    toastDelivery.setReceiver((item: ToastItem) => {
       pendingToastIds.delete(item.id);
       const pendingUpdate = pendingToastUpdates.get(item.id);
       pendingToastUpdates.delete(item.id);
@@ -98,7 +104,7 @@ function ToastContainer() {
       setItems((prev) =>
         upsertToastItem(prev, pendingUpdate ? { ...item, ...pendingUpdate } : item),
       );
-    };
+    });
     removeToast = (id: number) => {
       setItems((prev) => prev.filter((item) => item.id !== id));
     };
@@ -107,7 +113,7 @@ function ToastContainer() {
     };
 
     return () => {
-      addToast = null;
+      toastDelivery.unsetReceiver();
       removeToast = null;
       updateToastItem = null;
     };
@@ -238,18 +244,19 @@ function ToastMessage({
   onDone: (id: number) => void;
   isBottom?: boolean;
 }) {
-  const [visible, setVisible] = useState(false);
+  // 可见性零 rAF 依赖（26.5.6 修复项 1/2）：挂载即处于可见态（进入动画交给
+  // CSS keyframes，帧恢复时自然播放）；仅退出经 leaving 态翻转 transition。
+  // 旧实现用 rAF 把 visible 从 false 翻到 true，被遮挡/后台窗口 rAF 停摆时
+  // toast 停在 opacity-0，读屏与 DOM 里都「不存在」。
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    // 触发进入动画
-    requestAnimationFrame(() => setVisible(true));
-
     if (!Number.isFinite(item.durationMs) || item.durationMs <= 0) {
       return undefined;
     }
 
     const timer = setTimeout(() => {
-      setVisible(false);
+      setLeaving(true);
       // 等退出动画结束后移除
       setTimeout(() => onDone(item.id), TOAST_TRANSITION_DURATION_MS);
     }, item.durationMs);
@@ -263,7 +270,7 @@ function ToastMessage({
   const [title, ...bodyLines] = item.message.split("\n");
   const body = bodyLines.join("\n").trim();
   const dismissWithTransition = () => {
-    setVisible(false);
+    setLeaving(true);
     window.setTimeout(() => onDone(item.id), TOAST_TRANSITION_DURATION_MS);
   };
   const handleAction = () => {
@@ -274,7 +281,7 @@ function ToastMessage({
   return (
     <ToastMessageView
       item={item}
-      visible={visible}
+      leaving={leaving}
       isBottom={isBottom}
       title={title}
       body={body}
@@ -286,7 +293,7 @@ function ToastMessage({
 
 export function ToastMessageView({
   item,
-  visible,
+  leaving,
   isBottom,
   title,
   body,
@@ -294,7 +301,7 @@ export function ToastMessageView({
   onDismiss,
 }: {
   item: ToastItem;
-  visible: boolean;
+  leaving: boolean;
   isBottom?: boolean;
   title?: string;
   body?: string;
@@ -312,6 +319,8 @@ export function ToastMessageView({
     <div
       className={cn(
         "rounded-2xl border bg-toast/60 text-ui-base shadow-lg backdrop-blur-xl transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transform-none motion-reduce:transition-opacity",
+        // 进入动画用 CSS keyframes（挂载即见，帧恢复时自然播放），不再经 rAF 翻转可见态。
+        !leaving && !isUpdate && "motion-safe:animate-[zcode-toast-in_200ms_cubic-bezier(0.77,0,0.175,1)_both]",
         isUpdate
           ? "origin-bottom-left w-[min(300px,calc(100vw-1rem))] max-w-[min(300px,calc(100vw-1rem))] border-popover-border text-foreground shadow-lg"
           : isNotice
@@ -319,16 +328,16 @@ export function ToastMessageView({
             : "border-border px-4 py-3 text-foreground whitespace-pre-line",
         // 右上角 Toast 曾复用顶部居中的纵向缩放动画，无法表达其从右侧进入的空间关系。
         isTopRight
-          ? visible
-            ? "translate-x-0 opacity-100"
-            : "translate-x-[calc(100%+1rem)] opacity-0 rtl:translate-x-[calc(-100%-1rem)]"
+          ? leaving
+            ? "translate-x-[calc(100%+1rem)] opacity-0 rtl:translate-x-[calc(-100%-1rem)]"
+            : "translate-x-0 opacity-100"
           : isBottom
-            ? visible
-              ? "translate-y-0 scale-100 opacity-100"
-              : "translate-y-1 scale-[0.98] opacity-0"
-            : visible
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-1 scale-[0.98] opacity-0",
+            ? leaving
+              ? "translate-y-1 scale-[0.98] opacity-0"
+              : "translate-y-0 scale-100 opacity-100"
+            : leaving
+              ? "-translate-y-1 scale-[0.98] opacity-0"
+              : "translate-y-0 scale-100 opacity-100",
       )}
     >
       {isUpdate ? (
@@ -404,8 +413,8 @@ export function ToastMessageView({
 
 export function toast(message: string, options?: ToastOptions): number {
   ensureHost();
-  // ensureHost 是同步的，但 addToast 在下一帧 React 渲染后才可用
-  // 用 requestAnimationFrame 保证 container 已挂载
+  // 投递零 rAF 依赖（26.5.6 修复项 1/2）：容器未就绪时经 toastDelivery 缓冲，
+  // 挂载后同步排空——被遮挡/后台窗口的 rAF 停摆不再吞掉或推迟 toast。
   const id = nextId++;
   pendingToastIds.add(id);
   const durationMs = options?.durationMs ?? DEFAULT_TOAST_DURATION_MS;
@@ -417,30 +426,20 @@ export function toast(message: string, options?: ToastOptions): number {
   const dismissLabel = options?.dismissLabel;
   const anchorId = options?.anchorId;
   const dedupeKey = options?.dedupeKey;
-  const tryAdd = () => {
-    if (addToast) {
-      const item: ToastItem = {
-        id,
-        message,
-        durationMs,
-        position,
-        variant,
-        actionLabel,
-        onAction,
-        dismissible,
-        dismissLabel,
-        anchorId,
-        dedupeKey,
-      };
-      const pendingUpdate = pendingToastUpdates.get(id);
-      pendingToastUpdates.delete(id);
-      addToast(pendingUpdate ? { ...item, ...pendingUpdate } : item);
-    } else {
-      requestAnimationFrame(tryAdd);
-    }
-  };
 
-  tryAdd();
+  toastDelivery.deliver({
+    id,
+    message,
+    durationMs,
+    position,
+    variant,
+    actionLabel,
+    onAction,
+    dismissible,
+    dismissLabel,
+    anchorId,
+    dedupeKey,
+  });
   return id;
 }
 
