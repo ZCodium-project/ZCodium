@@ -1,5 +1,6 @@
 /* oxlint-disable eslint(max-lines) -- footer 聚合账户、主题、模式和快捷键菜单。 */
 import type { Locale, UserInfo } from "@zcode/shared";
+import { ZCODE_VERSION } from "@zcode/shared";
 import { memo, useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   DesktopCommandIds,
@@ -171,6 +172,10 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="min-w-0 truncate text-ui-base font-semibold text-foreground">
             {profileBadge}
+          </span>
+          {/* 审计版没有账户体系与关于页入口，应用名旁边直接露出版本号，省得用户去找。 */}
+          <span className="shrink-0 text-[11px] leading-none text-muted-foreground">
+            v{ZCODE_VERSION}
           </span>
         </div>
       </div>
