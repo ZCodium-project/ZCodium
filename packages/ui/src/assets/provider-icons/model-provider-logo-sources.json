@@ -147,6 +147,15 @@
       "sourceUrl": "https://cheapaimodel.ai/favicon.svg",
       "sourceOwner": "cheapaimodel",
       "normalization": "Official three-feather mark from the favicon, paths and 30x30 viewBox unchanged. Background tile removed. Fill set to #000000 for light backgrounds and #ffffff for dark backgrounds. Retrieved 2026-11-05."
+    },
+    {
+      "brand": "UberLLM",
+      "file": "model-provider-uberllm-light.svg",
+      "darkFile": "model-provider-uberllm-dark.svg",
+      "providerIds": ["uberllm"],
+      "sourceUrl": "https://uberllm.dev/favicon.svg",
+      "sourceOwner": "UberLLM",
+      "normalization": "Official mark from the favicon, path and circle unchanged. Background tile removed and the viewBox cropped to a square 21x21 around the mark. Stroke and fill set to #000000 for light backgrounds and #ffffff for dark backgrounds. Retrieved 2026-11-10."
     }
   ]
 }

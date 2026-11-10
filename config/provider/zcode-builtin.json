@@ -756,6 +756,28 @@
               "key": "cheapaimodel"
             }
           }
+        },
+        {
+          "templateId": "uberllm",
+          "templateNameMap": {
+            "zh-CN": "UberLLM",
+            "en-US": "UberLLM"
+          },
+          "config": {
+            "access": {
+              "type": "api-key",
+              "apiKeyManagementUrl": "https://uberllm.dev/dashboard/keys"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.uberllm.dev/v1"
+            },
+            "builtinModelIds": ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3"],
+            "logo": {
+              "type": "builtin",
+              "key": "uberllm"
+            }
+          }
         }
       ],
       "providerRules": []
@@ -6084,6 +6106,20 @@
         {
           "templateId": "cheapaimodel",
           "modelId": "glm-5.3",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "uberllm",
+          "modelId": "deepseek/deepseek-v4.1-flash",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "uberllm",
+          "modelId": "z-ai/glm-5.3",
           "config": {
             "enabled": true
           }
