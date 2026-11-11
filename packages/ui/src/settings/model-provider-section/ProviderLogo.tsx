@@ -24,6 +24,8 @@ import cheaperInferenceLight from "@/assets/provider-icons/model-provider-cheape
 import cheaperInferenceDark from "@/assets/provider-icons/model-provider-cheaperinference-dark.svg";
 import cheapaimodelLight from "@/assets/provider-icons/model-provider-cheapaimodel-light.svg";
 import cheapaimodelDark from "@/assets/provider-icons/model-provider-cheapaimodel-dark.svg";
+import standardComputeLight from "@/assets/provider-icons/model-provider-standardcompute-light.svg";
+import standardComputeDark from "@/assets/provider-icons/model-provider-standardcompute-dark.svg";
 
 type ProviderLogoRef = NonNullable<ProviderConfigObject["logo"]>;
 
@@ -52,6 +54,7 @@ const BUILTIN_PROVIDER_LOGO_ASSETS: Readonly<Record<string, BuiltinProviderLogoA
   orcarouter: { light: orcaRouterLogo },
   cheaperinference: { light: cheaperInferenceLight, dark: cheaperInferenceDark },
   cheapaimodel: { light: cheapaimodelLight, dark: cheapaimodelDark },
+  standardcompute: { light: standardComputeLight, dark: standardComputeDark },
 };
 
 export function resolveBuiltinProviderLogoAsset(
