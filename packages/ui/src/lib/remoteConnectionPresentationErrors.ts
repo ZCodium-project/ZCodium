@@ -10,6 +10,7 @@ import {
   SOURCE_SERVER_INSTALL_REQUIRED_ERROR_CODE,
   SOURCE_SERVER_STOP_FAILED_ERROR_CODE,
   SOURCE_SERVER_IDENTITY_CHANGE_PENDING_ERROR_CODE,
+  SOURCE_SERVER_UPDATE_IN_PROGRESS_ERROR_CODE,
   SOURCE_SERVER_UPDATE_RUNNING_TASKS_ERROR_CODE,
   SOURCE_SERVER_UPGRADE_REQUIRED_ERROR_CODE,
   SOURCE_SERVER_REMOVE_CALLBACK_MISSING_ERROR_CODE,
@@ -57,6 +58,7 @@ const messageIdByCode: Record<PublicZCodeErrorCode, string> = {
     "remote.error.sourceServerIdentityChangePending",
   [SOURCE_SERVER_UPGRADE_REQUIRED_ERROR_CODE]: "remote.error.sourceServerUpgradeRequired",
   [SOURCE_SERVER_UPDATE_RUNNING_TASKS_ERROR_CODE]: "remote.error.sourceServerRunningTasks",
+  [SOURCE_SERVER_UPDATE_IN_PROGRESS_ERROR_CODE]: "remote.error.unknown",
   [SOURCE_SERVER_DOWNGRADE_UNCONFIRMED_ERROR_CODE]: "remote.error.unknown",
   [SOURCE_SERVER_STOP_FAILED_ERROR_CODE]: "remote.error.unknown",
   [SOURCE_SERVER_CONTROL_UNRESPONSIVE_ERROR_CODE]: "remote.error.unknown",
@@ -69,7 +71,8 @@ const messageIdByCode: Record<PublicZCodeErrorCode, string> = {
   [REMOTE_RECOVERY_BUDGET_EXHAUSTED_ERROR_CODE]: "remote.error.recoveryBudgetExhausted",
   [REMOTE_WORKSPACE_BIND_SESSION_MISSING_ERROR_CODE]: "remote.error.bindSessionMissing",
   [REMOTE_WORKSPACE_DIRECTORY_UNAVAILABLE_ERROR_CODE]: "remote.error.workspaceDirectoryUnavailable",
-  [REMOTE_WORKSPACE_DIRECTORY_UNRESPONSIVE_ERROR_CODE]: "remote.error.workspaceDirectoryUnavailable",
+  [REMOTE_WORKSPACE_DIRECTORY_UNRESPONSIVE_ERROR_CODE]:
+    "remote.error.workspaceDirectoryUnavailable",
   [SOURCE_SERVER_REMOVE_CALLBACK_MISSING_ERROR_CODE]:
     "settings.source.error.source-server-remove-callback-missing",
   [SOURCE_SERVER_REMOVE_CALLBACK_FAILED_ERROR_CODE]:
