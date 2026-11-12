@@ -22,7 +22,7 @@ describe("AnimatedSidePanePanel layout", () => {
     expect(resolveAnimatedSidePanePanelLayout({ mobileOverlay: false })).toMatchObject({
       collapsedSize: "0px",
       defaultSize: "0px",
-      maxSize: "65%",
+      maxSize: "100%",
       minSize: "240px",
       useResizablePanel: true,
     });
