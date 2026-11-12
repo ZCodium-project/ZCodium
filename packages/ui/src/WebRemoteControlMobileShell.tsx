@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, LoaderIcon } from "lucide-react";
 import {
   resolveWebRemoteControlWorkspaceKey,
@@ -25,26 +25,39 @@ interface WebRemoteControlMobileHistoryState {
   zcodeMobilePage?: WebRemoteControlMobilePage;
 }
 
-export function isWebRemoteControlMobileChatHistoryState(
+function hasMobileHistoryPage(
   state: unknown,
+  page: WebRemoteControlMobilePage,
 ): state is WebRemoteControlMobileHistoryState {
   return (
     typeof state === "object" &&
     state !== null &&
-    (state as WebRemoteControlMobileHistoryState).zcodeMobilePage === "chat"
+    "zcodeMobilePage" in state &&
+    (state as WebRemoteControlMobileHistoryState).zcodeMobilePage === page
   );
 }
 
-function pushWebRemoteControlMobileChatHistory() {
+export function isWebRemoteControlMobileChatHistoryState(
+  state: unknown,
+): state is WebRemoteControlMobileHistoryState {
+  return hasMobileHistoryPage(state, "chat");
+}
+
+function recordMobileChatHistory() {
   if (typeof window === "undefined") {
     return;
   }
 
-  if (isWebRemoteControlMobileChatHistoryState(window.history.state)) {
+  const state: unknown = window.history.state;
+  if (hasMobileHistoryPage(state, "chat")) {
     return;
   }
 
-  window.history.pushState({ zcodeMobilePage: "chat" }, "");
+  if (hasMobileHistoryPage(state, "home")) {
+    window.history.replaceState({ ...state, zcodeMobilePage: "chat" }, "");
+  } else {
+    window.history.pushState({ zcodeMobilePage: "chat" }, "");
+  }
 }
 
 function resolveInitialWebRemoteControlMobilePage(
@@ -127,7 +140,6 @@ export function WebRemoteControlMobileShell({
 
   const navigateToChat = useCallback(() => {
     setCurrentPage("chat");
-    pushWebRemoteControlMobileChatHistory();
   }, []);
 
   const handleTaskHomePreferencesChange = useCallback(
@@ -144,15 +156,15 @@ export function WebRemoteControlMobileShell({
 
   const navigateHome = useCallback(() => {
     setHomeRefreshKey((key) => key + 1);
-    if (
-      typeof window !== "undefined" &&
-      isWebRemoteControlMobileChatHistoryState(window.history.state)
-    ) {
-      window.history.back();
+    // 聊天可能是历史首项，浏览器无法后退。箭头直接回列表，并同步历史供刷新恢复。
+    setCurrentPage("home");
+    if (typeof window === "undefined") {
       return;
     }
-
-    setCurrentPage("home");
+    const state: unknown = window.history.state;
+    if (hasMobileHistoryPage(state, "chat")) {
+      window.history.replaceState({ ...state, zcodeMobilePage: "home" }, "");
+    }
   }, []);
 
   useEffect(() => {
@@ -162,6 +174,10 @@ export function WebRemoteControlMobileShell({
 
     navigateToChat();
   }, [initialNavigationIntent, navigateToChat]);
+
+  useLayoutEffect(() => {
+    if (currentPage === "chat") recordMobileChatHistory();
+  }, [currentPage]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

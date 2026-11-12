@@ -2759,6 +2759,10 @@ export class ConversationV4Gateway {
       detachedLive: this.detachedLiveSessions.size,
       detachedTerminal: this.detachedTerminalAt.size,
       rawSeqStates: this.rawSequenceStates.size,
+      // 本仓库尚无 historyOpenings 历史打开状态；保留其余可用的内存诊断计数。
+      hydrations: this.hydrationInFlight.size,
+      binaryCacheEntries: this.binaryReadCache.size,
+      binaryCacheBytes: this.binaryReadCacheBytes,
     };
   }
 
