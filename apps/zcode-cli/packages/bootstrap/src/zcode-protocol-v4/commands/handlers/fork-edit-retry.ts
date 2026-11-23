@@ -65,13 +65,13 @@ export class V4ForkTargetGuardError extends Error {
   }
 }
 
-/** latestQueryEditOnly：旧 row / 非 realUser row / 无投影均直接拒绝，不 stop 当前 turn。 */
-export class V4EditTargetNotLatestError extends Error {
-  readonly reasonCode = "guard.latestQueryEditOnly";
+export class V4EditTargetUnavailableError extends Error {
+  readonly reasonCode: string;
 
-  constructor(targetRowId: number) {
-    super(`editUserQuery targetRowId ${targetRowId} 不是最后一轮 real user query`);
-    this.name = "V4EditTargetNotLatestError";
+  constructor(targetRowId: number, reasonCode = "guard.actionUnavailable") {
+    super(`editUserQuery targetRowId ${targetRowId} 不可编辑: ${reasonCode}`);
+    this.name = "V4EditTargetUnavailableError";
+    this.reasonCode = reasonCode;
   }
 }
 
@@ -129,7 +129,14 @@ async function editUserQuery(
     "editUserQuery",
   );
   if (!resolution?.ok || !resolution.editTarget) {
-    throw new V4EditTargetNotLatestError(payload.target.rowId);
+    const reasonCode = resolution && !resolution.ok ? resolution.reasonCode : undefined;
+    throw new V4EditTargetUnavailableError(payload.target.rowId, reasonCode);
+  }
+  if (payload.workspaceMode === "rewind" && resolution.row.actions?.editPreserveWorkspaceOnly) {
+    throw new V4InputAdmissionRejectedError(
+      "guard.workspaceRewindUnavailable",
+      "历史消息编辑仅重置对话",
+    );
   }
   const editTarget = resolution.editTarget;
   const attachmentRefs = payload.attachments ?? stableAttachmentRefs(editTarget);
