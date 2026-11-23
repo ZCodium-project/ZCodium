@@ -1026,3 +1026,9 @@ exceptions:
       - packages/shared/src/subagent-profile.ts
       - packages/shared/src/subagent-profile-parser.ts
     reason: 已准入的存量文件为插件 agent 的 permissionMode 只能收紧（ZP-20261028-13）增加进程内 profile 标记字段并更新注释；跨进程 schema 与解析行为不变，接管 shared 目录不在本次范围内。
+  - id: upstream-2026-11-23-ui-standalone-fixes
+    rule: unmanaged-new-file
+    paths:
+      - packages/ui/src/lib/markdownCjkBareUrl.ts
+      - packages/ui/src/app-shell/WorkflowRunFillFrames.tsx
+    reason: 上游 v4.0.0 同步（审计 2026-11-23）带入的独立 Markdown 裸 URL 规范化新文件与填充帧几何修复；只新增纯函数与同文件缺陷修复，不改变模块边界，接管整个未受管的 ui 包不在本次审计范围内。
