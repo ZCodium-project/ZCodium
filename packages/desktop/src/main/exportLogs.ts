@@ -22,6 +22,7 @@ import { CLI_MEMORY_DIAGNOSTIC_DIRECTORY, CLI_MEMORY_FILE_PATTERN } from "@zcode
 import {
   createFeedbackDiagnosticArchive,
   getAppConfigDir,
+  getCliMemoryDiagnosticsDir,
   getExportLogDir as getDefaultExportLogDir,
   getExportLogStageDir as getDefaultExportLogStageDir,
   getFeedbackLogArchiveDir as getDefaultFeedbackLogArchiveDir,
@@ -973,7 +974,7 @@ export async function createLogArchiveArtifacts(
 
   const zcodeCliDir = getZCodeCliDir();
   await collectLogArchiveFilesByName(
-    join(zcodeCliDir, CLI_MEMORY_DIAGNOSTIC_DIRECTORY),
+    getCliMemoryDiagnosticsDir(),
     posix.join(".zcodium", "cli", CLI_MEMORY_DIAGNOSTIC_DIRECTORY),
     (name) => CLI_MEMORY_FILE_PATTERN.test(name),
     files,
@@ -1151,7 +1152,7 @@ export async function createFeedbackLogArchiveFromExportLogs(
   return createFeedbackDiagnosticArchive({
     sources: [
       {
-        directory: join(getZCodeCliDir(), CLI_MEMORY_DIAGNOSTIC_DIRECTORY),
+        directory: getCliMemoryDiagnosticsDir(),
         archivePrefix: ".zcode/cli/memory-diagnostics",
         contentPolicy: "cli-memory",
         onlyCurrentDay: false,

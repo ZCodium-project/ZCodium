@@ -2,10 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { realpath, stat } from "node:fs/promises";
 import { Session } from "node:inspector";
-import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { getHeapStatistics } from "node:v8";
-import { CLI_MEMORY_DIAGNOSTIC_DIRECTORY, ZCODE_COMMIT, ZCODE_VERSION } from "@zcode/shared";
+import { ZCODE_COMMIT, ZCODE_VERSION } from "@zcode/shared";
 import {
   createMemoryDiagnosticRecorder,
   MEMORY_DIAGNOSTIC_INTERVAL_MS,
@@ -68,7 +67,7 @@ async function hashBundle(path: string): Promise<string> {
 /** app-server 的独立诊断资源；不依赖 renderer、网络或业务日志级别。 */
 export function startCliMemoryDiagnostics(
   readCounters: () => Record<string, number>,
-  options: { directory?: string } = {},
+  directory: string,
 ): CliMemoryDiagnostics {
   let bundlePath = resolve(process.argv[1] ?? "");
   const metadata = {
@@ -91,11 +90,7 @@ export function startCliMemoryDiagnostics(
       ...process.memoryUsage(),
       heapLimit: getHeapStatistics().heap_size_limit,
     }),
-    write: (record) =>
-      writeMemoryDiagnostic(
-        options.directory ?? join(homedir(), ".zcodium", "cli", CLI_MEMORY_DIAGNOSTIC_DIRECTORY),
-        record,
-      ),
+    write: (record) => writeMemoryDiagnostic(directory, record),
   });
   // 哈希流式读取，不复制 bundle 到 JS 堆，也不挡住协议 ready。
   // macOS 的 /var、/tmp 等别名与 V8 返回的真实路径不同，需异步归一化再匹配采样帧。

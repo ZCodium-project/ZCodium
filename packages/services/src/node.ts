@@ -111,6 +111,7 @@ export {
   isDataBaseDirEnvOverrideActive,
   setDataRootPathOverride,
   getZCodeDataRootDir,
+  getCliMemoryDiagnosticsDir,
   getConversationWorkspaceDir,
   getAppConfigDir,
   getExportLogStageDir,

@@ -845,6 +845,8 @@ export interface RunZCodeProtocolAgentOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   input?: NodeJS.ReadableStream;
+  /** 仅正式 CLI 入口提供，嵌入式入口不隐式写 HOME。 */
+  memoryDiagnosticsDir?: string;
   output?: NodeJS.WritableStream;
   presentationSurface?: PresentationSurface;
   providerEndpointRoutingPort?: ProviderEndpointRoutingPort;

@@ -17,6 +17,7 @@ export function startProtocolResourceSampler(
   server: ZCodeProtocolAgentServer,
   send: (message: ZCodeProtocolNotification) => void,
   logger: Logger,
+  memoryDiagnosticsDir?: string,
 ): ZCodeProcessResourceSampler | undefined {
   try {
     // 本地内存诊断日志：复用同一 60s 节拍，
@@ -62,9 +63,12 @@ export function startProtocolResourceSampler(
     sampler.start();
     let diagnostics: { stop(): void } | undefined;
     try {
-      diagnostics = startCliMemoryDiagnostics(() =>
-        server.collectMemoryDiagnostics({ includeEventStats: false }),
-      );
+      if (memoryDiagnosticsDir) {
+        diagnostics = startCliMemoryDiagnostics(
+          () => server.collectMemoryDiagnostics({ includeEventStats: false }),
+          memoryDiagnosticsDir,
+        );
+      }
     } catch {
       // inspector 不可用时不能影响协议握手和既有资源采样。
     }

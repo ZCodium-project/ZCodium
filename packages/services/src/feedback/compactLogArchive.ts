@@ -1,8 +1,6 @@
 import { rm } from "node:fs/promises";
-import { homedir } from "node:os";
 import { join } from "node:path";
-import { CLI_MEMORY_DIAGNOSTIC_DIRECTORY } from "@zcode/shared";
-import { getAppConfigDir, getFeedbackLogArchiveDir } from "../paths.js";
+import { getAppConfigDir, getCliMemoryDiagnosticsDir, getFeedbackLogArchiveDir } from "../paths.js";
 import { createFeedbackDiagnosticArchive } from "./feedbackLogArchive.js";
 
 interface ArchiveProgressEvent {
@@ -25,7 +23,7 @@ export async function prepareCompactLogArchive(options?: {
   return createFeedbackDiagnosticArchive({
     sources: [
       {
-        directory: join(homedir(), ".zcodium", "cli", CLI_MEMORY_DIAGNOSTIC_DIRECTORY),
+        directory: getCliMemoryDiagnosticsDir(),
         archivePrefix: ".zcodium/cli/memory-diagnostics",
         contentPolicy: "cli-memory",
         onlyCurrentDay: false,
