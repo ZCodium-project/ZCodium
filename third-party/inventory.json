@@ -1642,7 +1642,7 @@
     "packages/ui/src/components/ai-elements/markdown-list.tsx": "997ada2044f7ad8fd555d05b5fda6ff6ad14f9e8078fe702da7caaa60d6ca7ab",
     "packages/ui/src/components/ai-elements/markdown-table.tsx": "085c58dd757667ad82f14f84e4bb078dcae72e082c36cd5bd9cf68d393f0efcb",
     "packages/ui/src/components/ai-elements/mermaid-block.tsx": "4cc6783097a6ecbb1896ee1f3dd1d89115ca81f3efb15d9fbabcf448063818ae",
-    "packages/ui/src/components/ai-elements/message.tsx": "e3f228fc4998ab7f9d68cdd509054f5fd05a74230cdf81e2b42901dd3de6cfdd",
+    "packages/ui/src/components/ai-elements/message.tsx": "b946197260ce138d63416688a69338168b2feb6ed4d88752feccfa9e56e23f1b",
     "packages/ui/src/components/ai-elements/mic-selector.tsx": "4fbbf1818e99986fa18c8aff094576efbbccdf2fe00d402dba668bd5460fb9ab",
     "packages/ui/src/components/ai-elements/model-selector.tsx": "8f2cc2b786d93c6294893e7916a339275bfe7b5a0615ff71246996565ab9149e",
     "packages/ui/src/components/ai-elements/node.tsx": "d7b68c41717a509bd9063f0a9fc0c4525ceb2b23bae4028bcd49ec949fc6268f",
@@ -19071,7 +19071,7 @@
         },
         {
           "file": "packages/ui/src/components/ai-elements/message.tsx",
-          "sha256": "e3f228fc4998ab7f9d68cdd509054f5fd05a74230cdf81e2b42901dd3de6cfdd"
+          "sha256": "b946197260ce138d63416688a69338168b2feb6ed4d88752feccfa9e56e23f1b"
         },
         {
           "file": "packages/ui/src/components/ai-elements/mic-selector.tsx",
