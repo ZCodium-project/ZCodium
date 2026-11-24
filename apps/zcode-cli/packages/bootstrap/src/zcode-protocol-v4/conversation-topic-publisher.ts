@@ -549,11 +549,6 @@ export class ConversationTopicPublisher {
     return this.projection.isLatestRetryAssistantRow(rowId);
   }
 
-  /** latestQueryEditOnly：只有最后一轮 realUser userInput row 可 edit。 */
-  isLatestEditableUserRow(rowId: number): boolean {
-    return this.projection.isLatestEditableUserRow(rowId);
-  }
-
   /** rowId → product turnId（editUserQuery 无 assistant anchor 时回查 user messageId）。 */
   getTurnIdForRow(rowId: number): string | null {
     return this.projection.getTurnIdForRow(rowId);

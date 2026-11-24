@@ -3649,8 +3649,7 @@ export function SessionPane({
   const retryActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
   // fork 可用性完全由 row.actions.canFork（CLI stable resolver 投影）裁决；pane 只提供命令回调。
   const forkActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
-  // editUserQuery 已由 command 层防御 latest real user query，并在 running
-  // 提交时先 stop barrier 再 rewind/rerun；UI 不应再用 completed gate 把入口整轮隐藏。
+  // CLI 投影裁决哪些用户行可编辑；running 中提交由命令层先等待当前工作终止。
   const editActionsEnabled = !readOnly && !selectionSideChat && Boolean(sessionId);
   const isDraft = sessionId === null;
   // 滚动恢复必须使用与 sessionId 匹配的 lease projection。切换 session 的 render 与

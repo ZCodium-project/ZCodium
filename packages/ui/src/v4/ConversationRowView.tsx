@@ -1234,20 +1234,22 @@ const SingleUserInputRowView = memo(function SingleUserInputRowView({
           submitTestId={testId(TID_V4_EDIT_SUBMIT, String(row.rowId))}
           cancelTestId={testId(TID_V4_EDIT_CANCEL, String(row.rowId))}
           betweenCancelAndSubmitAction={
-            <ControlHintTooltip
-              title={rewindWorkspaceTooltipTitle}
-              description={rewindWorkspaceTooltipDescription}
-            >
-              {rewindWorkspaceDisabled ? (
-                // Button disabled 会应用 pointer-events-none，TooltipTrigger 直接落在
-                // 按钮上时收不到 hover。禁用态用外层 span 承接 hover，实际按钮仍保持 disabled。
-                <span className="inline-flex" data-disabled-tooltip-trigger="true">
-                  {rewindWorkspaceButton}
-                </span>
-              ) : (
-                rewindWorkspaceButton
-              )}
-            </ControlHintTooltip>
+            row.actions?.editPreserveWorkspaceOnly ? null : (
+              <ControlHintTooltip
+                title={rewindWorkspaceTooltipTitle}
+                description={rewindWorkspaceTooltipDescription}
+              >
+                {rewindWorkspaceDisabled ? (
+                  // Button disabled 会应用 pointer-events-none，TooltipTrigger 直接落在
+                  // 按钮上时收不到 hover。禁用态用外层 span 承接 hover，实际按钮仍保持 disabled。
+                  <span className="inline-flex" data-disabled-tooltip-trigger="true">
+                    {rewindWorkspaceButton}
+                  </span>
+                ) : (
+                  rewindWorkspaceButton
+                )}
+              </ControlHintTooltip>
+            )
           }
           className="w-full max-w-xl"
           shellClassName="min-h-32"
