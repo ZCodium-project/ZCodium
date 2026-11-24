@@ -33,6 +33,14 @@
       "syntheticReason": "先建立 compact coverage，再验证 edit 使用 same-session branch cut。"
     },
     {
+      "id": "v4-edit-followup",
+      "description": "在 compact 后追加一轮，使原始问题成为历史编辑目标。",
+      "kind": "main",
+      "source": "synthetic",
+      "timingPolicy": "fast-text",
+      "syntheticReason": "后续轮提供可识别的分支内容，用于验证历史编辑会截断后续上下文。"
+    },
+    {
       "id": "v4-edit-new",
       "description": "M4 editUserQuery 门禁：编辑后 newText 的回复。",
       "kind": "main",

@@ -566,10 +566,10 @@ map。legacy workspace fork 可以保留原 checkpoint 策略，但 V4 入口不
 
 ### Edit 与 Retry
 
-- 统一 `editUserQuery` 只允许当前 active branch 的最后一条 `humanAuthored=true` real-user
-  input；它可以是普通 text query 或用户提交的 goal input。更早 real-user input、synthetic/
-  model-only/background result、assistant、tool 和 timeline 都不提供 edit。
-- latest real-user input 无论是否已被 compact summary 覆盖，都在原 session 通过 append-only
+- 当前 active branch 上具有持久身份的真实用户输入可以使用 `editUserQuery`，包括历史 text 和 goal。
+  synthetic/model-only/background result、assistant、tool、timeline、已离开 active branch 的输入及
+  无持久锚点的输入禁止编辑。
+- 真实用户输入无论是否已被 compact summary 覆盖，都在原 session 通过 append-only
   branch cut rewind 到该 intent，再用编辑后的完整 intent 重跑；text 仍走 `sendText`，goal
   仍走 `sendGoalCommand`。旧 message/part 不物理删除，但不再属于 active projection、模型上下文
   或冷恢复分支；显式 `forkAssistant` 是唯一创建 child 的入口。
@@ -579,11 +579,11 @@ map。legacy workspace fork 可以保留原 checkpoint 策略，但 V4 入口不
 - conversation rewind 不追加 provider-visible `rewind_notice`，模型只能看到保留前缀和替换后的
   canonical intent。持久层使用 `branchCutAfterMessageID + branchGeneration` 识别新分支，并兼容
   旧 `createdMessageID` 数据。
-- `editUserQuery.workspaceMode=preserve|rewind` 区分“只重置对话”和“对话 + 文件重置”。组合模式
-  在同一 command 内重新预检并倒序恢复 checkpoint；任一 unsafe、ignored shell、unsupported
+- 历史输入沿用行内编辑并直接发送，替换该消息及之后的对话，保留工作区文件。
+  `workspaceMode=rewind` 继续用于最后一条真实用户输入的本轮文件重置。
+  组合模式在同一 command 内重新预检并倒序恢复 checkpoint；任一 unsafe、ignored shell、unsupported
   或无安全 checkpoint 都返回结构化 blocked，文件、对话和 provider request 全部不变。
-- primary turn、goal continuation 或 goal verifier 正在运行时，latest real-user input edit
-  （包括 latest goal input）先进入
+- primary turn、goal continuation 或 goal verifier 正在运行时，真实用户输入的编辑先进入
   stop barrier；只有旧 completion-blocking work 全部终态收口后，才执行原 session rewind。
   barrier 失败时不得 rewind、不得启动新的 text/goal intent，必须保留旧 active
   work、原输入与当前 branch，也不发送编辑后的 provider 请求。
@@ -733,8 +733,8 @@ fork 目标只定义在 assistant message/turn 上。edit 目标只定义在 use
 | `guideModePreservesMessage`                   | `guide` 模式下后续文本必须保留在 turn-steer/guided history 或 fallback queue，不能丢失                                                                                                                                                                                                                                                                         | accepted |
 | `runningCompactQueues`                        | `running` 时 `/compact` 作为 typed maintenance intent 进入统一 FIFO；不能当普通消息，也不能并发启动 compact                                                                                                                                                                                                                                                    | accepted |
 | `runningStableAssistantForkAllowed`           | `running` 时可以 fork 更早 `completedSuccess` turn 最后一段 completed assistant；当前 streaming/interrupted/failed partial 和中间 assistant 段不能 fork                                                                                                                                                                                                        | accepted |
-| `latestQueryEditPreemptsActiveTurn`           | 只有最后一条 real-user input（text 或 goal）可以 edit；running 时提交 edit 等价先 stop 当前 active work，再从该 input 重跑且保留原 intent kind                                                                                                                                                                                                                 | accepted |
-| `compactCoveredLatestEditRewindsInPlace`      | latest real-user input 已被稳定 compact summary 覆盖时，原 session append-only branch cut，重置被跨过的 compact 派生状态并按原 kind 重放；不创建 child、不追加 rewind reminder                                                                                                                                                                                 | accepted |
+| `queryEditPreemptsActiveTurn`           | 当前分支有持久锚点的 real-user input（text 或 goal）可以 edit；running 时提交 edit 等价先 stop 当前 active work，再从该 input 重跑且保留原 intent kind                                                                                                                                                                                                                 | accepted |
+| `compactCoveredEditRewindsInPlace`      | active-branch real-user input 已被稳定 compact summary 覆盖时，原 session append-only branch cut，重置被跨过的 compact 派生状态并按原 kind 重放；不创建 child、不追加 rewind reminder                                                                                                                                                                                 | accepted |
 | `latestAssistantRetryOnly`                    | 底层 capability 先锁定当前投影里全时间线最后一条 `assistantText` row，再要求同一 product turn 存在 `origin=realUser` 的 canonical user input；background result/goal continuation/mailbox 等 synthetic turn 和更早真实用户轮均不得获得 capability。产品 UI 在桌面、Web、手机端统一隐藏普通 assistant retry 入口，`canRetry` / `retryTurn` 仅为协议兼容继续保留 | accepted |
 | `retryPreservesFullIntent`                    | retry 从 canonical cause 恢复 input kind、text、attachments、goal intent、delivery/fallback 与来源 cause，禁止仅从可见文本重建                                                                                                                                                                                                                                 | accepted |
 | `goalInputUsesUnifiedEditTarget`              | `goalSet` lifecycle 不产 marker；用户 goal input 产 canonical visible real-user row，并与 text query 共用 `editUserQuery` target；重发仍是 `sendGoalCommand`                                                                                                                                                                                                   | accepted |
@@ -777,10 +777,10 @@ fork 目标只定义在 assistant message/turn 上。edit 目标只定义在 use
 | `unfinishedSessionGoalQueues`             | `sessionEnded=false + sendGoalCommand`                                                                                   | `enqueue`           | deferred `sendGoalCommand` 保留 goal 意图，消费时 set/update goal                                                                                                                       |
 | `runningCompactQueues`                    | `running + sendCompactCommand/clickCompact`                                                                              | `enqueue`           | 追加 kind=`compact` 的 queue item；不作为普通 user message；当前 work 结束后严格按 FIFO 执行                                                                                            |
 | `runningStableAssistantForkAllowed`       | `running + forkAssistant + stable historical assistant target`                                                           | `allow`             | 创建 child；父 session 当前 active work、queue、background work 继续留在父 session                                                                                                      |
-| `latestQueryEditPreemptsActiveTurn`       | `running + editUserQuery + latest real-user input(text/goal)`                                                            | `allow`             | 先执行 stop barrier；旧 work 清空后 rewind 并按原 kind 重跑；barrier 失败保留旧 work/input/branch，不启动 text/goal                                                                     |
-| `compactCoveredLatestEditRewindsInPlace`  | `editUserQuery + latest real-user input + coveredByStableCompact`                                                        | `allow`             | 原 session append-only branch cut；重置跨过的 compact/microcompact 状态，按原 kind 重放，不创建或导航 child                                                                             |
-| `goalInputUsesUnifiedEditTarget`          | `editUserQuery + latest real-user input(kind=goal)`                                                                      | `allow`             | 按稳定 entity target rewind；重发 `sendGoalCommand` intent，goal input row 保持可见，不生成 `goalSet` marker                                                                            |
-| `latestQueryEditOnly`                     | `editUserQuery + non-latest real-user input`                                                                             | `reject`            | 历史 text/goal input 不提供 edit，避免 active branch 回退到旧上下文                                                                                                                     |
+| `queryEditPreemptsActiveTurn`       | `running + editUserQuery + active-branch real-user input(text/goal)`                                                            | `allow`             | 先执行 stop barrier；旧 work 清空后 rewind 并按原 kind 重跑；barrier 失败保留旧 work/input/branch，不启动 text/goal                                                                     |
+| `compactCoveredEditRewindsInPlace`  | `editUserQuery + active-branch real-user input + coveredByStableCompact`                                                        | `allow`             | 原 session append-only branch cut；重置跨过的 compact/microcompact 状态，按原 kind 重放，不创建或导航 child                                                                             |
+| `goalInputUsesUnifiedEditTarget`          | `editUserQuery + active-branch real-user input(kind=goal)`                                                                      | `allow`             | 按稳定 entity target rewind；重发 `sendGoalCommand` intent，goal input row 保持可见，不生成 `goalSet` marker                                                                            |
+| `historicalEditPreservesWorkspace` | `editUserQuery + historical real-user input + workspaceMode=rewind` | `reject` | 历史消息使用 conversation-only 编辑。 |
 | `latestAssistantRetryOnly`                | `retryTurn + non-latest assistantText row`，或 latest assistant 所在 turn 没有 `origin=realUser` 的 canonical user input | `reject`            | 历史 assistant 回复和 background/synthetic 结果轮都不获得 retry capability；禁止跳过最新 synthetic assistant 回退到旧上下文。所有普通 assistant retry capability 均不渲染为产品 UI 入口 |
 | `activeWorkBlocksCompletion`              | `assistantComplete + activeWork!=empty`                                                                                  | `system-transition` | 收口已完成 work，但 session 保持 busy，不开放 completed-only 操作                                                                                                                       |
 | `controlProjectionKeepsStopVisible`       | `canStop=true OR stopState=stopping`                                                                                     | `system-transition` | UI 保留同一个停止按钮；`stopTargetKind` 变化只更新细节文案                                                                                                                              |
