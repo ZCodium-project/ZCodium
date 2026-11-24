@@ -5912,11 +5912,14 @@ test("redirects every protocol console level to stderr and restores the global c
 
 test("passes the Desktop presentation surface to the protocol app server", async () => {
   const ctx = createContext(["app-server", "--stdio", "--surface", "desktop"]);
+  const memoryDiagnosticsDir = join("profile", "cli", "diagnostics");
   let called = false;
   const exitCode = await run(ctx, {
+    memoryDiagnosticsDir,
     runZCodeProtocolAgent: async (options) => {
       called = true;
       assert.equal(options?.presentationSurface, "zcode_desktop");
+      assert.equal(options?.memoryDiagnosticsDir, memoryDiagnosticsDir);
     },
   });
 

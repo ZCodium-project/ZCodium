@@ -12,6 +12,7 @@ import { installProtocolStderrBoundary } from "./protocol-stderr.js";
 import { createProtocolProcessLifecycle } from "./protocol-lifecycle.js";
 import { isProtocolServerInvocation } from "./arguments.js";
 import {
+  getCliMemoryDiagnosticsDir,
   initializeDataRootNonInteractive,
   resolveDataRootActionFromEnv,
 } from "@zcode/services/node";
@@ -99,6 +100,7 @@ async function main(): Promise<void> {
     const { run } = await import("./run.js");
     lifecycle?.signal.throwIfAborted();
     const exitCode = await run(context, {
+      memoryDiagnosticsDir: lifecycle ? getCliMemoryDiagnosticsDir() : undefined,
       protocolLifecycle: lifecycle,
       protocolInput: lifecycle?.input,
     });

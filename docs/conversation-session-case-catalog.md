@@ -1,5 +1,9 @@
 # Conversation Session Case Catalog
 
+## 手机远控列表与聊天历史（#131）
+
+MH05/MH06 已确认：真实浏览器上的返回、刷新与直达验收见[手机任务首页规格](web-remote-control/mobile-task-home-design.md#状态与路由)。只改变 Shell 展示导航，剪枝 Host、Session、stream 重放和扫码配对协议组合。
+
 ## ZCodium 非官方能力对齐（ZUP，#79，2026-10-23）
 
 用户明确要求同步官方 3.16.2 非官方服务能力及多文件夹项目 UI。沿用现有项目合同，不恢复官方服务/遥测。ZUP01–ZUP07 的 setup/action/assertion、owner 和剪枝见 [本轮规格](superpowers/specs/2026-10-23-zcodium-upstream-parity.md#验收用例与剪枝)：本地多选创建、编辑与旧 cwd 保持、附加目录能力和配置隔离、V4 冷恢复、同 cwd 项目草稿隔离、主题/窄屏、远程单 root/手机边界。产品语义 accepted，确定性回归及 macOS 多目录/重启/冷恢复证据见 [验收报告](testing/project-parity-validation.md)，不复用上游历史 PASS 充当本 fork 的验收。

@@ -1,6 +1,6 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
-import { getAppConfigDir, getFeedbackLogArchiveDir } from "../paths.js";
+import { getAppConfigDir, getCliMemoryDiagnosticsDir, getFeedbackLogArchiveDir } from "../paths.js";
 import { createFeedbackDiagnosticArchive } from "./feedbackLogArchive.js";
 
 interface ArchiveProgressEvent {
@@ -21,7 +21,15 @@ export async function prepareCompactLogArchive(options?: {
     return options.createFullArchive(sourceDir, { onProgress: options.onProgress });
   }
   return createFeedbackDiagnosticArchive({
-    sources: [{ directory: join(sourceDir, "logs"), archivePrefix: "logs" }],
+    sources: [
+      {
+        directory: getCliMemoryDiagnosticsDir(),
+        archivePrefix: ".zcodium/cli/memory-diagnostics",
+        contentPolicy: "cli-memory",
+        onlyCurrentDay: false,
+      },
+      { directory: join(sourceDir, "logs"), archivePrefix: "logs" },
+    ],
     outputRootDir: getFeedbackLogArchiveDir(),
     ...(!options?.full ? { maxTotalBytes: 2 * 1024 * 1024 } : {}),
     onProgress: options?.onProgress,

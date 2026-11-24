@@ -49,8 +49,21 @@ host / agent CLI 四类进程，必须先有运行时证据才能决定修哪一
   renderer 经既有 preload `window.zcode.log` 桥）。
 - agent_node 写 CLI 自己的 JSONL 日志。远端 workspace 的 CLI 日志留在远端机器上；这是刻意的，
   资源样本不经协议新增字段。
-- 日志导出（`exportLogs.ts`）与用户反馈压缩包（`prepareCompactLogArchive`）已覆盖上述文件，
-  无需改动。
+- CLI app-server 另有本地有界内存诊断文件。目录由 CLI 入口已初始化的产品数据根决定：
+  `<data-root>/cli/memory-diagnostics/profile-v1`。Desktop Main 用同一个数据根解析器，并通过
+  既有 `ZCODE_DATA_BASE_DIR` / `ZCODIUM_DATA_BASE_DIR` 传给 Local Host，CLI 子进程继承。
+  CLI 入口把诊断目录明确传给采样器；未提供的嵌入式入口不开启独立的文件采样。
+  此边界只针对新诊断，不改变历史 CLI `storage.dir`、业务日志、配置、数据库或轨迹的位置。
+- 简版反馈、Desktop 完整反馈与手动导出只从本实例的诊断目录收集。旧版未分 profile 的
+  `memory-diagnostics` 根下的文件无法证明归属，保留在原处，不迁移、不回退收集。
+  远端 CLI 文件不回传；反馈继续按原有白名单做字段投影，只由用户提交触发。
+
+```text
+Desktop Main 已选定数据根 ──既有环境变量──> Local Host ──继承──> CLI 已初始化数据根
+        │                               │                           │
+        ├─ 手动导出／完整反馈读取         └─ 简版反馈读取                └─ 有界采样写入
+        └────────────────── 同一 profile 的 cli/memory-diagnostics/profile-v1 ──┘
+```
 
 ## 行格式
 
@@ -162,3 +175,7 @@ grep memory_sample ~/.zcode/cli/log/zcode-2026-09-03.jsonl | jq -c '[.time, .con
 | MEM-009 | main 6 个 10s tick        | 推进 timer              | logger.info 一行含 `role=main` 与 `ws.<process_role>=`；同一次读数同时作为 `perf_process_window` 的 main heap 样本         | unit  |
 | MEM-010 | renderer 生产构建         | `logMemoryDiagnostics`  | 仍调用桥；无桥 no-op                                                                                                       | unit  |
 | MEM-011 | renderer 60s tick         | 推进 timer              | 同一次读数既经 preload 桥发出 heap 样本，又按门控写本地行；门控跳过写盘的 tick 仍发样本；桥抛错不影响本地行                | unit  |
+
+MEM-012（集成）：HOME 与自定义数据根分别放入不同诊断标记，再放入归属不明的旧文件。
+启动本地 CLI，生成简版／完整反馈 ZIP 与手动导出；只写入和收集当前数据根的诊断，
+反馈只含白名单字段；根为空不读 HOME 或旧文件。

@@ -286,6 +286,7 @@ const runZCodeProtocolCommand = async (
       cwd: workingDirectory,
       env,
       input: deps.protocolInput ?? ctx.stdin,
+      memoryDiagnosticsDir: deps.memoryDiagnosticsDir,
       output: ctx.stdout,
       presentationSurface,
       prepareStorageOnly,

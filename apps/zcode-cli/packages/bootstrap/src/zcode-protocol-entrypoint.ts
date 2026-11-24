@@ -327,6 +327,7 @@ export async function runZCodeProtocolAgent(
       server,
       (message) => connection.send(message),
       logger,
+      options.memoryDiagnosticsDir,
     );
     startupTimer.complete("ZCode Protocol agent startup completed", {
       event: "zcode_protocol.startup.completed",

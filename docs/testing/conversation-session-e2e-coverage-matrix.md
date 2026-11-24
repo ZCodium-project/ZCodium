@@ -1,5 +1,9 @@
 # Conversation Session E2E Coverage Matrix
 
+## 手机远控浏览器返回（#131）
+
+MH05/MH06：`packages/web/test/e2e/manual-review/pending/mobile-history.mjs` 通过窄屏 Chromium 验证 Shell 实际 `history`、刷新与 `popstate`（2/2）。测试未连接 relay，也不代替实体手机验收；场景待人工准入。
+
 ## ZCodium 多文件夹项目对齐（ZUP，#79）
 
 | Case     | 本轮覆盖                                               | 当前状态                                                                             |

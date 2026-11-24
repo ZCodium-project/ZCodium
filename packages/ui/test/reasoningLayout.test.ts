@@ -101,7 +101,7 @@ describe("Reasoning layout", () => {
     expect(html).not.toMatch(
       /data-testid="chat-reasoning-trigger"[^>]*class="[^"]*(?:^|\s)w-full(?:\s|")/,
     );
-    expect(html).toContain('class="not-prose flex flex-col w-full"');
+    expect(html).toContain('class="not-prose min-w-0 flex flex-col w-full"');
     expect(html).not.toContain('class="not-prose flex flex-col gap-2');
     expect(html).toContain('class="pt-3"');
     expect(html).not.toMatch(/data-slot="collapsible-content"[^>]*class="[^"]*\bpt-1\b[^"]*"/);

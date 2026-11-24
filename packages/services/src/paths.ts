@@ -7,6 +7,7 @@ import { homedir } from "node:os";
 import { readExternalEnvVar } from "@zcode/shared";
 import {
   DATA_BASE_DIR_FORBIDDEN_WINDOWS_INSTALL_DIR_ERROR_CODE,
+  CLI_MEMORY_DIAGNOSTIC_DIRECTORY,
   ZCODE_AGENT_RUNTIME,
   ZCODE_DATA_ROOT_DIR_NAME,
 } from "@zcode/shared";
@@ -73,6 +74,11 @@ export function setDataRootPathOverride(dir: string | null): void {
 export function getZCodeDataRootDir(): string {
   if (_dataRootOverride) return _dataRootOverride;
   return join(getDataBaseDir(), ZCODE_DATA_ROOT_DIR_NAME);
+}
+
+export function getCliMemoryDiagnosticsDir(): string {
+  // 旧目录里的样本可能来自别的 profile，不能在默认实例里继续收集。
+  return join(getZCodeDataRootDir(), "cli", CLI_MEMORY_DIAGNOSTIC_DIRECTORY, "profile-v1");
 }
 
 /** 非项目对话共享的真实工作目录；默认 ~/.zcode/workspace/default。 */
