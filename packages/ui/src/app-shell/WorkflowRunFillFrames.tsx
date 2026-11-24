@@ -20,6 +20,12 @@ import {
   useFreshFills,
 } from "@/components/workflow-timeline/WorkflowTimelineFills.js";
 
+function sectionOf(root: HTMLElement, attribute: string, value: string): HTMLElement | undefined {
+  return [...root.querySelectorAll<HTMLElement>(`[${attribute}]`)].find(
+    (element) => element.getAttribute(attribute) === value,
+  );
+}
+
 /**
  * 侧板上补全的框（docs/dynamic-workflow/presentation.md「The pane」）：与卡上同一个框竖着画——同墨、同圆角、
  * 同一笔。卡上的框按列几何算得出；这里节的高随展开 / 折叠、名单开合而变，所以纵向位置从 DOM 量：
@@ -29,20 +35,6 @@ import {
  * 点亮只认头（`useFillHeadTarget`，与卡共用）：标题行与笔标带 `data-fill-head`。
  * 侧板不缩进（用户修订：嵌套由框套框说出），嵌套的框每层各收 4px。
  */
-interface SpineFrameGeometry {
-  width: number;
-  height: number;
-  boxes: Readonly<Record<string, FrameBox>>;
-}
-
-const EMPTY: SpineFrameGeometry = { width: 0, height: 0, boxes: {} };
-
-function sectionOf(root: HTMLElement, attribute: string, value: string): HTMLElement | undefined {
-  return [...root.querySelectorAll<HTMLElement>(`[${attribute}]`)].find(
-    (element) => element.getAttribute(attribute) === value,
-  );
-}
-
 export function useSpineFillFrames(
   rootRef: RefObject<HTMLDivElement | null>,
   model: WorkflowTimelineModel,
@@ -58,7 +50,7 @@ export function useSpineFillFrames(
   const marks = fillMarksOf(model.stations, fills);
   const parents = model.holeParents ?? {};
   const fresh = useFreshFills([...fills, ...marks]);
-  const [geometry, setGeometry] = useState<SpineFrameGeometry>(EMPTY);
+  const [boxes, setBoxes] = useState<Readonly<Record<string, FrameBox>>>({});
   const any = fills.length + marks.length > 0;
 
   const measure = () => {
@@ -68,13 +60,13 @@ export function useSpineFillFrames(
     const top = (element: HTMLElement) => element.getBoundingClientRect().top - rootTop;
     const bottom = (element: HTMLElement) => top(element) + element.getBoundingClientRect().height;
     const width = root.clientWidth;
-    const boxes: Record<string, FrameBox> = {};
+    const next: Record<string, FrameBox> = {};
     for (const fill of fills) {
       const heading = sectionOf(root, "data-fill-heading", fill.holeId);
       const last = model.stations[fill.to];
       const section = last === undefined ? undefined : sectionOf(root, "data-phase-id", last.id);
       if (heading === undefined || section === undefined) continue;
-      boxes[fill.holeId] = spineFrameBox({
+      next[fill.holeId] = spineFrameBox({
         bottom: bottom(section),
         depth: fillDepthOf(fill.holeId, fills, parents),
         headed: true,
@@ -87,7 +79,7 @@ export function useSpineFillFrames(
       const section =
         station === undefined ? undefined : sectionOf(root, "data-phase-id", station.id);
       if (section === undefined) continue;
-      boxes[mark.holeId] = spineFrameBox({
+      next[mark.holeId] = spineFrameBox({
         bottom: bottom(section),
         depth: fillDepthOf(mark.holeId, fills, parents),
         headed: false,
@@ -95,10 +87,7 @@ export function useSpineFillFrames(
         width,
       });
     }
-    const next: SpineFrameGeometry = { boxes, height: root.scrollHeight, width };
-    setGeometry((previous) =>
-      JSON.stringify(previous) === JSON.stringify(next) ? previous : next,
-    );
+    setBoxes((previous) => (JSON.stringify(previous) === JSON.stringify(next) ? previous : next));
   };
   // 观察者只建一次，却总要调到最新的一版量法（它闭包里有这一帧的 fills 与站）。
   const measureRef = useRef(measure);
@@ -120,13 +109,12 @@ export function useSpineFillFrames(
   const frames = (
     <svg
       aria-hidden
-      className="pointer-events-none absolute left-0 top-0 overflow-visible"
+      // 取整的滚动尺寸若写回 SVG，会撑大小数尺寸的列表并触发重测。1px 视口不依赖测量，路径可画在视口外。
+      className="pointer-events-none absolute left-0 top-0 size-px overflow-visible"
       data-testid="workflow-run-fill-frames"
-      height={geometry.height}
-      width={geometry.width}
     >
       {[...fills, ...marks].map(({ holeId }) => {
-        const box = geometry.boxes[holeId];
+        const box = boxes[holeId];
         const isFresh = fresh.has(holeId);
         return (
           <path

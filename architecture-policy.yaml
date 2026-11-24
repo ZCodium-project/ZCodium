@@ -955,6 +955,10 @@ exceptions:
     rule: unmanaged-new-file
     paths: [ packages/ui/src/components/workflow-run-line/WorkflowRunRail.tsx ]
     reason: Existing upstream workflow rail edited only to adapt native titles within the sidebar tooltip scope; workflow ownership and imports remain unchanged except for the shared UI tooltip adapter.
+  - id: workflow-fill-frame-existing-ui-edit
+    rule: unmanaged-new-file
+    paths: [ packages/ui/src/app-shell/WorkflowRunFillFrames.tsx ]
+    reason: 存量侧板装饰层只解除 SVG 视口与测量结果的反馈循环，未增加模块、依赖或状态所有者；不豁免同目录的新文件。
   - id: onboarding-existing-module-edit
     rule: unmanaged-new-file
     paths:
