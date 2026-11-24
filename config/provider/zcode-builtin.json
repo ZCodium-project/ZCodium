@@ -765,21 +765,14 @@
           },
           "config": {
             "access": {
-              "type": "api-key"
+              "type": "api-key",
+              "apiKeyManagementUrl": "https://standardcompute.com/dashboard/api-keys"
             },
             "api": {
               "type": "openai-chat-completions",
               "baseUrl": "https://api.stdcmpt.com/v1"
             },
-            "builtinModelIds": [
-              "StandardCompute",
-              "deepseek/deepseek-v4.1-flash",
-              "z-ai/glm-5.3"
-            ],
-            "logo": {
-              "type": "builtin",
-              "key": "standardcompute"
-            }
+            "builtinModelIds": ["StandardCompute", "deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3"]
           }
         }
       ],
@@ -3209,6 +3202,46 @@
         }
       ],
       "providerSiteRules": [
+        {
+          "modelMatch": "(?:StandardCompute|deepseek/deepseek-v4\\.1-flash|z-ai/glm-5\\.3)",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.stdcmpt\\.com/v1/?",
+          "config": {
+            "properties": {
+              "contextWindow": 500000
+            },
+            "optionSpecs": {
+              "maxOutputTokens": {
+                "max": 32768
+              }
+            }
+          }
+        },
+        {
+          "modelMatch": "StandardCompute",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.stdcmpt\\.com/v1/?",
+          "config": {
+            "optionSpecs": {
+              "reasoningLevel": {
+                "values": ["low", "high", "default"],
+                "map": "reasoningLevel == \"default\" ? {} : {\"reasoning_effort\": reasoningLevel}"
+              }
+            }
+          }
+        },
+        {
+          "modelMatch": "(?:deepseek/deepseek-v4\\.1-flash|z-ai/glm-5\\.3)",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.stdcmpt\\.com/v1/?",
+          "config": {
+            "optionSpecs": {
+              "reasoningLevel": {
+                "map": "{\"reasoning_effort\": reasoningLevel == \"disabled\" ? \"none\" : reasoningLevel}"
+              }
+            }
+          }
+        },
         {
           "modelMatch": "glm-5\\.3-flash",
           "apiTypeMatch": "openai-chat-completions",
