@@ -39,7 +39,7 @@ import {
 } from "react";
 import type { BundledTheme } from "shiki";
 import { defaultRehypePlugins, defaultRemarkPlugins, Streamdown } from "streamdown";
-import type { Pluggable, PluggableList } from "unified";
+import type { Parser, Pluggable, PluggableList, Plugin } from "unified";
 import { CodeBlock, CodeBlockHeader } from "@/components/ai-elements/code-block.js";
 import {
   ContextMenu,
@@ -827,6 +827,122 @@ const messageRehypePlugins: PluggableList = [
   ...Object.values(defaultRehypePlugins),
 ];
 
+interface MessageMarkdownNode extends ReturnType<Parser> {
+  children?: MessageMarkdownNode[];
+  url?: string;
+}
+
+function visitMessageMarkdown(
+  node: MessageMarkdownNode,
+  visit: (child: MessageMarkdownNode, previous?: MessageMarkdownNode) => void,
+): void {
+  node.children?.forEach((child, index, siblings) => {
+    visit(child, siblings[index - 1]);
+    visitMessageMarkdown(child, visit);
+  });
+}
+
+const cjkPunctuation = /[\u3000-\u303F\uFF01-\uFF65]/u;
+const cjkTextStart =
+  /^(?:\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul})/u;
+const emphasisOpener = /(?<![\\*_~])(\*{1,2}|_{1,2}|~~)$/u;
+const emphasisMarker = /(?<![\\*_~])(?:\*{1,2}|_{1,2}|~~)(?![*_~])/gu;
+
+const cjkBareLinkEmphasisRemarkPlugin: Plugin<[], MessageMarkdownNode> =
+  function cjkBareLinkEmphasisRemarkPlugin() {
+    const parse = this.parser;
+    return (tree, file) => {
+      const source = String(file);
+      if (!parse || !/[*_~]https?:\/\//iu.test(source)) return;
+      const candidates: { start: number; end: number; marker: string; url: string }[] = [];
+      visitMessageMarkdown(tree, (node, previous) => {
+        if (node.type !== "link" || previous?.type !== "text" || !node.url) return;
+        const start = node.position?.start.offset;
+        const end = node.position?.end.offset;
+        const previousStart = previous.position?.start.offset;
+        if (start === undefined || end === undefined || previousStart === undefined) return;
+        if (previous.position?.end.offset !== start || source.slice(start, end) !== node.url)
+          return;
+        if (!/^https?:\/\//iu.test(node.url)) return;
+
+        const marker = emphasisOpener.exec(source.slice(previousStart, start))?.[1];
+        if (!marker) return;
+        for (const match of node.url.matchAll(emphasisMarker)) {
+          if (match[0] !== marker) continue;
+          const tail = node.url.slice(match.index + marker.length);
+          if (
+            !cjkPunctuation.test(tail[0] ?? "") &&
+            (marker.startsWith("_") || !cjkTextStart.test(tail))
+          ) {
+            continue;
+          }
+          const url = node.url.slice(0, match.index);
+          // shortcut: URL 自身含全角标点时保留 CJK 插件的既有行为，直到能无歧义地区分 URL 与正文。
+          if (cjkPunctuation.test(url)) break;
+          candidates.push({ start, end: start + url.length, marker, url });
+          break;
+        }
+      });
+      if (candidates.length === 0) return;
+
+      // GFM 先吞掉了闭合符；只对 AST 已确认的裸链接重试，让同一个 Markdown
+      // 解析器判定强调符是否真能配对，而不是用逐行替换去猜链接、围栏或转义的范围。
+      const reparse = (links: typeof candidates) => {
+        let rewritten = "";
+        let cursor = 0;
+        const expected = new Map<
+          number,
+          { end: number; type: string; link: (typeof links)[number] }
+        >();
+        for (const link of links) {
+          const { start, end, marker, url } = link;
+          const parsedStart = start + rewritten.length - cursor;
+          expected.set(parsedStart - marker.length, {
+            end: parsedStart + url.length + 2 + marker.length,
+            type: marker === "~~" ? "delete" : marker.length === 2 ? "strong" : "emphasis",
+            link,
+          });
+          rewritten += `${source.slice(cursor, start)}<${url}>`;
+          cursor = end;
+        }
+        rewritten += source.slice(cursor);
+        const parsed = parse(rewritten, file);
+        visitMessageMarkdown(parsed, (node) => {
+          const start = node.position?.start.offset;
+          if (start === undefined) return;
+          const match = expected.get(start);
+          if (
+            match &&
+            node.type === match.type &&
+            node.position?.end.offset === match.end &&
+            node.children?.length === 1 &&
+            node.children[0]?.type === "link" &&
+            node.children[0].url === match.link.url
+          ) {
+            expected.delete(start);
+          }
+        });
+        return {
+          rewritten,
+          parsed,
+          rejected: new Set(Array.from(expected.values(), ({ link }) => link)),
+        };
+      };
+
+      let result = reparse(candidates);
+      if (result.rejected.size === candidates.length) return;
+      if (result.rejected.size > 0) {
+        // 无效标记不阻塞同段其他链接；只再重试一次，避免反复解析同一段落。
+        result = reparse(candidates.filter((link) => !result.rejected.has(link)));
+        if (result.rejected.size > 0) return;
+      }
+
+      // 仅替换本次渲染使用的 VFile；后续 remark 插件仍能用节点偏移量读到对应的原文。
+      file.value = result.rewritten;
+      return result.parsed;
+    };
+  };
+
 const messageDefaultRemarkPlugins: PluggableList = Object.entries(defaultRemarkPlugins).map(
   ([name, plugin]) => {
     if (name !== "gfm") {
@@ -1352,6 +1468,7 @@ export const MessageResponse = memo(
     const streamdownMode = resolveMessageStreamdownMode(renderStreaming);
     const messageRemarkPlugins = useMemo<PluggableList>(
       () => [
+        cjkBareLinkEmphasisRemarkPlugin,
         // 显式传 remarkPlugins 会覆盖 Streamdown 默认插件；
         // citation 必须和默认 GFM 插件一起传入，否则表格会退化成普通段落。
         ...messageDefaultRemarkPlugins,
