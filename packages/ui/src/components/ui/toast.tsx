@@ -8,7 +8,6 @@ import { createRoot } from "react-dom/client";
 import { useEffect, useState } from "react";
 import { Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
-import { createToastDelivery } from "@/components/ui/toastDelivery.js";
 
 export type ToastPosition = "top-center" | "top-right" | "bottom-left" | "bottom-center";
 type ToastVariant = "default" | "update" | "info" | "warning";
@@ -62,13 +61,10 @@ export function resolveToastStackClassName(position: ToastPosition): string {
 export type ToastUpdate = Partial<Omit<ToastItem, "id">>;
 
 let nextId = 0;
+let addToast: ((item: ToastItem) => void) | null = null;
 let removeToast: ((id: number) => void) | null = null;
 let updateToastItem: ((id: number, patch: ToastUpdate) => void) | null = null;
-// 投递经 toastDelivery 控制器缓冲/排空，不依赖 rAF（26.5.6 修复项 1/2，根因见 toastDelivery.ts）。
-const toastDelivery = createToastDelivery<ToastItem>();
-const pendingToastIds = new Set<number>();
-const pendingToastUpdates = new Map<number, ToastUpdate>();
-const dismissedBeforeMountToastIds = new Set<number>();
+const pendingToasts = new Map<number, ToastItem>();
 const DEFAULT_TOAST_DURATION_MS = 3000;
 const TOAST_TRANSITION_DURATION_MS = 200;
 
@@ -91,20 +87,7 @@ function ToastContainer() {
   const [items, setItems] = useState<ToastItem[]>([]);
 
   useEffect(() => {
-    // 接收方就绪即同步排空缓冲队列（React 挂载走 Scheduler，不随窗口可见性停摆）。
-    toastDelivery.setReceiver((item: ToastItem) => {
-      pendingToastIds.delete(item.id);
-      const pendingUpdate = pendingToastUpdates.get(item.id);
-      pendingToastUpdates.delete(item.id);
-      if (dismissedBeforeMountToastIds.has(item.id)) {
-        dismissedBeforeMountToastIds.delete(item.id);
-        return;
-      }
-      // 挂载前的进度更新和既有去重必须同时生效，不能合入分享提示后又堆叠同一操作。
-      setItems((prev) =>
-        upsertToastItem(prev, pendingUpdate ? { ...item, ...pendingUpdate } : item),
-      );
-    });
+    addToast = (item) => setItems((prev) => upsertToastItem(prev, item));
     removeToast = (id: number) => {
       setItems((prev) => prev.filter((item) => item.id !== id));
     };
@@ -112,8 +95,12 @@ function ToastContainer() {
       setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
     };
 
+    // 遮挡窗口可能停发动画帧，必须在容器挂载时直接交接待投递项。
+    for (const item of pendingToasts.values()) addToast(item);
+    pendingToasts.clear();
+
     return () => {
-      toastDelivery.unsetReceiver();
+      addToast = null;
       removeToast = null;
       updateToastItem = null;
     };
@@ -244,10 +231,7 @@ function ToastMessage({
   onDone: (id: number) => void;
   isBottom?: boolean;
 }) {
-  // 可见性零 rAF 依赖（26.5.6 修复项 1/2）：挂载即处于可见态（进入动画交给
-  // CSS keyframes，帧恢复时自然播放）；仅退出经 leaving 态翻转 transition。
-  // 旧实现用 rAF 把 visible 从 false 翻到 true，被遮挡/后台窗口 rAF 停摆时
-  // toast 停在 opacity-0，读屏与 DOM 里都「不存在」。
+  // 进入由 CSS 装饰，不能等动画帧才把提示切到显示态。
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -266,7 +250,6 @@ function ToastMessage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.durationMs]);
 
-  const isUpdate = item.variant === "update";
   const [title, ...bodyLines] = item.message.split("\n");
   const body = bodyLines.join("\n").trim();
   const dismissWithTransition = () => {
@@ -319,14 +302,15 @@ export function ToastMessageView({
     <div
       className={cn(
         "rounded-2xl border bg-toast/60 text-ui-base shadow-lg backdrop-blur-xl transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transform-none motion-reduce:transition-opacity",
-        // 进入动画用 CSS keyframes（挂载即见，帧恢复时自然播放），不再经 rAF 翻转可见态。
-        !leaving && !isUpdate && "motion-safe:animate-[zcode-toast-in_200ms_cubic-bezier(0.77,0,0.175,1)_both]",
+        !leaving &&
+          !isUpdate &&
+          "motion-safe:animate-[zcode-toast-in_200ms_cubic-bezier(0.77,0,0.175,1)_both]",
         isUpdate
           ? "origin-bottom-left w-[min(300px,calc(100vw-1rem))] max-w-[min(300px,calc(100vw-1rem))] border-popover-border text-foreground shadow-lg"
           : isNotice
             ? "w-[min(536px,calc(100vw-2rem))] border-border text-foreground"
             : "border-border px-4 py-3 text-foreground whitespace-pre-line",
-        // 右上角 Toast 曾复用顶部居中的纵向缩放动画，无法表达其从右侧进入的空间关系。
+        // 右上角提示向行尾退出，RTL 保持对称。
         isTopRight
           ? leaving
             ? "translate-x-[calc(100%+1rem)] opacity-0 rtl:translate-x-[calc(-100%-1rem)]"
@@ -413,53 +397,27 @@ export function ToastMessageView({
 
 export function toast(message: string, options?: ToastOptions): number {
   ensureHost();
-  // 投递零 rAF 依赖（26.5.6 修复项 1/2）：容器未就绪时经 toastDelivery 缓冲，
-  // 挂载后同步排空——被遮挡/后台窗口的 rAF 停摆不再吞掉或推迟 toast。
   const id = nextId++;
-  pendingToastIds.add(id);
-  const durationMs = options?.durationMs ?? DEFAULT_TOAST_DURATION_MS;
-  const position = options?.position ?? "top-center";
-  const variant = options?.variant ?? "default";
-  const actionLabel = options?.actionLabel;
-  const onAction = options?.onAction;
-  const dismissible = options?.dismissible;
-  const dismissLabel = options?.dismissLabel;
-  const anchorId = options?.anchorId;
-  const dedupeKey = options?.dedupeKey;
-
-  toastDelivery.deliver({
+  const item: ToastItem = {
+    ...options,
     id,
     message,
-    durationMs,
-    position,
-    variant,
-    actionLabel,
-    onAction,
-    dismissible,
-    dismissLabel,
-    anchorId,
-    dedupeKey,
-  });
+    durationMs: options?.durationMs ?? DEFAULT_TOAST_DURATION_MS,
+    position: options?.position ?? "top-center",
+    variant: options?.variant ?? "default",
+  };
+  if (addToast) addToast(item);
+  else pendingToasts.set(id, item);
   return id;
 }
 
 /** 更新已有 Toast，适合把同一长耗时操作的阶段变化收敛到一个提示中。 */
 export function updateToast(id: number, patch: ToastUpdate): void {
-  if (pendingToastIds.has(id)) {
-    pendingToastUpdates.set(id, {
-      ...(pendingToastUpdates.get(id) ?? {}),
-      ...patch,
-    });
-    return;
-  }
-  updateToastItem?.(id, patch);
+  const pending = pendingToasts.get(id);
+  if (pending) pendingToasts.set(id, { ...pending, ...patch });
+  else updateToastItem?.(id, patch);
 }
 
 export function dismissToast(id: number): void {
-  if (pendingToastIds.has(id)) {
-    pendingToastUpdates.delete(id);
-    dismissedBeforeMountToastIds.add(id);
-    return;
-  }
-  removeToast?.(id);
+  if (!pendingToasts.delete(id)) removeToast?.(id);
 }
