@@ -2,6 +2,12 @@
 
 本索引从 v1.17.0 起维护；不补造此前版本的发布历史。每版完整说明在 `docs/releases/`，GitHub Release 使用对应版本文件作为正文。
 
+## v1.19.0
+
+支持编辑历史用户消息并重发；新增 Standard Compute 与 MartLLM（原 UberLLM）预设；同步上游 v3.18.0 / v3.18.1 / v3.18.2 与 v4.0.0 独立 UI 修复；修复后台窗口提示丢失、工作流填充框滚动循环、Windows 打包解压与全仓换行归一。遥测保持移除。详见[完整发布说明](docs/releases/v1.19.0.md)。
+
+Adds historical user-message editing, Standard Compute and MartLLM presets, audited upstream v3.18.x and v4.0.0 standalone UI fixes, and repairs for toasts in background windows, workflow fill-frame scroll loops, Windows packaging, and repository-wide LF normalization. Telemetry remains removed. See the [release notes](docs/releases/v1.19.0.md).
+
 ## v1.18.0
 
 同步上游 v3.17.1 / v3.17.2（远端诊断、本地文件菜单、内置浏览器本地 HTML 预览、MCP 诊断与权限收紧，遥测保持移除），新增 cheapaimodel 预设，并恢复侧栏版本号、移除智谱套餐预设入口。详见[完整发布说明](docs/releases/v1.18.0.md)。
