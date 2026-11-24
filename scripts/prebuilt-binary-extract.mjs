@@ -39,13 +39,16 @@ export function extractPrebuiltArchive({ archivePath, archiveExt, extractDir, cw
   mkdirSync(extractDir, { recursive: true });
   if (archiveExt === "zip") {
     if (process.platform === "win32") {
+      // 不走 Expand-Archive：windows-2025-vs2026 镜像 20261116 起其 -Force 分支在
+      // Windows PowerShell 里找不到 ExtractToDirectory 三参重载（#141）。解压目标为
+      // 新建临时目录，直接调 .NET 两参重载即可，PS 5.1 与 7 都可用。
       runCommand("powershell.exe", [
         "-NoProfile",
         "-NonInteractive",
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        `Expand-Archive -LiteralPath '${archivePath.replaceAll("'", "''")}' -DestinationPath '${extractDir.replaceAll("'", "''")}' -Force`,
+        `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('${archivePath.replaceAll("'", "''")}', '${extractDir.replaceAll("'", "''")}')`,
       ]);
       return;
     }
