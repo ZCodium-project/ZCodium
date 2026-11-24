@@ -41,7 +41,7 @@ describe("toast", () => {
     expect(resolveToastStackClassName("bottom-center")).toContain("bottom-");
     expect(resolveToastStackClassName("bottom-left")).not.toContain("translate-y");
     expect(resolveToastStackClassName("bottom-center")).not.toContain("translate-y");
-    expect(resolveToastStackClassName("bottom-center")).toContain("left-1/2");
+    expect(resolveToastStackClassName("bottom-center")).toContain("start-1/2");
     expect(resolveToastStackClassName("bottom-center")).toContain("-translate-x-1/2");
   });
 
@@ -57,7 +57,7 @@ describe("toast", () => {
           actionLabel: "查看",
           onAction: vi.fn(),
         },
-        visible: true,
+        leaving: false,
         isBottom: true,
       }),
     );
@@ -85,7 +85,7 @@ describe("toast", () => {
           actionLabel: "Restart",
           onAction: vi.fn(),
         },
-        visible: true,
+        leaving: false,
         isBottom: true,
       }),
     );
@@ -109,7 +109,7 @@ describe("toast", () => {
           onAction: vi.fn(),
           dismissible: true,
         },
-        visible: true,
+        leaving: false,
         onDismiss: vi.fn(),
       }),
     );
@@ -143,7 +143,7 @@ describe("toast", () => {
           actionLabel: "一键安装",
           onAction: vi.fn(),
         },
-        visible: true,
+        leaving: false,
       }),
     );
 
@@ -153,7 +153,7 @@ describe("toast", () => {
     expect(html).toContain("self-center");
   });
 
-  it("moves top-right toasts from right to left with reduced-motion fallback", () => {
+  it("keeps top-right toasts visible until they exit toward the inline end", () => {
     const item = {
       id: 5,
       message: "Idle-time tasks are available for Coding Plan subscribers only.",
@@ -164,13 +164,13 @@ describe("toast", () => {
     const hiddenHtml = renderToStaticMarkup(
       createElement(ToastMessageView, {
         item,
-        visible: false,
+        leaving: true,
       }),
     );
     const visibleHtml = renderToStaticMarkup(
       createElement(ToastMessageView, {
         item,
-        visible: true,
+        leaving: false,
       }),
     );
 
@@ -178,10 +178,12 @@ describe("toast", () => {
     expect(hiddenHtml).toContain("duration-200");
     expect(hiddenHtml).toContain("ease-[cubic-bezier(0.77,0,0.175,1)]");
     expect(hiddenHtml).toContain("translate-x-[calc(100%+1rem)]");
+    expect(hiddenHtml).toContain("rtl:translate-x-[calc(-100%-1rem)]");
     expect(hiddenHtml).toContain("opacity-0");
     expect(hiddenHtml).toContain("motion-reduce:transform-none");
     expect(visibleHtml).toContain("translate-x-0");
     expect(visibleHtml).toContain("opacity-100");
+    expect(visibleHtml).toContain("motion-safe:animate-[zcode-toast-in_");
     expect(visibleHtml).not.toContain("-translate-y-1");
   });
 });
