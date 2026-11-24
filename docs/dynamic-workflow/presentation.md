@@ -1036,6 +1036,15 @@ mark frames that one section, 2 px inside its top and bottom. The fresh frame dr
 too. On a phone there is no hover: the head on the card opens the pane, a tap on a heading
 toggles its section, and no frame is drawn on tap.
 
+The frame is a decorative overlay. The browser lays out the sections and determines the
+list's scroll area; the pane derives the frame path from that layout, never the other way
+round. In a fractional-width pane the frame alone must not introduce a scrollbar or
+make the list alternate between scrollbar states. If the content needs both scrollbars,
+its scroll range must be unchanged by the frame. The
+[browser regression (DWH-05)](../../packages/ui/test/browser/manual-review/pending/workflow-fill-frame-overflow.test.mjs)
+resizes a pane near the overflow threshold, then exercises a pane with content overflowing
+on both axes and checks that the frame still follows the heading and last section.
+
 **The sidebar** draws a hole as a dashed 6 px lamp, warning while waiting, with the
 line 「决定分组 · 等待补全」; after the fill its mini rail has one lamp more and nothing else.
 
