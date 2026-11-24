@@ -41,7 +41,7 @@ describe("ProviderLogo", () => {
     expect(container.querySelector(".lucide-package")).not.toBeNull();
   });
 
-  it.each(["openrouter", "opencode", "cheaperinference", "uberllm"])(
+  it.each(["openrouter", "opencode", "cheaperinference"])(
     "聚合供应商 %s 使用已打包的深浅主题资源",
     (key) => {
       const light = resolveBuiltinProviderLogoAsset({ type: "builtin", key }, "light");

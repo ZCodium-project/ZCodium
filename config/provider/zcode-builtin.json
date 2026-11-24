@@ -716,6 +716,24 @@
           }
         },
         {
+          "templateId": "martllm",
+          "templateNameMap": {
+            "zh-CN": "MartLLM",
+            "en-US": "MartLLM"
+          },
+          "config": {
+            "access": {
+              "type": "api-key",
+              "apiKeyManagementUrl": "https://martllm.com/dashboard/keys"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.martllm.com/v1"
+            },
+            "builtinModelIds": ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3"]
+          }
+        },
+        {
           "templateId": "cheaperinference",
           "templateNameMap": {
             "zh-CN": "Cheaper Inference",
@@ -754,28 +772,6 @@
             "logo": {
               "type": "builtin",
               "key": "cheapaimodel"
-            }
-          }
-        },
-        {
-          "templateId": "uberllm",
-          "templateNameMap": {
-            "zh-CN": "UberLLM",
-            "en-US": "UberLLM"
-          },
-          "config": {
-            "access": {
-              "type": "api-key",
-              "apiKeyManagementUrl": "https://uberllm.dev/dashboard/keys"
-            },
-            "api": {
-              "type": "openai-chat-completions",
-              "baseUrl": "https://api.uberllm.dev/v1"
-            },
-            "builtinModelIds": ["deepseek/deepseek-v4.1-flash", "z-ai/glm-5.3"],
-            "logo": {
-              "type": "builtin",
-              "key": "uberllm"
             }
           }
         }
@@ -4336,6 +4332,21 @@
               }
             }
           }
+        },
+        {
+          "modelMatch": "(?:deepseek/deepseek-v4\\.1-flash|z-ai/glm-5\\.3)",
+          "apiTypeMatch": "openai-chat-completions",
+          "baseUrlMatch": "https://api\\.martllm\\.com/v1/?",
+          "config": {
+            "optionSpecs": {
+              "maxOutputTokens": {
+                "map": "{\"max_tokens\": maxOutputTokens}"
+              },
+              "reasoningLevel": {
+                "map": "{\"reasoning_effort\": reasoningLevel == \"disabled\" ? \"none\" : reasoningLevel}"
+              }
+            }
+          }
         }
       ],
       "templateModelRules": [
@@ -6083,6 +6094,20 @@
           }
         },
         {
+          "templateId": "martllm",
+          "modelId": "deepseek/deepseek-v4.1-flash",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "martllm",
+          "modelId": "z-ai/glm-5.3",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
           "templateId": "cheaperinference",
           "modelId": "gpt-5.4-mini",
           "config": {
@@ -6106,20 +6131,6 @@
         {
           "templateId": "cheapaimodel",
           "modelId": "glm-5.3",
-          "config": {
-            "enabled": true
-          }
-        },
-        {
-          "templateId": "uberllm",
-          "modelId": "deepseek/deepseek-v4.1-flash",
-          "config": {
-            "enabled": true
-          }
-        },
-        {
-          "templateId": "uberllm",
-          "modelId": "z-ai/glm-5.3",
           "config": {
             "enabled": true
           }
