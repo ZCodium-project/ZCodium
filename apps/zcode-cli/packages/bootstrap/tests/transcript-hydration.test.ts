@@ -310,7 +310,15 @@ describe("transcript→event 合成", () => {
     // Bugfix 回归：cold 合成必须保留各 assistant message 的真实创建时间，不能全部
     // 退化成首条 transcript 时间附近的合成序号。
     expect(assistantRows.map((row) => row.createdAt)).toEqual([1001, 2001]);
-    expect(userRows[0]?.actions?.canEdit).not.toBe(true);
+    expect(userRows[0]?.actions).toMatchObject({
+      canEdit: true,
+      editDisposition: "rewind",
+      editPreserveWorkspaceOnly: true,
+    });
+    expect(projection.resolveEditTarget(userRows[0]!.rowId)).toMatchObject({
+      transcriptMessageId: "u1",
+      intent: { text: "问题一" },
+    });
     expect(userRows[1]?.actions?.canEdit).toBe(true);
     expect(projection.getMessageIdForRow(userRows[1]!.rowId)).toBe("u2");
     expect(projection.getTurnRewindAnchor(userRows[1]!.rowId)).toBe("u2");
@@ -492,7 +500,7 @@ describe("transcript→event 合成", () => {
     const rows = projection.getSnapshot().rows.window;
     const userRow = rows.find((row) => row.kind === "userInput");
     expect(userRow?.actions?.canEdit).toBe(true);
-    expect(projection.isLatestEditableUserRow(userRow!.rowId)).toBe(true);
+    expect(projection.resolveEditTarget(userRow!.rowId)).not.toBeNull();
     expect(projection.getMessageIdForRow(userRow!.rowId)).toBe("u-latest");
     expect(projection.getTurnRewindAnchor(userRow!.rowId)).toBe("u-latest");
     expect(rows.some((row) => row.actions?.canRetry === true)).toBe(false);

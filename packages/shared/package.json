@@ -31,7 +31,8 @@
     "./gen-ui": "./src/gen-ui/index.ts",
     "./testing/fake-relay-v2": "./test/fixtures/fake-relay-v2.ts",
     "./request-security": "./src/request-security-edition/index.ts",
-    "./web-remote-relay": "./src/web-remote-relay/index.ts"
+    "./web-remote-relay": "./src/web-remote-relay/index.ts",
+    "./agent-crash-diagnostic": "./src/agent-crash-diagnostic/index.ts"
   },
   "scripts": {
     "lint": "oxlint",
