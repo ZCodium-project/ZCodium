@@ -106,6 +106,7 @@ export interface RunDependencies extends PluginsCommandOverrides {
   ) => ReturnType<typeof resolveLatestSession>;
   resolveWorkspaceGitBranch?: typeof resolveWorkspaceGitBranch;
   logoutZCodeCli?: (options?: LogoutZCodeCliOptions) => ReturnType<typeof logoutZCodeCli>;
+  memoryDiagnosticsDir?: RunZCodeProtocolAgentOptions["memoryDiagnosticsDir"];
   runZCodeProtocolAgent?: (options?: RunZCodeProtocolAgentOptions) => Promise<void>;
   runTui?: typeof import("@zcode/tui").runTui;
   skipUserConfig?: boolean;

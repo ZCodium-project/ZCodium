@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, LoaderIcon } from "lucide-react";
 import {
   resolveWebRemoteControlWorkspaceKey,
@@ -23,6 +23,7 @@ type WebRemoteControlMobilePage = "home" | "chat";
 
 interface WebRemoteControlMobileHistoryState {
   zcodeMobilePage?: WebRemoteControlMobilePage;
+  zcodeMobileCanGoBack?: boolean;
 }
 
 export function isWebRemoteControlMobileChatHistoryState(
@@ -31,20 +32,21 @@ export function isWebRemoteControlMobileChatHistoryState(
   return (
     typeof state === "object" &&
     state !== null &&
-    (state as WebRemoteControlMobileHistoryState).zcodeMobilePage === "chat"
+    "zcodeMobilePage" in state &&
+    state.zcodeMobilePage === "chat"
   );
 }
 
-function pushWebRemoteControlMobileChatHistory() {
-  if (typeof window === "undefined") {
+function pushMobileChatHistory() {
+  if (
+    typeof window === "undefined" ||
+    isWebRemoteControlMobileChatHistoryState(window.history.state)
+  ) {
     return;
   }
 
-  if (isWebRemoteControlMobileChatHistoryState(window.history.state)) {
-    return;
-  }
-
-  window.history.pushState({ zcodeMobilePage: "chat" }, "");
+  // 只有从列表进入时才拥有上一项；刷新/前进恢复出的聊天不能伪造上一项。
+  window.history.pushState({ zcodeMobilePage: "chat", zcodeMobileCanGoBack: true }, "");
 }
 
 function resolveInitialWebRemoteControlMobilePage(
@@ -126,8 +128,8 @@ export function WebRemoteControlMobileShell({
   const shouldInertChatSurface = Boolean(sidePaneContent) && isSidePaneOpen;
 
   const navigateToChat = useCallback(() => {
+    pushMobileChatHistory();
     setCurrentPage("chat");
-    pushWebRemoteControlMobileChatHistory();
   }, []);
 
   const handleTaskHomePreferencesChange = useCallback(
@@ -143,24 +145,23 @@ export function WebRemoteControlMobileShell({
   );
 
   const navigateHome = useCallback(() => {
-    setHomeRefreshKey((key) => key + 1);
-    if (
-      typeof window !== "undefined" &&
-      isWebRemoteControlMobileChatHistoryState(window.history.state)
-    ) {
-      window.history.back();
-      return;
+    if (typeof window !== "undefined") {
+      const state: unknown = window.history.state;
+      if (isWebRemoteControlMobileChatHistoryState(state)) {
+        if (state.zcodeMobileCanGoBack === true) {
+          window.history.back();
+          return;
+        }
+        // 直达聊天没有 shell 创建的列表前项，后退可能离开应用；就地恢复列表。
+        window.history.replaceState({ ...state, zcodeMobilePage: "home" }, "");
+      }
     }
-
     setCurrentPage("home");
+    setHomeRefreshKey((key) => key + 1);
   }, []);
 
-  useEffect(() => {
-    if (initialNavigationIntent !== "chat") {
-      return;
-    }
-
-    navigateToChat();
+  useLayoutEffect(() => {
+    if (initialNavigationIntent === "chat") navigateToChat();
   }, [initialNavigationIntent, navigateToChat]);
 
   useEffect(() => {

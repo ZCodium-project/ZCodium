@@ -2416,6 +2416,7 @@ nodes:
     label: "Mobile remote task home"
     aliases:
       - "mobile task list"
+      - "mobile browser back"
       - "remote task status"
       - "手机远控任务首页"
       - "手机任务状态"
@@ -2424,6 +2425,8 @@ nodes:
     codeSeeds:
       - symbol: "WebRemoteControlMobileTaskHome"
         file: "packages/ui/src/WebRemoteControlMobileTaskHome.tsx"
+      - symbol: "WebRemoteControlMobileShell"
+        file: "packages/ui/src/WebRemoteControlMobileShell.tsx"
       - symbol: "buildWebRemoteControlTaskTargets"
         file: "packages/ui/src/lib/webRemoteControlTaskIndex.ts"
 

@@ -559,29 +559,24 @@ pinned?: boolean;
 currentMobilePage: "home" | "chat"
 ```
 
-进入聊天：
+浏览器持有历史栈，mobile shell 只投影当前 `home` / `chat`：
 
-1. 用户点击 task。
-2. task 选择成功。
-3. 设置 `currentMobilePage = "chat"`。
-4. 如果当前 history state 不是 `{ zcodeMobilePage: "chat" }`，补一层 chat history state。
+```text
+任务列表 ──选择成功（含跨 workspace intent）──> push 一条 shell 拥有的聊天项
+聊天项 ──页头返回 / 浏览器后退──> popstate ──> 原列表项（刷新一次）
+列表项 ──再次浏览器后退──> 浏览器正常离开应用
+无拥有标记的聊天项 ──页头返回──> replace 当前项为列表（不出站、不 push）
+```
 
-返回首页：
-
-1. 点击 header 返回按钮。
-2. 如果当前 history state 是 `{ zcodeMobilePage: "chat" }`，调用 `history.back()`，由 `popstate` 回到 home。
-3. 如果当前没有 chat history state，直接设置 `currentMobilePage = "home"` 作为兜底。
-4. 保留当前 active task 的选中态。
-
-浏览器返回键：
-
-1. mobile shell 初始进入 `home` 时不写 history，保留扫码入口原始历史栈。
-2. 只有用户从 `home` 点击 task 并成功进入 `chat` 时，调用一次 `history.pushState({ zcodeMobilePage: "chat" }, "")`。
-3. 如果当前已经是这层 `chat` state，不重复 push，避免同一个 task 多次点击堆叠历史。
-4. `popstate` 命中 `{ zcodeMobilePage: "chat" }` 时设置 `currentMobilePage = "chat"`；从 chat 点返回按钮时用 `history.back()` 回到 home，而不是直接改 state。
-5. `popstate` 回到非 `zcodeMobilePage` state 时设置 `currentMobilePage = "home"`，并放行浏览器后续默认返回行为。
-6. 跨 workspace task 点击成功并重新挂载 Root 后，仍按“用户点击进入 chat”的规则补一层 `chat` state；这层 state 来自点击流程的一次性 `mobileNavigationIntent`，扫码初始 `initialTaskId` 不补这层 state。
-7. mobile shell unmount 时移除 `popstate` listener。
+- 只有列表进入聊天才 push；跨 workspace 重挂载消费原有 `mobileNavigationIntent`。已有聊天项不重复 push。
+  扫码 `initialTaskId` 仍只定位列表；没有对应列表前项的直达或旧聊天项没有拥有标记。
+- 刷新只读取当前 history state，不改变深度；`popstate`（包括浏览器前进）只投影已存在的历史项。
+  页头返回仅在拥有聊天项上调用 `history.back()`，否则就地返回列表。保留当前 active task 选中态；
+  卸载时移除 `popstate` listener。
+- MH05：站外页 → 列表 → 点击任务 → 刷新聊天 → 页头返回或浏览器后退 → 列表，再退一次到站外页；
+  浏览器前进恢复列表、聊天，不另加历史项。
+- MH06：扫码初始有选中项仍是列表；无拥有标记的直达聊天可用页头返回列表，刷新后保持列表，
+  不跳出应用且不增殖历史项；再从此列表进聊天，应有正常的后退层级。
 
 不要把 workspace/task 状态塞进 URL，避免和扫码入口及配对态互相耦合。
 

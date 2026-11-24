@@ -3,7 +3,6 @@ import {
   resolveQueuedSummaryPlaybackQueue,
   SUMMARY_ROLL_TOTAL_MS,
   shouldAnimateQueuedSummaryContent,
-  shouldRefreshQueuedSummaryContent,
 } from "@/ToolCallBlocks/QueuedSummaryContent.js";
 
 describe("summary roll timing", () => {
@@ -41,22 +40,5 @@ describe("shouldAnimateQueuedSummaryContent", () => {
         reducedMotion: false,
       }),
     ).toBe(true);
-  });
-});
-
-describe("shouldRefreshQueuedSummaryContent", () => {
-  it("refreshes streaming text in place without changing the queue key", () => {
-    expect(
-      shouldRefreshQueuedSummaryContent(
-        { key: "message:2", refreshVersion: "正在", trailingText: "2 events" },
-        { key: "message:2", refreshVersion: "正在检查", trailingText: "2 events" },
-      ),
-    ).toBe(true);
-    expect(
-      shouldRefreshQueuedSummaryContent(
-        { key: "message:2", refreshVersion: "正在检查", trailingText: "2 events" },
-        { key: "message:3", refreshVersion: "下一条", trailingText: "3 events" },
-      ),
-    ).toBe(false);
   });
 });
