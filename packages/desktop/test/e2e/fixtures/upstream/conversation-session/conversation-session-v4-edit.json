@@ -87,6 +87,31 @@
       }
     },
     {
+      "id": "v4-edit-followup",
+      "description": "在 compact 后追加一轮，使原始问题成为历史编辑目标。",
+      "metadata": {
+        "kind": "main",
+        "timingPolicy": "fast-text",
+        "source": "synthetic",
+        "syntheticReason": "后续轮提供可识别的分支内容，用于验证历史编辑会截断后续上下文。"
+      },
+      "match": {
+        "method": "POST",
+        "pathIncludes": "/messages",
+        "lastUserMessageIncludes": ["E2E_V4_EDIT_FOLLOWUP"],
+        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
+      },
+      "response": {
+        "statusCode": 200,
+        "text": {
+          "id": "v4-edit-followup",
+          "inputTokens": 50,
+          "outputTokens": 5,
+          "text": "V4_EDIT_FOLLOWUP_REPLY"
+        }
+      }
+    },
+    {
       "id": "v4-edit-new",
       "description": "M4 editUserQuery 门禁：编辑后 newText 的回复。",
       "metadata": {
@@ -99,7 +124,14 @@
         "method": "POST",
         "pathIncludes": "/messages",
         "lastUserMessageIncludes": ["E2E_V4_EDIT_NEWTEXT"],
-        "bodyExcludes": ["Generate a concise title", "CRITICAL: Respond with TEXT ONLY"]
+        "bodyExcludes": [
+          "Generate a concise title",
+          "CRITICAL: Respond with TEXT ONLY",
+          "E2E_V4_EDIT_ORIGINAL",
+          "E2E_V4_EDIT_FOLLOWUP",
+          "V4_EDIT_ORIGINAL_REPLY",
+          "V4_EDIT_FOLLOWUP_REPLY"
+        ]
       },
       "response": {
         "statusCode": 200,

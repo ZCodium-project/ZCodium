@@ -838,13 +838,35 @@ modules:
     roots:
       - packages/desktop/src/main/browser-local-preview
     managed: true
-    requires: [shared]
+    requires: [ shared ]
     publicEntrypoints:
       - packages/desktop/src/main/browser-local-preview/index.ts
       - packages/desktop/src/main/browser-local-preview/contract.ts
     layers:
       adapters: .
     owner: desktop
+  # agent-crash-diagnostic：由 architecture:adopt 登记
+  - id: agent-crash-diagnostic
+    roots:
+      - packages/shared/src/agent-crash-diagnostic
+    managed: true
+    requires: []
+    publicEntrypoints:
+      - packages/shared/src/agent-crash-diagnostic/index.ts
+      - packages/shared/src/agent-crash-diagnostic/contract.ts
+    layers:
+      adapters: .
+  # windows-runtime-host：由 architecture:adopt 登记
+  - id: windows-runtime-host
+    roots:
+      - packages/services/src/windows-runtime-host
+    managed: true
+    requires: []
+    publicEntrypoints:
+      - packages/services/src/windows-runtime-host/index.ts
+      - packages/services/src/windows-runtime-host/contract.ts
+    layers:
+      adapters: .
 
 global:
   # 临时时间戳（2026-09-10）：unmanaged-new-file 只约束此日期之后首次入库的文件。

@@ -30,6 +30,7 @@ const rowBaseFields = {
       canRetry: z.literal(true).optional(),
       canRewindFiles: z.literal(true).optional(),
       editDisposition: z.enum(["rewind", "fork"]).optional(),
+      editPreserveWorkspaceOnly: z.literal(true).optional(),
     })
     .optional(),
 } as const;
