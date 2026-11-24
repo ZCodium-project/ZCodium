@@ -2,24 +2,34 @@
 
 import { cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { toast, updateToast } from "@/components/ui/toast.js";
+import { dismissToast, toast, updateToast } from "@/components/ui/toast.js";
 
 afterEach(() => {
   cleanup();
   document.body.replaceChildren();
-  vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 describe("toast updates", () => {
-  it("updates an existing toast in place instead of stacking a second item", async () => {
+  it("delivers and updates toasts even when animation frames never run", async () => {
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn(() => 1),
+    );
     let id = toast("导入状态初始化", { durationMs: 0, dedupeKey: "share-import" });
-    // Toast 容器可能还没有完成首帧挂载，更新也必须保留并合并到即将挂载的同一个 item。
+    const cancelled = toast("挂载前已取消", { durationMs: 0 });
+    const following = toast("第二条有效提示", { durationMs: 0 });
+    dismissToast(cancelled);
     updateToast(id, { message: "正在下载分享文件：0/1", variant: "info" });
     await waitFor(() => {
-      expect(document.querySelector("#zcode-toast-host")?.textContent).toContain(
-        "正在下载分享文件：0/1",
-      );
+      const hosts = document.querySelectorAll("#zcode-toast-host");
+      expect(hosts).toHaveLength(1);
+      expect(
+        [...hosts[0].querySelectorAll(".rounded-2xl")].map((item) => item.textContent),
+      ).toEqual(["正在下载分享文件：0/1", "第二条有效提示"]);
+      expect(hosts[0].querySelector(".rounded-2xl")?.classList.contains("opacity-100")).toBe(true);
     });
+    dismissToast(following);
 
     // 同一操作的替代提示仍须去重，同时保留紧接着到达的进度更新。
     id = toast("正在完成导入", { durationMs: 0, dedupeKey: "share-import" });

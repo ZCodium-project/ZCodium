@@ -959,6 +959,19 @@ html[data-document-hidden] *::after {
   }
 }
 
+/* 全局 toast 进入动画：挂载即处于可见态，帧产出时播放此过渡（不依赖 rAF 翻转可见性）。 */
+@keyframes zcode-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes zcode-stream-text-in {
   0% {
     opacity: 0;
