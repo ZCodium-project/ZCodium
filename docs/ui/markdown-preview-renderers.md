@@ -12,6 +12,20 @@ Strikethrough follows the GFM specification rather than GitHub's permissive
 single-tilde extension: only `~~text~~` renders as strikethrough. A paired single
 tilde such as `~text~` remains literal text in completed and streaming messages.
 
+In `MessageResponse`, when an HTTP(S) URL is the entire contents of an
+italic, bold, or strikethrough span and is immediately followed by CJK text or
+punctuation (for example, `**https://example.com/版本**。说明`), the closing
+marker and prose are not part of the link destination. This applies only when
+the Markdown parser confirms that the bare URL and surrounding markers form
+the span. Paths containing ambiguous CJK punctuation and other bare-link
+boundaries keep their existing rendering.
+
+The adjustment is local to Markdown rendering and applies to the same complete
+span in both streaming and completed messages. Explicit link destinations,
+reference definitions, Unicode path characters, escaped markers, code spans
+(including multiline spans), and the text copied from fenced code blocks
+(including fences inside list items) are not rewritten by this adjustment.
+
 The markdown renderer now routes high-impact block elements through local UI
 components instead of relying only on Streamdown defaults:
 
