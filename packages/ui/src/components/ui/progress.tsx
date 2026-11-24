@@ -7,7 +7,6 @@ import { cn } from "../lib/utils.js";
 
 type ProgressProps = React.ComponentProps<typeof ProgressPrimitive.Root> & {
   indicatorClassName?: string;
-  indeterminate?: boolean;
   segments?: readonly ProgressSegment[];
 };
 
@@ -18,14 +17,7 @@ export interface ProgressSegment {
   style?: React.CSSProperties;
 }
 
-function Progress({
-  className,
-  indicatorClassName,
-  indeterminate = false,
-  segments,
-  value,
-  ...props
-}: ProgressProps) {
+function Progress({ className, indicatorClassName, segments, value, ...props }: ProgressProps) {
   const normalizedValue = Math.min(Math.max(value ?? 0, 0), 100);
   const normalizedSegments =
     segments
@@ -47,13 +39,11 @@ function Progress({
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
         className={cn(
-          "h-full rounded-full",
-          // left 动画需要定位；滚动阶段不沿用下载进度的宽度过渡。
-          indeterminate ? "absolute inset-y-0" : "transition-[width]",
+          "h-full rounded-full transition-[width]",
           normalizedSegments.length > 0 ? "flex overflow-hidden bg-transparent" : "bg-primary",
-          (indeterminate || normalizedValue > 0) && indicatorClassName,
+          normalizedValue > 0 && indicatorClassName,
         )}
-        style={{ width: indeterminate ? "35%" : `${normalizedValue}%` }}
+        style={{ width: `${normalizedValue}%` }}
       >
         {normalizedSegments.map((segment) => (
           <span

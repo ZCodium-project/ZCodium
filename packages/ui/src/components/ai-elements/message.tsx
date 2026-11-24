@@ -83,7 +83,6 @@ import {
   resolveMarkdownFileLink,
 } from "@/lib/markdownFileLink.js";
 import { stripBalancedAssistantPathQuotes } from "@/lib/assistantPathQuotes.js";
-import { normalizeMarkdownCjkBareUrls } from "@/lib/markdownCjkBareUrl.js";
 import { getPathLeaf } from "@/lib/path.js";
 import { getWorkspaceFileRelativePath } from "@/workspace-file-tree/model.js";
 import { resolveWorkspaceEditorSelection } from "@/lib/workspaceEditorSelection.js";
@@ -1345,9 +1344,7 @@ export const MessageResponse = memo(
       () =>
         rewriteMarkdownArtifactImageSources(
           normalizeMessageSingleDollarMath(
-            normalizeMarkdownCjkBareUrls(
-              normalizeConsecutiveMarkdownImageBlocks(projectedCitationMarkdown),
-            ),
+            normalizeConsecutiveMarkdownImageBlocks(projectedCitationMarkdown),
           ),
         ),
       [projectedCitationMarkdown],
