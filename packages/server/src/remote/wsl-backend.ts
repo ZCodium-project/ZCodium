@@ -4,20 +4,28 @@ import type { ChildProcess } from "node:child_process";
 import { access, copyFile, mkdir, readFile, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { dirname, posix } from "node:path";
-import type { WSLConnectOptions } from "@zcode/shared";
+import { isValidWslUser, type WSLConnectOptions } from "@zcode/shared";
 import type {
   IRemoteBackend,
   RemoteEnvironment,
   RemoteUploadOptions,
   StdioStream,
 } from "@zcode/server/remote/backend.js";
-import { createCloseEventController } from "@zcode/server/remote/closeEvent.js";
+import {
+  createCloseEventController,
+  resolveRemoteExitCode,
+} from "@zcode/server/remote/closeEvent.js";
 import {
   normalizeRemoteArch,
   normalizeRemotePlatform,
   resolveRemotePlatform,
 } from "@zcode/server/remote/detectEnv.js";
-import { isWSLAvailable, listWSLDistros, type WSLDistro } from "@zcode/server/remote/wsl-detect.js";
+import {
+  createWslExecError,
+  isWSLAvailable,
+  listWSLDistros,
+  type WSLDistro,
+} from "@zcode/server/remote/wsl-detect.js";
 import {
   buildWslHostGatewayCommand,
   buildWslProxyPortProbeCommand,
@@ -42,6 +50,17 @@ export interface ResolvedWSLIdentity {
 
 const WSL_COMMAND = "wsl.exe";
 const WSL_EXEC_MAX_BUFFER = 8 * 1024 * 1024;
+const WSL_IDENTITY_SENTINEL = "__ZCODE_WSL_IDENTITY__";
+// Bug 原因：身份探测曾用 `bash -lc` 并按行解析；profile 里的 echo 先于身份输出，被当成
+// distro/user 写进设备 Profile，此后每次连接都报“未找到名为 … 的 WSL distro”。身份只依赖
+// WSL 注入的 $WSL_DISTRO_NAME、id 与 $HOME，不需要登录环境；哨兵隔开 wsl.exe 或 shell 的其余输出。
+const WSL_IDENTITY_COMMAND_ARGS = [
+  "bash",
+  "--noprofile",
+  "--norc",
+  "-c",
+  `printf '%s\\n' '${WSL_IDENTITY_SENTINEL}' "$WSL_DISTRO_NAME" "$(id -un)" "$HOME"`,
+];
 
 function quotePosixShellArg(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
@@ -366,11 +385,12 @@ export class WSLBackend implements IRemoteBackend {
           onClose.fire(code);
         };
 
-        child.on("exit", (code) => {
-          fireOnce(code ?? 0);
+        // 被信号终止时 code 为 null，不能当作成功，见 resolveRemoteExitCode。
+        child.on("exit", (code, signal) => {
+          fireOnce(resolveRemoteExitCode(code, signal));
         });
-        child.on("close", (code) => {
-          fireOnce(code ?? 0);
+        child.on("close", (code, signal) => {
+          fireOnce(resolveRemoteExitCode(code, signal));
         });
 
         resolve({
@@ -522,22 +542,36 @@ export class WSLBackend implements IRemoteBackend {
       return this.resolvedInfoPromise;
     }
 
-    this.resolvedInfoPromise = (async () => {
+    const resolving = (async () => {
       const distros = await this.safeListDistros();
       const selected = this.pickDistro(distros);
       const launchDistroName = selected?.name ?? this.options.distro?.trim() ?? null;
       const requestedUserName = this.options.user?.trim() || null;
-      const identityOutput = normalizeWslOutput(
-        await this.execDirect(
-          ["bash", "-lc", `printf '%s\\n' "$WSL_DISTRO_NAME"; id -un; printf %s "$HOME"`],
-          launchDistroName,
-          requestedUserName,
-        ),
+      const identityLines = normalizeWslOutput(
+        await this.execDirect(WSL_IDENTITY_COMMAND_ARGS, launchDistroName, requestedUserName),
+      ).split("\n");
+      const sentinelIndex = identityLines
+        .map((line) => line.trim())
+        .lastIndexOf(WSL_IDENTITY_SENTINEL);
+      if (sentinelIndex < 0) {
+        throw new Error("无法解析 WSL 身份：探测输出缺少身份标记");
+      }
+      const [reportedDistroName = "", actualUserName = "", ...homeLines] = identityLines.slice(
+        sentinelIndex + 1,
       );
-      const [reportedDistroName = "", actualUserName = "", ...homeLines] =
-        identityOutput.split("\n");
-      const distroName = reportedDistroName.trim() || launchDistroName;
+      // distro 以 wsl -l 列表为准；只有列表不可用时才采用 distro 内上报的名称。
+      const listedDistroName = distros.find(
+        (distro) =>
+          distro.name.localeCompare(reportedDistroName.trim(), undefined, {
+            sensitivity: "base",
+          }) === 0,
+      )?.name;
+      const distroName =
+        listedDistroName ?? selected?.name ?? (reportedDistroName.trim() || launchDistroName);
       const userName = actualUserName.trim() || requestedUserName;
+      if (userName && !isValidWslUser(userName)) {
+        throw new Error("无法解析 WSL 身份：user 无效");
+      }
       const homeDir = homeLines.join("\n").trim();
       if (!homeDir) {
         throw new Error("无法解析 WSL 用户 HOME");
@@ -550,8 +584,16 @@ export class WSLBackend implements IRemoteBackend {
         homeDir,
       };
     })();
+    this.resolvedInfoPromise = resolving;
+    // 失败不缓存：wsl.exe 启动中、distro 暂不可用等失败要允许下一次调用重新探测，
+    // 否则长生命周期 backend 会一直复用同一个失败结果。
+    resolving.catch(() => {
+      if (this.resolvedInfoPromise === resolving) {
+        this.resolvedInfoPromise = null;
+      }
+    });
 
-    return this.resolvedInfoPromise;
+    return resolving;
   }
 
   private async safeListDistros(): Promise<WSLDistro[]> {
@@ -654,10 +696,9 @@ export class WSLBackend implements IRemoteBackend {
         (error, stdout, stderr) => {
           const stdoutBuffer = Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout ?? "");
           const stderrBuffer = Buffer.isBuffer(stderr) ? stderr : Buffer.from(stderr ?? "");
-          const stderrText = normalizeWslOutput(decodeWslOutput(stderrBuffer)).trim();
 
           if (error) {
-            reject(new Error(stderrText || error.message));
+            reject(createWslExecError(error, stdoutBuffer, stderrBuffer));
             return;
           }
 

@@ -13,7 +13,7 @@ import { RewindStrategy, SessionEventType } from "@zcode/contracts";
 import type { CommandEnvelope } from "@zcode/shared/zcode-protocol-v4";
 import { V4CommandExecutor } from "../src/zcode-protocol-v4/commands/executor.js";
 import {
-  V4EditTargetNotLatestError,
+  V4EditTargetUnavailableError,
   V4RetryTargetNotLatestError,
   V4RowTranslationError,
 } from "../src/zcode-protocol-v4/commands/handlers/fork-edit-retry.js";
@@ -71,20 +71,12 @@ function makeHost(
 ): V4CommandCoreHost {
   const host: V4CommandCoreHost = {
     getRecord: (id) => (id === "s1" ? record : undefined),
-    isLatestEditableUserRow: () => true,
     isLatestRetryAssistantRow: () => true,
     waitForProjectionEventCommit: async () => {},
     ...overrides,
   };
   host.resolveRowActionTarget ??= (_sessionId, target, action) => {
     if (action === "editUserQuery") {
-      if (host.isLatestEditableUserRow?.("s1", target.rowId) !== true) {
-        return {
-          ok: false,
-          status: "rejected",
-          reasonCode: "guard.actionUnavailable",
-        };
-      }
       const transcriptMessageId = host.getTurnRewindAnchor?.("s1", target.rowId);
       if (!transcriptMessageId) {
         return {
@@ -822,7 +814,7 @@ describe("v4 原生 editUserQuery", () => {
           newText: "x",
         }),
       ),
-    ).rejects.toThrow(V4EditTargetNotLatestError);
+    ).rejects.toThrow(V4EditTargetUnavailableError);
     expect(info).not.toHaveBeenCalledWith("v4 editUserQuery completed", expect.anything());
   });
 
@@ -860,8 +852,7 @@ describe("v4 原生 editUserQuery", () => {
     const record = makeRecord({ app, activeAbortController: controller });
     const host = makeHost(record, {
       getTurnRewindAnchor: () => "msg-a",
-      isLatestEditableUserRow: () => true,
-    });
+      });
 
     await new V4CommandExecutor(host).execute(
       envelope("editUserQuery", {
@@ -915,7 +906,39 @@ describe("v4 原生 editUserQuery", () => {
     );
   });
 
-  it("running 历史 user query：直接拒绝，且不 stop 当前 turn", async () => {
+  it("历史输入的组合文件回退被拒绝，当前工作继续运行", async () => {
+    const controller = new AbortController();
+    const record = makeRecord({ activeAbortController: controller });
+    const host = makeHost(record, {
+      resolveRowActionTarget: () => ({
+        ok: true,
+        action: "editUserQuery",
+        row: { actions: { editPreserveWorkspaceOnly: true } } as never,
+        editTarget: {
+          entityId: "entity-7",
+          productTurnId: "turn-7",
+          transcriptMessageId: "msg-old",
+          coveredByStableCompact: false,
+          intent: { kind: "sendText", text: "原始问题" },
+        },
+      }),
+    });
+
+    await expect(
+      new V4CommandExecutor(host).execute(
+        envelope("editUserQuery", {
+          target: { rowId: 7, entityId: "entity-7" },
+          newText: "历史编辑",
+          workspaceMode: "rewind",
+        }),
+      ),
+    ).rejects.toMatchObject({ reasonCode: "guard.workspaceRewindUnavailable" });
+    expect(controller.signal.aborted).toBe(false);
+    expect(record.app.runtime.rewindConversationToMessage).not.toHaveBeenCalled();
+    expect(record.app.sendInput).not.toHaveBeenCalled();
+  });
+
+  it("running 中已失效的 user query 拒绝，且不 stop 当前 turn", async () => {
     const calls: string[] = [];
     const controller = new AbortController();
     controller.signal.addEventListener("abort", () => {
@@ -924,7 +947,11 @@ describe("v4 原生 editUserQuery", () => {
     const record = makeRecord({ activeAbortController: controller });
     const host = makeHost(record, {
       getTurnRewindAnchor: () => "msg-a",
-      isLatestEditableUserRow: () => false,
+      resolveRowActionTarget: () => ({
+      ok: false,
+      status: "stale",
+      reasonCode: "proto.staleTarget",
+    }),
     });
 
     await expect(
@@ -934,7 +961,7 @@ describe("v4 原生 editUserQuery", () => {
           newText: "x",
         }),
       ),
-    ).rejects.toThrow(V4EditTargetNotLatestError);
+    ).rejects.toThrow(V4EditTargetUnavailableError);
     expect(calls).toEqual([]);
     expect(record.activeAbortController).toBe(controller);
   });

@@ -64,7 +64,21 @@ branch 由保留前缀与 cut 之后的新消息组成；随后才在 active bra
 boundary 构建 provider history。被 cut 掉的 compact summary/boundary、microcompact、context usage
 和 read-file 派生状态必须重建，且不得追加描述旧 prompt 的 model-visible reminder。
 
-### 5. 附件 artifact 独立于 workspace checkpoint
+### 5. 编辑历史用户输入
+
+CLI 以当前分支中有持久消息 ID 的真实用户行生成 edit action。已加载的历史页和冷恢复使用同一裁决。
+编辑历史输入从该输入的消息锚点发起对话 rewind，保留工作区文件。桌面连续订阅接收投影变更，
+手机可重放订阅通过相同的行事件或快照恢复。
+
+```text
+用户行 + entityId → CommandInbox → 校验当前投影与输入
+  → 等待活动轮停止 → 持久化 branch cut → 更新投影并重跑 canonical intent
+```
+
+验收覆盖编辑前缀与后续轮次之间的用户消息、刷新后编辑历史输入，以及已截断的 row target
+被拒绝。Compact 运行期间锁定 edit。会话内已有的排队输入保留。
+
+### 6. 附件 artifact 独立于 workspace checkpoint
 
 用户消息里的图片、PDF、二进制和大文本 preview 属于 session input artifact，不属于 workspace mutation checkpoint。file-only rewind 恢复工作区文件时，不应重新解释已经提交的附件；conversation rewind 清理 message/part 时，也不应立即删除附件 artifact。附件 artifact 通过引用计数或未引用扫描延迟 GC。
 

@@ -735,6 +735,27 @@
               "key": "cheaperinference"
             }
           }
+        },
+        {
+          "templateId": "cheapaimodel",
+          "templateNameMap": {
+            "zh-CN": "cheapaimodel",
+            "en-US": "cheapaimodel"
+          },
+          "config": {
+            "access": {
+              "type": "api-key"
+            },
+            "api": {
+              "type": "openai-chat-completions",
+              "baseUrl": "https://api.cheapaimodel.ai/v1"
+            },
+            "builtinModelIds": ["deepseek-v4-1-flash", "glm-5.3"],
+            "logo": {
+              "type": "builtin",
+              "key": "cheapaimodel"
+            }
+          }
         }
       ],
       "providerRules": []
@@ -6049,6 +6070,20 @@
         {
           "templateId": "cheaperinference",
           "modelId": "claude-sonnet-5",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "cheapaimodel",
+          "modelId": "deepseek-v4-1-flash",
+          "config": {
+            "enabled": true
+          }
+        },
+        {
+          "templateId": "cheapaimodel",
+          "modelId": "glm-5.3",
           "config": {
             "enabled": true
           }

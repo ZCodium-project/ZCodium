@@ -2696,11 +2696,6 @@ export class ConversationV4Gateway {
     return this.publishers.get(sessionId)?.isLatestRetryAssistantRow(rowId) ?? null;
   }
 
-  /** latestQueryEditOnly：edit 目标必须是当前投影里的最后一条 realUser userInput row。 */
-  isLatestEditableUserRow(sessionId: string, rowId: number): boolean | null {
-    return this.publishers.get(sessionId)?.isLatestEditableUserRow(rowId) ?? null;
-  }
-
   /** rowId → product turnId（editUserQuery 无 assistant anchor 时回查 user messageId）。 */
   getTurnIdForRow(sessionId: string, rowId: number): string | null {
     return this.publishers.get(sessionId)?.getTurnIdForRow(rowId) ?? null;

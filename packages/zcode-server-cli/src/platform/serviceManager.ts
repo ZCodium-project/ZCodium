@@ -1,5 +1,5 @@
 import { access } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { stablePathId, type ServerLayout } from "../runtime/paths.js";
 
 export type ServicePlatform = "darwin" | "linux" | "win32";
@@ -194,11 +194,22 @@ export async function isServiceManagerAvailable(
   }
 }
 
+/**
+ * systemd 注册失败的阶段：load 为 daemon-reload / enable，本次没有启动任何 unit；
+ * start 为 unit 已启用后的 start。launchd 与 Task Scheduler 的注册错误不带阶段。
+ */
+type ServiceRegistrationStage = "load" | "start";
+
+export function isServiceLoadFailure(error: unknown): boolean {
+  return error instanceof Error && (error as { stage?: unknown }).stage === "load";
+}
+
 export async function registerService(
   descriptor: ServiceDescriptor,
   descriptorPath: string,
   executor: ServiceCommandExecutor = defaultServiceCommandExecutor,
 ): Promise<void> {
+  let stage: ServiceRegistrationStage | undefined;
   try {
     if (descriptor.kind === "launchd") {
       // Label 稳定但 plist 内容可能变化；先卸载旧 job，避免 load 失败后 start 唤醒旧参数。
@@ -210,8 +221,14 @@ export async function registerService(
       await executor.run("launchctl", ["load", "-w", descriptorPath]);
       await executor.run("launchctl", ["start", descriptor.name]);
     } else if (descriptor.kind === "systemd") {
+      // Bug 原因：`enable --now` 把装载和启动合成一次调用，失败时无法知道 unit 是否已启动，
+      // 调用方只能一律报错。拆开后按失败阶段决定：装载失败时没有启动任何 unit，可以安全回退。
+      stage = "load";
       await executor.run("systemctl", ["--user", "daemon-reload"]);
-      await executor.run("systemctl", ["--user", "enable", "--now", descriptorPath]);
+      await executor.run("systemctl", ["--user", "enable", descriptorPath]);
+      stage = "start";
+      // enable 按文件名创建 unit；用完整文件名 start，不依赖 systemd 补全后缀。
+      await executor.run("systemctl", ["--user", "start", basename(descriptorPath)]);
     } else {
       const parsed = JSON.parse(descriptor.content) as {
         taskName: string;
@@ -234,9 +251,11 @@ export async function registerService(
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Failed to register service ${descriptor.name} (${descriptorPath}): ${message}`,
-      { cause: error },
+    throw Object.assign(
+      new Error(`Failed to register service ${descriptor.name} (${descriptorPath}): ${message}`, {
+        cause: error,
+      }),
+      stage ? { stage } : {},
     );
   }
 }

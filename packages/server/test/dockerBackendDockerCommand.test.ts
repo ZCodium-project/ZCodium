@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   isDockerAvailable: vi.fn(),
   listDockerContainers: vi.fn(),
   resolveDockerCommand: vi.fn(),
+  // 上游 v3.17.1 在 availability 检查里新增的 daemon 探测；测试保持不触网、直接成功。
+  probeDockerDaemon: vi.fn(async () => {}),
   spawn: vi.fn(),
 }));
 
@@ -23,6 +25,7 @@ vi.mock("@zcode/server/remote/docker-detect.js", () => ({
   isDockerAvailable: mocks.isDockerAvailable,
   listDockerContainers: mocks.listDockerContainers,
   resolveDockerCommand: mocks.resolveDockerCommand,
+  probeDockerDaemon: mocks.probeDockerDaemon,
 }));
 
 import { DockerBackend } from "@zcode/server/remote/docker-backend.js";

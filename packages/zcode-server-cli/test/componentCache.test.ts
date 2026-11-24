@@ -223,10 +223,9 @@ describe("component cache", () => {
     await expect(readFile(join(release, "runtime", "server-core.js"), "utf8")).resolves.toBe("new");
 
     await writeFile(join(release, "runtime", "server-core.js"), "tampered", "utf8");
-    await expect(cache.assemble(assembleOptions)).rejects.toThrow(/immutable release conflict/i);
-    await expect(readFile(join(release, "runtime", "server-core.js"), "utf8")).resolves.toBe(
-      "tampered",
-    );
+    // 上游 v3.17.1：同一 archive 的损坏副本会被替换修复，而不是报冲突。
+    await cache.assemble(assembleOptions);
+    await expect(readFile(join(release, "runtime", "server-core.js"), "utf8")).resolves.toBe("new");
   });
 
   it("ignores a cache entry whose archive bytes no longer match its marker", async () => {

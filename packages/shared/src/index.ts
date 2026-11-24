@@ -140,6 +140,8 @@ export {
   BROWSER_SCREENSHOT_SURFACE_PREPARE_TIMEOUT_MS,
   BROWSER_VIEW_RESTORE_BOOTSTRAP_URL,
   LOCAL_MEDIA_PREVIEW_SCHEME,
+  BROWSER_LOCAL_PREVIEW_SCHEME,
+  browserPreviewSourceUrl,
   DesktopCommandIds,
   buildLocalMediaPreviewUrl,
   createOpenInEditorRemoteTarget,
@@ -149,6 +151,8 @@ export { LAUNCH_MARKS_QUERY_KEY, parseLaunchMarks, serializeLaunchMarks } from "
 export type {
   BrowserViewSurfaceScaleMode,
   CancelPendingRemoteConnectionRequest,
+  FileApplicationInfo,
+  FileApplicationTarget,
   BindRemoteWorkspaceSessionContextRequest,
   BindRemoteWorkspaceSessionContextIpcResult,
   BindRemoteWorkspaceSessionContextResult,

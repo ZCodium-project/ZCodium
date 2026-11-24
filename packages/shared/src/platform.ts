@@ -108,6 +108,25 @@ export interface BrowserViewCloseTabRequest {
 }
 
 export const LOCAL_MEDIA_PREVIEW_SCHEME = "zcode-media";
+export const BROWSER_LOCAL_PREVIEW_SCHEME = "zcode-html";
+
+/** 仅还原展示/外部打开地址；目录授权和签名校验始终由 main 执行。 */
+export function browserPreviewSourceUrl(input: string): string {
+  try {
+    const url = new URL(input);
+    if (url.protocol !== `${BROWSER_LOCAL_PREVIEW_SCHEME}:`) return input;
+    const [, directory, ...segments] = url.pathname.split("/");
+    const root = new URL(decodeURIComponent(directory ?? ""));
+    if (root.protocol !== "file:" || root.host || !root.pathname.endsWith("/")) return input;
+    const source = new URL(segments.join("/"), root);
+    if (!source.href.startsWith(root.href)) return input;
+    source.search = url.search;
+    source.hash = url.hash;
+    return source.href;
+  } catch {
+    return input;
+  }
+}
 
 export function buildLocalMediaPreviewUrl(path: string): string {
   const url = new URL(`${LOCAL_MEDIA_PREVIEW_SCHEME}://local/preview`);
@@ -214,6 +233,21 @@ export interface EditorInfo {
   name: string;
   /** 图标 base64 data URL */
   iconDataUrl: string;
+}
+
+/** 系统对当前文件类型注册的应用；id 仅由宿主解析，不能当作命令执行。 */
+export interface FileApplicationInfo {
+  id: string;
+  name: string;
+  iconDataUrl?: string;
+  isDefault: boolean;
+}
+
+export interface FileApplicationTarget {
+  path: string;
+  pathKind: "file" | "directory";
+  workspaceIdentity?: string;
+  remoteTarget?: OpenInEditorRemoteTarget;
 }
 
 export interface ApplicationIconInfo {
@@ -716,6 +750,15 @@ export interface IPlatformService {
   /** 使用宿主原生另存为对话框写入文件；普通 Web 端不实现 */
   saveFile?(payload: SaveFileRequest): Promise<SaveFileResult>;
 
+  /** 查询当前文件类型注册的本机应用；仅桌面实现，Web/手机返回空。 */
+  getFileApplications?(target: FileApplicationTarget): Promise<FileApplicationInfo[]>;
+
+  /** 用指定本机应用打开文件；应用 id 由宿主解析，不接受任意命令。 */
+  openFileWithApplication?(
+    applicationId: string,
+    target: FileApplicationTarget,
+  ): Promise<{ success: boolean; error?: string }>;
+
   /**
    * 用 Chromium 打印引擎把当前 webContents 的 print 媒体版面输出为 PDF（矢量文本）。
    * 页面尺寸由 renderer 注入的 @page CSS 决定（preferCSSPageSize）；仅 Desktop 实现。
@@ -1073,6 +1116,9 @@ export interface IPlatformService {
 
   /** 截取当前窗口，用于错误反馈携带现场画面；Web fallback 可返回 null */
   captureWindowScreenshot?(): Promise<WindowScreenshotResult | null>;
+
+  /** 可信宿主导航自己承载的 guest；main 负责本地 HTML 的目录授权。 */
+  browserViewLoadUrl?(payload: { webContentsId: number; url: string }): Promise<void>;
 
   /** `<webview>` guest 上报；active=true 表示 agent 无 tabId 命令优先读取当前可见页。 */
   browserViewAttachGuest?(payload: {

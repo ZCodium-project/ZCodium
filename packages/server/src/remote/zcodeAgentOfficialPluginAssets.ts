@@ -17,6 +17,7 @@ export const REMOTE_AGENT_OFFICIAL_PLUGIN_PACKAGE_NAMES = [
   "plugin-creator-plugin",
   "zcode-guide-plugin",
   "visualize-plugin",
+  "zcode-site-plugin",
 ] as const;
 
 export const REMOTE_AGENT_OFFICIAL_PLUGIN_INCLUDED_TOP_LEVEL_PATHS = [

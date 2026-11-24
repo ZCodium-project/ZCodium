@@ -36,14 +36,27 @@ describe("DataRootLock", () => {
     const root = await mkdtemp(join(tmpdir(), "zcode-r2-lock-live-"));
     const lockFile = join(root, "run", "server.lock");
     await mkdir(join(root, "run"), { recursive: true });
-    await writeFile(
-      lockFile,
-      `${JSON.stringify({ pid: process.pid, acquiredAt: Date.now() })}\n`,
-      "utf8",
-    );
+    // 上游 v3.17.1 起判活核对进程身份：PID 等于当前进程且没有 ownerToken 的锁视为残留。
+    // 用真实子进程模拟另一个存活的 Server 实例。
+    const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
+      stdio: "ignore",
+    });
+    await new Promise<void>((resolve, reject) => {
+      child.once("spawn", resolve);
+      child.once("error", reject);
+    });
+    try {
+      await writeFile(
+        lockFile,
+        `${JSON.stringify({ pid: child.pid, acquiredAt: Date.now() })}\n`,
+        "utf8",
+      );
 
-    const lock = new DataRootLock(lockFile);
-    await expect(lock.acquire()).rejects.toThrow(/already running/);
+      const lock = new DataRootLock(lockFile);
+      await expect(lock.acquire()).rejects.toThrow(/already running/);
+    } finally {
+      child.kill();
+    }
   });
 
   it("reports missing, stale, active and malformed lock owners without mutating the file", async () => {
@@ -55,7 +68,8 @@ describe("DataRootLock", () => {
     await mkdir(join(root, "run"), { recursive: true });
     await writeFile(lockFile, `${JSON.stringify({ pid: DEAD_PID })}\n`, "utf8");
     await expect(lock.inspect()).resolves.toMatchObject({ state: "stale", pid: DEAD_PID });
-    await writeFile(lockFile, `${JSON.stringify({ pid: process.pid })}\n`, "utf8");
+    // 上游 v3.17.1 起只有带本进程 ownerToken 的锁才算 active；用真实 acquire 构造。
+    await lock.acquire();
     await expect(lock.inspect()).resolves.toMatchObject({ state: "active", pid: process.pid });
     await writeFile(lockFile, "not-json", "utf8");
     await expect(lock.inspect()).resolves.toMatchObject({ state: "invalid" });

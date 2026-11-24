@@ -1105,8 +1105,6 @@ export function createConversationV4Gateway(
     },
     isLatestRetryAssistantRow: (sessionId, rowId) =>
       context.v4Gateway?.isLatestRetryAssistantRow(sessionId, rowId) ?? null,
-    isLatestEditableUserRow: (sessionId, rowId) =>
-      context.v4Gateway?.isLatestEditableUserRow(sessionId, rowId) ?? null,
     getTurnIdForRow: (sessionId, rowId) =>
       context.v4Gateway?.getTurnIdForRow(sessionId, rowId) ?? null,
     // restoreWarning 时序自愈探针：App 的模型视图直接来自进程 Registry。

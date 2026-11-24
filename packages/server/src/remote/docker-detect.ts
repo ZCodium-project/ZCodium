@@ -162,14 +162,20 @@ export function parseDockerContainerList(rawOutput: string): DockerContainerInfo
     });
 }
 
+/** 探测 Docker daemon；失败时抛出 docker CLI 的原始原因（stderr 或启动错误）。 */
+export async function probeDockerDaemon(): Promise<void> {
+  await execDocker(["version", "--format", "{{.Server.Version}}"]);
+}
+
 export async function isDockerAvailable(): Promise<boolean> {
   try {
-    await execDocker(["version", "--format", "{{.Server.Version}}"]);
+    await probeDockerDaemon();
     return true;
   } catch {
     // 之前只把“docker 命令不存在”视为不可用，daemon 未启动时仍会误判成可用，
     // UI 会继续展示 Docker 入口，直到真正连接时才报错。
     // 这里改成任何探测失败都返回 false，让入口展示和实际可连接状态保持一致。
+    // 需要失败原因的连接路径使用 probeDockerDaemon。
     return false;
   }
 }

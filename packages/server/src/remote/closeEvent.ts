@@ -1,3 +1,4 @@
+import { constants } from "node:os";
 import { Emitter, type Event } from "@zcode/rpc";
 
 interface CloseEventController {
@@ -35,4 +36,27 @@ export function createCloseEventController(): CloseEventController {
   };
 
   return { event, fire };
+}
+
+/** 没有可用退出码时的失败值，与 OpenSSH 客户端收不到 exit-status 时的退出码一致。 */
+const UNKNOWN_REMOTE_EXIT_CODE = 255;
+
+/**
+ * 把 child_process / ssh2 的 exit 参数归一成一个退出码。
+ *
+ * Bug 原因：三个 Backend 都写成 `code ?? 0`。进程被信号杀死时 code 是 null，
+ * ssh2 的通道在没有 exit-status 时 close 也不带 code，于是被 kill -9 的下载、解包、
+ * update 都被当成成功。这里按 shell 惯例返回 128 + 信号值；完全没有退出信息时返回 255。
+ */
+export function resolveRemoteExitCode(
+  code: number | null | undefined,
+  signal: string | null | undefined,
+): number {
+  if (typeof code === "number") {
+    return code;
+  }
+  const signalNumber = signal
+    ? constants.signals[signal as keyof typeof constants.signals]
+    : undefined;
+  return typeof signalNumber === "number" ? 128 + signalNumber : UNKNOWN_REMOTE_EXIT_CODE;
 }

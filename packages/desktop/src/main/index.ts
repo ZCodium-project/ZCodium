@@ -1,4 +1,8 @@
 import { installOfficialPlatformNetworkPolicy } from "./desktopOfficialPlatformPolicy.js";
+import {
+  BROWSER_LOCAL_PREVIEW_PRIVILEGES,
+  installBrowserLocalPreview,
+} from "./browser-local-preview/index.js";
 /* eslint-disable max-lines */
 import { getDesktopDataRootStartupResult } from "./desktopEarlyDataBaseDirBootstrap.js";
 import { runDesktopDataRootDecisionFlow } from "./desktopDataRootDecision.js";
@@ -201,7 +205,10 @@ import {
   installPluginSandboxHost,
 } from "./pluginSandbox/index.js";
 // privileged schemes 必须在 ready 前同一次注册；单独补 IPC 仍会使沙箱文档加载失败。
-registerLocalMediaPreviewScheme(protocol, [PLUGIN_SANDBOX_PRIVILEGED_SCHEME]);
+registerLocalMediaPreviewScheme(protocol, [
+  PLUGIN_SANDBOX_PRIVILEGED_SCHEME,
+  BROWSER_LOCAL_PREVIEW_PRIVILEGES,
+]);
 const localMediaPreviewPathRegistry = createLocalMediaPreviewPathRegistry();
 
 // e2e 由 Chromedriver 管理远程调试端口；如果这里继续固定到 9229，
@@ -1990,6 +1997,7 @@ app.whenReady().then(async () => {
   });
   // Electron 的 net.request 只能在 app ready 后使用；灰度请求仍是旁路预热，不阻塞首个 Host。
   void desktopContextPromptRollout?.refresh();
+  installBrowserLocalPreview(session.fromPartition(EMBEDDED_BROWSER_PARTITION));
   installBrowserRestoreBootstrapProtocol(
     session.fromPartition(EMBEDDED_BROWSER_PARTITION).protocol,
   );
