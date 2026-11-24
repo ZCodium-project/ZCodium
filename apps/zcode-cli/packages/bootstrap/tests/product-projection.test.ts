@@ -6078,7 +6078,7 @@ describe("fork / modelChange marker", () => {
     // turn rewind 仍能找到 assistant anchor，但 exact user target 不存在。
     expect(projection.getTurnRewindAnchor(userRow!.rowId)).toBe("assistant-only-anchor");
     expect(userRow!.actions?.canEdit).not.toBe(true);
-    expect(projection.isLatestEditableUserRow(userRow!.rowId)).toBe(false);
+    expect(projection.resolveEditTarget(userRow!.rowId)).toBeNull();
   });
 
   it("P1：legacy 身份 fallback 必须由 normalizer 留下可观测诊断", () => {
@@ -6194,8 +6194,19 @@ describe("fork / modelChange marker", () => {
     const { projection } = runAll(log.events);
     const userRows = projection.getSnapshot().rows.window.filter((row) => row.kind === "userInput");
 
-    expect(userRows.map((row) => row.actions?.canEdit === true)).toEqual([false, true]);
-    expect(projection.resolveEditTargetByEntityId("message-user-1")).toBeNull();
+    expect(userRows.map((row) => row.actions)).toEqual([
+      { canEdit: true, editDisposition: "rewind", editPreserveWorkspaceOnly: true },
+      { canEdit: true, editDisposition: "rewind" },
+    ]);
+    expect(projection.resolveEditTargetByEntityId("message-user-1")).toMatchObject({
+      entityId: "message-user-1",
+      transcriptMessageId: "message-user-1",
+    });
+    const historicalTarget = { rowId: userRows[0]!.rowId, entityId: "message-user-1" };
+    expect(projection.resolveRowActionTarget(historicalTarget, "editUserQuery")).toMatchObject({
+      ok: true,
+      editTarget: { transcriptMessageId: "message-user-1", intent: { text: "query 1" } },
+    });
     expect(projection.resolveEditTargetByEntityId("message-user-2")).toMatchObject({
       entityId: "message-user-2",
       productTurnId: "message-user-2",

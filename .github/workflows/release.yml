@@ -257,6 +257,9 @@ jobs:
 
       - name: Build ZCode CLI distribution
         env:
+          # CLI 发行包内置的 provider 配置必须与桌面一致：默认（test）会读
+          # zcode-builtin.test.json，漏掉本地预设（OrcaRouter / Cheaper Inference / cheapaimodel）。
+          ZCODE_ENV: production
           ZCODE_DIST_BASE_URL: https://github.com/${{ github.repository }}/releases/download/${{ needs.release.outputs.tag }}/
           RELEASE_TAG: ${{ needs.release.outputs.tag }}
         run: |

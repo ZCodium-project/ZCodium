@@ -1382,14 +1382,14 @@ export function getV4GoalProjection(): Promise<{
 }
 
 /** 打开 latest user query 行内编辑并填入新文本，但不提交。 */
-export async function beginFirstV4UserQueryEdit(newText: string) {
+export async function beginFirstV4UserQueryEdit(newText: string, targetText?: string) {
   let rowId: string | null = null;
   let lastClickedRowId: string | null = null;
   let lastClickedAt = 0;
   await browser.waitUntil(
     async () => {
       const state = await browser.execute(
-        (editPrefix, editInputPrefix) => {
+        (editPrefix, editInputPrefix, expectedText) => {
           const actionPattern = new RegExp(`^${editPrefix}-(\\d+)$`);
           const inputPattern = new RegExp(`^${editInputPrefix}-(\\d+)$`);
           const testIds = Array.from(document.querySelectorAll<HTMLElement>("[data-testid]"));
@@ -1403,7 +1403,12 @@ export async function beginFirstV4UserQueryEdit(newText: string) {
             };
           }
           const action = testIds
-            .filter((candidate) => actionPattern.test(candidate.dataset.testid ?? ""))
+            .filter(
+              (candidate) =>
+                actionPattern.test(candidate.dataset.testid ?? "") &&
+                (expectedText === null ||
+                  candidate.closest("[data-row-id]")?.textContent?.includes(expectedText)),
+            )
             .at(-1);
           return {
             inputRowId: null,
@@ -1412,6 +1417,7 @@ export async function beginFirstV4UserQueryEdit(newText: string) {
         },
         TID_V4_EDIT,
         TID_V4_EDIT_INPUT,
+        targetText ?? null,
       );
       if (state.inputRowId) {
         rowId = state.inputRowId;
@@ -1449,9 +1455,9 @@ export async function beginFirstV4UserQueryEdit(newText: string) {
   return rowId;
 }
 
-/** 按真实行内编辑交互提交 latest user query，主 composer 草稿不参与。 */
-export async function editFirstV4UserQuery(newText: string) {
-  const rowId = await beginFirstV4UserQueryEdit(newText);
+/** 通过行内编辑提交 user query，支持按原文定位目标。 */
+export async function editFirstV4UserQuery(newText: string, targetText?: string) {
+  const rowId = await beginFirstV4UserQueryEdit(newText, targetText);
   await clickTestIdByDom(testId(TID_V4_EDIT_SUBMIT, rowId), {
     timeout: 15000,
     timeoutMsg: `v4 行内编辑提交按钮没有出现: rowId=${rowId}`,

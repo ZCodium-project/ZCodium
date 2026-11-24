@@ -30,6 +30,7 @@
     "test:browser-background-activity-smoke": "electron scripts/browser-background-activity-smoke.mjs",
     "test:browser-hidden-guest-screenshot-smoke": "electron scripts/browser-hidden-guest-screenshot-smoke.mjs",
     "test:browser-screenshot-surface-smoke": "electron scripts/browser-screenshot-surface-smoke.mjs",
+    "test:agent-crash-diagnostic": "tsx --test test/agent-crash-diagnostic.node.test.ts",
     "pretest:browser-webm-recording-smoke": "tsup",
     "test:browser-webm-recording-smoke": "electron scripts/browser-webm-recording-smoke.mjs",
     "pretest:e2e": "pnpm --filter @zcode/e2e-report build:node",
